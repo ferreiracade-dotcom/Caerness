@@ -774,12 +774,19 @@ def create_personnel(
     if loc is None:
         raise ValueError("organization needs a primary location to crystallize personnel")
     if actor_id is None:
-        oc = _leader_open_core(rng, float(culture["open_core_command_bias"]), role_kind) if role_kind in {"boss","underboss","lieutenant","crew_leader","enforcer"} else rng.random() < .10
-        stage = _leader_stage(rng, role_kind) if oc else None
+        # Command demand may reveal an already-existing person; it may not manufacture one.
+        # PERSONECO-01 profiles were seeded independently of this role before underworld demand.
+        from .person_ecology import resolve_background_person
         age_floor, age_ceil = ((32, 68) if role_kind == "boss" else (24, 58))
-        age = rng.randint(age_floor, age_ceil)
-        name = _unique_actor_name(conn, rng, family_name=family_name if str(org["organization_type"]) == "criminal_dynasty" else None)
-        actor_id = _create_person(conn, name, loc, subtype=f"underworld_{role_kind}", age=age, open_core=oc, stage=stage)
+        actor_id = resolve_background_person(
+            conn, reason=f"Underworld {role_kind} became consequential", demand_kind="underworld_personnel",
+            location_id=loc, occupation_domains=("criminal","soldier","transport","hospitality","labor","merchant","artisan"),
+            min_age=age_floor, max_age=age_ceil, subtype=f"underworld_{role_kind}",
+            command_weight=1.0 if role_kind in {"boss","underboss","lieutenant","crew_leader"} else .55,
+            criminal_weight=1.15, economic_weight=.20 if role_kind in {"boss","underboss","accountant","fixer"} else 0.0,
+        )
+        if actor_id is None:
+            raise RuntimeError(f"No pre-existing background person is available for underworld role {role_kind!r} at location {loc}")
     if membership_status is None:
         model = str(culture["membership_model"])
         membership_status = "sworn_member" if model == "sworn" else ("blood_family" if model == "blood_household" else "member")
@@ -789,14 +796,14 @@ def create_personnel(
            VALUES (?,?,?,?,?,?,?,?, 'active',?)
            ON CONFLICT(actor_id) DO UPDATE SET organization_id=excluded.organization_id,crew_id=excluded.crew_id,
              role_kind=excluded.role_kind,membership_status=excluded.membership_status,authority=excluded.authority,status='active'""",
-        (actor_id, organization_id, crew_id, role_kind, membership_status, authority, max(10, authority * .65), _day(conn), _j({"generated_underworld": True})),
+        (actor_id, organization_id, crew_id, role_kind, membership_status, authority, max(10, authority * .65), _day(conn), _j({"resolved_preexisting_person": True, "population_delta": 0})),
     )
     if role_kind == "boss":
         conn.execute("UPDATE underworld_organizations SET current_leader_actor_id=? WHERE id=?", (actor_id, organization_id))
         _ensure_leader_decision_cadence(conn,int(actor_id))
         conn.execute(
             "INSERT OR IGNORE INTO underworld_leader_wealth(actor_id,organization_id,last_review_day,metadata_json) VALUES (?,?,?,?)",
-            (actor_id, organization_id, _day(conn), _j({"generated_underworld": True})),
+            (actor_id, organization_id, _day(conn), _j({"resolved_preexisting_person": True, "population_delta": 0})),
         )
     return int(actor_id)
 
@@ -1895,8 +1902,13 @@ def _territorial_attack(conn: sqlite3.Connection, organization_id: int, rng: ran
     att_prof=ensure_underworld_membership_profile(conn,organization_id); def_prof=ensure_underworld_membership_profile(conn,target)
     att_loss=min(float(att_prof["active_members"]), rng.uniform(.2,1.4)*(1.2 if not won else .7))
     def_loss=min(float(def_prof["active_members"]), rng.uniform(.3,1.8)*(1.2 if won else .7))
-    if att_loss>0: record_underworld_membership_flow(conn,organization_id,"death_or_incapacitation",att_loss,from_tier="active",metadata={"territorial_fight":True,"target":target})
-    if def_loss>0: record_underworld_membership_flow(conn,target,"death_or_incapacitation",def_loss,from_tier="active",metadata={"territorial_fight":True,"attacker":organization_id})
+    # Membership loss combines killed and incapacitated members, but population accounting must
+    # distinguish them.  Resolve a bounded death subset explicitly rather than treating the full
+    # loss label as mortality.
+    att_deaths=min(att_loss, att_loss*rng.uniform(.20,.46)) if att_loss>0 else 0.0
+    def_deaths=min(def_loss, def_loss*rng.uniform(.24,.52)) if def_loss>0 else 0.0
+    if att_loss>0: record_underworld_membership_flow(conn,organization_id,"death_or_incapacitation",att_loss,from_tier="active",metadata={"territorial_fight":True,"target":target,"deaths":att_deaths,"incapacitated":max(0.0,att_loss-att_deaths)})
+    if def_loss>0: record_underworld_membership_flow(conn,target,"death_or_incapacitation",def_loss,from_tier="active",metadata={"territorial_fight":True,"attacker":organization_id,"deaths":def_deaths,"incapacitated":max(0.0,def_loss-def_deaths)})
     if won:
         # Conquest only sticks if the attacker can staff the new zone after losses.
         post=organization_manpower_balance(conn,organization_id)
@@ -1951,7 +1963,15 @@ def _targeted_hit(conn: sqlite3.Connection, organization_id: int, rng: random.Ra
         from .household_life import mark_actor_deceased
         mark_actor_deceased(conn,int(victim["actor_id"]),reason="killed in an underworld hit",event_logger=event_logger)
         conn.execute("UPDATE underworld_personnel SET status='dead' WHERE actor_id=?",(int(victim["actor_id"]),))
-    _operation(conn,organization_id,"targeted_hit",target_organization_id=target,target_actor_id=int(victim["actor_id"]),result="killed" if success else "failed",success=chance)
+    op_id=_operation(conn,organization_id,"targeted_hit",target_organization_id=target,target_actor_id=int(victim["actor_id"]),result="killed" if success else "failed",success=chance)
+    if success:
+        from .population_reconciliation import record_excess_mortality, population_source_for_location
+        target_org=conn.execute("SELECT primary_location_id FROM underworld_organizations WHERE id=?",(target,)).fetchone()
+        loc=int(target_org[0]) if target_org and target_org[0] is not None else None
+        pop_source=population_source_for_location(conn,loc)
+        record_excess_mortality(conn,source_kind='underworld_targeted_hit',source_id=op_id,aggregate_deaths=1,tracked_deaths=1,
+                                population_source_id=pop_source,metadata={'organization_id':organization_id,'target_organization_id':target,
+                                                                         'victim_actor_id':int(victim['actor_id']),'location_id':loc},adult_only=True)
     change_relation(conn,organization_id,target,kind="war",hostility_delta=12 if success else 7,respect_delta=2 if success else 0)
     add_heat(conn,organization_id,public=2 if success else 1,investigative=5,violence=8)
     return True

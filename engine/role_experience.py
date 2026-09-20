@@ -385,7 +385,7 @@ def _underworld(conn: sqlite3.Connection, actor_id: int, enterprise: sqlite3.Row
             if member_delta < 0:
                 prof=underworld_membership_profile(conn,org_id)
                 tier='active' if float(prof['active_members'])>=1 else ('peripheral' if float(prof['peripheral_associates'])>=1 else 'core')
-                record_underworld_membership_flow(conn,org_id,'death_or_incapacitation',abs(member_delta),from_tier=tier,source_event_id=ev,metadata={'source':'gang_fight'})
+                record_underworld_membership_flow(conn,org_id,'death_or_incapacitation',abs(member_delta),from_tier=tier,source_event_id=ev,metadata={'source':'gang_fight','deaths':0,'incapacitation_or_death_unresolved':True})
             update_underworld_organization(conn,org_id,dimension_deltas=org_deltas)
             maybe_deepen_gang_structure(conn,org_id)
         if rng.random()<.22:

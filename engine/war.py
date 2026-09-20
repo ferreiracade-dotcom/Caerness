@@ -86,12 +86,18 @@ def add_campaign_force(conn: sqlite3.Connection, operation_id: int, name: str, *
         raise ValueError("personnel cannot be negative")
     loc = int(current_location_id if current_location_id is not None else op["origin_location_id"])
     day = _day(conn)
+    from .population_reconciliation import population_source_for_location
+    force_meta = dict(metadata or {})
+    pop_source = population_source_for_location(conn, loc)
+    if pop_source is not None:
+        force_meta.setdefault("population_source_id", int(pop_source))
+        force_meta.setdefault("population_source_location_id", loc)
     cur = conn.execute(
         """INSERT INTO war_campaign_forces(operation_id,polity_id,name,role,personnel_initial,personnel_available,
                current_location_id,status,last_review_day,next_review_day,metadata_json)
            VALUES (?,?,?,?,?,?,?,'mobilized',?,?,?)""",
         (operation_id, polity_id, name, role, int(personnel), int(personnel), loc, day, day,
-         json.dumps(metadata or {}, sort_keys=True)),
+         json.dumps(force_meta, sort_keys=True)),
     )
     conn.execute("UPDATE war_campaign_operations SET status='marching',next_review_day=? WHERE id=?", (day, operation_id))
     return int(cur.lastrowid)
@@ -514,6 +520,27 @@ def _apply_force_casualties(conn: sqlite3.Connection, force: sqlite3.Row, engage
         (new_available, killed, wounded, captured, deserted, 'destroyed' if new_available <= 0 else str(force['status']), int(force['id'])),
     )
     named = _named_member_consequences(conn, force, killed=killed, wounded=wounded, captured=captured, engagement_id=int(engagement['id']), day=day)
+    # Aggregate killed already includes any named/tracked deaths.  Apply it once to the source
+    # population and retain the named count only as subset/audit information.
+    from .population_reconciliation import record_excess_mortality, population_source_for_location
+    fmeta = _j(force['metadata_json'])
+    pop_source = fmeta.get('population_source_id')
+    if pop_source is None:
+        pop_source = population_source_for_location(conn, int(force['current_location_id']) if force['current_location_id'] is not None else None)
+    mortality_source_id = int(engagement['id']) * 100000 + int(force['id'])
+    ledger = record_excess_mortality(
+        conn, source_kind='war_force_engagement', source_id=mortality_source_id, aggregate_deaths=killed,
+        tracked_deaths=int(named.get('named_killed',0)), population_source_id=int(pop_source) if pop_source is not None else None,
+        metadata={'engagement_id':int(engagement['id']),'force_id':int(force['id']),
+                  'location_id':int(force['current_location_id']) if force['current_location_id'] is not None else None},
+        adult_only=True,
+    )
+    conn.execute(
+        """INSERT OR IGNORE INTO population_casualty_links(casualty_kind,casualty_source_id,population_source_id,aggregate_deaths,
+             tracked_actor_deaths,applied,applied_day,metadata_json) VALUES (?,?,?,?,?,?,?,?)""",
+        ('war_force_engagement',mortality_source_id,pop_source,killed,int(named.get('named_killed',0)),
+         1 if str(ledger.get('status'))=='applied' else 0,day,json.dumps({'engagement_id':int(engagement['id']),'force_id':int(force['id'])},sort_keys=True)),
+    )
     return {"force_id": int(force['id']), "casualty_rate": round(casualty_rate, 4), "killed": killed, "wounded": wounded,
             "captured": captured, "deserted": deserted, "remaining": new_available, **named}
 

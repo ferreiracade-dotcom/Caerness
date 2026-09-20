@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 89
+SCHEMA_VERSION = 104
 
 
 def _running_tests() -> bool:
@@ -3937,6 +3937,375 @@ def _migration_89(conn: sqlite3.Connection) -> None:
     # capability requirements are backfilled, so historical vacancies/needs are not fabricated.
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('orgneed01_version','1')")
 
+
+
+def _migration_90(conn: sqlite3.Connection) -> None:
+    """PERSONECO-01: demand-independent background-person profiles and resolution provenance."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS background_person_profiles (
+        partition_id INTEGER NOT NULL REFERENCES background_population_partitions(id) ON DELETE CASCADE,
+        local_uid INTEGER NOT NULL,
+        source_id INTEGER NOT NULL REFERENCES background_population_sources(id) ON DELETE CASCADE,
+        current_location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
+        given_name TEXT NOT NULL,
+        family_name TEXT NOT NULL,
+        birth_day INTEGER NOT NULL,
+        demographic_sex TEXT NOT NULL CHECK(demographic_sex IN ('female','male')),
+        occupation_domain TEXT NOT NULL,
+        social_archetype TEXT NOT NULL,
+        open_core INTEGER NOT NULL DEFAULT 0 CHECK(open_core IN (0,1)),
+        current_stage TEXT,
+        command_aptitude REAL NOT NULL DEFAULT 0 CHECK(command_aptitude BETWEEN 0 AND 100),
+        economic_aptitude REAL NOT NULL DEFAULT 0 CHECK(economic_aptitude BETWEEN 0 AND 100),
+        medical_aptitude REAL NOT NULL DEFAULT 0 CHECK(medical_aptitude BETWEEN 0 AND 100),
+        teaching_aptitude REAL NOT NULL DEFAULT 0 CHECK(teaching_aptitude BETWEEN 0 AND 100),
+        criminal_familiarity REAL NOT NULL DEFAULT 0 CHECK(criminal_familiarity BETWEEN 0 AND 100),
+        status TEXT NOT NULL DEFAULT 'background' CHECK(status IN ('background','resolved','dead')),
+        actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        seeded_day INTEGER NOT NULL,
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        PRIMARY KEY(partition_id,local_uid),
+        UNIQUE(actor_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_background_person_candidate
+      ON background_person_profiles(status,current_location_id,occupation_domain,open_core,current_stage,local_uid);
+    CREATE INDEX IF NOT EXISTS idx_background_person_source
+      ON background_person_profiles(source_id,status,local_uid);
+
+    CREATE TABLE IF NOT EXISTS person_resolution_provenance (
+        actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
+        partition_id INTEGER NOT NULL,
+        local_uid INTEGER NOT NULL,
+        resolved_day INTEGER NOT NULL,
+        resolution_reason TEXT NOT NULL,
+        demand_kind TEXT,
+        source_kind TEXT NOT NULL DEFAULT 'preexisting_background_identity',
+        population_delta INTEGER NOT NULL DEFAULT 0 CHECK(population_delta=0),
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        UNIQUE(partition_id,local_uid)
+    );
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('personeco01_version','1')")
+
+
+def _migration_91(conn: sqlite3.Connection) -> None:
+    """PROFESSION-01 / business ecology: ordinary provider standing and insolvency continuity."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS professional_profiles (
+        actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+        domain_key TEXT NOT NULL,
+        competence REAL NOT NULL DEFAULT 40 CHECK(competence BETWEEN 0 AND 100),
+        reputation REAL NOT NULL DEFAULT 40 CHECK(reputation BETWEEN 0 AND 100),
+        capacity REAL NOT NULL DEFAULT 1 CHECK(capacity>=0),
+        current_load REAL NOT NULL DEFAULT 0 CHECK(current_load>=0),
+        status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','inactive','retired','dead')),
+        source_kind TEXT NOT NULL DEFAULT 'resolved_background',
+        source_id INTEGER,
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        PRIMARY KEY(actor_id,domain_key)
+    );
+    CREATE INDEX IF NOT EXISTS idx_professional_profiles_provider ON professional_profiles(domain_key,status,competence,reputation,actor_id);
+
+    CREATE TABLE IF NOT EXISTS enterprise_ecology_state (
+        enterprise_id INTEGER PRIMARY KEY REFERENCES civilian_enterprises(id) ON DELETE CASCADE,
+        founded_day INTEGER,
+        crystallized_day INTEGER,
+        structural_origin TEXT NOT NULL DEFAULT 'preexisting',
+        profitable_streak_days INTEGER NOT NULL DEFAULT 0,
+        insolvent_since_day INTEGER,
+        closed_day INTEGER,
+        closure_reason TEXT,
+        last_review_day INTEGER NOT NULL DEFAULT 0,
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('profession01_version','1')")
+
+
+def _migration_92(conn: sqlite3.Connection) -> None:
+    """SERVICEFULFILL-01: conserved service demand routed to concrete providers."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS service_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        requester_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        requester_institution_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        requester_enterprise_id INTEGER REFERENCES civilian_enterprises(id) ON DELETE SET NULL,
+        domain_key TEXT NOT NULL,
+        location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
+        need_level REAL NOT NULL DEFAULT 50 CHECK(need_level BETWEEN 0 AND 100),
+        requested_day INTEGER NOT NULL,
+        due_day INTEGER,
+        provider_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        provider_institution_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        provider_enterprise_id INTEGER REFERENCES civilian_enterprises(id) ON DELETE SET NULL,
+        status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open','matched','fulfilled','failed','cancelled')),
+        fulfilled_day INTEGER,
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE INDEX IF NOT EXISTS idx_service_requests_open ON service_requests(status,domain_key,location_id,requested_day,id);
+
+    CREATE TABLE IF NOT EXISTS service_fulfillments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        request_id INTEGER NOT NULL REFERENCES service_requests(id) ON DELETE CASCADE,
+        provider_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        provider_institution_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        provider_enterprise_id INTEGER REFERENCES civilian_enterprises(id) ON DELETE SET NULL,
+        fulfilled_day INTEGER NOT NULL,
+        quality REAL NOT NULL DEFAULT 50 CHECK(quality BETWEEN 0 AND 100),
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        UNIQUE(request_id)
+    );
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('servicefulfill01_version','1')")
+
+
+def _migration_93(conn: sqlite3.Connection) -> None:
+    """DEMO-04 / MIGGEO / EXCESSMORT: route-aware migration and excess-death reconciliation."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS population_migration_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        from_source_id INTEGER NOT NULL REFERENCES background_population_sources(id) ON DELETE CASCADE,
+        to_source_id INTEGER NOT NULL REFERENCES background_population_sources(id) ON DELETE CASCADE,
+        requested_population REAL NOT NULL CHECK(requested_population>0),
+        route_id INTEGER,
+        requested_day INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','completed','blocked','cancelled')),
+        completed_day INTEGER,
+        reason TEXT NOT NULL,
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE INDEX IF NOT EXISTS idx_population_migration_pending ON population_migration_requests(status,requested_day,id);
+
+    CREATE TABLE IF NOT EXISTS excess_mortality_ledger (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        day INTEGER NOT NULL,
+        source_kind TEXT NOT NULL,
+        source_id INTEGER,
+        population_source_id INTEGER REFERENCES background_population_sources(id) ON DELETE SET NULL,
+        aggregate_deaths REAL NOT NULL CHECK(aggregate_deaths>=0),
+        tracked_deaths INTEGER NOT NULL DEFAULT 0 CHECK(tracked_deaths>=0),
+        applied_population_deaths REAL NOT NULL DEFAULT 0 CHECK(applied_population_deaths>=0),
+        status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','applied','unresolved','cancelled')),
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        UNIQUE(source_kind,source_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_excess_mortality_pending ON excess_mortality_ledger(status,day,id);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('demo04_miggeo_excessmort_version','1')")
+
+
+def _migration_94(conn: sqlite3.Connection) -> None:
+    """CONFLICTGEO-01: explicit military-frontier geometry independent of civilian roads."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS conflict_geometries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        location_a_id INTEGER NOT NULL REFERENCES locations(id) ON DELETE CASCADE,
+        location_b_id INTEGER NOT NULL REFERENCES locations(id) ON DELETE CASCADE,
+        geometry_kind TEXT NOT NULL CHECK(geometry_kind IN ('civilian_route','military_frontier','maritime','wilderness_corridor')),
+        traversable INTEGER NOT NULL DEFAULT 1 CHECK(traversable IN (0,1)),
+        military_feasibility REAL NOT NULL DEFAULT 50 CHECK(military_feasibility BETWEEN 0 AND 100),
+        civilian_feasibility REAL NOT NULL DEFAULT 50 CHECK(civilian_feasibility BETWEEN 0 AND 100),
+        source_kind TEXT NOT NULL,
+        source_id INTEGER,
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        UNIQUE(location_a_id,location_b_id,geometry_kind)
+    );
+    CREATE INDEX IF NOT EXISTS idx_conflict_geometries_pair ON conflict_geometries(location_a_id,location_b_id,geometry_kind,traversable);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('conflictgeo01_version','1')")
+
+
+def _migration_95(conn: sqlite3.Connection) -> None:
+    """Structural providers and contractual institutional authority."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS structural_provider_contracts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        consumer_institution_actor_id INTEGER REFERENCES actors(id) ON DELETE CASCADE,
+        provider_institution_actor_id INTEGER REFERENCES actors(id) ON DELETE CASCADE,
+        provider_enterprise_id INTEGER REFERENCES civilian_enterprises(id) ON DELETE SET NULL,
+        domain_key TEXT NOT NULL,
+        authority_kind TEXT NOT NULL DEFAULT 'collective_contractual',
+        started_day INTEGER,
+        ended_day INTEGER,
+        status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','paused','ended','breached')),
+        terms_json TEXT NOT NULL DEFAULT '{}',
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE INDEX IF NOT EXISTS idx_structural_provider_contract ON structural_provider_contracts(consumer_institution_actor_id,domain_key,status,id);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('structural_provider_contract_version','1')")
+
+
+def _migration_96(conn: sqlite3.Connection) -> None:
+    """Underworld splinter/provenance: people and crews transfer rather than duplicate."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS organization_transfer_provenance (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        day INTEGER NOT NULL,
+        transfer_kind TEXT NOT NULL,
+        source_organization_id INTEGER,
+        target_organization_id INTEGER,
+        actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        crew_id INTEGER,
+        quantity REAL,
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE INDEX IF NOT EXISTS idx_org_transfer_target ON organization_transfer_provenance(target_organization_id,day,id);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('splinter_provenance_version','1')")
+
+
+def _migration_97(conn: sqlite3.Connection) -> None:
+    """Merchant-house taxonomy: institutional house status is not a profitability threshold."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS merchant_house_qualifications (
+        enterprise_id INTEGER PRIMARY KEY REFERENCES civilian_enterprises(id) ON DELETE CASCADE,
+        institution_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        durable_depth INTEGER NOT NULL DEFAULT 0 CHECK(durable_depth IN (0,1)),
+        dynastic_or_family_continuity INTEGER NOT NULL DEFAULT 0 CHECK(dynastic_or_family_continuity IN (0,1)),
+        multi_venture_depth INTEGER NOT NULL DEFAULT 0 CHECK(multi_venture_depth IN (0,1)),
+        recognized_house_status INTEGER NOT NULL DEFAULT 0 CHECK(recognized_house_status IN (0,1)),
+        reviewed_day INTEGER NOT NULL DEFAULT 0,
+        evidence_json TEXT NOT NULL DEFAULT '{}'
+    );
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('merchant_taxonomy_version','1')")
+
+
+def _migration_98(conn: sqlite3.Connection) -> None:
+    """Opening-location and institutional-authority provenance."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS actor_location_provenance (
+        actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
+        location_id INTEGER NOT NULL REFERENCES locations(id) ON DELETE CASCADE,
+        provenance_kind TEXT NOT NULL,
+        confidence REAL NOT NULL DEFAULT 1 CHECK(confidence BETWEEN 0 AND 1),
+        resolved_day INTEGER NOT NULL,
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE TABLE IF NOT EXISTS institutional_authority_slots (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        institution_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+        authority_key TEXT NOT NULL,
+        authority_kind TEXT NOT NULL CHECK(authority_kind IN ('named_incumbent','collective','unresolved_incumbent','vacant')),
+        incumbent_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        required_stage TEXT,
+        status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','vacant','retired')),
+        created_day INTEGER NOT NULL,
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        UNIQUE(institution_actor_id,authority_key)
+    );
+    CREATE INDEX IF NOT EXISTS idx_authority_slots ON institutional_authority_slots(institution_actor_id,status,authority_kind,id);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('location_authority_version','1')")
+
+
+def _migration_99(conn: sqlite3.Connection) -> None:
+    """NONMERCHANT-01 + TEACHECO: spare teaching capacity and informal-circle persistence."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS teaching_capacity_profiles (
+        teacher_actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
+        domain_key TEXT NOT NULL DEFAULT 'martial_instruction',
+        personal_capacity INTEGER NOT NULL DEFAULT 1 CHECK(personal_capacity>=0),
+        occupied_places INTEGER NOT NULL DEFAULT 0 CHECK(occupied_places>=0),
+        spare_places INTEGER NOT NULL DEFAULT 0 CHECK(spare_places>=0),
+        discoverability REAL NOT NULL DEFAULT 50 CHECK(discoverability BETWEEN 0 AND 100),
+        last_review_day INTEGER NOT NULL DEFAULT 0,
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE TABLE IF NOT EXISTS informal_teaching_circles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        teacher_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+        domain_key TEXT NOT NULL DEFAULT 'martial_instruction',
+        started_day INTEGER NOT NULL,
+        active_students INTEGER NOT NULL DEFAULT 0 CHECK(active_students>=0),
+        status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','ended','formalized')),
+        formalized_institution_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE INDEX IF NOT EXISTS idx_informal_teaching_circle ON informal_teaching_circles(teacher_actor_id,status,started_day,id);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('nonmerchant_teacheco_version','1')")
+
+
+def _migration_100(conn: sqlite3.Connection) -> None:
+    """Named mortality parity audit; no character class receives plot armor."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS mortality_audit (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+        day INTEGER NOT NULL,
+        age_years REAL,
+        annual_hazard REAL NOT NULL DEFAULT 0,
+        elapsed_days INTEGER NOT NULL DEFAULT 0,
+        draw REAL,
+        died INTEGER NOT NULL DEFAULT 0 CHECK(died IN (0,1)),
+        source_kind TEXT NOT NULL DEFAULT 'ordinary_health',
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE INDEX IF NOT EXISTS idx_mortality_audit_actor ON mortality_audit(actor_id,day,id);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('mortality_parity_version','1')")
+
+
+def _migration_101(conn: sqlite3.Connection) -> None:
+    """Formation-vs-crystallization provenance and historical-membership non-backfill."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS entity_origin_provenance (
+        entity_kind TEXT NOT NULL,
+        entity_id INTEGER NOT NULL,
+        origin_kind TEXT NOT NULL CHECK(origin_kind IN ('preexisting_crystallized','formed_in_simulation','imported','unknown_preexisting')),
+        formation_day INTEGER,
+        crystallized_day INTEGER,
+        source_kind TEXT,
+        source_id INTEGER,
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        PRIMARY KEY(entity_kind,entity_id)
+    );
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('formation_crystallization_version','1')")
+
+
+def _migration_102(conn: sqlite3.Connection) -> None:
+    """Population-casualty reconciliation bridge for war and underworld violence."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS population_casualty_links (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        casualty_kind TEXT NOT NULL,
+        casualty_source_id INTEGER,
+        population_source_id INTEGER REFERENCES background_population_sources(id) ON DELETE SET NULL,
+        aggregate_deaths REAL NOT NULL DEFAULT 0 CHECK(aggregate_deaths>=0),
+        tracked_actor_deaths INTEGER NOT NULL DEFAULT 0 CHECK(tracked_actor_deaths>=0),
+        applied INTEGER NOT NULL DEFAULT 0 CHECK(applied IN (0,1)),
+        applied_day INTEGER,
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        UNIQUE(casualty_kind,casualty_source_id)
+    );
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('population_casualty_bridge_version','1')")
+
+
+def _migration_103(conn: sqlite3.Connection) -> None:
+    """Recovered merged-line completeness marker; capability only, no simulated history."""
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema103_recovery_complete','1')")
+
+
+def _migration_104(conn: sqlite3.Connection) -> None:
+    """ONEYEAR recovery acceptance epoch: release TENYEAR-02 only for this reconstructed line."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS acceptance_epochs (
+        acceptance_key TEXT PRIMARY KEY,
+        schema_version INTEGER NOT NULL,
+        status TEXT NOT NULL CHECK(status IN ('pending','passed','failed')),
+        accepted_day INTEGER,
+        evidence_json TEXT NOT NULL DEFAULT '{}',
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+    conn.execute("""INSERT OR IGNORE INTO acceptance_epochs(acceptance_key,schema_version,status,evidence_json)
+                    VALUES ('ONEYEAR_RECOVERY_SCHEMA104',104,'pending','{}')""")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_RECOVERY_SCHEMA104')")
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4027,6 +4396,21 @@ _MIGRATIONS: dict[int, Migration] = {
     87: ("patronage_networks", "PATRONNET-01 beneficiary patron-seeking, competing offers and patronage network state", _migration_87),
     88: ("patronage_circles", "PATRONCIRCLE-01 convened patronage circles, introductions and evidence-bound cultural movements", _migration_88),
     89: ("organization_needs", "ORGNEED-01 evidence-bound autonomous staffing and capability needs", _migration_89),
+    90: ("background_person_ecology", "PERSONECO-01 demand-independent background-person profiles and resolution provenance", _migration_90),
+    91: ("profession_business_ecology", "PROFESSION-01 professional emergence and ordinary business ecology", _migration_91),
+    92: ("service_fulfillment", "SERVICEFULFILL-01 concrete provider fulfillment", _migration_92),
+    93: ("demography_migration_excess_mortality", "DEMO-04, MIGGEO and EXCESSMORT reconciliation", _migration_93),
+    94: ("conflict_geometry", "CONFLICTGEO-01 explicit military-frontier geometry", _migration_94),
+    95: ("structural_provider_contracts", "Structural-provider contracting and collective authority", _migration_95),
+    96: ("splinter_provenance", "Real crew/personnel transfer and splinter provenance", _migration_96),
+    97: ("merchant_house_taxonomy", "Merchant House status separated from ordinary profitable firms", _migration_97),
+    98: ("location_authority_parity", "Opening locations and institutional-head parity", _migration_98),
+    99: ("nonmerchant_teacheco", "NONMERCHANT-01 and TEACHECO", _migration_99),
+    100: ("mortality_parity", "Named/background ordinary mortality parity audit", _migration_100),
+    101: ("formation_crystallization_provenance", "Formation versus crystallization provenance", _migration_101),
+    102: ("population_casualty_bridge", "WAR/underworld excess-mortality population reconciliation", _migration_102),
+    103: ("merged_recovery_complete", "Recovered schema-101-era merged line plus acceptance fixes", _migration_103),
+    104: ("oneyear_recovery_acceptance_epoch", "Current-line ONEYEAR acceptance epoch and TENYEAR-02 gate", _migration_104),
 }
 
 

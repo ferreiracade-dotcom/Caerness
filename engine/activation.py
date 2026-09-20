@@ -1068,6 +1068,8 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     from .background_population import activate_population_sources, activate_population_life_course
     out.update(activate_population_sources(conn))
     out.update(activate_population_life_course(conn))
+    from .person_ecology import activate_background_people
+    out.update(activate_background_people(conn))
     from .aggregate_trade import activate_aggregate_trade
     out.update(activate_aggregate_trade(conn))
     out.update(activate_elixir_substrate(conn))
@@ -1107,5 +1109,5 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     from .hollow import activate_hollow_substrate
     out.update(activate_hollow_substrate(conn))
     out.update(activate_integration_opening_substrate(conn))
-    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version','17')")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version','18')")
     return out

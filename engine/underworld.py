@@ -417,17 +417,34 @@ def record_underworld_membership_flow(
     if flow_kind in {'desistance','defection','custody','death_or_incapacitation','relocation'}:
         exits+=n
     d=_day(conn) if day is None else int(day)
-    conn.execute(
+    flow_cur = conn.execute(
         """INSERT INTO underworld_membership_flows(organization_id,day,flow_kind,count,from_tier,to_tier,source_event_id,metadata_json)
            VALUES (?,?,?,?,?,?,?,?)""",
         (organization_id,d,flow_kind,n,from_tier,to_tier,source_event_id,_j(metadata or {})),
     )
+    flow_id = int(flow_cur.lastrowid)
     conn.execute(
         """UPDATE underworld_membership_profiles SET core_members=?,active_members=?,peripheral_associates=?,
            lifetime_entries=?,lifetime_exits=?,last_review_day=? WHERE organization_id=?""",
         (stock['core'],stock['active'],stock['peripheral'],entries,exits,d,organization_id),
     )
     conn.execute("UPDATE underworld_organizations SET member_count_estimate=?,updated_day=? WHERE id=?",(stock['core']+stock['active'],d,organization_id))
+    # The analytic flow label intentionally combines deaths and incapacitation.  Population is
+    # reduced only when the causal caller supplies an explicit death subset; absent that evidence
+    # we do not silently reinterpret incapacitation as death.
+    meta = dict(metadata or {})
+    explicit_deaths = float(meta.get('deaths', 0) or 0) if flow_kind == 'death_or_incapacitation' else 0.0
+    if explicit_deaths > 0:
+        from .population_reconciliation import record_excess_mortality, population_source_for_location
+        org = conn.execute("SELECT primary_location_id FROM underworld_organizations WHERE id=?",(organization_id,)).fetchone()
+        loc = int(org[0]) if org and org[0] is not None else None
+        pop_source = population_source_for_location(conn, loc)
+        record_excess_mortality(
+            conn, source_kind='underworld_membership_flow', source_id=flow_id,
+            aggregate_deaths=min(n, explicit_deaths), tracked_deaths=int(meta.get('tracked_deaths',0) or 0),
+            population_source_id=pop_source, metadata={'organization_id':organization_id,'location_id':loc,'flow_id':flow_id,**meta},
+            adult_only=True,
+        )
     return conn.execute("SELECT * FROM underworld_membership_profiles WHERE organization_id=?",(organization_id,)).fetchone()
 
 
