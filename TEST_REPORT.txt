@@ -1,0 +1,55 @@
+Caerness Engine v0.26.1 — final pre-RC validation
+=================================================
+
+Ordinary cumulative regression suite: PASS
+Command: python tests/run_all.py
+Final line: All Caerness Engine v0.26.1 tests passed.
+
+Covered cumulative regressions/adversarial audits:
+- canon / decisions / interactions / information / actions / model gateway
+- v0.7 through v0.25 subsystem regressions
+- v0.15.1 implementation audit
+- v0.19 household edge audit
+- v0.20.1 health edge audit
+- v0.21 religion/cultural edge audit
+- v0.22 ecology/travel edge audit
+- v0.23 politics edge audit
+- v0.24 education/transmission edge audit
+- v0.25 long-run/camera/crystallization audit
+- v0.26.1 bootstrap/save-safety regression
+- v0.26.1 ownership/cadence/seeded-scale adversarial audit
+
+Representative schema migration validation: PASS
+- v0.15.1 -> schema 26: integrity ok, zero critical contradictions, safety backup created
+- v0.19.1 -> schema 26: integrity ok, zero critical contradictions, safety backup created
+- v0.20.1 -> schema 26: integrity ok, zero critical contradictions, safety backup created
+- v0.24.0 -> schema 26: integrity ok, zero critical contradictions, safety backup created
+- v0.25.0 -> schema 26: integrity ok, zero critical contradictions, safety backup created
+  Populated sample preserved story day 180, 1 actor, and 1 event.
+
+Candidate-scale validation: PASS
+Production seed 20/40/120-year run:
+- year 20: day 7,300; 5.58 s; ~9.58 MB; 23,106 decisions; 0 contradictions
+- year 40: day 14,600; 5.51 s; ~15.95 MB; 46,113 decisions; 0 contradictions
+- year 120: day 43,800; 19.67 s; ~31.23 MB; 99,207 decisions; 0 contradictions
+- total measured simulation time: ~30.76 s
+
+Additional scale cases:
+- RNG seed 271828, 40 years: ~10.84 s; 0 critical contradictions
+- RNG seed 314159, 40 years: ~10.80 s; 0 critical contradictions
+- 1,500 actors due same day: 1,500 resolved; ~0.22 s
+- route/information graph: 64 locations, 112 routes, 192 actors; full propagation; ~0.011 s
+- business scale: 200 enterprises, 10 locations, 5 years, 12,000 business cycles; ~0.94 s
+
+Final distributable database state after validation:
+- engine version: 0.26.1
+- schema version: 26
+- story day: 0
+- actors: 0
+- events: 0
+- decisions: 0
+- player configured: false
+- production campaign bootstrap: not yet applied
+- canon chunks: 160
+
+Performance figures are regression measurements from the packaging environment, not hardware guarantees.

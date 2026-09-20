@@ -1,0 +1,104 @@
+{
+  "engine_version": "0.59.0",
+  "schema_version": 50,
+  "purpose": "Verify that gang membership is stock-and-flow rather than a target-size progression and that the old 8->12 result is not preserved.",
+  "research_use": {
+    "principle": "External gang research supports high heterogeneity, short tenure for many less-embedded members, and longer persistence among embedded/core members. Exact modern youth-gang rates are not copied into Caerness; they motivate tiered turnover only.",
+    "sources": [
+      "National Gang Center FAQ / survey analysis on gang membership duration and gang size variation",
+      "NIJ Continuity and Change in Gang Membership and Gang Embeddedness",
+      "OJP/NIJ literature distinguishing core, regular/active and peripheral/fringe participation"
+    ]
+  },
+  "opening": {
+    "full_members": 8,
+    "core_members": 3,
+    "active_members": 5,
+    "peripheral_associates": 0,
+    "target_final_size": null
+  },
+  "removed_anchors": [
+    "automatic peripheral associates equal to ~45% of full membership",
+    "member_count < 18 gate on deliberate recruitment",
+    "lazy profile clock that discarded turnover before first membership review"
+  ],
+  "sampled_full_decade_branches": [
+    {
+      "seed": 9201,
+      "full_members": 7,
+      "core": 3,
+      "active": 4,
+      "peripheral": 5,
+      "wider_orbit": 12,
+      "lifetime_entries": 17,
+      "lifetime_exits": 13,
+      "command_depth": 1
+    },
+    {
+      "seed": 9202,
+      "full_members": 8,
+      "core": 3,
+      "active": 5,
+      "peripheral": 4,
+      "wider_orbit": 12,
+      "lifetime_entries": 16,
+      "lifetime_exits": 12,
+      "command_depth": 1
+    },
+    {
+      "seed": 9203,
+      "full_members": 16,
+      "core": 5,
+      "active": 11,
+      "peripheral": 3,
+      "wider_orbit": 19,
+      "lifetime_entries": 30,
+      "lifetime_exits": 19,
+      "command_depth": 2
+    },
+    {
+      "seed": 9204,
+      "full_members": 6,
+      "core": 4,
+      "active": 2,
+      "peripheral": 12,
+      "wider_orbit": 18,
+      "lifetime_entries": 31,
+      "lifetime_exits": 21,
+      "command_depth": 1
+    },
+    {
+      "seed": 9205,
+      "full_members": 13,
+      "core": 5,
+      "active": 8,
+      "peripheral": 3,
+      "wider_orbit": 16,
+      "lifetime_entries": 26,
+      "lifetime_exits": 18,
+      "command_depth": 2
+    }
+  ],
+  "observed_ranges": {
+    "final_full_members": [
+      6,
+      16
+    ],
+    "final_wider_orbit": [
+      12,
+      19
+    ],
+    "lifetime_entries": [
+      16,
+      31
+    ],
+    "lifetime_exits": [
+      12,
+      21
+    ]
+  },
+  "acceptance": "PASS: sampled outcomes include contraction, near-flat full membership, a large fluid periphery, and material expansion; gross turnover is much larger than net change; no fixed 12-member endpoint or small-gang recruitment ceiling remains.",
+  "status": "SUPERSEDED_BY_OPERATIONAL_SCALE_RECALIBRATION",
+  "superseded_by": "diagnostics/v59_underworld_operational_scale_calibration.json",
+  "note": "This file reflects the discarded eight-member Cale opening and is retained only as pre-recalibration diagnostic history."
+}

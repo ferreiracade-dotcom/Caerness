@@ -1,0 +1,624 @@
+{
+  "coverage": [
+    {
+      "domain_key": "01_canon_identity",
+      "label": "Canon and identity",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 744,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "02_geography",
+      "label": "Geography and political geography",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 133,
+      "eligible_count": 11,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "03_current_ecology",
+      "label": "Current ecology and cultivation sites",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 17,
+      "eligible_count": 17,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "04_cultivation_realization",
+      "label": "Cultivation and Realization",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 445,
+      "eligible_count": 443,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "05_core_heredity",
+      "label": "Core assessment and heredity",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 464,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "06_elixirs_sediment",
+      "label": "Elixirs, Sediment and Rupture",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "07_teaching_apprenticeship",
+      "label": "Ordinary teaching and apprenticeship",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 40,
+      "eligible_count": 96,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "08_master_disciple",
+      "label": "Personal master and disciple",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 54,
+      "eligible_count": 54,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "09_manuals",
+      "label": "Manuals and restricted transmission",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 10,
+      "eligible_count": 10,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "10_institution_reproduction",
+      "label": "Institutional recruitment and reproduction",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 40,
+      "eligible_count": 40,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "11_concord_law",
+      "label": "Concord governance and ordinary law",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 7,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "12_undertow_compacts",
+      "label": "Undertow compacts",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 17,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "13_unsworn",
+      "label": "Unsworn institutions",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 98,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "14_hollow_succession",
+      "label": "Hollow practice and Grand Coven succession",
+      "mechanism_status": "MAJOR_GAP",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "mechanism not implemented"
+    },
+    {
+      "domain_key": "15_long_road",
+      "label": "Long Road and waystones",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 11,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "16_combat",
+      "label": "Challenges, duels and battlefield combat",
+      "mechanism_status": "API_ONLY",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "17_tournament",
+      "label": "Tournament and circuit economy",
+      "mechanism_status": "MAJOR_GAP",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "mechanism not implemented"
+    },
+    {
+      "domain_key": "18_households_property",
+      "label": "Households and property",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 8,
+      "eligible_count": 8,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "19_new_unions",
+      "label": "New unions and household formation",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 3,
+      "eligible_count": 0,
+      "blocked_count": 0,
+      "blocked_reason": "no eligible work"
+    },
+    {
+      "domain_key": "20_births_children",
+      "label": "Births, fertility and children",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 3,
+      "eligible_count": 3,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "21_guardianship",
+      "label": "Guardianship, adoption and dependencies",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "22_service_migration",
+      "label": "Domestic service and household migration",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": 0,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "23_population_resolution",
+      "label": "Population cohorts and named resolution",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 14,
+      "eligible_count": 54,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "24_aging_death",
+      "label": "Aging, death and retirement",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 462,
+      "eligible_count": 462,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "25_illness_treatment",
+      "label": "Illness, treatment and disability",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 462,
+      "eligible_count": 0,
+      "blocked_count": 0,
+      "blocked_reason": "no eligible work"
+    },
+    {
+      "domain_key": "26_addiction_psych",
+      "label": "Addiction and psychological injury",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "27_material_life",
+      "label": "Food, water, fuel, housing and repair",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 5,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "28_business_demand",
+      "label": "Businesses and differentiated demand",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 10,
+      "eligible_count": 10,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "29_business_lifecycle",
+      "label": "Business founding, expansion and closure",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 10,
+      "eligible_count": 0,
+      "blocked_count": 0,
+      "blocked_reason": "no eligible work"
+    },
+    {
+      "domain_key": "30_production",
+      "label": "Production, cultivation goods and arms",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 5,
+      "eligible_count": 5,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "31_merchant_transport",
+      "label": "Merchant houses, transport and escorts",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 4,
+      "eligible_count": 3,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "32_credit_inheritance",
+      "label": "Credit, inheritance and partnerships",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 0,
+      "eligible_count": 0,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "33_appraisal_auction",
+      "label": "Appraisal, auction and provenance",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 4,
+      "eligible_count": 0,
+      "blocked_count": 0,
+      "blocked_reason": "no eligible work"
+    },
+    {
+      "domain_key": "34_nightlife",
+      "label": "Nightlife venues and ordinary employment",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 10,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "35_gambling",
+      "label": "Gambling and Red Board",
+      "mechanism_status": "MAJOR_GAP",
+      "populated_count": 10,
+      "eligible_count": null,
+      "blocked_count": 10,
+      "blocked_reason": "mechanism not implemented"
+    },
+    {
+      "domain_key": "36_prizefighting",
+      "label": "Prizefighting and fighter careers",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "37_crime_orgs",
+      "label": "Crime families, gangs and syndicate formation",
+      "mechanism_status": "MAJOR_GAP",
+      "populated_count": 2,
+      "eligible_count": null,
+      "blocked_count": 2,
+      "blocked_reason": "mechanism not implemented"
+    },
+    {
+      "domain_key": "38_smuggling",
+      "label": "Smuggling, fencing and laundering",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "39_policing",
+      "label": "Policing, corruption and disputes",
+      "mechanism_status": "MAJOR_GAP",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "mechanism not implemented"
+    },
+    {
+      "domain_key": "40_privacy_intelligence",
+      "label": "Privacy, intelligence and hidden affiliations",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 4,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "41_assassination",
+      "label": "Assassination and targeted violence",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 55,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "42_exploitation_medicine",
+      "label": "Exploitation and underworld medicine",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "43_religion",
+      "label": "Religion and worship",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 4,
+      "eligible_count": 4,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "44_culture",
+      "label": "Culture, art, fashion and performance",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 1,
+      "eligible_count": 1,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "45_news_reputation",
+      "label": "News, reputation and public memory",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 4,
+      "eligible_count": 4,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "46_polity",
+      "label": "Polity government, succession and territory",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 7,
+      "eligible_count": 7,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "47_war_logistics",
+      "label": "War, military logistics and aftermath",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "48_regional_norms",
+      "label": "Regional variation and social norms",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 133,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "49_npc_agency",
+      "label": "Cross-system NPC agency",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 560,
+      "eligible_count": 560,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "50_shared_clock",
+      "label": "Shared clock, replay and observability",
+      "mechanism_status": "RUNNABLE",
+      "populated_count": 560,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": null
+    },
+    {
+      "domain_key": "51_player_boundary",
+      "label": "Player boundary and historical continuity",
+      "mechanism_status": "PARTIAL",
+      "populated_count": 0,
+      "eligible_count": null,
+      "blocked_count": 1,
+      "blocked_reason": "not populated"
+    },
+    {
+      "domain_key": "52_protected_open",
+      "label": "Protected open and narrative-only detail",
+      "mechanism_status": "SEMANTIC_ONLY",
+      "populated_count": null,
+      "eligible_count": null,
+      "blocked_count": 0,
+      "blocked_reason": "semantic-only/protected boundary"
+    }
+  ],
+  "ten_year_gate": {
+    "pass": false,
+    "required_domains": 51,
+    "failure_count": 16,
+    "failures": [
+      {
+        "domain_key": "06_elixirs_sediment",
+        "label": "Elixirs, Sediment and Rupture",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "14_hollow_succession",
+        "label": "Hollow practice and Grand Coven succession",
+        "mechanism_status": "MAJOR_GAP",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "mechanism not implemented"
+      },
+      {
+        "domain_key": "16_combat",
+        "label": "Challenges, duels and battlefield combat",
+        "mechanism_status": "API_ONLY",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "17_tournament",
+        "label": "Tournament and circuit economy",
+        "mechanism_status": "MAJOR_GAP",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "mechanism not implemented"
+      },
+      {
+        "domain_key": "21_guardianship",
+        "label": "Guardianship, adoption and dependencies",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "22_service_migration",
+        "label": "Domestic service and household migration",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": 0,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "26_addiction_psych",
+        "label": "Addiction and psychological injury",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "32_credit_inheritance",
+        "label": "Credit, inheritance and partnerships",
+        "mechanism_status": "RUNNABLE",
+        "populated_count": 0,
+        "eligible_count": 0,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "35_gambling",
+        "label": "Gambling and Red Board",
+        "mechanism_status": "MAJOR_GAP",
+        "populated_count": 10,
+        "eligible_count": null,
+        "blocked_count": 10,
+        "blocked_reason": "mechanism not implemented"
+      },
+      {
+        "domain_key": "36_prizefighting",
+        "label": "Prizefighting and fighter careers",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "37_crime_orgs",
+        "label": "Crime families, gangs and syndicate formation",
+        "mechanism_status": "MAJOR_GAP",
+        "populated_count": 2,
+        "eligible_count": null,
+        "blocked_count": 2,
+        "blocked_reason": "mechanism not implemented"
+      },
+      {
+        "domain_key": "38_smuggling",
+        "label": "Smuggling, fencing and laundering",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "39_policing",
+        "label": "Policing, corruption and disputes",
+        "mechanism_status": "MAJOR_GAP",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "mechanism not implemented"
+      },
+      {
+        "domain_key": "42_exploitation_medicine",
+        "label": "Exploitation and underworld medicine",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "47_war_logistics",
+        "label": "War, military logistics and aftermath",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "51_player_boundary",
+        "label": "Player boundary and historical continuity",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      }
+    ],
+    "principle": "The decade run may test compounding only after ordinary systems demonstrably start."
+  }
+}

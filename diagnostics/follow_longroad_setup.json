@@ -1,0 +1,9 @@
+{
+  "scenario": "longroad",
+  "rng_seed": 9102,
+  "assumptions": [
+    "Opening exact location is unresolved; Waymeet chosen as a plausible Road-network starting node for this experiment."
+  ],
+  "focus_actor_id": 472,
+  "focus_actor": "Everett Broome"
+}

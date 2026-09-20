@@ -1,0 +1,12 @@
+{
+  "canonical_fk": 0,
+  "canonical_integrity": "ok",
+  "compared": 379,
+  "mismatches": [],
+  "pass": true,
+  "replay_fk": 0,
+  "replay_integrity": "ok",
+  "sqlite_sequence_mismatches": {},
+  "tables_a": 379,
+  "tables_b": 379
+}

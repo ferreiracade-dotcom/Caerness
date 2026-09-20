@@ -1,0 +1,9 @@
+{
+  "scenario": "witness",
+  "rng_seed": 9105,
+  "focus_actor_id": 509,
+  "focus_actor": "Hadrian Bellgrave",
+  "assumptions": [
+    "Witness affiliation is source-explicit but missing from executable affiliation table; wired as an adherent with Archbishop role preserved in metadata for this scenario."
+  ]
+}

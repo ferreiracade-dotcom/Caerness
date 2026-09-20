@@ -1,0 +1,9 @@
+{
+  "name": "Caerness",
+  "short_name": "Caerness",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#151310",
+  "theme_color": "#151310",
+  "description": "Phone-local interface for the Caerness persistent world simulation."
+}

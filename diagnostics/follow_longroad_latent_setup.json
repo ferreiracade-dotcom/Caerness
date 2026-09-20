@@ -1,0 +1,10 @@
+{
+  "scenario": "longroad",
+  "rng_seed": 9202,
+  "focus_actor_id": 568,
+  "focus_actor": "[SIM] Sella Marrin",
+  "latent_entity_id": 4,
+  "non_ledger": true,
+  "campaign_only": true,
+  "starting_location": "Waymeet"
+}

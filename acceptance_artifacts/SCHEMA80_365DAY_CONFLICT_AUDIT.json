@@ -1,0 +1,43 @@
+{
+  "schema": "80",
+  "initial": {
+    "day": 0,
+    "agency_profiles": 106,
+    "conflict_channels": 5
+  },
+  "final_day": 365,
+  "incidents": [
+    {
+      "day": 210,
+      "incident_kind": "border_raid",
+      "severity": 53.6,
+      "initiator": "Underheaven Empire",
+      "target": "Thornward",
+      "status": "responded",
+      "response_state": "formal_demand"
+    },
+    {
+      "day": 300,
+      "incident_kind": "border_raid",
+      "severity": 53.0,
+      "initiator": "Greywood",
+      "target": "Dunmoor",
+      "status": "responded",
+      "response_state": "formal_demand"
+    },
+    {
+      "day": 360,
+      "incident_kind": "maritime_restriction",
+      "severity": 48.6,
+      "initiator": "Windmere",
+      "target": "Sunreach Confederacy",
+      "status": "open",
+      "response_state": "none"
+    }
+  ],
+  "incident_count": 3,
+  "response_count": 2,
+  "campaign_count": 0,
+  "integrity": "ok",
+  "foreign_keys": 0
+}

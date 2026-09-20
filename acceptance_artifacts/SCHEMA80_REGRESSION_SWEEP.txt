@@ -1,0 +1,42 @@
+===== tests/orgagency_conflict01_test.py =====
+ORGAGENCY/POLITYAGENCY/CONFLICT-01 adversarial acceptance PASS
+RESULT: PASS
+
+===== tests/dec01_information_bounded_decision_runtime_test.py =====
+DEC-01 information-bounded decision runtime tests: PASS
+RESULT: PASS
+
+===== tests/underworld_rackets_assets_test.py =====
+underworld rackets/assets tests: PASS
+RESULT: PASS
+
+===== tests/v60_underworld_rebuild_test.py =====
+v0.60 underworld rebuild tests: PASS
+RESULT: PASS
+
+===== tests/econ01_underworld_economic_interests_test.py =====
+ECON-01 underworld economic interests tests: PASS
+RESULT: PASS
+
+===== tests/events01_territorial_event_sourcing_test.py =====
+EVENTS-01 territorial event-sourcing tests: PASS
+RESULT: PASS
+
+===== tests/war01_campaign_battle_world_consequences_test.py =====
+WAR-01 campaign/battle/world-consequences acceptance: PASS
+RESULT: PASS
+
+===== tests/arch02_scheduler_chunk_invariance_test.py =====
+ARCH-02 scheduler chunk invariance: PASS
+{'engine_version': '0.60.0', 'schema_version': 80, 'days': 90, 'tables_compared': 30, 'events': 35, 'knowledge': 335, 'rumours': 29, 'trade_periods': 3, 'status': 'PASS'}
+RESULT: PASS
+
+===== tests/resclean01_resolution_owner_cleanup_test.py =====
+{'schema_version': 80, 'misclassified_institution_rows': 0, 'cohort_due_rows': 0, 'integrity': 'ok', 'foreign_keys': 0}
+RESULT: PASS
+
+===== tests/smoke_test.py =====
+Smoke test passed: dormant simulation is not frozen.
+RESULT: PASS
+
+compileall engine: PASS

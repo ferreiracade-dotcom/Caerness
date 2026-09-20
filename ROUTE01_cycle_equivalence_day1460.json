@@ -1,0 +1,82 @@
+{
+  "baseline_fk": 0,
+  "baseline_integrity": "ok",
+  "baseline_result": {
+    "observations": 0,
+    "offer_awareness": 149,
+    "offers_created": 57
+  },
+  "baseline_seconds": 0.5141806249999945,
+  "different_tables": [],
+  "optimized_fk": 0,
+  "optimized_integrity": "ok",
+  "optimized_result": {
+    "observations": 0,
+    "offer_awareness": 149,
+    "offers_created": 57
+  },
+  "optimized_seconds": 0.038574714000105814,
+  "speedup": 13.32947342133461,
+  "table_hashes": {
+    "civilian_enterprises": {
+      "baseline": [
+        212,
+        "25b093a356ca2039d27a7871cae9727909b3683a324b658583186a9c1a62cd10"
+      ],
+      "optimized": [
+        212,
+        "25b093a356ca2039d27a7871cae9727909b3683a324b658583186a9c1a62cd10"
+      ]
+    },
+    "commercial_stock": {
+      "baseline": [
+        99,
+        "2a94f2393edd003de08f9dc3e52a2c25425aa78d7790c633727d7360a80aba08"
+      ],
+      "optimized": [
+        99,
+        "2a94f2393edd003de08f9dc3e52a2c25425aa78d7790c633727d7360a80aba08"
+      ]
+    },
+    "engine_meta": {
+      "baseline": [
+        102,
+        "1e7aec3b6f5956569dbeb77637b446fff9e4d4c96507b64411edc01bc958542d"
+      ],
+      "optimized": [
+        102,
+        "1e7aec3b6f5956569dbeb77637b446fff9e4d4c96507b64411edc01bc958542d"
+      ]
+    },
+    "merchant_market_observations": {
+      "baseline": [
+        4128,
+        "766b41d6c2bd3a3a7039807143ba1ab8963cf03f286d0dbd64d5adda6467cc69"
+      ],
+      "optimized": [
+        4128,
+        "766b41d6c2bd3a3a7039807143ba1ab8963cf03f286d0dbd64d5adda6467cc69"
+      ]
+    },
+    "merchant_offer_awareness": {
+      "baseline": [
+        1631,
+        "84a858aa72ddeb69c4a7786c5ea60ccff383572419b2dc1c22a02d7003d819b1"
+      ],
+      "optimized": [
+        1631,
+        "84a858aa72ddeb69c4a7786c5ea60ccff383572419b2dc1c22a02d7003d819b1"
+      ]
+    },
+    "merchant_trade_offers": {
+      "baseline": [
+        1150,
+        "dc7ed8c0ff9aab20573eceaac90439d8541c92cec99c304a4747ae383ce4eb1e"
+      ],
+      "optimized": [
+        1150,
+        "dc7ed8c0ff9aab20573eceaac90439d8541c92cec99c304a4747ae383ce4eb1e"
+      ]
+    }
+  }
+}

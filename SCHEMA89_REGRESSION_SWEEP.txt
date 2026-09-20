@@ -1,0 +1,33 @@
+Caerness v0.60.0 / schema 89 — ORGNEED-01 focused regression sweep — 2026-09-19
+
+PASS orgneed01_autonomous_need_generation_test.py
+PASS adapt01_reuse_before_create_test.py
+PASS opportunity01_symmetric_relationships_test.py
+PASS opportunity01_negotiation_test.py
+PASS orglife01_country_lifecycle_test.py
+PASS dec01_information_bounded_decision_runtime_test.py
+PASS patron01_social_patronage_test.py
+PASS patronnet01_patron_seeking_competition_test.py
+PASS patroncircle01_social_circle_movement_test.py
+PASS arch02_scheduler_chunk_invariance_test.py (90 days; 30 tables compared)
+PASS smoke_test.py
+PASS python -m compileall -q engine tests
+
+Fresh 365-day opening ecology:
+required roles=0
+capability requirements=0
+ORGNEED pressures=0
+ORGNEED searches=0
+integrity=ok
+foreign keys=0
+
+Mature schema-88 day3830 -> schema89:
+day unchanged=3830
+events unchanged=5713
+interactions unchanged=2752
+pressures unchanged=0
+required roles backfilled=0
+capability requirements backfilled=0
+ORGNEED pressures backfilled=0
+
+After +60 days: day3890, events=5849, interactions=2836, ORGNEED pressures=0, ORGNEED searches=0, integrity=ok, foreign keys=0.

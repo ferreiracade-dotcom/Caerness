@@ -1,0 +1,122 @@
+{
+  "actor": "[SIM] Tobin Verra",
+  "basis": "Normally trained Wrenfield developing disciple; Temper is ordinary at opening.",
+  "breakthrough_history": [
+    {
+      "after": "Temper",
+      "before": "Temper",
+      "day": 1090,
+      "kind": "breakthrough_attempt",
+      "metadata": {
+        "ordinary_realization_ratio": 1.1818181818181819,
+        "probability_authority": "STRUCTURAL_READINESS_NOT_LOTTERY",
+        "rare_realization_required": false,
+        "success_probability": 1.0,
+        "transition_mode": "vessel_maturation",
+        "vessel_readiness_ratio": 1.0089393007495742
+      }
+    },
+    {
+      "after": "Third",
+      "before": "Temper",
+      "day": 1090,
+      "kind": "breakthrough_success",
+      "metadata": {
+        "demographic_pressure": null,
+        "historical_event": false,
+        "rare_realization_required": false,
+        "stage_bound_anchors_closed": 0,
+        "transition_mode": "vessel_maturation"
+      }
+    }
+  ],
+  "final_age": 33,
+  "final_stage": "Third",
+  "opening_age": 23,
+  "opening_stage": "Temper",
+  "realization_aptitude": 1.120982,
+  "scenario": "tobin",
+  "snapshots": [
+    {
+      "age": 24,
+      "realization": 44.2,
+      "stage": "Temper",
+      "teacher_support": 35.0,
+      "vessel": 60.31,
+      "year": 1
+    },
+    {
+      "age": 25,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 35.0,
+      "vessel": 75.77,
+      "year": 2
+    },
+    {
+      "age": 26,
+      "realization": 23.47,
+      "stage": "Third",
+      "teacher_support": 35.0,
+      "vessel": 31.74,
+      "year": 3
+    },
+    {
+      "age": 27,
+      "realization": 33.16,
+      "stage": "Third",
+      "teacher_support": 35.0,
+      "vessel": 46.89,
+      "year": 4
+    },
+    {
+      "age": 28,
+      "realization": 42.72,
+      "stage": "Third",
+      "teacher_support": 35.0,
+      "vessel": 61.83,
+      "year": 5
+    },
+    {
+      "age": 29,
+      "realization": 52.15,
+      "stage": "Third",
+      "teacher_support": 35.0,
+      "vessel": 76.57,
+      "year": 6
+    },
+    {
+      "age": 30,
+      "realization": 61.72,
+      "stage": "Third",
+      "teacher_support": 35.0,
+      "vessel": 91.51,
+      "year": 7
+    },
+    {
+      "age": 31,
+      "realization": 65.0,
+      "stage": "Third",
+      "teacher_support": 35.0,
+      "vessel": 100.0,
+      "year": 8
+    },
+    {
+      "age": 32,
+      "realization": 65.0,
+      "stage": "Third",
+      "teacher_support": 35.0,
+      "vessel": 100.0,
+      "year": 9
+    },
+    {
+      "age": 33,
+      "realization": 65.0,
+      "stage": "Third",
+      "teacher_support": 35.0,
+      "vessel": 100.0,
+      "year": 10
+    }
+  ],
+  "vessel_aptitude": 1.195601
+}

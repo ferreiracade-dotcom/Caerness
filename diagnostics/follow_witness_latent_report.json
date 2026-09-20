@@ -1,0 +1,4201 @@
+{
+  "scenario": "witness",
+  "years": 10,
+  "focus_actor_id": 568,
+  "snapshots": [
+    {
+      "day": 0,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 0.0,
+          "status": "active",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 0.0,
+          "status": "active",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 46.0,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 6.0,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 18.0,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 0,
+        "next_review_day": 30,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [],
+      "events": [],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "parish_worker",
+          "stage_name": "Parish Worker",
+          "sequence_index": 10,
+          "started_day": 0,
+          "stage_started_day": 0,
+          "status": "active",
+          "experience_json": "{\"advancements\": 0, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"opportunities\": 0, \"responsibilities\": [], \"responsibility_opportunities\": 0, \"role_events\": 0}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 365,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 54.325368294044665,
+          "status": "active",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 0.0,
+          "status": "active",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 22.928424120693037,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 6.0,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 21.023242524521564,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 364,
+        "next_review_day": 454,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "parish_worker",
+          "stage_name": "Parish Worker",
+          "sequence_index": 10,
+          "started_day": 0,
+          "stage_started_day": 0,
+          "status": "active",
+          "experience_json": "{\"advancements\": 0, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 365, \"days_in_stage\": 365, \"eligible_since_day\": 91, \"eligible_stage_id\": 2, \"last_review_day\": 365, \"last_role_event_day\": 273, \"opportunities\": 0, \"responsibilities\": [], \"responsibility_opportunities\": 0, \"role_events\": 3}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 730,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 20.21718558040372,
+          "status": "active",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 22.928424120693037,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 6.0,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 23.90976565448854,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 729,
+        "next_review_day": 819,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "parish_worker",
+          "stage_name": "Parish Worker",
+          "sequence_index": 10,
+          "started_day": 0,
+          "stage_started_day": 0,
+          "status": "active",
+          "experience_json": "{\"advancements\": 0, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 730, \"days_in_stage\": 730, \"eligible_since_day\": 91, \"eligible_stage_id\": 2, \"last_review_day\": 730, \"last_role_event_day\": 638, \"opportunities\": 0, \"responsibilities\": [], \"responsibility_opportunities\": 0, \"role_events\": 5}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 1095,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 90.55242581356688,
+          "status": "active",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 22.928424120693037,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 5.799613795808955,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 24.420741253396443,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 1094,
+        "next_review_day": 1184,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        },
+        {
+          "day": 821,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+        },
+        {
+          "day": 912,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+        },
+        {
+          "day": 1003,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+        },
+        {
+          "day": 1094,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 1003,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "parish_worker",
+          "stage_name": "Parish Worker",
+          "sequence_index": 10,
+          "started_day": 0,
+          "stage_started_day": 0,
+          "status": "active",
+          "experience_json": "{\"advancements\": 0, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 1095, \"days_in_stage\": 1095, \"eligible_since_day\": 91, \"eligible_stage_id\": 2, \"last_review_day\": 1095, \"last_role_event_day\": 1003, \"opportunities\": 0, \"responsibilities\": [], \"responsibility_opportunities\": 0, \"role_events\": 6}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 1460,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 0.0,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 5.799613795808955,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 24.420741253396443,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 1459,
+        "next_review_day": 1549,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        },
+        {
+          "day": 821,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+        },
+        {
+          "day": 912,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+        },
+        {
+          "day": 1003,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+        },
+        {
+          "day": 1094,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+        },
+        {
+          "day": 1186,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 1277,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 22.9 to 0.0."
+        },
+        {
+          "day": 1368,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1459,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 1003,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1186,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "parish_worker",
+          "stage_name": "Parish Worker",
+          "sequence_index": 10,
+          "started_day": 0,
+          "stage_started_day": 0,
+          "status": "active",
+          "experience_json": "{\"advancements\": 0, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 1460, \"days_in_stage\": 1460, \"eligible_since_day\": 91, \"eligible_stage_id\": 2, \"last_review_day\": 1460, \"last_role_event_day\": 1003, \"opportunities\": 0, \"responsibilities\": [], \"responsibility_opportunities\": 0, \"role_events\": 6}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 1825,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 0.0,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 5.52035050642532,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 25.99559046299509,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 1824,
+        "next_review_day": 1914,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        },
+        {
+          "day": 821,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+        },
+        {
+          "day": 912,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+        },
+        {
+          "day": 1003,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+        },
+        {
+          "day": 1094,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+        },
+        {
+          "day": 1186,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 1277,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 22.9 to 0.0."
+        },
+        {
+          "day": 1368,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1459,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1551,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1642,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1733,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1824,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 1003,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1186,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 1642,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "parish_worker",
+          "stage_name": "Parish Worker",
+          "sequence_index": 10,
+          "started_day": 0,
+          "stage_started_day": 0,
+          "status": "active",
+          "experience_json": "{\"advancements\": 0, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 1825, \"days_in_stage\": 1825, \"eligible_since_day\": 91, \"eligible_stage_id\": 2, \"last_review_day\": 1825, \"last_role_event_day\": 1642, \"opportunities\": 0, \"responsibilities\": [], \"responsibility_opportunities\": 0, \"role_events\": 7}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 2190,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 0.0,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 5.52035050642532,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 27.97993102166216,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 2189,
+        "next_review_day": 2279,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        },
+        {
+          "day": 821,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+        },
+        {
+          "day": 912,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+        },
+        {
+          "day": 1003,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+        },
+        {
+          "day": 1094,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+        },
+        {
+          "day": 1186,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 1277,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 22.9 to 0.0."
+        },
+        {
+          "day": 1368,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1459,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1551,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1642,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1733,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1824,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1916,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2007,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2098,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2189,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 1003,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1186,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 1642,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1916,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2098,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "parish_worker",
+          "stage_name": "Parish Worker",
+          "sequence_index": 10,
+          "started_day": 0,
+          "stage_started_day": 0,
+          "status": "active",
+          "experience_json": "{\"advancements\": 0, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 2190, \"days_in_stage\": 2190, \"eligible_since_day\": 91, \"eligible_stage_id\": 2, \"last_review_day\": 2190, \"last_role_event_day\": 2098, \"opportunities\": 0, \"responsibilities\": [], \"responsibility_opportunities\": 0, \"role_events\": 9}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 2555,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 0.0,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 5.52035050642532,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 29.594677719726672,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 2554,
+        "next_review_day": 2644,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        },
+        {
+          "day": 821,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+        },
+        {
+          "day": 912,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+        },
+        {
+          "day": 1003,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+        },
+        {
+          "day": 1094,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+        },
+        {
+          "day": 1186,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 1277,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 22.9 to 0.0."
+        },
+        {
+          "day": 1368,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1459,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1551,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1642,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1733,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1824,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1916,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2007,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2098,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2189,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2281,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2372,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2463,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2554,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 1003,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1186,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 1642,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1916,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2098,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2372,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2463,
+          "event_type": "career_advancement",
+          "title": "[SIM] Mara Elwick: Trusted Parish Worker",
+          "summary": "[SIM] Mara Elwick's durable professional standing changed to Trusted Parish Worker because of local trust 29.6, sustained parish service. This standing change does not determine which appointments or specializations they hold.",
+          "severity": 2
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "trusted_worker",
+          "stage_name": "Trusted Parish Worker",
+          "sequence_index": 20,
+          "started_day": 0,
+          "stage_started_day": 2463,
+          "status": "active",
+          "experience_json": "{\"advancements\": 1, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 2555, \"days_in_stage\": 2555, \"eligible_since_day\": 91, \"eligible_stage_id\": 3, \"last_advancement_day\": 2463, \"last_opportunity_day\": 2463, \"last_review_day\": 2555, \"last_role_event_day\": 2372, \"opportunities\": 1, \"responsibilities\": [], \"responsibility_opportunities\": 0, \"role_events\": 10}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 2920,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 0.0,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 5.52035050642532,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 29.594677719726672,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 2919,
+        "next_review_day": 3009,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        },
+        {
+          "day": 821,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+        },
+        {
+          "day": 912,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+        },
+        {
+          "day": 1003,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+        },
+        {
+          "day": 1094,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+        },
+        {
+          "day": 1186,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 1277,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 22.9 to 0.0."
+        },
+        {
+          "day": 1368,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1459,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1551,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1642,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1733,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1824,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1916,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2007,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2098,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2189,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2281,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2372,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2463,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2554,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2646,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2737,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2828,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2919,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 1003,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1186,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 1642,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1916,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2098,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2372,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2463,
+          "event_type": "career_advancement",
+          "title": "[SIM] Mara Elwick: Trusted Parish Worker",
+          "summary": "[SIM] Mara Elwick's durable professional standing changed to Trusted Parish Worker because of local trust 29.6, sustained parish service. This standing change does not determine which appointments or specializations they hold.",
+          "severity": 2
+        },
+        {
+          "day": 2646,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Mara Elwick: Volunteer Coordinator",
+          "summary": "A real responsibility opened because of local trust 29.6, sustained lay service. [SIM] Mara Elwick accepted/was entrusted with Volunteer Coordinator. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "trusted_worker",
+          "stage_name": "Trusted Parish Worker",
+          "sequence_index": 20,
+          "started_day": 0,
+          "stage_started_day": 2463,
+          "status": "active",
+          "experience_json": "{\"advancements\": 1, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 2920, \"days_in_stage\": 2920, \"eligible_since_day\": 91, \"eligible_stage_id\": 3, \"last_advancement_day\": 2463, \"last_opportunity_day\": 2463, \"last_responsibility_day\": 2646, \"last_responsibility_opportunity_day\": 2646, \"last_review_day\": 2920, \"last_role_event_day\": 2372, \"opportunities\": 1, \"responsibilities\": [{\"acquired_day\": 2646, \"key\": \"volunteer_coordinator\", \"kind\": \"branching_responsibility\", \"name\": \"Volunteer Coordinator\", \"reasons\": [\"local trust 29.6\", \"sustained lay service\"], \"status\": \"active\"}], \"responsibility_opportunities\": 2, \"role_events\": 10}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 3285,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 0.0,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 5.040961294183715,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 30.25947002923144,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 3284,
+        "next_review_day": 3374,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        },
+        {
+          "day": 821,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+        },
+        {
+          "day": 912,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+        },
+        {
+          "day": 1003,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+        },
+        {
+          "day": 1094,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+        },
+        {
+          "day": 1186,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 1277,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 22.9 to 0.0."
+        },
+        {
+          "day": 1368,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1459,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1551,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1642,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1733,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1824,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1916,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2007,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2098,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2189,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2281,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2372,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2463,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2554,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2646,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2737,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2828,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2919,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3011,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3102,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3193,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3284,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 1003,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1186,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 1642,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1916,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2098,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2372,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2463,
+          "event_type": "career_advancement",
+          "title": "[SIM] Mara Elwick: Trusted Parish Worker",
+          "summary": "[SIM] Mara Elwick's durable professional standing changed to Trusted Parish Worker because of local trust 29.6, sustained parish service. This standing change does not determine which appointments or specializations they hold.",
+          "severity": 2
+        },
+        {
+          "day": 2646,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Mara Elwick: Volunteer Coordinator",
+          "summary": "A real responsibility opened because of local trust 29.6, sustained lay service. [SIM] Mara Elwick accepted/was entrusted with Volunteer Coordinator. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        },
+        {
+          "day": 3102,
+          "event_type": "role_witness_relief",
+          "title": "Trusted case review",
+          "summary": "[SIM] Mara Elwick reviewed a difficult local service case and was trusted to resolve routine questions without escalating every detail.",
+          "severity": 2
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "trusted_worker",
+          "stage_name": "Trusted Parish Worker",
+          "sequence_index": 20,
+          "started_day": 0,
+          "stage_started_day": 2463,
+          "status": "active",
+          "experience_json": "{\"advancements\": 1, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 3285, \"days_in_stage\": 3285, \"eligible_since_day\": 91, \"eligible_stage_id\": 3, \"last_advancement_day\": 2463, \"last_opportunity_day\": 2463, \"last_responsibility_day\": 2646, \"last_responsibility_opportunity_day\": 2646, \"last_review_day\": 3285, \"last_role_event_day\": 3102, \"opportunities\": 1, \"responsibilities\": [{\"acquired_day\": 2646, \"key\": \"volunteer_coordinator\", \"kind\": \"branching_responsibility\", \"name\": \"Volunteer Coordinator\", \"reasons\": [\"local trust 29.6\", \"sustained lay service\"], \"status\": \"active\"}], \"responsibility_opportunities\": 2, \"role_events\": 11}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    },
+    {
+      "day": 3650,
+      "actor": {
+        "id": 568,
+        "name": "[SIM] Mara Elwick",
+        "actor_type": "character",
+        "subtype": "Witness parish clerk and charitable organizer",
+        "home_location_id": 33,
+        "current_location_id": 33,
+        "status": "active",
+        "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+        "is_demo": 0,
+        "location_name": "Eldenfell"
+      },
+      "goals": [
+        {
+          "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "priority": 84,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        },
+        {
+          "description": "Deepen religious service without seeking elite ecclesiastical office",
+          "priority": 58,
+          "progress": 100.0,
+          "status": "completed",
+          "target_day": null
+        }
+      ],
+      "pressures": [
+        {
+          "kind": "service",
+          "description": "Needs routinely exceed the time and money available for relief",
+          "intensity": 0.0,
+          "threshold": 76.0
+        }
+      ],
+      "resources": [
+        {
+          "resource_type": "household_cash",
+          "amount": 4.873517352685689,
+          "unit": "calibration units"
+        },
+        {
+          "resource_type": "local_trust",
+          "amount": 32.26360714321375,
+          "unit": "index"
+        }
+      ],
+      "cultivation": {
+        "actor_id": 568,
+        "core_state": "Closed-Core",
+        "current_stage": null,
+        "active": 0,
+        "vessel_adaptation": 0.0,
+        "realization_integration": 0.0,
+        "training_effort": 0.0,
+        "resource_access": 0.0,
+        "teacher_support": 0.0,
+        "injury_constraint": 0.0,
+        "realization_aptitude": 1.0,
+        "vessel_aptitude": 1.0,
+        "next_realization_check_day": 3650,
+        "observed_stage_days": 0,
+        "plateau_days": 0,
+        "last_realization_day": null,
+        "last_breakthrough_attempt_day": null,
+        "last_review_day": 3649,
+        "next_review_day": 3739,
+        "status": "paused",
+        "core_capacity": 0.0,
+        "current_reserve": 0.0,
+        "sediment_burden": 0.0,
+        "metadata": {
+          "attainment_date": "UNKNOWN",
+          "authority": "V0_58_SCENARIO_CALIBRATION",
+          "current_age_not_attainment_age": true,
+          "final_stage": "NOT_STORED"
+        }
+      },
+      "decisions": [
+        {
+          "day": 91,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+        },
+        {
+          "day": 182,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+        },
+        {
+          "day": 273,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 46.0 to 22.9."
+        },
+        {
+          "day": 364,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+        },
+        {
+          "day": 456,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+        },
+        {
+          "day": 547,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+        },
+        {
+          "day": 638,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 729,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+        },
+        {
+          "day": 821,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+        },
+        {
+          "day": 912,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+        },
+        {
+          "day": 1003,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+        },
+        {
+          "day": 1094,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+        },
+        {
+          "day": 1186,
+          "tier": "STRATEGIC",
+          "action_type": "advance_goal",
+          "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+          "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+        },
+        {
+          "day": 1277,
+          "tier": "STRATEGIC",
+          "action_type": "address_pressure",
+          "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+          "outcome_summary": "Pressure fell from 22.9 to 0.0."
+        },
+        {
+          "day": 1368,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1459,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1551,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1642,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1733,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1824,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 1916,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2007,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2098,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2189,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2281,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2372,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2463,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2554,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2646,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2737,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2828,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 2919,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3011,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3102,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3193,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3284,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3376,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3467,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3558,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        },
+        {
+          "day": 3649,
+          "tier": "STRATEGIC",
+          "action_type": "consolidate",
+          "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+          "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+        }
+      ],
+      "events": [
+        {
+          "day": 91,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 182,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 273,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 547,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 1003,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1186,
+          "event_type": "actor_decision",
+          "title": "Decision consequence: [SIM] Mara Elwick",
+          "summary": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office Goal progress moved from 90.6 to 100.0. Goal completed.",
+          "severity": 2
+        },
+        {
+          "day": 1642,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 1
+        },
+        {
+          "day": 1916,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2098,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2372,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 1
+        },
+        {
+          "day": 2463,
+          "event_type": "career_advancement",
+          "title": "[SIM] Mara Elwick: Trusted Parish Worker",
+          "summary": "[SIM] Mara Elwick's durable professional standing changed to Trusted Parish Worker because of local trust 29.6, sustained parish service. This standing change does not determine which appointments or specializations they hold.",
+          "severity": 2
+        },
+        {
+          "day": 2646,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Mara Elwick: Volunteer Coordinator",
+          "summary": "A real responsibility opened because of local trust 29.6, sustained lay service. [SIM] Mara Elwick accepted/was entrusted with Volunteer Coordinator. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        },
+        {
+          "day": 3102,
+          "event_type": "role_witness_relief",
+          "title": "Trusted case review",
+          "summary": "[SIM] Mara Elwick reviewed a difficult local service case and was trusted to resolve routine questions without escalating every detail.",
+          "severity": 2
+        },
+        {
+          "day": 3558,
+          "event_type": "role_witness_records",
+          "title": "Parish records and service",
+          "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+          "severity": 2
+        },
+        {
+          "day": 3649,
+          "event_type": "role_witness_relief",
+          "title": "Poor-relief case organized",
+          "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+          "severity": 2
+        }
+      ],
+      "relationships": [],
+      "memberships": [],
+      "careers": [
+        {
+          "id": 1,
+          "track_key": "structural_witness_lay_service",
+          "track_name": "Witness Lay Service",
+          "stage_key": "trusted_worker",
+          "stage_name": "Trusted Parish Worker",
+          "sequence_index": 20,
+          "started_day": 0,
+          "stage_started_day": 2463,
+          "status": "active",
+          "experience_json": "{\"advancements\": 1, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 3650, \"days_in_stage\": 3650, \"eligible_since_day\": 91, \"eligible_stage_id\": 3, \"last_advancement_day\": 2463, \"last_opportunity_day\": 2463, \"last_responsibility_day\": 2646, \"last_responsibility_opportunity_day\": 2646, \"last_review_day\": 3650, \"last_role_event_day\": 3649, \"opportunities\": 1, \"responsibilities\": [{\"acquired_day\": 2646, \"key\": \"volunteer_coordinator\", \"kind\": \"branching_responsibility\", \"name\": \"Volunteer Coordinator\", \"reasons\": [\"local trust 29.6\", \"sustained lay service\"], \"status\": \"active\"}], \"responsibility_opportunities\": 2, \"role_events\": 13}",
+          "reputation_json": "{}"
+        }
+      ],
+      "religion": [
+        {
+          "name": "The Witness",
+          "affiliation_kind": "adherent",
+          "practice_intensity": 78.0,
+          "publicness": 82.0,
+          "status": "active",
+          "last_observance_day": null
+        }
+      ],
+      "underworld_organizations": [],
+      "enterprises": [],
+      "underworld_evidence": [],
+      "institution_candidates": [],
+      "resolution": [],
+      "cultivation_history": [],
+      "travel": [],
+      "tournament_entries": [],
+      "tournament_bouts": [],
+      "challenges": [],
+      "combat_engagements": [],
+      "households": [],
+      "unions": [],
+      "children": [],
+      "health_conditions": []
+    }
+  ],
+  "final": {
+    "day": 3650,
+    "actor": {
+      "id": 568,
+      "name": "[SIM] Mara Elwick",
+      "actor_type": "character",
+      "subtype": "Witness parish clerk and charitable organizer",
+      "home_location_id": 33,
+      "current_location_id": 33,
+      "status": "active",
+      "notes": "Campaign-only non-ledger character resolved for follow simulation.",
+      "is_demo": 0,
+      "location_name": "Eldenfell"
+    },
+    "goals": [
+      {
+        "description": "Keep parish records and poor-relief work dependable through ordinary local pressures",
+        "priority": 84,
+        "progress": 100.0,
+        "status": "completed",
+        "target_day": null
+      },
+      {
+        "description": "Deepen religious service without seeking elite ecclesiastical office",
+        "priority": 58,
+        "progress": 100.0,
+        "status": "completed",
+        "target_day": null
+      }
+    ],
+    "pressures": [
+      {
+        "kind": "service",
+        "description": "Needs routinely exceed the time and money available for relief",
+        "intensity": 0.0,
+        "threshold": 76.0
+      }
+    ],
+    "resources": [
+      {
+        "resource_type": "household_cash",
+        "amount": 4.873517352685689,
+        "unit": "calibration units"
+      },
+      {
+        "resource_type": "local_trust",
+        "amount": 32.26360714321375,
+        "unit": "index"
+      }
+    ],
+    "cultivation": {
+      "actor_id": 568,
+      "core_state": "Closed-Core",
+      "current_stage": null,
+      "active": 0,
+      "vessel_adaptation": 0.0,
+      "realization_integration": 0.0,
+      "training_effort": 0.0,
+      "resource_access": 0.0,
+      "teacher_support": 0.0,
+      "injury_constraint": 0.0,
+      "realization_aptitude": 1.0,
+      "vessel_aptitude": 1.0,
+      "next_realization_check_day": 3650,
+      "observed_stage_days": 0,
+      "plateau_days": 0,
+      "last_realization_day": null,
+      "last_breakthrough_attempt_day": null,
+      "last_review_day": 3649,
+      "next_review_day": 3739,
+      "status": "paused",
+      "core_capacity": 0.0,
+      "current_reserve": 0.0,
+      "sediment_burden": 0.0,
+      "metadata": {
+        "attainment_date": "UNKNOWN",
+        "authority": "V0_58_SCENARIO_CALIBRATION",
+        "current_age_not_attainment_age": true,
+        "final_stage": "NOT_STORED"
+      }
+    },
+    "decisions": [
+      {
+        "day": 91,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+        "outcome_summary": "Goal progress moved from 0.0 to 19.6."
+      },
+      {
+        "day": 182,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+        "outcome_summary": "Goal progress moved from 19.6 to 37.0."
+      },
+      {
+        "day": 273,
+        "tier": "STRATEGIC",
+        "action_type": "address_pressure",
+        "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+        "outcome_summary": "Pressure fell from 46.0 to 22.9."
+      },
+      {
+        "day": 364,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+        "outcome_summary": "Goal progress moved from 37.0 to 54.3."
+      },
+      {
+        "day": 456,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+        "outcome_summary": "Goal progress moved from 54.3 to 72.9."
+      },
+      {
+        "day": 547,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+        "outcome_summary": "Goal progress moved from 72.9 to 90.6."
+      },
+      {
+        "day": 638,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures",
+        "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+      },
+      {
+        "day": 729,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+        "outcome_summary": "Goal progress moved from 0.0 to 20.2."
+      },
+      {
+        "day": 821,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+        "outcome_summary": "Goal progress moved from 20.2 to 37.1."
+      },
+      {
+        "day": 912,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+        "outcome_summary": "Goal progress moved from 37.1 to 53.2."
+      },
+      {
+        "day": 1003,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+        "outcome_summary": "Goal progress moved from 53.2 to 71.3."
+      },
+      {
+        "day": 1094,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+        "outcome_summary": "Goal progress moved from 71.3 to 90.6."
+      },
+      {
+        "day": 1186,
+        "tier": "STRATEGIC",
+        "action_type": "advance_goal",
+        "rationale": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office",
+        "outcome_summary": "Goal progress moved from 90.6 to 100.0. Goal completed."
+      },
+      {
+        "day": 1277,
+        "tier": "STRATEGIC",
+        "action_type": "address_pressure",
+        "rationale": "Address the most severe pressure: Needs routinely exceed the time and money available for relief",
+        "outcome_summary": "Pressure fell from 22.9 to 0.0."
+      },
+      {
+        "day": 1368,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 1459,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 1551,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 1642,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 1733,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 1824,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 1916,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2007,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2098,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2189,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2281,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2372,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2463,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2554,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2646,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2737,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2828,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 2919,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 3011,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 3102,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 3193,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 3284,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 3376,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 3467,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 3558,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      },
+      {
+        "day": 3649,
+        "tier": "STRATEGIC",
+        "action_type": "consolidate",
+        "rationale": "Preserve resources, strengthen the current position, and avoid creating a new commitment.",
+        "outcome_summary": "Consolidation reduced the highest pressure to 0.0."
+      }
+    ],
+    "events": [
+      {
+        "day": 91,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 1
+      },
+      {
+        "day": 182,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 1
+      },
+      {
+        "day": 273,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 1
+      },
+      {
+        "day": 547,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 1
+      },
+      {
+        "day": 638,
+        "event_type": "actor_decision",
+        "title": "Decision consequence: [SIM] Mara Elwick",
+        "summary": "Advance the highest-priority goal: Keep parish records and poor-relief work dependable through ordinary local pressures Goal progress moved from 90.6 to 100.0. Goal completed.",
+        "severity": 2
+      },
+      {
+        "day": 638,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 1
+      },
+      {
+        "day": 1003,
+        "event_type": "role_witness_relief",
+        "title": "Poor-relief case organized",
+        "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+        "severity": 1
+      },
+      {
+        "day": 1186,
+        "event_type": "actor_decision",
+        "title": "Decision consequence: [SIM] Mara Elwick",
+        "summary": "Advance the highest-priority goal: Deepen religious service without seeking elite ecclesiastical office Goal progress moved from 90.6 to 100.0. Goal completed.",
+        "severity": 2
+      },
+      {
+        "day": 1642,
+        "event_type": "role_witness_relief",
+        "title": "Poor-relief case organized",
+        "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+        "severity": 1
+      },
+      {
+        "day": 1916,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 1
+      },
+      {
+        "day": 2098,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 1
+      },
+      {
+        "day": 2372,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 1
+      },
+      {
+        "day": 2463,
+        "event_type": "career_advancement",
+        "title": "[SIM] Mara Elwick: Trusted Parish Worker",
+        "summary": "[SIM] Mara Elwick's durable professional standing changed to Trusted Parish Worker because of local trust 29.6, sustained parish service. This standing change does not determine which appointments or specializations they hold.",
+        "severity": 2
+      },
+      {
+        "day": 2646,
+        "event_type": "career_responsibility",
+        "title": "[SIM] Mara Elwick: Volunteer Coordinator",
+        "summary": "A real responsibility opened because of local trust 29.6, sustained lay service. [SIM] Mara Elwick accepted/was entrusted with Volunteer Coordinator. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+        "severity": 2
+      },
+      {
+        "day": 3102,
+        "event_type": "role_witness_relief",
+        "title": "Trusted case review",
+        "summary": "[SIM] Mara Elwick reviewed a difficult local service case and was trusted to resolve routine questions without escalating every detail.",
+        "severity": 2
+      },
+      {
+        "day": 3558,
+        "event_type": "role_witness_records",
+        "title": "Parish records and service",
+        "summary": "[SIM] Mara Elwick handled parish records, correspondence and ordinary service obligations.",
+        "severity": 2
+      },
+      {
+        "day": 3649,
+        "event_type": "role_witness_relief",
+        "title": "Poor-relief case organized",
+        "summary": "[SIM] Mara Elwick coordinated a concrete parish relief case, reconciling records, funds and a household in need.",
+        "severity": 2
+      }
+    ],
+    "relationships": [],
+    "memberships": [],
+    "careers": [
+      {
+        "id": 1,
+        "track_key": "structural_witness_lay_service",
+        "track_name": "Witness Lay Service",
+        "stage_key": "trusted_worker",
+        "stage_name": "Trusted Parish Worker",
+        "sequence_index": 20,
+        "started_day": 0,
+        "stage_started_day": 2463,
+        "status": "active",
+        "experience_json": "{\"advancements\": 1, \"authority\": \"V0_59_FLEXIBLE_ROLE_REACH\", \"days_in_career\": 3650, \"days_in_stage\": 3650, \"eligible_since_day\": 91, \"eligible_stage_id\": 3, \"last_advancement_day\": 2463, \"last_opportunity_day\": 2463, \"last_responsibility_day\": 2646, \"last_responsibility_opportunity_day\": 2646, \"last_review_day\": 3650, \"last_role_event_day\": 3649, \"opportunities\": 1, \"responsibilities\": [{\"acquired_day\": 2646, \"key\": \"volunteer_coordinator\", \"kind\": \"branching_responsibility\", \"name\": \"Volunteer Coordinator\", \"reasons\": [\"local trust 29.6\", \"sustained lay service\"], \"status\": \"active\"}], \"responsibility_opportunities\": 2, \"role_events\": 13}",
+        "reputation_json": "{}"
+      }
+    ],
+    "religion": [
+      {
+        "name": "The Witness",
+        "affiliation_kind": "adherent",
+        "practice_intensity": 78.0,
+        "publicness": 82.0,
+        "status": "active",
+        "last_observance_day": null
+      }
+    ],
+    "underworld_organizations": [],
+    "enterprises": [],
+    "underworld_evidence": [],
+    "institution_candidates": [],
+    "resolution": [],
+    "cultivation_history": [],
+    "travel": [],
+    "tournament_entries": [],
+    "tournament_bouts": [],
+    "challenges": [],
+    "combat_engagements": [],
+    "households": [],
+    "unions": [],
+    "children": [],
+    "health_conditions": []
+  }
+}

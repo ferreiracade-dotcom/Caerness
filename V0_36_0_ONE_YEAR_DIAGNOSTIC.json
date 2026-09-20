@@ -1,0 +1,102 @@
+{
+  "active_enterprises": 21,
+  "active_households": 8,
+  "actors_total": 567,
+  "addiction_psych_conditions": 0,
+  "aggregate_book_result": 169.25,
+  "autonomous_action_attempts": 232,
+  "betting_handle": 2197.43,
+  "betting_markets_settled": 59,
+  "betting_markets_total": 59,
+  "betting_payout": 2028.18,
+  "book_results": [
+    {
+      "book_key": "red-board-cairnholt",
+      "handle": 745.73,
+      "markets": 18,
+      "name": "Red Board \u2014 Cairnholt aggregate books",
+      "result": 61.13
+    },
+    {
+      "book_key": "red-board-toll",
+      "handle": 428.56,
+      "markets": 13,
+      "name": "Red Board \u2014 Toll\u2019s Reach aggregate books",
+      "result": 25.19
+    },
+    {
+      "book_key": "independent-cairnholt-books",
+      "handle": 728.72,
+      "markets": 18,
+      "name": "Independent Cairnholt books \u2014 aggregate market",
+      "result": 56.91
+    },
+    {
+      "book_key": "independent-waymeet-books",
+      "handle": 0.0,
+      "markets": 0,
+      "name": "Independent Waymeet books \u2014 aggregate market",
+      "result": 0.0
+    },
+    {
+      "book_key": "independent-aldergate-books",
+      "handle": 294.42,
+      "markets": 10,
+      "name": "Independent Aldergate books \u2014 aggregate market",
+      "result": 26.02
+    }
+  ],
+  "coercive_or_criminal_prize_markets": 0,
+  "credit_agreements": 0,
+  "day": 365,
+  "decisions": 1250,
+  "gate_failure_count": 7,
+  "gate_failures": [
+    "14_hollow_succession",
+    "26_addiction_psych",
+    "37_crime_orgs",
+    "38_smuggling",
+    "39_policing",
+    "42_exploitation_medicine",
+    "47_war_logistics"
+  ],
+  "named_characters": 464,
+  "prize_markets": [
+    {
+      "champion_streak": 6,
+      "injury_load": 27.92,
+      "market_key": "cairnholt-prize-halls",
+      "name": "Cairnholt licensed prize-hall market",
+      "public_form": 57.81,
+      "resolved_cards": 12
+    },
+    {
+      "champion_streak": 2,
+      "injury_load": 29.14,
+      "market_key": "toll-prize-halls",
+      "name": "Toll\u2019s Reach tolerated prize-hall market",
+      "public_form": 57.54,
+      "resolved_cards": 13
+    },
+    {
+      "champion_streak": 1,
+      "injury_load": 27.33,
+      "market_key": "aldergate-prize-halls",
+      "name": "Aldergate licensed prize-hall market",
+      "public_form": 54.39,
+      "resolved_cards": 10
+    }
+  ],
+  "prizefight_betting_markets": 47,
+  "prizefight_bouts": 192,
+  "prizefight_cards_resolved": 35,
+  "prizefight_markets": 3,
+  "prizefighter_pools": 3,
+  "process_execution_log": 3924,
+  "promoted_latent_champions": 5,
+  "spectacle_books": 5,
+  "stage_changes": 0,
+  "tournament_betting_markets": 12,
+  "tournament_bouts_resolved": 6,
+  "tournament_events_resolved": 1
+}

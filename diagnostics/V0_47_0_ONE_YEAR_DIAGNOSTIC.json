@@ -1,0 +1,55 @@
+{
+  "active_households": 8,
+  "active_unions": 3,
+  "births": 0,
+  "characters": 464,
+  "day": 365,
+  "decisions": 1374,
+  "domain_decisions": 215,
+  "emergent_businesses": 0,
+  "engine_version": "0.47.0",
+  "events": 193,
+  "gate": {
+    "failure_count": 0,
+    "failures": [],
+    "pass": true,
+    "principle": "The decade run may test compounding only after ordinary systems demonstrably start.",
+    "required_domains": 50
+  },
+  "groundbinding": [
+    {
+      "bound_location": "Silent Peak",
+      "core_state": "Open-Core",
+      "cultivation_status": "active",
+      "current_location": "Silent Peak",
+      "dependency_state": "comfortable",
+      "mismatch_burden": 0.0,
+      "name": "Clement Bray",
+      "stage": "Fifth"
+    },
+    {
+      "bound_location": "Silent Peak",
+      "core_state": "Open-Core",
+      "cultivation_status": "active",
+      "current_location": "Silent Peak",
+      "dependency_state": "comfortable",
+      "mismatch_burden": 0.0,
+      "name": "Rowena Fitch",
+      "stage": "Breach"
+    }
+  ],
+  "living_characters": 462,
+  "negative_enterprise_cash": 0,
+  "resolution_reviews": 1969,
+  "schema_version": 47,
+  "stages": {
+    "Breach": 74,
+    "Fifth": 80,
+    "First": 75,
+    "Sixth": 40,
+    "Temper": 81,
+    "Third": 93
+  },
+  "structural_trainees": 326,
+  "structural_training_cohorts": 40
+}

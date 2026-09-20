@@ -1,0 +1,12 @@
+CAERNESS CURRENT SOURCE STATE
+
+This package is the Caerness Engine v0.60.0 ONEYEAR-01 accepted checkpoint, schema 70, with the post-acceptance named-person chronology repair applied.
+
+Canon/seed chronology authority:
+- embedded canon/world_bible_current.docx is the repaired MASTER FINAL;
+- current seed is game/seeds/Caerness_Initial_World_State_Seed_v1_3.json;
+- all 464 named registry people have concrete age and explicit opening-relative birth_day;
+- named-person import/bootstrap rejects missing age or birth_day;
+- the clean packaged database remains day 0 and contains no diagnostic TENYEAR history.
+
+TENYEAR-01 must restart from day 0 after this repair because aging/mortality chronology changed.

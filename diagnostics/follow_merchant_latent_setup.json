@@ -1,0 +1,10 @@
+{
+  "scenario": "merchant",
+  "rng_seed": 9206,
+  "focus_actor_id": 568,
+  "focus_actor": "[SIM] Elian Torve",
+  "latent_entity_id": 4,
+  "non_ledger": true,
+  "campaign_only": true,
+  "starting_location": "Saltmere"
+}

@@ -1,0 +1,18 @@
+=== tests/orgneed01_autonomous_need_generation_test.py ===
+ORGNEED-01 autonomous evidence-bound need generation acceptance PASS
+=== tests/adapt01_reuse_before_create_test.py ===
+ADAPT-01 reuse-before-role-creation acceptance PASS
+=== tests/opportunity01_symmetric_relationships_test.py ===
+OPPORTUNITY-01 symmetric relationships/ownership/search acceptance PASS
+=== tests/orglife01_country_lifecycle_test.py ===
+ORGLIFE-01 country/institution lifecycle adversarial acceptance PASS
+=== tests/dec01_information_bounded_decision_runtime_test.py ===
+DEC-01 information-bounded decision runtime tests: PASS
+=== tests/patroncircle01_social_circle_movement_test.py ===
+PATRONCIRCLE-01 convened circles + evidence-bound movement acceptance PASS
+=== tests/arch02_scheduler_chunk_invariance_test.py ===
+ARCH-02 scheduler chunk invariance: PASS
+{'engine_version': '0.60.0', 'schema_version': 89, 'days': 90, 'tables_compared': 30, 'events': 35, 'knowledge': 335, 'rumours': 29, 'trade_periods': 3, 'status': 'PASS'}
+=== tests/smoke_test.py ===
+Smoke test passed: dormant simulation is not frozen.
+compileall PASS

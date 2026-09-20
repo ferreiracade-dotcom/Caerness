@@ -1,0 +1,13 @@
+{
+  "scenario": "dunmoor",
+  "db": "/mnt/data/caerness_v054/Caerness_Engine_v0_47_0_Groundbinding/diagnostics/follow_dunmoor_latent.db",
+  "report": "/mnt/data/caerness_v054/Caerness_Engine_v0_47_0_Groundbinding/diagnostics/follow_dunmoor_latent_report.json",
+  "actor_id": 568,
+  "day": 3641,
+  "decisions": 122,
+  "events": 3,
+  "relationships": 0,
+  "enterprises": 0,
+  "candidates": 0,
+  "stage": "First"
+}

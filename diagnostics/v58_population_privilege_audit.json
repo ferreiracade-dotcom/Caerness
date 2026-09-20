@@ -1,0 +1,129 @@
+{
+  "tournament_entries": 73,
+  "tournament_unique_actors": 31,
+  "tournament_unique_ordinary_actors": 30,
+  "challenge_anchors": 44,
+  "challenge_anchor_unique_actors": 37,
+  "challenge_anchor_unique_ordinary_actors": 36,
+  "emergent_realization_unique_actors": 43,
+  "emergent_realization_unique_ordinary_actors": 42,
+  "role_event_unique_actors": 63,
+  "role_event_unique_ordinary_actors": 62,
+  "opening_thirds": 93,
+  "opening_thirds_to_breach": 4,
+  "opening_tempers": 79,
+  "opening_tempers_to_third": 65,
+  "opening_tempers_to_breach": 0,
+  "experience_ranking": [
+    {
+      "id": 161,
+      "name": "Stella York",
+      "t_entries": 4,
+      "challenges": 1
+    },
+    {
+      "id": 176,
+      "name": "Tessa Varr",
+      "t_entries": 5,
+      "challenges": 0
+    },
+    {
+      "id": 568,
+      "name": "[SIM] Sella Marrin",
+      "t_entries": 4,
+      "challenges": 1
+    },
+    {
+      "id": 163,
+      "name": "Faith Palmer",
+      "t_entries": 4,
+      "challenges": 0
+    },
+    {
+      "id": 198,
+      "name": "Della Venn",
+      "t_entries": 4,
+      "challenges": 0
+    },
+    {
+      "id": 365,
+      "name": "Bastian Crow",
+      "t_entries": 4,
+      "challenges": 0
+    },
+    {
+      "id": 549,
+      "name": "Jory Morrick",
+      "t_entries": 4,
+      "challenges": 0
+    },
+    {
+      "id": 550,
+      "name": "Peregrine Dovell",
+      "t_entries": 4,
+      "challenges": 0
+    },
+    {
+      "id": 156,
+      "name": "Tobias Ashe",
+      "t_entries": 3,
+      "challenges": 0
+    },
+    {
+      "id": 175,
+      "name": "Merrick Quill",
+      "t_entries": 3,
+      "challenges": 0
+    }
+  ],
+  "sella_breach_history": [
+    {
+      "day": 2919,
+      "history_kind": "realization_opportunity",
+      "stage_before": "Third",
+      "stage_after": "Third",
+      "summary": "A stage-relevant Realization opportunity emerged from accumulated conditions.",
+      "metadata_json": "{\"anchor_id\": 143, \"cultivation_context\": {\"current_load_ratio\": 0.0, \"ecology_quality\": 55.0, \"ecology_source\": \"hearth-regional-fallback\", \"groundbinding\": null, \"hearth_context\": true, \"location_id\": 12, \"milieu_quality\": 76.0, \"opportunity_factor\": 1.060808, \"political_owner\": \"Underheaven Empire\", \"realization_growth_factor\": 1.166, \"vessel_growth_factor\": 1.0904, \"whole_vessel_current_factor\": 1.0}, \"elapsed_time_bonus\": false, \"external_anchors_consumed_for_check\": 1, \"opportunity_probability\": 0.147393009, \"realization_aptitude\": 0.963353, \"transition_mode\": \"realization_wall\", \"vessel_aptitude\": 1.144175}"
+    },
+    {
+      "day": 2919,
+      "history_kind": "breakthrough_attempt",
+      "stage_before": "Third",
+      "stage_after": "Third",
+      "summary": "The cultivator attempted to resolve the available Stage problem.",
+      "metadata_json": "{\"anchor_id\": 143, \"probability_authority\": \"CAMPAIGN_CALIBRATION\", \"success_probability\": 0.1888008919167633, \"transition_mode\": \"realization_wall\"}"
+    },
+    {
+      "day": 2919,
+      "history_kind": "breakthrough_failure",
+      "stage_before": "Third",
+      "stage_after": "Third",
+      "summary": "The available Stage problem was not resolved; training continues from the failed attempt.",
+      "metadata_json": "{\"anchor_id\": 143, \"transition_mode\": \"realization_wall\"}"
+    },
+    {
+      "day": 3558,
+      "history_kind": "realization_opportunity",
+      "stage_before": "Third",
+      "stage_after": "Third",
+      "summary": "A stage-relevant Realization opportunity emerged from accumulated conditions.",
+      "metadata_json": "{\"anchor_id\": 174, \"cultivation_context\": {\"current_load_ratio\": 0.0, \"ecology_quality\": 55.0, \"ecology_source\": \"hearth-regional-fallback\", \"groundbinding\": null, \"hearth_context\": true, \"location_id\": 24, \"milieu_quality\": 76.0, \"opportunity_factor\": 1.060808, \"political_owner\": \"Underheaven Empire\", \"realization_growth_factor\": 1.166, \"vessel_growth_factor\": 1.0904, \"whole_vessel_current_factor\": 1.0}, \"elapsed_time_bonus\": false, \"external_anchors_consumed_for_check\": 0, \"opportunity_probability\": 0.042739263910086124, \"realization_aptitude\": 0.963353, \"transition_mode\": \"realization_wall\", \"vessel_aptitude\": 1.144175}"
+    },
+    {
+      "day": 3558,
+      "history_kind": "breakthrough_attempt",
+      "stage_before": "Third",
+      "stage_after": "Third",
+      "summary": "The cultivator attempted to resolve the available Stage problem.",
+      "metadata_json": "{\"anchor_id\": 174, \"probability_authority\": \"CAMPAIGN_CALIBRATION\", \"success_probability\": 0.1894107825332233, \"transition_mode\": \"realization_wall\"}"
+    },
+    {
+      "day": 3558,
+      "history_kind": "breakthrough_success",
+      "stage_before": "Third",
+      "stage_after": "Breach",
+      "summary": "Stage advancement achieved: Third -> Breach.",
+      "metadata_json": "{\"anchor_id\": 174, \"demographic_pressure\": null, \"historical_event\": false, \"population_counts_are_runtime_quota\": false, \"rare_realization_required\": true, \"stage_bound_anchors_closed\": 0, \"transition_mode\": \"realization_wall\"}"
+    }
+  ]
+}

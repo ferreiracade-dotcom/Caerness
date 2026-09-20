@@ -1,0 +1,180 @@
+{
+  "engine_version": "0.59.0",
+  "schema_version": 50,
+  "purpose": "Recalibrate Cale from an arbitrary eight-person opening to operational-footprint-derived gang scale; no target headcount.",
+  "research_guardrails": [
+    {
+      "source": "National Gang Center, National Youth Gang Survey Analysis \u2014 Measuring the Extent of Gang Problems",
+      "finding": "2012 estimates: about 30,700 gangs and 850,000 gang members nationally; simple division is roughly 28 members per gang, but this is only a crude aggregate and not a target or typical-size estimate.",
+      "url": "https://nationalgangcenter.ojp.gov/survey-analysis/measuring-the-extent-of-gang-problems"
+    },
+    {
+      "source": "U.S. Department of Justice gang-structure material",
+      "finding": "Reported gang sizes range from four or five members to thousands; analyses distinguish core, regular/associate, peripheral/fringe, and recruit categories.",
+      "url": "https://www.justice.gov/usdoj-media/usao-edwi/media/866756/dl?inline="
+    },
+    {
+      "source": "FBI / DOJ gang descriptions",
+      "finding": "Gangs vary widely in membership and structure; sophisticated, well-organized gangs remain gangs rather than becoming Mafia organizations because of scale.",
+      "url": "https://www.fbi.gov/investigate/violent-crime/gangs"
+    }
+  ],
+  "caerness_calibration_rule": "Qualitative operational facts resolve manpower only when needed. Explicit canon/scenario headcounts override. There is no universal gang-size ladder and no desired endpoint.",
+  "cale_operational_footprint": {
+    "description": "independent Aldergate ward gang",
+    "recurring_rackets": 2,
+    "operating_front": true,
+    "group_violence_capacity": true,
+    "targeted_killing_capacity": true,
+    "racket_breadth": 24,
+    "territorial_presence": 22,
+    "front_depth": 28,
+    "violence_capacity": 28,
+    "command_depth": 2
+  },
+  "opening_resolution_sample": [
+    {
+      "seed": 9201,
+      "core_members": 8,
+      "active_members": 29,
+      "peripheral_associates": 17,
+      "full_members": 37,
+      "wider_orbit": 54,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 0.9803
+    },
+    {
+      "seed": 9202,
+      "core_members": 10,
+      "active_members": 35,
+      "peripheral_associates": 20,
+      "full_members": 45,
+      "wider_orbit": 65,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 1.206
+    },
+    {
+      "seed": 9203,
+      "core_members": 11,
+      "active_members": 40,
+      "peripheral_associates": 28,
+      "full_members": 51,
+      "wider_orbit": 79,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 1.3696
+    },
+    {
+      "seed": 9204,
+      "core_members": 7,
+      "active_members": 25,
+      "peripheral_associates": 17,
+      "full_members": 32,
+      "wider_orbit": 49,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 0.8657
+    },
+    {
+      "seed": 9205,
+      "core_members": 11,
+      "active_members": 43,
+      "peripheral_associates": 31,
+      "full_members": 54,
+      "wider_orbit": 85,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 1.437
+    },
+    {
+      "seed": 9206,
+      "core_members": 7,
+      "active_members": 28,
+      "peripheral_associates": 14,
+      "full_members": 35,
+      "wider_orbit": 49,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 0.9269
+    },
+    {
+      "seed": 9207,
+      "core_members": 15,
+      "active_members": 49,
+      "peripheral_associates": 17,
+      "full_members": 64,
+      "wider_orbit": 81,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 1.6949
+    },
+    {
+      "seed": 9208,
+      "core_members": 9,
+      "active_members": 22,
+      "peripheral_associates": 18,
+      "full_members": 31,
+      "wider_orbit": 49,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 0.8196
+    },
+    {
+      "seed": 9209,
+      "core_members": 8,
+      "active_members": 26,
+      "peripheral_associates": 18,
+      "full_members": 34,
+      "wider_orbit": 52,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 0.9182
+    },
+    {
+      "seed": 9210,
+      "core_members": 14,
+      "active_members": 41,
+      "peripheral_associates": 19,
+      "full_members": 55,
+      "wider_orbit": 74,
+      "operational_demand": 37.52,
+      "stochastic_multiplier": 1.4666
+    }
+  ],
+  "canonical_decade": {
+    "seed": 9201,
+    "opening": {
+      "full_members": 37.0,
+      "core_members": 8.0,
+      "active_members": 29.0,
+      "peripheral_associates": 17.0,
+      "wider_orbit": 54.0,
+      "command_depth": 2,
+      "racket_breadth": 24.0,
+      "territorial_presence": 22.0,
+      "front_depth": 28.0,
+      "violence_capacity": 28.0
+    },
+    "final": {
+      "full_members": 33.0,
+      "core_members": 12.0,
+      "active_members": 21.0,
+      "peripheral_associates": 4.0,
+      "wider_orbit": 37.0,
+      "lifetime_entries": 31.0,
+      "lifetime_exits": 48.0,
+      "command_depth": 2,
+      "racket_breadth": 30.178875031157368,
+      "territorial_presence": 25.0,
+      "front_depth": 30.799999999999997,
+      "violence_capacity": 30.099999999999998
+    }
+  },
+  "alternate_decade": {
+    "seed": 9204,
+    "opening_full": 32.0,
+    "opening_peripheral": 17.0,
+    "final_full": 26.0,
+    "final_peripheral": 12.0,
+    "lifetime_entries": 44.0,
+    "lifetime_exits": 55.0
+  },
+  "interpretation": {
+    "tiny_groups": "A 4\u201310-person criminal group remains possible under a lighter operational footprint and may read more like a crew/micro-gang.",
+    "cale": "Cale is not calibrated as a tiny crew. His starting functions resolve to a ward-gang-scale organization in the tens, with a wider peripheral orbit.",
+    "not_grandfathered": "37 is not a target. It is seed 9201 under one operational footprint. Other seeds resolve different openings, and later recruitment/attrition can grow or contract them."
+  }
+}

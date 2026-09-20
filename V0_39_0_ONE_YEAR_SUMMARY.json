@@ -1,0 +1,38 @@
+{
+  "day": 365,
+  "actors": 464,
+  "living": 462,
+  "dependency_profiles": 0,
+  "active_dependencies": 0,
+  "dependency_exposures": 0,
+  "psych_stressors": 0,
+  "psych_conditions": 0,
+  "psych_process_logs": 330,
+  "health_conditions": 0,
+  "gate": {
+    "pass": false,
+    "required_domains": 50,
+    "failure_count": 2,
+    "failures": [
+      {
+        "domain_key": "42_exploitation_medicine",
+        "label": "Exploitation and underworld medicine",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      },
+      {
+        "domain_key": "47_war_logistics",
+        "label": "War, military logistics and aftermath",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      }
+    ],
+    "principle": "The decade run may test compounding only after ordinary systems demonstrably start."
+  }
+}

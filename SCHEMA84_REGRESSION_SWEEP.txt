@@ -1,0 +1,33 @@
+=== tests/opportunity01_symmetric_relationships_test.py ===
+OPPORTUNITY-01 symmetric relationships/ownership/search acceptance PASS
+=== tests/opportunity01_negotiation_test.py ===
+OPPORTUNITY-01 negotiation/rejection/counter acceptance PASS
+=== tests/attention01_strategic_relevance_test.py ===
+ATTENTION-01 strategic relevance/appointment acceptance PASS
+=== tests/seek01_inbound_demand_test.py ===
+SEEK-01 inbound demand/player gravity acceptance PASS
+=== tests/seek01_natural_attraction_test.py ===
+SEEK-01 natural attraction/capacity acceptance PASS {'created_needs': 8, 'started_travel': 3, 'pending_player_requests': 3}
+=== tests/seek01_reputation_feedback_test.py ===
+SEEK-01 reputation feedback acceptance PASS {'before': 80.0, 'after': 82.05, 'offering_rep': 82.05}
+=== tests/seek01_enterprise_projection_test.py ===
+SEEK-01 enterprise capability projection acceptance PASS
+=== tests/dec01_information_bounded_decision_runtime_test.py ===
+DEC-01 information-bounded decision runtime tests: PASS
+=== tests/arch02_scheduler_chunk_invariance_test.py ===
+ARCH-02 scheduler chunk invariance: PASS
+{'engine_version': '0.60.0', 'schema_version': 84, 'days': 90, 'tables_compared': 30, 'events': 35, 'knowledge': 335, 'rumours': 29, 'trade_periods': 3, 'status': 'PASS'}
+=== tests/orglife01_country_lifecycle_test.py ===
+ORGLIFE-01 country/institution lifecycle adversarial acceptance PASS
+=== tests/merchant01_vertical_slice_test.py ===
+MERCHANT-01 merchant-house / market vertical slice tests: PASS
+=== tests/war01_campaign_battle_world_consequences_test.py ===
+WAR-01 campaign/battle/world-consequences acceptance: PASS
+=== tests/econ01_underworld_economic_interests_test.py ===
+ECON-01 underworld economic interests tests: PASS
+=== tests/events01_territorial_event_sourcing_test.py ===
+EVENTS-01 territorial event-sourcing tests: PASS
+=== tests/v60_underworld_rebuild_test.py ===
+v0.60 underworld rebuild tests: PASS
+=== tests/smoke_test.py ===
+Smoke test passed: dormant simulation is not frozen.

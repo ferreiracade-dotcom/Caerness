@@ -1,0 +1,78 @@
+{
+  "attacker_killed": 5,
+  "attacker_wounded": 17,
+  "battle_id": 59,
+  "battle_reports": 2,
+  "branch_day": 3657,
+  "damage_events": 3,
+  "defender_killed": 12,
+  "defender_wounded": 20,
+  "engine_version": "0.60.0",
+  "force_supply_consumed": 1.3714285714285714,
+  "grain_stock_after_march": 10.04788936567298,
+  "grain_stock_before": 6.097782386786193,
+  "invariants": {
+    "checks": [
+      {
+        "check": "negative_commercial_stock",
+        "violations": 0
+      },
+      {
+        "check": "trade_delivered_exceeds_quantity",
+        "violations": 0
+      },
+      {
+        "check": "nonpositive_shipment_quantity",
+        "violations": 0
+      },
+      {
+        "check": "invalid_craft_output_quantity",
+        "violations": 0
+      },
+      {
+        "check": "negative_public_debt",
+        "violations": 0
+      },
+      {
+        "check": "project_overconsumption",
+        "violations": 0
+      },
+      {
+        "check": "negative_harvest",
+        "violations": 0
+      },
+      {
+        "check": "foreign_keys",
+        "violations": 0
+      },
+      {
+        "check": "integrity",
+        "value": "ok"
+      }
+    ],
+    "failures": [],
+    "pass": true
+  },
+  "operation_id": 1,
+  "pass": true,
+  "physical_stock_draw": 5.371428571428571,
+  "route_id": 9,
+  "schema_version": 76,
+  "source_day": 3650,
+  "supply_ledger": {
+    "consumed": {
+      "entries": 4,
+      "quantity": 1.3714285714285714
+    },
+    "mobilized": {
+      "entries": 1,
+      "quantity": 4.0
+    },
+    "resupplied": {
+      "entries": 4,
+      "quantity": 1.371428571428571
+    }
+  },
+  "warehouse_condition_after": 0.0,
+  "warehouse_condition_before": 0.0
+}

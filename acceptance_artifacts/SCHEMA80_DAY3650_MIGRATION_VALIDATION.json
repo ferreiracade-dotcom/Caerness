@@ -1,0 +1,50 @@
+{
+  "activation": {
+    "conflict_channels_configured": 5,
+    "opening_political_relations_configured": 6,
+    "organization_agency_profiles_created": 95,
+    "organization_regimes_created": 95,
+    "polity_government_actors_configured": 7,
+    "polity_issue_states_configured": 12,
+    "underworld_institution_identities_created": 11
+  },
+  "active_regimes": 106,
+  "after_migration_counts": {
+    "actors": 873,
+    "events": 5324,
+    "institution_profiles": 103,
+    "political_history": 129,
+    "underworld_organizations": 11,
+    "war_campaign_operations": 0
+  },
+  "agency_profiles": 106,
+  "conflict_channels": 5,
+  "conflict_incidents": 0,
+  "conflict_responses": 0,
+  "foreign_keys": 0,
+  "government_actors": 7,
+  "integrity": "ok",
+  "political_relations": 6,
+  "polity_issue_states": 12,
+  "post_activation_counts": {
+    "actors": 886,
+    "events": 5324,
+    "institution_profiles": 116,
+    "political_history": 129,
+    "underworld_organizations": 11,
+    "war_campaign_operations": 0
+  },
+  "post_day": 3650,
+  "post_schema": "80",
+  "pre_counts": {
+    "actors": 873,
+    "events": 5324,
+    "institution_profiles": 103,
+    "political_history": 129,
+    "underworld_organizations": 11,
+    "war_campaign_operations": 0
+  },
+  "pre_day": 3650,
+  "pre_schema": "76",
+  "underworld_missing_institution_identity": 0
+}

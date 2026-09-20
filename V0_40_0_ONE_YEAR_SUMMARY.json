@@ -1,0 +1,24 @@
+{
+  "day": 365,
+  "medical_access": 0,
+  "misconduct": 0,
+  "active_health": 0,
+  "underworld_members": 0,
+  "gate": {
+    "pass": false,
+    "required_domains": 50,
+    "failure_count": 1,
+    "failures": [
+      {
+        "domain_key": "47_war_logistics",
+        "label": "War, military logistics and aftermath",
+        "mechanism_status": "PARTIAL",
+        "populated_count": 0,
+        "eligible_count": null,
+        "blocked_count": 1,
+        "blocked_reason": "not populated"
+      }
+    ],
+    "principle": "The decade run may test compounding only after ordinary systems demonstrably start."
+  }
+}

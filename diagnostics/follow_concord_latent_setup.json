@@ -1,0 +1,10 @@
+{
+  "scenario": "concord",
+  "rng_seed": 9203,
+  "focus_actor_id": 568,
+  "focus_actor": "[SIM] Tobin Verra",
+  "latent_entity_id": 4,
+  "non_ledger": true,
+  "campaign_only": true,
+  "starting_location": "Wrenfield seat district"
+}

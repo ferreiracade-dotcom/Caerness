@@ -1,0 +1,10 @@
+{
+  "noindex_seconds": 14.581276777000085,
+  "indexed_seconds": 2.611417326000037,
+  "speedup": 5.583663948241675,
+  "entity_resolution_after_migration_noindex": 833,
+  "entity_resolution_after_migration_indexed": 833,
+  "differences": [],
+  "tables_compared": 30,
+  "day": 1855
+}

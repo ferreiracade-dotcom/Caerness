@@ -1,0 +1,904 @@
+{
+  "accepted": true,
+  "activity": {
+    "craft_completed_orders": 1,
+    "craft_output_lots": 1,
+    "craft_recipes": 1,
+    "fiscal_entries": 383,
+    "growth_snapshots": 1464,
+    "harvests": 9,
+    "health_conditions": 0,
+    "law_cases": 0,
+    "merchant_contracts": 25,
+    "merchant_fulfilled": 24,
+    "merchant_observations": 425,
+    "merchant_offers": 62,
+    "merchant_shipments": 11,
+    "public_treasuries": 7,
+    "resolution_transitions": 1123,
+    "war_operations": 0
+  },
+  "activity_ok": true,
+  "belief_firewall": {
+    "candidate_rows": 2367,
+    "canon_basis_hits": 0,
+    "canon_basis_samples": [],
+    "decision_evaluations": 1619,
+    "samples": [
+      {
+        "action": "hold_position",
+        "basis": {
+          "kind": "self_state"
+        },
+        "id": 2367,
+        "provider": "baseline"
+      },
+      {
+        "action": "hold_position",
+        "basis": {
+          "kind": "self_state"
+        },
+        "id": 2366,
+        "provider": "baseline"
+      },
+      {
+        "action": "hold_position",
+        "basis": {
+          "kind": "self_state"
+        },
+        "id": 2365,
+        "provider": "baseline"
+      },
+      {
+        "action": "invest_in_racket",
+        "basis": {
+          "access": "own_organization",
+          "racket_id": 28,
+          "treasury_known": true
+        },
+        "id": 2364,
+        "provider": "underworld"
+      },
+      {
+        "action": "invest_in_racket",
+        "basis": {
+          "access": "own_organization",
+          "racket_id": 28,
+          "treasury_known": true
+        },
+        "id": 2362,
+        "provider": "underworld"
+      },
+      {
+        "action": "hold_position",
+        "basis": {
+          "kind": "self_state"
+        },
+        "id": 2360,
+        "provider": "baseline"
+      },
+      {
+        "action": "hold_position",
+        "basis": {
+          "kind": "self_state"
+        },
+        "id": 2359,
+        "provider": "baseline"
+      },
+      {
+        "action": "hold_position",
+        "basis": {
+          "kind": "self_state"
+        },
+        "id": 2357,
+        "provider": "baseline"
+      },
+      {
+        "action": "invest_in_racket",
+        "basis": {
+          "access": "own_organization",
+          "racket_id": 27,
+          "treasury_known": true
+        },
+        "id": 2356,
+        "provider": "underworld"
+      },
+      {
+        "action": "hold_position",
+        "basis": {
+          "kind": "self_state"
+        },
+        "id": 2354,
+        "provider": "baseline"
+      }
+    ]
+  },
+  "conditional_trigger_audit": {
+    "engine_version": "0.60.0",
+    "health": {
+      "actor_id": 548,
+      "actor_name": "Amory Selwick",
+      "care_site_id": 8,
+      "care_site_name": "[STRUCTURAL] Saltmere ordinary care network",
+      "condition_id": 1,
+      "condition_severity": 68.17442916666667,
+      "condition_status": "active",
+      "end_day": 372,
+      "invariants": {
+        "checks": [
+          {
+            "check": "negative_commercial_stock",
+            "violations": 0
+          },
+          {
+            "check": "trade_delivered_exceeds_quantity",
+            "violations": 0
+          },
+          {
+            "check": "nonpositive_shipment_quantity",
+            "violations": 0
+          },
+          {
+            "check": "invalid_craft_output_quantity",
+            "violations": 0
+          },
+          {
+            "check": "negative_public_debt",
+            "violations": 0
+          },
+          {
+            "check": "project_overconsumption",
+            "violations": 0
+          },
+          {
+            "check": "negative_harvest",
+            "violations": 0
+          },
+          {
+            "check": "foreign_keys",
+            "violations": 0
+          },
+          {
+            "check": "integrity",
+            "value": "ok"
+          }
+        ],
+        "failures": [],
+        "pass": true
+      },
+      "pass": true,
+      "provider_actor_id": null,
+      "request_status": "treated",
+      "start_day": 365,
+      "structural_provider_pool": true,
+      "treated_day": 367
+    },
+    "law": {
+      "amount_awarded": 2.0,
+      "amount_enforced": 2.0,
+      "buyer_cash_after": 50.761357057954655,
+      "buyer_cash_before": 42.534104243130834,
+      "case_id": 1,
+      "case_status": "closed",
+      "end_day": 455,
+      "enforcement_steps": 1,
+      "finding": "claimant",
+      "invariants": {
+        "checks": [
+          {
+            "check": "negative_commercial_stock",
+            "violations": 0
+          },
+          {
+            "check": "trade_delivered_exceeds_quantity",
+            "violations": 0
+          },
+          {
+            "check": "nonpositive_shipment_quantity",
+            "violations": 0
+          },
+          {
+            "check": "invalid_craft_output_quantity",
+            "violations": 0
+          },
+          {
+            "check": "negative_public_debt",
+            "violations": 0
+          },
+          {
+            "check": "project_overconsumption",
+            "violations": 0
+          },
+          {
+            "check": "negative_harvest",
+            "violations": 0
+          },
+          {
+            "check": "foreign_keys",
+            "violations": 0
+          },
+          {
+            "check": "integrity",
+            "value": "ok"
+          }
+        ],
+        "failures": [],
+        "pass": true
+      },
+      "judgment_status": "enforced",
+      "jurisdiction_id": 3,
+      "office_id": 3,
+      "pass": true,
+      "seller_cash_after": 46.89868731091004,
+      "seller_cash_before": 57.16373128843962,
+      "start_day": 365
+    },
+    "method": "three independent branches copied from the accepted peaceful day-365 diagnostic save; each branch receives one explicit causal trigger and then runs the real production owners",
+    "pass": true,
+    "schema_version": 70,
+    "source_database": "/mnt/data/oneyear01_output_v2/ONEYEAR01_diagnostic.db",
+    "source_day": 365,
+    "war": {
+      "attacker_force_location_after_march": 15,
+      "attacker_force_status_after_march": "deployed",
+      "attacker_killed": 5,
+      "attacker_wounded": 17,
+      "battle_day": 372,
+      "battle_id": 7,
+      "battle_reports": 2,
+      "damage_events": 4,
+      "defender_killed": 12,
+      "defender_wounded": 20,
+      "grain_stock_after_march": 7.292480000000005,
+      "grain_stock_before": 12.492480000000004,
+      "invariants": {
+        "checks": [
+          {
+            "check": "negative_commercial_stock",
+            "violations": 0
+          },
+          {
+            "check": "trade_delivered_exceeds_quantity",
+            "violations": 0
+          },
+          {
+            "check": "nonpositive_shipment_quantity",
+            "violations": 0
+          },
+          {
+            "check": "invalid_craft_output_quantity",
+            "violations": 0
+          },
+          {
+            "check": "negative_public_debt",
+            "violations": 0
+          },
+          {
+            "check": "project_overconsumption",
+            "violations": 0
+          },
+          {
+            "check": "negative_harvest",
+            "violations": 0
+          },
+          {
+            "check": "foreign_keys",
+            "violations": 0
+          },
+          {
+            "check": "integrity",
+            "value": "ok"
+          }
+        ],
+        "failures": [],
+        "pass": true
+      },
+      "operation_id": 1,
+      "pass": true,
+      "start_day": 365,
+      "warehouse_condition_after": 33.00000000000114,
+      "warehouse_condition_before": 53.500000000001144
+    }
+  },
+  "coverage_gate": {
+    "failure_count": 0,
+    "failures": [],
+    "pass": true,
+    "principle": "One-year simulation may start only when ordinary opening substrates exist and every required autonomous domain has a wired owner.",
+    "required_domains": 50,
+    "states": {
+      "eligible": 26,
+      "missing_population": 1,
+      "populated_active": 10,
+      "populated_no_eligible_work": 14,
+      "protected_open": 1
+    }
+  },
+  "end_day": 365,
+  "engine_version": "0.60.0",
+  "final_snapshot": {
+    "actors": {
+      "active": 612,
+      "all": 622,
+      "characters": 519,
+      "deceased": 0
+    },
+    "beliefs": 5808,
+    "care_requests": {},
+    "coverage_failures": [],
+    "coverage_states": {
+      "eligible": 26,
+      "missing_population": 1,
+      "populated_active": 10,
+      "populated_no_eligible_work": 14,
+      "protected_open": 1
+    },
+    "craft_orders": {
+      "completed": 1
+    },
+    "day": 365,
+    "decisions": 1619,
+    "enterprises": {
+      "active": 57,
+      "all": 57
+    },
+    "event_types": {
+      "civilian:auction": 4,
+      "commerce:shipment_arrived": 9,
+      "craft:order_completed": 1,
+      "cultivation_breakthrough": 10,
+      "duel_exchange": 48,
+      "life:coming_of_age": 46,
+      "prizefight_card": 35,
+      "prizefight_card_scheduled": 35,
+      "role_martial_service": 4,
+      "tournament_registration": 1,
+      "tournament_result": 1,
+      "tournament_start": 1,
+      "travel_arrival": 14,
+      "underworld_membership_turnover": 43
+    },
+    "events": 252,
+    "harvests": 9,
+    "health_conditions": {},
+    "households": 8,
+    "institution_candidates": {},
+    "invariants": {
+      "checks": [
+        {
+          "check": "negative_commercial_stock",
+          "violations": 0
+        },
+        {
+          "check": "trade_delivered_exceeds_quantity",
+          "violations": 0
+        },
+        {
+          "check": "nonpositive_shipment_quantity",
+          "violations": 0
+        },
+        {
+          "check": "invalid_craft_output_quantity",
+          "violations": 0
+        },
+        {
+          "check": "negative_public_debt",
+          "violations": 0
+        },
+        {
+          "check": "project_overconsumption",
+          "violations": 0
+        },
+        {
+          "check": "negative_harvest",
+          "violations": 0
+        },
+        {
+          "check": "foreign_keys",
+          "violations": 0
+        },
+        {
+          "check": "integrity",
+          "value": "ok"
+        }
+      ],
+      "failures": [],
+      "pass": true
+    },
+    "label": "day_365_final_acceptance",
+    "latent_entities": {
+      "crystallized": 4,
+      "latent": 5
+    },
+    "law_cases": {},
+    "medical_treatments": {},
+    "processes": {
+      "agriculture": {
+        "blocked": 0,
+        "changed": 218,
+        "due": 218,
+        "eligible": 218,
+        "executed": 218,
+        "runs": 363
+      },
+      "civilian": {
+        "blocked": 0,
+        "changed": 186249,
+        "due": 186249,
+        "eligible": 186249,
+        "executed": 186249,
+        "runs": 363
+      },
+      "craft": {
+        "blocked": 0,
+        "changed": 4,
+        "due": 4,
+        "eligible": 4,
+        "executed": 4,
+        "runs": 363
+      },
+      "cultivation": {
+        "blocked": 0,
+        "changed": 1429,
+        "due": 1429,
+        "eligible": 1429,
+        "executed": 1429,
+        "runs": 363
+      },
+      "ecology": {
+        "blocked": 0,
+        "changed": 234,
+        "due": 234,
+        "eligible": 234,
+        "executed": 234,
+        "runs": 363
+      },
+      "education": {
+        "blocked": 0,
+        "changed": 4745,
+        "due": 4745,
+        "eligible": 4745,
+        "executed": 4745,
+        "runs": 363
+      },
+      "groundbinding": {
+        "blocked": 0,
+        "changed": 52,
+        "due": 52,
+        "eligible": 52,
+        "executed": 52,
+        "runs": 363
+      },
+      "growth": {
+        "blocked": 0,
+        "changed": 956,
+        "due": 956,
+        "eligible": 956,
+        "executed": 956,
+        "runs": 363
+      },
+      "health": {
+        "blocked": 0,
+        "changed": 1054,
+        "due": 1054,
+        "eligible": 1054,
+        "executed": 1054,
+        "runs": 363
+      },
+      "hollow": {
+        "blocked": 0,
+        "changed": 4,
+        "due": 4,
+        "eligible": 4,
+        "executed": 4,
+        "runs": 363
+      },
+      "information": {
+        "blocked": 0,
+        "changed": 2306,
+        "due": 2306,
+        "eligible": 2306,
+        "executed": 2306,
+        "runs": 363
+      },
+      "law": {
+        "blocked": 0,
+        "changed": 0,
+        "due": 0,
+        "eligible": 0,
+        "executed": 0,
+        "runs": 363
+      },
+      "logistics": {
+        "blocked": 0,
+        "changed": 32,
+        "due": 32,
+        "eligible": 32,
+        "executed": 32,
+        "runs": 363
+      },
+      "merchant": {
+        "blocked": 0,
+        "changed": 593,
+        "due": 593,
+        "eligible": 593,
+        "executed": 593,
+        "runs": 363
+      },
+      "politics": {
+        "blocked": 0,
+        "changed": 84,
+        "due": 84,
+        "eligible": 84,
+        "executed": 84,
+        "runs": 363
+      },
+      "psychology": {
+        "blocked": 0,
+        "changed": 0,
+        "due": 0,
+        "eligible": 0,
+        "executed": 0,
+        "runs": 363
+      },
+      "religion": {
+        "blocked": 0,
+        "changed": 60,
+        "due": 60,
+        "eligible": 60,
+        "executed": 60,
+        "runs": 363
+      },
+      "resolution": {
+        "blocked": 0,
+        "changed": 2643,
+        "due": 2643,
+        "eligible": 2643,
+        "executed": 2643,
+        "runs": 363
+      },
+      "spectacle": {
+        "blocked": 0,
+        "changed": 412,
+        "due": 412,
+        "eligible": 412,
+        "executed": 412,
+        "runs": 363
+      },
+      "tournament": {
+        "blocked": 0,
+        "changed": 88,
+        "due": 88,
+        "eligible": 88,
+        "executed": 88,
+        "runs": 363
+      },
+      "underworld": {
+        "blocked": 0,
+        "changed": 168,
+        "due": 168,
+        "eligible": 168,
+        "executed": 168,
+        "runs": 363
+      },
+      "underworld_medicine": {
+        "blocked": 0,
+        "changed": 0,
+        "due": 0,
+        "eligible": 0,
+        "executed": 0,
+        "runs": 363
+      },
+      "war": {
+        "blocked": 0,
+        "changed": 0,
+        "due": 0,
+        "eligible": 0,
+        "executed": 0,
+        "runs": 363
+      },
+      "world": {
+        "blocked": 0,
+        "changed": 0,
+        "due": 0,
+        "eligible": 0,
+        "executed": 0,
+        "runs": 350
+      },
+      "world_catchup": {
+        "blocked": 0,
+        "changed": 0,
+        "due": 0,
+        "eligible": 0,
+        "executed": 0,
+        "runs": 13
+      }
+    },
+    "protection_accounts": 29,
+    "resolution_to_levels": {
+      "ACTIVE": 22,
+      "STRUCTURAL": 486,
+      "TRACKED": 615
+    },
+    "resolution_transitions": 1123,
+    "shipments": {
+      "delivered": 9,
+      "in_transit": 2
+    },
+    "stock_by_good": {
+      "Cloth and ordinary textiles": 0.0,
+      "Grain and staple food": 195.41808,
+      "Shipbuilding and naval supplies": 13.0,
+      "Timber and building material": 0.0,
+      "Tools, arms and metalwork": 0.0,
+      "Travel and caravan supplies": 15.748319
+    },
+    "stock_total": 224.166399,
+    "trade_contracts": {
+      "fulfilled": 24,
+      "in_transit": 1
+    },
+    "treasury": {
+      "cash": 839.626146,
+      "count": 7,
+      "debt": 0.0
+    },
+    "underworld_orgs": {
+      "gang": 10,
+      "syndicate": 1
+    },
+    "underworld_rackets": {},
+    "unions_active": 3,
+    "war_operations": {}
+  },
+  "hard_invariants": {
+    "checks": [
+      {
+        "check": "negative_commercial_stock",
+        "violations": 0
+      },
+      {
+        "check": "trade_delivered_exceeds_quantity",
+        "violations": 0
+      },
+      {
+        "check": "nonpositive_shipment_quantity",
+        "violations": 0
+      },
+      {
+        "check": "invalid_craft_output_quantity",
+        "violations": 0
+      },
+      {
+        "check": "negative_public_debt",
+        "violations": 0
+      },
+      {
+        "check": "project_overconsumption",
+        "violations": 0
+      },
+      {
+        "check": "negative_harvest",
+        "violations": 0
+      },
+      {
+        "check": "foreign_keys",
+        "violations": 0
+      },
+      {
+        "check": "integrity",
+        "value": "ok"
+      }
+    ],
+    "failures": [],
+    "pass": true
+  },
+  "process_summary": {
+    "agriculture": {
+      "blocked": 0,
+      "changed": 218,
+      "due": 218,
+      "eligible": 218,
+      "executed": 218,
+      "runs": 363
+    },
+    "civilian": {
+      "blocked": 0,
+      "changed": 186249,
+      "due": 186249,
+      "eligible": 186249,
+      "executed": 186249,
+      "runs": 363
+    },
+    "craft": {
+      "blocked": 0,
+      "changed": 4,
+      "due": 4,
+      "eligible": 4,
+      "executed": 4,
+      "runs": 363
+    },
+    "cultivation": {
+      "blocked": 0,
+      "changed": 1429,
+      "due": 1429,
+      "eligible": 1429,
+      "executed": 1429,
+      "runs": 363
+    },
+    "ecology": {
+      "blocked": 0,
+      "changed": 234,
+      "due": 234,
+      "eligible": 234,
+      "executed": 234,
+      "runs": 363
+    },
+    "education": {
+      "blocked": 0,
+      "changed": 4745,
+      "due": 4745,
+      "eligible": 4745,
+      "executed": 4745,
+      "runs": 363
+    },
+    "groundbinding": {
+      "blocked": 0,
+      "changed": 52,
+      "due": 52,
+      "eligible": 52,
+      "executed": 52,
+      "runs": 363
+    },
+    "growth": {
+      "blocked": 0,
+      "changed": 956,
+      "due": 956,
+      "eligible": 956,
+      "executed": 956,
+      "runs": 363
+    },
+    "health": {
+      "blocked": 0,
+      "changed": 1054,
+      "due": 1054,
+      "eligible": 1054,
+      "executed": 1054,
+      "runs": 363
+    },
+    "hollow": {
+      "blocked": 0,
+      "changed": 4,
+      "due": 4,
+      "eligible": 4,
+      "executed": 4,
+      "runs": 363
+    },
+    "information": {
+      "blocked": 0,
+      "changed": 2306,
+      "due": 2306,
+      "eligible": 2306,
+      "executed": 2306,
+      "runs": 363
+    },
+    "law": {
+      "blocked": 0,
+      "changed": 0,
+      "due": 0,
+      "eligible": 0,
+      "executed": 0,
+      "runs": 363
+    },
+    "logistics": {
+      "blocked": 0,
+      "changed": 32,
+      "due": 32,
+      "eligible": 32,
+      "executed": 32,
+      "runs": 363
+    },
+    "merchant": {
+      "blocked": 0,
+      "changed": 593,
+      "due": 593,
+      "eligible": 593,
+      "executed": 593,
+      "runs": 363
+    },
+    "politics": {
+      "blocked": 0,
+      "changed": 84,
+      "due": 84,
+      "eligible": 84,
+      "executed": 84,
+      "runs": 363
+    },
+    "psychology": {
+      "blocked": 0,
+      "changed": 0,
+      "due": 0,
+      "eligible": 0,
+      "executed": 0,
+      "runs": 363
+    },
+    "religion": {
+      "blocked": 0,
+      "changed": 60,
+      "due": 60,
+      "eligible": 60,
+      "executed": 60,
+      "runs": 363
+    },
+    "resolution": {
+      "blocked": 0,
+      "changed": 2643,
+      "due": 2643,
+      "eligible": 2643,
+      "executed": 2643,
+      "runs": 363
+    },
+    "spectacle": {
+      "blocked": 0,
+      "changed": 412,
+      "due": 412,
+      "eligible": 412,
+      "executed": 412,
+      "runs": 363
+    },
+    "tournament": {
+      "blocked": 0,
+      "changed": 88,
+      "due": 88,
+      "eligible": 88,
+      "executed": 88,
+      "runs": 363
+    },
+    "underworld": {
+      "blocked": 0,
+      "changed": 168,
+      "due": 168,
+      "eligible": 168,
+      "executed": 168,
+      "runs": 363
+    },
+    "underworld_medicine": {
+      "blocked": 0,
+      "changed": 0,
+      "due": 0,
+      "eligible": 0,
+      "executed": 0,
+      "runs": 363
+    },
+    "war": {
+      "blocked": 0,
+      "changed": 0,
+      "due": 0,
+      "eligible": 0,
+      "executed": 0,
+      "runs": 363
+    },
+    "world": {
+      "blocked": 0,
+      "changed": 0,
+      "due": 0,
+      "eligible": 0,
+      "executed": 0,
+      "runs": 350
+    },
+    "world_catchup": {
+      "blocked": 0,
+      "changed": 0,
+      "due": 0,
+      "eligible": 0,
+      "executed": 0,
+      "runs": 13
+    }
+  },
+  "required_process_failures": [],
+  "restart_deterministic": {
+    "all_equal": true,
+    "differences": {}
+  },
+  "schema_version": 70
+}

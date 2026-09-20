@@ -1,0 +1,4465 @@
+{
+  "seed_id": "caerness_core_2026_09",
+  "seed_version": 1,
+  "world_bible_sha256": "44be7c89c6bc9ebcb3a9365b42f1594669d0d6fd822777387596d02fd20f3396",
+  "source_name": "Caerness_World_Bible_Merged.docx",
+  "source_status_note": "Settled/strong facts are seeded as canon-facing structure; working registry/calibrations remain marked working campaign seeds.",
+  "locations": [
+    {
+      "name": "Caerness",
+      "kind": "continent",
+      "status": "settled",
+      "notes": "Continental frame."
+    },
+    {
+      "name": "Hearthlands",
+      "kind": "macro-region",
+      "status": "working",
+      "notes": "Use ~3.5 million population midpoint; broader Hearth civilization."
+    },
+    {
+      "name": "Crownlands",
+      "kind": "region",
+      "status": "settled",
+      "notes": "Imperial political and administrative heartland around Crownhold."
+    },
+    {
+      "name": "Central Hearth",
+      "kind": "region",
+      "status": "settled",
+      "notes": "Broadest and most reliable current-bearing Hearth region."
+    },
+    {
+      "name": "The Spine",
+      "kind": "mountain-system",
+      "status": "settled",
+      "notes": "Long north-south mountain system with difficult passes and uneven current."
+    },
+    {
+      "name": "Eastern Hearth",
+      "kind": "region",
+      "status": "settled",
+      "notes": "Thinner and patchier on average; major Hollow history."
+    },
+    {
+      "name": "Fellmarch",
+      "kind": "region",
+      "status": "settled",
+      "notes": "Southern/southeastern Hearth macro-region; unusually dense Undertow presence."
+    },
+    {
+      "name": "Ashgrave",
+      "kind": "region",
+      "status": "settled",
+      "notes": "War-scarred former cultivation region; damage is physical/ecological, not magical."
+    },
+    {
+      "name": "Windmere",
+      "kind": "kingdom",
+      "status": "settled",
+      "notes": "Independent southwestern maritime kingdom; deeper fighting culture banked."
+    },
+    {
+      "name": "Dunmoor",
+      "kind": "kingdom",
+      "status": "settled",
+      "notes": "Independent northern kingdom; deeper development banked."
+    },
+    {
+      "name": "Crownhold",
+      "kind": "city",
+      "status": "settled",
+      "parent": "Crownlands",
+      "notes": "Imperial capital and seat of the Underheaven throne."
+    },
+    {
+      "name": "Cairnholt",
+      "kind": "city",
+      "status": "settled",
+      "notes": "Imperial-Churn political centre and annual major tournament city."
+    },
+    {
+      "name": "Toll's Reach",
+      "kind": "free-port",
+      "status": "settled",
+      "notes": "Chartered free port and cosmopolitan exchange."
+    },
+    {
+      "name": "Aldergate",
+      "kind": "city",
+      "status": "settled",
+      "notes": "Great inland exchange city."
+    },
+    {
+      "name": "Waymeet",
+      "kind": "crossroads",
+      "status": "settled",
+      "notes": "Long Road crossroads."
+    },
+    {
+      "name": "Aldenmoor",
+      "kind": "city",
+      "status": "settled",
+      "notes": "Scholar/manual centre."
+    },
+    {
+      "name": "Lysmere",
+      "kind": "free-city",
+      "status": "settled",
+      "notes": "Medical free city."
+    },
+    {
+      "name": "Amber Court",
+      "kind": "ceremonial-ground",
+      "status": "settled",
+      "notes": "Great Churn-wide ceremonial and competitive ground."
+    },
+    {
+      "name": "Saltmere",
+      "kind": "port",
+      "status": "settled",
+      "parent": "Windmere",
+      "notes": "Windmere's principal international port."
+    },
+    {
+      "name": "Highford",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Rivermoor",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Redford",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Blackfen",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Stonecross",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Mirehold",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Mapleford",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Talonkeep",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Eastwatch",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Oakridge",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Britterwatch",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Verenwood",
+      "kind": "settlement",
+      "status": "working",
+      "notes": "Named Underheaven settlement; exact detailed placement remains open."
+    },
+    {
+      "name": "Greywatch",
+      "kind": "settlement",
+      "status": "working",
+      "parent": "Ashgrave",
+      "notes": "Named Underheaven settlement in the Ashgrave."
+    },
+    {
+      "name": "White Laurel Heights",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Rich mountain ground; one of the reasons the sect exists where it does. The best portions have limited capacity and increasingly restricted access.",
+      "control_note": "White Laurel Sect"
+    },
+    {
+      "name": "Stillwater",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Old stable ancestral ground. Valuable for sustained disciplined cultivation rather than sheer density.",
+      "control_note": "House Halloway"
+    },
+    {
+      "name": "Bell Hollow",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Broad moderate-to-rich basin capable of supporting many disciples; helps explain Grey Bell’s scale as a teaching institution.",
+      "control_note": "Grey Bell Sect"
+    },
+    {
+      "name": "Stonepool",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Smaller and denser ancestral ground; naturally produces more restricted high-value access.",
+      "control_note": "Rannick Clan"
+    },
+    {
+      "name": "Brackwater Springs",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Several useful concentrations distributed through the district rather than one sacred chamber.",
+      "control_note": "Brackwater Sect"
+    },
+    {
+      "name": "Deepwell Basin",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Broad reliable ground; timed access can be bought, awarded, sponsored, or granted. Common high-end tournament reward.",
+      "control_note": "Chartered / semi-neutral"
+    },
+    {
+      "name": "Clearwell",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Weaker but dependable site held commercially; access sold to people lacking institutional ground. Exact owner remains open.",
+      "control_note": "Commercial"
+    },
+    {
+      "name": "Stonewake Caverns",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Remote cavern network with rich scattered chambers; difficult to occupy permanently and surrounded by uncertain reports.",
+      "control_note": "Wild / effectively uncontrolled"
+    },
+    {
+      "name": "Redroot Vale",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Major Vein-Root environment involving landholders, refiners, merchants, institutions, and Imperial interests.",
+      "control_note": "Mixed economic control"
+    },
+    {
+      "name": "Ashgrave Wells",
+      "kind": "cultivation-site",
+      "status": "settled",
+      "parent": "Ashgrave",
+      "notes": "Surviving and damaged remnants of former cultivation infrastructure; some recover, some remain broken, some are contested.",
+      "control_note": "Ruined / fragmented claims"
+    },
+    {
+      "name": "Silent Peak",
+      "kind": "cultivation-site",
+      "status": "working",
+      "parent": "The Spine",
+      "notes": "Low-density but exceptionally stable current. Ordeal cultivation, sealcraft, and Groundbinding rather than rich ordinary cultivation.",
+      "control_note": "House Greaves — working name"
+    },
+    {
+      "name": "Founder’s Cut",
+      "kind": "historic-martial-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Physical trace of an extraordinary old feat; an Enlightenment Trace rather than a power-up location.",
+      "control_note": "Historic martial site"
+    },
+    {
+      "name": "The Long Stair",
+      "kind": "historic-training-route",
+      "status": "settled",
+      "parent": null,
+      "notes": "Old mountain route culturally associated with endurance, travelling challengers, and martial pilgrimage.",
+      "control_note": "Historic training route"
+    },
+    {
+      "name": "The Red Yard",
+      "kind": "challenge-ground",
+      "status": "settled",
+      "parent": "Toll's Reach",
+      "notes": "Famous permanent challenge ground where circuit fighters, wanderers, and spectators intersect.",
+      "control_note": "Toll's Reach / Road culture"
+    },
+    {
+      "name": "Seven Bridges",
+      "kind": "tournament-site",
+      "status": "settled",
+      "parent": null,
+      "notes": "Old recurring river tournament and one of the River Circuit’s iconic events.",
+      "control_note": "Nine Ferries region"
+    },
+    {
+      "name": "Oldstone Hall",
+      "kind": "archive-centre",
+      "status": "settled",
+      "parent": "Aldenmoor",
+      "notes": "Archive/manual authentication centre tied to scholars, historians, legitimate copies, and provenance disputes.",
+      "control_note": "Aldenmoor sphere"
+    }
+  ],
+  "institutions": [
+    {
+      "name": "Underheaven Empire",
+      "kind": "polity",
+      "subtype": "empire",
+      "status": "settled",
+      "primary_location": "Crownhold"
+    },
+    {
+      "name": "Concord",
+      "kind": "martial-federation",
+      "subtype": "martial federation",
+      "status": "settled",
+      "primary_location": "Cairnholt"
+    },
+    {
+      "name": "House Halloway",
+      "kind": "martial-clan",
+      "subtype": "great clan",
+      "status": "settled",
+      "primary_location": "Stillwater"
+    },
+    {
+      "name": "House Corr",
+      "kind": "martial-clan",
+      "subtype": "great clan",
+      "status": "settled"
+    },
+    {
+      "name": "White Laurel Sect",
+      "kind": "martial-sect",
+      "subtype": "ancient sect",
+      "status": "settled",
+      "primary_location": "White Laurel Heights"
+    },
+    {
+      "name": "Grey Bell Sect",
+      "kind": "martial-sect",
+      "subtype": "ancient sect",
+      "status": "settled",
+      "primary_location": "Bell Hollow"
+    },
+    {
+      "name": "Amberlight Sect",
+      "kind": "martial-sect",
+      "subtype": "recruiting sect",
+      "status": "settled"
+    },
+    {
+      "name": "Wrenfield Sect",
+      "kind": "martial-sect",
+      "subtype": "great sect",
+      "status": "settled"
+    },
+    {
+      "name": "Ragged Order",
+      "kind": "martial-order",
+      "subtype": "mass order",
+      "status": "settled"
+    },
+    {
+      "name": "Red Cedar Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled"
+    },
+    {
+      "name": "Brightwell Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled"
+    },
+    {
+      "name": "Larkspur School",
+      "kind": "martial-school",
+      "subtype": "school",
+      "status": "settled"
+    },
+    {
+      "name": "Sedgewick",
+      "kind": "martial-sect",
+      "subtype": "combat-medicine sect",
+      "status": "settled"
+    },
+    {
+      "name": "Rannick Clan",
+      "kind": "martial-clan",
+      "subtype": "clan",
+      "status": "settled",
+      "primary_location": "Stonepool"
+    },
+    {
+      "name": "Kastel Clan",
+      "kind": "martial-clan",
+      "subtype": "clan",
+      "status": "settled"
+    },
+    {
+      "name": "Reedmark Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled"
+    },
+    {
+      "name": "Brackwater Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled",
+      "primary_location": "Brackwater Springs"
+    },
+    {
+      "name": "Blackwood League",
+      "kind": "martial-league",
+      "subtype": "stronghold confederation",
+      "status": "settled"
+    },
+    {
+      "name": "Nine Ferries Union",
+      "kind": "martial-union",
+      "subtype": "river-network union",
+      "status": "settled"
+    },
+    {
+      "name": "Ashwick Clan",
+      "kind": "martial-clan",
+      "subtype": "specialist clan",
+      "status": "settled"
+    },
+    {
+      "name": "Kellbrook Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled"
+    },
+    {
+      "name": "Stonewatch Clan",
+      "kind": "martial-clan",
+      "subtype": "clan",
+      "status": "settled"
+    },
+    {
+      "name": "Farlight Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled"
+    },
+    {
+      "name": "Rookwood Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled"
+    },
+    {
+      "name": "Thistlewood Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled"
+    },
+    {
+      "name": "Hallowmere Sect",
+      "kind": "martial-sect",
+      "subtype": "sect",
+      "status": "settled"
+    },
+    {
+      "name": "Redmarsh Clan",
+      "kind": "martial-clan",
+      "subtype": "clan",
+      "status": "settled"
+    },
+    {
+      "name": "Grand Coven",
+      "kind": "hollow-coven",
+      "subtype": "coven",
+      "status": "settled",
+      "primary_location": "Eastern Hearth"
+    },
+    {
+      "name": "Greywater Coven",
+      "kind": "hollow-coven",
+      "subtype": "coven",
+      "status": "settled",
+      "primary_location": "Eastern Hearth"
+    },
+    {
+      "name": "Black Reed Coven",
+      "kind": "hollow-coven",
+      "subtype": "coven",
+      "status": "settled",
+      "primary_location": "Eastern Hearth"
+    },
+    {
+      "name": "House Greaves",
+      "kind": "custodial-house",
+      "subtype": "sealkeeper house",
+      "status": "working",
+      "primary_location": "Silent Peak"
+    },
+    {
+      "name": "Painted Veil",
+      "kind": "information-network",
+      "subtype": "trans-city information network",
+      "status": "settled"
+    },
+    {
+      "name": "The Hush",
+      "kind": "information-network",
+      "subtype": "loose information network",
+      "status": "settled"
+    },
+    {
+      "name": "The Reckoning",
+      "kind": "assassin-organization",
+      "subtype": "assassin organization",
+      "status": "settled"
+    },
+    {
+      "name": "Windmere",
+      "kind": "polity",
+      "subtype": "kingdom",
+      "status": "settled",
+      "primary_location": "Windmere"
+    },
+    {
+      "name": "Dunmoor",
+      "kind": "polity",
+      "subtype": "kingdom",
+      "status": "settled",
+      "primary_location": "Dunmoor"
+    }
+  ],
+  "named_characters": [
+    {
+      "name": "Aaron Sawyer",
+      "age": 22,
+      "stage": "Temper",
+      "role": "High-promise household disciple.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Abel Forsythe",
+      "age": 15,
+      "stage": "First",
+      "role": "Extreme early talent; now under Cormac Dyer.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Abigail Tern",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Technically gifted.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Ada March",
+      "age": 53,
+      "stage": "Fifth",
+      "role": "Veteran western-road fighter.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Adele Lott",
+      "age": 22,
+      "stage": "Temper",
+      "role": "Affiliated-family disciple.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Adrian Hartwell",
+      "age": 39,
+      "stage": "Breach",
+      "role": "Former sect disciple with independent following.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Aiden Gorse",
+      "age": 20,
+      "stage": "First",
+      "role": "Roman Wood circle; relative of Alfred Gorse.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Alden Corr",
+      "age": 69,
+      "stage": "Fifth",
+      "role": "Senior family master.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Alec Kerr",
+      "age": 39,
+      "stage": "Breach",
+      "role": "Younger relative of Matthias; formal sect member.",
+      "affiliation": "Kellbrook Sect",
+      "sphere": null,
+      "source_table": 41,
+      "status": "working"
+    },
+    {
+      "name": "Alfred Gorse",
+      "age": 29,
+      "stage": "Temper",
+      "role": "Mature steady disciple.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Alice Carver",
+      "age": 31,
+      "stage": "Third",
+      "role": "Accelerating development; increasingly noticed.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Alistair Hardy",
+      "age": 58,
+      "stage": "Fifth",
+      "role": "Senior unrelated teacher.",
+      "affiliation": "Kellbrook Sect",
+      "sphere": null,
+      "source_table": 41,
+      "status": "working"
+    },
+    {
+      "name": "Alton Dunbar",
+      "age": 61,
+      "stage": "Fifth",
+      "role": "Lord of a major hill stronghold.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Alvin Pope",
+      "age": 29,
+      "stage": "Temper",
+      "role": "Waymeet mentorship around Quentin Dale.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Alwyn Redmarsh",
+      "age": 74,
+      "stage": "Fifth",
+      "role": "Clan Head.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Amos Maddox",
+      "age": 16,
+      "stage": "First",
+      "role": "Very promising early talent.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Andrew Wren",
+      "age": 87,
+      "stage": "Sixth",
+      "role": "Sect Head.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Anna Rey",
+      "age": 34,
+      "stage": "Breach",
+      "role": "Younger family master.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Anton Kerrigan",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Travelling student likely to move on.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Ari Goss",
+      "age": 28,
+      "stage": "Third",
+      "role": "Strong younger field practitioner.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Arnold Gale",
+      "age": 27,
+      "stage": "Temper",
+      "role": "Formal outsider disciple.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Arthur Dean",
+      "age": 40,
+      "stage": "Third",
+      "role": "Former retainer.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Aven Briggs",
+      "age": 39,
+      "stage": "Third",
+      "role": "Mature greatsword-line practitioner; non-blood household member.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Avery Clarke",
+      "age": 38,
+      "stage": "Breach",
+      "role": "Former household disciple.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Barrow",
+      "age": 78,
+      "stage": "Sixth",
+      "role": "Born Corren Rannick; former clan heir, now famous Long Roader.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Basil Moorcroft",
+      "age": 40,
+      "stage": "Breach",
+      "role": "Outside-born disciple.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Bastian Crow",
+      "age": 84,
+      "stage": "Fifth",
+      "role": "Old teacher and inheritance figure.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Ben Pritchard",
+      "age": 19,
+      "stage": "First",
+      "role": "Good young practitioner.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Benedict Shaw",
+      "age": 78,
+      "stage": "Sixth",
+      "role": "Senior master and keeper of deep inheritance.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Bennet Crowe",
+      "age": 77,
+      "stage": "Sixth",
+      "role": "Strongest living Brackwater practitioner.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Bernard Trask",
+      "age": 35,
+      "stage": "Third",
+      "role": "Strong unrelated practitioner.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Beryl Mason",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Joss Fenner working mentorship.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Beth Tanner",
+      "age": 21,
+      "stage": "Temper",
+      "role": "Major young prospect.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Blaine Cook",
+      "age": 20,
+      "stage": "First",
+      "role": "Outside-born junior.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Blake Merrin",
+      "age": 34,
+      "stage": "Sixth",
+      "role": "Historical freak; Sixth at thirty-four.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Boyd Rainer",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Bounty-work apprentice under Gideon Ross.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Brady Pierce",
+      "age": 25,
+      "stage": "Breach",
+      "role": "Generational anomaly; direct attention from Nall.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Bram Foster",
+      "age": 42,
+      "stage": "Third",
+      "role": "Competent veteran.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Bramwell Kane",
+      "age": 83,
+      "stage": "Fifth",
+      "role": "Independent teacher with scattered students.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Bran Iver",
+      "age": 42,
+      "stage": "Breach",
+      "role": "Active regional master.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Brennan Hodge",
+      "age": 31,
+      "stage": "Third",
+      "role": "Former clan retainer.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Bridget Tarlow",
+      "age": 28,
+      "stage": "Third",
+      "role": "Recruited outsider.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Bruce Jarvis",
+      "age": 74,
+      "stage": "Fifth",
+      "role": "Older branch master.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Bruno Webb",
+      "age": 64,
+      "stage": "Fifth",
+      "role": "Free-company captain and master.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Bryce Holden",
+      "age": 29,
+      "stage": "Third",
+      "role": "Professional stronghold fighter.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Caitlin Wren",
+      "age": 32,
+      "stage": "Third",
+      "role": "Head relative and formal disciple.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Caleb North",
+      "age": 43,
+      "stage": "Breach",
+      "role": "Challenge-circuit regular.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Calvin Ruskin",
+      "age": 49,
+      "stage": "Breach",
+      "role": "Senior field master.",
+      "affiliation": "Greywater Coven",
+      "sphere": null,
+      "source_table": 50,
+      "status": "working"
+    },
+    {
+      "name": "Cara Preece",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Above-average young practitioner.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Carl Spence",
+      "age": 27,
+      "stage": "Temper",
+      "role": "Experienced working fighter.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Carter Oswin",
+      "age": 19,
+      "stage": "First",
+      "role": "Promising retainer-line student.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Casimir Halloway",
+      "age": 31,
+      "stage": "Breach",
+      "role": "Convergence champion; exceptional young master.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Cassia Bexley",
+      "age": 66,
+      "stage": "Fifth",
+      "role": "Senior instructor.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Cassian Groves",
+      "age": 35,
+      "stage": "Breach",
+      "role": "Young Breach attracting attention.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Cedric Nash",
+      "age": 34,
+      "stage": "Third",
+      "role": "Waymeet-known working duelist.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Celia Treadwell",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Better current student.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Clara Wick",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Promising disciple.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Claudia Reeve",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Hollow-associated independent; status depends on actual practice, not association alone.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Clay Hume",
+      "age": 48,
+      "stage": "Breach",
+      "role": "Regional organizer and fighter.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Clement Bray",
+      "age": 67,
+      "stage": "Fifth",
+      "role": "Senior Watcher; Groundbound for decades.",
+      "affiliation": "House Greaves",
+      "sphere": null,
+      "source_table": 58,
+      "status": "working"
+    },
+    {
+      "name": "Clint Voss",
+      "age": 43,
+      "stage": "Breach",
+      "role": "Veteran field commander.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Clyde Barker",
+      "age": 39,
+      "stage": "Breach",
+      "role": "Stronghold champion.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Cody Marsham",
+      "age": 12,
+      "stage": "First",
+      "role": "Anomaly from a small independent Hearth school; trained by Third-stage Quincy Dorr.",
+      "affiliation": null,
+      "sphere": "Independent local",
+      "source_table": 57,
+      "status": "working"
+    },
+    {
+      "name": "Colby Farren",
+      "age": 18,
+      "stage": "First",
+      "role": "Former-company junior.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Coleman Dall",
+      "age": 28,
+      "stage": "Temper",
+      "role": "Solid working fighter.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Colin Blythe",
+      "age": 55,
+      "stage": "Fifth",
+      "role": "Highly respected independent duelist.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Colm Avery",
+      "age": 19,
+      "stage": "First",
+      "role": "Young household fighter.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Conor Hallam",
+      "age": 35,
+      "stage": "Third",
+      "role": "Head of a tiny family school.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Conrad Slate",
+      "age": 94,
+      "stage": "Sixth",
+      "role": "Red Cedar Sect senior master.",
+      "affiliation": "Red Cedar Sect",
+      "sphere": null,
+      "source_table": 33,
+      "status": "working"
+    },
+    {
+      "name": "Cora Kern",
+      "age": 38,
+      "stage": "Breach",
+      "role": "Highly visible younger master.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Corbin Yarrow",
+      "age": 104,
+      "stage": "Sixth",
+      "role": "Ancient independent Hollow.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Cormac Dyer",
+      "age": 33,
+      "stage": "Third",
+      "role": "Self-made with irregular training history.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Curtis Wray",
+      "age": 19,
+      "stage": "First",
+      "role": "Junior household fighter.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Cyril Marden",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Coven member; Hollow by affiliation.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Daisy Redmarsh",
+      "age": 19,
+      "stage": "First",
+      "role": "Young family member.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Dale Cooper",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Professional-track disciple.",
+      "affiliation": "Kellbrook Sect",
+      "sphere": null,
+      "source_table": 41,
+      "status": "working"
+    },
+    {
+      "name": "Dalen Kell",
+      "age": 29,
+      "stage": "Third",
+      "role": "Strong younger fighter.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Damian Frost",
+      "age": 85,
+      "stage": "Sixth",
+      "role": "Sedgewick senior master.",
+      "affiliation": "Sedgewick",
+      "sphere": null,
+      "source_table": 33,
+      "status": "working"
+    },
+    {
+      "name": "Dana Poe",
+      "age": 19,
+      "stage": "First",
+      "role": "Junior from a ferry family.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Daniel Rook",
+      "age": 94,
+      "stage": "Sixth",
+      "role": "Reclusive Sect Head.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Daphne Roan",
+      "age": 32,
+      "stage": "Third",
+      "role": "Outside-born formal disciple.",
+      "affiliation": "Ashwick Clan",
+      "sphere": null,
+      "source_table": 40,
+      "status": "working"
+    },
+    {
+      "name": "Darius Fennel",
+      "age": 32,
+      "stage": "Third",
+      "role": "Strong younger adult.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Darran Moor",
+      "age": 45,
+      "stage": "Breach",
+      "role": "Affiliated-family household master.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Darren Pomeroy",
+      "age": 18,
+      "stage": "First",
+      "role": "Caleb North challenge-circle junior.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Dean Sutter",
+      "age": 21,
+      "stage": "First",
+      "role": "Good fundamentals; future open.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Declan Fair",
+      "age": 30,
+      "stage": "Third",
+      "role": "Outside-born household disciple.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Della Venn",
+      "age": 61,
+      "stage": "Fifth",
+      "role": "Travelling senior master.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Dennis Shawcross",
+      "age": 29,
+      "stage": "Third",
+      "role": "Younger disciple developing quickly.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Derek Wardell",
+      "age": 32,
+      "stage": "Third",
+      "role": "Rising captain.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Deren Holt",
+      "age": 51,
+      "stage": "Fifth",
+      "role": "Active public-facing master.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Desmond Poole",
+      "age": 57,
+      "stage": "Fifth",
+      "role": "Outside master incorporated into household.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Dexter Hall",
+      "age": 44,
+      "stage": "Third",
+      "role": "Older Third with strong combat reputation.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Diana Corbett",
+      "age": 15,
+      "stage": "Temper",
+      "role": "Anomaly; recruited young and advancing unusually fast.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Dora Whitlock",
+      "age": 46,
+      "stage": "Breach",
+      "role": "Escort captain with working reputation.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Doran Vess",
+      "age": 51,
+      "stage": "Breach",
+      "role": "Infamous figure whose reputation exceeds Stage.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Dorian Fell",
+      "age": 33,
+      "stage": "Third",
+      "role": "Retainer-line practitioner.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Douglas Pryor",
+      "age": 27,
+      "stage": "Temper",
+      "role": "Solid late-developing disciple.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Dravik",
+      "age": 71,
+      "stage": "Fifth",
+      "role": "Senior field authority.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Drew Abbott",
+      "age": 19,
+      "stage": "First",
+      "role": "Outside recruit.",
+      "affiliation": "Black Reed Coven",
+      "sphere": null,
+      "source_table": 51,
+      "status": "working"
+    },
+    {
+      "name": "Duncan Price",
+      "age": 42,
+      "stage": "Breach",
+      "role": "Sworn household disciple.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Dylan Porter",
+      "age": 32,
+      "stage": "Temper",
+      "role": "Former-company martial schooling; Wyatt Porter’s twin.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Eamon Pike",
+      "age": 41,
+      "stage": "Breach",
+      "role": "Retainer-family master.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Edith Fallon",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Outside-born Coven disciple.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Edmund Hale",
+      "age": 31,
+      "stage": "Third",
+      "role": "Sect Head relative; formal disciple.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Edran Vail",
+      "age": 92,
+      "stage": "Sixth",
+      "role": "Sect Head.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Edward Cross",
+      "age": 47,
+      "stage": "Breach",
+      "role": "Most visible external representative.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Edwin Loxley",
+      "age": 76,
+      "stage": "Fifth",
+      "role": "Current Sect Head.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Elaine Broder",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Outsider accepted as formal disciple.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Elias Waller",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Challenge-circle trainee under Caleb North.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Elin Shore",
+      "age": 38,
+      "stage": "Breach",
+      "role": "Visible travelling practitioner.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Elise Arden",
+      "age": 76,
+      "stage": "Sixth",
+      "role": "Brightwell Sect senior master.",
+      "affiliation": "Brightwell Sect",
+      "sphere": null,
+      "source_table": 33,
+      "status": "working"
+    },
+    {
+      "name": "Eliza Rowe",
+      "age": 31,
+      "stage": "Third",
+      "role": "Escort fighter and company hand.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Ella Stone",
+      "age": 20,
+      "stage": "First",
+      "role": "Moira Stone’s niece and formal student.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Elliot Roach",
+      "age": 28,
+      "stage": "Third",
+      "role": "Younger travelling fighter.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Elsa Vardon",
+      "age": 30,
+      "stage": "Third",
+      "role": "Young master and travelling teacher.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Elsie Page",
+      "age": 18,
+      "stage": "First",
+      "role": "Young talent drawing cautious attention.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Emily Trent",
+      "age": 20,
+      "stage": "First",
+      "role": "Good early development.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Emmett Crossley",
+      "age": 44,
+      "stage": "Breach",
+      "role": "Experienced instructor and representative.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Eran Sloane",
+      "age": 97,
+      "stage": "Sixth",
+      "role": "Senior spear master.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Erica Dane",
+      "age": 29,
+      "stage": "Third",
+      "role": "Younger Hollow with local reputation.",
+      "affiliation": "Black Reed Coven",
+      "sphere": null,
+      "source_table": 51,
+      "status": "working"
+    },
+    {
+      "name": "Erin Boyd",
+      "age": 18,
+      "stage": "First",
+      "role": "Junior with open future.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Esther Mott",
+      "age": 33,
+      "stage": "Third",
+      "role": "Established younger Hollow.",
+      "affiliation": "Greywater Coven",
+      "sphere": null,
+      "source_table": 50,
+      "status": "working"
+    },
+    {
+      "name": "Ethan Vale",
+      "age": 49,
+      "stage": "Breach",
+      "role": "Late-reaching master still improving.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Evan Sol",
+      "age": 18,
+      "stage": "First",
+      "role": "Promising sect junior.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Everett Broome",
+      "age": 23,
+      "stage": "First",
+      "role": "Older beginner in escort network.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Ezra Baines",
+      "age": 44,
+      "stage": "Breach",
+      "role": "Travelling instructor.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Faith Palmer",
+      "age": 17,
+      "stage": "First",
+      "role": "Promising junior.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Faye Rey",
+      "age": 17,
+      "stage": "First",
+      "role": "Young family member.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Felix Ward",
+      "age": 62,
+      "stage": "Fifth",
+      "role": "Veteran spear fighter and challenge master.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Fen",
+      "age": 26,
+      "stage": "Third",
+      "role": "Relatively recent independent Hollow.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Finn Corr",
+      "age": 18,
+      "stage": "First",
+      "role": "Young family member.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Fletcher Doyle",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Formal household disciple.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Flora Kastel",
+      "age": 18,
+      "stage": "First",
+      "role": "Young family member.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Francis Dallow",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Steady developing disciple.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Fraser Underwood",
+      "age": 27,
+      "stage": "Temper",
+      "role": "Above-average branch talent.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Frederick Ames",
+      "age": 21,
+      "stage": "First",
+      "role": "Member of a tiny local school.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Freya Bellamy",
+      "age": 37,
+      "stage": "Breach",
+      "role": "Southern Road fighter with rising reputation.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Galen Thorpe",
+      "age": 85,
+      "stage": "Sixth",
+      "role": "Famous wandering master.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Gareth Vell",
+      "age": 45,
+      "stage": "Breach",
+      "role": "Senior relative of Malric; no automatic succession.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Garrett Moon",
+      "age": 45,
+      "stage": "Breach",
+      "role": "Late-developing experienced master.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Garrick Halloway",
+      "age": 73,
+      "stage": "Fifth",
+      "role": "Head of House Halloway.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Gavin Tress",
+      "age": 62,
+      "stage": "Fifth",
+      "role": "Coven master.",
+      "affiliation": "Black Reed Coven",
+      "sphere": null,
+      "source_table": 51,
+      "status": "working"
+    },
+    {
+      "name": "Gemma Moran",
+      "age": 34,
+      "stage": "Third",
+      "role": "Western escort master.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "George Latham",
+      "age": 64,
+      "stage": "Fifth",
+      "role": "Senior elder and teacher.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Gerald Thane",
+      "age": 67,
+      "stage": "Fifth",
+      "role": "Chief speaker and political organizer.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Gerard Oakes",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Technically strong, steady trajectory.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Gerran Ashwick",
+      "age": 45,
+      "stage": "Breach",
+      "role": "Senior family practitioner.",
+      "affiliation": "Ashwick Clan",
+      "sphere": null,
+      "source_table": 40,
+      "status": "working"
+    },
+    {
+      "name": "Gideon Ross",
+      "age": 37,
+      "stage": "Third",
+      "role": "Bounty fighter.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Giles Morton",
+      "age": 39,
+      "stage": "Breach",
+      "role": "More martial external representative.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Glen Emery",
+      "age": 18,
+      "stage": "First",
+      "role": "Junior household disciple.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Gordon Gage",
+      "age": 48,
+      "stage": "Breach",
+      "role": "Former free-company officer.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Grace Vance",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Temporary mentorship under Senna Vosk.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Graham Fairburn",
+      "age": 35,
+      "stage": "Third",
+      "role": "Mature, powerful Third often underrated by youth-focused commentary.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Greer Sutton",
+      "age": 18,
+      "stage": "First",
+      "role": "Student of Elsa Vardon.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Greta Morland",
+      "age": 35,
+      "stage": "Third",
+      "role": "Regional independent Hollow.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Hadrin Sol",
+      "age": 71,
+      "stage": "Fifth",
+      "role": "Sect Head.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Halric Sten",
+      "age": 97,
+      "stage": "Sixth",
+      "role": "Old independent master.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Halwen Marr",
+      "age": 82,
+      "stage": "Sixth",
+      "role": "Sect Head; major unarmed master.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Harlan Grey",
+      "age": 76,
+      "stage": "Fifth",
+      "role": "Coven leader.",
+      "affiliation": "Greywater Coven",
+      "sphere": null,
+      "source_table": 50,
+      "status": "working"
+    },
+    {
+      "name": "Harran Kastel",
+      "age": 65,
+      "stage": "Fifth",
+      "role": "Senior family elder.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Harriet Faber",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Ada March personal mentee.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Harris Locke",
+      "age": 19,
+      "stage": "First",
+      "role": "Average junior; future open.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Harrod Kest",
+      "age": 88,
+      "stage": "Sixth",
+      "role": "Most formidable senior stronghold lord.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Harvey Noll",
+      "age": 44,
+      "stage": "Breach",
+      "role": "Veteran route protector.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Hazel Lang",
+      "age": 28,
+      "stage": "Third",
+      "role": "Highly regarded young practitioner.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Heath Dacre",
+      "age": 20,
+      "stage": "First",
+      "role": "Strong fundamentals.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Hector Ashwick",
+      "age": 110,
+      "stage": "Sixth",
+      "role": "Ancient senior master.",
+      "affiliation": "Ashwick Clan",
+      "sphere": null,
+      "source_table": 40,
+      "status": "working"
+    },
+    {
+      "name": "Helena Corr",
+      "age": 86,
+      "stage": "Sixth",
+      "role": "Senior Corr and major Concord political figure.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Henry Moss",
+      "age": 70,
+      "stage": "Fifth",
+      "role": "Senior master and external representative.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Holden Fry",
+      "age": 33,
+      "stage": "Third",
+      "role": "Mature disciple and instructor.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Hollis Pate",
+      "age": 40,
+      "stage": "Breach",
+      "role": "Principal travelling representative.",
+      "affiliation": "Black Reed Coven",
+      "sphere": null,
+      "source_table": 51,
+      "status": "working"
+    },
+    {
+      "name": "Holly Nunn",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Fast progress and growing attention.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Howard Dunn",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Affiliated-family disciple.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Hugh Barrett",
+      "age": 38,
+      "stage": "Breach",
+      "role": "Outside-born household disciple and master.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Hugo Kent",
+      "age": 60,
+      "stage": "Fifth",
+      "role": "Senior escort and caravan-route master.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Iain Rey",
+      "age": 89,
+      "stage": "Sixth",
+      "role": "Clan Head.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Irene Fallow",
+      "age": 18,
+      "stage": "First",
+      "role": "Young Coven disciple.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Iris Keene",
+      "age": 28,
+      "stage": "Third",
+      "role": "Young independent duelist.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Isaac Bell",
+      "age": 41,
+      "stage": "Breach",
+      "role": "Internal teaching master.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Ivan Laird",
+      "age": 27,
+      "stage": "Temper",
+      "role": "Technically mature.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Ivy Pember",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Young unaffiliated martial artist.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "James Redfern",
+      "age": 50,
+      "stage": "Breach",
+      "role": "Senior instructor carrying much daily teaching.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Jamie Darnell",
+      "age": 20,
+      "stage": "Temper",
+      "role": "Roman Wood teaching circle.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Jane Keller",
+      "age": 28,
+      "stage": "Temper",
+      "role": "Escort-network practitioner.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Janet Redmarsh",
+      "age": 30,
+      "stage": "Third",
+      "role": "Younger family practitioner.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Jared Lunn",
+      "age": 18,
+      "stage": "First",
+      "role": "Gideon Ross bounty-work apprentice.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Jasper Hill",
+      "age": 27,
+      "stage": "Third",
+      "role": "Fast-developing challenge regular.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Jeren Falk",
+      "age": 96,
+      "stage": "Sixth",
+      "role": "Senior saber master.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Jerome Lake",
+      "age": 55,
+      "stage": "Fifth",
+      "role": "Head of another major following.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Joan Pruitt",
+      "age": 18,
+      "stage": "First",
+      "role": "Junior outsider.",
+      "affiliation": "Ashwick Clan",
+      "sphere": null,
+      "source_table": 40,
+      "status": "working"
+    },
+    {
+      "name": "Joel Harland",
+      "age": 26,
+      "stage": "Third",
+      "role": "Young practitioner drawing attention.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Jonas Keel",
+      "age": 33,
+      "stage": "Third",
+      "role": "Strong mature Third.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Jorin Quade",
+      "age": 49,
+      "stage": "Fifth",
+      "role": "Senior route fighter.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Joss Fenner",
+      "age": 46,
+      "stage": "Breach",
+      "role": "Reliable bounty and contract professional.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Joy Halden",
+      "age": 19,
+      "stage": "First",
+      "role": "Promising young outsider.",
+      "affiliation": "Kellbrook Sect",
+      "sphere": null,
+      "source_table": 41,
+      "status": "working"
+    },
+    {
+      "name": "Jude Ingram",
+      "age": 24,
+      "stage": "Third",
+      "role": "Exceptional retainer-line disciple.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Julian Beck",
+      "age": 58,
+      "stage": "Fifth",
+      "role": "Former institutional disciple.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "June Bexley",
+      "age": 16,
+      "stage": "First",
+      "role": "Clear early talent.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Kara Dune",
+      "age": 17,
+      "stage": "First",
+      "role": "Travelling with Moira Stone.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Keaton Ashford",
+      "age": 27,
+      "stage": "Third",
+      "role": "Highly regarded younger disciple.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Keira Tarn",
+      "age": 57,
+      "stage": "Fifth",
+      "role": "Senior master and instructor.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Keith Ashwick",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Younger family member.",
+      "affiliation": "Ashwick Clan",
+      "sphere": null,
+      "source_table": 40,
+      "status": "working"
+    },
+    {
+      "name": "Kellan Rannick",
+      "age": 46,
+      "stage": "Fifth",
+      "role": "Powerful branch-family master.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Kenneth Drew",
+      "age": 34,
+      "stage": "Breach",
+      "role": "Strong instructor.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Kessa Thorne",
+      "age": 67,
+      "stage": "Fifth",
+      "role": "Famous independent Hollow.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Kevin Hollis",
+      "age": 19,
+      "stage": "First",
+      "role": "Waymeet mentorship under Quentin Dale.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Kieran Foyle",
+      "age": 29,
+      "stage": "Third",
+      "role": "Ambitious challenge fighter.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Kirk Danner",
+      "age": 29,
+      "stage": "Temper",
+      "role": "Solid branch fighter.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Kit Rook",
+      "age": 18,
+      "stage": "First",
+      "role": "Head relative; currently ordinary.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Kurt Saye",
+      "age": 52,
+      "stage": "Fifth",
+      "role": "Senior teacher.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Kyle Browne",
+      "age": 19,
+      "stage": "First",
+      "role": "Free-company trainee.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Lance Brant",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Very good developing practitioner.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Landon Dover",
+      "age": 40,
+      "stage": "Breach",
+      "role": "Affiliated-household master.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Laura Cairn",
+      "age": 81,
+      "stage": "Sixth",
+      "role": "Strongest known Redmarsh-associated master; outside birth.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Laurence Tait",
+      "age": 54,
+      "stage": "Fifth",
+      "role": "Outside-born specialist.",
+      "affiliation": "Ashwick Clan",
+      "sphere": null,
+      "source_table": 40,
+      "status": "working"
+    },
+    {
+      "name": "Leah Goodwin",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Strong young talent.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Leander Burke",
+      "age": 59,
+      "stage": "Fifth",
+      "role": "Outside-born household master.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Lena Orr",
+      "age": 41,
+      "stage": "Breach",
+      "role": "Established field master.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Leon Pace",
+      "age": 42,
+      "stage": "Breach",
+      "role": "Contract fighter with merchant ties.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Lester Kersey",
+      "age": 39,
+      "stage": "Breach",
+      "role": "Former household disciple, now Road-aligned.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Levi Brook",
+      "age": 32,
+      "stage": "Third",
+      "role": "River-route wanderer.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Lewis Grant",
+      "age": 67,
+      "stage": "Fifth",
+      "role": "Challenge witness and local mediator.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Liam Huxley",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Free-company fighter under Bruno Webb’s company.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Lily Grant",
+      "age": 18,
+      "stage": "First",
+      "role": "Lewis Grant’s granddaughter and disciple.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Lionel Crestwood",
+      "age": 73,
+      "stage": "Fifth",
+      "role": "Independent practitioner with personal circle.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Lloyd Sykes",
+      "age": 18,
+      "stage": "First",
+      "role": "Young recruit.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Logan Farrell",
+      "age": 22,
+      "stage": "First",
+      "role": "Contract-circle apprentice under Leon Pace.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Lola Bright",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Promising young member.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Loren Harcourt",
+      "age": 21,
+      "stage": "Temper",
+      "role": "Felix Ward personal disciple.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Lorna Creed",
+      "age": 28,
+      "stage": "Third",
+      "role": "Steady developing Hollow.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Louise Carrow",
+      "age": 27,
+      "stage": "Temper",
+      "role": "Escort-network fighter.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Lucy Sorn",
+      "age": 18,
+      "stage": "First",
+      "role": "Relative of Sect Head; ordinary formal disciple.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Luke Carr",
+      "age": 38,
+      "stage": "Breach",
+      "role": "Regional duelist and instructor.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Luther Bain",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Reliable professional trajectory.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Lyle Benton",
+      "age": 35,
+      "stage": "Third",
+      "role": "Former minor-sect disciple.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Lysa Merrow",
+      "age": 36,
+      "stage": "Breach",
+      "role": "Young master with broad reputation.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Mabel Keen",
+      "age": 36,
+      "stage": "Third",
+      "role": "Travelling healer-fighter.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Maeve Rey",
+      "age": 27,
+      "stage": "Third",
+      "role": "Younger clan member.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Maisie Dacre",
+      "age": 20,
+      "stage": "First",
+      "role": "Ada March circle; related to Heath Dacre but outside Wrenfield.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Malcolm Vane",
+      "age": 46,
+      "stage": "Breach",
+      "role": "Independent operating largely through Fellmarch.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Malric Vell",
+      "age": 93,
+      "stage": "Sixth",
+      "role": "Master of the Grand Coven.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Marcus Dorn",
+      "age": 61,
+      "stage": "Fifth",
+      "role": "Major teacher and negotiator.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Marek Cole",
+      "age": 90,
+      "stage": "Sixth",
+      "role": "Veteran contract and bounty-circuit master.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Marion Greer",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Affiliated-family student.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Marnie Edge",
+      "age": 22,
+      "stage": "Temper",
+      "role": "Travelling student in Stefan Lowe / Roman Wood circle.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Martha Elwell",
+      "age": 29,
+      "stage": "Third",
+      "role": "Promising younger practitioner.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Martin Rey",
+      "age": 66,
+      "stage": "Fifth",
+      "role": "Senior family elder.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Marvin Case",
+      "age": 20,
+      "stage": "First",
+      "role": "Coven-raised junior.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Mason Verner",
+      "age": 18,
+      "stage": "First",
+      "role": "Young First under Jasper Hill.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Matilda Greaves",
+      "age": 79,
+      "stage": "Fifth",
+      "role": "Senior Sealkeeper; deepest living sealcraft practitioner in the House.",
+      "affiliation": "House Greaves",
+      "sphere": null,
+      "source_table": 58,
+      "status": "working"
+    },
+    {
+      "name": "Matthias Kerr",
+      "age": 87,
+      "stage": "Sixth",
+      "role": "Old senior master.",
+      "affiliation": "Kellbrook Sect",
+      "sphere": null,
+      "source_table": 41,
+      "status": "working"
+    },
+    {
+      "name": "Mavis Finch",
+      "age": 31,
+      "stage": "Third",
+      "role": "Travelling practitioner.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Max Wells",
+      "age": 21,
+      "stage": "First",
+      "role": "Later starter whose progress improved.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "May Cress",
+      "age": 19,
+      "stage": "First",
+      "role": "Coven-raised junior.",
+      "affiliation": "Greywater Coven",
+      "sphere": null,
+      "source_table": 50,
+      "status": "working"
+    },
+    {
+      "name": "Megan Lark",
+      "age": 19,
+      "stage": "First",
+      "role": "Travelling with Moira Stone.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Meriel Halloway",
+      "age": 101,
+      "stage": "Sixth",
+      "role": "Senior elder; deepest living Halloway master.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Merrick Quill",
+      "age": 63,
+      "stage": "Fifth",
+      "role": "Sect Head.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Micah Rowland",
+      "age": 30,
+      "stage": "Third",
+      "role": "Retainer-family martial artist.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Miles Kenton",
+      "age": 58,
+      "stage": "Fifth",
+      "role": "Remaining senior teacher.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Milo Halloway",
+      "age": 16,
+      "stage": "First",
+      "role": "Young family member; future still open.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Mina Jove",
+      "age": 18,
+      "stage": "First",
+      "role": "Ezra Baines circle.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Mira Solt",
+      "age": 27,
+      "stage": "Third",
+      "role": "Excellent young practitioner.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Miriam Rook",
+      "age": 35,
+      "stage": "Breach",
+      "role": "Head relative and formal disciple.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Mitchell Goff",
+      "age": 31,
+      "stage": "Third",
+      "role": "Outside-born household disciple.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Moira Stone",
+      "age": 40,
+      "stage": "Breach",
+      "role": "Strong eastern-Hearth wanderer.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Molly Green",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Above-average young practitioner.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Mona Rooke",
+      "age": 23,
+      "stage": "Temper",
+      "role": "Ezra Baines travelling instruction.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Morgan Heath",
+      "age": 38,
+      "stage": "Third",
+      "role": "Company fighter and instructor.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Morris Cade",
+      "age": 42,
+      "stage": "Breach",
+      "role": "Experienced practitioner.",
+      "affiliation": "Greywater Coven",
+      "sphere": null,
+      "source_table": 50,
+      "status": "working"
+    },
+    {
+      "name": "Murray Knox",
+      "age": 21,
+      "stage": "First",
+      "role": "Good junior.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Nadia Hillman",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Recent mentorship under Freya Bellamy.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Nall Reed",
+      "age": 68,
+      "stage": "Sixth",
+      "role": "Current leader; formidable apex practitioner.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Nancy Root",
+      "age": 30,
+      "stage": "Third",
+      "role": "Unrelated disciple with strong prospects.",
+      "affiliation": "Kellbrook Sect",
+      "sphere": null,
+      "source_table": 41,
+      "status": "working"
+    },
+    {
+      "name": "Nate Rush",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Solid developing disciple.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Nathan Bloom",
+      "age": 31,
+      "stage": "Third",
+      "role": "Strong river-circuit martial artist.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Ned Faris",
+      "age": 34,
+      "stage": "Third",
+      "role": "Retainer-family martial artist.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Nell Benton",
+      "age": 17,
+      "stage": "First",
+      "role": "Lyle Benton’s younger sister and student.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Neris Wynn",
+      "age": 24,
+      "stage": "Third",
+      "role": "Exceptional young talent.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Neville Mossman",
+      "age": 36,
+      "stage": "Third",
+      "role": "Experienced regional practitioner.",
+      "affiliation": "Black Reed Coven",
+      "sphere": null,
+      "source_table": 51,
+      "status": "working"
+    },
+    {
+      "name": "Nevin Orley",
+      "age": 28,
+      "stage": "Temper",
+      "role": "Independent teacher’s disciple.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Nico Dunley",
+      "age": 19,
+      "stage": "First",
+      "role": "Talented new-generation disciple.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Nina Fox",
+      "age": 29,
+      "stage": "Third",
+      "role": "Talked-about Toll’s Reach fighter.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Noah Redd",
+      "age": 18,
+      "stage": "First",
+      "role": "Escort trainee under Samuel Ford.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Noel Harker",
+      "age": 18,
+      "stage": "First",
+      "role": "Quietly promising junior.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Nolan Drake",
+      "age": 41,
+      "stage": "Breach",
+      "role": "Saber fighter on central and southern roads.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Nora Keats",
+      "age": 22,
+      "stage": "Temper",
+      "role": "Outside recruit.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Olan Mercer",
+      "age": 49,
+      "stage": "Breach",
+      "role": "Field instructor and talent recruiter.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Olive Norwood",
+      "age": 18,
+      "stage": "First",
+      "role": "Talented branch junior.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Opal King",
+      "age": 17,
+      "stage": "First",
+      "role": "Promising youth.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Orin Marsh",
+      "age": 30,
+      "stage": "Temper",
+      "role": "Ezra Baines travelling instruction.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Orren Clay",
+      "age": 34,
+      "stage": "Breach",
+      "role": "Strong younger master.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Orric Fen",
+      "age": 70,
+      "stage": "Fifth",
+      "role": "Sect Head.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Orson Sorn",
+      "age": 72,
+      "stage": "Fifth",
+      "role": "Sect Head.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Oscar Wills",
+      "age": 43,
+      "stage": "Breach",
+      "role": "Established master and instructor.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Ossian Thren",
+      "age": 108,
+      "stage": "Sixth",
+      "role": "Ancient independent mediator and traveller.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Otis Fuller",
+      "age": 19,
+      "stage": "First",
+      "role": "Joss Fenner work apprentice.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Owen Hart",
+      "age": 52,
+      "stage": "Fifth",
+      "role": "Travelling senior member.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Paige Rannick",
+      "age": 17,
+      "stage": "First",
+      "role": "Young blood-family member.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Patrick Naylor",
+      "age": 36,
+      "stage": "Third",
+      "role": "Strong mature practitioner.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Paula Gant",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Promising younger member.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Pavel Croft",
+      "age": 29,
+      "stage": "Third",
+      "role": "Known in some Road circles.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Pearl Dodd",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Coven member; Hollow by affiliation.",
+      "affiliation": "Greywater Coven",
+      "sphere": null,
+      "source_table": 50,
+      "status": "working"
+    },
+    {
+      "name": "Penny Kirk",
+      "age": 21,
+      "stage": "First",
+      "role": "Coven-raised junior.",
+      "affiliation": "Black Reed Coven",
+      "sphere": null,
+      "source_table": 51,
+      "status": "working"
+    },
+    {
+      "name": "Perry Sloan",
+      "age": 41,
+      "stage": "Third",
+      "role": "Mature travelling swordsman.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Peter Rowan",
+      "age": 46,
+      "stage": "Breach",
+      "role": "Travelling mediator and challenge witness.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Petra Wilde",
+      "age": 79,
+      "stage": "Fifth",
+      "role": "Reclusive senior wanderer.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Philip Stowe",
+      "age": 27,
+      "stage": "Third",
+      "role": "Good developing disciple.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Phoebe Oakley",
+      "age": 23,
+      "stage": "Third",
+      "role": "Genuine Road prodigy.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Piers Ashe",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Younger relative of Tobias; strong disciple.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Piper Lane",
+      "age": 16,
+      "stage": "First",
+      "role": "Stefan/Roman travelling circle.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Quentin Dale",
+      "age": 45,
+      "stage": "Breach",
+      "role": "Waymeet regular and formal challenger.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Quincy Dorr",
+      "age": 40,
+      "stage": "Third",
+      "role": "Head of the small school that trained Cody Marsham.",
+      "affiliation": null,
+      "sphere": "Independent local",
+      "source_table": 57,
+      "status": "working"
+    },
+    {
+      "name": "Quinn Baker",
+      "age": 22,
+      "stage": "Temper",
+      "role": "External disciple.",
+      "affiliation": "Ashwick Clan",
+      "sphere": null,
+      "source_table": 40,
+      "status": "working"
+    },
+    {
+      "name": "Rafe Larkin",
+      "age": 59,
+      "stage": "Fifth",
+      "role": "Former mercenary captain.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Ralph Dorne",
+      "age": 62,
+      "stage": "Fifth",
+      "role": "Sect Head.",
+      "affiliation": "Kellbrook Sect",
+      "sphere": null,
+      "source_table": 41,
+      "status": "working"
+    },
+    {
+      "name": "Raymond Gower",
+      "age": 29,
+      "stage": "Third",
+      "role": "Highly regarded younger practitioner.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Reece Kemp",
+      "age": 22,
+      "stage": "Temper",
+      "role": "Promising younger Hollow.",
+      "affiliation": "Greywater Coven",
+      "sphere": null,
+      "source_table": 50,
+      "status": "working"
+    },
+    {
+      "name": "Reuben Tate",
+      "age": 35,
+      "stage": "Third",
+      "role": "Experienced working practitioner.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Rhett Crowder",
+      "age": 36,
+      "stage": "Breach",
+      "role": "Road-facing challenge figure.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Robert Baird",
+      "age": 103,
+      "stage": "Sixth",
+      "role": "Survivor of Thistlewood before its decline.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Robin Mears",
+      "age": 20,
+      "stage": "First",
+      "role": "Promising beginner.",
+      "affiliation": "Rookwood Sect",
+      "sphere": null,
+      "source_table": 44,
+      "status": "working"
+    },
+    {
+      "name": "Roderick Ash",
+      "age": 96,
+      "stage": "Sixth",
+      "role": "Old independent summit figure.",
+      "affiliation": null,
+      "sphere": "Independent Hollow",
+      "source_table": 52,
+      "status": "working"
+    },
+    {
+      "name": "Roland Muir",
+      "age": 34,
+      "stage": "Third",
+      "role": "Dependable adult disciple.",
+      "affiliation": "Thistlewood Sect",
+      "sphere": null,
+      "source_table": 45,
+      "status": "working"
+    },
+    {
+      "name": "Roman Wood",
+      "age": 36,
+      "stage": "Third",
+      "role": "Travelling teacher with small circle.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Ronan Birch",
+      "age": 58,
+      "stage": "Fifth",
+      "role": "Expansionist senior figure.",
+      "affiliation": "Grand Coven",
+      "sphere": null,
+      "source_table": 49,
+      "status": "working"
+    },
+    {
+      "name": "Rory Tull",
+      "age": 16,
+      "stage": "First",
+      "role": "Retainer-family junior.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Roslyn Beale",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Technically strong developing practitioner.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Ross Denham",
+      "age": 31,
+      "stage": "Third",
+      "role": "Strong adult disciple.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Rowena Fitch",
+      "age": 53,
+      "stage": "Breach",
+      "role": "Watch captain; Groundbound.",
+      "affiliation": "House Greaves",
+      "sphere": null,
+      "source_table": 58,
+      "status": "working"
+    },
+    {
+      "name": "Rufus Crane",
+      "age": 111,
+      "stage": "Sixth",
+      "role": "Old hermit-like Road figure.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Rupert Snow",
+      "age": 39,
+      "stage": "Third",
+      "role": "Experienced mercenary, likely command path.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Ruth Glass",
+      "age": 44,
+      "stage": "Breach",
+      "role": "Regionally important unaffiliated master.",
+      "affiliation": null,
+      "sphere": "Independent Unsworn",
+      "source_table": 48,
+      "status": "working"
+    },
+    {
+      "name": "Sabine Kells",
+      "age": 36,
+      "stage": "Breach",
+      "role": "Younger eastern-circuit wanderer.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Sable Ashwick",
+      "age": 63,
+      "stage": "Fifth",
+      "role": "Clan Head.",
+      "affiliation": "Ashwick Clan",
+      "sphere": null,
+      "source_table": 40,
+      "status": "working"
+    },
+    {
+      "name": "Sally Dent",
+      "age": 22,
+      "stage": "First",
+      "role": "Student of Mabel Keen.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Samuel Ford",
+      "age": 39,
+      "stage": "Third",
+      "role": "Escort specialist.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Sarah Upton",
+      "age": 20,
+      "stage": "First",
+      "role": "Above-average junior.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Scott Lyle",
+      "age": 20,
+      "stage": "First",
+      "role": "Household trainee.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Selene Kastel",
+      "age": 79,
+      "stage": "Sixth",
+      "role": "Clan Head.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Senna Vosk",
+      "age": 39,
+      "stage": "Breach",
+      "role": "Famous independent who repeatedly refused institutional recruitment.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Sera Pell",
+      "age": 118,
+      "stage": "Sixth",
+      "role": "Very old senior elder and deep master.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Shane Pollard",
+      "age": 20,
+      "stage": "Third",
+      "role": "Anomaly; recently accepted for Orric personal instruction.",
+      "affiliation": "Brackwater Sect",
+      "sphere": null,
+      "source_table": 37,
+      "status": "working"
+    },
+    {
+      "name": "Silas Renn",
+      "age": 37,
+      "stage": "Breach",
+      "role": "Famous younger saber specialist.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Simeon Mays",
+      "age": 52,
+      "stage": "Breach",
+      "role": "Mature steady fighter.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Simon Hale",
+      "age": 82,
+      "stage": "Sixth",
+      "role": "Sect Head and senior mediator.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Skye Harper",
+      "age": 19,
+      "stage": "First",
+      "role": "Promising recruit.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Sophie Gable",
+      "age": 24,
+      "stage": "Temper",
+      "role": "Promising regional practitioner.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Soren Firth",
+      "age": 91,
+      "stage": "Sixth",
+      "role": "Old river master.",
+      "affiliation": "Nine Ferries Union",
+      "sphere": null,
+      "source_table": 39,
+      "status": "working"
+    },
+    {
+      "name": "Spencer Nolan",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Julian Beck personal student.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Stanley Reddick",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Coven disciple.",
+      "affiliation": "Black Reed Coven",
+      "sphere": null,
+      "source_table": 51,
+      "status": "working"
+    },
+    {
+      "name": "Stefan Lowe",
+      "age": 57,
+      "stage": "Fifth",
+      "role": "Wandering teacher.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Stella York",
+      "age": 20,
+      "stage": "Temper",
+      "role": "Prodigious developing disciple.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Stephen Hewitt",
+      "age": 43,
+      "stage": "Breach",
+      "role": "Senior internal master.",
+      "affiliation": "Hallowmere Sect",
+      "sphere": null,
+      "source_table": 46,
+      "status": "working"
+    },
+    {
+      "name": "Stuart Redmarsh",
+      "age": 59,
+      "stage": "Fifth",
+      "role": "Senior family master.",
+      "affiliation": "Redmarsh Clan",
+      "sphere": null,
+      "source_table": 47,
+      "status": "working"
+    },
+    {
+      "name": "Talen Reese",
+      "age": 31,
+      "stage": "Third",
+      "role": "Strong younger practitioner.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Talia Dorsey",
+      "age": 33,
+      "stage": "Fifth",
+      "role": "Extreme anomaly; Sera Pell personal disciple.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Talus Kastel",
+      "age": 32,
+      "stage": "Breach",
+      "role": "Major young family talent.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Tara Corr",
+      "age": 47,
+      "stage": "Breach",
+      "role": "Branch-family master.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Tavin Rannick",
+      "age": 35,
+      "stage": "Breach",
+      "role": "Younger family master with visible career.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Teren Halloway",
+      "age": 54,
+      "stage": "Fifth",
+      "role": "Senior instructor; rapier-side inheritance.",
+      "affiliation": "House Halloway",
+      "sphere": null,
+      "source_table": 26,
+      "status": "working"
+    },
+    {
+      "name": "Tessa Varr",
+      "age": 75,
+      "stage": "Fifth",
+      "role": "Senior teacher.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Theo Barr",
+      "age": 43,
+      "stage": "Breach",
+      "role": "Former company lieutenant.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 54,
+      "status": "working"
+    },
+    {
+      "name": "Thomas Calder",
+      "age": 48,
+      "stage": "Fifth",
+      "role": "Outside-born household master.",
+      "affiliation": "Stonewatch Clan",
+      "sphere": null,
+      "source_table": 42,
+      "status": "working"
+    },
+    {
+      "name": "Tobias Ashe",
+      "age": 64,
+      "stage": "Fifth",
+      "role": "Senior teacher and sword figure.",
+      "affiliation": "White Laurel Sect",
+      "sphere": null,
+      "source_table": 28,
+      "status": "working"
+    },
+    {
+      "name": "Tobin Corr",
+      "age": 29,
+      "stage": "Third",
+      "role": "Younger family practitioner.",
+      "affiliation": "House Corr",
+      "sphere": null,
+      "source_table": 27,
+      "status": "working"
+    },
+    {
+      "name": "Toby Field",
+      "age": 20,
+      "stage": "First",
+      "role": "Roman Wood circle.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Todd Phelps",
+      "age": 19,
+      "stage": "First",
+      "role": "Junior stronghold member.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Tomas Black",
+      "age": 69,
+      "stage": "Fifth",
+      "role": "Political convener.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Torran Chase",
+      "age": 58,
+      "stage": "Fifth",
+      "role": "Senior public-facing master.",
+      "affiliation": "Reedmark Sect",
+      "sphere": null,
+      "source_table": 36,
+      "status": "working"
+    },
+    {
+      "name": "Trevor Kendal",
+      "age": 28,
+      "stage": "Temper",
+      "role": "Rafe Larkin old mercenary circle.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Tristan Cobb",
+      "age": 27,
+      "stage": "Third",
+      "role": "Talented outside-born household disciple.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Troy Haines",
+      "age": 27,
+      "stage": "Temper",
+      "role": "Steady, experienced Temper.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Vera Morrow",
+      "age": 102,
+      "stage": "Sixth",
+      "role": "Elder wandering sword master.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 53,
+      "status": "working"
+    },
+    {
+      "name": "Victor Lorne",
+      "age": 73,
+      "stage": "Sixth",
+      "role": "Larkspur School senior master.",
+      "affiliation": "Larkspur School",
+      "sphere": null,
+      "source_table": 33,
+      "status": "working"
+    },
+    {
+      "name": "Vincent Greaves",
+      "age": 64,
+      "stage": "Fifth",
+      "role": "Head of House Greaves; accomplished Sealkeeper, not Groundbound.",
+      "affiliation": "House Greaves",
+      "sphere": null,
+      "source_table": 58,
+      "status": "working"
+    },
+    {
+      "name": "Violet Ellis",
+      "age": 26,
+      "stage": "Third",
+      "role": "Highly promising recruit.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Voss Rannick",
+      "age": 84,
+      "stage": "Sixth",
+      "role": "Clan Head and senior Undertow figure.",
+      "affiliation": "Rannick Clan",
+      "sphere": null,
+      "source_table": 34,
+      "status": "working"
+    },
+    {
+      "name": "Wade Parker",
+      "age": 29,
+      "stage": "Third",
+      "role": "Above-average field practitioner.",
+      "affiliation": "Amberlight Sect",
+      "sphere": null,
+      "source_table": 30,
+      "status": "working"
+    },
+    {
+      "name": "Walter Peake",
+      "age": 25,
+      "stage": "Temper",
+      "role": "Professional-track disciple.",
+      "affiliation": "Kastel Clan",
+      "sphere": null,
+      "source_table": 35,
+      "status": "working"
+    },
+    {
+      "name": "Warren Clift",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Good steady disciple.",
+      "affiliation": "Farlight Sect",
+      "sphere": null,
+      "source_table": 43,
+      "status": "working"
+    },
+    {
+      "name": "Wendy Grove",
+      "age": 26,
+      "stage": "Temper",
+      "role": "Young retainer drawing attention.",
+      "affiliation": "Blackwood League",
+      "sphere": null,
+      "source_table": 38,
+      "status": "working"
+    },
+    {
+      "name": "Wes Glover",
+      "age": 30,
+      "stage": "Third",
+      "role": "Solid Road professional.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 55,
+      "status": "working"
+    },
+    {
+      "name": "Wesley Judd",
+      "age": 19,
+      "stage": "Temper",
+      "role": "Young prodigy.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    },
+    {
+      "name": "Willa Archer",
+      "age": 21,
+      "stage": "First",
+      "role": "Originally trained by obscure local teacher; occasional Ezra Baines instruction.",
+      "affiliation": null,
+      "sphere": "Long Road",
+      "source_table": 56,
+      "status": "working"
+    },
+    {
+      "name": "Winston Hare",
+      "age": 30,
+      "stage": "Third",
+      "role": "Capable adult practitioner.",
+      "affiliation": "Greywater Coven",
+      "sphere": null,
+      "source_table": 50,
+      "status": "working"
+    },
+    {
+      "name": "Wyatt Porter",
+      "age": 32,
+      "stage": "Third",
+      "role": "Steady developing practitioner.",
+      "affiliation": "Wrenfield Sect",
+      "sphere": null,
+      "source_table": 31,
+      "status": "working"
+    },
+    {
+      "name": "Zach Hurst",
+      "age": 17,
+      "stage": "First",
+      "role": "Early talent, locally known.",
+      "affiliation": "Ragged Order",
+      "sphere": null,
+      "source_table": 32,
+      "status": "working"
+    },
+    {
+      "name": "Zane Miller",
+      "age": 20,
+      "stage": "First",
+      "role": "Good student without unusual hype.",
+      "affiliation": "Grey Bell Sect",
+      "sphere": null,
+      "source_table": 29,
+      "status": "working"
+    }
+  ],
+  "demography": {
+    "hearthlands_midpoint": 3500000,
+    "age_distribution_assumption": {
+      "0_4": 0.12,
+      "5_12": 0.18,
+      "13_17": 0.1,
+      "18_39": 0.31,
+      "40_59": 0.2,
+      "60_plus": 0.09
+    },
+    "hearth_stage_counts": {
+      "First": 330000,
+      "Temper": 122500,
+      "Third": 24750,
+      "Breach": 2800,
+      "Fifth": 300,
+      "Sixth": 38
+    },
+    "status": "working"
+  }
+}

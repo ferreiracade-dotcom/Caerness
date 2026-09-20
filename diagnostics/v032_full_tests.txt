@@ -1,0 +1,43 @@
+Canon test passed: indexed 587 chunks and retrieved relevant evidence.
+Decision test passed: canon-grounded choices persist, interact, and dormant actors continue acting.
+Smoke test passed: dormant simulation is not frozen.
+Interaction test passed: agreements, counters, conflict, wake-up, and dormant-origin interactions all work.
+Information test passed: privacy, rumours, propagation, provenance, player knowledge, scene guardrails, and dormant information all work.
+Action test passed: freeform actions, explicit player agency, travel/time, and camera-not-protagonist simulation all work.
+model_gateway_test: PASS
+v07_test: PASS
+v08_test: PASS
+v09_test: PASS
+v10_test: PASS
+v11_test: PASS
+v12_test: PASS
+v13_test: PASS
+v14_test: PASS
+v15_test: PASS
+audit_v01_v15_test: PASS
+v16_test: PASS
+v17_test: PASS
+v18_test: PASS
+v19_test: PASS
+v19_edge_test: PASS
+v0.20 health/aging regression PASS
+v0.20.1 health edge-case audit PASS
+v0.21 religion/cultural institutions regression PASS
+v0.21 adversarial religion/cultural edge-case audit PASS
+v0.22 ecology/seasons/travel regression PASS
+v0.22 adversarial ecology/travel edge-case audit PASS
+v0.23 politics/macro-history regression PASS
+v0.23 adversarial politics edge audit PASS
+v0.24 education/transmission regression PASS
+v0.24 adversarial education/transmission edge audit PASS
+v0.25 long-run 20/40/120-year stress regression PASS
+v0.25 adversarial long-run/camera/crystallization audit PASS
+v0.26.1 integration/bootstrap/save-safety regression PASS
+v0.26.1 adversarial ownership/cadence/seeded-scale audit PASS
+v0.27.1 current-canon bridge/coverage/two-way-resolution regression PASS
+v0.28.0 autonomous domain-actions regression PASS
+v0.29.0 commercial logistics conservation regression PASS
+v0.30.0 current-canon aggregate economic substrate regression PASS
+v0.31.0 prose-geography completion regression PASS
+v0.32.0 causal cultivation/Realization regression PASS
+All Caerness Engine v0.32.0 tests passed.

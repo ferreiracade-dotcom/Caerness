@@ -1,0 +1,30 @@
+{
+  "before": {
+    "day": 3830,
+    "schema": 88,
+    "events": 5713,
+    "interactions": 2752,
+    "pressures": 0
+  },
+  "after_migration": {
+    "day": 3830,
+    "schema": 89,
+    "events": 5713,
+    "interactions": 2752,
+    "pressures": 0,
+    "required_roles": 0,
+    "capability_requirements": 0,
+    "orgneed_pressures": 0
+  },
+  "after_60": {
+    "day": 3890,
+    "schema": 89,
+    "events": 5849,
+    "interactions": 2836,
+    "pressures": 0,
+    "orgneed_pressures": 0,
+    "orgneed_searches": 0,
+    "integrity": "ok",
+    "fk": 0
+  }
+}

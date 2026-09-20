@@ -1,0 +1,10 @@
+{
+  "scenario": "witness",
+  "rng_seed": 9205,
+  "focus_actor_id": 568,
+  "focus_actor": "[SIM] Mara Elwick",
+  "latent_entity_id": 4,
+  "non_ledger": true,
+  "campaign_only": true,
+  "starting_location": "Eldenfell"
+}

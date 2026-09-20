@@ -1,0 +1,120 @@
+{
+  "activation_hollow": {
+    "grand_coven_heirs": 1,
+    "grand_coven_power_brokers": 2,
+    "grand_coven_succession_states": 1,
+    "hollow_profiles": 36
+  },
+  "active_enterprises": 23,
+  "active_households": 8,
+  "carrion_reset_events": 0,
+  "day": 365,
+  "decisions": 1250,
+  "domain_decisions": 215,
+  "engine_version": "0.38.0",
+  "events": 192,
+  "extraction_events": 0,
+  "gate_failure_count": 3,
+  "gate_failures": [
+    "26_addiction_psych",
+    "42_exploitation_medicine",
+    "47_war_logistics"
+  ],
+  "grand_coven_heirs": [
+    {
+      "actor_id": 364,
+      "authority_support": 88.0,
+      "claim_kind": "recognized_heir",
+      "created_day": 0,
+      "current_choice": 1,
+      "formal_status": "recognized",
+      "id": 1,
+      "institution_actor_id": 26,
+      "mantle_eligible": 1,
+      "martial_credibility": 82.0,
+      "metadata_json": "{\"authority\": \"WORLD_BIBLE\", \"basis\": \"Foremost recognized heir, most important direct disciple, openly favored and entrusted with senior authority.\", \"choice_is_not_sealing\": true, \"not_yet_ruler\": true}",
+      "name": "Dravik",
+      "political_support": 82.0,
+      "teaching_access": 95.0,
+      "updated_day": 0
+    }
+  ],
+  "grand_coven_power_brokers": [
+    {
+      "actor_id": 365,
+      "created_day": 0,
+      "id": 1,
+      "institution_actor_id": 26,
+      "institutional_weight": 88.0,
+      "metadata_json": "{\"authority\": \"WORLD_BIBLE\", \"basis\": \"Deep Court senior, old teacher and inheritance figure. Deep Court office is not Mantle-heir status.\"}",
+      "name": "Bastian Crow",
+      "role_kind": "deep_court_elder",
+      "stance": "uncommitted",
+      "supported_heir_actor_id": null,
+      "supported_name": null,
+      "updated_day": 0
+    },
+    {
+      "actor_id": 366,
+      "created_day": 0,
+      "id": 2,
+      "institution_actor_id": 26,
+      "institutional_weight": 80.0,
+      "metadata_json": "{\"authority\": \"WORLD_BIBLE\", \"basis\": \"Expansionist senior Fifth and major Coven power; not established as a Mantle heir or Deep Court elder.\"}",
+      "name": "Ronan Birch",
+      "role_kind": "senior_power",
+      "stance": "uncommitted",
+      "supported_heir_actor_id": null,
+      "supported_name": null,
+      "updated_day": 0
+    }
+  ],
+  "grand_coven_state": {
+    "foremost_heir_actor_id": 364,
+    "heir_name": "Dravik",
+    "inheritor_actor_id": 126,
+    "inheritor_name": "Malric Vell",
+    "institution_actor_id": 26,
+    "last_review_day": 360,
+    "mantle_sealed": 0,
+    "metadata_json": "{\"authority\": \"WORLD_BIBLE\", \"carrion_is_not_succession\": true, \"deep_court_elder_is_not_heir\": true, \"inheritor_number\": 12, \"law\": \"Law of the Current\", \"living_abdication_forbidden\": true, \"opening_state\": \"Malric is the living Twelfth Inheritor; Dravik is foremost recognized heir and current favored choice, but the Mantle is not Sealed.\"}",
+    "next_review_day": 450,
+    "sealed_day": null,
+    "succession_status": "open",
+    "transfer_available": 1
+  },
+  "hollow_coverage": {
+    "blocked_count": 0,
+    "blocked_reason": null,
+    "domain_key": "14_hollow_succession",
+    "eligible_count": 1,
+    "label": "Hollow practice and Grand Coven succession",
+    "mechanism_status": "RUNNABLE",
+    "populated_count": 37
+  },
+  "hollow_summary": {
+    "deep_court_power_brokers": 1,
+    "extraction_events": 0,
+    "heirs": 1,
+    "hollow_profiles": 36,
+    "mantle_events": 0,
+    "personal_extractors": 9,
+    "succession_states": 1
+  },
+  "imported": {
+    "claims": 12,
+    "cohorts": 14,
+    "households": 8,
+    "institutions": 98,
+    "latent_scopes": 54,
+    "persons": 464,
+    "places": 133,
+    "processes": 4,
+    "relationships": 78,
+    "routes": 11,
+    "source_namespace": "caerness_seed_v1_1"
+  },
+  "mantle_events": 0,
+  "named_characters": 464,
+  "schema_version": 38
+}

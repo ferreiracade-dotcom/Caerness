@@ -1,0 +1,94 @@
+{
+  "actor": "[SIM] Ansel Rooke",
+  "basis": "Established Dunmoor retainer; Temper is the more ordinary mature-professional outer level.",
+  "breakthrough_history": [],
+  "final_age": 41,
+  "final_stage": "Temper",
+  "opening_age": 31,
+  "opening_stage": "Temper",
+  "realization_aptitude": 1.355607,
+  "scenario": "ansel",
+  "snapshots": [
+    {
+      "age": 32,
+      "realization": 45.65,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 56.82,
+      "year": 1
+    },
+    {
+      "age": 33,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 58.47,
+      "year": 2
+    },
+    {
+      "age": 34,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 60.13,
+      "year": 3
+    },
+    {
+      "age": 35,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 61.78,
+      "year": 4
+    },
+    {
+      "age": 36,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 63.44,
+      "year": 5
+    },
+    {
+      "age": 37,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 65.09,
+      "year": 6
+    },
+    {
+      "age": 38,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 66.75,
+      "year": 7
+    },
+    {
+      "age": 39,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 68.4,
+      "year": 8
+    },
+    {
+      "age": 40,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 70.06,
+      "year": 9
+    },
+    {
+      "age": 41,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 71.71,
+      "year": 10
+    }
+  ],
+  "vessel_aptitude": 0.546502
+}

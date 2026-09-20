@@ -1,0 +1,10 @@
+{
+  "scenario": "underworld",
+  "rng_seed": 9101,
+  "assumptions": [
+    "Reckoning membership is source-explicit but missing from executable membership table; wired for scenario.",
+    "Opening exact location is unresolved; Toll\u2019s Reach chosen only for this alternate-history experiment."
+  ],
+  "focus_actor_id": 136,
+  "focus_actor": "Seth Carrick"
+}

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#151310">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/style.css">
+  <title>Caerness</title>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand">CAERNESS</div>
+      <div id="worldline" class="worldline">Loading…</div>
+    </div>
+    <button id="interrupt" class="ghost hidden" type="button">Interrupt</button>
+  </header>
+
+  <main>
+    <section id="scene" class="panel active">
+      <div id="attention"></div>
+      <div id="transcript" class="transcript"></div>
+      <div id="emptyScene" class="empty hidden">No campaign scene yet.</div>
+    </section>
+
+    <section id="matters" class="panel">
+      <h2>Matters</h2>
+      <p class="muted">Commitments and intentions your character would naturally remember.</p>
+      <div id="mattersBody"></div>
+    </section>
+
+    <section id="world" class="panel">
+      <h2>World</h2>
+      <div class="subtabs">
+        <button data-worldtab="people" class="active">People</button>
+        <button data-worldtab="places">Places</button>
+        <button data-worldtab="claims">Knowledge</button>
+      </div>
+      <div id="worldBody"></div>
+    </section>
+
+
+    <section id="ledger" class="panel">
+      <h2>Ledger</h2>
+      <p class="muted">Campaign setup, your character's persistent condition, and save diagnostics.</p>
+      <div id="setupBody"></div>
+      <div id="ledgerBody"></div>
+    </section>
+
+    <section id="you" class="panel">
+      <h2>You</h2>
+      <div id="youBody"></div>
+      <div class="settings-card">
+        <h3>Runtime</h3>
+        <div id="runtimeBody"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="referral" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="eyebrow">Higher-quality model recommended</div>
+      <h2 id="referralTitle">This section is unusually demanding.</h2>
+      <div id="referralScores" class="scoregrid"></div>
+      <ul id="referralReasons"></ul>
+      <div class="modal-actions">
+        <button id="copyChatGPT">Copy ChatGPT packet</button>
+        <button id="copyClaude">Copy Claude packet</button>
+        <button id="importExternal" class="secondary">Import AI response from clipboard</button>
+        <button id="runLocalAnyway" class="secondary">Run locally anyway</button>
+        <button id="closeReferral" class="ghost">Leave unresolved</button>
+      </div>
+      <p class="muted small">The world state already resolved only where safe. External narration or reasoning cannot silently rewrite it.</p>
+    </div>
+  </div>
+
+  <form id="composer" class="composer">
+    <textarea id="input" rows="1" aria-label="Player action"></textarea>
+    <button id="send" type="submit" aria-label="Send">↑</button>
+  </form>
+
+  <nav class="bottomnav">
+    <button data-panel="scene" class="active">Scene</button>
+    <button data-panel="matters">Matters</button>
+    <button data-panel="world">World</button>
+    <button data-panel="ledger">Ledger</button>
+    <button data-panel="you">You</button>
+  </nav>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "scenario": "dunmoor",
+  "rng_seed": 9204,
+  "focus_actor_id": 568,
+  "focus_actor": "[SIM] Ansel Rooke",
+  "latent_entity_id": 4,
+  "non_ledger": true,
+  "campaign_only": true,
+  "starting_location": "Northwatch"
+}

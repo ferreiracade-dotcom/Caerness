@@ -1,0 +1,122 @@
+{
+  "actor": "[SIM] Sella Marrin",
+  "basis": "Established Long Road professional in the Churn; Temper is the neutral opening state.",
+  "breakthrough_history": [
+    {
+      "after": "Temper",
+      "before": "Temper",
+      "day": 1275,
+      "kind": "breakthrough_attempt",
+      "metadata": {
+        "ordinary_realization_ratio": 1.1818181818181819,
+        "probability_authority": "STRUCTURAL_READINESS_NOT_LOTTERY",
+        "rare_realization_required": false,
+        "success_probability": 1.0,
+        "transition_mode": "vessel_maturation",
+        "vessel_readiness_ratio": 1.0012970678003188
+      }
+    },
+    {
+      "after": "Third",
+      "before": "Temper",
+      "day": 1275,
+      "kind": "breakthrough_success",
+      "metadata": {
+        "demographic_pressure": null,
+        "historical_event": false,
+        "rare_realization_required": false,
+        "stage_bound_anchors_closed": 0,
+        "transition_mode": "vessel_maturation"
+      }
+    }
+  ],
+  "final_age": 34,
+  "final_stage": "Third",
+  "opening_age": 24,
+  "opening_stage": "Temper",
+  "realization_aptitude": 0.844293,
+  "scenario": "sella",
+  "snapshots": [
+    {
+      "age": 25,
+      "realization": 42.96,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 65.25,
+      "year": 1
+    },
+    {
+      "age": 26,
+      "realization": 50.09,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 75.17,
+      "year": 2
+    },
+    {
+      "age": 27,
+      "realization": 52.0,
+      "stage": "Temper",
+      "teacher_support": 20.0,
+      "vessel": 85.09,
+      "year": 3
+    },
+    {
+      "age": 28,
+      "realization": 25.67,
+      "stage": "Third",
+      "teacher_support": 20.0,
+      "vessel": 32.63,
+      "year": 4
+    },
+    {
+      "age": 29,
+      "realization": 33.98,
+      "stage": "Third",
+      "teacher_support": 20.0,
+      "vessel": 42.44,
+      "year": 5
+    },
+    {
+      "age": 30,
+      "realization": 42.28,
+      "stage": "Third",
+      "teacher_support": 20.0,
+      "vessel": 52.24,
+      "year": 6
+    },
+    {
+      "age": 31,
+      "realization": 51.27,
+      "stage": "Third",
+      "teacher_support": 20.0,
+      "vessel": 62.85,
+      "year": 7
+    },
+    {
+      "age": 32,
+      "realization": 59.69,
+      "stage": "Third",
+      "teacher_support": 20.0,
+      "vessel": 72.79,
+      "year": 8
+    },
+    {
+      "age": 33,
+      "realization": 65.0,
+      "stage": "Third",
+      "teacher_support": 20.0,
+      "vessel": 81.65,
+      "year": 9
+    },
+    {
+      "age": 34,
+      "realization": 65.0,
+      "stage": "Third",
+      "teacher_support": 20.0,
+      "vessel": 91.46,
+      "year": 10
+    }
+  ],
+  "vessel_aptitude": 0.834338
+}

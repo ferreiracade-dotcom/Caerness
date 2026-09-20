@@ -1,0 +1,8 @@
+{
+  "calls": 887,
+  "old_batched_scan_seconds": 2.0256589199998416,
+  "reverse_index_seconds": 1.5253641050003353,
+  "speedup": 1.3279838652027258,
+  "mismatches": 0,
+  "active_characters": 513
+}

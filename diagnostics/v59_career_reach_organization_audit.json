@@ -1,0 +1,1678 @@
+{
+  "engine_version": "0.59.0",
+  "schema_version": 50,
+  "principles": {
+    "standing": "coarse durable professional/social standing; not a mandatory job ladder",
+    "responsibility": "branching appointments/specializations can open independently of standing",
+    "reach": "capability/reputation/resources widen possible work without forcing title change",
+    "underworld_form": "gang, Mafia-style family, criminal dynasty, syndicate, criminal enterprise, network, crew are parallel forms; type is not a power rank and never auto-changes from scale alone",
+    "underworld_membership_flow": "headcount is a stock emerging from recruitment, desistance/defection/custody/death/relocation and movement between peripheral, active and core tiers; no target final size or small-gang growth ceiling",
+    "underworld_scale": "Gang manpower is resolved from operational footprint when unspecified; explicit headcounts override. Cale is a ward-gang-scale case, not a universal small-gang template."
+  },
+  "scenarios": {
+    "underworld": {
+      "opening_subtype": "boss of an independent Aldergate ward gang and cartage-yard operator",
+      "ending_subtype": "boss of an independent Aldergate ward gang and cartage-yard operator",
+      "opening_stage": null,
+      "ending_stage": null,
+      "opening_careers": [],
+      "ending_careers": [],
+      "career_events": [],
+      "reach_events": [],
+      "opening_organization": {
+        "organization_type": "gang",
+        "name": "[SIM] Cale Brann gang",
+        "member_count_estimate": 37.0,
+        "command_depth": 2,
+        "territorial_presence": 22.0,
+        "racket_breadth": 24.0,
+        "front_depth": 28.0,
+        "corrupt_access": 5.0,
+        "reputation_deterrence": 18.0,
+        "violence_capacity": 28.0,
+        "cohesion": 62.0,
+        "membership_stability": 52.0,
+        "succession_depth": 5.0,
+        "status": "active"
+      },
+      "ending_organization": {
+        "organization_type": "gang",
+        "name": "[SIM] Cale Brann gang",
+        "member_count_estimate": 33.0,
+        "command_depth": 2,
+        "territorial_presence": 25.0,
+        "racket_breadth": 30.178875031157368,
+        "front_depth": 30.799999999999997,
+        "corrupt_access": 5.0,
+        "reputation_deterrence": 21.050000000000004,
+        "violence_capacity": 30.099999999999998,
+        "cohesion": 61.499999999999986,
+        "membership_stability": 52.85,
+        "succession_depth": 5.0,
+        "status": "active"
+      },
+      "organization_events": [
+        {
+          "day": 364,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "1 people entered the gang orbit; 6 left or were lost; 1 associates became active members and 1 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 364,
+          "event_type": "role_underworld_front",
+          "title": "Legitimate front handled gang business",
+          "summary": "[STRUCTURAL SIM] Aldergate ward cartage yard handled ordinary customers while also serving as a meeting, storage and payment point for the gang. Routine collections and yard business were increasingly handled by trusted hands beneath the boss.",
+          "severity": 2
+        },
+        {
+          "day": 638,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "2 people entered the gang orbit; 7 left or were lost; 2 associates became active members and 1 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 638,
+          "event_type": "role_underworld_conflict",
+          "title": "Gang conflict",
+          "summary": "A collection/territory dispute became a real street fight around the gang network. The fight broke without a clean territorial winner, but both groups paid for it. A lieutenant or trusted hand coordinated part of the response without the boss personally directing every movement.",
+          "severity": 3
+        },
+        {
+          "day": 729,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "0 people entered the gang orbit; 2 left or were lost; 1 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 729,
+          "event_type": "role_underworld_front",
+          "title": "Legitimate front handled gang business",
+          "summary": "[STRUCTURAL SIM] Aldergate ward cartage yard handled ordinary customers while also serving as a meeting, storage and payment point for the gang. Routine collections and yard business were increasingly handled by trusted hands beneath the boss.",
+          "severity": 2
+        },
+        {
+          "day": 1368,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "9 people entered the gang orbit; 12 left or were lost; 1 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 1368,
+          "event_type": "role_underworld_conflict",
+          "title": "Gang conflict",
+          "summary": "A collection/territory dispute became a real street fight around the gang network. The fight broke without a clean territorial winner, but both groups paid for it. A lieutenant or trusted hand coordinated part of the response without the boss personally directing every movement.",
+          "severity": 3
+        },
+        {
+          "day": 1642,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "1 people entered the gang orbit; 4 left or were lost; 2 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 1642,
+          "event_type": "role_underworld_racket_expansion",
+          "title": "Gang added another racket",
+          "summary": "The gang began taking a durable share of unlicensed betting alongside its existing collections and front business. This diversified the gang; it did not transform it into a different kind of criminal organization.",
+          "severity": 3
+        },
+        {
+          "day": 1824,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "2 people entered the gang orbit; 2 left or were lost; 1 associates became active members and 1 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 1824,
+          "event_type": "role_underworld_collection",
+          "title": "Gang protection collection",
+          "summary": "Subordinate collectors handled several protection payments while the gang boss reconciled shares, disputes and enforcement decisions.",
+          "severity": 2
+        },
+        {
+          "day": 1916,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "0 people entered the gang orbit; 1 left or were lost; 0 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 1916,
+          "event_type": "role_underworld_conflict",
+          "title": "Gang conflict",
+          "summary": "A collection/territory dispute became a real street fight around the gang network. The fight broke without a clean territorial winner, but both groups paid for it. A lieutenant or trusted hand coordinated part of the response without the boss personally directing every movement.",
+          "severity": 3
+        },
+        {
+          "day": 2098,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "3 people entered the gang orbit; 4 left or were lost; 1 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 2098,
+          "event_type": "role_underworld_hit_ordered",
+          "title": "Targeted retaliation ordered",
+          "summary": "The gang boss authorized a killing against a rival crew leader after repeated local conflict. The order is now a pending causal fact and must later resolve.",
+          "severity": 4
+        },
+        {
+          "day": 2372,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "3 people entered the gang orbit; 2 left or were lost; 2 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 2372,
+          "event_type": "role_underworld_hit_failed",
+          "title": "Ordered killing failed",
+          "summary": "The attempt on the rival crew leader failed. The target survived and now has concrete reason to expect further violence.",
+          "severity": 4
+        },
+        {
+          "day": 2463,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "1 people entered the gang orbit; 1 left or were lost; 0 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 2463,
+          "event_type": "role_underworld_front",
+          "title": "Legitimate front handled gang business",
+          "summary": "[STRUCTURAL SIM] Aldergate ward cartage yard handled ordinary customers while also serving as a meeting, storage and payment point for the gang. Routine collections and yard business were increasingly handled by trusted hands beneath the boss.",
+          "severity": 2
+        },
+        {
+          "day": 2646,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "2 people entered the gang orbit; 0 left or were lost; 1 associates became active members and 1 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 2646,
+          "event_type": "role_underworld_collection",
+          "title": "Gang protection collection",
+          "summary": "Subordinate collectors handled several protection payments while the gang boss reconciled shares, disputes and enforcement decisions.",
+          "severity": 2
+        },
+        {
+          "day": 2919,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "0 people entered the gang orbit; 1 left or were lost; 3 associates became active members and 3 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 2919,
+          "event_type": "role_underworld_collection",
+          "title": "Gang protection collection",
+          "summary": "Subordinate collectors handled several protection payments while the gang boss reconciled shares, disputes and enforcement decisions.",
+          "severity": 2
+        },
+        {
+          "day": 3011,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "0 people entered the gang orbit; 2 left or were lost; 0 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 3011,
+          "event_type": "role_underworld_front",
+          "title": "Legitimate front handled gang business",
+          "summary": "[STRUCTURAL SIM] Aldergate ward cartage yard handled ordinary customers while also serving as a meeting, storage and payment point for the gang. Routine collections and yard business were increasingly handled by trusted hands beneath the boss.",
+          "severity": 2
+        },
+        {
+          "day": 3193,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "3 people entered the gang orbit; 4 left or were lost; 0 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 3193,
+          "event_type": "role_underworld_conflict",
+          "title": "Gang conflict",
+          "summary": "A collection/territory dispute became a real street fight around the gang network. The gang held the collection point and came away with the stronger local position. A lieutenant or trusted hand coordinated part of the response without the boss personally directing every movement.",
+          "severity": 3
+        },
+        {
+          "day": 3284,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "1 people entered the gang orbit; 0 left or were lost; 1 associates became active members and 0 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 3284,
+          "event_type": "role_underworld_conflict",
+          "title": "Gang conflict",
+          "summary": "A collection/territory dispute became a real street fight around the gang network. The gang held the collection point and came away with the stronger local position. A lieutenant or trusted hand coordinated part of the response without the boss personally directing every movement.",
+          "severity": 3
+        },
+        {
+          "day": 3376,
+          "event_type": "underworld_membership_turnover",
+          "title": "Gang membership changed",
+          "summary": "3 people entered the gang orbit; 0 left or were lost; 0 associates became active members and 1 active members entered the hard core.",
+          "severity": 1
+        },
+        {
+          "day": 3376,
+          "event_type": "role_underworld_conflict",
+          "title": "Gang conflict",
+          "summary": "A collection/territory dispute became a real street fight around the gang network. The fight broke without a clean territorial winner, but both groups paid for it. A lieutenant or trusted hand coordinated part of the response without the boss personally directing every movement.",
+          "severity": 3
+        }
+      ],
+      "tracking_candidate": {
+        "id": 1,
+        "candidate_kind": "criminal organization",
+        "location_id": 20,
+        "enterprise_id": 24,
+        "founder_actor_id": 568,
+        "proposed_name": null,
+        "significance_score": 68.84236386506136,
+        "resources_json": "{\"candidate_semantics\": \"tracking_preexisting_organization\", \"capital\": 17.0, \"cash\": 219.95457599773454, \"command_depth\": 2, \"enterprise_id\": 24, \"front_depth\": 30.799999999999997, \"location_id\": 20, \"member_count_estimate\": 33.0, \"organization_id\": 1, \"organization_type\": \"gang\", \"preexisting_organization\": true, \"racket_breadth\": 30.178875031157368, \"reputation_deterrence\": 21.050000000000004, \"territorial_presence\": 25.0}",
+        "participants_json": "[568]",
+        "evidence_json": "[{\"evidence_id\": 1, \"kind\": \"protection_collection\", \"strength\": 36.0, \"visibility\": \"hidden\"}, {\"evidence_id\": 2, \"kind\": \"stolen_goods_handling\", \"strength\": 31.0, \"visibility\": \"hidden\"}, {\"evidence_id\": 41, \"kind\": \"street_violence\", \"strength\": 42.034365609764585, \"visibility\": \"hidden\"}, {\"evidence_id\": 95, \"kind\": \"street_violence\", \"strength\": 47.7606041886072, \"visibility\": \"hidden\"}, {\"evidence_id\": 117, \"kind\": \"unlicensed gambling/bookmaking\", \"strength\": 40.164738837258625, \"visibility\": \"hidden\"}, {\"evidence_id\": 128, \"kind\": \"protection_collection\", \"strength\": 30.781975669126385, \"visibility\": \"hidden\"}, {\"evidence_id\": 139, \"kind\": \"street_violence\", \"strength\": 59.70523431439866, \"visibility\": \"local\"}, {\"evidence_id\": 150, \"kind\": \"targeted_violence\", \"strength\": 58.0, \"visibility\": \"hidden\"}, {\"evidence_id\": 191, \"kind\": \"protection_collection\", \"strength\": 29.29596212269082, \"visibility\": \"hidden\"}, {\"evidence_id\": 207, \"kind\": \"protection_collection\", \"strength\": 37.46869809313827, \"visibility\": \"hidden\"}, {\"evidence_id\": 228, \"kind\": \"street_violence\", \"strength\": 48.9645745415606, \"visibility\": \"hidden\"}, {\"evidence_id\": 234, \"kind\": \"street_violence\", \"strength\": 53.42509789261682, \"visibility\": \"local\"}, {\"evidence_id\": 245, \"kind\": \"street_violence\", \"strength\": 58.15960257743829, \"visibility\": \"local\"}]",
+        "status": "eligible",
+        "crystallized_institution_actor_id": null,
+        "created_day": 91,
+        "updated_day": 3650,
+        "resources": {
+          "candidate_semantics": "tracking_preexisting_organization",
+          "capital": 17.0,
+          "cash": 219.95457599773454,
+          "command_depth": 2,
+          "enterprise_id": 24,
+          "front_depth": 30.799999999999997,
+          "location_id": 20,
+          "member_count_estimate": 33.0,
+          "organization_id": 1,
+          "organization_type": "gang",
+          "preexisting_organization": true,
+          "racket_breadth": 30.178875031157368,
+          "reputation_deterrence": 21.050000000000004,
+          "territorial_presence": 25.0
+        },
+        "evidence": [
+          {
+            "evidence_id": 1,
+            "kind": "protection_collection",
+            "strength": 36.0,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 2,
+            "kind": "stolen_goods_handling",
+            "strength": 31.0,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 41,
+            "kind": "street_violence",
+            "strength": 42.034365609764585,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 95,
+            "kind": "street_violence",
+            "strength": 47.7606041886072,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 117,
+            "kind": "unlicensed gambling/bookmaking",
+            "strength": 40.164738837258625,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 128,
+            "kind": "protection_collection",
+            "strength": 30.781975669126385,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 139,
+            "kind": "street_violence",
+            "strength": 59.70523431439866,
+            "visibility": "local"
+          },
+          {
+            "evidence_id": 150,
+            "kind": "targeted_violence",
+            "strength": 58.0,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 191,
+            "kind": "protection_collection",
+            "strength": 29.29596212269082,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 207,
+            "kind": "protection_collection",
+            "strength": 37.46869809313827,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 228,
+            "kind": "street_violence",
+            "strength": 48.9645745415606,
+            "visibility": "hidden"
+          },
+          {
+            "evidence_id": 234,
+            "kind": "street_violence",
+            "strength": 53.42509789261682,
+            "visibility": "local"
+          },
+          {
+            "evidence_id": 245,
+            "kind": "street_violence",
+            "strength": 58.15960257743829,
+            "visibility": "local"
+          }
+        ]
+      },
+      "opening_enterprises": [
+        {
+          "id": 24,
+          "name": "[STRUCTURAL SIM] Aldergate ward cartage yard",
+          "enterprise_kind": "service",
+          "capital": 17.0,
+          "cash": 10.0,
+          "debt": 2.0,
+          "reputation": 42.0,
+          "status": "active",
+          "created_day": 0,
+          "updated_day": 0
+        }
+      ],
+      "ending_enterprises": [
+        {
+          "id": 24,
+          "name": "[STRUCTURAL SIM] Aldergate ward cartage yard",
+          "enterprise_kind": "service",
+          "capital": 17.0,
+          "cash": 219.95457599773454,
+          "debt": 2.0,
+          "reputation": 46.53114512382543,
+          "status": "active",
+          "created_day": 0,
+          "updated_day": 3650
+        }
+      ],
+      "opening_membership_profile": {
+        "organization_id": 1,
+        "core_members": 8.0,
+        "active_members": 29.0,
+        "peripheral_associates": 17.0,
+        "lifetime_entries": 0.0,
+        "lifetime_exits": 0.0,
+        "last_review_day": 0,
+        "metadata_json": "{\"membership_categories_are_analytic\": true, \"opening_scale_result\": {\"active_members\": 29, \"core_members\": 8, \"full_members\": 37, \"operational_demand\": 37.52, \"peripheral_associates\": 17, \"stochastic_multiplier\": 0.9803, \"wider_orbit\": 54}, \"opening_stock_resolved_from_operational_footprint\": true}"
+      },
+      "ending_membership_profile": {
+        "organization_id": 1,
+        "core_members": 12.0,
+        "active_members": 21.0,
+        "peripheral_associates": 4.0,
+        "lifetime_entries": 31.0,
+        "lifetime_exits": 48.0,
+        "last_review_day": 3376,
+        "metadata_json": "{\"membership_categories_are_analytic\": true, \"opening_scale_result\": {\"active_members\": 29, \"core_members\": 8, \"full_members\": 37, \"operational_demand\": 37.52, \"peripheral_associates\": 17, \"stochastic_multiplier\": 0.9803, \"wider_orbit\": 54}, \"opening_stock_resolved_from_operational_footprint\": true}"
+      },
+      "membership_flows": [
+        {
+          "id": 1,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "recruitment",
+          "count": 1.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 2,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "custody",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 3,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 4,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 5,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 6,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "custody",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 7,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 8,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "associate_to_active",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 9,
+          "organization_id": 1,
+          "day": 364,
+          "flow_kind": "active_to_core",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": "core",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 10,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "recruitment",
+          "count": 2.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 11,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 12,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "relocation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 13,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "defection",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 14,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 15,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "custody",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 16,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 17,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "core",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 18,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "associate_to_active",
+          "count": 2.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 19,
+          "organization_id": 1,
+          "day": 638,
+          "flow_kind": "active_to_core",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": "core",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 20,
+          "organization_id": 1,
+          "day": 729,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 21,
+          "organization_id": 1,
+          "day": 729,
+          "flow_kind": "custody",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 22,
+          "organization_id": 1,
+          "day": 729,
+          "flow_kind": "associate_to_active",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 23,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "recruitment",
+          "count": 9.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 24,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "death_or_incapacitation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 25,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 26,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "defection",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 27,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "death_or_incapacitation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 28,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "death_or_incapacitation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 29,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 30,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "death_or_incapacitation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 31,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "relocation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 32,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 33,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 34,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 35,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "core",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 36,
+          "organization_id": 1,
+          "day": 1368,
+          "flow_kind": "associate_to_active",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 37,
+          "organization_id": 1,
+          "day": 1642,
+          "flow_kind": "recruitment",
+          "count": 1.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 38,
+          "organization_id": 1,
+          "day": 1642,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 39,
+          "organization_id": 1,
+          "day": 1642,
+          "flow_kind": "death_or_incapacitation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 40,
+          "organization_id": 1,
+          "day": 1642,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 41,
+          "organization_id": 1,
+          "day": 1642,
+          "flow_kind": "relocation",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 42,
+          "organization_id": 1,
+          "day": 1642,
+          "flow_kind": "associate_to_active",
+          "count": 2.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 43,
+          "organization_id": 1,
+          "day": 1824,
+          "flow_kind": "recruitment",
+          "count": 2.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 44,
+          "organization_id": 1,
+          "day": 1824,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 45,
+          "organization_id": 1,
+          "day": 1824,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "core",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 46,
+          "organization_id": 1,
+          "day": 1824,
+          "flow_kind": "associate_to_active",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 47,
+          "organization_id": 1,
+          "day": 1824,
+          "flow_kind": "active_to_core",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": "core",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 48,
+          "organization_id": 1,
+          "day": 1916,
+          "flow_kind": "custody",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 49,
+          "organization_id": 1,
+          "day": 2098,
+          "flow_kind": "recruitment",
+          "count": 3.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 50,
+          "organization_id": 1,
+          "day": 2098,
+          "flow_kind": "custody",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 51,
+          "organization_id": 1,
+          "day": 2098,
+          "flow_kind": "custody",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 52,
+          "organization_id": 1,
+          "day": 2098,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 53,
+          "organization_id": 1,
+          "day": 2098,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "core",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 54,
+          "organization_id": 1,
+          "day": 2098,
+          "flow_kind": "associate_to_active",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 55,
+          "organization_id": 1,
+          "day": 2372,
+          "flow_kind": "recruitment",
+          "count": 3.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 56,
+          "organization_id": 1,
+          "day": 2372,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 57,
+          "organization_id": 1,
+          "day": 2372,
+          "flow_kind": "defection",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 58,
+          "organization_id": 1,
+          "day": 2372,
+          "flow_kind": "associate_to_active",
+          "count": 2.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 59,
+          "organization_id": 1,
+          "day": 2463,
+          "flow_kind": "recruitment",
+          "count": 1.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 60,
+          "organization_id": 1,
+          "day": 2463,
+          "flow_kind": "death_or_incapacitation",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 61,
+          "organization_id": 1,
+          "day": 2646,
+          "flow_kind": "recruitment",
+          "count": 2.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 62,
+          "organization_id": 1,
+          "day": 2646,
+          "flow_kind": "associate_to_active",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 63,
+          "organization_id": 1,
+          "day": 2646,
+          "flow_kind": "active_to_core",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": "core",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 64,
+          "organization_id": 1,
+          "day": 2919,
+          "flow_kind": "custody",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 65,
+          "organization_id": 1,
+          "day": 2919,
+          "flow_kind": "associate_to_active",
+          "count": 3.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 66,
+          "organization_id": 1,
+          "day": 2919,
+          "flow_kind": "active_to_core",
+          "count": 3.0,
+          "from_tier": "active",
+          "to_tier": "core",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 67,
+          "organization_id": 1,
+          "day": 3011,
+          "flow_kind": "relocation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 68,
+          "organization_id": 1,
+          "day": 3011,
+          "flow_kind": "relocation",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 69,
+          "organization_id": 1,
+          "day": 3193,
+          "flow_kind": "recruitment",
+          "count": 3.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 70,
+          "organization_id": 1,
+          "day": 3193,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 71,
+          "organization_id": 1,
+          "day": 3193,
+          "flow_kind": "relocation",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 72,
+          "organization_id": 1,
+          "day": 3193,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 73,
+          "organization_id": 1,
+          "day": 3193,
+          "flow_kind": "desistance",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": null,
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 74,
+          "organization_id": 1,
+          "day": 3284,
+          "flow_kind": "recruitment",
+          "count": 1.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 75,
+          "organization_id": 1,
+          "day": 3284,
+          "flow_kind": "associate_to_active",
+          "count": 1.0,
+          "from_tier": "peripheral",
+          "to_tier": "active",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        },
+        {
+          "id": 76,
+          "organization_id": 1,
+          "day": 3376,
+          "flow_kind": "recruitment",
+          "count": 3.0,
+          "from_tier": null,
+          "to_tier": "peripheral",
+          "source_event_id": null,
+          "metadata_json": "{\"basis\": \"recruitment into gang orbit\", \"routine_turnover\": true}"
+        },
+        {
+          "id": 77,
+          "organization_id": 1,
+          "day": 3376,
+          "flow_kind": "active_to_core",
+          "count": 1.0,
+          "from_tier": "active",
+          "to_tier": "core",
+          "source_event_id": null,
+          "metadata_json": "{\"routine_turnover\": true}"
+        }
+      ],
+      "opening_scale_basis": "resolved from operational footprint; no explicit headcount target",
+      "opening_scale_calibration_file": "diagnostics/v59_underworld_operational_scale_calibration.json"
+    },
+    "longroad": {
+      "opening_subtype": "independent Long Road escort hand",
+      "ending_subtype": "independent Long Road escort hand",
+      "opening_stage": "Temper",
+      "ending_stage": "Breach",
+      "opening_careers": [
+        {
+          "track": "Long Road Escort Work",
+          "standing_key": "escort_hand",
+          "standing": "Working Escort Hand",
+          "responsibilities": [],
+          "opportunities": 0,
+          "advancements": 0,
+          "responsibility_opportunities": 0
+        }
+      ],
+      "ending_careers": [
+        {
+          "track": "Long Road Escort Work",
+          "standing_key": "escort_hand",
+          "standing": "Working Escort Hand",
+          "responsibilities": [],
+          "opportunities": 0,
+          "advancements": 0,
+          "responsibility_opportunities": 0
+        }
+      ],
+      "career_events": [],
+      "reach_events": [
+        {
+          "day": 2281,
+          "event_type": "role_longroad_contract",
+          "title": "Higher-value Road escort",
+          "summary": "[SIM] Sella Marrin accepted work bound for Aldergate at reach band 2; the journey and payment are persisted. This commission was above their current durable Road standing, opened by reputation and martial capability.",
+          "severity": 2
+        },
+        {
+          "day": 3467,
+          "event_type": "role_longroad_contract",
+          "title": "Higher-value Road escort",
+          "summary": "[SIM] Sella Marrin accepted work bound for Lysmere at reach band 2; the journey and payment are persisted. This commission was above their current durable Road standing, opened by reputation and martial capability.",
+          "severity": 2
+        }
+      ]
+    },
+    "concord": {
+      "opening_subtype": "Wrenfield junior spear disciple",
+      "ending_subtype": "Wrenfield junior spear disciple",
+      "opening_stage": "Temper",
+      "ending_stage": "Third",
+      "opening_careers": [
+        {
+          "track": "Martial Institution Service",
+          "standing_key": "junior",
+          "standing": "Junior Disciple",
+          "responsibilities": [],
+          "opportunities": 0,
+          "advancements": 0,
+          "responsibility_opportunities": 0
+        }
+      ],
+      "ending_careers": [
+        {
+          "track": "Martial Institution Service",
+          "standing_key": "senior",
+          "standing": "Senior Disciple",
+          "responsibilities": [
+            {
+              "key": "external_representative",
+              "label": "External Representative",
+              "acquired_day": 1551
+            },
+            {
+              "key": "disciple_examiner",
+              "label": "Disciple Examiner",
+              "acquired_day": 1642
+            },
+            {
+              "key": "patrol_lead",
+              "label": "Patrol Lead",
+              "acquired_day": 1916
+            }
+          ],
+          "opportunities": 3,
+          "advancements": 2,
+          "responsibility_opportunities": 6
+        }
+      ],
+      "career_events": [
+        {
+          "day": 912,
+          "event_type": "career_opportunity",
+          "title": "[SIM] Tobin Verra: Established Disciple standing opportunity passed",
+          "summary": "A durable standing change became possible because of repeated institutional service, but it did not occur. Branching responsibilities remain independently available.",
+          "severity": 1
+        },
+        {
+          "day": 1551,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Tobin Verra: External Representative",
+          "summary": "A real responsibility opened because of reliable institutional service, Third-stage capability. [SIM] Tobin Verra accepted/was entrusted with External Representative. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        },
+        {
+          "day": 1642,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Tobin Verra: Disciple Examiner",
+          "summary": "A real responsibility opened because of reliable institutional service, Third-stage capability. [SIM] Tobin Verra accepted/was entrusted with Disciple Examiner. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        },
+        {
+          "day": 1733,
+          "event_type": "career_advancement",
+          "title": "[SIM] Tobin Verra: Established Disciple",
+          "summary": "[SIM] Tobin Verra's durable professional standing changed to Established Disciple because of repeated institutional service. This standing change does not determine which appointments or specializations they hold.",
+          "severity": 2
+        },
+        {
+          "day": 1916,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Tobin Verra: Patrol Lead",
+          "summary": "A real responsibility opened because of reliable institutional service, Third-stage capability. [SIM] Tobin Verra accepted/was entrusted with Patrol Lead. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        },
+        {
+          "day": 2463,
+          "event_type": "career_advancement",
+          "title": "[SIM] Tobin Verra: Senior Disciple",
+          "summary": "[SIM] Tobin Verra's durable professional standing changed to Senior Disciple because of sustained institutional service, Third-stage professional standing. This standing change does not determine which appointments or specializations they hold.",
+          "severity": 2
+        }
+      ],
+      "reach_events": []
+    },
+    "dunmoor": {
+      "opening_subtype": "Dunmoor estate retainer and horse-country fighter",
+      "ending_subtype": "Dunmoor estate retainer and horse-country fighter",
+      "opening_stage": "Temper",
+      "ending_stage": "Temper",
+      "opening_careers": [
+        {
+          "track": "Household Retainer Service",
+          "standing_key": "retainer",
+          "standing": "Retainer",
+          "responsibilities": [],
+          "opportunities": 0,
+          "advancements": 0,
+          "responsibility_opportunities": 0
+        }
+      ],
+      "ending_careers": [
+        {
+          "track": "Household Retainer Service",
+          "standing_key": "senior_retainer",
+          "standing": "Senior Retainer",
+          "responsibilities": [
+            {
+              "key": "horsemaster",
+              "label": "Remount / Horse Readiness Specialist",
+              "acquired_day": 2098
+            }
+          ],
+          "opportunities": 1,
+          "advancements": 1,
+          "responsibility_opportunities": 2
+        }
+      ],
+      "career_events": [
+        {
+          "day": 1916,
+          "event_type": "career_advancement",
+          "title": "[SIM] Ansel Rooke: Senior Retainer",
+          "summary": "[SIM] Ansel Rooke's durable professional standing changed to Senior Retainer because of sustained estate service, demonstrated household loyalty. This standing change does not determine which appointments or specializations they hold.",
+          "severity": 2
+        },
+        {
+          "day": 2098,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Ansel Rooke: Remount / Horse Readiness Specialist",
+          "summary": "A real responsibility opened because of substantial horse/remount access 14.0, sustained estate service. [SIM] Ansel Rooke accepted/was entrusted with Remount / Horse Readiness Specialist. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        }
+      ],
+      "reach_events": []
+    },
+    "witness": {
+      "opening_subtype": "Witness parish clerk and charitable organizer",
+      "ending_subtype": "Witness parish clerk and charitable organizer",
+      "opening_stage": null,
+      "ending_stage": null,
+      "opening_careers": [
+        {
+          "track": "Witness Lay Service",
+          "standing_key": "parish_worker",
+          "standing": "Parish Worker",
+          "responsibilities": [],
+          "opportunities": 0,
+          "advancements": 0,
+          "responsibility_opportunities": 0
+        }
+      ],
+      "ending_careers": [
+        {
+          "track": "Witness Lay Service",
+          "standing_key": "trusted_worker",
+          "standing": "Trusted Parish Worker",
+          "responsibilities": [
+            {
+              "key": "volunteer_coordinator",
+              "label": "Volunteer Coordinator",
+              "acquired_day": 2646
+            }
+          ],
+          "opportunities": 1,
+          "advancements": 1,
+          "responsibility_opportunities": 2
+        }
+      ],
+      "career_events": [
+        {
+          "day": 2463,
+          "event_type": "career_advancement",
+          "title": "[SIM] Mara Elwick: Trusted Parish Worker",
+          "summary": "[SIM] Mara Elwick's durable professional standing changed to Trusted Parish Worker because of local trust 29.6, sustained parish service. This standing change does not determine which appointments or specializations they hold.",
+          "severity": 2
+        },
+        {
+          "day": 2646,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Mara Elwick: Volunteer Coordinator",
+          "summary": "A real responsibility opened because of local trust 29.6, sustained lay service. [SIM] Mara Elwick accepted/was entrusted with Volunteer Coordinator. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        }
+      ],
+      "reach_events": []
+    },
+    "merchant": {
+      "opening_subtype": "independent small freight and provisions merchant",
+      "ending_subtype": "independent small freight and provisions merchant",
+      "opening_stage": null,
+      "ending_stage": null,
+      "opening_careers": [
+        {
+          "track": "Independent Merchant Career",
+          "standing_key": "small_operator",
+          "standing": "Local-Scale Operator",
+          "responsibilities": [],
+          "opportunities": 0,
+          "advancements": 0,
+          "responsibility_opportunities": 0
+        }
+      ],
+      "ending_careers": [
+        {
+          "track": "Independent Merchant Career",
+          "standing_key": "small_operator",
+          "standing": "Local-Scale Operator",
+          "responsibilities": [
+            {
+              "key": "factor_coordinator",
+              "label": "Factor / Carrier Coordinator",
+              "acquired_day": 3467
+            }
+          ],
+          "opportunities": 0,
+          "advancements": 0,
+          "responsibility_opportunities": 3
+        }
+      ],
+      "career_events": [
+        {
+          "day": 3284,
+          "event_type": "career_responsibility_opportunity",
+          "title": "[SIM] Elian Torve: Factor / Carrier Coordinator opportunity passed",
+          "summary": "Factor / Carrier Coordinator became genuinely possible because of business resources 371.4, commercial reputation 51.4, completed commercial history, but the appointment/working responsibility did not result. No other career path is blocked by this.",
+          "severity": 1
+        },
+        {
+          "day": 3467,
+          "event_type": "career_responsibility",
+          "title": "[SIM] Elian Torve: Factor / Carrier Coordinator",
+          "summary": "A real responsibility opened because of business resources 392.6, commercial reputation 51.4, completed commercial history. [SIM] Elian Torve accepted/was entrusted with Factor / Carrier Coordinator. This is a branching appointment or working role, not a required rung in a promotion ladder.",
+          "severity": 2
+        }
+      ],
+      "reach_events": [
+        {
+          "day": 3011,
+          "event_type": "role_merchant_contract",
+          "title": "Regional supply contract",
+          "summary": "[SIM] Elian Torve accepted a scale-2 contract toward Saltmere; proceeds, increased capital and business capacity are persisted. They coordinated carriers/factors beneath them rather than personally handling every operational detail. This commission exceeded their current durable commercial standing and was opened by actual business scale/reputation.",
+          "severity": 3
+        },
+        {
+          "day": 3467,
+          "event_type": "role_merchant_loss",
+          "title": "Commercial setback",
+          "summary": "[SIM] Elian Torve absorbed a scale-2 delayed payment, spoilage or freight loss worth 5.7 calibration cash.",
+          "severity": 2
+        },
+        {
+          "day": 3649,
+          "event_type": "role_merchant_contract",
+          "title": "Regional supply contract",
+          "summary": "[SIM] Elian Torve accepted a scale-2 contract toward White Laurel foothills; proceeds, increased capital and business capacity are persisted. They coordinated carriers/factors beneath them rather than personally handling every operational detail.",
+          "severity": 3
+        }
+      ],
+      "opening_enterprises": [
+        {
+          "id": 24,
+          "name": "[STRUCTURAL SIM] Saltmere independent provisions factor",
+          "enterprise_kind": "merchant_house",
+          "capital": 28.0,
+          "cash": 16.0,
+          "debt": 4.0,
+          "reputation": 47.0,
+          "status": "active",
+          "created_day": 0,
+          "updated_day": 0
+        }
+      ],
+      "ending_enterprises": [
+        {
+          "id": 24,
+          "name": "[STRUCTURAL SIM] Saltmere independent provisions factor",
+          "enterprise_kind": "merchant_house",
+          "capital": 36.863050082238274,
+          "cash": 391.29397478516535,
+          "debt": 4.0,
+          "reputation": 52.87821704064266,
+          "status": "active",
+          "created_day": 0,
+          "updated_day": 3650
+        }
+      ]
+    }
+  },
+  "nonfocus": {
+    "underworld": {
+      "career_rows": 5,
+      "career_advancements": 2,
+      "responsibility_appointments": 3
+    },
+    "longroad": {
+      "career_rows": 5,
+      "career_advancements": 1,
+      "responsibility_appointments": 8
+    },
+    "concord": {
+      "career_rows": 5,
+      "career_advancements": 4,
+      "responsibility_appointments": 6
+    },
+    "dunmoor": {
+      "career_rows": 6,
+      "career_advancements": 2,
+      "responsibility_appointments": 6
+    },
+    "witness": {
+      "career_rows": 5,
+      "career_advancements": 4,
+      "responsibility_appointments": 8
+    },
+    "merchant": {
+      "career_rows": 5,
+      "career_advancements": 2,
+      "responsibility_appointments": 8
+    }
+  },
+  "regressions": [
+    "v59 flexible career/reach",
+    "v48 inverse attainment",
+    "v56 Vessel/Realization",
+    "v47 Groundbinding",
+    "v46 stage variability/summit",
+    "v45 decade integrity",
+    "v44 autonomous resolution",
+    "v42 cultivation demography",
+    "v37 underworld ecology",
+    "v35 combat/tournaments",
+    "v33 elixir physiology",
+    "v32 cultivation/Realization",
+    "v29 logistics",
+    "v20 health/aging"
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "engine_version": "0.60.0",
+  "health": {
+    "actor_id": 548,
+    "actor_name": "Amory Selwick",
+    "care_site_id": 8,
+    "care_site_name": "[STRUCTURAL] Saltmere ordinary care network",
+    "condition_id": 1,
+    "condition_severity": 68.17442916666667,
+    "condition_status": "active",
+    "end_day": 372,
+    "invariants": {
+      "checks": [
+        {
+          "check": "negative_commercial_stock",
+          "violations": 0
+        },
+        {
+          "check": "trade_delivered_exceeds_quantity",
+          "violations": 0
+        },
+        {
+          "check": "nonpositive_shipment_quantity",
+          "violations": 0
+        },
+        {
+          "check": "invalid_craft_output_quantity",
+          "violations": 0
+        },
+        {
+          "check": "negative_public_debt",
+          "violations": 0
+        },
+        {
+          "check": "project_overconsumption",
+          "violations": 0
+        },
+        {
+          "check": "negative_harvest",
+          "violations": 0
+        },
+        {
+          "check": "foreign_keys",
+          "violations": 0
+        },
+        {
+          "check": "integrity",
+          "value": "ok"
+        }
+      ],
+      "failures": [],
+      "pass": true
+    },
+    "pass": true,
+    "provider_actor_id": null,
+    "request_status": "treated",
+    "start_day": 365,
+    "structural_provider_pool": true,
+    "treated_day": 367
+  },
+  "law": {
+    "amount_awarded": 2.0,
+    "amount_enforced": 2.0,
+    "buyer_cash_after": 50.761357057954655,
+    "buyer_cash_before": 42.534104243130834,
+    "case_id": 1,
+    "case_status": "closed",
+    "end_day": 455,
+    "enforcement_steps": 1,
+    "finding": "claimant",
+    "invariants": {
+      "checks": [
+        {
+          "check": "negative_commercial_stock",
+          "violations": 0
+        },
+        {
+          "check": "trade_delivered_exceeds_quantity",
+          "violations": 0
+        },
+        {
+          "check": "nonpositive_shipment_quantity",
+          "violations": 0
+        },
+        {
+          "check": "invalid_craft_output_quantity",
+          "violations": 0
+        },
+        {
+          "check": "negative_public_debt",
+          "violations": 0
+        },
+        {
+          "check": "project_overconsumption",
+          "violations": 0
+        },
+        {
+          "check": "negative_harvest",
+          "violations": 0
+        },
+        {
+          "check": "foreign_keys",
+          "violations": 0
+        },
+        {
+          "check": "integrity",
+          "value": "ok"
+        }
+      ],
+      "failures": [],
+      "pass": true
+    },
+    "judgment_status": "enforced",
+    "jurisdiction_id": 3,
+    "office_id": 3,
+    "pass": true,
+    "seller_cash_after": 46.89868731091004,
+    "seller_cash_before": 57.16373128843962,
+    "start_day": 365
+  },
+  "method": "three independent branches copied from the accepted peaceful day-365 diagnostic save; each branch receives one explicit causal trigger and then runs the real production owners",
+  "pass": true,
+  "schema_version": 70,
+  "source_database": "/mnt/data/oneyear01_output_v2/ONEYEAR01_diagnostic.db",
+  "source_day": 365,
+  "war": {
+    "attacker_force_location_after_march": 15,
+    "attacker_force_status_after_march": "deployed",
+    "attacker_killed": 5,
+    "attacker_wounded": 17,
+    "battle_day": 372,
+    "battle_id": 7,
+    "battle_reports": 2,
+    "damage_events": 4,
+    "defender_killed": 12,
+    "defender_wounded": 20,
+    "grain_stock_after_march": 7.292480000000005,
+    "grain_stock_before": 12.492480000000004,
+    "invariants": {
+      "checks": [
+        {
+          "check": "negative_commercial_stock",
+          "violations": 0
+        },
+        {
+          "check": "trade_delivered_exceeds_quantity",
+          "violations": 0
+        },
+        {
+          "check": "nonpositive_shipment_quantity",
+          "violations": 0
+        },
+        {
+          "check": "invalid_craft_output_quantity",
+          "violations": 0
+        },
+        {
+          "check": "negative_public_debt",
+          "violations": 0
+        },
+        {
+          "check": "project_overconsumption",
+          "violations": 0
+        },
+        {
+          "check": "negative_harvest",
+          "violations": 0
+        },
+        {
+          "check": "foreign_keys",
+          "violations": 0
+        },
+        {
+          "check": "integrity",
+          "value": "ok"
+        }
+      ],
+      "failures": [],
+      "pass": true
+    },
+    "operation_id": 1,
+    "pass": true,
+    "start_day": 365,
+    "warehouse_condition_after": 33.00000000000114,
+    "warehouse_condition_before": 53.500000000001144
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "scenario": "underworld",
+  "rng_seed": 9303,
+  "focus_actor_id": 568,
+  "focus_actor": "[SIM] Cale Brann",
+  "latent_entity_id": 4,
+  "non_ledger": true,
+  "campaign_only": true,
+  "starting_location": "Aldergate"
+}
