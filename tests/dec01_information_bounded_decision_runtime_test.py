@@ -11,6 +11,8 @@ from engine.decision_runtime import generate_candidates
 from engine.belief import ensure_claim, add_claim_evidence, observe_claim
 from engine.underworld_rebuild import seed_city_underworld, protect_business
 from engine.underworld_decisions import execute_underworld_action
+from engine.current_seed import import_current_seed
+from engine.activation import activate_existing_loops
 
 
 def bootstrap():
@@ -25,8 +27,9 @@ def run():
     assert c.execute("SELECT value FROM engine_meta WHERE key='decision_runtime_version'").fetchone()[0]=='1'
     assert c.execute("SELECT value FROM engine_meta WHERE key='decision_information_rule'").fetchone()[0]=='actor_accessible_only'
 
-    city=int(c.execute("INSERT INTO locations(name,kind) VALUES ('[DEC01] Aldergate Test','city')").lastrowid)
-    seed_city_underworld(c,city_location_id=city,force=True,salt=6301)
+    import_current_seed(c)
+    activate_existing_loops(c)
+    city=int(c.execute("SELECT id FROM locations WHERE name='Aldergate'").fetchone()[0])
 
     # Find an existing protected account and a real rival organization to attempt a poach.
     acct=c.execute("""SELECT p.*,o.current_leader_actor_id FROM underworld_protection_accounts p

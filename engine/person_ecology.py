@@ -88,9 +88,10 @@ def _profile_stage(seed: int, uid: int, urban: bool) -> tuple[int, str | None]:
 def activate_background_people(conn: sqlite3.Connection) -> dict[str, int]:
     """Ensure disjoint identity reservoirs and demand-independent profiles exist.
 
-    Most sources use 13 identities. Aldergate receives a larger bounded local sample because the
-    already-existing v0.60 city ecology resolves many command figures there at opening.  This
-    changes only resolution granularity, never the population denominator.
+    Most sources use 32 identities. Aldergate receives a larger bounded local sample because the
+    already-existing v0.60 city ecology resolves many command figures there at opening.  The
+    larger reservoir prevents causal demand from exhausting rare pre-existing traits such as
+    Open-Core status; it changes only resolution granularity, never the population denominator.
     """
     day = _day(conn)
     sources = conn.execute("SELECT * FROM background_population_sources ORDER BY id").fetchall()
@@ -103,7 +104,7 @@ def activate_background_people(conn: sqlite3.Connection) -> dict[str, int]:
             if source["location_id"] is not None:
                 r = conn.execute("SELECT name FROM locations WHERE id=?", (int(source["location_id"]),)).fetchone()
                 locname = str(r[0]) if r else None
-            sample = 64 if locname == "Aldergate" else 13
+            sample = 128 if locname == "Aldergate" else 32
             sample = max(1, min(sample, int(source["population_estimate"])))
             pid = create_partition(
                 conn, sid, sample_size=sample,

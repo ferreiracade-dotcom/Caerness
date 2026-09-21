@@ -7,7 +7,6 @@ if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 from engine.db import connect, init_db, reset_db
 from engine.bootstrap import bootstrap_campaign
 
-LEGACY_V026_CANON = ROOT / 'tests' / 'fixtures' / 'v026_world_bible_current.docx'
 
 from engine.simulation import advance_connection
 from engine.stress import contradiction_scan
@@ -86,7 +85,7 @@ def run():
     # and without reverting to the pre-v0.26 ~60-day universal structural cadence flood.
     reset_db(); init_db()
     with connect() as c:
-        bootstrap_campaign(c, verification_canon_path=LEGACY_V026_CANON)
+        bootstrap_campaign(c)
         started=time.perf_counter(); advance_connection(c,365); elapsed=time.perf_counter()-started
         assert not contradiction_scan(c)
         decisions=int(c.execute('SELECT COUNT(*) FROM decisions').fetchone()[0])

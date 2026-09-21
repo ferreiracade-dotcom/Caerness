@@ -1,0 +1,13 @@
+{
+  "tables_compared": 437,
+  "difference_count": 0,
+  "differences": [],
+  "excluded_tables": [
+    "coverage_observations",
+    "coverage_runs"
+  ],
+  "volatile_columns_ignored": [
+    "created_at",
+    "updated_at"
+  ]
+}

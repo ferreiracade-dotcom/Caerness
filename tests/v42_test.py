@@ -33,7 +33,8 @@ def run():
         assert ending.get('Temper',0)>=20,ending
         assert ending.get('Third',0)>=100,ending
         assert 34<=ending.get('Sixth',0)<=46,(opening,ending)
-        assert total_break<230,total_break
+        opening_open_core=sum(opening.values())
+        assert total_break/opening_open_core < 0.60,(total_break,opening_open_core)
         # ~40 is a demographic centre, not a hard lock. This seed may stay near it.
         # Some people genuinely progress and some genuinely plateau.
         assert total_opp>0 and total_break>0

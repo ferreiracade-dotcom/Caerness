@@ -1,0 +1,56 @@
+{
+  "acceptance_epoch": {
+    "accepted_day": 0,
+    "key": "ONEYEAR_RECOVERY_SCHEMA104",
+    "schema_version": 104,
+    "status": "passed"
+  },
+  "candidate_scale": {
+    "contradiction_errors": 0,
+    "dead_character_sim_profiles": 0,
+    "post_death_decisions": 0,
+    "production_day": 43800,
+    "status": "PASS"
+  },
+  "canon": {
+    "expected": "1eeaf0ffb2c8bb84c86d2866ebeedfdc544ac1074763e8e8546cb1e5519b54c8",
+    "path": "canon/world_bible_current.docx",
+    "sha256": "1eeaf0ffb2c8bb84c86d2866ebeedfdc544ac1074763e8e8546cb1e5519b54c8"
+  },
+  "compileall": "PASS",
+  "conditional_domains": {
+    "pass": true
+  },
+  "current_seed": {
+    "expected": "bbd3d248519be74861b862c340dd4717de93e2cd5d2d21aca3acb2637871fd88",
+    "path": "game/seeds/Caerness_Initial_World_State_Seed_v1_3.json",
+    "sha256": "bbd3d248519be74861b862c340dd4717de93e2cd5d2d21aca3acb2637871fd88"
+  },
+  "date": "2026-09-21",
+  "notes": [
+    "Packaged DB is a clean day-0 schema-104 opening world; ONEYEAR evidence is capability evidence only and is not imported as campaign history.",
+    "TENYEAR-02 must start fresh from this day-0 database."
+  ],
+  "packaged_database": {
+    "current_day": 0,
+    "fk_violations": 0,
+    "integrity": "ok",
+    "path": "data/caerness.db",
+    "sha256": "9dfcc32a96d45925a89fa543fd0e17a77c2c11357bb66d527173c04660e95106"
+  },
+  "release": "Caerness v0.60 schema-104 TENYEAR-02 final release candidate",
+  "restart_determinism": {
+    "difference_count": 0,
+    "tables_compared": 437
+  },
+  "runtime_bootstrap_seed": {
+    "path": "canon/core_seed_v2.json",
+    "sha256": "39157da0f57965c1f215954f773ac15518196d5da1a53a6d5b99fa23778473d0"
+  },
+  "schema_version": 104,
+  "standard_regression": {
+    "failed": 0,
+    "passed": 101,
+    "total": 101
+  }
+}

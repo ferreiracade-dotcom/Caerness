@@ -56,7 +56,11 @@ def run():
         world_before = int(c.execute('select sum(population_estimate) from population_scale_buckets').fetchone()[0])
         source_total_before = int(c.execute('select sum(population_estimate) from background_population_sources').fetchone()[0])
 
-        pid = create_partition(c, source_id, sample_size=1000, partition_key='popback01:test:aldergate', seed=99173)
+        existing_partition = c.execute('select id,sample_size from background_population_partitions where source_id=?', (source_id,)).fetchone()
+        assert existing_partition is not None
+        pid = int(existing_partition['id'])
+        sample_size = int(existing_partition['sample_size'])
+        baseline_summary = partition_summary(c)
         c.commit()
 
         # Identity resolution overlaps SCALE-01; it must never inflate headcount.
@@ -71,7 +75,7 @@ def run():
 
         row1, state1 = load_partition(c, pid)
         row2, state2 = load_partition(c, pid)
-        assert state1.sample_size == 1000
+        assert state1.sample_size == sample_size
         assert state1.state_bytes < 30_000
         assert row1['state_sha256'] == row2['state_sha256']
         assert state1.uid.tolist() == state2.uid.tolist()
@@ -82,17 +86,21 @@ def run():
         c.execute('update world_state set current_day=30 where id=1')
         result = step_partition_month(c, pid, day=30)
         c.commit()
-        assert result['aged'] == 1000
+        assert result['aged'] == sample_size
         _, stepped = load_partition(c, pid)
-        assert stepped.uid.size == 1000
-        assert stepped.active_uids.size == 1000 - result['deaths']
+        assert stepped.uid.size == sample_size
+        assert stepped.active_uids.size == sample_size - result['deaths']
         assert (stepped.uid == state1.uid).all()
         assert int(c.execute('select sum(population_estimate) from population_scale_buckets').fetchone()[0]) == world_before
         assert int(c.execute('select sum(population_estimate) from background_population_sources').fetchone()[0]) == source_total_before
 
         # Pick a surviving adult identity. Its identity existed before any merchant/underworld significance.
+        unresolved_uids = {int(r[0]) for r in c.execute(
+            "select local_uid from background_person_profiles where partition_id=? and status='background' and actor_id is null", (pid,)
+        ).fetchall()}
         candidates = [int(slot) for slot in stepped.active_uids.tolist()
-                      if 18 * 365 <= int(stepped.age_days[int(slot)]) < 60 * 365]
+                      if int(stepped.uid[int(slot)]) in unresolved_uids
+                      and 18 * 365 <= int(stepped.age_days[int(slot)]) < 60 * 365]
         assert candidates
         slot = candidates[0]
         local_uid = int(stepped.uid[slot])
@@ -147,10 +155,10 @@ def run():
         summary = partition_summary(c)
         assert summary['population_sources'] == 68
         assert summary['source_population_total'] == 52_000_000
-        assert summary['active_partitions'] == 1
-        assert summary['sampled_identities'] == 1000
-        assert summary['linked_latent'] == 1
-        assert summary['linked_actors'] == 1
+        assert summary['active_partitions'] == 68
+        assert summary['sampled_identities'] == baseline_summary['sampled_identities']
+        assert summary['linked_latent'] >= baseline_summary['linked_latent'] + 1
+        assert summary['linked_actors'] >= baseline_summary['linked_actors'] + 1
         assert c.execute('pragma integrity_check').fetchone()[0] == 'ok'
         assert not c.execute('pragma foreign_key_check').fetchall()
 
@@ -159,7 +167,7 @@ def run():
             'source_total': 52_000_000,
             'partition_id': pid,
             'source_population': 210_000,
-            'sample_size': 1000,
+            'sample_size': sample_size,
             'sample_deaths': result['deaths'],
             'promoted_local_uid': local_uid,
             'latent_id': latent_id,

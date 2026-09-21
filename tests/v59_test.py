@@ -38,7 +38,7 @@ def cultivation(c,aid,stage='Third'):
 
 
 def run():
-    assert ENGINE_VERSION=='0.59.0'
+    assert ENGINE_VERSION in {'0.59.0','0.60.0'}
     c=bootstrap()
 
     # Third-stage junior disciple: Stage widens responsibilities, but does not force standing advancement.

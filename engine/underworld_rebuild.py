@@ -778,13 +778,21 @@ def create_personnel(
         # PERSONECO-01 profiles were seeded independently of this role before underworld demand.
         from .person_ecology import resolve_background_person
         age_floor, age_ceil = ((32, 68) if role_kind == "boss" else (24, 58))
-        actor_id = resolve_background_person(
-            conn, reason=f"Underworld {role_kind} became consequential", demand_kind="underworld_personnel",
-            location_id=loc, occupation_domains=("criminal","soldier","transport","hospitality","labor","merchant","artisan"),
+        command_role = role_kind in {"boss","underboss","lieutenant","crew_leader"}
+        prefer_open_core = command_role and _leader_open_core(rng, float(culture["open_core_command_bias"]), role_kind)
+        resolve_kwargs = dict(
+            reason=f"Underworld {role_kind} became consequential", demand_kind="underworld_personnel",
+            location_id=loc,
+            # Command can emerge from any pre-existing adult occupation; ordinary personnel remain
+            # weighted toward occupations with plausible criminal adjacency.
+            occupation_domains=None if command_role else ("criminal","soldier","transport","hospitality","labor","merchant","artisan"),
             min_age=age_floor, max_age=age_ceil, subtype=f"underworld_{role_kind}",
-            command_weight=1.0 if role_kind in {"boss","underboss","lieutenant","crew_leader"} else .55,
-            criminal_weight=1.15, economic_weight=.20 if role_kind in {"boss","underboss","accountant","fixer"} else 0.0,
+            command_weight=1.0 if command_role else .55, criminal_weight=1.15,
+            economic_weight=.20 if role_kind in {"boss","underboss","accountant","fixer"} else 0.0,
         )
+        actor_id = resolve_background_person(conn, require_open_core=True, **resolve_kwargs) if prefer_open_core else None
+        if actor_id is None:
+            actor_id = resolve_background_person(conn, **resolve_kwargs)
         if actor_id is None:
             raise RuntimeError(f"No pre-existing background person is available for underworld role {role_kind!r} at location {loc}")
     if membership_status is None:

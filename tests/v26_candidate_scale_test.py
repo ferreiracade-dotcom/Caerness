@@ -15,7 +15,6 @@ if str(ROOT) not in sys.path:
 from engine.db import connect, init_db, reset_db
 from engine.bootstrap import bootstrap_campaign
 
-LEGACY_V026_CANON = ROOT / 'tests' / 'fixtures' / 'v026_world_bible_current.docx'
 
 from engine.simulation import advance_connection
 from engine.stress import contradiction_scan, run_horizon, world_snapshot
@@ -41,7 +40,7 @@ def _errors(conn):
 def _production_120() -> dict:
     path = _fresh("production120")
     with connect() as c:
-        bootstrap_campaign(c, verification_canon_path=LEGACY_V026_CANON)
+        bootstrap_campaign(c)
         c.commit()
         checkpoints = []
         total_start = time.perf_counter()
@@ -85,7 +84,7 @@ def _alternate_seed(seed: int, years: int = 40) -> dict:
     path = _fresh(f"seed{seed}")
     with connect() as c:
         c.execute("UPDATE world_state SET rng_seed=? WHERE id=1", (int(seed),))
-        bootstrap_campaign(c, verification_canon_path=LEGACY_V026_CANON)
+        bootstrap_campaign(c)
         c.commit()
         t = time.perf_counter()
         run_horizon(c, years, label=f"candidate_seed_{seed}", scenario_kind="alternate_seed", checkpoint_years=10)

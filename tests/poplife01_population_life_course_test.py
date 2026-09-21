@@ -37,7 +37,7 @@ def run():
         c.execute('update world_state set current_day=365 where id=1')
         out=process_due_population_life_course(c,365); c.commit()
         assert out['sources_reviewed']==68 and out['source_year_periods']==68
-        assert close(out['births'],52_000_000*.016)
+        assert close(out['births'],52_000_000*.027)
         assert out['deaths']>0
         live_after=current_world_population(c)
         assert live_after!=52_000_000

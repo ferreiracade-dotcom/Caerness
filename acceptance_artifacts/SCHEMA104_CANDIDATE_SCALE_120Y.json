@@ -1,0 +1,67 @@
+{
+  "alternate_seeds_40_year": [
+    {
+      "contradiction_errors": 0,
+      "day": 14600,
+      "decisions": 32591,
+      "events": 15,
+      "fk_violations": 0,
+      "integrity": "ok",
+      "rng_seed": 271828,
+      "seed": 271828
+    },
+    {
+      "contradiction_errors": 0,
+      "day": 14600,
+      "decisions": 32591,
+      "events": 15,
+      "fk_violations": 0,
+      "integrity": "ok",
+      "rng_seed": 314159,
+      "seed": 314159
+    }
+  ],
+  "dense_same_day_scheduler": {
+    "actors_due_same_day": 1500,
+    "decisions": 1500,
+    "status": "PASS"
+  },
+  "enterprise_business_scale": {
+    "business_cycles": 12000,
+    "ending_cash": 160677.57,
+    "enterprises": 200,
+    "initial_cash": 73610.0,
+    "locations": 10,
+    "status": "PASS",
+    "years": 5
+  },
+  "gate": "SCHEMA104 candidate-scale / long-horizon validation",
+  "large_route_information_graph": {
+    "actors": 192,
+    "delivered_transmissions": 63,
+    "locations": 64,
+    "rumour_exposures": 3,
+    "rumour_locations": 64,
+    "status": "PASS",
+    "travel_routes": 112
+  },
+  "notes": [
+    "The 120-year production worker was executed incrementally on one persisted database to avoid single-process execution-window limits.",
+    "Each segment used the production run_horizon path with fail_on_contradiction enabled; final invariants were checked explicitly.",
+    "Alternate-seed workers were likewise completed across persisted halfway databases after fresh seeded bootstrap reached year 20."
+  ],
+  "production_120_year": {
+    "contradiction_errors": 0,
+    "day": 43800,
+    "dead_character_sim_profiles": 0,
+    "deceased_characters": 387,
+    "decisions": 70722,
+    "events": 402,
+    "fk_violations": 0,
+    "integrity": "ok",
+    "living_characters": 1,
+    "post_death_decisions": 0,
+    "rng_seed": 812197
+  },
+  "status": "PASS"
+}

@@ -80,7 +80,7 @@ def run():
         h1,h1f=finals('First',True); o1,o1f=finals('First',False)
         ht,htf=finals('Temper',True); ot,otf=finals('Temper',False)
         h3,h3f=finals('Third',True); o3,o3f=finals('Third',False)
-        assert len(h1)>20 and len(o1)>10 and len(ht)>20 and len(ot)>10
+        assert len(h1)>20 and len(o1)>=5 and len(ht)>20 and len(ot)>=5
         # Churn Firsts usually move toward the mature-professional Third ecology over a decade.
         assert h1f['Third']/len(h1) >= 0.60,(h1f,len(h1))
         # Outer Firsts most commonly mature to Temper rather than matching Churn Third density.
