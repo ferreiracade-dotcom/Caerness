@@ -828,18 +828,28 @@ def create_crew(
         open_core_estimate = max(0.0, float(size_estimate) * rng.uniform(.07, .16))
     if staged_estimate is None:
         staged_estimate = max(0.0, float(open_core_estimate) * rng.uniform(.45, .78))
-    cur = conn.execute(
-        """INSERT INTO underworld_crews(organization_id,name,leader_actor_id,home_zone_id,purpose_kind,size_estimate,open_core_estimate,staged_estimate,assigned_patrol_strength,cohesion,loyalty,status,created_day,metadata_json)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,'active',?,?)""",
-        (organization_id, name, leader_actor_id, home_zone_id, purpose_kind, max(0, size_estimate), max(0, open_core_estimate), max(0, staged_estimate),
-         min(max(0.0, size_estimate), max(0.0, size_estimate) * .35), _clamp(cohesion), _clamp(loyalty), _day(conn), _j({"generated_underworld": True})),
-    )
-    cid = int(cur.lastrowid)
-    if leader_actor_id is None:
-        leader_actor_id = create_personnel(conn, organization_id, role_kind="crew_leader", crew_id=cid, rng=rng)
-        conn.execute("UPDATE underworld_crews SET leader_actor_id=? WHERE id=?", (leader_actor_id, cid))
-    else:
-        conn.execute("UPDATE underworld_personnel SET crew_id=? WHERE actor_id=?", (cid, leader_actor_id))
+    # Crew creation is atomic with its required named command figure. If no legitimate
+    # pre-existing person can be resolved as leader, callers may defer the organizational
+    # change without leaving a phantom leaderless crew behind.
+    conn.execute("SAVEPOINT underworld_create_crew")
+    try:
+        cur = conn.execute(
+            """INSERT INTO underworld_crews(organization_id,name,leader_actor_id,home_zone_id,purpose_kind,size_estimate,open_core_estimate,staged_estimate,assigned_patrol_strength,cohesion,loyalty,status,created_day,metadata_json)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,'active',?,?)""",
+            (organization_id, name, leader_actor_id, home_zone_id, purpose_kind, max(0, size_estimate), max(0, open_core_estimate), max(0, staged_estimate),
+             min(max(0.0, size_estimate), max(0.0, size_estimate) * .35), _clamp(cohesion), _clamp(loyalty), _day(conn), _j({"generated_underworld": True})),
+        )
+        cid = int(cur.lastrowid)
+        if leader_actor_id is None:
+            leader_actor_id = create_personnel(conn, organization_id, role_kind="crew_leader", crew_id=cid, rng=rng)
+            conn.execute("UPDATE underworld_crews SET leader_actor_id=? WHERE id=?", (leader_actor_id, cid))
+        else:
+            conn.execute("UPDATE underworld_personnel SET crew_id=? WHERE actor_id=?", (cid, leader_actor_id))
+    except Exception:
+        conn.execute("ROLLBACK TO SAVEPOINT underworld_create_crew")
+        conn.execute("RELEASE SAVEPOINT underworld_create_crew")
+        raise
+    conn.execute("RELEASE SAVEPOINT underworld_create_crew")
     return cid
 
 
@@ -1995,6 +2005,10 @@ def _ensure_leader_decision_cadence(conn: sqlite3.Connection, actor_id: int) -> 
     else:
         conn.execute("INSERT INTO simulation_profiles(actor_id,tier,cadence_days,volatility,agency,last_review_day,next_review_day,wake_threshold) VALUES (?,'STRATEGIC',30,.35,.75,?,?,3)",(actor_id,day,day+30))
 
+def _is_background_person_unavailable(exc: BaseException) -> bool:
+    return isinstance(exc, RuntimeError) and str(exc).startswith("No pre-existing background person is available for underworld role")
+
+
 def ensure_organization_leader(conn: sqlite3.Connection, organization_id: int, rng: random.Random | None=None) -> int | None:
     if rng is None: rng=random.Random(_seed(conn,organization_id*1901+_day(conn)))
     org=conn.execute("SELECT * FROM underworld_organizations WHERE id=?",(organization_id,)).fetchone()
@@ -2022,8 +2036,16 @@ def ensure_organization_leader(conn: sqlite3.Connection, organization_id: int, r
         family=None
         if model=='blood_household':
             nm=str(org['name'] or '').split()[0]; family=nm if nm else None
-        aid=create_personnel(conn,organization_id,role_kind='lieutenant',rng=rng,family_name=family,
-                             membership_status='blood_family' if model=='blood_household' else ('sworn_member' if model=='sworn' else 'member'))
+        try:
+            aid=create_personnel(conn,organization_id,role_kind='lieutenant',rng=rng,family_name=family,
+                                 membership_status='blood_family' if model=='blood_household' else ('sworn_member' if model=='sworn' else 'member'))
+        except RuntimeError as exc:
+            # A leadership vacancy is allowed to persist when the pre-existing person reservoir
+            # cannot supply a legitimate contender. Autonomous maintenance must defer rather than
+            # invent an adult identity or abort the world clock.
+            if _is_background_person_unavailable(exc):
+                return None
+            raise
         pool=[conn.execute("SELECT p.*,cp.core_state,cp.current_stage FROM underworld_personnel p LEFT JOIN cultivation_profiles cp ON cp.actor_id=p.actor_id WHERE p.actor_id=?",(aid,)).fetchone()]
     def score(p:sqlite3.Row)->float:
         oc=12 if str(p['core_state'])=='Open-Core' else 0
@@ -2330,7 +2352,14 @@ def ensure_crew_leadership(conn:sqlite3.Connection,organization_id:int,*,rng:ran
             living=bool(r and str(r[0])=='active' and str(r[1])=='active')
         if living: continue
         membership='blood_family' if str(culture['membership_model'])=='blood_household' and rng.random()<.72 else ('sworn_member' if str(culture['membership_model'])=='sworn' else 'member')
-        aid=create_personnel(conn,organization_id,role_kind='crew_leader',crew_id=int(crew['id']),membership_status=membership,rng=rng,family_name=family)
+        try:
+            aid=create_personnel(conn,organization_id,role_kind='crew_leader',crew_id=int(crew['id']),membership_status=membership,rng=rng,family_name=family)
+        except RuntimeError as exc:
+            # Low-resolution crews may remain leaderless until an eligible pre-existing person can
+            # be resolved. Do not fabricate a person and do not make the global scheduler fail.
+            if _is_background_person_unavailable(exc):
+                continue
+            raise
         conn.execute('update underworld_crews set leader_actor_id=? where id=?',(aid,int(crew['id']))); repaired+=1
     return repaired
 
@@ -2347,12 +2376,27 @@ def _split_crew_for_zone(conn:sqlite3.Connection,organization_id:int,zone_id:int
     split=max(5,min(float(donor['size_estimate'])*.42,required*.85))
     if float(donor['size_estimate'])-split<5: return None
     ratio=split/max(.001,float(donor['size_estimate']))
-    conn.execute("update underworld_crews set size_estimate=size_estimate-?,open_core_estimate=max(0,open_core_estimate-?),staged_estimate=max(0,staged_estimate-?) where id=?",
-                 (split,float(donor['open_core_estimate'])*ratio,float(donor['staged_estimate'])*ratio,int(donor['id'])))
-    name=f"Split Crew {zone_id}-{_day(conn)}-{rng.randrange(1000)}"
-    return create_crew(conn,organization_id,name,home_zone_id=zone_id,purpose_kind='territorial',size_estimate=split,
-                       open_core_estimate=float(donor['open_core_estimate'])*ratio,staged_estimate=float(donor['staged_estimate'])*ratio,
-                       cohesion=max(35,float(donor['cohesion'])-rng.uniform(0,6)),loyalty=max(35,float(donor['loyalty'])-rng.uniform(0,5)),rng=rng)
+    # Crew splitting is one causal operation. If no legitimate pre-existing person can become
+    # the new crew leader, roll the attempted split back and leave the zone understaffed.
+    # This preserves manpower and identity conservation while allowing the world clock to continue.
+    conn.execute("SAVEPOINT underworld_zone_staff_split")
+    try:
+        conn.execute("update underworld_crews set size_estimate=size_estimate-?,open_core_estimate=max(0,open_core_estimate-?),staged_estimate=max(0,staged_estimate-?) where id=?",
+                     (split,float(donor['open_core_estimate'])*ratio,float(donor['staged_estimate'])*ratio,int(donor['id'])))
+        name=f"Split Crew {zone_id}-{_day(conn)}-{rng.randrange(1000)}"
+        cid=create_crew(conn,organization_id,name,home_zone_id=zone_id,purpose_kind='territorial',size_estimate=split,
+                        open_core_estimate=float(donor['open_core_estimate'])*ratio,staged_estimate=float(donor['staged_estimate'])*ratio,
+                        cohesion=max(35,float(donor['cohesion'])-rng.uniform(0,6)),loyalty=max(35,float(donor['loyalty'])-rng.uniform(0,5)),rng=rng)
+    except RuntimeError as exc:
+        if not _is_background_person_unavailable(exc):
+            conn.execute("ROLLBACK TO SAVEPOINT underworld_zone_staff_split")
+            conn.execute("RELEASE SAVEPOINT underworld_zone_staff_split")
+            raise
+        conn.execute("ROLLBACK TO SAVEPOINT underworld_zone_staff_split")
+        conn.execute("RELEASE SAVEPOINT underworld_zone_staff_split")
+        return None
+    conn.execute("RELEASE SAVEPOINT underworld_zone_staff_split")
+    return cid
 
 
 def ensure_zone_staffing(conn:sqlite3.Connection,organization_id:int,*,rng:random.Random|None=None)->dict[str,Any]:
@@ -2412,8 +2456,15 @@ def reconcile_crews_to_membership(conn:sqlite3.Connection,organization_id:int,*,
     p=ensure_underworld_membership_profile(conn,organization_id)
     target=max(0.0,float(p['core_members'])+float(p['active_members']))
     crews=conn.execute("select * from underworld_crews where organization_id=? and status='active' order by id",(organization_id,)).fetchall()
+    staffing_deferred=0
     if not crews and target>0:
-        create_crew(conn,organization_id,f'Core Crew {_day(conn)}',size_estimate=target,open_core_estimate=target*.11,staged_estimate=target*.065,rng=rng)
+        try:
+            create_crew(conn,organization_id,f'Core Crew {_day(conn)}',size_estimate=target,open_core_estimate=target*.11,staged_estimate=target*.065,rng=rng)
+        except RuntimeError as exc:
+            if _is_background_person_unavailable(exc):
+                staffing_deferred+=1
+            else:
+                raise
         crews=conn.execute("select * from underworld_crews where organization_id=? and status='active' order by id",(organization_id,)).fetchall()
     current=sum(float(c['size_estimate']) for c in crews)
     created=depleted=0
@@ -2426,8 +2477,14 @@ def reconcile_crews_to_membership(conn:sqlite3.Connection,organization_id:int,*,
             if avg>30 or (delta>=12 and all(float(c['size_estimate'])>=24 for c in crews)):
                 add=min(delta,rng.uniform(12,22))
                 ratio=rng.uniform(.08,.15)
-                create_crew(conn,organization_id,f'Crew {len(crews)+1}-{_day(conn)}-{rng.randrange(1000)}',size_estimate=add,
-                            open_core_estimate=add*ratio,staged_estimate=add*ratio*rng.uniform(.45,.75),purpose_kind='general',rng=rng)
+                try:
+                    create_crew(conn,organization_id,f'Crew {len(crews)+1}-{_day(conn)}-{rng.randrange(1000)}',size_estimate=add,
+                                open_core_estimate=add*ratio,staged_estimate=add*ratio*rng.uniform(.45,.75),purpose_kind='general',rng=rng)
+                except RuntimeError as exc:
+                    if _is_background_person_unavailable(exc):
+                        staffing_deferred+=1
+                        break
+                    raise
                 delta-=add; created+=1
             else:
                 c=crews[0]; room=max(1,28-float(c['size_estimate'])); add=min(delta,room)
@@ -2461,4 +2518,4 @@ def reconcile_crews_to_membership(conn:sqlite3.Connection,organization_id:int,*,
     depth=1 if crew_count<=1 else (2 if crew_count<=4 else (3 if crew_count<=11 else 4))
     conn.execute("update underworld_organizations set command_depth=?,updated_day=? where id=?",(depth,_day(conn),organization_id))
     final=float(conn.execute("select coalesce(sum(size_estimate),0) from underworld_crews where organization_id=? and status='active'",(organization_id,)).fetchone()[0])
-    return {'target_full_members':target,'crew_manpower':final,'crews_created':created,'crews_depleted':depleted,'command_depth':depth}
+    return {'target_full_members':target,'crew_manpower':final,'crews_created':created,'crews_depleted':depleted,'command_depth':depth,'staffing_deferred':staffing_deferred}
