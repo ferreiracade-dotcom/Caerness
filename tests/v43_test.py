@@ -16,7 +16,8 @@ def run():
     reset_db();init_db()
     with connect() as c:
         import_current_seed(c);activate_existing_loops(c)
-        assert c.execute("SELECT COUNT(*) FROM structural_training_cohorts WHERE status='active'").fetchone()[0]==40
+        opening_structural=int(c.execute("SELECT COUNT(*) FROM structural_training_cohorts WHERE status='active'").fetchone()[0])
+        assert opening_structural==90
         # Let ordinary life and institutional cohorts advance for a decade without NPC decision execution.
         for day in range(30,3651,30):
             c.execute('UPDATE world_state SET current_day=? WHERE id=1',(day,))
@@ -32,7 +33,7 @@ def run():
         assert eligible_proposals>10,eligible_proposals
         es=education_summary(c)
         assert es['active_enrollments']==0  # named opening cohort can graduate
-        assert es['active_structural_cohorts']==40 and es['structural_active_trainees']>100,es
+        assert es['active_structural_cohorts']==opening_structural and es['structural_active_trainees']>100,es
         assert c.execute("SELECT COUNT(*) FROM structural_training_cohorts WHERE status='completed'").fetchone()[0]>0
         # Birth continuity can be recorded without inferring sex or a birth parent from names.
         loc=int(c.execute("SELECT id FROM locations ORDER BY id LIMIT 1").fetchone()[0])
