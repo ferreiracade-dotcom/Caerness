@@ -361,9 +361,20 @@ def activate_economic_substrate(conn: sqlite3.Connection) -> dict[str, int]:
     for inst_name, loc_name in explicit_seats.items():
         iid, lid = _institution(conn, inst_name), _location(conn, loc_name)
         if iid is not None and lid is not None:
-            conn.execute("UPDATE actors SET home_location_id=COALESCE(home_location_id,?),current_location_id=COALESCE(current_location_id,?) WHERE id=?", (lid,lid,iid))
-            conn.execute("UPDATE institution_profiles SET primary_location_id=COALESCE(primary_location_id,?) WHERE actor_id=?", (lid,iid))
-            conn.execute("UPDATE civilian_enterprises SET location_id=COALESCE(location_id,?) WHERE institution_actor_id=?", (lid,iid))
+            # Canon-explicit present seats outrank any earlier non-canon opening working placement.
+            # This is current-state correction, not invented travel/history.
+            conn.execute("UPDATE actors SET home_location_id=?,current_location_id=? WHERE id=?", (lid,lid,iid))
+            conn.execute("UPDATE institution_profiles SET primary_location_id=? WHERE actor_id=?", (lid,iid))
+            conn.execute("UPDATE civilian_enterprises SET location_id=? WHERE institution_actor_id=?", (lid,iid))
+            day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+            conn.execute(
+                """INSERT INTO actor_location_provenance(actor_id,location_id,provenance_kind,confidence,resolved_day,metadata_json)
+                   VALUES (?,?, 'explicit_canon_seat',1.0,?,?)
+                   ON CONFLICT(actor_id) DO UPDATE SET location_id=excluded.location_id,
+                     provenance_kind=excluded.provenance_kind,confidence=excluded.confidence,
+                     resolved_day=excluded.resolved_day,metadata_json=excluded.metadata_json""",
+                (iid,lid,day,json.dumps({'opening_state':True,'history_invented':False,'authority':'MASTER_FINAL_EXPLICIT_SEAT'},sort_keys=True)),
+            )
             explicit_location_updates += 1
 
     enterprises_created = 0
