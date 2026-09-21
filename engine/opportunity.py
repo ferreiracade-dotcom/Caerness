@@ -47,6 +47,18 @@ def institution_decision_actor(conn: sqlite3.Connection, institution_actor_id: i
     ).fetchone()
     if row:
         return int(row[0])
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='institutional_authority_slots'").fetchone():
+        slot = conn.execute(
+            "SELECT authority_kind,incumbent_actor_id FROM institutional_authority_slots WHERE institution_actor_id=? AND authority_key='head' AND status='active' ORDER BY id LIMIT 1",
+            (institution_actor_id,),
+        ).fetchone()
+        if slot:
+            if slot["incumbent_actor_id"] is not None:
+                return int(slot["incumbent_actor_id"])
+            if str(slot["authority_kind"]) == "collective":
+                return int(institution_actor_id)
+            if str(slot["authority_kind"]) in {"unresolved_incumbent", "vacant"}:
+                return None
     row = conn.execute(
         """SELECT member_actor_id FROM institution_memberships
            WHERE institution_actor_id=? AND status='active'
@@ -344,7 +356,18 @@ def _execute_term(conn: sqlite3.Connection, p: sqlite3.Row, term: sqlite3.Row, d
              _j(value.get("scope",{})),_j(value.get("compensation",{})),max(0,min(1,float(value.get("exclusivity") or 0))),
              day,day+int(duration) if duration is not None else None,int(p["id"]),_j({"opportunity01":True})),
         )
-        return {"service_engagement_id":int(cur.lastrowid),"provider_kind":provider_kind,"provider_id":provider_id}
+        engagement_id = int(cur.lastrowid)
+        if p["proposer_institution_actor_id"] is not None and provider_kind in {"institution", "enterprise"} and conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='structural_provider_contracts'").fetchone():
+            provider_inst = provider_id if provider_kind == "institution" else None
+            provider_ent = provider_id if provider_kind == "enterprise" else None
+            conn.execute(
+                "INSERT INTO structural_provider_contracts(consumer_institution_actor_id,provider_institution_actor_id,provider_enterprise_id,domain_key,authority_kind,started_day,ended_day,status,terms_json,metadata_json) VALUES (?,?,?,?,'collective_contractual',?,?,'active',?,?)",
+                (int(p["proposer_institution_actor_id"]), provider_inst, provider_ent, str(p["domain_key"]), day,
+                 day + int(duration) if duration is not None else None,
+                 _j({"service_kind":str(value.get("service_kind") or p["domain_key"]),"scope":value.get("scope",{}),"compensation":value.get("compensation",{})}),
+                 _j({"source_service_engagement_id":engagement_id,"source_proposal_id":int(p["id"]),"no_person_required":True})),
+            )
+        return {"service_engagement_id":engagement_id,"provider_kind":provider_kind,"provider_id":provider_id}
     if kind in {"supply_commitment", "duration", "residence", "termination_right", "recurring_stipend", "revenue_share", "land_grant", "cash_payment", "other"}:
         # These terms remain authoritative in the agreement snapshot until their domain owner is available.
         return {"persisted_term": kind, "value": value}

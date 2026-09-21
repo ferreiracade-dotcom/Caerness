@@ -305,16 +305,45 @@ def coverage_gate(conn: sqlite3.Connection, coverage_run_id: int | None = None) 
         "principle":"One-year simulation may start only when ordinary opening substrates exist and every required autonomous domain has a wired owner.",
     }
 
+def record_one_year_acceptance(conn: sqlite3.Connection, *, evidence: dict[str, Any] | None = None, status: str = 'passed') -> dict[str, Any]:
+    """Record capability acceptance for the current explicit TENYEAR gate epoch."""
+    if status not in {'pending','passed','failed'}:
+        raise ValueError('invalid acceptance status')
+    epoch=conn.execute("SELECT value FROM engine_meta WHERE key='tenyear02_gate_epoch'").fetchone()
+    if not epoch:
+        raise ValueError('current engine has no explicit TENYEAR acceptance epoch')
+    key=str(epoch[0])
+    schema=conn.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()
+    schema_version=int(schema[0]) if schema else 0
+    day=_day(conn)
+    conn.execute(
+        """INSERT INTO acceptance_epochs(acceptance_key,schema_version,status,accepted_day,evidence_json,updated_at)
+           VALUES (?,?,?,?,?,CURRENT_TIMESTAMP)
+           ON CONFLICT(acceptance_key) DO UPDATE SET schema_version=excluded.schema_version,status=excluded.status,
+             accepted_day=excluded.accepted_day,evidence_json=excluded.evidence_json,updated_at=CURRENT_TIMESTAMP""",
+        (key,schema_version,status,day if status=='passed' else None,json.dumps(evidence or {},sort_keys=True,default=str)),
+    )
+    return dict(conn.execute("SELECT * FROM acceptance_epochs WHERE acceptance_key=?",(key,)).fetchone())
+
+
 def ten_year_gate(conn: sqlite3.Connection, coverage_run_id: int | None = None) -> dict[str, Any]:
     coverage=coverage_gate(conn,coverage_run_id)
-    row=conn.execute("SELECT value FROM engine_meta WHERE key='one_year_unattended_acceptance'").fetchone()
-    one_year_passed=bool(row and str(row[0]).lower() in {'pass','passed','accepted','true','1'})
+    epoch=conn.execute("SELECT value FROM engine_meta WHERE key='tenyear02_gate_epoch'").fetchone()
+    epoch_key=str(epoch[0]) if epoch else None
+    acceptance=None
+    if epoch_key and conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='acceptance_epochs'").fetchone():
+        acceptance=conn.execute("SELECT * FROM acceptance_epochs WHERE acceptance_key=?",(epoch_key,)).fetchone()
+    schema=conn.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()
+    schema_version=int(schema[0]) if schema else 0
+    one_year_passed=bool(acceptance and str(acceptance['status'])=='passed' and int(acceptance['schema_version'])==schema_version)
     failures=list(coverage['failures'])
     if not one_year_passed:
+        reason='current schema acceptance epoch has not passed' if epoch_key else 'current engine has no explicit acceptance epoch'
         failures.append({'domain_key':'one_year_unattended','label':'Integrated ordinary one-year unattended run',
                          'mechanism_status':'GATE','populated_count':None,'eligible_count':None,'blocked_count':1,
-                         'blocked_reason':'one-year unattended acceptance has not passed','state':'prerequisite_missing'})
+                         'blocked_reason':reason,'state':'prerequisite_missing'})
     return {**coverage,'pass':coverage['pass'] and one_year_passed,'failure_count':len(failures),'failures':failures,
             'coverage_pass':coverage['pass'],'one_year_unattended_passed':one_year_passed,
-            'principle':'The decade run may test compounding only after COVERAGE-01 and the ordinary one-year unattended run pass.'}
-
+            'acceptance_epoch':epoch_key,'acceptance_schema_version':int(acceptance['schema_version']) if acceptance else None,
+            'current_schema_version':schema_version,
+            'principle':'The decade run may test compounding only after COVERAGE-01 and a fresh ONEYEAR acceptance for this exact schema line pass.'}

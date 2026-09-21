@@ -25,12 +25,12 @@ DECLINE_START = {
     'sixth': 132.0,
 }
 DEFAULT_COHORT_MORTALITY = {
-    '0_4': 0.004,
-    '5_12': 0.001,
-    '13_17': 0.0015,
-    '18_39': 0.0025,
-    '40_59': 0.006,
-    '60_plus': 0.035,
+    '0_4': 0.045,
+    '5_12': 0.008,
+    '13_17': 0.005,
+    '18_39': 0.0045,
+    '40_59': 0.017,
+    '60_plus': 0.11,
 }
 
 
@@ -448,18 +448,25 @@ def _natural_mortality_check(conn: sqlite3.Connection, actor_id: int, day: int, 
     p=conn.execute("SELECT * FROM actor_health_profiles WHERE actor_id=?",(actor_id,)).fetchone()
     if not p:
         return False
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='mortality_audit'").fetchone():
+        prior=conn.execute("SELECT died FROM mortality_audit WHERE actor_id=? AND day=? AND source_kind='ordinary_health' ORDER BY id DESC LIMIT 1",(actor_id,day)).fetchone()
+        if prior:
+            return bool(prior[0])
     age=_age_years(conn,actor_id,day)
-    if age is None or age < 45:
-        return False
     pressure=float(p['mortality_pressure'])
-    if pressure < 8:
-        return False
-    # Convert pressure to a conservative annual hazard. The upper tail remains uncertain rather than deterministic.
-    annual=min(0.45,(pressure/100.0)**3*0.55)
-    prob=1.0-(1.0-annual)**(max(1,elapsed_days)/365.0)
-    rng=random.Random(_seed(conn,actor_id*1009+day))
-    return rng.random()<prob
-
+    annual=0.0; draw=None; prob=0.0; died=False
+    if age is not None and age >= 45 and pressure >= 8:
+        annual=min(0.45,(pressure/100.0)**3*0.55)
+        prob=1.0-(1.0-annual)**(max(1,elapsed_days)/365.0)
+        rng=random.Random(_seed(conn,actor_id*1009+day)); draw=rng.random(); died=draw<prob
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='mortality_audit'").fetchone():
+        conn.execute(
+            """INSERT INTO mortality_audit(actor_id,day,age_years,annual_hazard,elapsed_days,draw,died,source_kind,metadata_json)
+               VALUES (?,?,?,?,?,?,?,'ordinary_health',?)""",
+            (actor_id,day,age,annual,max(0,int(elapsed_days)),draw,1 if died else 0,
+             json.dumps({'mortality_pressure':pressure,'period_probability':prob,'same_rule_for_named_and_resolved_background':True},sort_keys=True)),
+        )
+    return died
 
 def _ensure_profiles_for_living_actors(conn: sqlite3.Connection) -> int:
     count=0

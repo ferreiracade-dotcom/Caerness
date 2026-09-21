@@ -40,6 +40,8 @@ from .underworld_medicine import next_underworld_medicine_due_day, process_due_u
 from .hollow import next_hollow_due_day, process_due_hollow
 from .war import next_war_due_day, process_due_war
 from .resolution_controller import next_resolution_due_day, process_due_resolution
+from .profession_runtime import next_profession_due_day, process_due_profession
+from .service_fulfillment import next_service_due_day, process_due_services
 from .role_experience import process_role_experience_review
 
 
@@ -524,6 +526,8 @@ def build_default_process_registry(*, eager_requery: bool = True):
     reg.register(ProcessSpec("merchant", next_merchant_due_day, process_due_merchant))
     reg.register(ProcessSpec("craft", next_craft_due_day, process_due_craft))
     reg.register(ProcessSpec("civilian", next_civilian_due_day, process_due_civilian))
+    reg.register(ProcessSpec("profession", next_profession_due_day, process_due_profession))
+    reg.register(ProcessSpec("service_fulfillment", next_service_due_day, process_due_services))
     reg.register(ProcessSpec("growth", next_growth_due_day, process_due_growth))
     reg.register(ProcessSpec("underworld", next_underworld_due_day, process_due_underworld))
     reg.register(ProcessSpec("underworld_medicine", next_underworld_medicine_due_day, process_due_underworld_medicine))
@@ -549,7 +553,7 @@ def build_default_process_registry(*, eager_requery: bool = True):
 
 
 _REGISTRY_BLOCK_A = (
-    "resolution", "world", "ecology", "agriculture", "logistics", "merchant", "craft", "civilian", "growth",
+    "resolution", "world", "ecology", "agriculture", "logistics", "merchant", "craft", "civilian", "profession", "service_fulfillment", "growth",
     "underworld", "underworld_medicine", "law", "war", "groundbinding", "health", "psychology", "hollow",
 )
 _REGISTRY_BLOCK_B = ("religion", "patronage", "politics", "conflict", "organization_lifecycle", "seeking", "attention", "education", "cultivation", "tournament", "spectacle", "information")

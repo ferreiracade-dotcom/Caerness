@@ -221,6 +221,22 @@ def _begin_force_segment(conn: sqlite3.Connection, force: sqlite3.Row, day: int)
         return True
     path = find_route_path(conn, current, target, day=day)
     if not path:
+        try:
+            from .conflict_geometry import military_geometry_between, direct_military_travel_days
+            geo = military_geometry_between(conn, current, target)
+        except sqlite3.OperationalError:
+            geo = None
+        if geo is not None and str(geo["geometry_kind"]) != "civilian_route":
+            days = direct_military_travel_days(conn, current, target) or 7.0
+            due = day + max(1, int(math.ceil(days)))
+            meta = _j(force["metadata_json"])
+            meta["active_conflict_geometry_id"] = int(geo["id"])
+            meta["military_geometry_kind"] = str(geo["geometry_kind"])
+            conn.execute(
+                "UPDATE war_campaign_forces SET status=?,current_route_id=NULL,segment_target_location_id=?,segment_due_day=?,next_review_day=?,metadata_json=? WHERE id=?",
+                ("withdrawing" if str(force["status"]) == "withdrawing" else "marching", target, due, due, json.dumps(meta, sort_keys=True), int(force["id"])),
+            )
+            return True
         conn.execute(
             "UPDATE war_campaign_forces SET status='stalled',current_route_id=NULL,segment_target_location_id=NULL,segment_due_day=NULL,next_review_day=? WHERE id=?",
             (day + 3, int(force["id"])),

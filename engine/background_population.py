@@ -250,8 +250,8 @@ def activate_population_life_course(conn: sqlite3.Connection) -> dict[str, int]:
                 created += 1
         conn.execute(
             """INSERT INTO background_population_dynamics(source_id,annual_birth_rate,health_modifier,last_review_day,status,metadata_json)
-               VALUES (?,0.016,1,?,'active',?) ON CONFLICT(source_id) DO NOTHING""",
-            (sid, day, _j({'authority': 'POPLIFE01_CAMPAIGN_CALIBRATION', 'birth_rate_basis': 'existing_bootstrap_v1'})),
+               VALUES (?,0.027,1,?,'active',?) ON CONFLICT(source_id) DO NOTHING""",
+            (sid, day, _j({'authority': 'POPLIFE01_CAMPAIGN_CALIBRATION', 'birth_rate_basis': 'DEMO04_gross_birth_rate_27_per_thousand'})),
         )
         dynamics += 1
     # Reconcile exact source totals to their seeded live cohorts.
@@ -294,7 +294,9 @@ def _advance_source_one_year(conn: sqlite3.Connection, source_id: int, step_day:
         closing[band] -= aged
         closing[nxt[band]] += aged
     births = opening * max(0.0, min(1.0, float(dyn['annual_birth_rate'])))
-    closing['0_4'] += births
+    infant_deaths = births * 0.10
+    deaths += infant_deaths
+    closing['0_4'] += births - infant_deaths
     for band in closing:
         conn.execute(
             "UPDATE background_population_age_cohorts SET population=?,last_review_day=? WHERE source_id=? AND age_band=?",
@@ -308,7 +310,7 @@ def _advance_source_one_year(conn: sqlite3.Connection, source_id: int, step_day:
              source_id,period_day,opening_population,births,deaths,movement_net,closing_population,metadata_json)
            VALUES (?,?,?,?,?,0,?,?)""",
         (source_id, int(step_day), opening, births, deaths, new_total,
-         _j({'method': 'aggregate_age_band_life_course', 'no_quota_rebalancing': True})),
+         _j({'method': 'aggregate_age_band_life_course', 'no_quota_rebalancing': True, 'infant_deaths_share_of_gross_births': 0.10, 'calibration': 'DEMO-04'})),
     )
     return opening, births, deaths, new_total
 

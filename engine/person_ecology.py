@@ -319,6 +319,11 @@ def resolve_background_person(
         (aid,int(profile["partition_id"]),int(profile["local_uid"]),day,reason,demand_kind,
          _j({"identity_profile_seeded_before_demand":True,"population_delta":0})),
     )
+    try:
+        from .profession_runtime import sync_actor_professions
+        sync_actor_professions(conn, aid)
+    except sqlite3.OperationalError:
+        pass
     return aid
 
 
