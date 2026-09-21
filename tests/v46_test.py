@@ -97,7 +97,7 @@ def run():
             assert 34<=dist.get('Sixth',0)<=46,dist
             assert c.execute("SELECT COUNT(*) FROM cultivation_profiles WHERE plateau_days>=1825 AND current_stage!='Sixth'").fetchone()[0]>20
             c.close()
-        if ENGINE_VERSION in {'0.58.0','0.59.0'}:
+        if ENGINE_VERSION in {'0.58.0','0.59.0','0.60.0'}:
             # v0.58 deliberately removed census feedback. A quiet two-seed decade is legal: the
             # opening ~40 Sixths are an ecological baseline, not a quota the runtime must refill.
             # Test permeability causally instead by presenting many already-ready Fifths with a
