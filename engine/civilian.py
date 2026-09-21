@@ -448,7 +448,7 @@ def _review_latent_commercial_emergence(conn: sqlite3.Connection, day: int) -> d
 
     # First update consequence for already-emergent merchants from actual enterprise history.
     rows = conn.execute("""SELECT e.*, l.id latent_id, l.historical_context_json
-                           FROM civilian_enterprises e JOIN latent_entities l
+                           FROM civilian_enterprises e LEFT JOIN latent_entities l
                              ON json_extract(e.metadata_json,'$.latent_owner_entity_id')=l.id
                            WHERE json_extract(e.metadata_json,'$.emergent_business')=1
                            ORDER BY e.id""").fetchall()
@@ -469,7 +469,8 @@ def _review_latent_commercial_emergence(conn: sqlite3.Connection, day: int) -> d
             "regional_significance": round(consequence, 3),
             "consequence_score": round(consequence, 3),
         })
-        conn.execute("UPDATE latent_entities SET historical_context_json=?,updated_day=? WHERE id=?", (json.dumps(hist, sort_keys=True), day, int(e["latent_id"])))
+        if e["latent_id"] is not None:
+            conn.execute("UPDATE latent_entities SET historical_context_json=?,updated_day=? WHERE id=?", (json.dumps(hist, sort_keys=True), day, int(e["latent_id"])))
 
         if age_days >= 3 * 365 and consequence >= 22.0 and str(e["status"]) in {"active", "strained"}:
             # A wholesaler is an enterprise, not automatically a merchant *house*.  Institutional
@@ -518,22 +519,28 @@ def _review_latent_commercial_emergence(conn: sqlite3.Connection, day: int) -> d
         if rng.random() >= chance:
             continue
         archetype = _commercial_emergence_archetype(ctx)
-        # The latent person exists before the business becomes important; no personal name is invented.
-        lcur = conn.execute("""INSERT INTO latent_entities(latent_kind,archetype,location_id,count_estimate,constraints_json,historical_context_json,status,created_day,updated_day,notes)
-                              VALUES ('person','merchant_operator',?,1,?,?,'latent',?,?,?)""",
-                            (loc, json.dumps({"identity_status":"unnamed latent individual","occupation":"merchant/operator","location_id":loc}, sort_keys=True),
-                             json.dumps({"commercial_origin":"local market opportunity","regional_significance":6.0,"consequence_score":6.0}, sort_keys=True), day, day,
-                             "Resolved from existing local population by commercial emergence; not a newly-spawned adult."))
-        latent_id = int(lcur.lastrowid)
-        label = f"[STRUCTURAL] {ctx['location_name']} {archetype.replace('_',' ')} concern {year_index}-{latent_id}"
+        # Formation needs a real operator. Resolve one from the pre-existing POPBACK ecology;
+        # if none is suitable locally, no business appears this year. Demand never spawns an adult.
+        from .person_ecology import resolve_background_person
+        operator_id = resolve_background_person(
+            conn, reason=f"local commercial opportunity at {ctx['location_name']}", location_id=loc,
+            occupation_domains=("merchant","clerk","artisan","transport","hospitality"), min_age=20, max_age=70,
+            economic_weight=1.0, command_weight=.15, subtype="Local business operator",
+        )
+        if operator_id is None:
+            continue
+        label = f"[STRUCTURAL] {ctx['location_name']} {archetype.replace('_',' ')} concern {year_index}-{operator_id}"
         capital = round(12.0 + opportunity * 0.16 + rng.uniform(-2.0, 3.0), 3)
         cash = round(7.0 + opportunity * 0.09 + rng.uniform(-1.5, 2.0), 3)
-        eid = create_enterprise(conn, label, {"wholesaler":"merchant_house","inn":"service","physician_practice":"service","smithy":"workshop","moneylender":"service","food_shop":"shop"}[archetype],
-                                location_id=loc, capital=max(8.0,capital), cash=max(4.0,cash), reputation=45+rng.random()*12, admin_quality=42+rng.random()*18, labor_capacity=42+rng.random()*20, risk_tolerance=35+rng.random()*40,
-                                metadata={"emergent_business":True,"latent_owner_entity_id":latent_id,"authority":"ENGINE_DERIVED_FROM_LATENT_POPULATION_PLUS_CAMPAIGN_CALIBRATION","display_name_status":"STRUCTURAL_LABEL_NOT_CANON_NAME","opportunity_score":opportunity})
-        configure_enterprise_business(conn, eid, archetype, quality=46+rng.random()*12, price_position=45+rng.random()*12, capacity=35+rng.random()*18, clientele_fit=45+rng.random()*15, service_reliability=45+rng.random()*15, regulatory_pressure=10+rng.random()*15, cadence_days=30, metadata={"authority":"ENGINE_DERIVED_STRUCTURAL_BUSINESS","latent_owner_entity_id":latent_id})
-        hist = {"commercial_origin":"local market opportunity","enterprise_id":eid,"regional_significance":8.0,"consequence_score":8.0}
-        conn.execute("UPDATE latent_entities SET historical_context_json=? WHERE id=?", (json.dumps(hist,sort_keys=True),latent_id))
+        broad_kind = {"wholesaler":"other","inn":"service","physician_practice":"service","smithy":"workshop","moneylender":"service","food_shop":"shop"}[archetype]
+        eid = create_enterprise(conn, label, broad_kind,
+                                owner_actor_id=operator_id, location_id=loc, capital=max(8.0,capital), cash=max(4.0,cash), reputation=45+rng.random()*12, admin_quality=42+rng.random()*18, labor_capacity=42+rng.random()*20, risk_tolerance=35+rng.random()*40,
+                                metadata={"emergent_business":True,"background_operator_actor_id":operator_id,"authority":"ENGINE_DERIVED_FROM_PREEXISTING_POPBACK_PLUS_CAMPAIGN_CALIBRATION","display_name_status":"STRUCTURAL_LABEL_NOT_CANON_NAME","opportunity_score":opportunity,"institutional_form":"ordinary_firm","population_delta":0})
+        configure_enterprise_business(conn, eid, archetype, quality=46+rng.random()*12, price_position=45+rng.random()*12, capacity=35+rng.random()*18, clientele_fit=45+rng.random()*15, service_reliability=45+rng.random()*15, regulatory_pressure=10+rng.random()*15, cadence_days=30, metadata={"authority":"ENGINE_DERIVED_STRUCTURAL_BUSINESS","background_operator_actor_id":operator_id,"population_delta":0})
+        if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='enterprise_ecology_state'").fetchone():
+            conn.execute("""INSERT INTO enterprise_ecology_state(enterprise_id,founded_day,crystallized_day,structural_origin,last_review_day,metadata_json)
+                            VALUES (?,?,?,'formed_during_simulation',?,?) ON CONFLICT(enterprise_id) DO NOTHING""",
+                         (eid,day,day,day,json.dumps({"real_popback_operator":True,"population_delta":0},sort_keys=True)))
         created += 1
     return {"commercial_emergence_reviews": reviewed, "latent_merchants_created": created, "structural_enterprises_created": created, "merchant_house_candidates": candidates}
 

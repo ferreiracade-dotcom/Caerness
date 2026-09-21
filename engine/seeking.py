@@ -358,6 +358,11 @@ def process_seek_intent(conn: sqlite3.Connection, intent_id: int, day: int | Non
     offer=conn.execute("SELECT * FROM seekable_offerings WHERE id=? AND status='active'",(int(selected),)).fetchone() if selected is not None else None
     if offer is None:
         matches=discover_for_intent(conn,intent_id)
+        if not matches and str(intent["need_kind"]) == "instruction" and str(intent["domain_key"]) == "martial_instruction":
+            # Actual demand may reveal a suitable pre-existing background teacher. It never creates one.
+            from .teaching_ecology import ensure_provider_for_seek_intent
+            ensure_provider_for_seek_intent(conn,intent_id)
+            matches=discover_for_intent(conn,intent_id)
         if not matches:
             conn.execute("UPDATE actor_seek_intents SET status='searching',last_review_day=?,next_review_day=? WHERE id=?",(day,day+30,intent_id)); return {"intent_id":intent_id,"action":"no_provider_known"}
         offer=conn.execute("SELECT * FROM seekable_offerings WHERE id=?",(matches[0]["offering_id"],)).fetchone()

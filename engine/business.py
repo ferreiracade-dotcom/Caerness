@@ -77,11 +77,11 @@ _ARCHETYPES: dict[str, dict[str, Any]] = {
     "architectural_practice": {"name":"Architectural Practice", "sector":"professional", "enterprise_kind":"service", "base_revenue":34, "cost_ratio":0.51,
                                "weights":{"construction_demand":0.38,"elite_patronage":0.24,"disposable_income":0.10,"cultural_activity":0.10,"reputation_climate":0.18}, "regulation":0.03, "skill_sensitive":True},
     # Trade / logistics
-    "warehouse": {"name":"Warehouse", "sector":"trade", "enterprise_kind":"merchant_house", "base_revenue":26, "cost_ratio":0.56,
+    "warehouse": {"name":"Warehouse", "sector":"trade", "enterprise_kind":"other", "base_revenue":26, "cost_ratio":0.56,
                   "weights":{"trade_flow":0.46,"traveler_flow":0.08,"security":0.20,"event_activity":0.08,"credit_demand":0.08,"foot_traffic":0.10}, "regulation":0.04},
-    "wholesaler": {"name":"Wholesaler", "sector":"trade", "enterprise_kind":"merchant_house", "base_revenue":34, "cost_ratio":0.70,
+    "wholesaler": {"name":"Wholesaler", "sector":"trade", "enterprise_kind":"other", "base_revenue":34, "cost_ratio":0.70,
                    "weights":{"trade_flow":0.48,"credit_demand":0.12,"security":0.14,"disposable_income":0.08,"traveler_flow":0.08,"reputation_climate":0.10}, "regulation":0.04},
-    "caravan_firm": {"name":"Caravan Firm", "sector":"logistics", "enterprise_kind":"merchant_house", "base_revenue":35, "cost_ratio":0.72,
+    "caravan_firm": {"name":"Caravan Firm", "sector":"logistics", "enterprise_kind":"shipping", "base_revenue":35, "cost_ratio":0.72,
                      "weights":{"trade_flow":0.38,"traveler_flow":0.16,"security":0.22,"credit_demand":0.08,"event_activity":0.06,"reputation_climate":0.10}, "regulation":0.03},
     "shipping_house": {"name":"Shipping House", "sector":"logistics", "enterprise_kind":"shipping", "base_revenue":41, "cost_ratio":0.76,
                        "weights":{"trade_flow":0.44,"security":0.20,"credit_demand":0.08,"elite_patronage":0.06,"event_activity":0.08,"reputation_climate":0.14}, "regulation":0.06},
@@ -384,6 +384,30 @@ def resolve_business_cycle(conn: sqlite3.Connection, enterprise_id: int, day: in
         status = "strained"
     elif status in ("strained", "insolvent") and cash > 0 and debt <= max(10.0, float(row["capital"]) * 1.2):
         status = "active"
+    # PROFESSION-01 business ecology: insolvency is persistent world state, not a one-cycle label.
+    # A firm that stays insolvent for roughly six months closes, while all accounts/debts/history remain.
+    eco = conn.execute("SELECT * FROM enterprise_ecology_state WHERE enterprise_id=?", (enterprise_id,)).fetchone() if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='enterprise_ecology_state'").fetchone() else None
+    if eco is None and conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='enterprise_ecology_state'").fetchone():
+        conn.execute("""INSERT INTO enterprise_ecology_state(enterprise_id,founded_day,crystallized_day,structural_origin,last_review_day,metadata_json)
+                        VALUES (?,NULL,0,'preexisting',?,?)""", (enterprise_id,day,json.dumps({"opening_founded_day_unknown":True},sort_keys=True)))
+        eco = conn.execute("SELECT * FROM enterprise_ecology_state WHERE enterprise_id=?", (enterprise_id,)).fetchone()
+    if eco is not None:
+        profitable = int(eco["profitable_streak_days"] or 0)
+        profitable = profitable + elapsed if net > 0 else 0
+        insolvent_since = eco["insolvent_since_day"]
+        if status == "insolvent":
+            if insolvent_since is None:
+                insolvent_since = day
+            if day - int(insolvent_since) >= 180:
+                status = "closed"
+                conn.execute("UPDATE enterprise_ecology_state SET profitable_streak_days=?,insolvent_since_day=?,closed_day=?,closure_reason='sustained_insolvency',last_review_day=? WHERE enterprise_id=?",
+                             (profitable,int(insolvent_since),day,day,enterprise_id))
+            else:
+                conn.execute("UPDATE enterprise_ecology_state SET profitable_streak_days=?,insolvent_since_day=?,last_review_day=? WHERE enterprise_id=?",
+                             (profitable,int(insolvent_since),day,enterprise_id))
+        else:
+            conn.execute("UPDATE enterprise_ecology_state SET profitable_streak_days=?,insolvent_since_day=NULL,last_review_day=? WHERE enterprise_id=?",
+                         (profitable,day,enterprise_id))
     conn.execute("UPDATE civilian_enterprises SET cash=?,debt=?,status=?,updated_day=? WHERE id=?", (cash, debt, status, day, enterprise_id))
     conn.execute(
         """UPDATE enterprise_business_profiles SET utilization=?,last_resolved_day=?,next_review_day=?,updated_day=? WHERE enterprise_id=?""",

@@ -1057,8 +1057,15 @@ def activate_post80_organization_lifecycle(conn: sqlite3.Connection) -> dict[str
 
 def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     out={}
+    from .opening_world_state import resolve_opening_institution_locations, resolve_opening_character_locations
+    out['opening_institution_locations_resolved']=resolve_opening_institution_locations(conn)
+    out.update({f'opening_character_locations_{k}':v for k,v in resolve_opening_character_locations(conn).items()})
     out.update(activate_missing_merchant_anchors(conn))
+    out['opening_institution_locations_post_anchors']=resolve_opening_institution_locations(conn)
     out.update(activate_explicit_teaching(conn))
+    out.update({f'opening_character_locations_post_teaching_{k}':v for k,v in resolve_opening_character_locations(conn).items()})
+    from .teaching_ecology import refresh_teacher_market
+    out.update(refresh_teacher_market(conn))
     out.update(activate_institution_training_contexts(conn))
     out['structural_training_cohorts_created']=ensure_structural_training_cohorts(conn,0)
     out.update(activate_commercial_anchors(conn))
@@ -1072,6 +1079,8 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     out.update(activate_background_people(conn))
     from .profession_runtime import activate_profession_runtime
     out.update(activate_profession_runtime(conn))
+    from .opening_world_state import activate_institutional_authority
+    out.update(activate_institutional_authority(conn))
     from .aggregate_trade import activate_aggregate_trade
     out.update(activate_aggregate_trade(conn))
     out.update(activate_elixir_substrate(conn))
@@ -1113,6 +1122,8 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     from .hollow import activate_hollow_substrate
     out.update(activate_hollow_substrate(conn))
     out.update(activate_integration_opening_substrate(conn))
+    from .merchant_taxonomy import activate_merchant_taxonomy
+    out.update(activate_merchant_taxonomy(conn))
     from .service_fulfillment import activate_structural_provider_contracts
     out.update(activate_structural_provider_contracts(conn))
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version','20')")

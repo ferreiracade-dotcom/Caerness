@@ -21,6 +21,13 @@ def create_service_request(conn,domain_key,*,requester_actor_id=None,requester_i
     vals=[requester_actor_id,requester_institution_actor_id,requester_enterprise_id]
     if sum(v is not None for v in vals)!=1: raise ValueError('service request requires exactly one requester')
     day=_day(conn) if requested_day is None else int(requested_day)
+    if location_id is None:
+        if requester_actor_id is not None:
+            r=conn.execute('SELECT current_location_id FROM actors WHERE id=?',(int(requester_actor_id),)).fetchone(); location_id=r[0] if r else None
+        elif requester_institution_actor_id is not None:
+            r=conn.execute('SELECT COALESCE(a.current_location_id,ip.primary_location_id) FROM actors a LEFT JOIN institution_profiles ip ON ip.actor_id=a.id WHERE a.id=?',(int(requester_institution_actor_id),)).fetchone(); location_id=r[0] if r else None
+        elif requester_enterprise_id is not None:
+            r=conn.execute('SELECT location_id FROM civilian_enterprises WHERE id=?',(int(requester_enterprise_id),)).fetchone(); location_id=r[0] if r else None
     cur=conn.execute("""INSERT INTO service_requests(requester_actor_id,requester_institution_actor_id,requester_enterprise_id,domain_key,location_id,need_level,requested_day,due_day,status,metadata_json) VALUES (?,?,?,?,?,?,?,?,'open',?)""",
                      (requester_actor_id,requester_institution_actor_id,requester_enterprise_id,str(domain_key),location_id,max(0,min(100,float(need_level))),day,due_day,_j(metadata)))
     return int(cur.lastrowid)
