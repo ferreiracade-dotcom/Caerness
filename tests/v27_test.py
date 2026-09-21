@@ -20,14 +20,14 @@ def run():
     reset_db(); init_db()
     with connect() as c:
         first=import_current_seed(c,SEED)
-        assert first['places']==101 and first['routes']==11 and first['institutions']==91 and first['persons']==464
+        assert first['places']==133 and first['routes']==11 and first['institutions']==98 and first['persons']==464
         assert first['households']==8 and first['cohorts']==14 and first['claims']==12 and first['latent_scopes']==54
         assert c.execute("SELECT COUNT(*) FROM actors WHERE actor_type='character'").fetchone()[0]==464
-        assert c.execute("SELECT COUNT(*) FROM actors WHERE actor_type='institution'").fetchone()[0]==91
+        assert c.execute("SELECT COUNT(*) FROM actors WHERE actor_type='institution'").fetchone()[0]==98
         assert c.execute("SELECT COUNT(*) FROM actors WHERE lower(name)='malcolm vane'").fetchone()[0]==0
         assert c.execute("SELECT COUNT(*) FROM coverage_registry").fetchone()[0]==52
         assert c.execute("SELECT COUNT(*) FROM latent_population_scopes WHERE population_estimate IS NOT NULL").fetchone()[0]==0
-        assert c.execute("SELECT COUNT(*) FROM actor_life_profiles WHERE birth_day IS NULL").fetchone()[0]==21
+        assert c.execute("SELECT COUNT(*) FROM actor_life_profiles WHERE birth_day IS NULL").fetchone()[0]==0
         unknown_loc=c.execute("""SELECT COUNT(*) FROM source_identity_map m JOIN actors a ON a.id=m.entity_id
                                   WHERE m.source_namespace=? AND m.entity_kind='actor' AND a.current_location_id IS NULL""",(SOURCE_NAMESPACE,)).fetchone()[0]
         assert unknown_loc>0
