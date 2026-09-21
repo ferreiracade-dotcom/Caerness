@@ -1,0 +1,19 @@
+{
+  "births": 1404000.0,
+  "closing_population": 52117780.0,
+  "contradiction_errors": 0,
+  "coverage_failures": 0,
+  "day": 365,
+  "deaths": 1286220.0,
+  "foreign_keys": 0,
+  "integrity": "ok",
+  "opening_population": 52000000,
+  "restart_determinism": {
+    "day180_to_day365": true,
+    "differences": 0,
+    "sqlite_sequence_mismatches": {},
+    "table_mismatches": [],
+    "tables_compared": 438
+  },
+  "status": "passed"
+}

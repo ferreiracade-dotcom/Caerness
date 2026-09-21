@@ -5,6 +5,8 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Any
 
+from .activation import CURRENT_CANON_ACTIVATION_VERSION
+
 
 @dataclass(frozen=True)
 class CoverageSpec:
@@ -337,13 +339,55 @@ def ten_year_gate(conn: sqlite3.Connection, coverage_run_id: int | None = None) 
     schema_version=int(schema[0]) if schema else 0
     one_year_passed=bool(acceptance and str(acceptance['status'])=='passed' and int(acceptance['schema_version'])==schema_version)
     failures=list(coverage['failures'])
+
+    # SQL schema currency does not prove that the opening-world projections were refreshed.
+    # TENYEAR-02 exposed a schema-104 database that still carried activation v17 and therefore
+    # lacked PERSONECO/profession/authority opening state. Refuse such a causally incomplete DB.
+    activation_row=conn.execute("SELECT value FROM engine_meta WHERE key='current_canon_activation_version'").fetchone()
+    try:
+        activation_version=int(activation_row[0]) if activation_row else 0
+    except (TypeError, ValueError):
+        activation_version=0
+    activation_fresh=activation_version >= CURRENT_CANON_ACTIVATION_VERSION
+
+    person_ecology_ready=True
+    profession_ready=True
+    authority_ready=True
+    if schema_version >= 104:
+        if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='background_population_sources'").fetchone():
+            source_count=int(conn.execute("SELECT COUNT(*) FROM background_population_sources").fetchone()[0])
+            partition_count=int(conn.execute("SELECT COUNT(*) FROM background_population_partitions").fetchone()[0])
+            profile_count=int(conn.execute("SELECT COUNT(*) FROM background_person_profiles").fetchone()[0])
+            person_ecology_ready=(source_count == 0) or (partition_count == source_count and profile_count > 0)
+        if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='professional_profiles'").fetchone():
+            profession_marker=conn.execute("SELECT value FROM engine_meta WHERE key='profession01_runtime_version'").fetchone()
+            profession_count=int(conn.execute("SELECT COUNT(*) FROM professional_profiles").fetchone()[0])
+            profession_ready=bool(profession_marker and str(profession_marker[0]) == '1' and profession_count > 0)
+        if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='institutional_authority_slots'").fetchone():
+            authority_ready=int(conn.execute("SELECT COUNT(*) FROM institutional_authority_slots").fetchone()[0]) > 0
+
+    opening_activation_passed=activation_fresh and person_ecology_ready and profession_ready and authority_ready
+    if not opening_activation_passed:
+        failures.append({
+            'domain_key':'opening_activation','label':'Current opening-world activation','mechanism_status':'GATE',
+            'populated_count':None,'eligible_count':None,'blocked_count':1,
+            'blocked_reason':(
+                f'opening activation is stale/incomplete: activation={activation_version}, '
+                f'required>={CURRENT_CANON_ACTIVATION_VERSION}, person_ecology={person_ecology_ready}, '
+                f'profession={profession_ready}, institutional_authority={authority_ready}'
+            ),'state':'prerequisite_missing',
+        })
     if not one_year_passed:
         reason='current schema acceptance epoch has not passed' if epoch_key else 'current engine has no explicit acceptance epoch'
         failures.append({'domain_key':'one_year_unattended','label':'Integrated ordinary one-year unattended run',
                          'mechanism_status':'GATE','populated_count':None,'eligible_count':None,'blocked_count':1,
                          'blocked_reason':reason,'state':'prerequisite_missing'})
-    return {**coverage,'pass':coverage['pass'] and one_year_passed,'failure_count':len(failures),'failures':failures,
+    return {**coverage,'pass':coverage['pass'] and one_year_passed and opening_activation_passed,
+            'failure_count':len(failures),'failures':failures,
             'coverage_pass':coverage['pass'],'one_year_unattended_passed':one_year_passed,
+            'opening_activation_passed':opening_activation_passed,
+            'current_canon_activation_version':activation_version,
+            'required_canon_activation_version':CURRENT_CANON_ACTIVATION_VERSION,
             'acceptance_epoch':epoch_key,'acceptance_schema_version':int(acceptance['schema_version']) if acceptance else None,
             'current_schema_version':schema_version,
             'principle':'The decade run may test compounding only after COVERAGE-01 and a fresh ONEYEAR acceptance for this exact schema line pass.'}

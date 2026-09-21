@@ -29,6 +29,11 @@ MARTIAL_INSTITUTION_KINDS={
     'state martial establishment','martial/religious order','martial religious order','martial institution','noble martial house','military tradition'
 }
 
+# Opening-world activation is versioned separately from the SQL schema. A database can be
+# schema-current yet still be missing newer opening projections. Long-horizon release gates
+# verify this value before accepting the opening world.
+CURRENT_CANON_ACTIVATION_VERSION = 20
+
 
 def _load(raw: str | None, default):
     try: return json.loads(raw) if raw else default
@@ -1138,5 +1143,8 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     out.update(activate_merchant_taxonomy(conn))
     from .service_fulfillment import activate_structural_provider_contracts
     out.update(activate_structural_provider_contracts(conn))
-    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version','20')")
+    conn.execute(
+        "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
+        (str(CURRENT_CANON_ACTIVATION_VERSION),),
+    )
     return out
