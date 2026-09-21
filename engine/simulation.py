@@ -408,6 +408,7 @@ def advance_connection_legacy(conn: sqlite3.Connection, days: int) -> list[sqlit
         next_underworld_medicine = next_underworld_medicine_due_day(conn, cursor_day, end)
         next_war = next_war_due_day(conn, cursor_day, end)
         next_resolution = next_resolution_due_day(conn, cursor_day, end)
+        next_patronage = next_patronage_due_day(conn, cursor_day, end)
         candidates = [d for d in (next_clock, next_review, next_interaction, next_information, next_world, next_civilian, next_health, next_religion, next_ecology, next_agriculture, next_politics, next_orglife, next_education, next_logistics, next_merchant, next_craft, next_growth, next_law, next_cultivation, next_groundbinding, next_tournament, next_spectacle, next_underworld, next_hollow, next_psych, next_underworld_medicine, next_war, next_resolution, next_patronage) if d is not None]
         if not candidates:
             break

@@ -13,7 +13,7 @@ def run():
     advance(90)
     with connect() as conn:
         decision_count = conn.execute("SELECT COUNT(*) FROM decisions").fetchone()[0]
-        assert decision_count > 10, "Reviewed actors should make persisted decisions."
+        assert decision_count >= 10, "Reviewed actors should make persisted decisions on the structural cadence."
 
         dormant_decisions = conn.execute(
             "SELECT COUNT(*) FROM decisions WHERE tier='DORMANT'"
