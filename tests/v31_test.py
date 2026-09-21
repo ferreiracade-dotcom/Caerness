@@ -9,7 +9,7 @@ from engine.db import ENGINE_VERSION, SCHEMA_VERSION, connect, init_db, reset_db
 from engine.current_seed import import_current_seed
 from engine.activation import activate_existing_loops
 
-SEED=ROOT/'game'/'seeds'/'Caerness_Initial_World_State_Seed_v1_2.json'
+SEED=ROOT/'game'/'seeds'/'Caerness_Initial_World_State_Seed_v1_3.json'
 
 def run():
     assert ENGINE_VERSION in {'0.31.0','0.32.0','0.33.0','0.34.0','0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION >= 31
