@@ -41,15 +41,16 @@ def run():
         resolve_business_cycle(c,eid,60)
         er=c.execute('SELECT cash,debt,status FROM civilian_enterprises WHERE id=?',(eid,)).fetchone()
         assert float(er['cash'])>=0 and float(er['debt'])>0,dict(er)
-        # Latent commercial emergence creates structural businesses without inventing a named adult.
+        # Demand alone cannot create an operator. This synthetic market has no pre-existing
+        # POPBACK identity reservoir, so no business may form merely because opportunity is high.
         set_commercial_context(c,loc,trade_flow=99,foot_traffic=95,traveler_flow=95,security=65,disposable_income=70,credit_demand=90,craft_demand=80,health_demand=75)
         created=0
         for year in range(1,11):
             day=365*year;c.execute('UPDATE world_state SET current_day=? WHERE id=1',(day,))
             out=_review_latent_commercial_emergence(c,day);created += out['structural_enterprises_created']
-        assert created>0
-        assert c.execute("SELECT COUNT(*) FROM latent_entities WHERE latent_kind='person' AND archetype='merchant_operator'").fetchone()[0]>0
-        assert c.execute("SELECT COUNT(*) FROM civilian_enterprises WHERE json_extract(metadata_json,'$.emergent_business')=1").fetchone()[0]>0
+        assert created==0
+        assert c.execute("SELECT COUNT(*) FROM latent_entities WHERE latent_kind='person' AND archetype='merchant_operator'").fetchone()[0]==0
+        assert c.execute("SELECT COUNT(*) FROM civilian_enterprises WHERE json_extract(metadata_json,'$.emergent_business')=1").fetchone()[0]==0
         assert c.execute("SELECT COUNT(*) FROM actors WHERE actor_type='character' AND name LIKE '[STRUCTURAL] %'").fetchone()[0]==0
         c.commit()
     print('v0.45.0 decade integrity / latent commercial emergence regression PASS')
