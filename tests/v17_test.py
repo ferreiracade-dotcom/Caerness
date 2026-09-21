@@ -86,7 +86,9 @@ def run():
 
         building = conn.execute('SELECT * FROM buildings WHERE project_id=?', (proj,)).fetchone()
         assert building is not None and building['building_kind'] == 'hall'
-        assert int(building['updated_day']) == 400 and float(building['condition']) > 0
+        # Event-driven maintenance remains at its last real scheduled checkpoint;
+        # the caller's arbitrary stop day is not itself a maintenance event.
+        assert int(building['updated_day']) == 390 and float(building['condition']) > 0
 
         adoption = float(conn.execute('SELECT adoption FROM style_adoption WHERE style_id=? AND location_id=?', (style,cairn)).fetchone()[0])
         assert adoption > adoption_before
@@ -109,7 +111,11 @@ def run():
         # Succession is automatically triggered only when the old head is actually marked dead/deceased.
         conn.execute("UPDATE actors SET status='deceased' WHERE id=?", (merchant['id'],))
         conn.commit()
-        advance_connection(conn, 1)
+        from engine.civilian import next_civilian_due_day
+        now = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+        succession_due = next_civilian_due_day(conn, now, now + 60)
+        assert succession_due is not None and int(succession_due) > now
+        advance_connection(conn, int(succession_due) - now)
         conn.commit()
         h = conn.execute('SELECT * FROM households WHERE id=?', (hh,)).fetchone()
         assert int(h['head_actor_id']) == heir
