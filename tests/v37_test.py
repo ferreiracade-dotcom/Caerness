@@ -94,12 +94,16 @@ def run():
         cand=c.execute("SELECT * FROM emergent_institution_candidates WHERE enterprise_id=? AND candidate_kind='criminal organization'",(indie,)).fetchone(); assert cand and cand['status']=='forming',p60
         _set_day(c,90); process_due_underworld(c,90)
         cand=c.execute("SELECT * FROM emergent_institution_candidates WHERE id=?",(cand['id'],)).fetchone(); assert cand['status']=='eligible',dict(cand)
-        try:
-            crystallize_institution_candidate(c,int(cand['id']))
-            raise AssertionError('unnamed candidate must not auto-crystallize')
-        except ValueError as e:
-            assert 'name' in str(e).lower()
-        assert int(c.execute("SELECT COUNT(*) FROM actors").fetchone()[0])==before_actors, 'formation should remain candidate resolution until grounded identity exists'
+        # Consequential organizations may crystallize under a structural identity even when their
+        # ordinary/social name is unresolved. This creates an institution, never a person.
+        characters_before=int(c.execute("SELECT COUNT(*) FROM actors WHERE actor_type='character'").fetchone()[0])
+        formed=crystallize_institution_candidate(c,int(cand['id']))
+        formed_row=c.execute("SELECT * FROM actors WHERE id=?",(formed,)).fetchone()
+        assert formed_row and formed_row['actor_type']=='institution' and str(formed_row['name']).startswith('[STRUCTURAL]')
+        assert int(c.execute("SELECT COUNT(*) FROM actors WHERE actor_type='character'").fetchone()[0])==characters_before
+        assert int(c.execute("SELECT COUNT(*) FROM actors").fetchone()[0])==before_actors+1
+        core=c.execute("SELECT core_json FROM continuity_cores WHERE entity_kind='institution' AND entity_id=?",(formed,)).fetchone()
+        assert core and json.loads(core[0]).get('unresolved_name') is True
 
         # Exposure creates local knowledge and therefore a local case; another city's police do not know automatically.
         c.execute("UPDATE shadow_market_links SET status='exposed',exposure=92 WHERE id=?",(s1,))
