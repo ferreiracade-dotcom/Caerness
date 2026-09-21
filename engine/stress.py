@@ -126,7 +126,7 @@ def contradiction_scan(conn: sqlite3.Connection, *, deep_integrity: bool = True)
     rows = conn.execute(
         """SELECT a.id,a.status,lp.life_status FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id
            WHERE (lower(a.status) IN ('dead','deceased') AND lp.life_status<>'deceased')
-              OR (lower(a.status) NOT IN ('dead','deceased') AND lp.life_status='deceased')"""
+              OR (lower(a.status) NOT IN ('dead','deceased','historical') AND lp.life_status='deceased')"""
     ).fetchall()
     for r in rows:
         add('life_status_mirror', f"Actor #{r['id']} status={r['status']} conflicts with life_status={r['life_status']}")
