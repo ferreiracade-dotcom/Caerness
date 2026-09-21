@@ -694,7 +694,8 @@ def _process_cultural_institutions(conn: sqlite3.Connection, day: int) -> int:
 def next_religion_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int | None:
     queries = [
         ("SELECT MIN(next_due_day) FROM religious_observances WHERE status='active' AND next_due_day>? AND next_due_day<=?",),
-        ("SELECT MIN(due_day) FROM religious_obligations WHERE status='pending' AND due_day>? AND due_day<=?",),
+        # Obligations become overdue only once day > due_day, so the causal transition is due_day + 1.
+        ("SELECT MIN(due_day + 1) FROM religious_obligations WHERE status='pending' AND (due_day + 1)>? AND (due_day + 1)<=?",),
         ("SELECT MIN(next_due_day) FROM institutional_patronage WHERE status IN ('active','strained') AND next_due_day>? AND next_due_day<=?",),
         ("SELECT MIN(next_review_day) FROM religious_institutions WHERE status IN ('active','strained','dormant') AND next_review_day>? AND next_review_day<=?",),
         ("SELECT MIN(next_due_day) FROM cultural_programs WHERE status='active' AND next_due_day>? AND next_due_day<=?",),
