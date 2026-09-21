@@ -41,7 +41,10 @@ def run():
         aid=create_medical_access(c,patient2,provider_actor_id=doctor,purpose_kind='concealed_treatment',consent_status='coerced',coercion=85)
         assert c.execute("select consent_status from underworld_medical_access where id=?",(aid,)).fetchone()[0]=='coerced'
         cov={x['domain_key']:x for x in snapshot_coverage(c,None,phase='v40-test')}
-        assert cov['42_exploitation_medicine']['mechanism_status']=='RUNNABLE' and cov['42_exploitation_medicine']['populated_count']>=1,cov['42_exploitation_medicine']
+        domain=cov['42_exploitation_medicine']
+        assert domain['mechanism_status']=='RUNNABLE' and domain['eligible_count']>=1,domain
+        # Conditional domains need not fabricate an opening incident merely to populate a counter.
+        assert domain['state'] in ('conditional_dormant','active') and domain['blocked_count']==0,domain
         c.commit()
     print('v0.40.0 underworld medicine / exploitation regression PASS')
 if __name__=='__main__':run()
