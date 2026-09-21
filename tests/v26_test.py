@@ -8,8 +8,6 @@ if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 from engine.db import ENGINE_VERSION, SCHEMA_VERSION, DEFAULT_DB_PATH, connect, database_path, init_db, migration_status, reset_db
 from engine.bootstrap import bootstrap_campaign, bootstrap_status, create_player_character
 
-LEGACY_V026_CANON = ROOT / 'tests' / 'fixtures' / 'v026_world_bible_current.docx'
-
 from engine.stress import contradiction_scan
 
 
@@ -23,14 +21,14 @@ def run():
         ms=migration_status(c)
         assert ms['schema_version']==SCHEMA_VERSION
         assert len(ms['applied'])>=26
-        first=bootstrap_campaign(c, verification_canon_path=LEGACY_V026_CANON)
+        first=bootstrap_campaign(c)
         assert first['locations']==48
         assert first['institutions']==36
         assert first['named_characters']==388
         assert first['demographic_cohorts']==6
         assert first['latent_stage_pools']==6
         assert first['player_created'] is False
-        second=bootstrap_campaign(c, verification_canon_path=LEGACY_V026_CANON)
+        second=bootstrap_campaign(c)
         assert second['idempotent'] is True
         st=bootstrap_status(c)
         assert st['counts']['locations']==48
