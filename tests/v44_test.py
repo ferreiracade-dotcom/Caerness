@@ -11,7 +11,7 @@ from engine.civilian import create_enterprise
 
 
 def run():
-    assert ENGINE_VERSION in {'0.44.0','0.45.0','0.46.0','0.47.0','0.54.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=44
+    assert ENGINE_VERSION in {'0.44.0','0.45.0','0.46.0','0.47.0','0.54.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=44
     reset_db();init_db()
     with connect() as c:
         import_current_seed(c);activate_existing_loops(c)

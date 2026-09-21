@@ -16,7 +16,7 @@ def add_fighter(c,name,loc,stage='Temper',age=24):
 
 
 def run():
-    assert ENGINE_VERSION in {'0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=35
+    assert ENGINE_VERSION in {'0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=35
     reset_db();init_db()
     with connect() as c:
         c.execute("INSERT INTO locations(name,kind,is_canon) VALUES ('Cairnholt','city',1)"); loc=int(c.execute("SELECT id FROM locations WHERE name='Cairnholt'").fetchone()[0])

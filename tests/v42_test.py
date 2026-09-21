@@ -11,7 +11,7 @@ from engine.cultivation import process_due_cultivation
 
 
 def run():
-    assert ENGINE_VERSION in {'0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.54.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=42
+    assert ENGINE_VERSION in {'0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.54.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=42
     reset_db(); init_db()
     with connect() as c:
         cols={r[1] for r in c.execute('PRAGMA table_info(cultivation_profiles)').fetchall()}

@@ -10,7 +10,7 @@ from engine.war import configure_military_logistics_profile,register_campaign_fo
 from engine.coverage import snapshot_coverage
 
 def run():
-    assert ENGINE_VERSION in {'0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=41
+    assert ENGINE_VERSION in {'0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=41
     reset_db();init_db()
     with connect() as c:
         src=int(c.execute("INSERT INTO locations(name,kind,is_canon) VALUES ('War Supply City','city',0)").lastrowid)

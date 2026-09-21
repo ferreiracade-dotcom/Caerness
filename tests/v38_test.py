@@ -26,7 +26,7 @@ def _bootstrap():
 
 
 def run():
-    assert ENGINE_VERSION in {'0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=38
+    assert ENGINE_VERSION in {'0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=38
 
     # Opening authority model: Deep Court elders are power-brokers, not heirs.
     c=_bootstrap()

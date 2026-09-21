@@ -28,7 +28,7 @@ def location(c,name,kind='town'):
 
 
 def run():
-    reset_db(); init_db(); assert ENGINE_VERSION in {'0.25.0','0.26.0','0.26.1','0.27.1','0.28.0','0.29.0', '0.30.0','0.31.0','0.32.0','0.33.0','0.34.0','0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0'}
+    reset_db(); init_db(); assert ENGINE_VERSION in {'0.25.0','0.26.0','0.26.1','0.27.1','0.28.0','0.29.0', '0.30.0','0.31.0','0.32.0','0.33.0','0.34.0','0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'}
     with connect() as c:
         home=location(c,'Stressford'); border=location(c,'Riverside')
         configure_environment(c,home,climate_label='temperate',terrain_kind='plain',current_carrying_capacity=120,current_replenishment=70)

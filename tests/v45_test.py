@@ -15,7 +15,7 @@ def _actor(c,name,loc):
     return a
 
 def run():
-    assert ENGINE_VERSION in {'0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=45
+    assert ENGINE_VERSION in {'0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=45
     reset_db();init_db()
     with connect() as c:
         loc=int(c.execute("INSERT INTO locations(name,kind) VALUES ('Fixture Market','city')").lastrowid)

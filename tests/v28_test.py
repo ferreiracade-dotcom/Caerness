@@ -29,7 +29,7 @@ def _actor(c,name,loc,tier='ACTIVE'):
     return int(aid)
 
 def run():
-    assert ENGINE_VERSION in {'0.28.0','0.29.0', '0.30.0','0.31.0','0.32.0','0.33.0','0.34.0','0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=28
+    assert ENGINE_VERSION in {'0.28.0','0.29.0', '0.30.0','0.31.0','0.32.0','0.33.0','0.34.0','0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=28
     reset_db(); init_db()
     with connect() as c:
         # Current-canon active training now produces an authoritative domain decision rather than generic consolidation.

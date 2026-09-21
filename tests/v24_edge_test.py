@@ -18,7 +18,7 @@ def fail(fn):
     raise AssertionError('expected failure')
 
 def run():
-    reset_db(); init_db(); assert ENGINE_VERSION in {'0.24.0','0.25.0','0.26.0','0.26.1','0.27.1','0.28.0','0.29.0', '0.30.0','0.31.0','0.32.0','0.33.0','0.34.0','0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0'}
+    reset_db(); init_db(); assert ENGINE_VERSION in {'0.24.0','0.25.0','0.26.0','0.26.1','0.27.1','0.28.0','0.29.0', '0.30.0','0.31.0','0.32.0','0.33.0','0.34.0','0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'}
     with connect() as c:
         inst=actor(c,'Edge Academy','institution'); t1=actor(c,'Edge Teacher'); t2=actor(c,'Replacement Teacher'); s=actor(c,'Edge Student'); s2=actor(c,'Second Student')
         set_actor_competence(c,t1,'martial',75); set_actor_competence(c,t2,'martial',70); set_actor_competence(c,s,'martial',10); set_actor_competence(c,s2,'martial',10)

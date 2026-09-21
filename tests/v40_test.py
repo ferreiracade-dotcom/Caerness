@@ -15,7 +15,7 @@ def _actor(c,name,loc):
     c.execute("insert into actor_life_profiles(actor_id,life_stage,family_formation_eligible,life_status,last_review_day,metadata_json) values (?,'adult',0,'living',0,'{}')",(aid,));ensure_health_profile(c,aid);return aid
 
 def run():
-    assert ENGINE_VERSION in {'0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=40
+    assert ENGINE_VERSION in {'0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=40
     reset_db();init_db()
     with connect() as c:
         loc=int(c.execute("insert into locations(name,kind,is_canon) values ('Medical Test Ward','district',1)").lastrowid)

@@ -21,7 +21,7 @@ def _bootstrap(path:str,seed:int):
 
 
 def run():
-    assert ENGINE_VERSION in {'0.46.0','0.47.0','0.54.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=46
+    assert ENGINE_VERSION in {'0.46.0','0.47.0','0.54.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=46
     old_path=os.environ.get('CAERNESS_DB_PATH')
     try:
         c=_bootstrap('/tmp/caerness_v46_core.db',1)

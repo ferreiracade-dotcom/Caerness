@@ -13,7 +13,7 @@ from engine.cultivation import (
 
 
 def run():
-    assert ENGINE_VERSION in {'0.54.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=48
+    assert ENGINE_VERSION in {'0.54.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=48
     old=os.environ.get('CAERNESS_DB_PATH'); os.environ['CAERNESS_DB_PATH']='/tmp/caerness_v054_attainment.db'
     try:
         reset_db(force=True);init_db();c=connect();import_current_seed(c);activate_existing_loops(c)

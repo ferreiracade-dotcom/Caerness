@@ -11,7 +11,7 @@ from engine.cultivation import _cultivation_context
 
 
 def run():
-    assert ENGINE_VERSION in {'0.47.0','0.54.0','0.56.0','0.58.0','0.59.0'} and SCHEMA_VERSION>=47
+    assert ENGINE_VERSION in {'0.47.0','0.54.0','0.56.0','0.58.0','0.59.0','0.60.0'} and SCHEMA_VERSION>=47
     old=os.environ.get('CAERNESS_DB_PATH'); os.environ['CAERNESS_DB_PATH']='/tmp/caerness_v47.db'
     try:
         reset_db(force=True);init_db(); c=connect();import_current_seed(c);activate_existing_loops(c)
