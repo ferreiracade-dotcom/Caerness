@@ -1,0 +1,643 @@
+{
+  "excluded_dedicated_stress": [
+    "v26_candidate_scale_test.py"
+  ],
+  "failed": 0,
+  "missing": [],
+  "passed": 105,
+  "results": [
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 4.409,
+      "test": "action_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.927,
+      "test": "adapt01_reuse_before_create_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.482,
+      "test": "age_birthdate_completeness_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.433,
+      "test": "age_birthdate_mortality_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 25.757,
+      "test": "arch01_process_registry_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 8.297,
+      "test": "arch02_scheduler_chunk_invariance_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.784,
+      "test": "attention01_strategic_relevance_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.153,
+      "test": "audit_v01_v15_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.07,
+      "test": "belief01_claims_competence_lens_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.681,
+      "test": "business_ecology_reconstructed_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.286,
+      "test": "canon_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 0.883,
+      "test": "civil_calendar_reconciliation_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.021,
+      "test": "coverage01_world_bible_gate_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.045,
+      "test": "craft01_production_dependency_closure_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.276,
+      "test": "dec01_information_bounded_decision_runtime_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.676,
+      "test": "decision_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.736,
+      "test": "demo04_reconstructed_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.94,
+      "test": "econ01_underworld_economic_interests_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.663,
+      "test": "events01_territorial_event_sourcing_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.724,
+      "test": "growth01_regional_growth_state_capacity_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 3.994,
+      "test": "information_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.219,
+      "test": "integration01_health_agriculture_law_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 3.076,
+      "test": "interaction_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.169,
+      "test": "merchant01_vertical_slice_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.392,
+      "test": "model_gateway_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.844,
+      "test": "opportunity01_negotiation_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.967,
+      "test": "opportunity01_symmetric_relationships_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.919,
+      "test": "orgagency_conflict01_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 3.871,
+      "test": "orglife01_country_lifecycle_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.809,
+      "test": "orgneed01_autonomous_need_generation_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.964,
+      "test": "patron01_social_patronage_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.643,
+      "test": "patroncircle01_social_circle_movement_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.847,
+      "test": "patronnet01_patron_seeking_competition_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.829,
+      "test": "popback01_background_population_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.993,
+      "test": "poplife01_population_life_course_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.269,
+      "test": "pres01_low_resolution_presence_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.894,
+      "test": "rel01_directed_relationships_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.985,
+      "test": "resclean01_resolution_owner_cleanup_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 0.933,
+      "test": "route01_route_snapshot_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.834,
+      "test": "schema104_reconstructed_parity_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.927,
+      "test": "seek01_enterprise_projection_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.723,
+      "test": "seek01_inbound_demand_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.298,
+      "test": "seek01_natural_attraction_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.428,
+      "test": "seek01_reputation_feedback_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.463,
+      "test": "smoke_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.935,
+      "test": "tenyear02_historical_life_status_scan_test.py"
+    },
+    {
+      "note": "Requires CAERNESS_DB_PATH bound to packaged development day-0 DB; rerun separately and passed.",
+      "pass": true,
+      "returncode": 0,
+      "seconds": null,
+      "test": "tenyear02_opening_activation_gate_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.762,
+      "test": "tenyear02_underworld_person_reservoir_defer_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.973,
+      "test": "trade01_aggregate_ordinary_trade_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 21.174,
+      "test": "underworld_rackets_assets_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.475,
+      "test": "v07_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.272,
+      "test": "v08_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.141,
+      "test": "v09_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.715,
+      "test": "v10_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.267,
+      "test": "v11_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.328,
+      "test": "v12_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.071,
+      "test": "v13_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.282,
+      "test": "v14_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.332,
+      "test": "v15_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.234,
+      "test": "v16_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.901,
+      "test": "v17_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.308,
+      "test": "v18_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.762,
+      "test": "v19_edge_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.852,
+      "test": "v19_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.402,
+      "test": "v20_edge_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.482,
+      "test": "v20_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.331,
+      "test": "v21_edge_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.227,
+      "test": "v21_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.225,
+      "test": "v22_edge_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.055,
+      "test": "v22_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.221,
+      "test": "v23_edge_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.261,
+      "test": "v23_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.347,
+      "test": "v24_edge_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.314,
+      "test": "v24_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.671,
+      "test": "v25_edge_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 13.573,
+      "test": "v25_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 3.915,
+      "test": "v26_edge_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 4.389,
+      "test": "v26_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.119,
+      "test": "v27_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.572,
+      "test": "v28_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.136,
+      "test": "v29_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.998,
+      "test": "v30_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.867,
+      "test": "v31_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.178,
+      "test": "v32_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 0.984,
+      "test": "v33_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.099,
+      "test": "v34_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.185,
+      "test": "v35_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.243,
+      "test": "v36_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.221,
+      "test": "v37_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 4.55,
+      "test": "v38_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.167,
+      "test": "v39_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.123,
+      "test": "v40_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.095,
+      "test": "v41_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 4.026,
+      "test": "v42_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 8.797,
+      "test": "v43_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 2.817,
+      "test": "v44_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.328,
+      "test": "v45_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 8.174,
+      "test": "v46_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.994,
+      "test": "v47_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.667,
+      "test": "v48_attainment_inverse_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 4.618,
+      "test": "v56_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.638,
+      "test": "v59_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.762,
+      "test": "v60_phase2a_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.711,
+      "test": "v60_underworld_rebuild_test.py"
+    },
+    {
+      "pass": true,
+      "returncode": 0,
+      "seconds": 1.106,
+      "test": "war01_campaign_battle_world_consequences_test.py"
+    }
+  ],
+  "total_expected": 105,
+  "total_recorded": 105
+}

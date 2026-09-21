@@ -1,0 +1,17 @@
+{
+  "canonical": "/mnt/data/TENYEAR02_SCHEMA104_665B6AF_2026-09-21/checkpoints/TENYEAR02_year10_day3650.db",
+  "canonical_fk": 0,
+  "canonical_integrity": "ok",
+  "difference_count": 0,
+  "differences": [],
+  "excluded_columns_rule": "columns ending _at",
+  "excluded_tables": [
+    "coverage_observations",
+    "sqlite_sequence"
+  ],
+  "replay": "/mnt/data/TENYEAR02_SCHEMA104_665B6AF_2026-09-21/TENYEAR02_year09_replay.db",
+  "replay_fk": 0,
+  "replay_integrity": "ok",
+  "sqlite_sequence_differences": {},
+  "substantive_tables_checked": 438
+}

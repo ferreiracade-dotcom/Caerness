@@ -1,0 +1,287 @@
+{
+  "acceptance_note": "TENYEAR-02 accepts the corrected decade as deterministic/integrity-safe development evidence. It does not assert that coverage domains explicitly marked PARTIAL are feature-complete.",
+  "acceptance_pass": true,
+  "classification": "NON-CANON ACCEPTANCE / DEVELOPMENT EVIDENCE",
+  "emergent_institution_candidates": {
+    "merchant firm": {
+      "crystallized": 0,
+      "eligible": 0,
+      "forming": 86
+    }
+  },
+  "final_day": 3650,
+  "final_db_sha256": "5916f5560a3354dd1ff9d3e7fa1dfee6a91a6600e0fb114b15047a3c6ca30c00",
+  "findings": [
+    {
+      "detail": "52,000,000 -> 53,470,527 (+2.83%); aggregate births 14,208,141, deaths 12,737,615, net movement 0.",
+      "key": "population",
+      "status": "PASS"
+    },
+    {
+      "detail": "Year-9 -> Year-10 replay: 438 substantive tables, 0 differences, 0 SQLite-sequence differences.",
+      "key": "determinism",
+      "status": "PASS"
+    },
+    {
+      "detail": "Final integrity=ok; FK violations=0; contradiction errors=0 across annual audits.",
+      "key": "integrity",
+      "status": "PASS"
+    },
+    {
+      "detail": "20,350 decisions; 0 decisions carry canon-chunk basis.",
+      "key": "information_firewall",
+      "status": "PASS"
+    },
+    {
+      "detail": "Enterprises 104->209, professional profiles 100->247, merchant contracts 0->307.",
+      "key": "business_profession",
+      "status": "PASS"
+    },
+    {
+      "detail": "Latent entities 3->34; 30 are crystallized by final state. Earlier audit field based on crystallization_runs was not the authoritative count.",
+      "key": "latent_crystallization",
+      "status": "PASS"
+    },
+    {
+      "detail": "Life events: {'birth': 89, 'coming_of_age': 15, 'household_formation': 81, 'other': 66, 'union': 84}; household migration plans final=6 ({'completed': 6}).",
+      "key": "households",
+      "status": "PASS"
+    },
+    {
+      "detail": "Crews 38->40, personnel 49->51, operations=1441, membership flows=1446; no forced violence was required.",
+      "key": "underworld",
+      "status": "PASS"
+    },
+    {
+      "detail": "Natural WAR=0, LAW=0, patronage=0, OPPORTUNITY searches=0. Quiet is allowed; HEALTH/LAW/WAR capability branches are retained from schema-104 ONEYEAR acceptance, while patronage/OPPORTUNITY contracts explicitly require real persisted motives/needs.",
+      "key": "conditional_domains",
+      "status": "PASS_WITH_EXTERNAL_EVIDENCE"
+    },
+    {
+      "detail": "No new tracked character death occurred; actual mortality audits imply ~0.88 expected tracked deaths over the decade, so zero is statistically plausible rather than evidence of a disabled owner. Aggregate deaths total 12,737,615.",
+      "key": "tracked_mortality",
+      "status": "PASS_CALIBRATION_NOTE"
+    },
+    {
+      "detail": "Emergent institution candidates=86 ({'merchant firm': {'forming': 86, 'eligible': 0, 'crystallized': 0}}). Merchant-firm candidates remain forming because autonomous enterprise expansion/staffing is explicitly still PARTIAL in coverage; successful ordinary firms are intentionally not auto-promoted to merchant Houses. This is a next-development target, not a TENYEAR integrity failure.",
+      "key": "organization_formation",
+      "status": "KNOWN_PARTIAL_NOT_BLOCKING"
+    }
+  ],
+  "gates": {
+    "coverage": {
+      "failure_count": 0,
+      "failures": [],
+      "pass": true,
+      "principle": "One-year simulation may start only when ordinary opening substrates exist and every required autonomous domain has a wired owner.",
+      "required_domains": 50,
+      "states": {
+        "eligible": 26,
+        "missing_population": 1,
+        "populated_active": 10,
+        "populated_no_eligible_work": 14,
+        "protected_open": 1
+      }
+    },
+    "ten_year": {
+      "acceptance_epoch": "ONEYEAR_RECOVERY_SCHEMA104",
+      "acceptance_schema_version": 104,
+      "coverage_pass": true,
+      "current_canon_activation_version": 20,
+      "current_schema_version": 104,
+      "failure_count": 0,
+      "failures": [],
+      "one_year_unattended_passed": true,
+      "opening_activation_passed": true,
+      "pass": true,
+      "principle": "The decade run may test compounding only after COVERAGE-01 and a fresh ONEYEAR acceptance for this exact schema line pass.",
+      "required_canon_activation_version": 20,
+      "required_domains": 50,
+      "states": {
+        "eligible": 26,
+        "missing_population": 1,
+        "populated_active": 10,
+        "populated_no_eligible_work": 14,
+        "protected_open": 1
+      }
+    }
+  },
+  "information_firewall": {
+    "canon_chunk_basis_hits": 0,
+    "decision_count": 20350
+  },
+  "latent_status": {
+    "crystallized": 30,
+    "latent": 4
+  },
+  "life_events": {
+    "birth": 89,
+    "coming_of_age": 15,
+    "household_formation": 81,
+    "other": 66,
+    "union": 84
+  },
+  "opening_day": 0,
+  "opening_db_sha256": "3a5d5e4c0252e14bd8d24bd3c5a08e096a9098f7a0cc453e924f3243259af7f4",
+  "population": {
+    "births_total": 14208141.411857218,
+    "change": 1470527,
+    "deaths_total": 12737614.766808154,
+    "final": 53470527,
+    "movement_net_total": 0.0,
+    "opening": 52000000,
+    "percent_change": 2.8279
+  },
+  "post_decade_standard_regression": {
+    "excluded_dedicated_stress": [
+      "v26_candidate_scale_test.py"
+    ],
+    "failed": 0,
+    "passed": 105,
+    "total": 105
+  },
+  "replay": {
+    "canonical": "/mnt/data/TENYEAR02_SCHEMA104_665B6AF_2026-09-21/checkpoints/TENYEAR02_year10_day3650.db",
+    "canonical_fk": 0,
+    "canonical_integrity": "ok",
+    "difference_count": 0,
+    "differences": [],
+    "excluded_columns_rule": "columns ending _at",
+    "excluded_tables": [
+      "coverage_observations",
+      "sqlite_sequence"
+    ],
+    "replay": "/mnt/data/TENYEAR02_SCHEMA104_665B6AF_2026-09-21/TENYEAR02_year09_replay.db",
+    "replay_fk": 0,
+    "replay_integrity": "ok",
+    "sqlite_sequence_differences": {},
+    "substantive_tables_checked": 438
+  },
+  "run": "TENYEAR-02 schema104 corrected canonical decade",
+  "schema": 104,
+  "source_commit": "665b6af874e3b1a4c2f0e527617770f8ac56c47c",
+  "tracked_deltas": {
+    "active_enterprises": [
+      104,
+      208
+    ],
+    "actor_careers": [
+      0,
+      5
+    ],
+    "actors": [
+      636,
+      916
+    ],
+    "decisions": [
+      0,
+      20350
+    ],
+    "education_enrollments": [
+      87,
+      193
+    ],
+    "emergent_institution_candidates": [
+      0,
+      86
+    ],
+    "enterprises": [
+      104,
+      209
+    ],
+    "events": [
+      0,
+      3426
+    ],
+    "health_events": [
+      0,
+      17
+    ],
+    "household_migration_plans": [
+      0,
+      6
+    ],
+    "knowledge": [
+      0,
+      106013
+    ],
+    "latent_crystallized": [
+      0,
+      30
+    ],
+    "latent_entities": [
+      3,
+      34
+    ],
+    "law_cases": [
+      0,
+      0
+    ],
+    "merchant_contracts": [
+      0,
+      307
+    ],
+    "opportunity_searches": [
+      0,
+      0
+    ],
+    "organization_lifecycle_events": [
+      0,
+      0
+    ],
+    "patronage_relationships": [
+      0,
+      0
+    ],
+    "professional_profiles": [
+      100,
+      247
+    ],
+    "relationships": [
+      0,
+      925
+    ],
+    "teaching_relationships": [
+      54,
+      54
+    ],
+    "underworld_crews": [
+      38,
+      40
+    ],
+    "underworld_operations": [
+      0,
+      1441
+    ],
+    "underworld_personnel": [
+      49,
+      51
+    ],
+    "war_campaign_operations": [
+      0,
+      0
+    ]
+  },
+  "tracked_mortality": {
+    "audit_rows": 13905,
+    "expected_deaths_from_applied_hazards": 0.8813026366171661,
+    "observed_new_deaths": 0
+  },
+  "underworld_membership_flows": {
+    "active_to_core": 156,
+    "associate_to_active": 273,
+    "custody": 127,
+    "death_or_incapacitation": 59,
+    "defection": 135,
+    "desistance": 253,
+    "recruitment": 362,
+    "relocation": 81
+  },
+  "underworld_operations": {
+    "delegate_racket": 30,
+    "expand_protection_account": 16,
+    "invest_in_racket": 1375,
+    "promote_personnel": 11,
+    "truce": 9
+  }
+}
