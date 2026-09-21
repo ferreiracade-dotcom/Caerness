@@ -1,0 +1,614 @@
+[
+  {
+    "test": "tests/action_test.py",
+    "rc": 0,
+    "seconds": 15.609,
+    "output": "Action test passed: freeform actions, explicit player agency, travel/time, and camera-not-protagonist simulation all work.\n"
+  },
+  {
+    "test": "tests/adapt01_reuse_before_create_test.py",
+    "rc": 0,
+    "seconds": 2.718,
+    "output": "ADAPT-01 reuse-before-role-creation acceptance PASS\n"
+  },
+  {
+    "test": "tests/age_birthdate_completeness_test.py",
+    "rc": 0,
+    "seconds": 5.94,
+    "output": "age/birthdate completeness PASS\n"
+  },
+  {
+    "test": "tests/age_birthdate_mortality_test.py",
+    "rc": 0,
+    "seconds": 4.744,
+    "output": "age/birthdate mortality trigger PASS \u2014 death day 1200\n"
+  },
+  {
+    "test": "tests/arch01_process_registry_test.py",
+    "rc": 0,
+    "seconds": 76.06,
+    "output": "ARCH-01 ProcessRegistry tests: PASS\n\n{\n  \"days_advanced\": 250,\n  \"eager_requery_every_checkpoint_s\": 24.61062093199962,\n  \"lazy_cache_only_requery_ran_s\": 11.429800792000606,\n  \"speedup\": 2.153197713579041,\n  \"note\": \"Mesa's EventList is not applicable here; the cost is SQL round-trips, not in-memory heap operations, and it cannot serve as the durable scheduling authority (see persistence/restart test). SQL stays authoritative.\"\n}\n"
+  },
+  {
+    "test": "tests/arch02_scheduler_chunk_invariance_test.py",
+    "rc": 0,
+    "seconds": 32.206,
+    "output": "ARCH-02 scheduler chunk invariance: PASS\n{'engine_version': '0.60.0', 'schema_version': 104, 'days': 90, 'tables_compared': 30, 'events': 35, 'knowledge': 601, 'rumours': 30, 'trade_periods': 3, 'status': 'PASS'}\n"
+  },
+  {
+    "test": "tests/attention01_strategic_relevance_test.py",
+    "rc": 0,
+    "seconds": 6.762,
+    "output": "ATTENTION-01 strategic relevance/appointment acceptance PASS\n"
+  },
+  {
+    "test": "tests/audit_v01_v15_test.py",
+    "rc": 0,
+    "seconds": 9.302,
+    "output": "audit_v01_v15_test: PASS\n"
+  },
+  {
+    "test": "tests/belief01_claims_competence_lens_test.py",
+    "rc": 0,
+    "seconds": 4.858,
+    "output": "BELIEF-01 claims/evidence + Competence Lens tests: PASS\n"
+  },
+  {
+    "test": "tests/business_ecology_reconstructed_test.py",
+    "rc": 0,
+    "seconds": 5.231,
+    "output": "BUSINESS ecology reconstructed PASS {'emergent_real_operator': 638, 'population_delta': 0, 'insolvency_closed_day': 575}\n"
+  },
+  {
+    "test": "tests/canon_test.py",
+    "rc": 0,
+    "seconds": 4.576,
+    "output": "Canon test passed: indexed 601 chunks and retrieved relevant evidence.\n"
+  },
+  {
+    "test": "tests/civil_calendar_reconciliation_test.py",
+    "rc": 0,
+    "seconds": 3.756,
+    "output": "civil calendar/canon reconciliation PASS\n"
+  },
+  {
+    "test": "tests/coverage01_world_bible_gate_test.py",
+    "rc": 0,
+    "seconds": 6.86,
+    "output": "COVERAGE-01 World-Bible gate + resolution acceptance: PASS\n"
+  },
+  {
+    "test": "tests/craft01_production_dependency_closure_test.py",
+    "rc": 0,
+    "seconds": 4.001,
+    "output": "CRAFT-01 production dependency closure acceptance: PASS\n"
+  },
+  {
+    "test": "tests/dec01_information_bounded_decision_runtime_test.py",
+    "rc": 0,
+    "seconds": 5.052,
+    "output": "DEC-01 information-bounded decision runtime tests: PASS\n"
+  },
+  {
+    "test": "tests/decision_test.py",
+    "rc": 0,
+    "seconds": 4.708,
+    "output": "Decision test passed: information-bounded candidates persist, weighted selections audit, and dormant actors continue acting.\n"
+  },
+  {
+    "test": "tests/demo04_reconstructed_test.py",
+    "rc": 0,
+    "seconds": 8.043,
+    "output": "DEMO-04 reconstructed PASS {'opening': 52000000, 'births_y1': 1404000, 'deaths_y1': 1286220, 'closing_y1': 52117780, 'closing_y10': 53470526}\n"
+  },
+  {
+    "test": "tests/econ01_underworld_economic_interests_test.py",
+    "rc": 0,
+    "seconds": 6.576,
+    "output": "ECON-01 underworld economic interests tests: PASS\n"
+  },
+  {
+    "test": "tests/events01_territorial_event_sourcing_test.py",
+    "rc": 0,
+    "seconds": 6.353,
+    "output": "EVENTS-01 territorial event-sourcing tests: PASS\n"
+  },
+  {
+    "test": "tests/growth01_regional_growth_state_capacity_test.py",
+    "rc": 0,
+    "seconds": 5.216,
+    "output": "GROWTH-01 regional growth/state-capacity acceptance: PASS {'route_access_before': 55.0, 'route_access_after': 100.0, 'treasury_cash': 389.1} constrained_debt 1098.05\n"
+  },
+  {
+    "test": "tests/information_test.py",
+    "rc": 0,
+    "seconds": 16.942,
+    "output": "Information test passed: privacy, rumours, propagation, provenance, player knowledge, scene guardrails, and dormant information all work.\n"
+  },
+  {
+    "test": "tests/integration01_health_agriculture_law_test.py",
+    "rc": 0,
+    "seconds": 3.134,
+    "output": "INTEGRATION-01 health/agriculture/law acceptance: PASS\n"
+  },
+  {
+    "test": "tests/interaction_test.py",
+    "rc": 0,
+    "seconds": 7.328,
+    "output": "Interaction test passed: agreements, counters, conflict, wake-up, and dormant-origin interactions all work.\n"
+  },
+  {
+    "test": "tests/merchant01_vertical_slice_test.py",
+    "rc": 0,
+    "seconds": 4.688,
+    "output": "MERCHANT-01 merchant-house / market vertical slice tests: PASS\n"
+  },
+  {
+    "test": "tests/model_gateway_test.py",
+    "rc": 0,
+    "seconds": 3.664,
+    "output": "model_gateway_test: PASS\n"
+  },
+  {
+    "test": "tests/opportunity01_negotiation_test.py",
+    "rc": 0,
+    "seconds": 6.9,
+    "output": "OPPORTUNITY-01 negotiation/rejection/counter acceptance PASS\n"
+  },
+  {
+    "test": "tests/opportunity01_symmetric_relationships_test.py",
+    "rc": 0,
+    "seconds": 7.5,
+    "output": "OPPORTUNITY-01 symmetric relationships/ownership/search acceptance PASS\n"
+  },
+  {
+    "test": "tests/orgagency_conflict01_test.py",
+    "rc": 0,
+    "seconds": 8.147,
+    "output": "ORGAGENCY/POLITYAGENCY/CONFLICT-01 adversarial acceptance PASS\n"
+  },
+  {
+    "test": "tests/orglife01_country_lifecycle_test.py",
+    "rc": 0,
+    "seconds": 11.396,
+    "output": "ORGLIFE-01 country/institution lifecycle adversarial acceptance PASS\n"
+  },
+  {
+    "test": "tests/orgneed01_autonomous_need_generation_test.py",
+    "rc": 0,
+    "seconds": 5.028,
+    "output": "ORGNEED-01 autonomous evidence-bound need generation acceptance PASS\n"
+  },
+  {
+    "test": "tests/patron01_social_patronage_test.py",
+    "rc": 0,
+    "seconds": 11.554,
+    "output": "PATRON-01 merchant/noble independent patronage acceptance PASS\n"
+  },
+  {
+    "test": "tests/patroncircle01_social_circle_movement_test.py",
+    "rc": 0,
+    "seconds": 7.701,
+    "output": "PATRONCIRCLE-01 convened circles + evidence-bound movement acceptance PASS\n"
+  },
+  {
+    "test": "tests/patronnet01_patron_seeking_competition_test.py",
+    "rc": 0,
+    "seconds": 5.429,
+    "output": "PATRONNET-01 beneficiary seeking + patron competition acceptance PASS\n"
+  },
+  {
+    "test": "tests/popback01_background_population_test.py",
+    "rc": 0,
+    "seconds": 5.623,
+    "output": "POPBACK-01 acceptance PASS {'sources': 68, 'source_total': 52000000, 'partition_id': 11, 'source_population': 210000, 'sample_size': 128, 'sample_deaths': 0, 'promoted_local_uid': 4, 'latent_id': 4, 'actor_id': 637, 'exact_birth_day': -17030, 'summary': {'population_sources': 68, 'source_population_total': 52000000, 'active_partitions': 68, 'sampled_identities': 2272, 'linked_latent': 1, 'linked_actors': 57, 'authority_rule': 'SCALE-01 owns totals; POPBACK sources decompose them; partitions preserve bounded identity only'}}\n"
+  },
+  {
+    "test": "tests/poplife01_population_life_course_test.py",
+    "rc": 0,
+    "seconds": 5.9,
+    "output": "POPLIFE-01 acceptance PASS {'opening_population': 52000000, 'year1_births': 1404000.0, 'year1_deaths': 1286220.0, 'year1_live_population': 52117780, 'movement_conserved': 10000, 'underheaven_live_population': 21047565, 'trade_uses_live_population': True}\n"
+  },
+  {
+    "test": "tests/pres01_low_resolution_presence_test.py",
+    "rc": 0,
+    "seconds": 5.343,
+    "output": "PRES-01 low-resolution presence tests: PASS\n"
+  },
+  {
+    "test": "tests/rel01_directed_relationships_test.py",
+    "rc": 0,
+    "seconds": 6.173,
+    "output": "REL-01 directed relationship tests: PASS\n"
+  },
+  {
+    "test": "tests/resclean01_resolution_owner_cleanup_test.py",
+    "rc": 0,
+    "seconds": 7.156,
+    "output": "{'schema_version': 104, 'misclassified_institution_rows': 0, 'cohort_due_rows': 0, 'integrity': 'ok', 'foreign_keys': 0}\n"
+  },
+  {
+    "test": "tests/route01_route_snapshot_test.py",
+    "rc": 0,
+    "seconds": 3.568,
+    "output": "ROUTE01 PASS\n"
+  },
+  {
+    "test": "tests/schema104_reconstructed_parity_test.py",
+    "rc": 0,
+    "seconds": 8.398,
+    "output": "SCHEMA104 reconstructed parity PASS {'authority_slots': 96, 'halric_spare': 1, 'background_teacher_resolved': 1, 'merchant_profit_not_house': True, 'military_frontier': True}\n"
+  },
+  {
+    "test": "tests/seek01_enterprise_projection_test.py",
+    "rc": 0,
+    "seconds": 8.609,
+    "output": "SEEK-01 enterprise capability projection acceptance PASS\n"
+  },
+  {
+    "test": "tests/seek01_inbound_demand_test.py",
+    "rc": 0,
+    "seconds": 8.807,
+    "output": "SEEK-01 inbound demand/player gravity acceptance PASS\n"
+  },
+  {
+    "test": "tests/seek01_natural_attraction_test.py",
+    "rc": 0,
+    "seconds": 5.197,
+    "output": "SEEK-01 natural attraction/capacity acceptance PASS {'created_needs': 5, 'started_travel': 2, 'pending_player_requests': 2}\n"
+  },
+  {
+    "test": "tests/seek01_reputation_feedback_test.py",
+    "rc": 0,
+    "seconds": 6.543,
+    "output": "SEEK-01 reputation feedback acceptance PASS {'before': 80.0, 'after': 82.05, 'offering_rep': 82.05}\n"
+  },
+  {
+    "test": "tests/smoke_test.py",
+    "rc": 0,
+    "seconds": 6.947,
+    "output": "Smoke test passed: dormant simulation is not frozen.\n"
+  },
+  {
+    "test": "tests/trade01_aggregate_ordinary_trade_test.py",
+    "rc": 0,
+    "seconds": 6.523,
+    "output": "TRADE-01 acceptance PASS {'world_population': 52000000, 'urban_population': 7172000, 'rural_population': 44828000, 'current_world_population': 52000000, 'current_urban_population': 7172000, 'current_rural_population': 44828000, 'named_settlement_profiles': 59, 'named_urban_population': 6621000, 'structural_urban_population': 551000} {'period_day': 1, 'flows': 22, 'dispatched': 475606.08, 'delivered': 468794.664, 'loss': 6811.416, 'unmet': 51630.336, 'consumption_requirement': 61308000.0} {'blocked_unmet': 46200.0, 'opened_unmet': 15131.04, 'tracked_route': [9, 8]}\n"
+  },
+  {
+    "test": "tests/underworld_rackets_assets_test.py",
+    "rc": 0,
+    "seconds": 52.373,
+    "output": "underworld rackets/assets tests: PASS\n"
+  },
+  {
+    "test": "tests/v07_test.py",
+    "rc": 0,
+    "seconds": 4.747,
+    "output": "v07_test: PASS\n"
+  },
+  {
+    "test": "tests/v08_test.py",
+    "rc": 0,
+    "seconds": 3.556,
+    "output": "v08_test: PASS\n"
+  },
+  {
+    "test": "tests/v09_test.py",
+    "rc": 0,
+    "seconds": 3.868,
+    "output": "v09_test: PASS\n"
+  },
+  {
+    "test": "tests/v10_test.py",
+    "rc": 0,
+    "seconds": 5.002,
+    "output": "v10_test: PASS\n"
+  },
+  {
+    "test": "tests/v11_test.py",
+    "rc": 0,
+    "seconds": 4.852,
+    "output": "v11_test: PASS\n"
+  },
+  {
+    "test": "tests/v12_test.py",
+    "rc": 0,
+    "seconds": 9.791,
+    "output": "v12_test: PASS\n"
+  },
+  {
+    "test": "tests/v13_test.py",
+    "rc": 0,
+    "seconds": 9.232,
+    "output": "v13_test: PASS\n"
+  },
+  {
+    "test": "tests/v14_test.py",
+    "rc": 0,
+    "seconds": 3.73,
+    "output": "v14_test: PASS\n"
+  },
+  {
+    "test": "tests/v15_test.py",
+    "rc": 0,
+    "seconds": 5.039,
+    "output": "v15_test: PASS\n"
+  },
+  {
+    "test": "tests/v16_test.py",
+    "rc": 0,
+    "seconds": 3.988,
+    "output": "v16_test: PASS\n"
+  },
+  {
+    "test": "tests/v17_test.py",
+    "rc": 0,
+    "seconds": 7.154,
+    "output": "v17_test: PASS\n"
+  },
+  {
+    "test": "tests/v18_test.py",
+    "rc": 0,
+    "seconds": 4.059,
+    "output": "v18_test: PASS\n"
+  },
+  {
+    "test": "tests/v19_edge_test.py",
+    "rc": 0,
+    "seconds": 7.076,
+    "output": "v19_edge_test: PASS\n"
+  },
+  {
+    "test": "tests/v19_test.py",
+    "rc": 0,
+    "seconds": 5.855,
+    "output": "v19_test: PASS\n"
+  },
+  {
+    "test": "tests/v20_edge_test.py",
+    "rc": 0,
+    "seconds": 5.831,
+    "output": "v0.20.1 health edge-case audit PASS\n"
+  },
+  {
+    "test": "tests/v20_test.py",
+    "rc": 0,
+    "seconds": 5.128,
+    "output": "v0.20 health/aging regression PASS\n"
+  },
+  {
+    "test": "tests/v21_edge_test.py",
+    "rc": 0,
+    "seconds": 3.865,
+    "output": "v0.21 adversarial religion/cultural edge-case audit PASS\n"
+  },
+  {
+    "test": "tests/v21_test.py",
+    "rc": 0,
+    "seconds": 4.764,
+    "output": "v0.21 religion/cultural institutions regression PASS\n"
+  },
+  {
+    "test": "tests/v22_edge_test.py",
+    "rc": 0,
+    "seconds": 4.779,
+    "output": "v0.22 adversarial ecology/travel edge-case audit PASS\n"
+  },
+  {
+    "test": "tests/v22_test.py",
+    "rc": 0,
+    "seconds": 3.817,
+    "output": "v0.22 ecology/seasons/travel regression PASS\n"
+  },
+  {
+    "test": "tests/v23_edge_test.py",
+    "rc": 0,
+    "seconds": 4.48,
+    "output": "v0.23 adversarial politics edge audit PASS\n"
+  },
+  {
+    "test": "tests/v23_test.py",
+    "rc": 0,
+    "seconds": 4.633,
+    "output": "v0.23 politics/macro-history regression PASS\n"
+  },
+  {
+    "test": "tests/v24_edge_test.py",
+    "rc": 0,
+    "seconds": 2.793,
+    "output": "v0.24 adversarial education/transmission edge audit PASS\n"
+  },
+  {
+    "test": "tests/v24_test.py",
+    "rc": 0,
+    "seconds": 4.779,
+    "output": "v0.24 education/transmission regression PASS\n"
+  },
+  {
+    "test": "tests/v25_edge_test.py",
+    "rc": 0,
+    "seconds": 6.723,
+    "output": "v0.25 adversarial long-run/camera/crystallization audit PASS\n"
+  },
+  {
+    "test": "tests/v25_test.py",
+    "rc": 0,
+    "seconds": 35.867,
+    "output": "v0.25 long-run 20/40/120-year stress regression PASS\n"
+  },
+  {
+    "test": "tests/v26_edge_test.py",
+    "rc": 0,
+    "seconds": 17.354,
+    "output": "v0.26.1 adversarial ownership/cadence/seeded-scale audit PASS\n"
+  },
+  {
+    "test": "tests/v26_test.py",
+    "rc": 0,
+    "seconds": 16.551,
+    "output": "v0.26.1 integration/bootstrap/save-safety regression PASS\n"
+  },
+  {
+    "test": "tests/v27_test.py",
+    "rc": 0,
+    "seconds": 7.123,
+    "output": "v0.27.1 current-canon bridge/coverage/two-way-resolution regression PASS\n"
+  },
+  {
+    "test": "tests/v28_test.py",
+    "rc": 0,
+    "seconds": 4.8,
+    "output": "v0.28.0 autonomous domain-actions regression PASS\n"
+  },
+  {
+    "test": "tests/v29_test.py",
+    "rc": 0,
+    "seconds": 2.957,
+    "output": "v0.29.0 commercial logistics conservation regression PASS\n"
+  },
+  {
+    "test": "tests/v30_test.py",
+    "rc": 0,
+    "seconds": 5.153,
+    "output": "v0.30.0 current-canon aggregate economic substrate regression PASS\n"
+  },
+  {
+    "test": "tests/v31_test.py",
+    "rc": 0,
+    "seconds": 10.397,
+    "output": "v0.31.0 prose-geography completion regression PASS\n"
+  },
+  {
+    "test": "tests/v32_test.py",
+    "rc": 0,
+    "seconds": 6.101,
+    "output": "v0.32.0 causal cultivation/Realization regression PASS\n"
+  },
+  {
+    "test": "tests/v33_test.py",
+    "rc": 0,
+    "seconds": 2.936,
+    "output": "v0.33.0 elixir/Sediment/Rupture conservation regression PASS\n"
+  },
+  {
+    "test": "tests/v34_test.py",
+    "rc": 0,
+    "seconds": 3.071,
+    "output": "v0.34.0 family/civilian consequence regression PASS\n"
+  },
+  {
+    "test": "tests/v35_test.py",
+    "rc": 0,
+    "seconds": 2.601,
+    "output": "v0.35.0 autonomous combat/tournament regression PASS\n"
+  },
+  {
+    "test": "tests/v36_test.py",
+    "rc": 0,
+    "seconds": 2.496,
+    "output": "v0.36.0 spectacle-economy regression PASS\n"
+  },
+  {
+    "test": "tests/v37_test.py",
+    "rc": 0,
+    "seconds": 3.358,
+    "output": "v0.37.0 underworld-ecology regression PASS\n"
+  },
+  {
+    "test": "tests/v38_test.py",
+    "rc": 0,
+    "seconds": 14.064,
+    "output": "v0.38.0 Hollow practice / Grand Coven succession regression PASS\n"
+  },
+  {
+    "test": "tests/v39_test.py",
+    "rc": 0,
+    "seconds": 2.359,
+    "output": "v0.39.0 addiction / psychological consequence regression PASS\n"
+  },
+  {
+    "test": "tests/v40_test.py",
+    "rc": 0,
+    "seconds": 6.478,
+    "output": "v0.40.0 underworld medicine / exploitation regression PASS\n"
+  },
+  {
+    "test": "tests/v41_test.py",
+    "rc": 0,
+    "seconds": 5.863,
+    "output": "v0.41.0 war logistics / aftermath regression PASS\n"
+  },
+  {
+    "test": "tests/v42_test.py",
+    "rc": 0,
+    "seconds": 11.206,
+    "output": "v0.42.0 long-run cultivation demography regression PASS\n"
+  },
+  {
+    "test": "tests/v43_test.py",
+    "rc": 0,
+    "seconds": 21.264,
+    "output": "v0.43.0 generational continuity / structural training regression PASS\n"
+  },
+  {
+    "test": "tests/v44_test.py",
+    "rc": 0,
+    "seconds": 7.896,
+    "output": "v0.44.0 autonomous two-way resolution regression PASS\n"
+  },
+  {
+    "test": "tests/v45_test.py",
+    "rc": 0,
+    "seconds": 4.075,
+    "output": "v0.45.0 decade integrity / latent commercial emergence regression PASS\n"
+  },
+  {
+    "test": "tests/v46_test.py",
+    "rc": 0,
+    "seconds": 18.042,
+    "output": "v0.46.0 probabilistic stage timing / summit variability regression PASS\n"
+  },
+  {
+    "test": "tests/v47_test.py",
+    "rc": 0,
+    "seconds": 8.374,
+    "output": "v0.47.0 Groundbinding dependency regression PASS\n"
+  },
+  {
+    "test": "tests/v48_attainment_inverse_test.py",
+    "rc": 0,
+    "seconds": 5.948,
+    "output": "v0.54 inverse age-stage / attainment chronology regression PASS\n"
+  },
+  {
+    "test": "tests/v56_test.py",
+    "rc": 0,
+    "seconds": 11.373,
+    "output": "v0.56 Vessel-led lower ladder / Realization-wall mastery regression PASS\n"
+  },
+  {
+    "test": "tests/v59_test.py",
+    "rc": 0,
+    "seconds": 8.014,
+    "output": "v0.59 flexible career/reach regression PASS: standing and branching responsibilities are independent\n"
+  },
+  {
+    "test": "tests/v60_phase2a_test.py",
+    "rc": 0,
+    "seconds": 4.446,
+    "output": "v0.60 Phase 2A tests: PASS\n"
+  },
+  {
+    "test": "tests/v60_underworld_rebuild_test.py",
+    "rc": 0,
+    "seconds": 5.922,
+    "output": "v0.60 underworld rebuild tests: PASS\n"
+  },
+  {
+    "test": "tests/war01_campaign_battle_world_consequences_test.py",
+    "rc": 0,
+    "seconds": 3.836,
+    "output": "WAR-01 campaign/battle/world-consequences acceptance: PASS\n"
+  }
+]

@@ -11,7 +11,7 @@ from engine.current_seed import import_current_seed
 from engine.activation import activate_existing_loops
 from engine.civilian import process_due_civilian
 
-SEED=ROOT/'game'/'seeds'/'Caerness_Initial_World_State_Seed_v1_3.json'
+SEED=ROOT/'game'/'seeds'/'Caerness_Initial_World_State_Seed_v1_4.json'
 
 
 def run():

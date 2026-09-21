@@ -1109,7 +1109,7 @@ The camera receives authoritative capacity through `health_context`; the narrato
 
 Religion is modeled as lived social reality rather than faction alignment. The simulation separates tradition, personal affiliation, organized institution, office, calendar observance, attendance, obligation, sacred place, patronage, and reputation. This permits household rites without centralized priesthood, organized religious institutions where appropriate, overlapping social practice, and exclusive theological claims without collapsing every person into one global alignment field.
 
-The calendar is campaign state. The engine intentionally seeds no exact feast days because the World Bible leaves those details open until stories need them.
+The shared civil calendar is settled: day 0 is 1 First Month, 624 SV in a fixed 365-day year. The engine still seeds no universal feast schedule because local religious/civic observances remain regional and partly latent until canon or campaign causality establishes them.
 
 Cultural institutions are persistent actors rather than event vending machines. Their prestige, resources, reach, programs, patrons, and continuity can develop off-camera. Patronage moves actual funds. Public programs create historical instances and can exert bounded influence on an already-existing local style movement.
 

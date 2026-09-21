@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .continuity import add_cohort_member, create_cohort, create_latent_entity, set_institution_profile, set_resolution
+from .civil_calendar import format_sv_date
 from .db import ROOT
 from .expertise import set_actor_competence
 from .health import ensure_health_profile
@@ -14,7 +15,7 @@ from .household_life import set_demographic_cohort, set_life_profile
 from .player import set_player
 from .politics import configure_polity, set_territorial_control
 
-DEFAULT_SEED = ROOT / "canon" / "core_seed_v2.json"
+DEFAULT_SEED = ROOT / "canon" / "core_seed_v3.json"
 
 _STAGE_LONGEVITY = {
     "First": "first", "Temper": "temper", "Third": "third", "Breach": "breach", "Fifth": "fifth", "Sixth": "sixth"
@@ -160,11 +161,15 @@ def _ensure_named_character(conn: sqlite3.Connection, item: dict[str, Any], inst
     birth_day = item.get("birth_day")
     if not isinstance(birth_day, int):
         raise ValueError(f"Named campaign seed character {name} requires explicit birth_day")
+    expected_birth_date = format_sv_date(birth_day)
+    if item.get("birth_date_sv") != expected_birth_date:
+        raise ValueError(f"Named campaign seed character {name} birth_date_sv mismatch: expected {expected_birth_date!r}, got {item.get('birth_date_sv')!r}")
     derived_age = max(0, (_day(conn) - int(birth_day)) // 365)
     if derived_age != age:
         raise ValueError(f"Named campaign seed character {name} age/birth_day mismatch: age={age}, derived={derived_age}")
     set_life_profile(conn, actor_id, birth_day=int(birth_day),
                      metadata={"bootstrap_seed": True, "registry_status": item.get("status", "working"),
+                               "birth_date_sv": item.get("birth_date_sv"),
                                "cultivation_stage": stage, "affiliation": aff, "sphere": sphere})
     ensure_health_profile(conn, actor_id, longevity_class=_STAGE_LONGEVITY[stage], baseline_health=80,
                           metadata={"bootstrap_stage": stage, "source": "working registry"})
@@ -194,8 +199,9 @@ def bootstrap_campaign(conn: sqlite3.Connection, *, seed_path: str | Path | None
                        verification_canon_path: str | Path | None = None) -> dict[str, Any]:
     """Apply the versioned World-Bible-derived production seed.
 
-    The seed intentionally does not invent the open detailed road map, exact feast calendar,
-    outer-kingdom martial systems, or a player character. Those remain campaign choices/latent detail.
+    The seed intentionally does not invent the open detailed road map, exact local feast schedule,
+    outer-kingdom martial systems, or a player character. The shared 365-day SV civil calendar is settled;
+    those remaining details are campaign choices/latent detail.
     """
     manifest = load_seed(seed_path, verification_canon_path=verification_canon_path)
     seed_id = str(manifest["seed_id"]); seed_version = int(manifest["seed_version"])

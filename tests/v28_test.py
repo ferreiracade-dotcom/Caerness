@@ -19,7 +19,7 @@ from engine.coverage import snapshot_coverage
 from engine.continuity import set_institution_profile
 from engine.competence import add_obligation
 
-SEED=ROOT/'game'/'seeds'/'Caerness_Initial_World_State_Seed_v1_3.json'
+SEED=ROOT/'game'/'seeds'/'Caerness_Initial_World_State_Seed_v1_4.json'
 
 def _actor(c,name,loc,tier='ACTIVE'):
     aid=c.execute("INSERT INTO actors(name,actor_type,subtype,home_location_id,current_location_id,status) VALUES (?,'character','fixture',?,?,'active')",(name,loc,loc)).lastrowid

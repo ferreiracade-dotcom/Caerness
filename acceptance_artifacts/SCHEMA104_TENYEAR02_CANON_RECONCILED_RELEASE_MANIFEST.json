@@ -1,0 +1,56 @@
+{
+  "release": "Caerness v0.60 schema-104 TENYEAR-02 canon-reconciled development release",
+  "date": "2026-09-21",
+  "schema_version": 104,
+  "canon": {
+    "path": "canon/world_bible_current.docx",
+    "sha256": "45947d046f816a95d118167e03a7d24872867b1521eb1a9414c5fe4349d995e3",
+    "status": "latest MASTER FINAL; shared SV calendar resolved and stale open-calendar sentence corrected"
+  },
+  "current_seed": {
+    "version": "1.4",
+    "path": "game/seeds/Caerness_Initial_World_State_Seed_v1_4.json",
+    "sha256": "98dd199d657cbd9780988901100c2c973e5230ecacab6ae4359f21e83d461985",
+    "canon_hash_firewall": true
+  },
+  "runtime_bootstrap_seed": {
+    "version": 3,
+    "path": "canon/core_seed_v3.json",
+    "sha256": "0b331c2dd0670b1b22fbf58a9248a872cef5dfca1d1a0979501bde099434c290"
+  },
+  "civil_calendar": {
+    "opening_date": "1 First Month, 624 SV",
+    "days_per_year": 365,
+    "leap_rule": "none",
+    "day_offsets_remain_arithmetic_authority": true
+  },
+  "packaged_database": {
+    "path": "data/caerness.db",
+    "sha256": "179246f18e8369866fa5635f201c99119fb12266628949031bb77feee7bfd4c8",
+    "current_day": 0,
+    "integrity": "ok",
+    "fk_violations": 0
+  },
+  "standard_regression": {
+    "total": 102,
+    "passed": 102,
+    "failed": 0,
+    "result_sha256": "f6005d0650f02894efc02644fc01e169d41a4bf9caa26a4ec1fc643b83d29d10",
+    "log_sha256": "6033a679bae3b5ff295b8a69a78507936c8f4728349d22a8ff72310c8dddc5a0"
+  },
+  "prior_long_horizon_capability_evidence": {
+    "one_year": "passed",
+    "restart_determinism_differences": 0,
+    "restart_tables_compared": 437,
+    "conditional_health_law_war": "passed",
+    "candidate_scale_day": 43800,
+    "candidate_scale_contradiction_errors": 0,
+    "mechanically_invalidated_by_calendar_reconciliation": false
+  },
+  "tenyear_gate": "PASS",
+  "notes": [
+    "The packaged database remains a clean day-0 opening world; no ONEYEAR or TENYEAR simulated history is imported.",
+    "v1.3 and core_seed_v2 are retained only as historical provenance; v1.4 and core_seed_v3 are current authority.",
+    "Earlier documents saying the civil calendar is open describe superseded development state."
+  ]
+}

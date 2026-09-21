@@ -1,12 +1,34 @@
-CAERNESS CURRENT SOURCE STATE
+CAERNESS CURRENT SOURCE STATE — 21 SEPTEMBER 2026
 
-This package is the Caerness Engine v0.60.0 ONEYEAR-01 accepted checkpoint, schema 70, with the post-acceptance named-person chronology repair applied.
+Engine: v0.60.0
+Schema: 104
+Release line: TENYEAR-02 preparation, canon-reconciled
 
-Canon/seed chronology authority:
-- embedded canon/world_bible_current.docx is the repaired MASTER FINAL;
-- current seed is game/seeds/Caerness_Initial_World_State_Seed_v1_3.json;
-- all 464 named registry people have concrete age and explicit opening-relative birth_day;
-- named-person import/bootstrap rejects missing age or birth_day;
-- the clean packaged database remains day 0 and contains no diagnostic TENYEAR history.
+Current authority:
+- canon/world_bible_current.docx is the latest MASTER FINAL with the shared 365-day Since the Vanishing (SV) calendar reconciled into engine authority.
+- Day 0 = 1 First Month, 624 SV.
+- Current engine-facing seed: game/seeds/Caerness_Initial_World_State_Seed_v1_4.json.
+- Current production bootstrap seed: canon/core_seed_v3.json.
+- Opening-relative integer day offsets remain authoritative for arithmetic; SV dates are deterministic renderings of those offsets.
+- Every named current-seed person carries an explicit birth_day and matching birth_date_sv; historical people also carry death_day and matching death_date_sv.
 
-TENYEAR-01 must restart from day 0 after this repair because aging/mortality chronology changed.
+Authority hashes:
+- World Bible SHA-256: 45947d046f816a95d118167e03a7d24872867b1521eb1a9414c5fe4349d995e3
+- current seed v1.4 SHA-256: 98dd199d657cbd9780988901100c2c973e5230ecacab6ae4359f21e83d461985
+- bootstrap seed v3 SHA-256: 0b331c2dd0670b1b22fbf58a9248a872cef5dfca1d1a0979501bde099434c290
+- packaged day-0 DB SHA-256 at reconciliation time: 179246f18e8369866fa5635f201c99119fb12266628949031bb77feee7bfd4c8
+
+Database state:
+- schema 104;
+- current_day 0;
+- SQLite integrity ok;
+- zero foreign-key violations;
+- no TENYEAR simulated history imported;
+- TENYEAR gate passes using the accepted schema-104 ONEYEAR capability evidence.
+
+Important provenance:
+- v1.3/current pre-reconciliation seed and core_seed_v2 are retained as historical files. Do not use them as current authority.
+- Earlier reports that say the civil calendar is still open describe an older development state. The shared SV civil calendar now supersedes those statements.
+- Exact local feast days, regional month nicknames, regnal formulas, and similar observances remain regional/partly latent; this does not reopen the shared civil calendar.
+
+The prior schema-104 long-horizon evidence remains relevant because the reconciliation changes canon provenance, civil-date rendering, and seed validation rather than world-simulation dynamics. The current standard regression suite is re-run after reconciliation and recorded under acceptance_artifacts.

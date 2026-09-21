@@ -23,7 +23,7 @@ def seed_religious_traditions(conn: sqlite3.Connection) -> None:
     rows = [
         ("witness", "The Witness", "revealed", 70, 95, "working",
          "Exclusive revealed communion centred in Greywood with established external minorities and institutions; local political expression varies by state.",
-         {"authority":"WORLD_BIBLE","no_universal_local_calendar":True}),
+         {"authority":"WORLD_BIBLE","no_universal_feast_calendar":True}),
         ("hearth_rites", "Hearth Rites", "household_rite", 5, 15, "settled",
          "Near-universal Hearthfolk remembrance and household tradition centred on family, dead, season, place and inherited obligation.",
          {"authority":"WORLD_BIBLE","central_priesthood_required":False}),

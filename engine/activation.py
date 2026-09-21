@@ -448,8 +448,9 @@ def activate_economic_substrate(conn: sqlite3.Connection) -> dict[str, int]:
             _, made = _ensure_aggregate_building(conn,key,name,kind,lid,basis=basis)
             buildings_created += int(made)
 
-    # The Brass Lantern explicitly runs four Grand Sales. Their exact calendar is open, so these
-    # are campaign-relative quarterly placements, not in-world named dates. No lots are invented.
+    # The Brass Lantern explicitly runs four Grand Sales. The shared SV civil calendar is fixed,
+    # but canon does not assign these sales exact dates, so these remain campaign-relative quarterly
+    # placements until an in-world schedule is causally established. No lots are invented.
     auctions_created = 0
     brass = _institution(conn,'Brass Lantern House'); toll = _location(conn,'Toll’s Reach')
     if brass is not None and toll is not None:
@@ -458,7 +459,7 @@ def activate_economic_substrate(conn: sqlite3.Connection) -> dict[str, int]:
             if conn.execute("SELECT 1 FROM auctions WHERE json_extract(metadata_json,'$.activation_key')=?",(key,)).fetchone():
                 continue
             create_auction(conn,f'Brass Lantern Grand Sale — cycle {idx}',due,location_id=toll,institution_actor_id=brass,prestige=80,
-                           metadata={'activation_key':key,'authority':'CAMPAIGN_CALIBRATION','basis':'MASTER FINAL states four major Grand Sales per year','calendar_status':'relative campaign placement; exact in-world calendar remains open','no_lots_invented':True})
+                           metadata={'activation_key':key,'authority':'CAMPAIGN_CALIBRATION','basis':'MASTER FINAL states four major Grand Sales per year','calendar_status':'shared SV calendar fixed; exact Grand Sale dates not canonically assigned','no_lots_invented':True})
             auctions_created += 1
 
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('economic_substrate_activation_version','1')")

@@ -1,0 +1,21 @@
+CAERNESS WORLD BIBLE — CALENDAR RECONCILIATION QA
+Date: 2026-09-21
+
+Input newer MASTER FINAL before consistency correction:
+SHA-256: 444162888bf34a28e9b6321b392f8191ae6284a1dc6e150fd155d0ed9960108c
+
+Current corrected canon/world_bible_current.docx:
+SHA-256: 45947d046f816a95d118167e03a7d24872867b1521eb1a9414c5fe4349d995e3
+
+Content correction:
+- retained the settled shared 365-day Since the Vanishing (SV) calendar;
+- moved/rewrote the one stale sentence that still framed shared-vs-competing civil calendars as open;
+- local feast days, seasonal customs, regnal formulas and month nicknames remain regional/latent detail without reopening the civil calendar.
+
+DOCX render QA:
+- rendered corrected DOCX through the canonical DOCX renderer / LibreOffice pipeline;
+- resulting PDF page count: 255;
+- original newer MASTER FINAL PDF page count: 255;
+- low-resolution page-raster comparison: 254/255 pages pixel-identical;
+- only page 246 differs, exactly where the corrected paragraph occurs;
+- corrected page 246 was inspected at high resolution: no clipping, overlap, broken headings, missing glyphs or layout defects.
