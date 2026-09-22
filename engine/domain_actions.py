@@ -238,10 +238,14 @@ def _treatment_option(conn: sqlite3.Connection, actor_id: int, day: int) -> Doma
 
 def _union_option(conn: sqlite3.Connection, actor_id: int, day: int) -> DomainActionOption | None:
     lp = conn.execute(
-        "SELECT family_formation_eligible,life_stage,life_status FROM actor_life_profiles WHERE actor_id=?",
+        "SELECT family_formation_eligible,life_stage,life_status,demographic_sex FROM actor_life_profiles WHERE actor_id=?",
         (actor_id,),
     ).fetchone()
     if not lp or not int(lp["family_formation_eligible"] or 0) or str(lp["life_status"]) != "living" or str(lp["life_stage"]) not in {"adult", "elder"}:
+        return None
+    if str(lp["demographic_sex"] or "unspecified") not in {"female", "male"}:
+        # FAMILY-02 treats missing demographic sex as incomplete state, not as permission to
+        # manufacture a marriage trajectory. Background people with resolved sex remain eligible.
         return None
     if _active_union(conn, actor_id):
         return None
@@ -259,7 +263,7 @@ def _union_option(conn: sqlite3.Connection, actor_id: int, day: int) -> DomainAc
              ON sc.actor_a_id=MIN(r.actor_a_id,r.actor_b_id) AND sc.actor_b_id=MAX(r.actor_a_id,r.actor_b_id)
            WHERE r.actor_a_id=? AND p.actor_type='character' AND p.status='active'
              AND p.current_location_id=? AND lp.life_status='living' AND lp.family_formation_eligible=1
-             AND lp.life_stage='adult' AND r.trust>=30 AND r.stance>=20
+             AND lp.life_stage='adult' AND lp.demographic_sex IN ('female','male') AND r.trust>=30 AND r.stance>=20
              AND COALESCE(sc.started_day,r.updated_day)<=?
            ORDER BY (r.trust+r.stance+r.obligation) DESC,r.id""",
         (actor_id, loc, day - 180),
@@ -268,13 +272,9 @@ def _union_option(conn: sqlite3.Connection, actor_id: int, day: int) -> DomainAc
         partner = int(r["partner_id"])
         if _active_union(conn, partner):
             continue
-        # Avoid close known kin. This is deliberately restrictive rather than guessing kinship norms.
-        if conn.execute(
-            """SELECT 1 FROM kinship_links WHERE ended_day IS NULL AND
-               ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))
-               AND kin_kind NOT IN ('spouse') LIMIT 1""",
-            (actor_id, partner, partner, actor_id),
-        ).fetchone():
+        # FAMILY-02 hard feasibility lives in household_life so every mutation path agrees.
+        from .household_life import prohibited_union_kinship_reason
+        if prohibited_union_kinship_reason(conn, actor_id, partner):
             continue
         return DomainActionOption(
             "propose_union", 6.0 + min(2.5, (float(r["trust"]) + float(r["stance"])) / 80.0),
@@ -1055,17 +1055,20 @@ def apply_accepted_interaction_domain_action(conn: sqlite3.Connection, interacti
             household_name = f"Household of {_name(conn, initiator)} and {_name(conn, partner)}"
             uid = create_union(conn, initiator, partner, union_kind=str(payload.get("union_kind") or "marriage"),
                                create_new_household_name=household_name)
-            # Whether this particular couple later has children is a trajectory, not a reward flag.
-            # The source seed does not encode sex, so biological birth-parent identity remains unresolved.
+            # Whether this couple later has children is a trajectory, not a reward flag.
+            # FAMILY-02 requires a resolved biological pair before auto-birth can ever be scheduled.
+            from .household_life import resolved_biological_birth_parent
             h=(min(initiator,partner)*73 + max(initiator,partner)*41 + day*7)
+            birth_parent=resolved_biological_birth_parent(conn,initiator,partner)
             family_plan={
                 "mode":"ENGINE_DERIVED_OPEN_FAMILY_CONTINUITY",
-                "auto_children": bool(h % 100 < 62),
+                "auto_children": bool(birth_parent is not None and h % 100 < 62),
                 "desired_children": 1 + (h % 3),
                 "spacing_days": 730 + (h % 366),
                 "earliest_next_child_day": day + 365 + (h % 365),
-                "birth_parent_unresolved": True,
+                "birth_parent_actor_id": birth_parent,
                 "authority":"CAMPAIGN_CALIBRATION_NOT_CANON_DESTINY",
+                "family02_reproductive_state":"resolved" if birth_parent is not None else "unresolved_no_auto_birth",
             }
             conn.execute("UPDATE household_unions SET family_plan_json=?,metadata_json=? WHERE id=?",
                          (json.dumps(family_plan,sort_keys=True),json.dumps({"authority":"ENGINE_DERIVED", "accepted_interaction_id":int(interaction["id"])}, sort_keys=True), uid))

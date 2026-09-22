@@ -462,8 +462,7 @@ def _review_active_side(conn, row, campaign, day):
 
 def _named_member_consequences(conn: sqlite3.Connection, force: sqlite3.Row, *, killed: int, wounded: int,
                                captured: int, engagement_id: int, day: int) -> dict[str, int]:
-    from .health import add_condition
-    from .household_life import mark_actor_deceased
+    from .harm import record_harm
 
     members = conn.execute(
         "SELECT * FROM war_force_members WHERE force_id=? AND status='active' ORDER BY exposure DESC,actor_id",
@@ -489,7 +488,10 @@ def _named_member_consequences(conn: sqlite3.Connection, force: sqlite3.Row, *, 
     for member, result in zip(ranked, slots):
         aid = int(member['actor_id'])
         if result == 'killed':
-            mark_actor_deceased(conn, aid, reason=f"killed in battle engagement #{engagement_id}")
+            record_harm(conn, aid, source_kind='war_battle', source_ref_id=engagement_id, severity=100,
+                        intent_class='lethal', harm_kind='battle', exposure=min(100.0, 65.0 + float(member['exposure']) * .35),
+                        metadata={'source_force_id': int(force['id']), 'authoritative_casualty_class':'killed'},
+                        outcome_override='fatal')
             conn.execute("UPDATE war_force_members SET status='killed',updated_day=? WHERE force_id=? AND actor_id=?", (day, int(force['id']), aid))
             conn.execute("UPDATE political_polities SET next_review_day=MIN(next_review_day,?) WHERE ruler_actor_id=?", (day, aid))
             out['named_killed'] += 1
@@ -498,12 +500,11 @@ def _named_member_consequences(conn: sqlite3.Connection, force: sqlite3.Row, *, 
             out['named_captured'] += 1
         else:
             severity = 28.0 + float(member['exposure']) * .25
-            cid = add_condition(
-                conn, aid, 'injury', f"Battle wound from engagement #{engagement_id}", severity=severity,
-                capacity_impact=min(60.0, severity * .65), pain_impact=min(70.0, severity * .75),
-                recovery_rate_per_30=10.0, next_review_days=10,
-                metadata={'source_engagement_id': engagement_id, 'source_force_id': int(force['id'])},
-            )
+            harm = record_harm(conn, aid, source_kind='war_battle', source_ref_id=engagement_id, severity=severity,
+                               intent_class='lethal', harm_kind='battle', exposure=min(100.0, 55.0 + float(member['exposure']) * .35),
+                               metadata={'source_force_id': int(force['id']), 'authoritative_casualty_class':'wounded'},
+                               outcome_override='persistent')
+            cid = harm.get('condition_id')
             conn.execute(
                 "UPDATE war_force_members SET status='wounded',health_condition_id=?,updated_day=? WHERE force_id=? AND actor_id=?",
                 (cid, day, int(force['id']), aid),

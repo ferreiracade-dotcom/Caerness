@@ -166,6 +166,9 @@ def create_union(conn: sqlite3.Connection, actor_a_id: int, actor_b_id: int, *, 
         raise ValueError("A union requires two distinct actors")
     if not _actor_is_living(conn, actor_a_id) or not _actor_is_living(conn, actor_b_id):
         raise ValueError("A union requires living actors")
+    kin_reason = prohibited_union_kinship_reason(conn, actor_a_id, actor_b_id)
+    if kin_reason:
+        raise ValueError(f"FAMILY-02 prohibits union between close known kin: {kin_reason}")
     existing_union = conn.execute(
         "SELECT id FROM household_unions WHERE status='active' AND ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?)) ORDER BY id LIMIT 1",
         (actor_a_id, actor_b_id, actor_b_id, actor_a_id),
@@ -181,6 +184,16 @@ def create_union(conn: sqlite3.Connection, actor_a_id: int, actor_b_id: int, *, 
     ).fetchone()
     if conflicting:
         raise ValueError("one or both actors are already in an active union")
+    family_plan = dict(family_plan or {})
+    if family_plan.get("auto_children"):
+        resolved_parent = resolved_biological_birth_parent(conn, actor_a_id, actor_b_id)
+        if resolved_parent is None:
+            raise ValueError("FAMILY-02 auto-children require a resolved female/male reproductive pair")
+        planned_parent = family_plan.get("birth_parent_actor_id")
+        if planned_parent is not None and int(planned_parent) != int(resolved_parent):
+            raise ValueError("FAMILY-02 family plan names an invalid biological birth parent")
+        family_plan["birth_parent_actor_id"] = int(resolved_parent)
+        family_plan.pop("birth_parent_unresolved", None)
     if create_new_household_name:
         location = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (actor_a_id,)).fetchone()
         household_id = create_household(
@@ -207,7 +220,7 @@ def create_union(conn: sqlite3.Connection, actor_a_id: int, actor_b_id: int, *, 
     cur = conn.execute(
         """INSERT INTO household_unions(actor_a_id,actor_b_id,household_id,union_kind,status,started_day,family_plan_json)
            VALUES (?,?,?,?, 'active', ?,?)""",
-        (actor_a_id, actor_b_id, household_id, union_kind, day, json.dumps(family_plan or {}, sort_keys=True)),
+        (actor_a_id, actor_b_id, household_id, union_kind, day, json.dumps(family_plan, sort_keys=True)),
     )
     add_kinship(conn, actor_a_id, actor_b_id, "spouse", reciprocal_kind="spouse")
     if household_id is not None:
@@ -249,7 +262,15 @@ def update_family_plan(conn: sqlite3.Connection, union_id: int, *, desired_child
     row = conn.execute("SELECT family_plan_json FROM household_unions WHERE id=?", (union_id,)).fetchone()
     if not row:
         raise ValueError("Unknown household union")
+    urow = conn.execute("SELECT actor_a_id,actor_b_id FROM household_unions WHERE id=?", (union_id,)).fetchone()
     plan = json.loads(row[0] or "{}")
+    resolved_parent = resolved_biological_birth_parent(conn, int(urow[0]), int(urow[1])) if urow else None
+    if birth_parent_actor_id is not None and (resolved_parent is None or int(birth_parent_actor_id) != int(resolved_parent)):
+        raise ValueError("FAMILY-02 family plan names an invalid biological birth parent")
+    if auto_children is True and resolved_parent is None:
+        raise ValueError("FAMILY-02 auto-children require a resolved female/male reproductive pair")
+    if auto_children is True and birth_parent_actor_id is None:
+        birth_parent_actor_id = int(resolved_parent)
     for key, val in {
         "desired_children": desired_children, "auto_children": auto_children,
         "birth_parent_actor_id": birth_parent_actor_id, "earliest_next_child_day": earliest_next_child_day,
@@ -289,6 +310,13 @@ def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str |
     a, b = int(row["actor_a_id"]), int(row["actor_b_id"])
     if not _actor_is_living(conn, a) or not _actor_is_living(conn, b):
         raise ValueError("Birth requires both union actors to be living")
+    birth_parent = resolved_biological_birth_parent(conn, a, b)
+    if birth_parent is None:
+        raise ValueError("FAMILY-02 birth requires a resolved female/male reproductive pair")
+    plan = json.loads(row["family_plan_json"] or "{}")
+    planned_parent = plan.get("birth_parent_actor_id")
+    if planned_parent is not None and int(planned_parent) != int(birth_parent):
+        raise ValueError("FAMILY-02 birth parent conflicts with resolved demographic sex")
     hid = row["household_id"]
     existing = _existing_children(conn, a, b)
     siblings = _children_of_either_parent(conn, a, b)
@@ -584,6 +612,55 @@ def _has_active_union(conn: sqlite3.Connection, actor_id: int) -> bool:
     return conn.execute("SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?) LIMIT 1",(actor_id,actor_id)).fetchone() is not None
 
 
+def _parents(conn: sqlite3.Connection, actor_id: int) -> set[int]:
+    return {int(r[0]) for r in conn.execute(
+        "SELECT actor_a_id FROM kinship_links WHERE actor_b_id=? AND kin_kind='parent' AND legal_status='recognized' AND ended_day IS NULL",
+        (actor_id,),
+    ).fetchall()}
+
+
+def prohibited_union_kinship_reason(conn: sqlite3.Connection, actor_a_id: int, actor_b_id: int) -> str | None:
+    """Return a hard FAMILY-02 kinship prohibition, without guessing culture-specific cousin rules."""
+    if actor_a_id == actor_b_id:
+        return "same_actor"
+    direct = conn.execute(
+        """SELECT kin_kind FROM kinship_links WHERE ended_day IS NULL AND legal_status='recognized' AND
+           ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?)) AND kin_kind<>'spouse'
+           ORDER BY id LIMIT 1""",
+        (actor_a_id, actor_b_id, actor_b_id, actor_a_id),
+    ).fetchone()
+    if direct:
+        return f"direct_{direct[0]}"
+    pa, pb = _parents(conn, actor_a_id), _parents(conn, actor_b_id)
+    if pa & pb:
+        return "shared_parent"
+    # Grandparent/grandchild.
+    grandparents_a = {gp for p in pa for gp in _parents(conn, p)}
+    grandparents_b = {gp for p in pb for gp in _parents(conn, p)}
+    if actor_a_id in grandparents_b or actor_b_id in grandparents_a:
+        return "grandparent_descendant"
+    # Aunt/uncle with niece/nephew: one actor shares a parent with the other's parent.
+    if any(_parents(conn, p) & pa for p in pb) or any(_parents(conn, p) & pb for p in pa):
+        return "aunt_uncle_niece_nephew"
+    return None
+
+
+def resolved_biological_birth_parent(conn: sqlite3.Connection, actor_a_id: int, actor_b_id: int) -> int | None:
+    """Return the explicit female birth parent only for a resolved female/male reproductive pair."""
+    rows = {}
+    for aid in (actor_a_id, actor_b_id):
+        row = conn.execute("SELECT demographic_sex,life_status FROM actor_life_profiles WHERE actor_id=?", (aid,)).fetchone()
+        if not row or str(row['life_status']) != 'living':
+            return None
+        sex = str(row['demographic_sex'] or 'unspecified')
+        if sex not in {'female','male'}:
+            return None
+        rows[aid] = sex
+    females = [aid for aid, sex in rows.items() if sex == 'female']
+    males = [aid for aid, sex in rows.items() if sex == 'male']
+    return females[0] if len(females) == 1 and len(males) == 1 else None
+
+
 def _contact_rng(conn: sqlite3.Connection, a: int, b: int, context_id: int, salt: int=0) -> random.Random:
     seed=int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
     return random.Random(seed*1000003 + min(a,b)*1709 + max(a,b)*9151 + int(context_id)*271 + salt)
@@ -702,23 +779,23 @@ def _resolve_planned_births(conn: sqlite3.Connection, day: int, event_logger: Ca
         a, b = int(u["actor_a_id"]), int(u["actor_b_id"])
         if not _actor_is_living(conn, a) or not _actor_is_living(conn, b):
             continue
-        birth_parent = plan.get("birth_parent_actor_id")
+        birth_parent = resolved_biological_birth_parent(conn, a, b)
         if birth_parent is None:
-            if not plan.get('birth_parent_unresolved'):
-                continue
-            # The source seed currently does not encode sex. Do not infer maternity from names.
-            # A household-level birth can proceed only when known ages leave a biologically plausible
-            # birth parent among the two; the specific birth parent remains unresolved.
-            pa=conn.execute("SELECT * FROM actor_life_profiles WHERE actor_id=?",(a,)).fetchone(); pb=conn.execute("SELECT * FROM actor_life_profiles WHERE actor_id=?",(b,)).fetchone()
-            ages=[_age_years(x,day) for x in (pa,pb) if x is not None]
-            if len(ages)!=2 or not any(x is not None and 18.0<=x<=48.0 for x in ages):
-                continue
-        else:
-            if int(birth_parent) not in {a,b}:
-                continue
-            p = conn.execute("SELECT family_formation_eligible,life_status FROM actor_life_profiles WHERE actor_id=?", (int(birth_parent),)).fetchone()
-            if not p or not bool(p[0]) or str(p[1]) != "living":
-                continue
+            # Unknown demographic sex or a non-female/male reproductive pairing is unresolved,
+            # not permission to fabricate a biological birth.
+            continue
+        planned_parent = plan.get("birth_parent_actor_id")
+        if planned_parent is not None and int(planned_parent) != int(birth_parent):
+            continue
+        p = conn.execute("SELECT family_formation_eligible,life_status,birth_day FROM actor_life_profiles WHERE actor_id=?", (int(birth_parent),)).fetchone()
+        if not p or not bool(p[0]) or str(p[1]) != "living":
+            continue
+        age = _age_years(p, day)
+        if age is None or not 18.0 <= age <= 48.0:
+            continue
+        if planned_parent is None:
+            plan["birth_parent_actor_id"] = int(birth_parent)
+            plan.pop("birth_parent_unresolved", None)
         # register_birth requires the current story day, which is exactly the due-processing day.
         child = register_birth(conn, int(u["id"]), day=day)
         plan["earliest_next_child_day"] = day + max(365, int(plan.get("spacing_days", 730)))

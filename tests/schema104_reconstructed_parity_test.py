@@ -27,7 +27,7 @@ def bootstrap():
 def run():
     c,missing,pop0,out=bootstrap()
     try:
-        assert SCHEMA_VERSION==104
+        assert SCHEMA_VERSION>=104
         assert missing==233, missing
         assert int(c.execute("select count(*) from actors where actor_type='character' and status='active' and current_location_id is null").fetchone()[0])==0
         assert out['opening_character_locations_opening_characters_missing_before']==233

@@ -194,7 +194,9 @@ def _referee_decision(conn: sqlite3.Connection, duel_id: int, day: int, *, max_r
     conn.execute("UPDATE duel_combatants SET status='victorious' WHERE id=?",(winner['id'],));conn.execute("UPDATE duel_combatants SET status='defeated' WHERE id=?",(loser['id'],))
     outcome={'winner_actor_id':int(winner['actor_id']),'resolution':'referee_decision','max_controlled_exchanges':max_rounds}
     conn.execute("UPDATE combat_engagements SET status='resolved',phase='aftermath',day_ended=?,outcome_json=? WHERE id=?",(day,json.dumps(outcome,sort_keys=True),duel_id))
-    return {'status':'resolved','engagement_id':duel_id,'outcome':outcome,'referee_decision':True}
+    from .harm import project_duel_harm
+    harm = project_duel_harm(conn, duel_id)
+    return {'status':'resolved','engagement_id':duel_id,'outcome':outcome,'referee_decision':True,'harm_incidents':[int(h['id']) for h in harm]}
 
 def _record_martial_anchor(conn: sqlite3.Connection, actor_id: int, *, kind: str, source_id: int, weight: float, description: str, day: int) -> int | None:
     if not conn.execute("SELECT 1 FROM cultivation_profiles WHERE actor_id=? AND core_state='Open-Core' AND active=1 AND status='active'",(actor_id,)).fetchone():
@@ -272,12 +274,8 @@ def _process_challenges(conn,day:int,event_logger:Callable[...,int]|None=None)->
             for aid in (int(ch['proposer_actor_id']),int(ch['recipient_actor_id'])):
                 _record_martial_anchor(conn,aid,kind='martial_challenge',source_id=int(ch['id']),weight=weight,
                                        description='A resolved accepted martial challenge forced adaptation against a resisting opponent.',day=day)
-            if int(ch['lethal']):
-                winner=(result.get('outcome') or {}).get('winner_actor_id')
-                if winner is not None:
-                    loser=int(ch['recipient_actor_id']) if int(winner)==int(ch['proposer_actor_id']) else int(ch['proposer_actor_id'])
-                    from .household_life import mark_actor_deceased
-                    mark_actor_deceased(conn,loser,reason='Killed in an accepted lethal martial challenge.',event_logger=event_logger)
+            # Lethal terms mean lethal intent, not guaranteed death. HARM-01 owns whether the
+            # resolved exchange produced transient injury, persistent injury/disability, or death.
             out['challenges_resolved']+=1
         else:conn.execute("UPDATE martial_challenges SET next_review_day=? WHERE id=?",(day+1,ch['id']))
     return out

@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 104
+SCHEMA_VERSION = 105
 
 
 def _running_tests() -> bool:
@@ -4306,6 +4306,37 @@ def _migration_104(conn: sqlite3.Connection) -> None:
                     VALUES ('ONEYEAR_RECOVERY_SCHEMA104',104,'pending','{}')""")
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_RECOVERY_SCHEMA104')")
 
+
+def _migration_105(conn: sqlite3.Connection) -> None:
+    """WORLDHIST-01A foundation: FAMILY-02 safety contract and provenance-bearing HARM-01."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS harm_incidents (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        day INTEGER NOT NULL,
+        actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+        source_kind TEXT NOT NULL,
+        source_ref_id INTEGER NOT NULL,
+        harm_kind TEXT NOT NULL,
+        intent_class TEXT NOT NULL CHECK(intent_class IN ('controlled','hostile','lethal','accidental')),
+        location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
+        exposure REAL NOT NULL DEFAULT 50 CHECK(exposure BETWEEN 0 AND 100),
+        raw_severity REAL NOT NULL CHECK(raw_severity BETWEEN 0 AND 100),
+        resolved_severity REAL NOT NULL CHECK(resolved_severity BETWEEN 0 AND 100),
+        outcome TEXT NOT NULL CHECK(outcome IN ('transient','persistent','fatal')),
+        condition_id INTEGER REFERENCES health_conditions(id) ON DELETE SET NULL,
+        fatal INTEGER NOT NULL DEFAULT 0 CHECK(fatal IN (0,1)),
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        UNIQUE(actor_id,source_kind,source_ref_id,harm_kind)
+    );
+    CREATE INDEX IF NOT EXISTS idx_harm_actor_day ON harm_incidents(actor_id,day,id);
+    CREATE INDEX IF NOT EXISTS idx_harm_source ON harm_incidents(source_kind,source_ref_id,actor_id);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('family02_feasibility_contract','kinship_and_resolved_reproduction_required')")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('harm01_projection_version','1')")
+    conn.execute("""INSERT OR IGNORE INTO acceptance_epochs(acceptance_key,schema_version,status,evidence_json)
+                    VALUES ('ONEYEAR_WORLDHIST01A_SCHEMA105',105,'pending','{}')""")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA105')")
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4411,6 +4442,7 @@ _MIGRATIONS: dict[int, Migration] = {
     102: ("population_casualty_bridge", "WAR/underworld excess-mortality population reconciliation", _migration_102),
     103: ("merged_recovery_complete", "Recovered schema-101-era merged line plus acceptance fixes", _migration_103),
     104: ("oneyear_recovery_acceptance_epoch", "Current-line ONEYEAR acceptance epoch and TENYEAR-02 gate", _migration_104),
+    105: ("worldhist01a_family_harm", "WORLDHIST-01A FAMILY-02 feasibility and HARM-01 shared consequence projection", _migration_105),
 }
 
 

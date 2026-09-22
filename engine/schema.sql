@@ -4818,3 +4818,26 @@ CREATE TABLE IF NOT EXISTS conflict_responses (
     metadata_json TEXT NOT NULL DEFAULT '{}'
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_conflict_one_formal_response ON conflict_responses(incident_id,responding_polity_id);
+
+
+-- schema 105: WORLDHIST-01A / HARM-01 shared provenance-bearing harm projection.
+CREATE TABLE IF NOT EXISTS harm_incidents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    source_kind TEXT NOT NULL,
+    source_ref_id INTEGER NOT NULL,
+    harm_kind TEXT NOT NULL,
+    intent_class TEXT NOT NULL CHECK(intent_class IN ('controlled','hostile','lethal','accidental')),
+    location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
+    exposure REAL NOT NULL DEFAULT 50 CHECK(exposure BETWEEN 0 AND 100),
+    raw_severity REAL NOT NULL CHECK(raw_severity BETWEEN 0 AND 100),
+    resolved_severity REAL NOT NULL CHECK(resolved_severity BETWEEN 0 AND 100),
+    outcome TEXT NOT NULL CHECK(outcome IN ('transient','persistent','fatal')),
+    condition_id INTEGER REFERENCES health_conditions(id) ON DELETE SET NULL,
+    fatal INTEGER NOT NULL DEFAULT 0 CHECK(fatal IN (0,1)),
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    UNIQUE(actor_id,source_kind,source_ref_id,harm_kind)
+);
+CREATE INDEX IF NOT EXISTS idx_harm_actor_day ON harm_incidents(actor_id,day,id);
+CREATE INDEX IF NOT EXISTS idx_harm_source ON harm_incidents(source_kind,source_ref_id,actor_id);
