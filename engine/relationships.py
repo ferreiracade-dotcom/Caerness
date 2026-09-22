@@ -106,3 +106,42 @@ def relationship_exists(conn: sqlite3.Connection, source_actor_id: int, target_a
         "SELECT 1 FROM relationships WHERE actor_a_id=? AND actor_b_id=?",
         (int(source_actor_id), int(target_actor_id)),
     ).fetchone() is not None
+
+
+def record_relationship_effect(
+    conn: sqlite3.Connection, source_actor_id: int, target_actor_id: int, day: int, *,
+    source_kind: str, source_id: int | None = None, summary: str, metadata: dict[str, Any] | None = None,
+    stance_delta: float=0.0, familiarity_delta: float=0.0, trust_delta: float=0.0,
+    affection_delta: float=0.0, respect_delta: float=0.0, fear_delta: float=0.0,
+    loyalty_delta: float=0.0, resentment_delta: float=0.0, obligation_delta: float=0.0,
+    professional_confidence_delta: float=0.0,
+) -> int:
+    """Apply a directional social consequence and preserve why it changed.
+
+    Structural relationships remain owned by their domain tables; this ledger records evaluative
+    social memory so later decisions can distinguish trust, fear, resentment, respect, etc.
+    """
+    effect = {
+        'stance_delta': stance_delta, 'familiarity_delta': familiarity_delta, 'trust_delta': trust_delta,
+        'affection_delta': affection_delta, 'respect_delta': respect_delta, 'fear_delta': fear_delta,
+        'loyalty_delta': loyalty_delta, 'resentment_delta': resentment_delta, 'obligation_delta': obligation_delta,
+        'professional_confidence_delta': professional_confidence_delta,
+    }
+    adjust_relationship(conn, source_actor_id, target_actor_id, day, **effect)
+    import json
+    cur = conn.execute(
+        """INSERT INTO relationship_history(day,source_actor_id,target_actor_id,source_kind,source_id,effect_json,summary,metadata_json)
+           VALUES (?,?,?,?,?,?,?,?)""",
+        (int(day), int(source_actor_id), int(target_actor_id), str(source_kind), source_id,
+         json.dumps(effect, sort_keys=True), str(summary), json.dumps(metadata or {}, sort_keys=True)),
+    )
+    return int(cur.lastrowid)
+
+def record_relationship_pair_effect(
+    conn: sqlite3.Connection, actor_a_id: int, actor_b_id: int, day: int, *, source_kind: str, source_id: int | None,
+    a_to_b: dict[str,float], b_to_a: dict[str,float], summary_a: str, summary_b: str, metadata: dict[str,Any] | None=None
+) -> tuple[int,int]:
+    return (
+        record_relationship_effect(conn, actor_a_id, actor_b_id, day, source_kind=source_kind, source_id=source_id, summary=summary_a, metadata=metadata, **a_to_b),
+        record_relationship_effect(conn, actor_b_id, actor_a_id, day, source_kind=source_kind, source_id=source_id, summary=summary_b, metadata=metadata, **b_to_a),
+    )

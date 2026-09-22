@@ -7,7 +7,8 @@ import sqlite3
 from dataclasses import dataclass
 
 from .information import register_event_information
-from .relationships import relationship_view, adjust_relationship, adjust_relationship_pair
+from .relationships import (relationship_view, adjust_relationship, adjust_relationship_pair,
+                            record_relationship_effect, record_relationship_pair_effect)
 
 
 INTERACTION_TYPES = {
@@ -131,6 +132,41 @@ def _wake_recipient(conn: sqlite3.Connection, actor_id: int, stakes: int, day: i
     )
 
 
+
+def _interaction_subject_key(interaction_type: str, terms: dict | None) -> str:
+    payload = terms or {}
+    subject = payload.get("purpose") or payload.get("domain_action_kind") or payload.get("goal_id") or payload.get("opportunity_proposal_id") or ""
+    return f"{interaction_type}:{subject}"
+
+def _reapproach_blocked(conn: sqlite3.Connection, proposer: int, recipient: int, interaction_type: str, day: int, terms: dict | None) -> int | None:
+    """Return the recent refusal that closes an unchanged approach after repeated rejection.
+
+    This is a generic safety net. Domain candidate providers should also learn from rejection, but
+    repeated identical approaches must not be able to generate hundreds of meaningless interactions.
+    """
+    if (terms or {}).get("force_reapproach"):
+        return None
+    key = _interaction_subject_key(interaction_type, terms)
+    rows = conn.execute(
+        """SELECT id,created_day,resolved_day,terms_json,status FROM interactions
+           WHERE proposer_actor_id=? AND recipient_actor_id=? AND interaction_type=?
+             AND status='rejected' AND COALESCE(resolved_day,created_day)>=?
+           ORDER BY COALESCE(resolved_day,created_day) DESC,id DESC LIMIT 8""",
+        (proposer, recipient, interaction_type, max(0, int(day)-365)),
+    ).fetchall()
+    matching=[]
+    for row in rows:
+        try:
+            old_terms=json.loads(row['terms_json'] or '{}')
+        except Exception:
+            old_terms={}
+        if _interaction_subject_key(interaction_type, old_terms)==key:
+            matching.append(row)
+    if len(matching) < 3:
+        return None
+    latest_day=int(matching[0]['resolved_day'] if matching[0]['resolved_day'] is not None else matching[0]['created_day'])
+    return int(matching[0]['id']) if day-latest_day < 180 else None
+
 def create_interaction(
     conn: sqlite3.Connection,
     proposer_actor_id: int,
@@ -151,6 +187,9 @@ def create_interaction(
         raise ValueError(f"unsupported interaction_type: {interaction_type}")
     if proposer_actor_id == recipient_actor_id:
         raise ValueError("an actor cannot initiate an interaction with itself")
+    blocked_by = _reapproach_blocked(conn, proposer_actor_id, recipient_actor_id, interaction_type, day, terms)
+    if blocked_by is not None:
+        return blocked_by
     proposer_name = _name(conn, proposer_actor_id)
     recipient_name = _name(conn, recipient_actor_id)
     urgency = max(1, min(5, int(urgency)))
@@ -384,10 +423,26 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
                         (new_progress, "completed" if new_progress >= 100 else "active", goal["id"]),
                     )
 
-        trust_delta = 3.0 if kind not in {"demand", "threat"} else -2.0
-        stance_delta = 2.0 if kind not in {"demand", "threat"} else -2.0
-        obligation_delta = 2.0 if kind in {"offer", "request", "contract"} else 0.0
-        adjust_relationship(conn, proposer, recipient, day, trust_delta=trust_delta, stance_delta=stance_delta, obligation_delta=obligation_delta)
+        if kind in {"demand", "threat"}:
+            record_relationship_pair_effect(
+                conn, proposer, recipient, day, source_kind="interaction", source_id=int(interaction["id"]),
+                a_to_b={"familiarity_delta":1.0,"professional_confidence_delta":0.5},
+                b_to_a={"familiarity_delta":1.0,"trust_delta":-2.0,"stance_delta":-2.0,"fear_delta":4.0,"resentment_delta":2.0},
+                summary_a="Compliance changed the initiator's evaluation of the recipient.",
+                summary_b="Compliance under pressure created fear and resentment toward the initiator.",
+                metadata={"interaction_type":kind,"outcome":"complied"},
+            )
+        else:
+            a_obligation = 2.0 if kind == "request" else (1.0 if kind == "contract" else 0.0)
+            b_obligation = 2.0 if kind == "offer" else (1.0 if kind == "contract" else 0.0)
+            record_relationship_pair_effect(
+                conn, proposer, recipient, day, source_kind="interaction", source_id=int(interaction["id"]),
+                a_to_b={"familiarity_delta":2.0,"trust_delta":3.0,"stance_delta":2.0,"respect_delta":1.0,"professional_confidence_delta":1.0,"obligation_delta":a_obligation},
+                b_to_a={"familiarity_delta":2.0,"trust_delta":2.0,"stance_delta":1.0,"respect_delta":0.5,"professional_confidence_delta":2.0,"obligation_delta":b_obligation},
+                summary_a="A successful interaction strengthened confidence in the recipient.",
+                summary_b="A successful interaction strengthened confidence in the initiator.",
+                metadata={"interaction_type":kind,"outcome":"accepted"},
+            )
         if kind == "conversation":
             summary = f"{recipient_name} engaged with {proposer_name}'s approach."
         elif response == "accept":
@@ -441,7 +496,13 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
             summary = f"{recipient_name} countered {proposer_name}'s {kind} rather than accepting or refusing outright."
             _record_action(conn, int(interaction["id"]), day, recipient, "counter", summary, {"child_interaction_id": child_id, "counter_proposal_id": counter_pid})
             conn.execute("UPDATE interactions SET status='countered',resolved_day=?,resolution_summary=? WHERE id=?", (day, summary, interaction["id"]))
-            adjust_relationship(conn, proposer, recipient, day, trust_delta=0.5)
+            record_relationship_pair_effect(
+                conn, proposer, recipient, day, source_kind="interaction", source_id=int(interaction["id"]),
+                a_to_b={"familiarity_delta":1.0,"trust_delta":0.5,"respect_delta":0.5},
+                b_to_a={"familiarity_delta":1.0,"respect_delta":0.5},
+                summary_a="A counterproposal kept negotiation open.", summary_b="A counterproposal kept negotiation open.",
+                metadata={"interaction_type":kind,"outcome":"countered"},
+            )
             return InteractionResult(int(interaction["id"]), "countered", "counter", summary, child_interaction_id=child_id)
         counter_terms = dict(terms)
         counter_terms["counter_depth"] = depth + 1
@@ -467,13 +528,34 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
             "UPDATE interactions SET status='countered',resolved_day=?,resolution_summary=? WHERE id=?",
             (day, summary, interaction["id"]),
         )
-        adjust_relationship(conn, proposer, recipient, day, trust_delta=0.5)
+        record_relationship_pair_effect(
+            conn, proposer, recipient, day, source_kind="interaction", source_id=int(interaction["id"]),
+            a_to_b={"familiarity_delta":1.0,"trust_delta":0.5,"respect_delta":0.5},
+            b_to_a={"familiarity_delta":1.0,"respect_delta":0.5},
+            summary_a="A counterproposal kept negotiation open.", summary_b="A counterproposal kept negotiation open.",
+            metadata={"interaction_type":kind,"outcome":"countered"},
+        )
         return InteractionResult(int(interaction["id"]), "countered", "counter", summary, child_interaction_id=child_id)
 
     response = "reject" if kind not in {"demand", "threat"} else "refuse"
-    trust_loss = -2.0 if kind not in {"demand", "threat"} else -5.0
-    stance_loss = -1.0 if kind not in {"demand", "threat"} else -4.0
-    adjust_relationship(conn, proposer, recipient, day, trust_delta=trust_loss, stance_delta=stance_loss)
+    if kind in {"demand", "threat"}:
+        record_relationship_pair_effect(
+            conn, proposer, recipient, day, source_kind="interaction", source_id=int(interaction["id"]),
+            a_to_b={"familiarity_delta":1.0,"trust_delta":-5.0,"stance_delta":-4.0,"resentment_delta":4.0},
+            b_to_a={"familiarity_delta":1.0,"trust_delta":-2.0,"stance_delta":-2.0,"fear_delta":2.0,"resentment_delta":2.0},
+            summary_a="Refusal of coercion increased hostility toward the recipient.",
+            summary_b="Receiving and refusing coercion increased fear and resentment toward the initiator.",
+            metadata={"interaction_type":kind,"outcome":"refused"},
+        )
+    else:
+        record_relationship_pair_effect(
+            conn, proposer, recipient, day, source_kind="interaction", source_id=int(interaction["id"]),
+            a_to_b={"familiarity_delta":0.5,"trust_delta":-2.0,"stance_delta":-1.0,"resentment_delta":1.0},
+            b_to_a={"familiarity_delta":0.5,"professional_confidence_delta":-0.5},
+            summary_a="Rejection reduced confidence and created some resentment.",
+            summary_b="Rejecting the approach changed confidence in the initiator.",
+            metadata={"interaction_type":kind,"outcome":"rejected"},
+        )
     summary = f"{recipient_name} {response}d {proposer_name}'s {kind}."
     _record_action(conn, int(interaction["id"]), day, recipient, response, summary)
     conn.execute(

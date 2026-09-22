@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 105
+SCHEMA_VERSION = 106
 
 
 def _running_tests() -> bool:
@@ -4337,6 +4337,51 @@ def _migration_105(conn: sqlite3.Connection) -> None:
                     VALUES ('ONEYEAR_WORLDHIST01A_SCHEMA105',105,'pending','{}')""")
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA105')")
 
+
+def _migration_106(conn: sqlite3.Connection) -> None:
+    """WORLDHIST-01A stage 2: durable social memory, event-driven organization pressure, and authority succession cases."""
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS relationship_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        day INTEGER NOT NULL,
+        source_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+        target_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+        source_kind TEXT NOT NULL,
+        source_id INTEGER,
+        effect_json TEXT NOT NULL DEFAULT '{}',
+        summary TEXT NOT NULL,
+        metadata_json TEXT NOT NULL DEFAULT '{}',
+        CHECK(source_actor_id<>target_actor_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_relationship_history_pair ON relationship_history(source_actor_id,target_actor_id,day,id);
+    CREATE INDEX IF NOT EXISTS idx_relationship_history_source ON relationship_history(source_kind,source_id,id);
+
+    CREATE TABLE IF NOT EXISTS leadership_transition_cases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        institution_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+        authority_key TEXT NOT NULL DEFAULT 'head',
+        trigger_kind TEXT NOT NULL,
+        trigger_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        source_kind TEXT,
+        source_id INTEGER,
+        status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open','resolved','deferred','cancelled')),
+        opened_day INTEGER NOT NULL,
+        resolved_day INTEGER,
+        chosen_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+        metadata_json TEXT NOT NULL DEFAULT '{}'
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_leadership_transition_open
+        ON leadership_transition_cases(institution_actor_id,authority_key) WHERE status IN ('open','deferred');
+    CREATE INDEX IF NOT EXISTS idx_leadership_transition_status
+        ON leadership_transition_cases(status,opened_day,institution_actor_id,id);
+    """)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('relationship_history_version','1')")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('orgpress_event_projection_version','1')")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('succession02_authority_transition_version','1')")
+    conn.execute("""INSERT OR IGNORE INTO acceptance_epochs(acceptance_key,schema_version,status,evidence_json)
+                    VALUES ('ONEYEAR_WORLDHIST01A_SCHEMA106',106,'pending','{}')""")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA106')")
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4443,6 +4488,7 @@ _MIGRATIONS: dict[int, Migration] = {
     103: ("merged_recovery_complete", "Recovered schema-101-era merged line plus acceptance fixes", _migration_103),
     104: ("oneyear_recovery_acceptance_epoch", "Current-line ONEYEAR acceptance epoch and TENYEAR-02 gate", _migration_104),
     105: ("worldhist01a_family_harm", "WORLDHIST-01A FAMILY-02 feasibility and HARM-01 shared consequence projection", _migration_105),
+    106: ("worldhist01a_social_org_succession", "WORLDHIST-01A REL-02 social memory, ORGPRESS-01 event projection and SUCCESSION-02 authority transitions", _migration_106),
 }
 
 

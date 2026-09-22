@@ -1005,6 +1005,8 @@ def resolve_duel_exchange(conn: sqlite3.Connection, engagement_id: int) -> dict[
     if resolved:
         from .harm import project_duel_harm
         duel_harm = project_duel_harm(conn, engagement_id)
+        from .organization_agency import project_internal_duel_consequences
+        institutional_consequence = project_internal_duel_consequences(conn, engagement_id)
     summary = {
         "engagement_id": engagement_id,
         "kind": "duel",
@@ -1014,6 +1016,7 @@ def resolve_duel_exchange(conn: sqlite3.Connection, engagement_id: int) -> dict[
         "outcome": outcome,
         "battle_consequence": battle_consequence,
         "harm_incidents": [int(h["id"]) for h in (duel_harm or [])],
+        "institutional_consequence": institutional_consequence if resolved else None,
         "note": "Duel resolution remains abstract tactically; HARM-01 projects final anatomical consequences with source provenance.",
     }
     conn.execute("INSERT INTO duel_exchanges(engagement_id,round_index,day,seed,summary_json) VALUES (?,?,?,?,?)",

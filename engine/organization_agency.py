@@ -151,6 +151,74 @@ def _infer_institution_governance(conn: sqlite3.Connection, iid: int) -> tuple[s
     return "institutional", None
 
 
+
+def record_organization_pressure(
+    conn: sqlite3.Connection, institution_actor_id: int, pressure_key: str, domain: str, *,
+    intensity_delta: float, urgency: float, source_kind: str | None = None, source_id: int | None = None,
+    target_kind: str | None = None, target_id: int | None = None, metadata: dict[str, Any] | None = None,
+) -> int:
+    """Accumulate event-derived institutional pressure without dictating the response."""
+    day = _day(conn)
+    ensure_agency_profile(conn, institution_actor_id)
+    row = conn.execute(
+        "SELECT * FROM organization_pressures WHERE institution_actor_id=? AND pressure_key=? AND status='active' ORDER BY id LIMIT 1",
+        (institution_actor_id, str(pressure_key)),
+    ).fetchone()
+    if row:
+        new_intensity = max(0.0, min(100.0, float(row['intensity']) + float(intensity_delta)))
+        new_urgency = max(float(row['urgency']), max(0.0, min(100.0, float(urgency))))
+        old_meta = _json(row['metadata_json'])
+        old_meta.update(metadata or {})
+        old_meta['last_source_kind'] = source_kind
+        old_meta['last_source_id'] = source_id
+        conn.execute(
+            """UPDATE organization_pressures SET intensity=?,urgency=?,target_kind=COALESCE(?,target_kind),
+               target_id=COALESCE(?,target_id),source_kind=?,source_id=?,updated_day=?,metadata_json=? WHERE id=?""",
+            (new_intensity, new_urgency, target_kind, target_id, source_kind, source_id, day, json.dumps(old_meta, sort_keys=True), int(row['id'])),
+        )
+        pid = int(row['id'])
+    else:
+        cur = conn.execute(
+            """INSERT INTO organization_pressures(institution_actor_id,pressure_key,domain,target_kind,target_id,intensity,urgency,source_kind,source_id,status,created_day,updated_day,metadata_json)
+               VALUES (?,?,?,?,?,?,?,?,?,'active',?,?,?)""",
+            (institution_actor_id, str(pressure_key), str(domain), target_kind, target_id,
+             max(0.0, min(100.0, float(intensity_delta))), max(0.0, min(100.0, float(urgency))),
+             source_kind, source_id, day, day, json.dumps(metadata or {}, sort_keys=True)),
+        )
+        pid = int(cur.lastrowid)
+    # Wake lifecycle review sooner; pressure changes future organizational decisions, not the past event itself.
+    try:
+        conn.execute(
+            "UPDATE organization_lifecycle_profiles SET next_review_day=MIN(next_review_day,?) WHERE institution_actor_id=?",
+            (day + 1, institution_actor_id),
+        )
+    except sqlite3.OperationalError:
+        pass
+    return pid
+
+def ensure_organization_faction(
+    conn: sqlite3.Connection, institution_actor_id: int, faction_key: str, *, name: str | None = None,
+    sponsor_actor_id: int | None = None, influence: float = 20.0, cohesion: float = 55.0,
+    positions: dict[str, Any] | None = None, metadata: dict[str, Any] | None = None,
+) -> int:
+    """Persist a causally justified faction. Never invent a sponsor merely to populate the table."""
+    day = _day(conn)
+    conn.execute(
+        """INSERT INTO organization_factions(institution_actor_id,faction_key,name,sponsor_actor_id,influence,cohesion,positions_json,status,created_day,updated_day,metadata_json)
+           VALUES (?,?,?,?,?,?,?,'active',?,?,?)
+           ON CONFLICT(institution_actor_id,faction_key) DO UPDATE SET
+             name=COALESCE(excluded.name,organization_factions.name),
+             sponsor_actor_id=COALESCE(excluded.sponsor_actor_id,organization_factions.sponsor_actor_id),
+             influence=MAX(organization_factions.influence,excluded.influence),
+             cohesion=excluded.cohesion,positions_json=excluded.positions_json,status='active',updated_day=excluded.updated_day,metadata_json=excluded.metadata_json""",
+        (institution_actor_id, str(faction_key), name, sponsor_actor_id, max(0,min(100,float(influence))),
+         max(0,min(100,float(cohesion))), json.dumps(positions or {}, sort_keys=True), day, day, json.dumps(metadata or {}, sort_keys=True)),
+    )
+    return int(conn.execute(
+        "SELECT id FROM organization_factions WHERE institution_actor_id=? AND faction_key=?",
+        (institution_actor_id, str(faction_key)),
+    ).fetchone()[0])
+
 def activate_shared_organization_agency(conn: sqlite3.Connection) -> dict[str, int]:
     created_underworld = ensure_underworld_institution_identities(conn)
     day = _day(conn)
@@ -175,3 +243,64 @@ def activate_shared_organization_agency(conn: sqlite3.Connection) -> dict[str, i
                 set_capability(conn, iid, "institutional_capacity", "general", sum(numeric)/len(numeric), basis={"source":"institution_profiles.capacity_json"})
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('organization_agency_activation_version','1')")
     return {"underworld_institution_identities_created":created_underworld,"organization_agency_profiles_created":profiles,"organization_regimes_created":regimes}
+
+
+def project_internal_duel_consequences(conn: sqlite3.Connection, engagement_id: int) -> dict[str, Any]:
+    """Project a resolved internal duel into social memory and institutional pressure.
+
+    The duel never directly removes a leader. It can make later succession/faction/lifecycle
+    decisions different by recording the prestige/legitimacy consequence of what happened.
+    """
+    eng = conn.execute("SELECT * FROM combat_engagements WHERE id=? AND engagement_kind='duel' AND status='resolved'", (engagement_id,)).fetchone()
+    if not eng:
+        return {"projected": False, "reason": "duel not resolved"}
+    outcome = _json(eng['outcome_json'])
+    winner = outcome.get('winner_actor_id')
+    if winner is None:
+        return {"projected": False, "reason": "no winner"}
+    winner = int(winner)
+    cs = conn.execute("SELECT actor_id FROM duel_combatants WHERE engagement_id=? ORDER BY id", (engagement_id,)).fetchall()
+    if len(cs) != 2:
+        return {"projected": False, "reason": "not two combatants"}
+    ids = [int(r[0]) for r in cs]
+    loser = ids[1] if ids[0] == winner else ids[0]
+    if winner not in ids:
+        return {"projected": False, "reason": "winner not combatant"}
+    day = _day(conn)
+    from .relationships import record_relationship_pair_effect
+    stakes = int(eng['stakes'] or 2)
+    record_relationship_pair_effect(
+        conn, winner, loser, day, source_kind='duel', source_id=engagement_id,
+        a_to_b={'familiarity_delta': 2.0, 'respect_delta': 1.5 + stakes * .5, 'professional_confidence_delta': 1.0},
+        b_to_a={'familiarity_delta': 2.0, 'respect_delta': 2.0 + stakes, 'resentment_delta': max(0.0, stakes - 2) * .75},
+        summary_a="A resolved duel changed the winner's evaluation of the opponent.",
+        summary_b="Defeat in a resolved duel changed the loser's evaluation of the winner.",
+        metadata={'engagement_id': engagement_id, 'controlled_context': True},
+    )
+    common = conn.execute(
+        """SELECT mw.institution_actor_id FROM institution_memberships mw
+           JOIN institution_memberships ml ON ml.institution_actor_id=mw.institution_actor_id
+           WHERE mw.member_actor_id=? AND ml.member_actor_id=? AND mw.status='active' AND ml.status='active'
+           ORDER BY mw.institution_actor_id""",
+        (winner, loser),
+    ).fetchall()
+    pressures: list[int] = []
+    for row in common:
+        iid = int(row[0])
+        head = conn.execute(
+            "SELECT incumbent_actor_id FROM institutional_authority_slots WHERE institution_actor_id=? AND authority_key='head' AND status='active'",
+            (iid,),
+        ).fetchone()
+        if not head or head[0] is None or int(head[0]) != loser:
+            continue
+        # A member publicly defeating the incumbent creates legitimacy pressure, not automatic replacement.
+        stage = conn.execute("SELECT current_stage FROM cultivation_profiles WHERE actor_id=?", (winner,)).fetchone()
+        high_stage = str(stage[0]) in {'Fifth','Sixth'} if stage else False
+        intensity = 8.0 + stakes * 5.0 + (8.0 if high_stage else 0.0)
+        pid = record_organization_pressure(
+            conn, iid, 'leadership_legitimacy', 'leadership', intensity_delta=intensity, urgency=min(95.0, 35.0 + stakes * 10.0),
+            source_kind='duel', source_id=engagement_id, target_kind='actor', target_id=loser,
+            metadata={'winner_actor_id': winner, 'loser_head_actor_id': loser, 'public_defeat': True, 'does_not_force_succession': True},
+        )
+        pressures.append(pid)
+    return {'projected': True, 'winner_actor_id': winner, 'loser_actor_id': loser, 'institution_pressure_ids': pressures}

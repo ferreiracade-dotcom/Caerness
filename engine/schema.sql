@@ -4841,3 +4841,37 @@ CREATE TABLE IF NOT EXISTS harm_incidents (
 );
 CREATE INDEX IF NOT EXISTS idx_harm_actor_day ON harm_incidents(actor_id,day,id);
 CREATE INDEX IF NOT EXISTS idx_harm_source ON harm_incidents(source_kind,source_ref_id,actor_id);
+
+
+-- schema 106: WORLDHIST-01A stage 2 social memory, organization pressure, succession.
+CREATE TABLE IF NOT EXISTS relationship_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    source_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    target_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    source_kind TEXT NOT NULL,
+    source_id INTEGER,
+    effect_json TEXT NOT NULL DEFAULT '{}',
+    summary TEXT NOT NULL,
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    CHECK(source_actor_id<>target_actor_id)
+);
+CREATE INDEX IF NOT EXISTS idx_relationship_history_pair ON relationship_history(source_actor_id,target_actor_id,day,id);
+CREATE INDEX IF NOT EXISTS idx_relationship_history_source ON relationship_history(source_kind,source_id,id);
+
+CREATE TABLE IF NOT EXISTS leadership_transition_cases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    institution_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    authority_key TEXT NOT NULL DEFAULT 'head',
+    trigger_kind TEXT NOT NULL,
+    trigger_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+    source_kind TEXT,
+    source_id INTEGER,
+    status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open','resolved','deferred','cancelled')),
+    opened_day INTEGER NOT NULL,
+    resolved_day INTEGER,
+    chosen_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_leadership_transition_open ON leadership_transition_cases(institution_actor_id,authority_key) WHERE status IN ('open','deferred');
+CREATE INDEX IF NOT EXISTS idx_leadership_transition_status ON leadership_transition_cases(status,opened_day,institution_actor_id,id);

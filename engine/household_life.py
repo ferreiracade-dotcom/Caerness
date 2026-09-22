@@ -579,6 +579,13 @@ def mark_actor_deceased(conn: sqlite3.Connection, actor_id: int, *, reason: str 
         conn.execute("UPDATE actor_health_profiles SET last_review_day=?,next_review_day=? WHERE actor_id=?", (day, day, actor_id))
     except sqlite3.OperationalError:
         pass
+    # Leadership death must become institutional history. This hook opens real authority
+    # vacancies/succession cases but never invents a replacement person.
+    try:
+        from .succession import handle_actor_death_authority
+        handle_actor_death_authority(conn, actor_id, source_kind='actor_death')
+    except (sqlite3.OperationalError, ImportError):
+        pass
     _record_life_event(conn, "death", f"{_name(conn, actor_id)} died: {reason}.", actor_id=actor_id, household_id=hid, location_id=location_id)
     if event_logger:
         event_logger(day=day, event_type="life:death", title=f"Death: {_name(conn, actor_id)}", summary=reason,

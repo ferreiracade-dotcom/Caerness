@@ -117,6 +117,17 @@ def set_ruler(conn: sqlite3.Connection, polity_id: int, actor_id: int, *, dynast
     conn.execute("UPDATE political_succession_claims SET status='chosen',resolved_day=? WHERE polity_id=? AND claimant_actor_id=? AND status='active'",
                  (_day(conn), polity_id, actor_id))
     _history(conn, "ruler_set", reason, polity_id=polity_id, actor_id=actor_id, detail={"dynasty_id": dynasty_id})
+    # Keep the generic institutional authority bridge synchronized with the political owner.
+    try:
+        iid = int(conn.execute("SELECT institution_actor_id FROM political_polities WHERE id=?", (polity_id,)).fetchone()[0])
+        conn.execute("""UPDATE institutional_authority_slots SET authority_kind='named_incumbent',incumbent_actor_id=?,status='active',
+                     metadata_json=json_patch(metadata_json,?) WHERE institution_actor_id=? AND authority_key='head'""",
+                     (actor_id, json.dumps({'political_succession_owner':True,'resolved_day':_day(conn)}), iid))
+        conn.execute("""UPDATE leadership_transition_cases SET status='resolved',resolved_day=?,chosen_actor_id=?
+                     WHERE institution_actor_id=? AND authority_key='head' AND status IN ('open','deferred')""",
+                     (_day(conn), actor_id, iid))
+    except sqlite3.OperationalError:
+        pass
     try:
         from .organization_agency import start_regime
         from .organization_lifecycle import record_lifecycle_event
