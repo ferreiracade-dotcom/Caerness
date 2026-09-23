@@ -1,13 +1,13 @@
 # Caerness v0.60.0 — CURRENT DEVELOPMENT HANDOFF
 
-**Package state:** Schema 106 / WORLDHIST-01A Stage 2  
+**Package state:** Schema 107 / WORLDHIST-01A Stage 2 + FAMILY-02 sex resolution  
 **Engine version:** 0.60.0  
 **Live development database:** `data/caerness.db`  
 **Live story day:** 0  
 **Current code checkpoint:** `58ee22291d34bb1da59db951ca14dae233e71e8d`  
 **Current World Bible:** `canon/world_bible_current.docx`  
 **Current opening-world seed:** `game/seeds/Caerness_Initial_World_State_Seed_v1_4.json`  
-**Status:** focused WORLDHIST-01A Stage 2 acceptance passed; fresh Schema-106 integrated ONEYEAR acceptance is still pending.
+**Status:** focused WORLDHIST-01A Stage 2 acceptance passed; Schema 107 adds review fixes and FAMILY-02 sex resolution (see `WORLDHIST01A_SCHEMA107_REVIEW_FIXES_AND_SEX_RESOLUTION_2026-09-23.md`); fresh Schema-107 integrated ONEYEAR acceptance is still pending.
 
 This README is the authoritative starting point for anyone resuming development from this package. Older handoffs, acceptance reports and roadmaps remain in the repository as historical evidence, but **their schema numbers and “current” labels must not override this file**.
 
@@ -27,7 +27,7 @@ The simulation should not preserve institutions, characters or outcomes merely b
 
 ## 2. Where development is RIGHT NOW
 
-The live code in this package is **Schema 106**, built on the corrected Schema-104 TENYEAR-02 development baseline.
+The live code in this package is **Schema 107**, built on the corrected Schema-104 TENYEAR-02 development baseline.
 
 ### Schema 104 baseline already accepted
 
@@ -90,11 +90,19 @@ Stage 2 makes consequential events persist as **social and institutional history
 
 See `WORLDHIST01A_STAGE2_SOCIAL_ORGPRESS_SUCCESSION_ACCEPTANCE_2026-09-22.md`.
 
+### Schema 107 — review fixes and FAMILY-02 sex resolution
+
+- correctness fixes to the Stage 1/2 code (re-approach blocking, war casualties, kinship prohibitions, duel harm events, succession savepoints);
+- `connect()` closes on leaving its `with` block (Windows could not delete or replace open databases);
+- every named character has a resolved demographic sex, in the order canon text → canon rule (male-only Mantle) → given name → seeded roll; newborns and characters created during play are resolved at creation (`engine/demographic_sex.py`, migration 107).
+
+See `WORLDHIST01A_SCHEMA107_REVIEW_FIXES_AND_SEX_RESOLUTION_2026-09-23.md`.
+
 ### Current gate status
 
 The packaged database is a clean opening state:
 
-- schema: **106**
+- schema: **107**
 - story day: **0**
 - engine version: **0.60.0**
 - background person profiles: **2,272**
@@ -103,7 +111,8 @@ The packaged database is a clean opening state:
 - `leadership_transition_cases`: **0** at opening by design
 - SQLite integrity: verified in the parent checkpoint
 - foreign-key violations: 0 in the parent checkpoint
-- acceptance epoch: `ONEYEAR_WORLDHIST01A_SCHEMA106` = **pending**
+- acceptance epoch: `ONEYEAR_WORLDHIST01A_SCHEMA107` = **pending**
+- named characters with unresolved demographic sex: **0** (schema-107 resolution)
 
 The zero history rows at day 0 are intentional: world history should arise from simulation, not be fabricated to satisfy coverage counters.
 
@@ -157,7 +166,7 @@ This is the runnable SQLite opening database for the packaged checkpoint. It is 
 
 `engine/schema.sql`
 
-This is the current database schema definition. The runtime reports Schema 106.
+This is the current database schema definition. The runtime reports Schema 107.
 
 ### C. Development evidence
 
@@ -337,7 +346,7 @@ python run.py status
 python run.py migration-status
 ```
 
-Confirm that the reported engine version is 0.60.0, schema is 106 and story day is 0 before treating the package as the current baseline.
+Confirm that the reported engine version is 0.60.0, schema is 107 and story day is 0 before treating the package as the current baseline.
 
 Inspect Git history:
 

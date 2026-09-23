@@ -768,13 +768,16 @@ def _create_domain_interaction(conn: sqlite3.Connection, actor_id: int, option: 
         urgency=2, stakes=2 if option.kind not in {"propose_union"} else 3,
         terms=terms, rationale=option.rationale, canon_chunk_ids=canon_chunk_ids,
     )
+    # create_interaction returns the closing refusal instead of a new row when re-approach is blocked.
+    blocked = str(conn.execute("SELECT status FROM interactions WHERE id=?", (iid,)).fetchone()[0]) != "pending"
     attempt = _log_attempt(
-        conn, actor_id, option.kind, _domain_for(option.kind), "eligible",
+        conn, actor_id, option.kind, _domain_for(option.kind), "blocked" if blocked else "eligible",
         institution_actor_id=(actor_id if _actor_type(conn, actor_id) == "institution" else (option.payload or {}).get("institution_actor_id")),
-        reason="proposal created; authoritative mutation waits for recipient response",
+        reason=("re-approach blocked by recent repeated refusal" if blocked else "proposal created; authoritative mutation waits for recipient response"),
         inputs=option.payload or {}, result={"interaction_id": iid}, day=day,
     )
-    return {"summary": f"Created domain interaction #{iid}: {option.kind}.", "interaction_id": iid, "attempt_id": attempt}
+    verb = "Re-approach blocked by" if blocked else "Created"
+    return {"summary": f"{verb} domain interaction #{iid}: {option.kind}.", "interaction_id": iid, "attempt_id": attempt}
 
 
 def _domain_for(kind: str) -> str:

@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 106
+SCHEMA_VERSION = 107
 
 
 def _running_tests() -> bool:
@@ -52,10 +52,25 @@ def backup_dir() -> Path:
     return database_path().parent / "backups"
 
 
+class _ClosingConnection(sqlite3.Connection):
+    """`with connect() as conn:` commits/rolls back like sqlite3, then also closes.
+
+    sqlite3's per-connection statement cache holds a reference back to the connection, so an
+    unclosed connection keeps its file handle until cyclic GC runs. Windows cannot delete or
+    replace a database file while that handle is open.
+    """
+
+    def __exit__(self, exc_type, exc, tb):
+        try:
+            return super().__exit__(exc_type, exc, tb)
+        finally:
+            self.close()
+
+
 def connect() -> sqlite3.Connection:
     path = database_path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path)
+    conn = sqlite3.connect(path, factory=_ClosingConnection)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
@@ -4382,6 +4397,17 @@ def _migration_106(conn: sqlite3.Connection) -> None:
                     VALUES ('ONEYEAR_WORLDHIST01A_SCHEMA106',106,'pending','{}')""")
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA106')")
 
+def _migration_107(conn: sqlite3.Connection) -> None:
+    """FAMILY-02 sex resolution: canon text, canon rule, given name, then seeded roll (no schema change)."""
+    if _has_table(conn, "actor_life_profiles") and _has_table(conn, "world_state") and conn.execute("SELECT 1 FROM world_state WHERE id=1").fetchone():
+        from .demographic_sex import resolve_missing_demographic_sex
+        resolve_missing_demographic_sex(conn)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('family02_sex_resolution_version','1')")
+    conn.execute("""INSERT OR IGNORE INTO acceptance_epochs(acceptance_key,schema_version,status,evidence_json)
+                    VALUES ('ONEYEAR_WORLDHIST01A_SCHEMA107',107,'pending','{}')""")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA107')")
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4489,6 +4515,7 @@ _MIGRATIONS: dict[int, Migration] = {
     104: ("oneyear_recovery_acceptance_epoch", "Current-line ONEYEAR acceptance epoch and TENYEAR-02 gate", _migration_104),
     105: ("worldhist01a_family_harm", "WORLDHIST-01A FAMILY-02 feasibility and HARM-01 shared consequence projection", _migration_105),
     106: ("worldhist01a_social_org_succession", "WORLDHIST-01A REL-02 social memory, ORGPRESS-01 event projection and SUCCESSION-02 authority transitions", _migration_106),
+    107: ("family02_sex_resolution", "FAMILY-02 demographic-sex resolution for named characters (canon text, canon rule, given name, seeded roll)", _migration_107),
 }
 
 

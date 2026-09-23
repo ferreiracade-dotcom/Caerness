@@ -162,7 +162,9 @@ def present_proposal(conn: sqlite3.Connection, proposal_id: int, *, day: int | N
         },
         rationale=rationale or "A concrete opportunity has been proposed with explicit terms and causal transfer consequences.",
     )
-    conn.execute("UPDATE opportunity_proposals SET status='pending' WHERE id=?", (proposal_id,))
+    # A blocked re-approach returns the earlier refusal; the proposal is refused, not pending.
+    live = str(conn.execute("SELECT status FROM interactions WHERE id=?", (iid,)).fetchone()[0]) == "pending"
+    conn.execute("UPDATE opportunity_proposals SET status=? WHERE id=?", ("pending" if live else "rejected", proposal_id))
     return iid
 
 

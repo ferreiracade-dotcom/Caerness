@@ -268,14 +268,14 @@ def project_internal_duel_consequences(conn: sqlite3.Connection, engagement_id: 
         return {"projected": False, "reason": "winner not combatant"}
     day = _day(conn)
     from .relationships import record_relationship_pair_effect
-    stakes = int(eng['stakes'] or 2)
+    stakes = int(eng['stakes']) if eng['stakes'] is not None else 2
     record_relationship_pair_effect(
         conn, winner, loser, day, source_kind='duel', source_id=engagement_id,
         a_to_b={'familiarity_delta': 2.0, 'respect_delta': 1.5 + stakes * .5, 'professional_confidence_delta': 1.0},
         b_to_a={'familiarity_delta': 2.0, 'respect_delta': 2.0 + stakes, 'resentment_delta': max(0.0, stakes - 2) * .75},
         summary_a="A resolved duel changed the winner's evaluation of the opponent.",
         summary_b="Defeat in a resolved duel changed the loser's evaluation of the winner.",
-        metadata={'engagement_id': engagement_id, 'controlled_context': True},
+        metadata={'engagement_id': engagement_id, 'controlled_context': _json(eng['metadata_json']).get('nonlethal') is True},
     )
     common = conn.execute(
         """SELECT mw.institution_actor_id FROM institution_memberships mw

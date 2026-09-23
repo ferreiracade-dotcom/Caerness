@@ -226,8 +226,12 @@ def _materialize_latent_person(conn: sqlite3.Connection, latent: sqlite3.Row, da
                      (name,subtype,lid,lid,f"Crystallized from latent person #{int(latent['id'])}; no retroactive biography invented."))
     aid=int(cur.lastrowid); stage='elder' if age>=60 else ('child' if age<13 else ('youth' if age<20 else 'adult'))
     family_eligible=1 if age>=16 else 0
-    conn.execute("""INSERT INTO actor_life_profiles(actor_id,birth_day,life_stage,family_formation_eligible,life_status,last_review_day,metadata_json)
-                    VALUES (?,?,?,?, 'living',?,?)""",(aid,birth,stage,family_eligible,day,_j({'latent_entity_id':int(latent['id']),'source_age':age,'source_birth_day':birth,'generated_from_existing_population':True})))
+    upstream_sex=constraints.get('demographic_sex') or hist.get('demographic_sex')
+    conn.execute("""INSERT INTO actor_life_profiles(actor_id,birth_day,demographic_sex,life_stage,family_formation_eligible,life_status,last_review_day,metadata_json)
+                    VALUES (?,?,?,?,?, 'living',?,?)""",(aid,birth,upstream_sex if upstream_sex in ('female','male') else None,stage,family_eligible,day,_j({'latent_entity_id':int(latent['id']),'source_age':age,'source_birth_day':birth,'generated_from_existing_population':True})))
+    # FAMILY-02: no unresolved sex for a new named person (given name, else seeded roll).
+    from .demographic_sex import resolve_missing_demographic_sex
+    resolve_missing_demographic_sex(conn,actor_id=aid)
     # Ordinary crystallization starts Closed-Core unless the latent evidence explicitly says otherwise.
     open_core=bool(constraints.get('open_core') or hist.get('open_core'))
     stage_name=(constraints.get('stage') or hist.get('stage')) if open_core else None

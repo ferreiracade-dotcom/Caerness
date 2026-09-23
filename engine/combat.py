@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import random
 import sqlite3
-from typing import Any
+from typing import Any, Callable
 
 from .simulation import current_day
 from .battlefield import effective_order_for_unit, apply_battlefield_flow, battlefield_view, ensure_default_zone, auto_assign_unzoned_units
@@ -898,7 +898,20 @@ def _duel_intent_mod(intent: str) -> dict[str, float]:
     }[intent]
 
 
-def resolve_duel_exchange(conn: sqlite3.Connection, engagement_id: int) -> dict[str, Any]:
+def project_resolved_duel(conn: sqlite3.Connection, engagement_id: int, *,
+                          event_logger: Callable[..., int] | None = None) -> dict[str, Any]:
+    """Single post-resolution hook for every duel path: HARM-01 bodies, then social/institutional memory."""
+    from .harm import project_duel_harm
+    from .organization_agency import project_internal_duel_consequences
+    harm = project_duel_harm(conn, engagement_id, event_logger=event_logger)
+    return {
+        "harm_incidents": [int(h["id"]) for h in harm],
+        "institutional_consequence": project_internal_duel_consequences(conn, engagement_id),
+    }
+
+
+def resolve_duel_exchange(conn: sqlite3.Connection, engagement_id: int, *,
+                          event_logger: Callable[..., int] | None = None) -> dict[str, Any]:
     eng = conn.execute("SELECT * FROM combat_engagements WHERE id=?", (engagement_id,)).fetchone()
     if not eng or eng["engagement_kind"] != "duel":
         raise ValueError("Duel does not exist")
@@ -1001,12 +1014,7 @@ def resolve_duel_exchange(conn: sqlite3.Connection, engagement_id: int) -> dict[
         conn.execute("UPDATE combat_engagements SET phase='exchange',round_index=? WHERE id=?", (round_index, engagement_id))
 
     battle_consequence = _apply_linked_duel_consequence(conn, engagement_id, outcome) if resolved else None
-    duel_harm = None
-    if resolved:
-        from .harm import project_duel_harm
-        duel_harm = project_duel_harm(conn, engagement_id)
-        from .organization_agency import project_internal_duel_consequences
-        institutional_consequence = project_internal_duel_consequences(conn, engagement_id)
+    projection = project_resolved_duel(conn, engagement_id, event_logger=event_logger) if resolved else {}
     summary = {
         "engagement_id": engagement_id,
         "kind": "duel",
@@ -1015,8 +1023,8 @@ def resolve_duel_exchange(conn: sqlite3.Connection, engagement_id: int) -> dict[
         "combatants": results,
         "outcome": outcome,
         "battle_consequence": battle_consequence,
-        "harm_incidents": [int(h["id"]) for h in (duel_harm or [])],
-        "institutional_consequence": institutional_consequence if resolved else None,
+        "harm_incidents": projection.get("harm_incidents", []),
+        "institutional_consequence": projection.get("institutional_consequence"),
         "note": "Duel resolution remains abstract tactically; HARM-01 projects final anatomical consequences with source provenance.",
     }
     conn.execute("INSERT INTO duel_exchanges(engagement_id,round_index,day,seed,summary_json) VALUES (?,?,?,?,?)",

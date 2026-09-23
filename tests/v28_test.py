@@ -21,10 +21,11 @@ from engine.competence import add_obligation
 
 SEED=ROOT/'game'/'seeds'/'Caerness_Initial_World_State_Seed_v1_4.json'
 
-def _actor(c,name,loc,tier='ACTIVE'):
+def _actor(c,name,loc,tier='ACTIVE',sex=None):
     aid=c.execute("INSERT INTO actors(name,actor_type,subtype,home_location_id,current_location_id,status) VALUES (?,'character','fixture',?,?,'active')",(name,loc,loc)).lastrowid
     c.execute("INSERT INTO simulation_profiles(actor_id,tier,cadence_days,volatility,agency,last_review_day,next_review_day,wake_threshold) VALUES (?,?,30,.25,.5,0,30,3)",(aid,tier))
     c.execute("INSERT INTO actor_life_profiles(actor_id,birth_day,life_stage,family_formation_eligible,life_status,last_review_day,metadata_json) VALUES (?,-10950,'adult',1,'living',0,'{}')",(aid,))
+    if sex: c.execute("UPDATE actor_life_profiles SET demographic_sex=? WHERE actor_id=?",(sex,aid))
     ensure_health_profile(c,aid)
     return int(aid)
 
@@ -85,7 +86,7 @@ def run():
     reset_db(); init_db()
     with connect() as c:
         loc=c.execute("INSERT INTO locations(name,kind,is_canon) VALUES ('Fixture Clinic','city',0)").lastrowid
-        patient=_actor(c,'Fixture Patient',loc)
+        patient=_actor(c,'Fixture Patient',loc,sex='female')
         provider=_actor(c,'Fixture Physician',loc)
         set_actor_competence(c,provider,'medicine',70,source_kind='campaign')
         cid=add_condition(c,patient,'illness','Fixture fever',severity=55,specialist_requirement='physician',recovery_rate_per_30=2)
@@ -98,7 +99,7 @@ def run():
         assert c.execute("SELECT COUNT(*) FROM medical_treatments WHERE actor_id=? AND condition_id=? AND provider_actor_id=? AND status='active'",(patient,cid,provider)).fetchone()[0]==1
 
         # Household formation is never roster-filling: it needs explicit eligibility + a sustained positive relationship.
-        partner=_actor(c,'Fixture Partner',loc)
+        partner=_actor(c,'Fixture Partner',loc,sex='male')  # FAMILY-02: unions need resolved sex
         c.execute("INSERT INTO relationships(actor_a_id,actor_b_id,stance,trust,obligation,updated_day) VALUES (?,?,?,?,?,?)",(patient,partner,35,45,5,-240))
         opts=domain_action_options(c,patient,'ACTIVE',0,drives={'ambition':.5,'risk_tolerance':.5,'patience':.5,'pragmatism':.5})
         union=next(o for o in opts if o.kind=='propose_union')

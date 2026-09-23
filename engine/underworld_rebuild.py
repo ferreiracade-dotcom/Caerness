@@ -704,6 +704,9 @@ def _create_person(
            VALUES (?,?,?,1,'living',?,?)""",
         (aid, birth, life_stage, day, _j({"generated_underworld": True, "source_age": age})),
     )
+    # FAMILY-02: no unresolved sex for a new named person (given name, else seeded roll).
+    from .demographic_sex import resolve_missing_demographic_sex
+    resolve_missing_demographic_sex(conn, actor_id=aid)
     core_state = "Open-Core" if open_core else "Closed-Core"
     conn.execute(
         """INSERT INTO cultivation_profiles(actor_id,core_state,current_stage,active,vessel_adaptation,realization_integration,

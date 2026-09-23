@@ -124,7 +124,7 @@ def run():
         submit_duel_intent(conn, eid, int(player["id"]), "measure", risk_level="balanced", reserve_commitment=0.2)
         result = resolve_duel_exchange(conn, eid)
         assert result["round_index"] == 1
-        assert "injury/medical consequences" in result["note"]
+        assert "HARM-01" in result["note"]  # final injury/death consequences are projected by HARM-01
         assert len(result["combatants"]) == 2
         view = duel_view(conn, eid, int(player["id"]))
         opponent = next(x for x in view["combatants"] if x["actor_id"] == rival_id)

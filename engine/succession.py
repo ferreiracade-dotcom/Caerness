@@ -14,14 +14,6 @@ def _day(conn: sqlite3.Connection) -> int:
     return int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
 
 
-def _alive(conn: sqlite3.Connection, actor_id: int) -> bool:
-    row = conn.execute(
-        "SELECT a.status,lp.life_status FROM actors a LEFT JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.id=?",
-        (actor_id,),
-    ).fetchone()
-    return bool(row and str(row["status"]) == "active" and (row["life_status"] is None or str(row["life_status"]) == "living"))
-
-
 def open_authority_transition(
     conn: sqlite3.Connection,
     institution_actor_id: int,
@@ -62,6 +54,7 @@ def _candidate_rows(conn: sqlite3.Connection, institution_actor_id: int, require
         (institution_actor_id,),
     ).fetchall()
     required_rank = _STAGE_RANK.get(required_stage, 0)
+    day = _day(conn)
     out: list[tuple[float, int, str]] = []
     role_bonus = {
         "heir": 36, "successor": 34, "deputy": 28, "underboss": 28, "lieutenant": 22,
@@ -69,8 +62,6 @@ def _candidate_rows(conn: sqlite3.Connection, institution_actor_id: int, require
     }
     for r in rows:
         aid = int(r["member_actor_id"])
-        if not _alive(conn, aid):
-            continue
         stage = str(r["current_stage"] or "")
         rank = _STAGE_RANK.get(stage, 0)
         if required_rank and rank < required_rank:
@@ -79,7 +70,7 @@ def _candidate_rows(conn: sqlite3.Connection, institution_actor_id: int, require
         bonus = max((v for k, v in role_bonus.items() if k in role), default=0)
         # Stage matters strongly for martial heads; long-standing membership is a smaller continuity signal.
         joined = int(r["joined_day"]) if r["joined_day"] is not None else 0
-        tenure_bonus = min(8.0, max(0.0, (_day(conn) - joined) / 3650.0 * 8.0)) if joined <= _day(conn) else 0.0
+        tenure_bonus = min(8.0, max(0.0, (day - joined) / 3650.0 * 8.0)) if joined <= day else 0.0
         score = rank * 12.0 + bonus + tenure_bonus
         out.append((score, aid, role))
     return sorted(out, key=lambda x: (-x[0], x[1]))
@@ -149,12 +140,14 @@ def resolve_authority_transition(conn: sqlite3.Connection, case_id: int, *, clea
         conn.execute("UPDATE underworld_organizations SET current_leader_actor_id=?,updated_day=? WHERE id=?", (chosen, day, int(uw["id"])))
         conn.execute("UPDATE underworld_personnel SET role_kind='boss',authority=100 WHERE organization_id=? AND actor_id=?", (int(uw["id"]), chosen))
 
-    start_regime(conn, iid, leader_actor_id=chosen, regime_kind="succession", metadata={"leadership_transition_case_id": case_id})
-    record_lifecycle_event(
-        conn, iid, "leadership_transition", f"Authority '{key}' passed to actor #{chosen}.",
-        cause_kind="leadership_transition_case", cause_id=case_id,
-        detail={"chosen_actor_id": chosen, "trigger_kind": str(case["trigger_kind"])},
-    )
+    if not polity:
+        # set_ruler already starts the political regime and records its lifecycle event.
+        start_regime(conn, iid, leader_actor_id=chosen, regime_kind="succession", metadata={"leadership_transition_case_id": case_id})
+        record_lifecycle_event(
+            conn, iid, "leadership_transition", f"Authority '{key}' passed to actor #{chosen}.",
+            cause_kind="leadership_transition_case", cause_id=case_id,
+            detail={"chosen_actor_id": chosen, "trigger_kind": str(case["trigger_kind"])},
+        )
     conn.execute(
         "UPDATE leadership_transition_cases SET status='resolved',resolved_day=?,chosen_actor_id=? WHERE id=?",
         (day, chosen, case_id),

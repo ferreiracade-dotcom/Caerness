@@ -184,7 +184,8 @@ def _resolve_named_track(conn,event:sqlite3.Row,field:sqlite3.Row,day:int)->None
 
 
 
-def _referee_decision(conn: sqlite3.Connection, duel_id: int, day: int, *, max_rounds: int) -> dict[str, Any] | None:
+def _referee_decision(conn: sqlite3.Connection, duel_id: int, day: int, *, max_rounds: int,
+                      event_logger: Callable[..., int] | None = None) -> dict[str, Any] | None:
     eng=conn.execute("SELECT * FROM combat_engagements WHERE id=?",(duel_id,)).fetchone()
     if not eng or eng['status']!='active' or int(eng['round_index'])<max_rounds:return None
     cs=conn.execute("SELECT * FROM duel_combatants WHERE engagement_id=? ORDER BY id",(duel_id,)).fetchall()
@@ -194,9 +195,9 @@ def _referee_decision(conn: sqlite3.Connection, duel_id: int, day: int, *, max_r
     conn.execute("UPDATE duel_combatants SET status='victorious' WHERE id=?",(winner['id'],));conn.execute("UPDATE duel_combatants SET status='defeated' WHERE id=?",(loser['id'],))
     outcome={'winner_actor_id':int(winner['actor_id']),'resolution':'referee_decision','max_controlled_exchanges':max_rounds}
     conn.execute("UPDATE combat_engagements SET status='resolved',phase='aftermath',day_ended=?,outcome_json=? WHERE id=?",(day,json.dumps(outcome,sort_keys=True),duel_id))
-    from .harm import project_duel_harm
-    harm = project_duel_harm(conn, duel_id)
-    return {'status':'resolved','engagement_id':duel_id,'outcome':outcome,'referee_decision':True,'harm_incidents':[int(h['id']) for h in harm]}
+    from .combat import project_resolved_duel
+    return {'status':'resolved','engagement_id':duel_id,'outcome':outcome,'referee_decision':True,
+            **project_resolved_duel(conn, duel_id, event_logger=event_logger)}
 
 def _record_martial_anchor(conn: sqlite3.Connection, actor_id: int, *, kind: str, source_id: int, weight: float, description: str, day: int) -> int | None:
     if not conn.execute("SELECT 1 FROM cultivation_profiles WHERE actor_id=? AND core_state='Open-Core' AND active=1 AND status='active'",(actor_id,)).fetchone():
@@ -264,9 +265,9 @@ def _process_challenges(conn,day:int,event_logger:Callable[...,int]|None=None)->
     from .combat import resolve_duel_exchange
     out={'challenge_exchanges':0,'challenges_resolved':0}
     for ch in conn.execute("SELECT * FROM martial_challenges WHERE status='active' AND next_review_day<=? ORDER BY id",(day,)).fetchall():
-        result=resolve_duel_exchange(conn,int(ch['duel_engagement_id']));out['challenge_exchanges']+=1
+        result=resolve_duel_exchange(conn,int(ch['duel_engagement_id']),event_logger=event_logger);out['challenge_exchanges']+=1
         if result.get('status')!='resolved' and not int(ch['lethal']):
-            decided=_referee_decision(conn,int(ch['duel_engagement_id']),day,max_rounds=10)
+            decided=_referee_decision(conn,int(ch['duel_engagement_id']),day,max_rounds=10,event_logger=event_logger)
             if decided: result=decided
         if result.get('status')=='resolved':
             conn.execute("UPDATE martial_challenges SET status='resolved',resolved_day=?,next_review_day=? WHERE id=?",(day,day,ch['id']))

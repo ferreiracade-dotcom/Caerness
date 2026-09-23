@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import random
 import sqlite3
-from typing import Any
+from typing import Any, Callable
 
 
 _VALID_INTENTS = {"controlled", "hostile", "lethal", "accidental"}
@@ -14,9 +14,10 @@ def _day(conn: sqlite3.Connection) -> int:
     return int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
 
 
-def _seed(conn: sqlite3.Connection, actor_id: int, source_ref_id: int, intent_class: str) -> int:
+def _seed(conn: sqlite3.Connection, actor_id: int, source_kind: str, source_ref_id: int, intent_class: str) -> int:
     base = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
-    salt = sum((i + 1) * ord(ch) for i, ch in enumerate(intent_class))
+    # source_kind is salted in so duel #12 and war_battle #12 draw independent rolls.
+    salt = sum((i + 1) * ord(ch) for i, ch in enumerate(f"{source_kind}:{intent_class}"))
     return (base * 1000003 + int(actor_id) * 9176 + int(source_ref_id) * 131071 + salt * 271) & 0x7FFFFFFF
 
 
@@ -67,6 +68,7 @@ def record_harm(
     location_id: int | None = None,
     metadata: dict[str, Any] | None = None,
     outcome_override: str | None = None,
+    event_logger: Callable[..., int] | None = None,
 ) -> dict[str, Any]:
     """Project a concrete hazard into persistent health/life state once.
 
@@ -109,7 +111,7 @@ def record_harm(
     exposure_factor = 0.78 + exposure / 220.0
     resolved = max(0.0, min(100.0, raw * _intent_multiplier(intent_class) * vulnerability * exposure_factor))
 
-    rng = random.Random(_seed(conn, actor_id, int(source_ref_id), intent_class))
+    rng = random.Random(_seed(conn, actor_id, source_kind, int(source_ref_id), intent_class))
     fatal_roll = rng.random()
     persistent_roll = rng.random()
     if outcome_override is not None:
@@ -143,7 +145,8 @@ def record_harm(
 
     if outcome == "fatal":
         from .household_life import mark_actor_deceased
-        mark_actor_deceased(conn, actor_id, reason=f"Fatal {harm_kind} harm from {source_kind} #{source_ref_id}.")
+        mark_actor_deceased(conn, actor_id, reason=f"Fatal {harm_kind} harm from {source_kind} #{source_ref_id}.",
+                            event_logger=event_logger)
         conn.execute("UPDATE harm_incidents SET fatal=1 WHERE id=?", (incident_id,))
     elif outcome == "persistent":
         from .health import add_condition
@@ -177,7 +180,8 @@ def record_harm(
     return dict(row)
 
 
-def project_duel_harm(conn: sqlite3.Connection, engagement_id: int) -> list[dict[str, Any]]:
+def project_duel_harm(conn: sqlite3.Connection, engagement_id: int, *,
+                      event_logger: Callable[..., int] | None = None) -> list[dict[str, Any]]:
     """Create final anatomical consequences for a resolved duel exactly once per combatant."""
     eng = conn.execute("SELECT * FROM combat_engagements WHERE id=? AND engagement_kind='duel'", (engagement_id,)).fetchone()
     if not eng or str(eng["status"]) != "resolved":
@@ -222,5 +226,6 @@ def project_duel_harm(conn: sqlite3.Connection, engagement_id: int) -> list[dict
                 "stakes": int(eng["stakes"]),
                 "nonlethal": nonlethal,
             },
+            event_logger=event_logger,
         ))
     return projected

@@ -465,7 +465,12 @@ def _named_member_consequences(conn: sqlite3.Connection, force: sqlite3.Row, *, 
     from .harm import record_harm
 
     members = conn.execute(
-        "SELECT * FROM war_force_members WHERE force_id=? AND status='active' ORDER BY exposure DESC,actor_id",
+        # Members who already died elsewhere cannot be battle casualties (HARM-01 requires a living target).
+        """SELECT m.* FROM war_force_members m JOIN actors a ON a.id=m.actor_id
+           LEFT JOIN actor_life_profiles lp ON lp.actor_id=a.id
+           WHERE m.force_id=? AND m.status='active' AND a.status<>'deceased'
+             AND (lp.life_status IS NULL OR lp.life_status='living')
+           ORDER BY m.exposure DESC,m.actor_id""",
         (int(force['id']),),
     ).fetchall()
     total_affected = killed + wounded + captured
@@ -488,10 +493,15 @@ def _named_member_consequences(conn: sqlite3.Connection, force: sqlite3.Row, *, 
     for member, result in zip(ranked, slots):
         aid = int(member['actor_id'])
         if result == 'killed':
-            record_harm(conn, aid, source_kind='war_battle', source_ref_id=engagement_id, severity=100,
-                        intent_class='lethal', harm_kind='battle', exposure=min(100.0, 65.0 + float(member['exposure']) * .35),
-                        metadata={'source_force_id': int(force['id']), 'authoritative_casualty_class':'killed'},
-                        outcome_override='fatal')
+            harm = record_harm(conn, aid, source_kind='war_battle', source_ref_id=engagement_id, severity=100,
+                               intent_class='lethal', harm_kind='battle', exposure=min(100.0, 65.0 + float(member['exposure']) * .35),
+                               metadata={'source_force_id': int(force['id']), 'authoritative_casualty_class':'killed'},
+                               outcome_override='fatal')
+            if str(harm['outcome']) != 'fatal':
+                # An earlier non-fatal incident for this engagement is returned idempotently; the
+                # authoritative killed class still has to end the life.
+                from .household_life import mark_actor_deceased
+                mark_actor_deceased(conn, aid, reason=f"killed in battle engagement #{engagement_id}")
             conn.execute("UPDATE war_force_members SET status='killed',updated_day=? WHERE force_id=? AND actor_id=?", (day, int(force['id']), aid))
             conn.execute("UPDATE political_polities SET next_review_day=MIN(next_review_day,?) WHERE ruler_actor_id=?", (day, aid))
             out['named_killed'] += 1

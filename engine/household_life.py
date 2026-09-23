@@ -298,7 +298,7 @@ def _children_of_either_parent(conn: sqlite3.Connection, actor_a: int, actor_b: 
 
 
 def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str | None = None,
-                   demographic_sex: str = "unspecified", day: int | None = None) -> int:
+                   demographic_sex: str | None = None, day: int | None = None) -> int:
     row = conn.execute("SELECT * FROM household_unions WHERE id=? AND status='active'", (union_id,)).fetchone()
     if not row:
         raise ValueError("Birth requires an active household union")
@@ -324,6 +324,11 @@ def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str |
         hname = conn.execute("SELECT name FROM households WHERE id=?", (hid,)).fetchone() if hid else None
         base = str(hname[0]) if hname else f"Union {union_id}"
         child_name = f"[Latent child] {base} D{birth_day}-{len(existing)+1}"
+    if demographic_sex is None:
+        # FAMILY-02: a newborn is never left unresolved; seeded 50/50 like the background population.
+        from .demographic_sex import seeded_sex
+        world_seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
+        demographic_sex = seeded_sex(f"birth:{world_seed}:{union_id}:{birth_day}:{len(existing)+1}")
     loc = conn.execute("SELECT location_id FROM households WHERE id=?", (hid,)).fetchone() if hid else None
     location_id = int(loc[0]) if loc and loc[0] is not None else None
     cur = conn.execute(
@@ -579,17 +584,21 @@ def mark_actor_deceased(conn: sqlite3.Connection, actor_id: int, *, reason: str 
         conn.execute("UPDATE actor_health_profiles SET last_review_day=?,next_review_day=? WHERE actor_id=?", (day, day, actor_id))
     except sqlite3.OperationalError:
         pass
-    # Leadership death must become institutional history. This hook opens real authority
-    # vacancies/succession cases but never invents a replacement person.
-    try:
-        from .succession import handle_actor_death_authority
-        handle_actor_death_authority(conn, actor_id, source_kind='actor_death')
-    except (sqlite3.OperationalError, ImportError):
-        pass
     _record_life_event(conn, "death", f"{_name(conn, actor_id)} died: {reason}.", actor_id=actor_id, household_id=hid, location_id=location_id)
     if event_logger:
         event_logger(day=day, event_type="life:death", title=f"Death: {_name(conn, actor_id)}", summary=reason,
                      severity=2, source_actor_id=actor_id, target_actor_ids=(), location_id=location_id)
+    # Leadership death must become institutional history. This hook opens real authority
+    # vacancies/succession cases but never invents a replacement person. It runs after the
+    # death is fully recorded, and a tolerated failure rolls back its partial writes.
+    conn.execute("SAVEPOINT actor_death_authority")
+    try:
+        from .succession import handle_actor_death_authority
+        handle_actor_death_authority(conn, actor_id, source_kind='actor_death')
+    except (sqlite3.OperationalError, ImportError):
+        conn.execute("ROLLBACK TO SAVEPOINT actor_death_authority")
+    finally:
+        conn.execute("RELEASE SAVEPOINT actor_death_authority")
 
 
 
@@ -621,7 +630,8 @@ def _has_active_union(conn: sqlite3.Connection, actor_id: int) -> bool:
 
 def _parents(conn: sqlite3.Connection, actor_id: int) -> set[int]:
     return {int(r[0]) for r in conn.execute(
-        "SELECT actor_a_id FROM kinship_links WHERE actor_b_id=? AND kin_kind='parent' AND legal_status='recognized' AND ended_day IS NULL",
+        # Disputed/informal and adoptive parentage still bar a union; only ended (former) links do not.
+        "SELECT actor_a_id FROM kinship_links WHERE actor_b_id=? AND kin_kind IN ('parent','adoptive_parent') AND legal_status<>'former' AND ended_day IS NULL",
         (actor_id,),
     ).fetchall()}
 
@@ -631,7 +641,7 @@ def prohibited_union_kinship_reason(conn: sqlite3.Connection, actor_a_id: int, a
     if actor_a_id == actor_b_id:
         return "same_actor"
     direct = conn.execute(
-        """SELECT kin_kind FROM kinship_links WHERE ended_day IS NULL AND legal_status='recognized' AND
+        """SELECT kin_kind FROM kinship_links WHERE ended_day IS NULL AND legal_status<>'former' AND
            ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?)) AND kin_kind<>'spouse'
            ORDER BY id LIMIT 1""",
         (actor_a_id, actor_b_id, actor_b_id, actor_a_id),

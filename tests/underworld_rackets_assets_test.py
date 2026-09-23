@@ -71,6 +71,7 @@ def run():
     grant_operating_permission(c, warehouse_zone, org, rival, 'collections', tribute_rate=.1)
     assert attempt_local_activity(c, warehouse_zone, rival, 'collections')['authorized'] is True
     assert attempt_local_activity(c, warehouse_zone, rival, 'local_debt_enforcement')['authorized'] is False
+    c.commit(); c.close()  # bootstrap() below rebuilds the DB file; Windows cannot replace it while open
 
     # --- secrecy now actually protects a racket. Two rackets, identical in every way
     # except secrecy, raided many times: the high-secrecy one must be suppressed far less.
@@ -122,6 +123,7 @@ def run():
 
     # --- enforcement can now hit a front, not only rackets: give an org one very exposed
     # front (low admin_quality) and no rackets, force the raid roll, confirm it lands.
+    c2.commit(); c2.close()
     c3 = bootstrap()
     aid3 = int(c3.execute("select id from locations where name='Aldergate'").fetchone()[0])
     o3 = create_underworld_organization(c3, 'test-front-raid-org', 'gang', name='Test Front Raid Gang', primary_location_id=aid3, member_count_estimate=20, command_depth=1)
@@ -140,6 +142,7 @@ def run():
             fired = True
             break
     assert fired, "enforcement never reached the only available target (a front) across 12 trials"
+    c3.commit(); c3.close()
 
     print('underworld rackets/assets tests: PASS')
 

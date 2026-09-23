@@ -135,7 +135,7 @@ def _wake_recipient(conn: sqlite3.Connection, actor_id: int, stakes: int, day: i
 
 def _interaction_subject_key(interaction_type: str, terms: dict | None) -> str:
     payload = terms or {}
-    subject = payload.get("purpose") or payload.get("domain_action_kind") or payload.get("goal_id") or payload.get("opportunity_proposal_id") or ""
+    subject = payload.get("opportunity_proposal_id") or payload.get("purpose") or payload.get("domain_action_kind") or payload.get("goal_id") or ""
     return f"{interaction_type}:{subject}"
 
 def _reapproach_blocked(conn: sqlite3.Connection, proposer: int, recipient: int, interaction_type: str, day: int, terms: dict | None) -> int | None:
@@ -187,7 +187,8 @@ def create_interaction(
         raise ValueError(f"unsupported interaction_type: {interaction_type}")
     if proposer_actor_id == recipient_actor_id:
         raise ValueError("an actor cannot initiate an interaction with itself")
-    blocked_by = _reapproach_blocked(conn, proposer_actor_id, recipient_actor_id, interaction_type, day, terms)
+    # A counterproposal answers a live thread; it is not a fresh re-approach.
+    blocked_by = None if parent_interaction_id is not None else _reapproach_blocked(conn, proposer_actor_id, recipient_actor_id, interaction_type, day, terms)
     if blocked_by is not None:
         return blocked_by
     proposer_name = _name(conn, proposer_actor_id)

@@ -35,13 +35,13 @@ def run():
         assert es['active_enrollments']==0  # named opening cohort can graduate
         assert es['active_structural_cohorts']==opening_structural and es['structural_active_trainees']>100,es
         assert c.execute("SELECT COUNT(*) FROM structural_training_cohorts WHERE status='completed'").fetchone()[0]>0
-        # Birth continuity can be recorded without inferring sex or a birth parent from names.
+        # Birth continuity: FAMILY-02 needs a resolved female/male pair; the newborn's sex is a seeded roll.
         loc=int(c.execute("SELECT id FROM locations ORDER BY id LIMIT 1").fetchone()[0])
-        def fixture(name,age):
+        def fixture(name,age,sex):
             aid=int(c.execute("INSERT INTO actors(name,actor_type,current_location_id,status) VALUES (?,'character',?,'active')",(name,loc)).lastrowid)
-            c.execute("INSERT INTO actor_life_profiles(actor_id,birth_day,demographic_sex,life_stage,family_formation_eligible,life_status,last_review_day,metadata_json) VALUES (?,?,NULL,'adult',1,'living',3650,'{}')",(aid,3650-age*365))
+            c.execute("INSERT INTO actor_life_profiles(actor_id,birth_day,demographic_sex,life_stage,family_formation_eligible,life_status,last_review_day,metadata_json) VALUES (?,?,?,'adult',1,'living',3650,'{}')",(aid,3650-age*365,sex))
             return aid
-        a,b=fixture('Generational Fixture A',30),fixture('Generational Fixture B',31)
+        a,b=fixture('Generational Fixture A',30,'female'),fixture('Generational Fixture B',31,'male')
         uid=create_union(c,a,b,create_new_household_name='Generational Fixture Household')
         plan={'auto_children':True,'desired_children':1,'earliest_next_child_day':3650,'spacing_days':730,'birth_parent_unresolved':True,'authority':'TEST'}
         c.execute('UPDATE household_unions SET family_plan_json=? WHERE id=?',(json.dumps(plan),uid))
@@ -51,7 +51,7 @@ def run():
         child=c.execute("SELECT a.id,lp.demographic_sex FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.name LIKE '[Latent child] Generational Fixture Household%' ESCAPE '\\'").fetchone()
         if not child:
             child=c.execute("SELECT a.id,lp.demographic_sex FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.subtype='child' ORDER BY a.id DESC LIMIT 1").fetchone()
-        assert child and str(child[1])=='unspecified'
+        assert child and str(child[1]) in {'female','male'}
         assert c.execute("SELECT COUNT(*) FROM kinship_links WHERE actor_b_id=? AND kin_kind='parent'",(int(child[0]),)).fetchone()[0]==2
         c.commit()
     print('v0.43.0 generational continuity / structural training regression PASS')

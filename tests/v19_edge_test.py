@@ -20,10 +20,10 @@ def fresh():
     reset_db(); init_db(); seed_demo(); init_db()
 
 
-def actor(conn, name, loc, age=30, eligible=True):
+def actor(conn, name, loc, age=30, eligible=True, sex=None):
     cur = conn.execute("INSERT INTO actors(name,actor_type,subtype,home_location_id,current_location_id,status,is_demo) VALUES (?,'character','civilian',?,?, 'active',0)", (name,loc,loc))
     aid=int(cur.lastrowid)
-    set_life_profile(conn, aid, birth_day=-(age*365), current_household_id=None, family_formation_eligible=eligible)
+    set_life_profile(conn, aid, birth_day=-(age*365), current_household_id=None, family_formation_eligible=eligible, demographic_sex=sex)
     return aid
 
 
@@ -44,7 +44,8 @@ def run():
         way=int(conn.execute("SELECT id FROM locations WHERE name='Windmere'").fetchone()[0])
 
         # Birth edge cases: exact due day, explicit birth-parent requirement, no retroactive manual birth.
-        a=actor(conn,'[EDGE19] A',cairn,30,True); b=actor(conn,'[EDGE19] B',cairn,31,True)
+        # FAMILY-02: births need a resolved female/male pair, and the birth parent must be the female.
+        a=actor(conn,'[EDGE19] A',cairn,30,True,'female'); b=actor(conn,'[EDGE19] B',cairn,31,True,'male')
         hh=create_household(conn,'[EDGE19] Birth HH',head_actor_id=a,location_id=cairn)
         add_household_member(conn,hh,b,role='partner',authority=80,dependency=0)
         conn.execute("UPDATE actor_life_profiles SET current_household_id=? WHERE actor_id IN (?,?)",(hh,a,b))
@@ -60,7 +61,7 @@ def run():
 
         # Half-sibling links are real kinship, not only full-sibling links.
         end_union(conn,u)
-        c=actor(conn,'[EDGE19] C',cairn,29,True)
+        c=actor(conn,'[EDGE19] C',cairn,29,True,'male')
         u2=create_union(conn,a,c,household_id=hh)
         child2=register_birth(conn,u2,child_name='[EDGE19] Half Child')
         child1=int(born['actor_id'])

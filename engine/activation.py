@@ -1143,6 +1143,9 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     out.update(activate_merchant_taxonomy(conn))
     from .service_fulfillment import activate_structural_provider_contracts
     out.update(activate_structural_provider_contracts(conn))
+    # Last, so the Hollow Mantle rule can see the heirs registered above.
+    from .demographic_sex import resolve_missing_demographic_sex
+    out.update({f'family02_sex_{k}': v for k, v in resolve_missing_demographic_sex(conn).items()})
     conn.execute(
         "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
         (str(CURRENT_CANON_ACTIVATION_VERSION),),
