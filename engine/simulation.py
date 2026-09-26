@@ -12,6 +12,7 @@ from .db import connect, init_db
 from .decisions import decide_actor
 from .interactions import process_due_interactions
 from .information import register_event_information, process_information, next_information_due_day
+from .memory import process_due_memory, next_memory_due_day
 from .world import next_world_process_due_day, process_due_world_processes, catch_up_world_processes
 from .civilian import next_civilian_due_day, process_due_civilian
 from .health import next_health_due_day, process_due_health
@@ -550,6 +551,8 @@ def build_default_process_registry(*, eager_requery: bool = True):
     reg.register(ProcessSpec("tournament", next_tournament_due_day, process_due_tournaments))
     reg.register(ProcessSpec("spectacle", next_spectacle_due_day, process_due_spectacle))
     reg.register(ProcessSpec("information", next_information_due_day, process_information, needs_event_logger=False))
+    # PERF-01: people forget minor rumours nobody repeats (bounded storage; the world keeps its history).
+    reg.register(ProcessSpec("memory", next_memory_due_day, process_due_memory, needs_event_logger=False))
     return reg
 
 
@@ -557,7 +560,7 @@ _REGISTRY_BLOCK_A = (
     "resolution", "world", "ecology", "agriculture", "logistics", "merchant", "craft", "civilian", "profession", "service_fulfillment", "growth",
     "underworld", "underworld_medicine", "law", "war", "groundbinding", "health", "psychology", "hollow",
 )
-_REGISTRY_BLOCK_B = ("religion", "patronage", "politics", "conflict", "organization_lifecycle", "seeking", "attention", "education", "cultivation", "tournament", "spectacle", "information")
+_REGISTRY_BLOCK_B = ("religion", "patronage", "politics", "conflict", "organization_lifecycle", "seeking", "attention", "education", "cultivation", "tournament", "spectacle", "information", "memory")
 
 
 def _next_scheduler_expiry_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int | None:

@@ -4099,6 +4099,7 @@ CREATE TABLE IF NOT EXISTS actor_evidence_access (
     PRIMARY KEY(actor_id,evidence_id)
 );
 CREATE INDEX IF NOT EXISTS idx_actor_evidence_access_actor ON actor_evidence_access(actor_id,received_day,evidence_id);
+CREATE INDEX IF NOT EXISTS idx_actor_evidence_access_evidence ON actor_evidence_access(evidence_id);
 
 CREATE TABLE IF NOT EXISTS actor_beliefs (
     actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
