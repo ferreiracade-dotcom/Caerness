@@ -121,13 +121,20 @@ def grant_evidence(
     )
 
 
+# An actor's evidence for one claim.  CROSS JOIN pins the claim side first: a claim has tens of evidence
+# rows, while an actor accumulates hundreds or thousands over a long run, and the actor-first plan the
+# planner otherwise picked made every lookup (and every rumour heard) slower as history grew.
+ACTOR_CLAIM_EVIDENCE_SQL = """SELECT ce.id,ce.polarity,ce.reliability,aea.weight
+           FROM claim_evidence ce CROSS JOIN actor_evidence_access aea ON aea.evidence_id=ce.id AND aea.actor_id=?
+           WHERE ce.claim_id=? ORDER BY aea.received_day,ce.id"""
+ACTOR_CLAIM_EVIDENCE_DETAIL_SQL = """SELECT ce.id,ce.evidence_kind,ce.source_actor_id,ce.polarity,ce.reliability,ce.salience,ce.domain_key,
+                      ce.location_id,ce.summary,aea.received_day,aea.access_kind,aea.weight
+               FROM claim_evidence ce CROSS JOIN actor_evidence_access aea ON aea.evidence_id=ce.id AND aea.actor_id=?
+               WHERE ce.claim_id=? ORDER BY aea.received_day,ce.id"""
+
+
 def _compute_belief_from_access(conn: sqlite3.Connection, actor_id: int, claim_id: int) -> tuple[str, float, list[int]]:
-    rows = conn.execute(
-        """SELECT ce.id,ce.polarity,ce.reliability,aea.weight
-           FROM claim_evidence ce JOIN actor_evidence_access aea ON aea.evidence_id=ce.id
-           WHERE ce.claim_id=? AND aea.actor_id=? ORDER BY aea.received_day,ce.id""",
-        (claim_id, actor_id),
-    ).fetchall()
+    rows = conn.execute(ACTOR_CLAIM_EVIDENCE_SQL, (actor_id, claim_id)).fetchall()
     if not rows:
         return "unaware", 0.0, []
     support = 0.0
@@ -272,13 +279,7 @@ def actor_belief_envelope(conn: sqlite3.Connection, actor_id: int, *, limit: int
     out: list[dict[str, Any]] = []
     for row in rows:
         item = dict(row)
-        evidence = conn.execute(
-            """SELECT ce.id,ce.evidence_kind,ce.source_actor_id,ce.polarity,ce.reliability,ce.salience,ce.domain_key,
-                      ce.location_id,ce.summary,aea.received_day,aea.access_kind,aea.weight
-               FROM claim_evidence ce JOIN actor_evidence_access aea ON aea.evidence_id=ce.id
-               WHERE ce.claim_id=? AND aea.actor_id=? ORDER BY aea.received_day,ce.id""",
-            (int(row["claim_id"]), actor_id),
-        ).fetchall()
+        evidence = conn.execute(ACTOR_CLAIM_EVIDENCE_DETAIL_SQL, (actor_id, int(row["claim_id"]))).fetchall()
         item["evidence"] = [dict(e) for e in evidence]
         out.append(item)
     return list(reversed(out))
