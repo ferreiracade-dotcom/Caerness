@@ -1,0 +1,34 @@
+{
+ "label": "pc",
+ "device": {
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "python": "3.13.15",
+  "numpy": "2.5.3",
+  "sqlite": "3.50.4",
+  "cpu_count": 12
+ },
+ "segments": [
+  {
+   "days": 1,
+   "wall_secs": 0.509,
+   "secs_per_day": 0.509,
+   "day_reached": 1,
+   "peak_rss_mb": null
+  },
+  {
+   "days": 7,
+   "wall_secs": 0.298,
+   "secs_per_day": 0.043,
+   "day_reached": 7,
+   "peak_rss_mb": null
+  },
+  {
+   "days": 90,
+   "wall_secs": 13.037,
+   "secs_per_day": 0.145,
+   "day_reached": 90,
+   "peak_rss_mb": null
+  }
+ ]
+}

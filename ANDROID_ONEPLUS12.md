@@ -12,42 +12,35 @@ Android browser/home-screen icon: game UI
 
 No PC needs to remain on. Real-world time away from the app does not advance Caerness.
 
-## 1. Install a current Termux build
+## 1. Install Termux
 
-Use a current official Termux distribution rather than an old abandoned Play Store build. Open Termux and update packages:
-
-```bash
-pkg update
-pkg upgrade
-```
-
-Allow shared-storage access if you want to move downloaded GGUF files in from Android Downloads:
+Install Termux from F-Droid or the Termux GitHub releases (the Play Store build is outdated). Open it and run:
 
 ```bash
+pkg update && pkg upgrade
+pkg install python python-numpy unzip
 termux-setup-storage
 ```
 
-Keep the Caerness database itself under the Termux home directory for more reliable SQLite behavior rather than running it directly from shared Android storage.
+`termux-setup-storage` gives Termux access to Android's Downloads folder (`~/storage/downloads`).
 
-## 2. Install Python and build tools
+## 2. Copy Caerness onto the phone
 
-```bash
-pkg install python git cmake clang make
-```
-
-Unzip `Caerness_Engine_v0_26_1.zip` somewhere under your Termux home folder and enter it.
+On the PC, build the package:
 
 ```bash
-cd ~/Caerness_Engine_v0_26_1
-python run.py init
-python run.py campaign-bootstrap
+python tools/package_phone.py
 ```
 
-`campaign-bootstrap` loads the versioned World-Bible-derived starting Caerness. It deliberately does not invent your player character. Create that explicitly once you have chosen the name/start:
+Copy `dist/caerness_phone.zip` to the phone's Downloads folder (USB, Google Drive or similar). Then in Termux:
 
 ```bash
-python run.py campaign-player-create "Your Name" --start-location Cairnholt --campaign "Caerness Campaign"
+mkdir -p ~/caerness && cd ~/caerness
+unzip -o ~/storage/downloads/caerness_phone.zip
+python -c "import numpy, sqlite3; print('numpy', numpy.__version__, 'sqlite', sqlite3.sqlite_version)"
 ```
+
+Keep Caerness and its database in the Termux home folder, not in shared storage: SQLite is more reliable there.
 
 ## 3. Build a local llama.cpp server
 
@@ -94,7 +87,7 @@ The 4096-token context is the comfortable default profile. Caerness can mark lar
 In a second Termux session:
 
 ```bash
-cd ~/Caerness_Engine_v0_26_1
+cd ~/caerness
 python run.py runtime-config \
   --backend openai_compatible \
   --endpoint http://127.0.0.1:8080/v1/chat/completions \
@@ -163,3 +156,33 @@ Long local generations are computationally expensive. v0.7 mitigates this by:
 - recommending external AI when a request is likely to be much heavier than the phone profile.
 
 Those technical generation boundaries are not player turns. You should never need to type `continue` simply because the local model needed another chunk.
+
+## 11. Phase 0 benchmark (POP-01)
+
+Run from `~/caerness` with the phone plugged in and the screen on (Android throttles background apps).
+
+1. Engine alone:
+
+   ```bash
+   python tools/bench_sim.py --label phone
+   ```
+
+2. Background prototype:
+
+   ```bash
+   python tools/bench_simulants.py --label phone
+   ```
+
+3. Optional, with the local model loaded (in a second Termux session, start `llama-server` as in section 5 and leave it idle):
+
+   ```bash
+   python tools/bench_sim.py --label phone_with_model
+   ```
+
+4. Copy the results back to the PC:
+
+   ```bash
+   cp ~/caerness/benchmarks/results/*.json ~/storage/downloads/
+   ```
+
+Put the JSON files in `benchmarks/results/` on the PC.

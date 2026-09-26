@@ -1,0 +1,37 @@
+{
+ "label": "pc",
+ "device": {
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "python": "3.13.15",
+  "numpy": "2.5.3",
+  "sqlite": "3.50.4",
+  "cpu_count": 12
+ },
+ "runs": [
+  {
+   "k": 50000,
+   "rows_end": 158788,
+   "secs_per_step": 0.1166,
+   "mb": 7.1
+  },
+  {
+   "k": 150000,
+   "rows_end": 464704,
+   "secs_per_step": 0.3975,
+   "mb": 20.8
+  },
+  {
+   "k": 300000,
+   "rows_end": 898724,
+   "secs_per_step": 0.8914,
+   "mb": 40.3
+  },
+  {
+   "k": 600000,
+   "rows_end": 1676639,
+   "secs_per_step": 1.7065,
+   "mb": 75.2
+  }
+ ]
+}
