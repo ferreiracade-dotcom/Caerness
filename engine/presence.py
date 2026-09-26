@@ -329,16 +329,18 @@ def presence_probability_snapshot(
     if missing:
         seed_presence_from_existing_state(conn, effective_day=day)
 
+    # PERF-01: each basis for being here is an indexed lookup; the old OR across left joins scanned every
+    # character for every place and day, so rumour spread slowed as the named population grew.
     rows = conn.execute(
-        """SELECT DISTINCT a.id,a.status,a.home_location_id,a.current_location_id
+        """SELECT a.id,a.status,a.home_location_id,a.current_location_id
            FROM actors a
-           LEFT JOIN actor_presence_profiles p ON p.actor_id=a.id
-           LEFT JOIN actor_presence_habits h ON h.actor_id=a.id AND h.location_id=?
-                AND h.effective_from_day<=? AND (h.effective_to_day IS NULL OR h.effective_to_day>=?)
-           LEFT JOIN travel_plans tp ON tp.subject_kind='actor' AND tp.subject_id=a.id
-                AND tp.status IN ('active','stalled')
-           WHERE a.actor_type='character' AND a.status='active'
-             AND (h.id IS NOT NULL OR p.base_location_id=? OR a.current_location_id=? OR tp.current_location_id=?)
+           WHERE a.actor_type='character' AND a.status='active' AND a.id IN (
+               SELECT actor_id FROM actor_presence_habits WHERE location_id=?
+                   AND effective_from_day<=? AND (effective_to_day IS NULL OR effective_to_day>=?)
+               UNION SELECT actor_id FROM actor_presence_profiles WHERE base_location_id=?
+               UNION SELECT id FROM actors WHERE current_location_id=?
+               UNION SELECT subject_id FROM travel_plans WHERE current_location_id=? AND subject_kind='actor'
+                   AND status IN ('active','stalled'))
            ORDER BY a.id""",
         (location_id, day, day, location_id, location_id, location_id),
     ).fetchall()

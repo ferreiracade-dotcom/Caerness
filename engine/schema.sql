@@ -4033,6 +4033,10 @@ CREATE TABLE IF NOT EXISTS actor_presence_profiles (
     effective_from_day INTEGER NOT NULL DEFAULT 0,
     notes TEXT NOT NULL DEFAULT ''
 );
+-- PERF-01: presence snapshots look people up by place.
+CREATE INDEX IF NOT EXISTS idx_presence_profiles_base ON actor_presence_profiles(base_location_id);
+CREATE INDEX IF NOT EXISTS idx_actors_current_location ON actors(current_location_id);
+CREATE INDEX IF NOT EXISTS idx_travel_plans_current_location ON travel_plans(current_location_id,subject_kind,status);
 
 CREATE TABLE IF NOT EXISTS actor_presence_habits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
