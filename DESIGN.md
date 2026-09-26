@@ -223,6 +223,17 @@ Demo actors, channels and world processes are prefixed `[DEMO]` and are not sett
 
 Canon retrieval provides evidence but does not fill absent facts.
 
+### 15.1 Opening resolution is not run-time invention
+
+Two different rules must not be confused.
+
+- **The seed's non-inference rule** ("household membership, marriages, children … and full social networks are left null where not explicitly established") describes what *canon* settles. A null there means *unknown*, never *none*. A world of adults with no marriages, no children and no acquaintances is itself an invention, and an implausible one.
+- **The run-time no-invention rule** ("never invents a replacement person", "roster shortage never causes a match", "not created by demand") forbids conjuring people, ties or events mid-run because a system, a scene or a counter wants them.
+
+**Opening resolution** fills canon's unknowns exactly once, at the start of a run, before any demand exists. It is deterministic from the world seed and each person's seed identity, and it follows the World Bible's own culture and the world's own demographic rates. It never overrides canon, and every resolved fact records its basis (`canon_text`, `canon_rule`, `opening_draw`, ...), so later canon can replace it. Resolved facts are campaign history, not setting canon. Demographic sex (schema 107), opening relationships and opening family life (schema 108) are opening resolution.
+
+**During a run**, change comes only from simulated processes at the world's own rates. A named person who marries someone from the unnamed population is not invention: the partner already existed ("latent does not mean newly created, it means previously undescribed"), and the marriage happens at the same demographic rate that produced the opening's marriages, never because the named roster is short.
+
 ## 16. Existing systems retained from v0.1-v0.4
 
 v0.6 preserves:

@@ -313,6 +313,44 @@ def _resolve_professional_memberships(conn: sqlite3.Connection, day: int) -> int
     return count
 
 
+def _register_family_claims(conn: sqlite3.Connection, household_id: int, former_head: int) -> int:
+    """Hearth custom: a household passes within the family.  With no designated heir and no filed claim,
+    the surviving spouse and living adult children hold inheritance claims (spouse first, then the
+    eldest).  Only when neither exists is a latent adult child of the former head revealed.
+    """
+    if conn.execute("SELECT 1 FROM inheritance_claims WHERE household_id=? AND status IN ('potential','active')", (household_id,)).fetchone():
+        return 0
+    day = _day(conn)
+    def living_adult(aid: int) -> bool:
+        r = conn.execute("""SELECT a.status,lp.life_status,lp.birth_day FROM actors a LEFT JOIN actor_life_profiles lp ON lp.actor_id=a.id
+                            WHERE a.id=?""", (aid,)).fetchone()
+        return bool(r and r[0] == "active" and (r[1] in (None, "living")) and (r[2] is None or day - int(r[2]) >= 18 * 365))
+    made = 0
+    for u in conn.execute("""SELECT actor_a_id,actor_b_id FROM household_unions WHERE (actor_a_id=? OR actor_b_id=?)
+                             AND status IN ('active','widowed') ORDER BY started_day DESC,id DESC""", (former_head, former_head)).fetchall():
+        spouse = int(u[1] if int(u[0]) == former_head else u[0])
+        if living_adult(spouse):
+            set_inheritance_claim(conn, household_id, spouse, priority=75, legitimacy=75, support=65, status="active",
+                                  notes="surviving spouse (family inheritance)")
+            made += 1
+            break
+    children = [int(r[0]) for r in conn.execute(
+        """SELECT k.actor_b_id FROM kinship_links k JOIN actor_life_profiles lp ON lp.actor_id=k.actor_b_id
+           WHERE k.actor_a_id=? AND k.kin_kind IN ('parent','adoptive_parent') AND k.legal_status<>'former'
+           ORDER BY lp.birth_day,k.actor_b_id""", (former_head,))]
+    adults = [c for c in children if living_adult(c)]
+    if not made and not adults:
+        from .opening_family import reveal_latent_adult_child
+        revealed = reveal_latent_adult_child(conn, former_head, reason="household inheritance")
+        if revealed is not None:
+            adults = [revealed]
+    for rank, child in enumerate(adults):
+        set_inheritance_claim(conn, household_id, child, priority=max(30, 60 - 8 * rank), legitimacy=65, support=max(20, 50 - 10 * rank),
+                              status="active", notes="adult child (family inheritance)")
+        made += 1
+    return made
+
+
 def _resolve_succession_triggers(conn: sqlite3.Connection, day: int, event_logger: Callable[..., int] | None = None) -> int:
     count = 0
     rows = conn.execute("""SELECT h.id AS household_id,h.head_actor_id,a.status AS actor_status
@@ -321,6 +359,10 @@ def _resolve_succession_triggers(conn: sqlite3.Connection, day: int, event_logge
     for r in rows:
         already = conn.execute("SELECT 1 FROM succession_events WHERE household_id=? AND former_head_actor_id=?", (r["household_id"], r["head_actor_id"])).fetchone()
         if not already:
+            plan = conn.execute("SELECT designated_heir_actor_id,certainty FROM household_succession_plans WHERE household_id=?",
+                                (r["household_id"],)).fetchone()
+            if not (plan and plan[0] is not None and float(plan[1]) >= 50):
+                _register_family_claims(conn, int(r["household_id"]), int(r["head_actor_id"]))
             resolve_household_succession(conn, int(r["household_id"]), event_logger=event_logger)
             count += 1
     return count

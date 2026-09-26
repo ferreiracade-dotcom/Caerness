@@ -323,7 +323,8 @@ def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str |
     if child_name is None:
         hname = conn.execute("SELECT name FROM households WHERE id=?", (hid,)).fetchone() if hid else None
         base = str(hname[0]) if hname else f"Union {union_id}"
-        child_name = f"[Latent child] {base} D{birth_day}-{len(existing)+1}"
+        # Several couples can share one household (royal and great households), so the union is part of the name.
+        child_name = f"[Latent child] {base} D{birth_day}-U{union_id}-{len(existing)+1}"
     if demographic_sex is None:
         # FAMILY-02: a newborn is never left unresolved; seeded 50/50 like the background population.
         from .demographic_sex import seeded_sex
@@ -351,6 +352,9 @@ def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str |
         )
     for parent in (a, b):
         add_kinship(conn, parent, child, "parent", reciprocal_kind="child")
+    # A newborn's Core is hereditary; a Veinborn child stays unstaged until someone trains them.
+    from .cultivation import assign_birth_core
+    assign_birth_core(conn, child, [a, b], location_id)
     for sib in siblings:
         if sib != child:
             add_kinship(conn, child, sib, "sibling", reciprocal_kind="sibling")
@@ -787,7 +791,8 @@ def _resolve_planned_births(conn: sqlite3.Connection, day: int, event_logger: Ca
         if not plan.get("auto_children"):
             continue
         desired = int(plan.get("desired_children", 0))
-        children = _existing_children(conn, int(u["actor_a_id"]), int(u["actor_b_id"]))
+        # A family aims for the children it wants *living*; a child who died does not count.
+        children = [c for c in _existing_children(conn, int(u["actor_a_id"]), int(u["actor_b_id"])) if _actor_is_living(conn, c)]
         if desired <= len(children):
             continue
         due = int(plan.get("earliest_next_child_day", int(u["started_day"]) + int(plan.get("spacing_days", 730))))
@@ -1087,12 +1092,24 @@ def next_household_life_due_day(conn: sqlite3.Connection, after_day: int, end_da
     return min(vals) if vals else None
 
 
+def _resolve_cultivation_uptake(conn: sqlite3.Connection, day: int) -> int:
+    from .cultivation import resolve_cultivation_uptake
+    return resolve_cultivation_uptake(conn, day)
+
+
+def _resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, event_logger: Callable[..., int] | None) -> int:
+    from .opening_family import resolve_unnamed_marriages
+    return resolve_unnamed_marriages(conn, day, event_logger=event_logger)
+
+
 def process_due_household_life(conn: sqlite3.Connection, day: int, *, event_logger: Callable[..., int] | None = None) -> dict[str, int | float]:
     from .background_population import process_due_population_life_course
     poplife = process_due_population_life_course(conn, day)
     return {
         "life_profiles": _review_profiles(conn, day, event_logger),
         "births": _resolve_planned_births(conn, day, event_logger),
+        "unnamed_marriages": _resolve_unnamed_marriages(conn, day, event_logger),
+        "cultivation_uptake": _resolve_cultivation_uptake(conn, day),
         "social_contacts": _resolve_social_contacts(conn, day),
         "guardianship_resolutions": _resolve_guardianship_needs(conn, day),
         "service_reviews": _resolve_service_terms(conn, day),

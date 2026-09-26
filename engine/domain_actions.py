@@ -264,7 +264,7 @@ def _union_option(conn: sqlite3.Connection, actor_id: int, day: int) -> DomainAc
            WHERE r.actor_a_id=? AND p.actor_type='character' AND p.status='active'
              AND p.current_location_id=? AND lp.life_status='living' AND lp.family_formation_eligible=1
              AND lp.life_stage='adult' AND lp.demographic_sex IN ('female','male') AND r.trust>=30 AND r.stance>=20
-             AND COALESCE(sc.started_day,r.updated_day)<=?
+             AND COALESCE(r.started_day,sc.started_day,r.updated_day)<=?
            ORDER BY (r.trust+r.stance+r.obligation) DESC,r.id""",
         (actor_id, loc, day - 180),
     ).fetchall()

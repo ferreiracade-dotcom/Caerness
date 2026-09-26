@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 107
+SCHEMA_VERSION = 108
 
 
 def _running_tests() -> bool:
@@ -4408,6 +4408,68 @@ def _migration_107(conn: sqlite3.Connection) -> None:
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA107')")
 
 
+def _migration_108(conn: sqlite3.Connection) -> None:
+    """OPENING-01: relationship start dates, then opening family life and relationships (DESIGN §15.1)."""
+    if _has_table(conn, "relationships"):
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(relationships)")}
+        if "started_day" not in cols:
+            conn.execute("ALTER TABLE relationships ADD COLUMN started_day INTEGER")
+        # Best existing evidence of when a pair first met: their earliest recorded effect, else the last change.
+        conn.execute(
+            """UPDATE relationships SET started_day=COALESCE(
+                   (SELECT MIN(h.day) FROM relationship_history h
+                    WHERE (h.source_actor_id=relationships.actor_a_id AND h.target_actor_id=relationships.actor_b_id)
+                       OR (h.source_actor_id=relationships.actor_b_id AND h.target_actor_id=relationships.actor_a_id)),
+                   updated_day)
+               WHERE started_day IS NULL"""
+            if _has_table(conn, "relationship_history") else
+            "UPDATE relationships SET started_day=updated_day WHERE started_day IS NULL"
+        )
+    if (_has_table(conn, "actor_life_profiles") and _has_table(conn, "latent_entities") and _has_table(conn, "world_state")
+            and conn.execute("SELECT 1 FROM world_state WHERE id=1").fetchone()
+            and conn.execute("SELECT 1 FROM actors WHERE actor_type='character' LIMIT 1").fetchone()):
+        from .demographic_sex import apply_world_bible_sex_corrections
+        apply_world_bible_sex_corrections(conn)
+        if int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]) == 0 and _has_table(conn, "background_person_profiles"):
+            # Background identities not yet revealed follow the canon Veinborn/staging anchors.
+            from .person_ecology import redraw_unresolved_profile_cores
+            redraw_unresolved_profile_cores(conn)
+        if int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]) == 0 and _has_table(conn, "cultivation_profiles"):
+            # Realization aptitude is bell-shaped human variation now (it was uniform); nothing has used it yet at day 0.
+            from .cultivation import _realization_aptitude
+            for (aid,) in conn.execute("SELECT actor_id FROM cultivation_profiles").fetchall():
+                conn.execute("UPDATE cultivation_profiles SET realization_aptitude=? WHERE actor_id=?", (_realization_aptitude(conn, int(aid)), int(aid)))
+            # People revealed at activation got a generic entry-level profile; at day 0 nothing has progressed
+            # yet, so give them the within-Stage calibration canon people receive.
+            from .cultivation import calibrate_revealed_profile
+            for (aid,) in conn.execute(
+                    """SELECT actor_id FROM cultivation_profiles WHERE core_state='Open-Core' AND current_stage IS NOT NULL
+                         AND json_extract(metadata_json,'$.opening_factor_basis') IS NULL
+                         AND (json_extract(metadata_json,'$.source')='PERSONECO01' OR json_extract(metadata_json,'$.generated_underworld')=1
+                              OR json_extract(metadata_json,'$.latent_entity_id') IS NOT NULL)""").fetchall():
+                calibrate_revealed_profile(conn, int(aid))
+        from .opening_family import resolve_opening_history
+        resolve_opening_history(conn)
+    if _has_table(conn, "travel_routes") and _has_table(conn, "source_identity_map") and conn.execute(
+            "SELECT 1 FROM source_identity_map WHERE entity_kind='location' LIMIT 1").fetchone():
+        # ROUTES-01: the canon travel graph (geography, so it applies at any day), then the frontier channels
+        # and military geometry that are projected from it.
+        from .route_network import ensure_canon_route_network
+        ensure_canon_route_network(conn)
+        if _has_table(conn, "polity_issue_states"):
+            from .polity_agency import ensure_missing_opening_geometry
+            ensure_missing_opening_geometry(conn)
+        if _has_table(conn, "conflict_channels"):
+            from .conflict import activate_conflict_channels
+            activate_conflict_channels(conn)
+        if _has_table(conn, "conflict_geometries"):
+            from .conflict_geometry import activate_conflict_geometry
+            activate_conflict_geometry(conn)
+    conn.execute("""INSERT OR IGNORE INTO acceptance_epochs(acceptance_key,schema_version,status,evidence_json)
+                    VALUES ('ONEYEAR_WORLDHIST01A_SCHEMA108',108,'pending','{}')""")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA108')")
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4516,6 +4578,7 @@ _MIGRATIONS: dict[int, Migration] = {
     105: ("worldhist01a_family_harm", "WORLDHIST-01A FAMILY-02 feasibility and HARM-01 shared consequence projection", _migration_105),
     106: ("worldhist01a_social_org_succession", "WORLDHIST-01A REL-02 social memory, ORGPRESS-01 event projection and SUCCESSION-02 authority transitions", _migration_106),
     107: ("family02_sex_resolution", "FAMILY-02 demographic-sex resolution for named characters (canon text, canon rule, given name, seeded roll)", _migration_107),
+    108: ("opening01_family_relationships", "OPENING-01 relationship start dates, opening family life (marriage, widowhood, spouses, latent children) and opening relationships", _migration_108),
 }
 
 

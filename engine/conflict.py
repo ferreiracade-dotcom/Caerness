@@ -47,13 +47,18 @@ def _adjust_relation(conn: sqlite3.Connection, a: int, b: int, *, tension_delta:
 
 
 def activate_conflict_channels(conn: sqlite3.Connection) -> dict[str,int]:
-    # Five pressure channels are enough to activate the opening geometry without pretending every border is equally volatile.
+    # The canon frontiers with live pressure; friendly (Greywood–Windmere) and purely commercial frontiers carry none.
     specs=[
         ("greywood_dunmoor_westbrook_stoneford","Greywood","Dunmoor","territorial_frontier","Westbrook","Stoneford",56,.22,42,60,22),
         ("dunmoor_underheaven_great_power_caution","Dunmoor","Underheaven Empire","security_frontier","Stoneford","Aldergate",34,.16,72,66,10),
         ("windmere_sunreach_maritime","Windmere","Sunreach Confederacy","maritime_competition","Saltmere","Southbay",46,.25,50,59,30),
         ("sunreach_underheaven_trade_wariness","Sunreach Confederacy","Underheaven Empire","trade_maritime","Southbay","Toll’s Reach",40,.18,57,62,25),
-        ("underheaven_thornward_armed_corridor","Underheaven Empire","Thornward","armed_corridor","Aldergate",None,62,.28,38,58,26),
+        # Canon: "Underheaven–Thornward: Western Thornward valleys; Eastwatch–Westgate. Armed peace. The principal
+        # eastern invasion corridor."  (Its Thornward end was unset, so no campaign could ever resolve.)
+        ("underheaven_thornward_armed_corridor","Underheaven Empire","Thornward","armed_corridor","Eastwatch","Westgate",62,.28,38,58,26),
+        # Canon: "Thornward–Stormhollow: Broken southern ridges. Tense local peace. Raids, forts, cattle, disputed
+        # valleys"; Stormhollow's "generations of border war with Thornward".
+        ("thornward_stormhollow_southern_ridges","Thornward","Stormhollow","security_frontier","Dunbriar","Highcairn",54,.30,40,57,24),
     ]
     created=0; day=_day(conn)
     for key,an,bn,kind,la,lb,base,vol,restraint,threshold,opening in specs:
@@ -86,8 +91,17 @@ def _incident_kind(issue_kind: str, armed: bool) -> str:
     return "political_incident"
 
 
+# Channels name the frontier's character; polity issue states name the underlying issue.  Without this
+# mapping the lookup never matched, so issue pressure silently read 0 in every incident (lower severity,
+# slower pressure, and a coin-flip instead of grievance deciding who struck first).
+_CHANNEL_ISSUE_KIND = {"territorial_frontier": "territorial", "security_frontier": "security",
+                       "maritime_competition": "maritime", "trade_maritime": "trade", "armed_corridor": "frontier"}
+
+
 def _issue_pressure(conn: sqlite3.Connection, a: int, b: int, kind: str) -> float:
-    rows=conn.execute("SELECT pressure FROM polity_issue_states WHERE polity_id=? AND other_polity_id=? AND issue_kind=?",(a,b,kind)).fetchall()
+    kinds = sorted({kind, _CHANNEL_ISSUE_KIND.get(kind, kind)})
+    rows=conn.execute(f"SELECT pressure FROM polity_issue_states WHERE polity_id=? AND other_polity_id=? AND issue_kind IN ({','.join('?'*len(kinds))})",
+                      (a,b,*kinds)).fetchall()
     return max([float(r[0]) for r in rows] or [0.0])
 
 

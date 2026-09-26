@@ -86,7 +86,12 @@ def run():
         c.execute("update aggregate_trade_reserves set quantity=0 where good_id=?",(naval,))
         route9=c.execute('select status from travel_routes where id=9').fetchone()
         assert route9 is not None
-        c.execute("update travel_routes set status='closed' where id=9")
+        # The world is connected (ROUTES-01), so one closed leg just reroutes. Cut Saltmere off entirely
+        # to prove a tracked corridor with no usable path blocks trade instead of teleporting it.
+        saltmere=int(c.execute("select id from locations where name='Saltmere'").fetchone()[0])
+        saltmere_routes=[int(r[0]) for r in c.execute("select id from travel_routes where ? in (from_location_id,to_location_id)",(saltmere,))]
+        assert 9 in saltmere_routes
+        c.execute(f"update travel_routes set status='closed' where id in ({','.join(map(str,saltmere_routes))})")
         c.execute("update engine_meta set value='31' where key='aggregate_trade_next_cycle_day'")
         c.execute('update world_state set current_day=31 where id=1')
         process_due_merchant(c,31); c.commit()
@@ -94,7 +99,7 @@ def run():
         assert blocked>0
         assert c.execute("select count(*) from aggregate_trade_flows where period_day=31 and good_id=? and origin_bucket_key='windmere' and destination_bucket_key='underheaven'",(naval,)).fetchone()[0]==0
 
-        # Re-open the known Toll's Reach-Saltmere leg: the same macro need can now move over
+        # Re-open only the known Toll's Reach-Saltmere leg: the same macro need can now move over
         # the tracked corridor, and the flow records the concrete route ids rather than hiding them.
         c.execute("update travel_routes set status='open' where id=9")
         c.execute("update aggregate_trade_reserves set quantity=0 where good_id=?",(naval,))
@@ -104,7 +109,7 @@ def run():
         flow=c.execute("""select * from aggregate_trade_flows where period_day=61 and good_id=?
                           and origin_bucket_key='windmere' and destination_bucket_key='underheaven' order by id limit 1""",(naval,)).fetchone()
         assert flow is not None and flow['route_resolution']=='tracked_route'
-        meta=json.loads(flow['metadata_json']); assert 8 in meta['route_ids'] and 9 in meta['route_ids']
+        meta=json.loads(flow['metadata_json']); assert 9 in meta['route_ids']
         opened=float(c.execute("select unmet_demand from aggregate_trade_balances where period_day=61 and bucket_key='underheaven' and good_id=?",(naval,)).fetchone()[0])
         assert opened < blocked
 

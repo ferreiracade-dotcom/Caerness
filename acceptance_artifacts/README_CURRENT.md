@@ -1,8 +1,8 @@
-# Current acceptance evidence — Schema 107 / WORLDHIST-01A Stage 2 + FAMILY-02 sex resolution
+# Current acceptance evidence — Schema 108 / WORLDHIST-01A Stage 2 + opening history, mortality and cultivation realism
 
-**Current runnable development baseline:** Schema 107, day 0.  
+**Current runnable development baseline:** Schema 108, day 0.  
 **Current code checkpoint:** `58ee22291d34bb1da59db951ca14dae233e71e8d`.  
-**Current gate:** focused WORLDHIST-01A Stage 2 acceptance PASS; schema-107 isolated regression 110/110 completed PASS (v26 scale test pending at commit); `ONEYEAR_WORLDHIST01A_SCHEMA107` remains pending.
+**Current gate:** focused WORLDHIST-01A Stage 2 acceptance PASS; schema-108 isolated regression 115/115 PASS (tenyear02 gate run against the packaged opening); `ONEYEAR_WORLDHIST01A_SCHEMA108` remains pending.
 
 ## Current-schema evidence
 
@@ -11,8 +11,9 @@ The load-bearing current-schema documents are:
 - `../WORLDHIST01A_STAGE1_FAMILY_HARM_ACCEPTANCE_2026-09-22.md` — Schema-105 FAMILY-02/HARM-01 foundation;
 - `../WORLDHIST01A_STAGE2_SOCIAL_ORGPRESS_SUCCESSION_ACCEPTANCE_2026-09-22.md` — Schema-106 REL-02 / ORGPRESS-01 / SUCCESSION-02 acceptance;
 - `../WORLDHIST01A_SCHEMA107_REVIEW_FIXES_AND_SEX_RESOLUTION_2026-09-23.md` — Schema-107 review fixes, Windows runtime fixes and FAMILY-02 sex resolution;
+- `../WORLDHIST01A_SCHEMA108_OPENING_HISTORY_MORTALITY_CULTIVATION_2026-09-23.md` — Schema-108 opening family history and relationships, named/childhood mortality, heirs, Veinborn staging and training uptake;
 - the packaged `data/caerness.db` — clean day-0 current opening database;
-- `../engine/schema.sql` — current schema (Schema 107 is a data migration with no table changes);
+- `../engine/schema.sql` — current schema (Schema 108 adds `relationships.started_day`; the rest is data migration);
 - `../game/seeds/Caerness_Initial_World_State_Seed_v1_4.json` — current opening-world seed;
 - `../canon/world_bible_current.docx` — current World Bible.
 

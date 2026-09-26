@@ -173,6 +173,8 @@ CREATE TABLE IF NOT EXISTS relationships (
     obligation REAL NOT NULL DEFAULT 0,
     professional_confidence REAL NOT NULL DEFAULT 0 CHECK (professional_confidence BETWEEN -100 AND 100),
     updated_day INTEGER NOT NULL DEFAULT 0,
+    -- When the two people first knew each other; changes never move it (updated_day does).
+    started_day INTEGER,
     UNIQUE(actor_a_id, actor_b_id),
     CHECK(actor_a_id <> actor_b_id)
 );

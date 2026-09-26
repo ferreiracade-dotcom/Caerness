@@ -67,12 +67,15 @@ def _source_location(conn: sqlite3.Connection, source: sqlite3.Row, seed: int, u
     return int(rows[idx][0])
 
 
-def _profile_stage(seed: int, uid: int, urban: bool) -> tuple[int, str | None]:
-    # Identity traits are drawn before demand.  The rates are a bounded identity sample, not a
-    # new population census; aggregate cultivation ecology remains authoritative elsewhere.
-    p_open = 0.13 if urban else 0.08
-    if _score(seed, uid, "open_core") >= p_open:
+def _profile_stage(seed: int, uid: int, hearth: bool, sex: str | None) -> tuple[int, str | None]:
+    # Identity traits are drawn before demand, at the World Bible's population anchors: Veinborn are 35%
+    # of the Hearth and ~8% elsewhere, and only some Veinborn ever became staged (sex-weighted, as canon's
+    # training investment is).  An unstaged Veinborn is Open-Core with no Stage.
+    from .cultivation import VEINBORN_SHARE, staged_probability
+    if _score(seed, uid, "open_core") >= VEINBORN_SHARE[bool(hearth)]:
         return 0, None
+    if _score(seed, uid, "staged") >= staged_probability(sex, hearth, False):
+        return 1, None
     x = _score(seed, uid, "stage")
     if x < .58:
         return 1, "First"
@@ -121,9 +124,10 @@ def activate_background_people(conn: sqlite3.Connection) -> dict[str, int]:
             if conn.execute("SELECT 1 FROM background_person_profiles WHERE partition_id=? AND local_uid=?", (pid, uid)).fetchone():
                 continue
             snap = state.snapshot(uid)
-            open_core, stage = _profile_stage(seed, uid, bool(source["urban"]))
             occupation = _pick(_OCCUPATIONS, seed, uid, "occupation")
             loc = _source_location(conn, source, seed, uid)
+            from .cultivation import location_in_hearth
+            open_core, stage = _profile_stage(seed, uid, location_in_hearth(conn, loc), snap["demographic_sex"])
             given = _pick(_FIRST, seed, uid, "given")
             family = _pick(_LAST, seed, uid, "family")
             # The local uid is not visible in ordinary naming unless a collision must be resolved.
@@ -152,6 +156,21 @@ def activate_background_people(conn: sqlite3.Connection) -> dict[str, int]:
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('personeco01_activation_version','1')")
     total = int(conn.execute("SELECT COUNT(*) FROM background_person_profiles").fetchone()[0])
     return {"background_partitions_created": created_partitions, "background_person_profiles_created": created_profiles, "background_person_profiles": total}
+
+
+def redraw_unresolved_profile_cores(conn: sqlite3.Connection) -> int:
+    """Re-draw Core/Stage for still-background identities with the canon-anchored rule (day 0 only)."""
+    changed = 0
+    from .cultivation import location_in_hearth
+    for r in conn.execute("""SELECT p.partition_id,p.local_uid,p.current_location_id,p.demographic_sex,p.open_core,p.current_stage,pt.seed
+                             FROM background_person_profiles p JOIN background_population_partitions pt ON pt.id=p.partition_id
+                             WHERE p.status='background'""").fetchall():
+        open_core, stage = _profile_stage(int(r["seed"]), int(r["local_uid"]), location_in_hearth(conn, r["current_location_id"]), r["demographic_sex"])
+        if (open_core, stage) != (int(r["open_core"]), r["current_stage"]):
+            conn.execute("UPDATE background_person_profiles SET open_core=?,current_stage=? WHERE partition_id=? AND local_uid=?",
+                         (open_core, stage, int(r["partition_id"]), int(r["local_uid"])))
+            changed += 1
+    return changed
 
 
 def _unique_actor_name(conn: sqlite3.Connection, profile: sqlite3.Row) -> str:
@@ -284,6 +303,9 @@ def resolve_background_person(
          day+365,day,day+30,"active" if open_core and stage else "paused",
          _j({"source":"PERSONECO01","preexisting_trait":True})),
     )
+    # A pre-existing Stage sits somewhere inside that Stage, calibrated like any canon person's.
+    from .cultivation import calibrate_revealed_profile
+    calibrate_revealed_profile(conn, aid)
     conn.execute(
         """INSERT INTO simulation_profiles(actor_id,tier,cadence_days,volatility,agency,last_review_day,next_review_day,wake_threshold)
            VALUES (?,'DORMANT',180,.30,.55,?,?,3)""", (aid,day,day+180)

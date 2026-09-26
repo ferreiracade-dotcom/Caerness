@@ -40,6 +40,8 @@ def run():
     assert sex_of(c,'Opal King')==('female','given_name')
     assert sex_of(c,'Meriel Halloway')==('female','given_name')
     assert sex_of(c,'Robin Mears')[1]=='seeded_roll'
+    # World Bible pronouns outrank the name lists and the roll ("... is his principal active family recipient").
+    assert sex_of(c,'Voss Rannick')==('male','canon_text') and sex_of(c,'Nall Reed')==('male','canon_text')
 
     # Seeded roll is stable, and re-running resolution changes nothing.
     assert sex_of(c,'Robin Mears')[0]==seeded_sex('person:robin-mears')

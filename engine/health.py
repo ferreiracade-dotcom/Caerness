@@ -6,23 +6,28 @@ import random
 import sqlite3
 from typing import Any, Callable
 
+# Tonal longevity anchors (World Bible: "demographic/tonal curves", never guaranteed dates).
+# Sixth is fitted to the canon census (all ~40 living Sixths: median age 88, p90 108, oldest 118,
+# described as "old" at 87-97, "ancient" at 104-110, "very old" at 118).  Fifth follows the canon text
+# ("vigorous" at 80; outlives a Closed-Core spouse "by decades").  Third satisfies "a sixty-year-old
+# Third can appear older than an eighty-year-old Fifth".  Lower stages are spaced between.
 LONGEVITY_MIDPOINT = {
     'ordinary': 77.5,
-    'first': 85.0,
-    'temper': 95.0,
-    'third': 105.0,
-    'breach': 117.5,
-    'fifth': 140.0,
-    'sixth': 165.0,
+    'first': 80.0,
+    'temper': 83.0,
+    'third': 86.5,
+    'breach': 91.5,
+    'fifth': 99.5,
+    'sixth': 111.0,
 }
 DECLINE_START = {
     'ordinary': 55.0,
-    'first': 65.0,
-    'temper': 75.0,
-    'third': 85.0,
-    'breach': 95.0,
-    'fifth': 112.0,
-    'sixth': 132.0,
+    'first': 57.0,
+    'temper': 60.0,
+    'third': 63.0,
+    'breach': 68.0,
+    'fifth': 76.0,
+    'sixth': 87.0,
 }
 DEFAULT_COHORT_MORTALITY = {
     '0_4': 0.045,
@@ -32,10 +37,149 @@ DEFAULT_COHORT_MORTALITY = {
     '40_59': 0.017,
     '60_plus': 0.11,
 }
+# Share of live births who die in their first year (DEMO-04).  Caerness is premodern: most births have
+# a midwife, but infection, fever and childbirth complications still take many infants.
+FIRST_YEAR_MORTALITY = 0.10
+
+
+def childhood_annual_hazard(age: float) -> float:
+    """The world's premodern childhood mortality (DEMO-04), shared by every population model."""
+    if age < 1:
+        return FIRST_YEAR_MORTALITY
+    if age < 5:
+        return DEFAULT_COHORT_MORTALITY['0_4']
+    if age < 13:
+        return DEFAULT_COHORT_MORTALITY['5_12']
+    return DEFAULT_COHORT_MORTALITY['13_17']
+
+# Named natural mortality (Gompertz-Makeham).  Ordinary adults follow the world's own demography: the
+# background tracked-person bands (15-49 0.18%, 50-64 0.9%, 65-74 3%, 75+ 8.5%) with risk doubling
+# about every 7.3 years, which puts the ordinary adult median death age at the 77.5 anchor.
+_BACKGROUND_ADULT_HAZARD = 0.0018   # everyday illness/accident risk at any adult age
+_HAZARD_AT_70 = 0.03                # ordinary age-70 hazard (background 65-74 band)
+_GOMPERTZ_SLOPE = 0.095
+_MAX_ANNUAL_HAZARD = 0.6
+
+
+def _ordinary_life_course(age: float, longevity_class: str) -> tuple[float, float]:
+    """Map a cultivator's age onto the ordinary life course: (equivalent age, biological years per year).
+
+    "Cultivation extends the prime before it extends old age": the prime (18 → decline start) and
+    old age (decline start → longevity midpoint) are stretched separately onto their ordinary spans,
+    so a cultivator also ages more slowly through each span.
+    """
+    if age < 18 or longevity_class == 'ordinary':
+        return age, 1.0
+    decline, mid = DECLINE_START[longevity_class], LONGEVITY_MIDPOINT[longevity_class]
+    o_decline, o_mid = DECLINE_START['ordinary'], LONGEVITY_MIDPOINT['ordinary']
+    if age <= decline:
+        rate = (o_decline - 18) / (decline - 18)
+        return 18 + (age - 18) * rate, rate
+    # "Their decline slows": cultivation never makes old age run faster than ordinary ageing.
+    rate = min(1.0, (o_mid - o_decline) / (mid - decline))
+    return o_decline + (age - decline) * rate, rate
+
+
+def natural_annual_hazard(age: float, longevity_class: str, *, childhood_multiplier: float = 1.0) -> float:
+    """Annual probability of natural death: never zero for anyone living, never a scheduled date.
+
+    Risk is ordinary risk per *biological* year, so each class's median death age lands on its
+    longevity anchor and cultivators' preserved health also lowers everyday illness risk.  A child's
+    risk is the world average scaled by the family's circumstances (``childhood_circumstance``).
+    """
+    if age < 15:
+        return min(_MAX_ANNUAL_HAZARD, childhood_annual_hazard(age) * childhood_multiplier)
+    eff, rate = _ordinary_life_course(age, longevity_class)
+    per_bio_year = min(_MAX_ANNUAL_HAZARD, _BACKGROUND_ADULT_HAZARD + _HAZARD_AT_70 * math.exp(_GOMPERTZ_SLOPE * (eff - 70)))
+    return min(_MAX_ANNUAL_HAZARD, 1.0 - (1.0 - per_bio_year) ** rate)
 
 
 def _day(conn: sqlite3.Connection) -> int:
     return int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+
+
+# "Wealth buys insulation from weather; poverty experiences it directly"; "a wealthy free city can possess
+# extraordinary medicine while nearby countryside remains poorly served"; Great Houses and sects keep
+# infirmaries and estate physicians.  The DEMO-04 childhood rates are the population *average*; a named
+# family's risk is scaled by two things, never by a group label alone:
+#   * means   - what the family can actually command (0-100, 50 = ordinary; unknown stays ordinary);
+#   * access  - care it can reach: a local care network or an institutional infirmary helps, and
+#               remoteness hurts in proportion to poverty (a rich remote family brings the physician in).
+# Historical elites lost about a fifth of their children where the general population lost a third, so a
+# wealthy house with its own infirmary lands near 0.65.
+_SETTLED_LOCATION_WORDS = ("settlement", "district", "city", "town", "port", "palace", "node", "inn", "street", "fortress")
+_GREAT_LINEAGE_KINDS = {"royal house", "imperial dynasty", "great house"}
+_DEPENDENT_FAMILY_WORDS = ("retainer", "affiliated", "servant", "household guard", "dependent")
+
+
+def _family_means(conn: sqlite3.Connection, ids: list[int]) -> tuple[float, list[str]]:
+    from .opening_family import LINEAGE_KINDS
+    marks = ",".join("?" * len(ids))
+    means, tags = 50.0, []
+    kinds = {str(r[0]) for r in conn.execute(
+        f"""SELECT ip.institution_kind FROM institution_memberships im JOIN institution_profiles ip ON ip.actor_id=im.institution_actor_id
+            WHERE im.member_actor_id IN ({marks}) AND im.status='active'""", ids)}
+    if kinds & LINEAGE_KINDS:
+        # Standing inside the house matters: retainer and affiliated families serve it, they do not own it.
+        text = " ".join(
+            " ".join(str(v or "") for v in (json.loads(r[0] or "{}").get(k) for k in ("role", "public_identity_text")))
+            for r in conn.execute(f"SELECT source_payload_json FROM source_identity_map WHERE entity_kind='actor' AND entity_id IN ({marks})", ids)
+        ).lower()
+        text += " " + " ".join(str(r[0] or "").lower() for r in conn.execute(
+            f"SELECT role_text FROM institution_memberships WHERE member_actor_id IN ({marks}) AND status='active'", ids))
+        if any(w in text for w in _DEPENDENT_FAMILY_WORDS):
+            means = max(means, 60.0); tags.append("dependent_house_family")
+        elif kinds & _GREAT_LINEAGE_KINDS:
+            means = max(means, 90.0); tags.append("great_house_family")
+        else:
+            means = max(means, 80.0); tags.append("house_family")
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='underworld_personnel'").fetchone():
+        r = conn.execute(
+            f"""SELECT MAX(MAX(p.earning_power,COALESCE(w.lifestyle_level,0))) FROM underworld_personnel p
+                LEFT JOIN underworld_leader_wealth w ON w.actor_id=p.actor_id
+                WHERE p.actor_id IN ({marks}) AND p.status='active'""", ids).fetchone()[0]
+        if r is not None:
+            means = max(means, float(r)) if float(r) >= 50 else min(means, float(r)); tags.append("underworld_earnings")
+    try:
+        if conn.execute(f"SELECT 1 FROM civilian_enterprises WHERE owner_actor_id IN ({marks}) AND status IN ('active','strained') LIMIT 1", ids).fetchone():
+            means = max(means, 70.0); tags.append("enterprise_owner")
+    except sqlite3.OperationalError:
+        pass
+    w = conn.execute(
+        f"""SELECT MAX(h.wealth) FROM actor_life_profiles lp JOIN households h ON h.id=lp.current_household_id
+            WHERE lp.actor_id IN ({marks}) AND h.wealth>0""", ids).fetchone()[0]
+    if w is not None:
+        means = max(means, min(100.0, 50.0 + float(w) / 2.0)); tags.append("household_wealth")
+    return means, tags
+
+
+def childhood_circumstance(conn: sqlite3.Connection, *, parent_ids: list[int], location_id: int | None) -> tuple[float, list[str]]:
+    """Multiplier on the world's childhood mortality for a family, and the factors behind it."""
+    ids = [int(x) for x in parent_ids if x is not None]
+    means, tags = _family_means(conn, ids) if ids else (50.0, [])
+    mult = 1.0 + (50.0 - means) * 0.007           # means 100 -> 0.65, 50 -> 1.0, 0 -> 1.35
+    if ids:
+        marks = ",".join("?" * len(ids))
+        if conn.execute(f"SELECT 1 FROM institution_memberships WHERE member_actor_id IN ({marks}) AND status='active' LIMIT 1", ids).fetchone():
+            mult *= 0.93; tags.append("institutional_infirmary")
+    if location_id is not None:
+        if conn.execute("SELECT 1 FROM health_care_sites WHERE location_id=? AND status='active' LIMIT 1", (int(location_id),)).fetchone():
+            mult *= 0.93; tags.append("care_network")
+        else:
+            kind = conn.execute("SELECT kind FROM locations WHERE id=?", (int(location_id),)).fetchone()
+            if kind and not any(w in str(kind[0]).lower() for w in _SETTLED_LOCATION_WORDS):
+                penalty = 0.20 * max(0.0, 1.0 - means / 100.0)
+                if penalty > 0.01:
+                    mult *= 1.0 + penalty; tags.append("remote_care_distance")
+    return round(max(0.5, min(1.5, mult)), 4), tags + [f"means:{round(means)}"]
+
+
+def _child_circumstance(conn: sqlite3.Connection, actor_id: int) -> tuple[float, list[str]]:
+    parents = [int(r[0]) for r in conn.execute(
+        "SELECT actor_a_id FROM kinship_links WHERE actor_b_id=? AND kin_kind IN ('parent','adoptive_parent') AND legal_status<>'former'",
+        (actor_id,))]
+    loc = conn.execute("SELECT COALESCE(home_location_id,current_location_id) FROM actors WHERE id=?", (actor_id,)).fetchone()
+    return childhood_circumstance(conn, parent_ids=parents, location_id=int(loc[0]) if loc and loc[0] is not None else None)
 
 
 def _seed(conn: sqlite3.Connection, salt: int) -> int:
@@ -143,8 +287,9 @@ def configure_health_profile(conn: sqlite3.Connection, actor_id: int, *, longevi
         if age is not None and old_phase=='late_decline':
             old_penalty=min(55.0,max(0.0,(age-DECLINE_START[old_class])*1.35))
         new_phase=_aging_phase(age, longevity_class)
-        # A later breakthrough can slow future aging but cannot erase decline already accrued.
-        if old_phase=='late_decline' and new_phase=='prime':
+        # A later breakthrough can slow future aging but cannot erase decline already accrued,
+        # whether the new class would place the actor back in prime or merely in a milder decline.
+        if old_phase=='late_decline':
             merged['age_penalty_floor']=max(float(merged.get('age_penalty_floor',0.0)), old_penalty)
             merged['mortality_pressure_floor']=max(float(merged.get('mortality_pressure_floor',0.0)), float(row['mortality_pressure']))
             new_phase='late_decline'
@@ -455,8 +600,15 @@ def _natural_mortality_check(conn: sqlite3.Connection, actor_id: int, day: int, 
     age=_age_years(conn,actor_id,day)
     pressure=float(p['mortality_pressure'])
     annual=0.0; draw=None; prob=0.0; died=False
-    if age is not None and age >= 45 and pressure >= 8:
-        annual=min(0.45,(pressure/100.0)**3*0.55)
+    child_mult, child_tags = (1.0, [])
+    if age is not None:
+        if age < 15:
+            child_mult, child_tags = _child_circumstance(conn, actor_id)
+        # Natural ageing risk applies to everyone living; condition-driven pressure can only raise it
+        # (max, not sum, so the age component inside mortality_pressure is not counted twice).
+        annual=natural_annual_hazard(age,str(p['longevity_class']),childhood_multiplier=child_mult)
+        if age >= 45 and pressure >= 8:
+            annual=max(annual,min(0.45,(pressure/100.0)**3*0.55))
         prob=1.0-(1.0-annual)**(max(1,elapsed_days)/365.0)
         rng=random.Random(_seed(conn,actor_id*1009+day)); draw=rng.random(); died=draw<prob
     if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='mortality_audit'").fetchone():
@@ -464,7 +616,8 @@ def _natural_mortality_check(conn: sqlite3.Connection, actor_id: int, day: int, 
             """INSERT INTO mortality_audit(actor_id,day,age_years,annual_hazard,elapsed_days,draw,died,source_kind,metadata_json)
                VALUES (?,?,?,?,?,?,?,'ordinary_health',?)""",
             (actor_id,day,age,annual,max(0,int(elapsed_days)),draw,1 if died else 0,
-             json.dumps({'mortality_pressure':pressure,'period_probability':prob,'same_rule_for_named_and_resolved_background':True},sort_keys=True)),
+             json.dumps({'mortality_pressure':pressure,'period_probability':prob,'hazard_model':'gompertz_makeham_v1','same_rule_for_named_and_resolved_background':True,
+                         **({'childhood_multiplier':child_mult,'childhood_factors':child_tags} if child_tags else {})},sort_keys=True)),
         )
     return died
 

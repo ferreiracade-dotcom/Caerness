@@ -69,13 +69,17 @@ def _draw(uid: np.ndarray, step_index: int, stream: int, seed: int) -> np.ndarra
 
 
 def _mortality_probability(age_days: np.ndarray) -> np.ndarray:
+    from .health import FIRST_YEAR_MORTALITY, DEFAULT_COHORT_MORTALITY as C
     age = age_days / 365.2425
+    # Childhood follows the world's premodern demography (DEMO-04), exactly as named children do.
     annual = np.where(
-        age < 1, 0.018,
-        np.where(age < 15, 0.0004,
+        age < 1, FIRST_YEAR_MORTALITY,
+        np.where(age < 5, C['0_4'],
+        np.where(age < 13, C['5_12'],
+        np.where(age < 15, C['13_17'],
         np.where(age < 50, 0.0018,
         np.where(age < 65, 0.009,
-        np.where(age < 75, 0.03, 0.085)))),
+        np.where(age < 75, 0.03, 0.085)))))),
     )
     return annual / 12.0
 
@@ -294,7 +298,8 @@ def _advance_source_one_year(conn: sqlite3.Connection, source_id: int, step_day:
         closing[band] -= aged
         closing[nxt[band]] += aged
     births = opening * max(0.0, min(1.0, float(dyn['annual_birth_rate'])))
-    infant_deaths = births * 0.10
+    from .health import FIRST_YEAR_MORTALITY
+    infant_deaths = births * FIRST_YEAR_MORTALITY
     deaths += infant_deaths
     closing['0_4'] += births - infant_deaths
     for band in closing:

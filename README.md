@@ -1,13 +1,13 @@
 # Caerness v0.60.0 — CURRENT DEVELOPMENT HANDOFF
 
-**Package state:** Schema 107 / WORLDHIST-01A Stage 2 + FAMILY-02 sex resolution  
+**Package state:** Schema 108 / WORLDHIST-01A Stage 2 + opening history, mortality and cultivation realism  
 **Engine version:** 0.60.0  
 **Live development database:** `data/caerness.db`  
 **Live story day:** 0  
 **Current code checkpoint:** `58ee22291d34bb1da59db951ca14dae233e71e8d`  
 **Current World Bible:** `canon/world_bible_current.docx`  
 **Current opening-world seed:** `game/seeds/Caerness_Initial_World_State_Seed_v1_4.json`  
-**Status:** focused WORLDHIST-01A Stage 2 acceptance passed; Schema 107 adds review fixes and FAMILY-02 sex resolution (see `WORLDHIST01A_SCHEMA107_REVIEW_FIXES_AND_SEX_RESOLUTION_2026-09-23.md`); fresh Schema-107 integrated ONEYEAR acceptance is still pending.
+**Status:** focused WORLDHIST-01A Stage 2 acceptance passed; Schema 107 adds review fixes and FAMILY-02 sex resolution; Schema 108 adds opening family life and relationships, canon-anchored named mortality, and Veinborn/training realism (see `WORLDHIST01A_SCHEMA108_OPENING_HISTORY_MORTALITY_CULTIVATION_2026-09-23.md`); fresh Schema-108 integrated ONEYEAR acceptance is still pending.
 
 This README is the authoritative starting point for anyone resuming development from this package. Older handoffs, acceptance reports and roadmaps remain in the repository as historical evidence, but **their schema numbers and “current” labels must not override this file**.
 
@@ -27,7 +27,7 @@ The simulation should not preserve institutions, characters or outcomes merely b
 
 ## 2. Where development is RIGHT NOW
 
-The live code in this package is **Schema 107**, built on the corrected Schema-104 TENYEAR-02 development baseline.
+The live code in this package is **Schema 108**, built on the corrected Schema-104 TENYEAR-02 development baseline.
 
 ### Schema 104 baseline already accepted
 
@@ -98,21 +98,36 @@ See `WORLDHIST01A_STAGE2_SOCIAL_ORGPRESS_SUCCESSION_ACCEPTANCE_2026-09-22.md`.
 
 See `WORLDHIST01A_SCHEMA107_REVIEW_FIXES_AND_SEX_RESOLUTION_2026-09-23.md`.
 
+### Schema 108 — opening history, mortality and cultivation realism
+
+- **Opening resolution is not run-time invention** (DESIGN §15.1). Canon's nulls mean *unknown*: the opening world now has lived family history and relationships, resolved once and deterministically, never over canon, with each fact's basis recorded (`engine/opening_family.py`).
+- Named adults have marriages, widowhood, remarriage and latent children, with canon-grounded group differences. Living spouses are revealed as low-attention persons. Opening relationships come from kin, teaching lines and shared institutions, backdated. Relationships have a real `started_day`.
+- During a run, single named adults can marry into the unnamed population at the same rates. Heirs come from family: a surviving spouse and adult children claim households, lineage houses weigh kinship, and latent adult children are revealed only when needed.
+- Named mortality follows a canon-fitted Gompertz-Makeham curve (Sixth median ~111, matching the Sixth census). Childhood mortality is premodern and shared by every population model, scaled by a family's actual means and access to care.
+- Veinborn (Open-Core) is not the same as martial artist. Staging follows canon anchors and is sex-weighted. Newborns inherit a Core. Any Veinborn may take up training at plausible rates. Aptitudes are bell-shaped, and revealed people get the same within-Stage calibration as canon people.
+- **ROUTES-01** (`engine/route_network.py`): the travel graph held only 11 routes, and 121 of 133 places, including every outer kingdom, were unreachable. This silently blocked trade, travel, news and war. There are now 132 routes at canon caravan times, each with its basis and certainty. The very old continental map is used only where the text is silent.
+- Conflict channels now see their frontier's issue pressure. An issue-kind naming mismatch had kept it at 0. The Empire–Thornward channel has its Thornward endpoint, and canon's Thornward–Stormhollow southern ridges frontier exists.
+
+See `WORLDHIST01A_SCHEMA108_OPENING_HISTORY_MORTALITY_CULTIVATION_2026-09-23.md`.
+
 ### Current gate status
 
 The packaged database is a clean opening state:
 
-- schema: **107**
+- schema: **108**
 - story day: **0**
 - engine version: **0.60.0**
 - background person profiles: **2,272**
 - professional profiles: **100**
-- `relationship_history`: **0** at opening by design
+- `relationship_history`: **0** at opening by design (history arises from play)
+- opening relationships: **3,288** (canon kin, teaching lines and shared institutions, backdated; schema 108)
+- travel routes: **132**, every place reachable (ROUTES-01); conflict channels: **6**
+- opening unions: **267** active; revealed opening spouses: **264**; latent (undescribed) children alive: **585**
 - `leadership_transition_cases`: **0** at opening by design
 - SQLite integrity: verified in the parent checkpoint
 - foreign-key violations: 0 in the parent checkpoint
-- acceptance epoch: `ONEYEAR_WORLDHIST01A_SCHEMA107` = **pending**
-- named characters with unresolved demographic sex: **0** (schema-107 resolution)
+- acceptance epoch: `ONEYEAR_WORLDHIST01A_SCHEMA108` = **pending**
+- named characters with unresolved demographic sex: **0**
 
 The zero history rows at day 0 are intentional: world history should arise from simulation, not be fabricated to satisfy coverage counters.
 
@@ -166,7 +181,7 @@ This is the runnable SQLite opening database for the packaged checkpoint. It is 
 
 `engine/schema.sql`
 
-This is the current database schema definition. The runtime reports Schema 107.
+This is the current database schema definition. The runtime reports Schema 108.
 
 ### C. Development evidence
 
@@ -346,7 +361,7 @@ python run.py status
 python run.py migration-status
 ```
 
-Confirm that the reported engine version is 0.60.0, schema is 107 and story day is 0 before treating the package as the current baseline.
+Confirm that the reported engine version is 0.60.0, schema is 108 and story day is 0 before treating the package as the current baseline.
 
 Inspect Git history:
 

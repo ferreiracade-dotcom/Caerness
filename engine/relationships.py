@@ -26,7 +26,8 @@ def relationship_view(conn: sqlite3.Connection, source_actor_id: int, target_act
     return {k: float(row[k]) for k in DIRECTIONAL_FIELDS}
 
 def ensure_relationship(
-    conn: sqlite3.Connection, source_actor_id: int, target_actor_id: int, day: int, **values: float
+    conn: sqlite3.Connection, source_actor_id: int, target_actor_id: int, day: int, *,
+    started_day: int | None = None, **values: float
 ) -> int:
     source_actor_id, target_actor_id = int(source_actor_id), int(target_actor_id)
     if source_actor_id == target_actor_id:
@@ -45,10 +46,11 @@ def ensure_relationship(
             vals[k] = _clamp100(vals[k])
     cur = conn.execute(
         """INSERT INTO relationships(
-               actor_a_id,actor_b_id,stance,familiarity,trust,affection,respect,fear,loyalty,resentment,obligation,professional_confidence,updated_day
-           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+               actor_a_id,actor_b_id,stance,familiarity,trust,affection,respect,fear,loyalty,resentment,obligation,professional_confidence,updated_day,started_day
+           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (source_actor_id,target_actor_id,vals['stance'],vals['familiarity'],vals['trust'],vals['affection'],
-         vals['respect'],vals['fear'],vals['loyalty'],vals['resentment'],vals['obligation'],vals['professional_confidence'],int(day)),
+         vals['respect'],vals['fear'],vals['loyalty'],vals['resentment'],vals['obligation'],vals['professional_confidence'],int(day),
+         int(day if started_day is None else started_day)),
     )
     return int(cur.lastrowid)
 

@@ -1075,6 +1075,9 @@ def activate_post80_organization_lifecycle(conn: sqlite3.Connection) -> dict[str
 def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     out={}
     from .opening_world_state import resolve_opening_institution_locations, resolve_opening_character_locations
+    # The canon travel graph must exist before anything that routes people, goods, news or armies.
+    from .route_network import ensure_canon_route_network
+    out.update({k:v for k,v in ensure_canon_route_network(conn).items() if k!='routes01_missing_places'})
     out['opening_institution_locations_resolved']=resolve_opening_institution_locations(conn)
     out.update({f'opening_character_locations_{k}':v for k,v in resolve_opening_character_locations(conn).items()})
     out.update(activate_missing_merchant_anchors(conn))
@@ -1146,6 +1149,9 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     # Last, so the Hollow Mantle rule can see the heirs registered above.
     from .demographic_sex import resolve_missing_demographic_sex
     out.update({f'family02_sex_{k}': v for k, v in resolve_missing_demographic_sex(conn).items()})
+    # Opening family life and relationships need resolved sex, locations, teaching and memberships.
+    from .opening_family import resolve_opening_history
+    out.update(resolve_opening_history(conn))
     conn.execute(
         "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
         (str(CURRENT_CANON_ACTIVATION_VERSION),),

@@ -69,7 +69,8 @@ def run():
         # Population calibration: same universal mechanics, different ordinary outcomes from context.
         c=_bootstrap('/tmp/caerness_v056_cohort.db',3)
         opening={}
-        for r in c.execute("SELECT actor_id,current_stage FROM cultivation_profiles WHERE core_state='Open-Core' AND current_stage IN ('First','Temper','Third')"):
+        # Practitioners only: Veinborn who are not training (e.g. revealed spouses) hold their Stage.
+        for r in c.execute("SELECT actor_id,current_stage FROM cultivation_profiles WHERE core_state='Open-Core' AND active=1 AND current_stage IN ('First','Temper','Third')"):
             aid0=int(r['actor_id']); st=r['current_stage']
             opening[aid0]=(st,bool(_cultivation_context(c,aid0,st)['hearth_context']))
         for day in range(30,3651,30):

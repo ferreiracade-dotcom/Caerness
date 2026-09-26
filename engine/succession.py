@@ -41,7 +41,36 @@ def open_authority_transition(
     return int(cur.lastrowid)
 
 
-def _candidate_rows(conn: sqlite3.Connection, institution_actor_id: int, required_stage: str | None) -> list[tuple[float, int, str]]:
+# A clan or house "is fundamentally reproduced through kinship, inheritance, marriage", but has "no simple
+# eldest-child succession: capability, branch acceptance, martial inheritance and household politics all
+# matter".  Close kin of the former head therefore gain standing without overriding Stage.
+_KIN_BONUS = {"child": 20.0, "sibling": 12.0, "spouse": 6.0}
+
+
+def _lineage_kin_bonus(conn: sqlite3.Connection, institution_actor_id: int, former_actor_id: int | None) -> dict[int, float]:
+    from .opening_family import LINEAGE_KINDS
+    kind = conn.execute("SELECT institution_kind FROM institution_profiles WHERE actor_id=?", (institution_actor_id,)).fetchone()
+    if former_actor_id is None or not kind or str(kind[0]) not in LINEAGE_KINDS:
+        return {}
+    out: dict[int, float] = {}
+    for r in conn.execute("SELECT actor_b_id,kin_kind FROM kinship_links WHERE actor_a_id=? AND legal_status IN ('recognized','former')",
+                          (former_actor_id,)):
+        rel = {"parent": "child", "adoptive_parent": "child"}.get(str(r[1]), str(r[1]))
+        if rel in _KIN_BONUS:
+            out[int(r[0])] = max(out.get(int(r[0]), 0.0), _KIN_BONUS[rel])
+    if not any(b == _KIN_BONUS["child"] for b in out.values()):
+        # The former head's adult children are members of the house by blood; reveal the eldest if still latent.
+        from .opening_family import reveal_latent_adult_child
+        child = reveal_latent_adult_child(conn, former_actor_id, reason="lineage succession",
+                                          institution_actor_id=institution_actor_id)
+        if child is not None:
+            out[child] = _KIN_BONUS["child"]
+    return out
+
+
+def _candidate_rows(conn: sqlite3.Connection, institution_actor_id: int, required_stage: str | None,
+                    former_actor_id: int | None = None) -> list[tuple[float, int, str]]:
+    kin_bonus = _lineage_kin_bonus(conn, institution_actor_id, former_actor_id)
     rows = conn.execute(
         """SELECT m.member_actor_id,m.role_text,m.joined_day,cp.current_stage
            FROM institution_memberships m
@@ -71,7 +100,7 @@ def _candidate_rows(conn: sqlite3.Connection, institution_actor_id: int, require
         # Stage matters strongly for martial heads; long-standing membership is a smaller continuity signal.
         joined = int(r["joined_day"]) if r["joined_day"] is not None else 0
         tenure_bonus = min(8.0, max(0.0, (day - joined) / 3650.0 * 8.0)) if joined <= day else 0.0
-        score = rank * 12.0 + bonus + tenure_bonus
+        score = rank * 12.0 + bonus + tenure_bonus + kin_bonus.get(aid, 0.0)
         out.append((score, aid, role))
     return sorted(out, key=lambda x: (-x[0], x[1]))
 
@@ -89,7 +118,8 @@ def resolve_authority_transition(conn: sqlite3.Connection, case_id: int, *, clea
         (iid, key),
     ).fetchone()
     required = str(slot["required_stage"]) if slot and slot["required_stage"] is not None else None
-    candidates = _candidate_rows(conn, iid, required)
+    former = int(case["trigger_actor_id"]) if case["trigger_actor_id"] is not None else None
+    candidates = _candidate_rows(conn, iid, required, former)
     day = _day(conn)
     if not candidates:
         conn.execute(

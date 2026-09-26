@@ -27,7 +27,8 @@ def main():
         assert c.execute("select count(*) from political_polities").fetchone()[0]==7
         assert c.execute("select count(*) from polity_government_actors").fetchone()[0]==7
         assert c.execute("select count(*) from political_relations").fetchone()[0]>=6
-        assert c.execute("select count(*) from conflict_channels").fetchone()[0]==5
+        # Six canon frontiers, including Thornward-Stormhollow's broken southern ridges (ROUTES-01).
+        assert c.execute("select count(*) from conflict_channels").fetchone()[0]==6
         active_uw=c.execute("select count(*) from underworld_organizations where status not in ('destroyed','merged')").fetchone()[0]
         linked_uw=c.execute("select count(*) from underworld_organizations where institution_actor_id is not null and status not in ('destroyed','merged')").fetchone()[0]
         assert active_uw==linked_uw and active_uw>0
@@ -44,6 +45,9 @@ def main():
         # Severe frontier incident: bounded diplomatic/retaliatory responses exist, campaign is physically gated.
         g=polity(c,'Greywood'); d=polity(c,'Dunmoor'); ch=c.execute("select * from conflict_channels where channel_key='greywood_dunmoor_westbrook_stoneford'").fetchone()
         actor=int(c.execute('select decision_actor_id from polity_government_actors where polity_id=?',(int(d['id']),)).fetchone()[0])
+        # The world is connected (ROUTES-01); cut the roads at both frontier towns so feasibility is the only variable.
+        c.execute("update travel_routes set status='closed' where from_location_id in (?,?) or to_location_id in (?,?)",
+                  (ch['location_a_id'],ch['location_b_id'],ch['location_a_id'],ch['location_b_id']))
         cur=c.execute("insert into conflict_incidents(channel_id,day,initiator_polity_id,target_polity_id,incident_kind,severity,location_id,status,response_state,metadata_json) values (?,?,?,?,?,?,?,'open','none','{}')",
                       (int(ch['id']),0,int(g['id']),int(d['id']),'border_raid',86,ch['location_a_id']))
         inc=int(cur.lastrowid)
@@ -63,8 +67,13 @@ def main():
         cur=c.execute("insert into conflict_incidents(channel_id,day,initiator_polity_id,target_polity_id,incident_kind,severity,location_id,status,response_state,metadata_json) values (?,?,?,?,?,?,?,'open','none','{}')",
                       (int(ch['id']),0,int(g['id']),int(d['id']),'border_raid',88,ch['location_a_id']))
         inc2=int(cur.lastrowid)
-        c.execute("insert into travel_routes(from_location_id,to_location_id,route_kind,base_days,capacity,reliability,seasonal_sensitivity,bidirectional,status,metadata_json) values (?,?,?,?,?,?,?,?,?,?)",
-                  (int(ch['location_b_id']),int(ch['location_a_id']),'road',4,70,80,1,1,'open',json.dumps({'test_only':True})))
+        direct=c.execute("select id from travel_routes where (from_location_id=? and to_location_id=?) or (from_location_id=? and to_location_id=?)",
+                         (ch['location_a_id'],ch['location_b_id'],ch['location_b_id'],ch['location_a_id'])).fetchone()
+        if direct:
+            c.execute("update travel_routes set status='open' where id=?",(int(direct[0]),))
+        else:
+            c.execute("insert into travel_routes(from_location_id,to_location_id,route_kind,base_days,capacity,reliability,seasonal_sensitivity,bidirectional,status,metadata_json) values (?,?,?,?,?,?,?,?,?,?)",
+                      (int(ch['location_b_id']),int(ch['location_a_id']),'road',4,70,80,1,1,'open',json.dumps({'test_only':True})))
         cs=generate_candidates(c,actor,'STRATEGIC',0,build_actor_context(c,actor,0)); camps=[x for x in cs if x.action_kind=='launch_limited_campaign' and x.payload.get('incident_id')==inc2]
         assert len(camps)==1
         before_other={(int(r['polity_a_id']),int(r['polity_b_id'])):(r['relation_kind'],float(r['stance']),float(r['trust']),float(r['tension']))

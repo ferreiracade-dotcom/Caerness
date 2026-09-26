@@ -29,8 +29,9 @@ def run():
     with connect() as c:
         c.execute("INSERT INTO locations(name,kind) VALUES ('Health Test','town')")
         loc=int(c.execute("SELECT id FROM locations WHERE name='Health Test'").fetchone()[0])
-        ordinary=_actor(c,'Ordinary Elder',-90*365,loc)
-        master=_actor(c,'Fifth Elder',-90*365,loc)
+        # Canon: a Fifth at 70 is still in the prime ("vigorous" even at 80); an ordinary 70-year-old is not.
+        ordinary=_actor(c,'Ordinary Elder',-70*365,loc)
+        master=_actor(c,'Fifth Elder',-70*365,loc)
         configure_health_profile(c,ordinary,longevity_class='ordinary')
         configure_health_profile(c,master,longevity_class='fifth')
         advance_connection(c,31)

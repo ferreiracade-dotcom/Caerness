@@ -79,7 +79,17 @@ def _split_name(name: str) -> tuple[list[str], str | None]:
     return titles, (tokens[0] if tokens else None)
 
 
-def _canon_text_sex(name: str, payload: dict[str, Any]) -> str | None:
+# World Bible pronouns for named people whose seed text is silent, read by hand (an automatic pronoun
+# scan misattributes too often).  Keyed by seed identity.
+WORLD_BIBLE_SEX = {
+    "person:voss-rannick": "male",  # "Kellan Rannick, 46 and Fifth, is his principal active family recipient"
+    "person:nall-reed": "male",     # "The huge order produces him through its own depth"
+}
+
+
+def _canon_text_sex(name: str, payload: dict[str, Any], source_key: str | None = None) -> str | None:
+    if source_key in WORLD_BIBLE_SEX:
+        return WORLD_BIBLE_SEX[source_key]
     titles, _ = _split_name(name)
     text = " ".join([*titles, str(payload.get("role") or ""), str(payload.get("public_identity_text") or "")]).lower()
     female, male = bool(_FEMALE_WORDS.search(text)), bool(_MALE_WORDS.search(text))
@@ -112,6 +122,25 @@ def _mantle_male_actor_ids(conn: sqlite3.Connection) -> set[int]:
     return ids
 
 
+def apply_world_bible_sex_corrections(conn: sqlite3.Connection) -> int:
+    """Correct weaker-evidence resolutions (given name, seeded roll) that World Bible text contradicts."""
+    fixed = 0
+    for key, sex in WORLD_BIBLE_SEX.items():
+        row = conn.execute(
+            """SELECT lp.actor_id FROM source_identity_map m JOIN actor_life_profiles lp ON lp.actor_id=m.entity_id
+               WHERE m.entity_kind='actor' AND m.source_key=? AND lp.demographic_sex<>?
+                 AND COALESCE(json_extract(lp.metadata_json,'$.demographic_sex_basis'),'') IN ('','given_name','seeded_roll')""",
+            (key, sex),
+        ).fetchone()
+        if row:
+            conn.execute(
+                "UPDATE actor_life_profiles SET demographic_sex=?,metadata_json=json_patch(metadata_json,?) WHERE actor_id=?",
+                (sex, json.dumps({"demographic_sex_basis": "canon_text", "demographic_sex_authority": "FAMILY02_SEX_RESOLUTION_V1"}), int(row[0])),
+            )
+            fixed += 1
+    return fixed
+
+
 def resolve_missing_demographic_sex(conn: sqlite3.Connection, *, actor_id: int | None = None) -> dict[str, int]:
     """Resolve named characters whose sex is NULL/'unspecified' (all, or just ``actor_id``); returns counts by basis."""
     seed_rows = {
@@ -134,7 +163,7 @@ def resolve_missing_demographic_sex(conn: sqlite3.Connection, *, actor_id: int |
     for aid, name in rows:
         aid, name = int(aid), str(name)
         source_key, payload = seed_rows.get(aid, (None, {}))
-        sex, basis = _canon_text_sex(name, payload) if source_key else None, "canon_text"
+        sex, basis = _canon_text_sex(name, payload, source_key) if source_key else None, "canon_text"
         if sex is None and aid in mantle:
             sex, basis = "male", "canon_rule"
         if sex is None:

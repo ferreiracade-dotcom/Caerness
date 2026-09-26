@@ -52,8 +52,11 @@ def run():
         assert c.execute("SELECT COUNT(*) FROM enterprise_business_profiles").fetchone()[0]>0
         # Unknown household finances are not literal zero-money budgets. Structural households must not
         # dissolve merely because canon deliberately leaves their economic state unquantified.
+        # (OPENING-01 adds the opening families' households; none may dissolve either.)
+        active_before=c.execute("SELECT COUNT(*) FROM households WHERE status='active'").fetchone()[0]
         process_due_civilian(c, 30)
-        assert c.execute("SELECT COUNT(*) FROM households WHERE status='active'").fetchone()[0]==8
+        assert c.execute("SELECT COUNT(*) FROM households WHERE status NOT IN ('active')").fetchone()[0]==0
+        assert c.execute("SELECT COUNT(*) FROM households WHERE status='active'").fetchone()[0]>=active_before>=8
         coverage_now={x['domain_key']:x for x in snapshot_coverage(c,None,phase='regression')}
         assert coverage_now['23_population_resolution']['eligible_count']==54
         if ENGINE_VERSION in {'0.35.0','0.36.0','0.37.0','0.38.0','0.39.0','0.40.0','0.41.0','0.42.0','0.43.0','0.44.0','0.45.0','0.46.0','0.47.0','0.56.0','0.58.0','0.59.0','0.60.0'}:

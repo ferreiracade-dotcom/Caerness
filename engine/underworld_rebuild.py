@@ -718,6 +718,9 @@ def _create_person(
          day + 365, day, day + 30, "active" if open_core and stage else "paused",
          _j({"generated_underworld": True, "not_canon": True})),
     )
+    # A pre-existing Stage sits somewhere inside that Stage, calibrated like any canon person's.
+    from .cultivation import calibrate_revealed_profile
+    calibrate_revealed_profile(conn, aid)
     conn.execute(
         """INSERT INTO simulation_profiles(actor_id,tier,cadence_days,volatility,agency,last_review_day,next_review_day,wake_threshold)
            VALUES (?,'DORMANT',180,.35,.65,?,?,3)""",

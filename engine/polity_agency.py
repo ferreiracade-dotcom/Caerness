@@ -106,6 +106,40 @@ def ensure_polity_government_actor(conn: sqlite3.Connection, polity_id: int) -> 
     return decision_actor
 
 
+# Opening diplomatic geometry. These are relationship-specific; no global aggression trait is inferred.
+OPENING_GEOMETRY = [
+    ("Greywood","Dunmoor","rival",-30,-15,58,"westbrook_stoneford","territorial",78,55,42,"hardline"),
+    ("Dunmoor","Underheaven Empire","neutral",-5,0,28,"great_power_caution","security",62,22,72,"cautious"),
+    ("Greywood","Windmere","friendly",45,38,12,"church_trade","trade",64,8,75,"cooperative"),
+    ("Windmere","Sunreach Confederacy","rival",-10,5,42,"maritime_competition","maritime",72,42,50,"competitive"),
+    ("Sunreach Confederacy","Underheaven Empire","neutral",-12,-5,38,"maritime_trade_wariness","trade",67,35,57,"cautious"),
+    ("Underheaven Empire","Thornward","rival",-25,-20,62,"armed_corridor","frontier",80,62,38,"hardline"),
+    # "Thornward–Stormhollow: Broken southern ridges. Tense local peace. Raids, forts, cattle, disputed valleys."
+    ("Stormhollow","Thornward","rival",-20,-15,50,"southern_ridges","security",68,50,42,"hardline"),
+    ]
+
+
+def ensure_missing_opening_geometry(conn: sqlite3.Connection) -> int:
+    """Add opening relations/issues that do not exist yet, without resetting any that a run has already moved."""
+    polities = {str(r[1]): int(r[0]) for r in conn.execute(
+        "SELECT p.id,a.name FROM political_polities p JOIN actors a ON a.id=p.institution_actor_id WHERE p.status!='dissolved'")}
+    added = 0
+    for an, bn, rkind, stance, trust, tension, key, ikind, interest, pressure, restraint, posture in OPENING_GEOMETRY:
+        if an not in polities or bn not in polities:
+            continue
+        a, b = polities[an], polities[bn]
+        if conn.execute("SELECT 1 FROM polity_issue_states WHERE polity_id=? AND other_polity_id=? AND issue_key=?", (a, b, key)).fetchone():
+            continue
+        lo, hi = sorted((a, b))
+        if not conn.execute("SELECT 1 FROM political_relations WHERE polity_a_id=? AND polity_b_id=?", (lo, hi)).fetchone():
+            _relation(conn, a, b, rkind, stance, trust, tension, f"Opening relationship geometry: {key}; relationship-specific state, not national personality.")
+        _issue(conn, a, b, key, ikind, interest, pressure, restraint, posture, {"opening_geometry": True})
+        reverse_posture = "cautious" if posture in {"hardline", "hostile"} else posture
+        _issue(conn, b, a, key, ikind, interest, max(0, pressure-5), min(100, restraint+5), reverse_posture, {"opening_geometry": True, "reverse_view": True})
+        added += 1
+    return added
+
+
 def activate_polity_agency(conn: sqlite3.Connection) -> dict[str,int]:
     polities = {str(r["institution_name"]):r for r in conn.execute("""SELECT p.*,a.name institution_name FROM political_polities p
                   JOIN actors a ON a.id=p.institution_actor_id WHERE p.status!='dissolved'""").fetchall()}
@@ -115,15 +149,7 @@ def activate_polity_agency(conn: sqlite3.Connection) -> dict[str,int]:
         had=conn.execute("SELECT 1 FROM polity_government_actors WHERE polity_id=?",(pid,)).fetchone()
         decision_actor=ensure_polity_government_actor(conn,pid)
         if not had: government_actors += 1
-    # Opening diplomatic geometry. These are relationship-specific; no global aggression trait is inferred.
-    specs=[
-        ("Greywood","Dunmoor","rival",-30,-15,58,"westbrook_stoneford","territorial",78,55,42,"hardline"),
-        ("Dunmoor","Underheaven Empire","neutral",-5,0,28,"great_power_caution","security",62,22,72,"cautious"),
-        ("Greywood","Windmere","friendly",45,38,12,"church_trade","trade",64,8,75,"cooperative"),
-        ("Windmere","Sunreach Confederacy","rival",-10,5,42,"maritime_competition","maritime",72,42,50,"competitive"),
-        ("Sunreach Confederacy","Underheaven Empire","neutral",-12,-5,38,"maritime_trade_wariness","trade",67,35,57,"cautious"),
-        ("Underheaven Empire","Thornward","rival",-25,-20,62,"armed_corridor","frontier",80,62,38,"hardline"),
-    ]
+    specs=OPENING_GEOMETRY
     relation_count=0; issue_count=0
     for an,bn,rkind,stance,trust,tension,key,ikind,interest,pressure,restraint,posture in specs:
         if an not in polities or bn not in polities: continue

@@ -24,8 +24,13 @@ def run():
             process_due_household_life(c,day);process_due_education(c,day)
         assert c.execute("SELECT COUNT(*) FROM actor_life_profiles WHERE family_formation_eligible=1 AND life_status='living'").fetchone()[0]>100
         assert c.execute("SELECT COUNT(*) FROM social_contact_links").fetchone()[0]>50
-        # Shared context creates familiarity, never an automatic union.
-        assert c.execute("SELECT COUNT(*) FROM household_unions WHERE started_day>0").fetchone()[0]==0
+        # Shared context creates familiarity, never an automatic union.  (OPENING-01: the only unions formed
+        # here are marriages into the unnamed population at the world's rates, never between contact partners.)
+        assert c.execute("""SELECT COUNT(*) FROM household_unions WHERE started_day>0
+                            AND COALESCE(json_extract(metadata_json,'$.basis'),'')<>'run_time_marriage'""").fetchone()[0]==0
+        assert c.execute("""SELECT COUNT(*) FROM household_unions u JOIN social_contact_links s
+                            ON s.actor_a_id=MIN(u.actor_a_id,u.actor_b_id) AND s.actor_b_id=MAX(u.actor_a_id,u.actor_b_id)
+                            WHERE u.started_day>0""").fetchone()[0]==0
         eligible_proposals=0
         for r in c.execute("SELECT id FROM actors WHERE actor_type='character' AND status='active'").fetchall():
             if any(x.kind=='propose_union' for x in domain_action_options(c,int(r[0]),'TRACKED',3650)):
@@ -47,7 +52,10 @@ def run():
         c.execute('UPDATE household_unions SET family_plan_json=? WHERE id=?',(json.dumps(plan),uid))
         c.execute('UPDATE world_state SET current_day=3650 WHERE id=1')
         out=process_due_household_life(c,3650)
-        assert out['births']==1,out
+        # Other (opening) families may also have a child due today; the fixture couple has exactly one.
+        assert out['births']>=1,out
+        from engine.household_life import _existing_children
+        assert len(_existing_children(c,a,b))==1
         child=c.execute("SELECT a.id,lp.demographic_sex FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.name LIKE '[Latent child] Generational Fixture Household%' ESCAPE '\\'").fetchone()
         if not child:
             child=c.execute("SELECT a.id,lp.demographic_sex FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.subtype='child' ORDER BY a.id DESC LIMIT 1").fetchone()

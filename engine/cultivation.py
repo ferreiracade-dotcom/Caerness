@@ -380,6 +380,151 @@ def _opening_depth_calibration(conn: sqlite3.Connection, actor_id: int, stage: s
     # current age or cross-sectional Stage averages. observed_stage_days starts at zero.
     return round(vessel,4),round(real,4),0
 
+# World Bible population anchors: ~4.79M Open-Core ("Veinborn": 35% in the Hearth, ~8% outside) and
+# ~2.05M staged cultivators -> about 60% of Hearth Veinborn and 37% outside are staged.  "Many Open-Core
+# people never become staged cultivators": training costs money, time, teachers and household labour.
+# Serious martial society is "roughly 70-75% male" from unequal training investment, "not a hard female
+# Stage ceiling", so staging and uptake are sex-weighted (about two-thirds male overall).
+VEINBORN_SHARE = {True: 0.35, False: 0.08}
+STAGED_SHARE = {True: 0.60, False: 0.37}
+SEX_TRAINING_WEIGHT = {'male': 1.3, 'female': 0.7}
+
+
+def location_in_hearth(conn: sqlite3.Connection, location_id: int | None) -> bool:
+    names={str(r['name']) for r in _location_chain(conn,location_id)}
+    return 'Hearthlands' in names or bool(names & HEARTH_SETTLEMENTS)
+
+
+def staged_probability(sex: str | None, hearth: bool, martial_household: bool) -> float:
+    """Chance a Veinborn adult became a staged cultivator; a martial family invests more."""
+    return min(0.95, STAGED_SHARE[bool(hearth)] * SEX_TRAINING_WEIGHT.get(str(sex), 1.0) * (1.3 if martial_household else 1.0))
+
+
+def inherited_open_core_probability(open_parents: int, hearth: bool) -> float:
+    """"Open-Core inheritance is primarily hereditary": martial families produce Open-Core children with
+    striking reliability; spontaneous Open Cores in families with no martial history remain uncommon."""
+    if open_parents >= 2: return 0.80
+    if open_parents == 1: return 0.45
+    return 0.12 if hearth else 0.03
+
+
+def assign_birth_core(conn: sqlite3.Connection, child_id: int, parent_ids: list[int], location_id: int | None) -> str:
+    """Give a newborn their Core by heredity.  Veinborn children are unstaged until someone trains them."""
+    opens=0
+    for pid in parent_ids:
+        r=conn.execute("SELECT core_state FROM cultivation_profiles WHERE actor_id=?",(int(pid),)).fetchone()
+        opens+=1 if r and r[0]=='Open-Core' else 0
+    seed=int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
+    rng=random.Random(seed*1000003 + int(child_id)*31337 + 88001)
+    open_core=rng.random()<inherited_open_core_probability(opens,location_in_hearth(conn,location_id))
+    core='Open-Core' if open_core else 'Closed-Core'
+    day=_day(conn)
+    conn.execute("""INSERT OR IGNORE INTO cultivation_profiles(actor_id,core_state,current_stage,active,vessel_adaptation,realization_integration,
+                    training_effort,resource_access,teacher_support,injury_constraint,realization_aptitude,vessel_aptitude,next_realization_check_day,
+                    core_capacity,current_reserve,last_review_day,next_review_day,status,metadata_json)
+                    VALUES (?,?,NULL,0,?,?,0,40,0,0,?,?,?,?,0,?,?,'paused',?)""",
+                 (child_id,core,STAGE_ENTRY_FACTORS[None][0] if open_core else 0,STAGE_ENTRY_FACTORS[None][1] if open_core else 0,
+                  _realization_aptitude(conn,child_id),_vessel_aptitude(conn,child_id),day+365,CORE_CAPACITY[None] if open_core else 0,
+                  day,day+365,json.dumps({'authority':'HEREDITARY_BIRTH_CORE','open_parents':opens,'unstaged_until_trained':True})))
+    return core
+
+
+_UPTAKE_GRID_DAYS = 30
+
+
+def _uptake_age_rate(age: float) -> float:
+    # Most who cultivate begin young; adult beginnings are real but rare.
+    if age < 12: return 0.0
+    if age < 18: return 0.20
+    if age < 25: return 0.08
+    if age < 35: return 0.035
+    if age < 50: return 0.012
+    return 0.003
+
+
+def resolve_cultivation_uptake(conn: sqlite3.Connection, day: int) -> int:
+    """Veinborn people who are not training may take up (or return to) cultivation at plausible rates.
+
+    Applies to everyone alike: canon people, revealed spouses and children, background and underworld
+    people.  The annual chance rises with youth, a martial connection (institution, or a practising spouse
+    or parent), the family's means (training costs money and household labour), the Hearth's denser
+    cultivation, and visible early responsiveness; it is sex-weighted as canon's training investment is.
+    Runs on the fixed 30-day grid so results do not depend on how a run is stepped.
+    """
+    if day <= 0 or day % _UPTAKE_GRID_DAYS:
+        return 0
+    from .health import _family_means
+    seed=int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
+    rows=conn.execute("""SELECT cp.actor_id,cp.current_stage,cp.vessel_aptitude,lp.birth_day,lp.demographic_sex,
+                                COALESCE(a.home_location_id,a.current_location_id) loc
+                         FROM cultivation_profiles cp JOIN actors a ON a.id=cp.actor_id JOIN actor_life_profiles lp ON lp.actor_id=a.id
+                         WHERE cp.core_state='Open-Core' AND cp.active=0 AND cp.status='paused' AND a.status='active'
+                           AND a.actor_type='character' AND lp.life_status='living' AND lp.birth_day IS NOT NULL
+                         ORDER BY cp.actor_id""").fetchall()
+    started=0
+    for r in rows:
+        aid=int(r['actor_id']); age=(day-int(r['birth_day']))/365.0
+        base=_uptake_age_rate(age)
+        if base<=0: continue
+        member=conn.execute("""SELECT 1 FROM institution_memberships im JOIN institution_profiles ip ON ip.actor_id=im.institution_actor_id
+                               WHERE im.member_actor_id=? AND im.status='active' LIMIT 1""",(aid,)).fetchone() is not None
+        kin_practising=conn.execute("""SELECT 1 FROM kinship_links k JOIN cultivation_profiles c2 ON c2.actor_id=k.actor_b_id
+                                       WHERE k.actor_a_id=? AND k.kin_kind IN ('spouse','child','parent','sibling') AND k.legal_status<>'former'
+                                         AND c2.active=1 LIMIT 1""",(aid,)).fetchone() is not None
+        family=[aid]+[int(x[0]) for x in conn.execute(
+            "SELECT actor_b_id FROM kinship_links WHERE actor_a_id=? AND kin_kind IN ('child','spouse') AND legal_status<>'former'",(aid,))]
+        means,_=_family_means(conn,family)
+        hearth=location_in_hearth(conn,int(r['loc']) if r['loc'] is not None else None)
+        annual=(base*SEX_TRAINING_WEIGHT.get(str(r['demographic_sex']),1.0)*(1.3 if hearth else 0.8)
+                *(2.0 if member else 1.0)*(1.4 if kin_practising else 1.0)*(0.5+means/100.0)
+                *(0.7+0.3*float(r['vessel_aptitude'] or 1.0)))
+        prob=1.0-(1.0-min(0.6,annual))**(_UPTAKE_GRID_DAYS/365.0)
+        if random.Random(seed*1000003+aid*7717+day*13+99001).random()>=prob:
+            continue
+        resource=min(90.0,25.0+0.5*means); teacher=45.0 if member else (30.0 if kin_practising else 20.0)
+        conn.execute("""UPDATE cultivation_profiles SET active=1,status='active',training_effort=55,resource_access=?,teacher_support=?,
+                        next_review_day=?,metadata_json=json_patch(metadata_json,?) WHERE actor_id=?""",
+                     (resource,teacher,day+30,json.dumps({'training_uptake_day':day,'training_uptake_basis':{
+                         'age':round(age,1),'martial_institution':member,'practising_kin':kin_practising,'family_means':round(means),'hearth':hearth}}),aid))
+        _history(conn,aid,'resume',f"Took up cultivation training (age {int(age)}).",stage_before=r['current_stage'],
+                 stage_after=r['current_stage'],metadata={'training_uptake':True},day=day)
+        started+=1
+    return started
+
+
+def calibrate_revealed_profile(conn: sqlite3.Connection, actor_id: int, *, active: bool | None = None,
+                               resource_access: float | None = None) -> None:
+    """Give a revealed pre-existing person the same opening calibration canon people receive.
+
+    A person who already held a Stage before being described is somewhere inside it, not at its entry
+    point, and has their own aptitude.  Whether they are *training* is separate (``active``; None keeps the
+    caller's choice): nobody is pushed into cultivation to create activity.
+    """
+    r=conn.execute("SELECT core_state,current_stage,active,training_effort,resource_access FROM cultivation_profiles WHERE actor_id=?",(actor_id,)).fetchone()
+    if not r or r['core_state']!='Open-Core':
+        return
+    effort=float(r['training_effort'])
+    if active is None:
+        active=bool(r['active'])
+    elif bool(active)!=bool(r['active']):
+        effort=60.0 if active else 0.0
+    if resource_access is None:
+        resource_access=float(r['resource_access'])
+    stage=r['current_stage'] if r['current_stage'] in STAGES else None
+    aptitude=_realization_aptitude(conn,actor_id); vessel_aptitude=_vessel_aptitude(conn,actor_id)
+    vessel,real,_=_opening_depth_calibration(conn,actor_id,stage,None,vessel_aptitude,aptitude)
+    day=int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+    cap=CORE_CAPACITY[stage]
+    first_check=int(_next_check_day(conn,actor_id,day,stage,failed=False)) if stage!='Sixth' else day+3650
+    conn.execute("""UPDATE cultivation_profiles SET active=?,vessel_adaptation=?,realization_integration=?,training_effort=?,
+                    resource_access=?,realization_aptitude=?,vessel_aptitude=?,next_realization_check_day=?,core_capacity=?,
+                    current_reserve=?,status=?,next_review_day=?,metadata_json=json_patch(metadata_json,?) WHERE actor_id=?""",
+                 (1 if active else 0,vessel,real,effort,resource_access,aptitude,vessel_aptitude,first_check,cap,
+                  cap*0.60 if active else 0.0,'active' if active else 'paused',day+30,
+                  json.dumps({'opening_factor_basis':'revealed pre-existing person; same within-Stage calibration as canon people',
+                              'training_active':bool(active)}),actor_id))
+
+
 def seed_cultivation_from_current_source(conn: sqlite3.Connection) -> dict[str,int]:
     """Create authoritative runtime profiles from current source facts plus explicit neutral calibration.
 
@@ -460,9 +605,13 @@ def _growth_rates(stage: str | None) -> tuple[float,float]:
 
 
 def _realization_aptitude(conn: sqlite3.Connection, actor_id: int) -> float:
+    """How readily practice turns into martial understanding: ordinary human variation, so most people
+    cluster near 1.0 with rare slow and rare exceptional tails (about 1 in 100 above 1.65 or below 0.6;
+    the schema caps it at 1.75).
+    Independent of Vessel aptitude ("an extraordinary Vessel and mediocre martial understanding")."""
     seed=int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
     rng=random.Random(seed*1000003 + int(actor_id)*17011 + 420042)
-    return round(0.55 + rng.random()*0.90, 6)
+    return round(max(0.45,min(1.75,math.exp(rng.gauss(0.0,0.215)))), 6)
 
 
 def _next_check_day(conn: sqlite3.Connection, actor_id: int, day: int, stage: str | None, *, failed: bool=False) -> int:
