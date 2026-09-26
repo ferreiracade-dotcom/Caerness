@@ -136,8 +136,8 @@ def _upsert_knowledge(
            VALUES (?,?,?,?,?,?,?)""",
         (knowledge_id, source_kind, source_id, channel_id, location_id, learned_day, notes),
     )
-    if source_id is not None and source_kind in {"event", "rumour", "knowledge", "channel"}:
-        _information_link(conn, learned_day, source_kind, int(source_id), "knowledge", knowledge_id, "learned_as")
+    # PERF-01: no rumour->knowledge "learned_as" link; knowledge_provenance above already records the
+    # source, and nothing read the link (it was a quarter of all rows written per rumour heard).
 
     # BELIEF-01 compatibility bridge: legacy knowledge remains readable, but new actor
     # reasoning should consume provenance-bearing claims/evidence/beliefs.

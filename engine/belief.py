@@ -100,6 +100,34 @@ def add_claim_evidence(
     return int(cur.lastrowid)
 
 
+def find_or_add_claim_evidence(
+    conn: sqlite3.Connection,
+    claim_id: int,
+    *,
+    evidence_kind: str,
+    summary: str,
+    source_id: int | None = None,
+    polarity: str = "supports",
+    reliability: float = 0.7,
+    salience: float = 0.6,
+    location_id: int | None = None,
+    available_from_day: int | None = None,
+) -> int:
+    """Shared evidence: everyone who meets the same source for the same claim at the same place, with the
+    same reliability, holds the same evidence row.  Who holds it lives in actor_evidence_access (PERF-01)."""
+    row = conn.execute(
+        """SELECT id FROM claim_evidence WHERE claim_id=? AND evidence_kind=? AND source_id IS ? AND location_id IS ?
+           AND polarity=? AND reliability=? AND source_actor_id IS NULL ORDER BY id LIMIT 1""",
+        (claim_id, evidence_kind, source_id, location_id, polarity, _clamp(reliability)),
+    ).fetchone()
+    if row:
+        return int(row[0])
+    return add_claim_evidence(
+        conn, claim_id, evidence_kind=evidence_kind, summary=summary, source_id=source_id, polarity=polarity,
+        reliability=reliability, salience=salience, location_id=location_id, available_from_day=available_from_day,
+    )
+
+
 def grant_evidence(
     conn: sqlite3.Connection,
     actor_id: int,
@@ -182,7 +210,9 @@ def recompute_actor_belief(conn: sqlite3.Connection, actor_id: int, claim_id: in
              updated_day=excluded.updated_day,correction_count=excluded.correction_count,basis_json=excluded.basis_json""",
         (actor_id, claim_id, stance, confidence, first_received, day, correction_count, json.dumps(evidence_ids)),
     )
-    if changed:
+    # A first acquisition is recorded by actor_beliefs.first_received_day; only a change to an existing
+    # belief is a revision (PERF-01: one revision row per rumour heard was pure duplication).
+    if changed and old is not None:
         conn.execute(
             """INSERT INTO belief_revisions(actor_id,claim_id,day,old_stance,new_stance,old_confidence,new_confidence,reason,evidence_ids_json)
                VALUES (?,?,?,?,?,?,?,?,?)""",
@@ -232,10 +262,11 @@ def mirror_legacy_knowledge(
         source_kind="legacy_knowledge",
     )
     # One evidence row per legacy knowledge/provenance acquisition; source_id can repeat legitimately.
-    evidence_id = add_claim_evidence(
+    # Shared evidence: the knowledge row (and its provenance) is the hearer's; the evidence is common.
+    evidence_id = find_or_add_claim_evidence(
         conn, claim_id, evidence_kind=source_kind, source_id=source_id, summary=belief_text,
         polarity="supports", reliability=confidence, salience=max(0.35, confidence), location_id=location_id,
-        available_from_day=learned_day, metadata={"legacy_knowledge_id": knowledge_id, "notes": notes or ""},
+        available_from_day=learned_day,
     )
     observe_claim(
         conn, actor_id, claim_id, evidence_id, received_day=learned_day,
