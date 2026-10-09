@@ -61,6 +61,16 @@ Small models misreport their own output, which is why step 2 has a text backstop
 - The injected violation test: a forced narrator response containing an unbacked promise is caught and regenerated.
 - Packet size for three speakers stays within the local model's context budget (measure on `pc` first, then phone).
 
+### 3.5 Status: step 1 implemented (2026-10-09)
+
+`engine/speaker_cards.py`, wired into `build_scene_packet` as `speakers`, with `player.visible_standing`; test `tests/speech01_speaker_cards_test.py`.
+
+- **Done:** up to three likely speakers (being named in the request outranks everything; then open dealings, history and familiarity; then people whose work is to address strangers). Each card carries public role and visible standing, familiarity and demeanour toward the followed character, the last three shared-history entries, open dealings (the only commitments they may voice), temperament as portrayal cues, mannerisms and a speech habit. About 425 tokens for three cards.
+- **Personality and mannerisms (owner, 2026-10-09):** temperament comes from `actor_drives` where it exists. Mannerisms and speech are resolved on first look from role- and age-fitting pools, recorded in `character_embodiment` (`development_json.revealed`), and identical in every later scene and in any fresh run with the same world seed.
+- **Found and fixed:** seed role texts mix public positions with the seed's private judgements ("Generational anomaly", "Strong mature Third", "Good fundamentals"); about 312 characters carry one as their `subtype`, which the narrator received for every present person. `public_role()` keeps positions and professions and drops judgements and Stage labels, for speaker cards and for `present_actors`.
+- **Found, not fixed (needs an owner decision):** 464 of 784 named characters have no `actor_drives` row, so the decision engine treats them all as exactly average (`decisions._drive_row`). Cards show such people a stable seeded temperament (`seeded_drives`, flagged `seeded_preview`), but their decisions still use 0.5. Opening resolution should write the same seeded draw to `actor_drives` so behaviour and portrayal agree; that changes simulation behaviour for those people and needs its own regression and fingerprint run.
+- **Not yet:** engine-chosen speech acts (3.2), the commitment check on narration (3.3), organisation colours and emblems for visible standing, and recording texture the narrator itself establishes.
+
 ## 4. SIFT-01: story sifting
 
 ### 4.1 Patterns

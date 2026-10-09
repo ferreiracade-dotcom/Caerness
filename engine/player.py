@@ -17,6 +17,7 @@ from .education import education_context
 from .presence import actors_plausibly_present
 from .belief import actor_belief_envelope
 from .scene_brief import NARRATOR_EXCLUDED_PARTS, build_scene_brief
+from .speaker_cards import SPEAKER_RULE, _role_text, build_speaker_cards, public_role
 
 
 def set_player(conn: sqlite3.Connection, actor_id: int, campaign_name: str = "Campaign 01") -> None:
@@ -229,6 +230,8 @@ def build_scene_packet(
     query = _canon_query(player, request_text, present, known_events)
     chunks = search_canon(query, limit=canon_limit, conn=conn, exclude_prefixes=NARRATOR_EXCLUDED_PARTS)
     scene_brief = build_scene_brief(conn, location_id, [int(a["id"]) for a in present if a["actor_type"] == "character"])
+    speakers = build_speaker_cards(conn, player_actor_id, present, request_text or "", day)
+    visible_standing = _role_text(conn, player_actor_id, player["subtype"])[1]
 
     packet: dict[str, Any] = {
         "world": {
@@ -242,6 +245,7 @@ def build_scene_packet(
             "actor_type": player["actor_type"],
             "subtype": player["subtype"],
             **_player_state_detail(conn, player_actor_id),
+            "visible_standing": visible_standing,
         },
         "location": {
             "id": location_id,
@@ -250,7 +254,10 @@ def build_scene_packet(
             "political_owner": player["political_owner"],
             "notes": player["location_notes"],
         },
-        "present_actors": present,
+        # Seed role texts can carry private judgements ("Generational anomaly"); the narrator sees public roles only.
+        "present_actors": [{**a, "subtype": public_role(a["subtype"])} if a["actor_type"] == "character" else a
+                           for a in present],
+        "speakers": speakers,
         "known_events": known_events,
         "known_rumours": known_rumours,
         "beliefs": actor_belief_envelope(conn, player_actor_id, limit=50),
@@ -276,6 +283,7 @@ def build_scene_packet(
         "narrator_rules": [
             "The player is the camera focus, not the world's causal center.",
             "Narrate only from the player's accessible knowledge plus retrieved canon.",
+            SPEAKER_RULE,
             "Apply scene_brief in every scene: its reading_lenses govern how standing, formality and Presence are shown (through recognition and reaction, not statement), and its cultures govern the manners, dress and customs of this place and of people present from elsewhere.",
             "Treat rumours as beliefs, not verified truth, unless the same fact is separately known.",
             "Use the beliefs envelope as actor-relative claims grounded in accessible evidence; confidence is not objective truth, and hidden authoritative truth links are not exposed here.",
@@ -321,6 +329,9 @@ def render_scene_brief(packet: dict[str, Any]) -> str:
     ]
     if packet.get("request"):
         lines.append(f"Player request: {packet['request']}")
+    speakers = packet.get("speakers") or []
+    if speakers:
+        lines.append("Likely speakers: " + "; ".join(f"{c['name']} ({c.get('role') or 'no public role'})" for c in speakers))
     cultures = (packet.get("scene_brief") or {}).get("cultures") or []
     if cultures:
         lines.append("Culture briefs: " + "; ".join(f"{c['name']} ({c['applies']})" for c in cultures))
