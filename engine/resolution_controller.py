@@ -245,8 +245,11 @@ def _materialize_latent_person(conn: sqlite3.Connection, latent: sqlite3.Row, da
     # A Stage held before crystallization sits somewhere inside that Stage, like any canon person's.
     from .cultivation import calibrate_revealed_profile
     calibrate_revealed_profile(conn,aid)
-    conn.execute("INSERT INTO actor_drives(actor_id,aggression,risk_tolerance,patience,loyalty,ambition,pragmatism) VALUES (?,?,?,?,?,?,?)",
-                 (aid,.35+(aid%17)/100,.45+(aid%13)/100,.55+(aid%11)/100,.55,.62,.68))
+    # The shared stable draw (DRIVES-01), not a near-constant formula: everyone revealed is a distinct person.
+    from .drives import DRIVES, seeded_drives
+    dv = seeded_drives(conn, aid)
+    conn.execute(f"INSERT INTO actor_drives(actor_id,{','.join(DRIVES)},basis) VALUES (?,?,?,?,?,?,?,'seeded_draw')",
+                 (aid, *(dv[d] for d in DRIVES)))
     from .health import ensure_health_profile
     ensure_health_profile(conn,aid,metadata={'latent_entity_id':int(latent['id']),'generated_from_existing_population':True})
     from .presence import ensure_presence_profile

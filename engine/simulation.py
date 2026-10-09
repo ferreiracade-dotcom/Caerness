@@ -7,6 +7,7 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Iterable
 
+from .drives import ensure_character_drives
 from .relationships import ensure_reciprocal_relationship
 from .db import connect, init_db
 from .decisions import decide_actor
@@ -632,6 +633,8 @@ def advance_connection_registry(conn: sqlite3.Connection, days: int) -> list[sql
         conn.execute("UPDATE world_state SET current_day=?, updated_at=CURRENT_TIMESTAMP WHERE id=1", (checkpoint,))
         _expire_forced_tiers(conn, checkpoint)
         _expire_agreements(conn, checkpoint)
+        # People created since the last checkpoint (births, reveals, promotions) get drives before anyone decides.
+        ensure_character_drives(conn)
 
         for clock in conn.execute(
             "SELECT * FROM clocks WHERE status='pending' AND due_day<=? ORDER BY due_day,id", (checkpoint,)
@@ -659,6 +662,9 @@ def advance_connection_registry(conn: sqlite3.Connection, days: int) -> list[sql
     # processes advance on their owning actor's review cadence; world/domain owners
     # advance on their registered due dates; expiries now advertise exact deadlines.
     conn.execute("UPDATE world_state SET current_day=?, updated_at=CURRENT_TIMESTAMP WHERE id=1", (end,))
+    # Not a causal checkpoint: drives depend only on world seed and person, and every checkpoint fills them before
+    # anyone decides, so filling here only makes newcomers' drives visible between advances.
+    ensure_character_drives(conn)
 
     return conn.execute(
         "SELECT * FROM events WHERE day>? AND day<=? ORDER BY day,id", (start_day, end)

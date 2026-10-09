@@ -8,10 +8,8 @@ stand toward the followed character (familiarity, demeanour, shared history), th
 (the only commitments they may voice), and how they come across: temperament as portrayal cues and a few
 mannerisms and speech habits.
 
-Temperament comes from the person's drives (actor_drives) when they have them. Otherwise it is drawn once from
-a stable seeded preview, bell-shaped around the middle, and the card says so: the decision engine still treats
-such people as average (decisions._drive_row) until opening resolution writes their drives, which should use
-the same draw (see seeded_drives). Mannerisms and speech habits are texture: resolved on first look (DESIGN
+Temperament comes from the person's drives (actor_drives), the same values every decision uses; people
+created without drives get a stable seeded draw (engine/drives.py, schema 109). Mannerisms and speech habits are texture: resolved on first look (DESIGN
 §15.1) from pools fitting the person's role and age, recorded in character_embodiment, and never redrawn.
 """
 from __future__ import annotations
@@ -22,9 +20,11 @@ import re
 import sqlite3
 from typing import Any, Iterable
 
+from .drives import seeded_drives, standing_out
+
 DRIVES = ("aggression", "risk_tolerance", "patience", "loyalty", "ambition", "pragmatism")
 
-# Portrayal cues for clearly high or low drives; shown through behaviour, never stated as traits.
+# Portrayal cues for drives that stand out from the population; shown through behaviour, never stated as traits.
 _CUES = {
     "aggression": ("slow to anger; steps around confrontation", "quick to take offence; meets a challenge head-on"),
     "risk_tolerance": ("cautious; wants guarantees before committing", "bold; at ease with danger"),
@@ -106,20 +106,15 @@ def _loads(raw: str | None) -> dict[str, Any]:
         return {}
 
 
-def seeded_drives(conn: sqlite3.Connection, actor_id: int) -> dict[str, float]:
-    """A stable, bell-shaped draw per drive (mean of three uniforms). Opening resolution should use this same
-    draw when it writes actor_drives for people who have none, so portrayal and decisions agree."""
-    seed = _world_seed(conn)
-    return {d: round(sum(_fraction("drives", seed, int(actor_id), d, i) for i in range(3)) / 3.0, 3) for d in DRIVES}
-
-
 def temperament(conn: sqlite3.Connection, actor_id: int) -> dict[str, Any]:
     row = conn.execute("SELECT * FROM actor_drives WHERE actor_id=?", (int(actor_id),)).fetchone()
     if row:
-        drives, basis = {d: float(row[d]) for d in DRIVES}, "actor_drives"
+        basis = "seeded_draw" if "basis" in row.keys() and row["basis"] == "seeded_draw" else "actor_drives"
+        drives = {d: float(row[d]) for d in DRIVES}
     else:
-        drives, basis = seeded_drives(conn, actor_id), "seeded_preview"
-    cues = [(_CUES[d][1] if v >= 0.68 else _CUES[d][0]) for d, v in drives.items() if v >= 0.68 or v <= 0.32]
+        # Only between a character's creation and the next checkpoint (drives.ensure_character_drives).
+        drives, basis = seeded_drives(conn, actor_id), "seeded_draw"
+    cues = [_CUES[d][1] if sign > 0 else _CUES[d][0] for d, sign in standing_out(drives).items()]
     return {"cues": cues or ["even-tempered; nothing in excess"], "basis": basis}
 
 

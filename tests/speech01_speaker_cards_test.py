@@ -13,7 +13,8 @@ if str(ROOT) not in sys.path:
 
 from engine.db import connect, init_db, reset_db
 from engine.player import build_scene_packet, set_player
-from engine.speaker_cards import SPEAKER_RULE, build_speaker_cards, likely_speakers, seeded_drives, temperament
+from engine.drives import seeded_drives
+from engine.speaker_cards import SPEAKER_RULE, build_speaker_cards, likely_speakers, temperament
 
 
 def _world(conn):
@@ -40,7 +41,7 @@ def _world(conn):
                     VALUES (0,?,?,'interaction','Mother Vey lent Ren the license money against her better judgement')""",
                  (steward, player))
     conn.execute("INSERT INTO actor_drives(actor_id,aggression,risk_tolerance,patience,loyalty,ambition,pragmatism) "
-                 "VALUES (?,0.2,0.3,0.9,0.85,0.5,0.5)", (steward,))
+                 "VALUES (?,0.3,0.4,0.8,0.75,0.55,0.6)", (steward,))
     conn.execute("UPDATE world_state SET current_day=0 WHERE id=1")
     return loc, player, steward, keeper, stranger
 
@@ -91,9 +92,9 @@ def run():
         for a in build_scene_packet(conn, "I look around")["present_actors"]:
             assert "anomaly" not in str(a.get("subtype") or "").lower(), a
 
-        # People without drives get a stable seeded preview, flagged as such.
+        # Someone created since the last checkpoint is shown their seeded draw, the same one decisions will use.
         tam = cards["[SPEECH] Tam Oarsby"]
-        assert tam["temperament"]["basis"] == "seeded_preview"
+        assert tam["temperament"]["basis"] == "seeded_draw"
         assert seeded_drives(conn, keeper) == seeded_drives(conn, keeper)
         assert temperament(conn, keeper) == tam["temperament"]
 

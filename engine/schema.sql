@@ -263,7 +263,9 @@ CREATE TABLE IF NOT EXISTS actor_drives (
     patience REAL NOT NULL DEFAULT 0.5 CHECK (patience BETWEEN 0 AND 1),
     loyalty REAL NOT NULL DEFAULT 0.5 CHECK (loyalty BETWEEN 0 AND 1),
     ambition REAL NOT NULL DEFAULT 0.5 CHECK (ambition BETWEEN 0 AND 1),
-    pragmatism REAL NOT NULL DEFAULT 0.5 CHECK (pragmatism BETWEEN 0 AND 1)
+    pragmatism REAL NOT NULL DEFAULT 0.5 CHECK (pragmatism BETWEEN 0 AND 1),
+    -- NULL: written by the owning system; 'seeded_draw': filled by drives.ensure_character_drives (schema 109).
+    basis TEXT
 );
 
 CREATE TABLE IF NOT EXISTS decisions (

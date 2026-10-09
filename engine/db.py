@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 108
+SCHEMA_VERSION = 109
 
 
 def _running_tests() -> bool:
@@ -4470,6 +4470,23 @@ def _migration_108(conn: sqlite3.Connection) -> None:
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA108')")
 
 
+def _migration_109(conn: sqlite3.Connection) -> None:
+    """DRIVES-01: characters without drives get their seeded draw instead of being read as exactly average; at day 0,
+    drives copied from the old near-constant crystallization formula are redrawn."""
+    if _has_table(conn, "actor_drives"):
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(actor_drives)")}
+        if "basis" not in cols:
+            conn.execute("ALTER TABLE actor_drives ADD COLUMN basis TEXT")
+        if _has_table(conn, "world_state") and conn.execute("SELECT 1 FROM world_state WHERE id=1").fetchone():
+            from .drives import ensure_character_drives, redraw_copied_drives
+            redraw_copied_drives(conn)
+            ensure_character_drives(conn)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('drives01_version','1')")
+    conn.execute("""INSERT OR IGNORE INTO acceptance_epochs(acceptance_key,schema_version,status,evidence_json)
+                    VALUES ('ONEYEAR_DRIVES01_SCHEMA109',109,'pending','{}')""")
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_DRIVES01_SCHEMA109')")
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4579,6 +4596,7 @@ _MIGRATIONS: dict[int, Migration] = {
     106: ("worldhist01a_social_org_succession", "WORLDHIST-01A REL-02 social memory, ORGPRESS-01 event projection and SUCCESSION-02 authority transitions", _migration_106),
     107: ("family02_sex_resolution", "FAMILY-02 demographic-sex resolution for named characters (canon text, canon rule, given name, seeded roll)", _migration_107),
     108: ("opening01_family_relationships", "OPENING-01 relationship start dates, opening family life (marriage, widowhood, spouses, latent children) and opening relationships", _migration_108),
+    109: ("drives01_seeded_drives", "DRIVES-01 seeded drives for characters without them (basis column)", _migration_109),
 }
 
 
