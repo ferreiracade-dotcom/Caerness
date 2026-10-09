@@ -5,7 +5,7 @@ import math
 import random
 import sqlite3
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 from .interactions import adjust_relationship, create_interaction, relationship_view
 from .motives import derive_actor_motives
@@ -144,9 +144,21 @@ def build_actor_context(conn: sqlite3.Connection, actor_id: int, day: int, canon
            ON CONFLICT(actor_id) DO UPDATE SET generated_day=excluded.generated_day,
              canon_query=excluded.canon_query,canon_chunk_ids_json=excluded.canon_chunk_ids_json,
              context_json=excluded.context_json,updated_at=CURRENT_TIMESTAMP""",
-        (actor_id, day, "DEC01 actor-safe envelope", "[]", json.dumps(context, default=str)),
+        (actor_id, day, "DEC01 actor-safe envelope", "[]", json.dumps(_inspectable_context(context), default=str)),
     )
     return context
+
+
+def _inspectable_context(context: dict[str, Any]) -> dict[str, Any]:
+    """The persisted inspection copy keeps each belief's claim, stance and confidence but counts its evidence
+    instead of copying it (PERF-01: the full envelope was ~70 KB per person, the largest table in a long run)."""
+    slim = dict(context)
+    slim["beliefs"] = [
+        {**{k: v for k, v in b.items() if k != "evidence"}, "evidence_count": len(b.get("evidence") or [])}
+        if isinstance(b, dict) else b
+        for b in (context.get("beliefs") or [])
+    ]
+    return slim
 
 def _resource_strength(resources: dict[str, float]) -> float:
     if not resources:

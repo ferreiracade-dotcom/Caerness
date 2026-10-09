@@ -346,7 +346,7 @@ def _schedule_from_location(
                 hop_count + 1,
             ),
         )
-        _information_link(conn, day, "rumour", rumour_id, "transmission", int(cur.lastrowid), "spread_via")
+        # PERF-01: no write-only rumour->transmission "spread_via" link.
 
 
 def seed_rumours_from_events(conn: sqlite3.Connection, through_day: int) -> int:

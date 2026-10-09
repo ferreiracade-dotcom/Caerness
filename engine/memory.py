@@ -19,6 +19,9 @@ import sqlite3
 MEMORY_GRID_DAYS = 30
 RETENTION_DAYS = {1: 365, 2: 540, 3: 1095}
 MIN_RETENTION_DAYS = int(min(RETENTION_DAYS.values()) * 0.7)
+# News goes stale: a rumour that has reached nowhere new for this long stops circulating (great events longer).
+NEWS_STALE_DAYS = {1: 180, 2: 180, 3: 365, 4: 730, 5: 730}
+DELIVERED_TRANSMISSION_KEEP_DAYS = 90
 
 
 def _stable_fraction(*parts: object) -> float:
@@ -92,7 +95,35 @@ def _forget_all(conn: sqlite3.Connection, forget: list[tuple[int, int, str, int]
     return len(forget), int(collected)
 
 
+def fade_stale_news(conn: sqlite3.Connection, day: int) -> dict[str, int]:
+    """Rumours that stopped moving stop circulating; their per-place spread rows and transmissions go.
+    The rumour row and its event stay (history); memories of it follow memory fading."""
+    stale = []
+    for rid, sev, last in conn.execute(
+        """SELECT r.id,COALESCE(e.severity,1),MAX(r.created_day,COALESCE(MAX(rl.last_updated_day),r.created_day))
+           FROM rumours r LEFT JOIN events e ON e.id=r.truth_event_id
+           LEFT JOIN rumour_locations rl ON rl.rumour_id=r.id
+           WHERE r.status='circulating' GROUP BY r.id"""
+    ):
+        if int(last) + NEWS_STALE_DAYS[max(1, min(5, int(sev)))] <= day:
+            stale.append((int(rid),))
+    if stale:
+        conn.executemany("UPDATE rumours SET status='faded' WHERE id=?", stale)
+        conn.executemany("DELETE FROM rumour_locations WHERE rumour_id=?", stale)
+        conn.executemany("DELETE FROM rumour_transmissions WHERE rumour_id=?", stale)
+    pruned = conn.execute("DELETE FROM rumour_transmissions WHERE status='delivered' AND due_day<?",
+                          (day - DELIVERED_TRANSMISSION_KEEP_DAYS,)).rowcount
+    return {"news_faded": len(stale), "transmissions_pruned": int(pruned)}
+
+
 def process_due_memory(conn: sqlite3.Connection, day: int) -> dict[str, int]:
+    day = int(day)
+    news = fade_stale_news(conn, day)
+    result = forget_minor_rumours(conn, day)
+    return {**news, **result}
+
+
+def forget_minor_rumours(conn: sqlite3.Connection, day: int) -> dict[str, int]:
     day = int(day)
     player = conn.execute("SELECT player_actor_id FROM player_state WHERE id=1").fetchone()
     player_id = int(player[0]) if player and player[0] is not None else -1

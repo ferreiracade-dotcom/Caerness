@@ -46,6 +46,12 @@ def _knows(c, actor, rid):
     return c.execute("SELECT 1 FROM knowledge WHERE knower_actor_id=? AND fact_key=?", (actor, f"rumour:{rid}")).fetchone() is not None
 
 
+def _rearrive(c, rid, loc, day):
+    """The same story comes round again (news fading had retired it)."""
+    c.execute("UPDATE rumours SET status='circulating' WHERE id=?", (rid,))
+    c.execute("INSERT OR REPLACE INTO rumour_locations(rumour_id,location_id,first_arrived_day,last_updated_day,prevalence,fidelity) VALUES (?,?,?,?,1.0,0.8)", (rid, loc, day, day))
+
+
 def _state(c):
     return sorted(tuple(r) for r in c.execute("SELECT knower_actor_id,fact_key FROM knowledge ORDER BY 1,2"))
 
@@ -76,6 +82,7 @@ def run():
     assert c.execute("SELECT 1 FROM claim_evidence WHERE claim_id IN (%s)" % ",".join("?" * len(minor_claims)), minor_claims).fetchone()
     # A forgotten rumour can be heard again.
     from engine.information import expose_actor_to_rumour
+    _rearrive(c, r["minor"], loc, 601)
     assert expose_actor_to_rumour(c, r["minor"], ids["bystander"], 601, loc, force=True) is not None
     monthly = _state(c)
     c.close()
@@ -84,6 +91,7 @@ def run():
     c2, ids2, r2, loc2 = _world(tmp / "b.db")
     process_due_memory(c2, 600)
     assert not _knows(c2, ids2["bystander"], r2["minor"]) and _knows(c2, ids2["target"], r2["minor"])
+    _rearrive(c2, r2["minor"], loc2, 601)
     expose_actor_to_rumour(c2, r2["minor"], ids2["bystander"], 601, loc2, force=True)
     assert _state(c2) == monthly
     c2.close()
