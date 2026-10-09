@@ -383,6 +383,15 @@ The simulation should not treat tragedy as a broken campaign. A dead player char
 - It belongs to whoever the camera is following at that moment. If the character dies anyway and the camera passes to a successor (see "Narrative-camera succession" below), the successor has it from then on; the dead character keeps nothing.
 - It is a deliberate exception to "named characters get no special treatment". It exists because the story being told is about someone who lived long enough to be followed. It is recorded on each resolution where it applied, so it is visible, never silent.
 
+**The followed character's fortune of encounter** (owner, 2026-10-09). This is the opening sentence of this section ("lucky about what it gets to see") made concrete:
+
+> **When it is plausible that the followed character meets someone of renown in a scene, it is more likely than not that they do.**
+
+- *Plausible* means the person could really be there that day: they live, work, train, trade or travel through that place, by their own presence profile. Nobody is pulled from elsewhere, and nobody's own plans change to make the meeting happen.
+- The tilt is per scene, not per person: if any renowned people could plausibly be about, the chance that at least one of them is met rises above even, chosen among them by how likely each already was. A great city full of famous residents therefore yields a notable encounter on most visits, not a crowd of celebrities on every street.
+- Meeting is not mattering. The renowned person is there on their own business. The fortune never makes them notice, like, help or care about the followed character (§27.1); whatever follows comes from the ordinary rules.
+- Once met, they were there: presence for that day becomes fact like any other, with the tilt recorded where it applied.
+
 ### 27.4 Experienced World Principle
 
 > **The World Bible establishes what is true. Play determines what becomes known.**
