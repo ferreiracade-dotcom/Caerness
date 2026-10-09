@@ -59,6 +59,7 @@ def build_narration_envelope(
         "narration_rules": [
             "The player is the camera focus, not the world's causal center.",
             "Narrate only information available in scene_after plus the explicit resolved player action.",
+            "Apply scene_after.scene_brief: show standing through recognition and reaction as its reading_lenses describe, and keep manners, dress and custom true to its cultures.",
             "Do not reveal off-screen events merely because the engine simulated them.",
             "Do not make NPCs care about the player unless persisted relationships, goals, events, or direct circumstances justify it.",
             "Do not create permanent state in prose. The database has already decided what changed.",

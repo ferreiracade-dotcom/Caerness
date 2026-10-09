@@ -16,6 +16,7 @@ from .ecology import ecology_context
 from .education import education_context
 from .presence import actors_plausibly_present
 from .belief import actor_belief_envelope
+from .scene_brief import NARRATOR_EXCLUDED_PARTS, build_scene_brief
 
 
 def set_player(conn: sqlite3.Connection, actor_id: int, campaign_name: str = "Campaign 01") -> None:
@@ -226,7 +227,8 @@ def build_scene_packet(
     political_context = politics_summary(conn)
     education_state = education_context(conn, player_actor_id)
     query = _canon_query(player, request_text, present, known_events)
-    chunks = search_canon(query, limit=canon_limit, conn=conn)
+    chunks = search_canon(query, limit=canon_limit, conn=conn, exclude_prefixes=NARRATOR_EXCLUDED_PARTS)
+    scene_brief = build_scene_brief(conn, location_id, [int(a["id"]) for a in present if a["actor_type"] == "character"])
 
     packet: dict[str, Any] = {
         "world": {
@@ -264,6 +266,7 @@ def build_scene_packet(
         "political_context": political_context,
         "education_context": education_state,
         "matters": matters,
+        "scene_brief": scene_brief,
         "canon": [
             {"chunk_id": c.id, "heading": c.heading_path, "text": c.text, "source": c.source}
             for c in chunks
@@ -273,6 +276,7 @@ def build_scene_packet(
         "narrator_rules": [
             "The player is the camera focus, not the world's causal center.",
             "Narrate only from the player's accessible knowledge plus retrieved canon.",
+            "Apply scene_brief in every scene: its reading_lenses govern how standing, formality and Presence are shown (through recognition and reaction, not statement), and its cultures govern the manners, dress and customs of this place and of people present from elsewhere.",
             "Treat rumours as beliefs, not verified truth, unless the same fact is separately known.",
             "Use the beliefs envelope as actor-relative claims grounded in accessible evidence; confidence is not objective truth, and hidden authoritative truth links are not exposed here.",
             "Do not reveal other actors' hidden goals, pressures, drives, resources, or private relationships.",
@@ -317,6 +321,9 @@ def render_scene_brief(packet: dict[str, Any]) -> str:
     ]
     if packet.get("request"):
         lines.append(f"Player request: {packet['request']}")
+    cultures = (packet.get("scene_brief") or {}).get("cultures") or []
+    if cultures:
+        lines.append("Culture briefs: " + "; ".join(f"{c['name']} ({c['applies']})" for c in cultures))
 
     present = packet.get("present_actors") or []
     lines.append("\nVisible/present actors:")

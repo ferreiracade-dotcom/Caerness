@@ -221,9 +221,13 @@ def _fts_query(query: str) -> str:
     return " OR ".join(f'"{t.replace(chr(34), "")}"' for t in terms[:18])
 
 
-def _search_canon_with_conn(conn: sqlite3.Connection, query: str, limit: int = 6) -> list[CanonChunk]:
+def _search_canon_with_conn(conn: sqlite3.Connection, query: str, limit: int = 6,
+                            exclude_prefixes: tuple[str, ...] = ()) -> list[CanonChunk]:
     if not query.strip():
         return []
+    # Heading prefixes a caller must never receive (the narrator excludes engine-only and open Parts).
+    excluded = "".join(" AND c.heading_path NOT LIKE ?" for _ in exclude_prefixes)
+    excluded_args = tuple(f"{p}%" for p in exclude_prefixes)
     fts = _ensure_fts(conn)
     rows = []
     if fts:
@@ -235,9 +239,9 @@ def _search_canon_with_conn(conn: sqlite3.Connection, query: str, limit: int = 6
                        FROM canon_chunks_fts
                        JOIN canon_chunks c ON c.id=canon_chunks_fts.chunk_id
                        JOIN canon_sources s ON s.id=c.source_id
-                       WHERE canon_chunks_fts MATCH ?
+                       WHERE canon_chunks_fts MATCH ?""" + excluded + """
                        ORDER BY rank LIMIT ?""",
-                    (q, limit),
+                    (q, *excluded_args, limit),
                 ).fetchall()
             except sqlite3.OperationalError:
                 rows = []
@@ -245,7 +249,8 @@ def _search_canon_with_conn(conn: sqlite3.Connection, query: str, limit: int = 6
         terms = {t.lower() for t in re.findall(r"[A-Za-z0-9][A-Za-z0-9'_-]*", query) if len(t) > 2}
         candidates = conn.execute(
             """SELECT c.id,c.heading_path,c.text,s.display_name
-               FROM canon_chunks c JOIN canon_sources s ON s.id=c.source_id"""
+               FROM canon_chunks c JOIN canon_sources s ON s.id=c.source_id WHERE 1=1""" + excluded,
+            excluded_args,
         ).fetchall()
         scored = []
         for row in candidates:
@@ -271,10 +276,11 @@ def _search_canon_with_conn(conn: sqlite3.Connection, query: str, limit: int = 6
     ]
 
 
-def search_canon(query: str, limit: int = 6, conn: sqlite3.Connection | None = None) -> list[CanonChunk]:
+def search_canon(query: str, limit: int = 6, conn: sqlite3.Connection | None = None,
+                 exclude_prefixes: tuple[str, ...] = ()) -> list[CanonChunk]:
     """Search indexed canon. Pass the active simulation connection to avoid nested SQLite locks."""
     if conn is not None:
-        return _search_canon_with_conn(conn, query, limit)
+        return _search_canon_with_conn(conn, query, limit, exclude_prefixes)
 
     init_db()
     with connect() as owned:
@@ -282,7 +288,7 @@ def search_canon(query: str, limit: int = 6, conn: sqlite3.Connection | None = N
     if not has_chunks and DEFAULT_CANON.exists():
         index_canon(DEFAULT_CANON)
     with connect() as owned:
-        return _search_canon_with_conn(owned, query, limit)
+        return _search_canon_with_conn(owned, query, limit, exclude_prefixes)
 
 def get_chunks(ids: list[int]) -> list[CanonChunk]:
     if not ids:

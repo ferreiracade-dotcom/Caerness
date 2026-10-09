@@ -1,0 +1,111 @@
+{
+  "_about": "SCENE-01 scene briefs: short narrator briefs condensed from named World Bible sections. The World Bible remains the authority; these are derived. Each brief lists its source headings (as indexed in canon_chunks) and a digest of their text; engine.scene_brief.brief_staleness() reports any brief whose sources changed so it can be rewritten. See docs/research/2026-10-09-world-bible-narrator-coverage.md.",
+  "lenses": {
+    "title": "Reading any scene in Caerness",
+    "text": "1. Recognition precedes introduction. People and institutions of consequence are recognisable by silhouette, dress, bearing, sound, or one distinctive object before they are named; the mark belongs to their own life, not a template. The greater someone's standing, the less they announce it: other people's reactions do the announcing, and a room reveals a visitor before the visitor speaks. Show standing through recognition and reaction; do not state it.\n2. Reactions vary by observer. A child stares until corrected; a merchant becomes attentive; a young First is visibly impressed; a seasoned Third gives exactly the proper bow; a rival offers the minimum courtesy required; a great master may only incline the head, which can mean more than a room standing. Who does not become formal (an old friend, a former master, a grandmother) is equally revealing.\n3. Formality is the response to power. Every society organised around rank has a grammar of conduct, distance, address, deference and precedence, keyed differently: the Churn to cultivation, lineage and martial standing; the kingdoms to office and birth; Underheaven to sacred sovereignty, most absolutely of all; looser on the Long Road and in open ports. Because the baseline is rigid, every entrance, deference, refusal to defer and deliberate breach of form reads loudly and has consequences.\n4. Standing has several axes that do not collapse into one: personal power (Stage, mastery, reputation); institutional station (Head, Elder, officer, teacher, official, host); relationship (family, master and disciple, senior and junior, friend, rival); propriety (host and guest, ceremony, challenge, mourning); character (honour, fear, infamy, reliability, generosity, cruelty); and faction. Power does not create office: a wandering Fifth does not become governor by entering a town, and a lower-Stage Clan Head remains Head. Yet nobody pretends great personal power is socially irrelevant.\n5. Same bows, different room. Etiquette does not prove admiration: the same bow can carry respect, obligation, fear, hatred concealed by propriety, calculation, or the wish to survive the encounter. Fear makes people more exact, not less: voices quiet, titles become exact, bows deepen, service becomes painfully correct. Ordinary people do not confront someone who could kill them; they comply, avoid provocation, and alert the proper authority afterward. Familiarity softens formality; public settings reactivate station.\n6. Presence is felt, not measured. A cultivated Vessel is perceptible, altered by Stage, reserve, control, suppression, method, demeanour and circumstance. It is not a fear spell or a Stage scanner; the deepest masters can be quieter than lesser ones, so social reaction often reveals more than raw Presence.\n7. Culture is not alignment. Institutions shape behaviour, not character. No faction, House, religion, Stage or Core state tells you whether a person is good. Some people are simply better or worse than others, but no institution is morally uniform.",
+    "sources": [
+      "Part Zero — Canon Status, Design Rules, and How to Read the Bible > How to read the world: two lenses",
+      "Part Three — The Hearth and the Churn > The Churn and ordinary authority",
+      "Part Three — The Hearth and the Churn > Recognition and social presence",
+      "Part Three — The Hearth and the Churn > Formality, familiarity, and etiquette",
+      "Part Three — The Hearth and the Churn > Fear, respect, and the same bow",
+      "Part Three — The Hearth and the Churn > Culture is not alignment",
+      "Part Two — The Vein: Anatomy, Cultivation, Stages, and Current Ecology > Presence"
+    ],
+    "digest": "0291a2ccedd5cdda"
+  },
+  "cultures": {
+    "hearth": {
+      "name": "The Hearth",
+      "depth": "full",
+      "text": "Who is who. Veinborn (born able to cultivate), cultivator, martial artist, Churned (belonging to the Hearth's own martial society) and Hearthfolk (culturally of the Hearth) are separate questions and come apart in practice. Martial arts sit between sport, aristocracy, celebrity, history, folklore and religion: ordinary people know the famous Houses and masters, follow the Convergence, argue about fighters and styles, and children imitate famous martial artists.\nFormal by default. The bow substitutes for the contest. Its depth, timing, who initiates it and whether it is returned communicate the relationship; there are no Stage-specific angles. Offices, family names, 'Master', 'Elder', 'Head' and 'Teacher' keep distance; personal names imply familiarity, and an overly familiar form can itself be an insult. People rise for an elder, an honoured guest, an officeholder or a famous master as context requires, not mechanically for strength. Seating balances host, guest, age, office, relationship and martial standing. In formal circumstances food, drink, rest and immediate needs come before business. A childhood friend addresses the Clan Head properly before the assembled House and uses the old nickname in private.\nFamily. You belong to people before you belong only to yourself. Parents hold real authority and filial respect continues into adulthood. Age has dignity independent of martial ability: a Closed-Core grandmother can tell her Breached grandson he is too thin. A younger sibling can surpass an elder martially and still acknowledge the elder. Great Houses magnify household politics into public matters.\nMasters and disciples. Most martial artists have teachers; far fewer have a true personal master. A master owes real instruction, correction and responsibility; a disciple owes respect and continuing loyalty without becoming property. Surpassing a master does not reverse the bond: a Fifth still bows deeply to the Third who taught them. Leaving or repudiating a true discipleship is culturally serious.\nDress. One visual tradition, East Asian in silhouette and medieval-European in status display. House colours, sigils, cuts, embroidery, belts, mantles, clasps, sleeve treatments and hair ornaments signal affiliation and office; fabric, dye, ornament and workmanship signal wealth and occasion more reliably than Stage. A junior disciple and an Elder of one tradition look related, not uniformed. Long Road dress is freer and practical. A great master can dress plainly and still overwhelm a room once recognised. Finery announces standing; it does not create it.\nThe dead. Every household keeps the seat of its dead: a named memorial at the house-shrine, where incense is offered and the dead are told of births, marriages, deaths and departures; a Great House keeps an ancestral hall. Mourning is fixed by exact kinship (depth, length, dress, conduct), and mourning wrongly is a failure everyone can read. Desecrating graves is exceptionally serious; returning an enemy's body shows respect without regret. Violent death is an ordinary possibility of Churned life, met with ritual, not indifference. The Hearth honours no gods of harvest or road. Some also hold a Vigil conviction about the First Current (Ascension, Waiting or Silence); most hold none.\nOne civilization, regional accents. Speech, food, architecture and dress details vary. Concord communities emphasise ordered, disciplined power; Undertow spheres are easier with overt personal hierarchy; Unsworn territories keep distinctive local ways. These are pressures, not personality templates.\nOutsiders are marked by accent, dress, food, etiquette and ignorance of local institutions, not by ancestry. A strong foreigner can still misread a title, a seat or a House insignia. Responses run from affectionate teasing through provincial snobbery to suspicion, sharpest where a foreigner might carry a lineage's deepest teaching out of the Churn.\nChallenges differ by Current. Concord is most formal: notice, witnesses, recognised venues, disapproval of bullying for prestige. Undertow is rougher; dominance tests and grudge fights are tolerated. Unsworn varies by institution. Hollow has little shared etiquette. The Long Road runs the full spectrum.",
+      "sources": [
+        "Part Three — The Hearth and the Churn > Hearthfolk, martial artists, and the Churn",
+        "Part Three — The Hearth and the Churn > Formality, familiarity, and etiquette",
+        "Part Three — The Hearth and the Churn > Family and household",
+        "Part Three — The Hearth and the Churn > Masters, teachers, and personal disciples",
+        "Part Three — The Hearth and the Churn > Dress and visible status",
+        "Part Three — The Hearth and the Churn > Ancestors, mourning, and the dead",
+        "Part Three — The Hearth and the Churn > Death in a martial civilization",
+        "Part Three — The Hearth and the Churn > Regional variation",
+        "Part Three — The Hearth and the Churn > Outsiders and acculturation",
+        "Part Three — The Hearth and the Churn > Popular martial culture and communal life",
+        "Part Three — The Hearth and the Churn > Challenge culture differs by Current",
+        "Part Twelve — Religion Across Caerness > The Hearth Rites and the Vigil"
+      ],
+      "digest": "e74f4468e7eb8a99"
+    },
+    "underheaven": {
+      "name": "Underheaven beyond the Hearth",
+      "depth": "minimal",
+      "text": "Everyday emphasis: household duty, bureaucracy, office, state ritual, urban-rural hierarchy, service families, examinations and tutoring where relevant, great infrastructure, and strong distinctions between the imperial centre and provincial life. Formality here is keyed to sacred sovereignty, the most absolute in Caerness.",
+      "sources": [
+        "Part Twenty-One — Society and Everyday Life > Regional social expressions"
+      ],
+      "digest": "cb5d242e66a4efce"
+    },
+    "dunmoor": {
+      "name": "Dunmoor",
+      "depth": "minimal",
+      "text": "Everyday emphasis: land, household, horses, retainer networks, aristocratic service, village and estate life, military obligation, a household pantheon, and the material authority of old landed families. Formality is keyed to office and birth.",
+      "sources": [
+        "Part Twenty-One — Society and Everyday Life > Regional social expressions"
+      ],
+      "digest": "cb5d242e66a4efce"
+    },
+    "windmere": {
+      "name": "Windmere",
+      "depth": "minimal",
+      "text": "Everyday emphasis: port mobility, merchant households, ships, charters, foreign contact, rented urban life, professional movement, mixed communities, and wealth expressed through access rather than only land. Formality is keyed to office and birth, looser in the open ports.",
+      "sources": [
+        "Part Twenty-One — Society and Everyday Life > Regional social expressions"
+      ],
+      "digest": "cb5d242e66a4efce"
+    },
+    "greywood": {
+      "name": "Greywood",
+      "depth": "minimal",
+      "text": "Everyday emphasis: parish and cathedral networks, monarchy, households shaped by Witness teaching, charity, textual culture, guild and estate life, and stronger public moral language around marriage and sexuality. Formality is keyed to office and birth.",
+      "sources": [
+        "Part Twenty-One — Society and Everyday Life > Regional social expressions"
+      ],
+      "digest": "cb5d242e66a4efce"
+    },
+    "sunreach": {
+      "name": "Sunreach",
+      "depth": "minimal",
+      "text": "Everyday emphasis: city identity, apprenticeship, guild and merchant households, civic law, commercial mobility, rival urban cultures, and unusually visible self-made wealth. Formality is keyed to office and birth.",
+      "sources": [
+        "Part Twenty-One — Society and Everyday Life > Regional social expressions"
+      ],
+      "digest": "cb5d242e66a4efce"
+    },
+    "thornward": {
+      "name": "Thornward",
+      "depth": "minimal",
+      "text": "Everyday emphasis: regional Ward identity, frontier households, garrison and ranger life, difficult travel, local obligation, fortified settlements, seasonal musters, and strong practical self-sufficiency. Formality is keyed to office and birth.",
+      "sources": [
+        "Part Twenty-One — Society and Everyday Life > Regional social expressions"
+      ],
+      "digest": "cb5d242e66a4efce"
+    },
+    "stormhollow": {
+      "name": "Stormhollow",
+      "depth": "minimal",
+      "text": "Everyday emphasis: highland and industrial households, mines and foundries, labour dependency, strong local lordship, fortified towns, worker cultures, resource-company pressure, and harsh weather. Formality is keyed to office and birth.",
+      "sources": [
+        "Part Twenty-One — Society and Everyday Life > Regional social expressions"
+      ],
+      "digest": "cb5d242e66a4efce"
+    }
+  },
+  "owner_culture": {
+    "Underheaven Empire": "underheaven",
+    "Dunmoor": "dunmoor",
+    "Windmere": "windmere",
+    "Greywood": "greywood",
+    "Sunreach Confederacy": "sunreach",
+    "Thornward": "thornward",
+    "Stormhollow": "stormhollow"
+  }
+}

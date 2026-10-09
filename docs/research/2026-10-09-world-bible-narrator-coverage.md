@@ -100,3 +100,22 @@ The third job is where most remaining "the narrator forgot" problems will come f
 1. Owner review of SCENE-01 (above) alongside the story-layer spec.
 2. Write the class A lenses brief and the first culture brief (Hearth) as data, and measure with the probe.
 3. Tag class C situations for Parts 3, 10, 21 and 22 first; they cover the play styles the owner named (cultivator, underworld boss, soldier, merchant, noble).
+
+## 8. Step 1 implemented (2026-10-09)
+
+- `canon/scene_briefs.json`: the reading-lenses brief (Part 0 two lenses; Part 3 recognition, formality, the same bow, the axes of standing, culture is not alignment; Part 2 Presence), a full Hearth culture brief (Part 3 culture sections; Part 12 Hearth Rites and the Vigil), and minimal briefs for Underheaven beyond the Hearth and the six kingdoms (their rows of Part 21 "Regional social expressions", plus each society's formality key from the Part 0 lens). Each brief records the digest of its sources.
+- `engine/scene_brief.py`: place culture (the existing Hearth membership rule, else the nearest political owner), visitors' cultures from their home place, brief assembly, and `brief_staleness()` / `stamp_digests()`.
+- `engine/player.py`: every scene packet carries `scene_brief`; narrator canon search excludes Part Zero, Part 24, Part 25 and the title chunk. Narrator rules in the scene packet and the narration envelope tell the narrator to apply it.
+- `tests/scene01_scene_brief_test.py`: culture mapping, visitors, exclusion (proved non-vacuous), staleness, and the full packet.
+
+Measured with `tools/canon_delivery_probe.py` (same 400 scenes, seed 7):
+
+| | Before | After |
+|---|---|---|
+| Scenes with the reading lenses | 0 | **400** |
+| Scenes with a culture brief for the place | 0 | **400** (Hearth 243, Underheaven 57, Windmere 31, Dunmoor 25, Stormhollow 20, Sunreach 11, Thornward 8, Greywood 5) |
+| Search slots on Part 24 registry / Part 25 open questions / Part Zero | 866 / 75 / 0 | **0 / 0 / 0** |
+
+Size: lenses 458 words, Hearth brief 630 words, kingdom briefs about 30–40 words each; a Hearth scene gains about 1,450 tokens, comparable to the six search passages. Fine on the laptop; the phone will want a compact variant.
+
+Still open, in the order of section 5: full-depth briefs for Underheaven and each kingdom (Parts 13–19, 21–23); situation rules (class C); entity cards by link (class D); the protagonist's visible standing; and the World Bible state the engine lacks (section 4). Note also that the docx misfiles the text of "Power, authority, and etiquette" under the next heading, "The Churn and ordinary authority"; the lenses brief cites it there.
