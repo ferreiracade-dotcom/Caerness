@@ -8,7 +8,7 @@ A persistent low-fantasy world simulation (a murim-style martial world plus West
 
 - Engine: Python + SQLite (`engine/`), schema migrations in `engine/db.py` (`SCHEMA_VERSION`), schema in `engine/schema.sql` (re-applied idempotently by `init_db`, so new `IF NOT EXISTS` indexes reach old saves).
 - Canon: `canon/world_bible_current.docx` (the World Bible) and seeds in `canon/` and `game/seeds/`.
-- Packaged opening world: `data/caerness.db` (schema 108, story day 0, 132 travel routes).
+- Packaged opening world: `data/caerness.db` (schema 109, story day 0, 132 travel routes; every character has drives).
 - Design: `DESIGN.md`. Specs and plans for current work: `docs/superpowers/specs/`, `docs/superpowers/plans/`.
 
 ## 2. Where work stands (2026-10-09)
@@ -17,7 +17,7 @@ Branches: **`master` is current.** `worldhist01a-stage1` and `pop01-phase0` are 
 
 | Stream | State | Where |
 |---|---|---|
-| Schema 108: opening family history, named/child mortality, Veinborn & training realism, ROUTES-01 travel graph, conflict fixes | Done, 125/125 suite | `WORLDHIST01A_SCHEMA108_OPENING_HISTORY_MORTALITY_CULTIVATION_2026-09-23.md`, README §Schema 108 |
+| Schema 108: opening family history, named/child mortality, Veinborn & training realism, ROUTES-01 travel graph, conflict fixes | Done (suite now 128/128 at schema 109) | `WORLDHIST01A_SCHEMA108_OPENING_HISTORY_MORTALITY_CULTIVATION_2026-09-23.md`, README §Schema 108 |
 | **PERF-01**: long-run speed and save size so the game can live on a phone | **In progress** (below) | `docs/superpowers/plans/2026-09-26-perf01-speed-and-storage.md` |
 | **POP-01** Phase 0: phone runtime + benchmark tooling | Tooling done; **phone run not done** (owner will not install until PERF-01 targets are met) | `docs/superpowers/plans/2026-09-26-pop01-phase0-phone-benchmark.md`, `ANDROID_ONEPLUS12.md` |
 | **POP-01** population tiers (background → notable → named, weighted simulants, promotion by distinction/significance/relevance, summit renewal ladder, Sixth depth bands) | Designed and approved; not started | `docs/superpowers/specs/2026-09-26-population-tiers-design.md` |
