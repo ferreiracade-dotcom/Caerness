@@ -153,10 +153,13 @@ def _inspectable_context(context: dict[str, Any]) -> dict[str, Any]:
     """The persisted inspection copy keeps each belief's claim, stance and confidence but counts its evidence
     instead of copying it (PERF-01: the full envelope was ~70 KB per person, the largest table in a long run)."""
     slim = dict(context)
+    beliefs = list(context.get("beliefs") or [])
+    slim["belief_count"] = len(beliefs)
+    # Most recent ten only (the envelope is ordered oldest-first); the full set is recomputable on demand.
     slim["beliefs"] = [
         {**{k: v for k, v in b.items() if k != "evidence"}, "evidence_count": len(b.get("evidence") or [])}
         if isinstance(b, dict) else b
-        for b in (context.get("beliefs") or [])
+        for b in beliefs[-10:]
     ]
     return slim
 

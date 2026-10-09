@@ -116,11 +116,30 @@ def fade_stale_news(conn: sqlite3.Connection, day: int) -> dict[str, int]:
     return {"news_faded": len(stale), "transmissions_pruned": int(pruned)}
 
 
+AUDIT_KEEP_DAYS = 365
+
+
+def prune_audit_logs(conn: sqlite3.Connection, day: int) -> dict[str, int]:
+    """Diagnostic trails keep about a year; history (events, decisions, breakthroughs, relationships) is kept.
+    Every reader of these trails looks at the same day or an entity's latest row, which is always kept."""
+    cutoff = int(day) - AUDIT_KEEP_DAYS
+    n = 0
+    n += conn.execute("DELETE FROM decision_evaluations WHERE day<?", (cutoff,)).rowcount  # candidate audits cascade
+    n += conn.execute("DELETE FROM mortality_audit WHERE day<?", (cutoff,)).rowcount
+    n += conn.execute("DELETE FROM regional_growth_snapshots WHERE day<?", (cutoff,)).rowcount
+    n += conn.execute("DELETE FROM cultivation_history WHERE history_kind='practice_review' AND day<?", (cutoff,)).rowcount
+    n += conn.execute(
+        """DELETE FROM resolution_reviews WHERE day<? AND id NOT IN
+           (SELECT MAX(id) FROM resolution_reviews GROUP BY entity_kind,entity_id)""", (cutoff,)).rowcount
+    return {"audit_rows_pruned": int(n)}
+
+
 def process_due_memory(conn: sqlite3.Connection, day: int) -> dict[str, int]:
     day = int(day)
     news = fade_stale_news(conn, day)
     result = forget_minor_rumours(conn, day)
-    return {**news, **result}
+    audit = prune_audit_logs(conn, day)
+    return {**news, **result, **audit}
 
 
 def forget_minor_rumours(conn: sqlite3.Connection, day: int) -> dict[str, int]:
