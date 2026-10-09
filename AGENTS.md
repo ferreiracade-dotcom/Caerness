@@ -22,6 +22,7 @@ Branches: **`master` is current.** `worldhist01a-stage1` and `pop01-phase0` are 
 | **POP-01** Phase 0: phone runtime + benchmark tooling | Tooling done; **phone run not done** (owner will not install until PERF-01 targets are met) | `docs/superpowers/plans/2026-09-26-pop01-phase0-phone-benchmark.md`, `ANDROID_ONEPLUS12.md` |
 | **POP-01** population tiers (background → notable → named, weighted simulants, promotion by distinction/significance/relevance, summit renewal ladder, Sixth depth bands) | Designed and approved; not started | `docs/superpowers/specs/2026-09-26-population-tiers-design.md` |
 | **Story layer** (SPEECH-01 intent-grounded NPC speech, SIFT-01 story sifting, RUMOUR-02 false/garbled rumours, DEAL-01 goal-valued bargaining) and an audit of earlier external-code adoptions | Proposed; awaiting owner review; not started | `docs/superpowers/specs/2026-10-09-story-layer-design.md`, `docs/research/2026-10-09-story-layer-sources-and-adoption-audit.md` |
+| **World Bible to narrator coverage** (SCENE-01: assemble each scene's brief from lenses, culture, situation and entity links instead of keyword search; measured: etiquette/dress/culture sections reach the narrator ~0 times in 400 scenes, 36% of slots go to Part 24 registry data, Part 25 open questions leak) | Proposed; awaiting owner review | `docs/research/2026-10-09-world-bible-narrator-coverage.md`, `tools/canon_delivery_probe.py` |
 
 ### PERF-01 numbers (PC, `tools/bench_sim.py` / `tools/run_years.py`)
 
