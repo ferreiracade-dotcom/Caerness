@@ -21,6 +21,7 @@ Branches: **`master` is current.** `worldhist01a-stage1` and `pop01-phase0` are 
 | **PERF-01**: long-run speed and save size so the game can live on a phone | **In progress** (below) | `docs/superpowers/plans/2026-09-26-perf01-speed-and-storage.md` |
 | **POP-01** Phase 0: phone runtime + benchmark tooling | Tooling done; **phone run not done** (owner will not install until PERF-01 targets are met) | `docs/superpowers/plans/2026-09-26-pop01-phase0-phone-benchmark.md`, `ANDROID_ONEPLUS12.md` |
 | **POP-01** population tiers (background → notable → named, weighted simulants, promotion by distinction/significance/relevance, summit renewal ladder, Sixth depth bands) | Designed and approved; not started | `docs/superpowers/specs/2026-09-26-population-tiers-design.md` |
+| **Story layer** (SPEECH-01 intent-grounded NPC speech, SIFT-01 story sifting, RUMOUR-02 false/garbled rumours, DEAL-01 goal-valued bargaining) and an audit of earlier external-code adoptions | Proposed; awaiting owner review; not started | `docs/superpowers/specs/2026-10-09-story-layer-design.md`, `docs/research/2026-10-09-story-layer-sources-and-adoption-audit.md` |
 
 ### PERF-01 numbers (PC, `tools/bench_sim.py` / `tools/run_years.py`)
 

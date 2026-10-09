@@ -3,6 +3,8 @@
 **Checkpoint:** v0.60.0 COVERAGE-01 / schema 69  
 **Purpose:** Close ambiguity about what was borrowed, benchmarked, rejected, or intentionally deferred from the completed external-code research pass.
 
+> **Audit 2026-10-09:** licence hygiene is clean, but several "incorporated" rows overstate what the code does (NegMAS, PsychSim, Vivarium Core, transitions, Talk of the Town). See `docs/research/2026-10-09-story-layer-sources-and-adoption-audit.md` §2 before relying on this table. New sources reviewed there (CICERO, Concordia, Felt/Winnow and others) are not yet in this table.
+
 ## Status vocabulary
 - **PATTERN INCORPORATED** — the external source materially changed Caerness architecture/semantics, implemented natively unless otherwise noted.
 - **SPIKED / SELECTIVELY INCORPORATED** — a bounded experiment was run and the useful conclusion/pattern retained without wholesale adoption.
