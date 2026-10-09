@@ -78,6 +78,10 @@ def infer_event_location(conn: sqlite3.Connection, event_id: int) -> int | None:
     return None
 
 
+# Shown for rumour provenance (not stored per hearer: it was 5 MB of one repeated sentence by year 3).
+RUMOUR_PROVENANCE_NOTE = "Heard as rumour; belief is not equivalent to verified world truth."
+
+
 def _information_link(
     conn: sqlite3.Connection,
     day: int,
@@ -455,7 +459,7 @@ def expose_actor_to_rumour(
         source_id=rumour_id,
         channel_id=channel_id,
         location_id=location_id,
-        notes="Heard as rumour; belief is not equivalent to verified world truth.",
+        notes=None,  # PERF-01: the standard rumour note is implied by source_kind; see RUMOUR_PROVENANCE_NOTE
     )
     return kid
 

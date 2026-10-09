@@ -26,7 +26,8 @@ def _source_label(row: sqlite3.Row) -> str:
 def known_claims(conn: sqlite3.Connection, actor_id: int, limit: int = 120) -> list[dict[str, Any]]:
     rows = conn.execute(
         """SELECT k.id,k.fact_key,k.belief_text,k.confidence,k.learned_day,k.truth_event_id,
-                  kp.source_kind,kp.source_id,kp.location_id,kp.acquired_day,kp.notes,
+                  kp.source_kind,kp.source_id,kp.location_id,kp.acquired_day,
+                  COALESCE(kp.notes,CASE kp.source_kind WHEN 'rumour' THEN 'Heard as rumour; belief is not equivalent to verified world truth.' END) notes,
                   l.name source_location_name
            FROM knowledge k
            LEFT JOIN knowledge_provenance kp ON kp.id=(
