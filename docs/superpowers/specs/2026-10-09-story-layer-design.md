@@ -21,7 +21,7 @@ Two further gaps make the world feel smaller than it is:
 1. **The engine decides; the model voices.** Following CICERO: an NPC's speech is conditioned on what the engine has decided that NPC intends, and generated speech is checked against that intent before the player sees it. (DESIGN §23: narration is post-state.)
 2. **Revealing is a decision, not a leak.** The narrator still never receives hidden goals, pressures or resources (DESIGN §13). What it receives is the *speech act* the engine chose for the NPC, which may be to conceal or to mislead. Concealment is then the NPC's choice, not the narrator's ignorance.
 3. **Recognition has zero authority** (DESIGN §29). Sifting may change what the camera is shown and what the journal indexes. It may never change an outcome, an actor's decision, or how far a rumour travels.
-4. **Nothing invented on demand** (DESIGN §15.1). A false rumour must come from a real process (a mistaken witness, a motivated liar, a garbled retelling) with its origin recorded. It is never conjured because a scene needs one.
+4. **No events conjured on demand; details resolved on first look and remembered** (DESIGN §15.1). A false rumour must come from a real process (a mistaken witness, a motivated liar, a garbled retelling) with its origin recorded. It is never conjured because a scene needs one.
 5. **Same rules at every tier** (owner rule). A background NPC with no DEC-01 review still has a speech card, built from role and routine.
 6. **Phone budget.** Everything per-day must be incremental and measured with `tools/bench_sim.py`. Narration-time work must fit the local 3-4B model's context.
 

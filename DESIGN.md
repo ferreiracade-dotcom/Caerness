@@ -234,6 +234,8 @@ Two different rules must not be confused.
 
 **During a run**, change comes only from simulated processes at the world's own rates. A named person who marries someone from the unnamed population is not invention: the partner already existed ("latent does not mean newly created, it means previously undescribed"), and the marriage happens at the same demographic rate that produced the opening's marriages, never because the named roster is short.
 
+**Resolution on first look** (owner, 2026-10-09). The run-time no-invention rule is about *causes*, not *descriptions*. It forbids conjuring people, ties or events because a scene, a system or a counter wants them. It does not forbid describing what nobody has described yet. When play needs a detail that is still undescribed (a father's trade, an innkeeper's name, what a sect's robes look like, a childhood memory), it is resolved at that moment: consistent with canon and existing state, plausible for that person's means, culture and history, and recorded with its basis (`resolved_on_reveal`, plus who told it and who now knows it). From then on it is campaign history and is never contradicted. A detail that would change what can happen (a living sister, a hidden debt, a claim to an inheritance) must come from the existing population and the world's own rates, exactly as latent people do, never from narrative convenience.
+
 ## 16. Existing systems retained from v0.1-v0.4
 
 v0.6 preserves:

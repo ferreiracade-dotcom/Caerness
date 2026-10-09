@@ -45,7 +45,7 @@ Then POP-01 plans 2–4 (background store + life rules; cultivation + renewal la
 
 - **World Bible plausibility beats real-world realism.** The World Bible is the current truth, not immutable: change a canon figure only when it is clearly the cause of a problem, and record it.
 - **Text wins over the continental map** in every case; the embedded map is very old and only places things the text leaves open (`working_placement`).
-- **Opening resolution is not run-time invention** (DESIGN §15.1). Canon null means unknown: the opening world gets lived history once, deterministically. During a run, nothing is invented on demand; latent means previously undescribed.
+- **Opening resolution is not run-time invention** (DESIGN §15.1). Canon null means unknown: the opening world gets lived history once, deterministically. During a run, no person, tie or event is conjured because a scene or system wants one; latent means previously undescribed. Undescribed *details* are different: resolve them when play first needs them, plausibly and consistent with canon and state, then record them and never contradict them (DESIGN §15.1, "Resolution on first look").
 - Model circumstances by **actual means and access**, never by a group label (not all underworld or remote people are poor).
 - No recognized same-sex household unions (judged too common/unaccepted); Veinborn ≠ cultivator; aptitudes are bell-shaped; groups marry at different, canon-grounded rates.
 - **Named characters get no special treatment**: same rules at every tier (POP-01).
