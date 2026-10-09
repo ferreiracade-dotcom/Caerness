@@ -4475,6 +4475,8 @@ CREATE TABLE IF NOT EXISTS regional_administrative_reports (
     evidence_id INTEGER REFERENCES claim_evidence(id) ON DELETE SET NULL,
     status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','delivered','lost'))
 );
+-- PERF-01: child key of claim_evidence; unindexed, every evidence deletion scanned the table.
+CREATE INDEX IF NOT EXISTS idx_regional_administrative_reports_evidence ON regional_administrative_reports(evidence_id);
 CREATE INDEX IF NOT EXISTS idx_regional_report_due ON regional_administrative_reports(status,received_day,id);
 CREATE INDEX IF NOT EXISTS idx_regional_report_recipient ON regional_administrative_reports(recipient_actor_id,delivered_day,id);
 
@@ -4658,6 +4660,8 @@ CREATE TABLE IF NOT EXISTS war_battle_reports (
     status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','delivered','lost')),
     metadata_json TEXT NOT NULL DEFAULT '{}'
 );
+-- PERF-01: child key of claim_evidence; unindexed, every evidence deletion scanned the table.
+CREATE INDEX IF NOT EXISTS idx_war_battle_reports_evidence ON war_battle_reports(evidence_id);
 CREATE INDEX IF NOT EXISTS idx_war_report_due ON war_battle_reports(status,received_day,id);
 CREATE INDEX IF NOT EXISTS idx_war_report_recipient ON war_battle_reports(recipient_actor_id,delivered_day,id);
 

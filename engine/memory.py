@@ -67,19 +67,29 @@ def _personal_pairs(conn: sqlite3.Connection, event_ids: set[int]) -> set[tuple[
     return {(member, eid) for eid, actors in involved.items() for a in actors for member in close.get(a, {a})}
 
 
-def _forget(conn: sqlite3.Connection, actor_id: int, knowledge_id: int, fact_key: str, rumour_id: int) -> set[int]:
-    claims = [int(r[0]) for r in conn.execute(
-        "SELECT id FROM information_claims WHERE claim_key=? OR claim_key LIKE ?", (fact_key, fact_key + "#%"))]
-    if claims:
-        marks = ",".join("?" * len(claims))
-        conn.execute(f"""DELETE FROM actor_evidence_access WHERE actor_id=? AND evidence_id IN
-                         (SELECT id FROM claim_evidence WHERE claim_id IN ({marks}))""", (actor_id, *claims))
-        conn.execute(f"DELETE FROM actor_beliefs WHERE actor_id=? AND claim_id IN ({marks})", (actor_id, *claims))
-        conn.execute(f"DELETE FROM belief_revisions WHERE actor_id=? AND claim_id IN ({marks})", (actor_id, *claims))
-    conn.execute("DELETE FROM knowledge_provenance WHERE knowledge_id=?", (knowledge_id,))
-    conn.execute("DELETE FROM knowledge WHERE id=?", (knowledge_id,))
-    conn.execute("DELETE FROM rumour_exposures WHERE rumour_id=? AND actor_id=?", (rumour_id, actor_id))
-    return set(claims)
+def _forget_all(conn: sqlite3.Connection, forget: list[tuple[int, int, str, int]]) -> tuple[int, int]:
+    """Set-based removal of (knowledge_id, actor, fact_key, rumour_id) memories; returns (faded, evidence collected)."""
+    claims_by_key: dict[str, list[int]] = {}
+    for cid, key in conn.execute("SELECT id,claim_key FROM information_claims WHERE claim_key LIKE 'rumour:%'"):
+        claims_by_key.setdefault(str(key).split("#", 1)[0], []).append(int(cid))
+    conn.execute("CREATE TEMP TABLE IF NOT EXISTS _memory_forget(knowledge_id INTEGER, actor_id INTEGER, rumour_id INTEGER)")
+    conn.execute("CREATE TEMP TABLE IF NOT EXISTS _memory_forget_claims(actor_id INTEGER, claim_id INTEGER, PRIMARY KEY(actor_id,claim_id))")
+    conn.execute("DELETE FROM _memory_forget"); conn.execute("DELETE FROM _memory_forget_claims")
+    conn.executemany("INSERT INTO _memory_forget VALUES (?,?,?)", [(k, a, r) for k, a, _, r in forget])
+    conn.executemany("INSERT OR IGNORE INTO _memory_forget_claims VALUES (?,?)",
+                     [(a, cid) for _, a, key, _ in forget for cid in claims_by_key.get(key, ())])
+    conn.execute("""DELETE FROM actor_evidence_access WHERE (actor_id,evidence_id) IN
+                    (SELECT f.actor_id,ce.id FROM _memory_forget_claims f JOIN claim_evidence ce ON ce.claim_id=f.claim_id)""")
+    conn.execute("DELETE FROM actor_beliefs WHERE (actor_id,claim_id) IN (SELECT actor_id,claim_id FROM _memory_forget_claims)")
+    conn.execute("DELETE FROM belief_revisions WHERE (actor_id,claim_id) IN (SELECT actor_id,claim_id FROM _memory_forget_claims)")
+    conn.execute("DELETE FROM knowledge_provenance WHERE knowledge_id IN (SELECT knowledge_id FROM _memory_forget)")
+    conn.execute("DELETE FROM knowledge WHERE id IN (SELECT knowledge_id FROM _memory_forget)")
+    conn.execute("DELETE FROM rumour_exposures WHERE (rumour_id,actor_id) IN (SELECT rumour_id,actor_id FROM _memory_forget)")
+    collected = conn.execute(
+        """DELETE FROM claim_evidence WHERE claim_id IN (SELECT DISTINCT claim_id FROM _memory_forget_claims)
+           AND evidence_kind='rumour' AND NOT EXISTS (SELECT 1 FROM actor_evidence_access a WHERE a.evidence_id=claim_evidence.id)"""
+    ).rowcount
+    return len(forget), int(collected)
 
 
 def process_due_memory(conn: sqlite3.Connection, day: int) -> dict[str, int]:
@@ -117,8 +127,7 @@ def process_due_memory(conn: sqlite3.Connection, day: int) -> dict[str, int]:
         ):
             key = (int(actor), f"e{eid}")
             last_touch[key] = max(last_touch.get(key, 0), int(latest))
-    faded = 0
-    touched_claims: set[int] = set()
+    forget: list[tuple[int, int, str, int]] = []
     for kid, actor, fact_key, learned, rid, eid, sev in rows:
         actor = int(actor)
         if eid is not None and (actor, int(eid)) in personal:
@@ -126,14 +135,8 @@ def process_due_memory(conn: sqlite3.Connection, day: int) -> dict[str, int]:
         event_key = f"e{eid}" if eid is not None else f"r{rid}"
         if last_touch[(actor, event_key)] + retention_days(actor, event_key, int(sev)) > day:
             continue
-        touched_claims |= _forget(conn, actor, int(kid), str(fact_key), int(rid))
-        faded += 1
-    collected = 0
-    if touched_claims:
-        marks = ",".join("?" * len(touched_claims))
-        collected = conn.execute(
-            f"""DELETE FROM claim_evidence WHERE claim_id IN ({marks}) AND evidence_kind='rumour'
-                AND NOT EXISTS (SELECT 1 FROM actor_evidence_access a WHERE a.evidence_id=claim_evidence.id)""",
-            tuple(sorted(touched_claims)),
-        ).rowcount
+        forget.append((int(kid), actor, str(fact_key), int(rid)))
+    if not forget:
+        return {"memories_faded": 0, "evidence_collected": 0}
+    faded, collected = _forget_all(conn, forget)
     return {"memories_faded": faded, "evidence_collected": int(collected)}

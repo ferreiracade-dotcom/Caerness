@@ -399,17 +399,26 @@ def expose_actor_to_rumour(
     *,
     channel_id: int | None = None,
     force: bool = False,
+    prefetched: tuple[sqlite3.Row | None, sqlite3.Row | None, set[int]] | None = None,
 ) -> int | None:
-    if conn.execute(
-        "SELECT 1 FROM rumour_exposures WHERE rumour_id=? AND actor_id=?",
-        (rumour_id, actor_id),
-    ).fetchone():
-        return None
-    local = conn.execute(
-        "SELECT * FROM rumour_locations WHERE rumour_id=? AND location_id=?",
-        (rumour_id, location_id),
-    ).fetchone()
-    rumour = conn.execute("SELECT * FROM rumours WHERE id=?", (rumour_id,)).fetchone()
+    # PERF-01: a caller exposing many people to one rumour at one place passes the rumour, its local
+    # spread and the set of people already exposed, instead of re-reading them for every person.
+    if prefetched is not None:
+        local, rumour, exposed = prefetched
+        if actor_id in exposed:
+            return None
+    else:
+        exposed = None
+        if conn.execute(
+            "SELECT 1 FROM rumour_exposures WHERE rumour_id=? AND actor_id=?",
+            (rumour_id, actor_id),
+        ).fetchone():
+            return None
+        local = conn.execute(
+            "SELECT * FROM rumour_locations WHERE rumour_id=? AND location_id=?",
+            (rumour_id, location_id),
+        ).fetchone()
+        rumour = conn.execute("SELECT * FROM rumours WHERE id=?", (rumour_id,)).fetchone()
     if not local or not rumour:
         return None
 
@@ -432,6 +441,8 @@ def expose_actor_to_rumour(
            VALUES (?,?,?,?,?,?)""",
         (rumour_id, actor_id, day, confidence, location_id, channel_id),
     )
+    if exposed is not None:
+        exposed.add(actor_id)
     kid = _upsert_knowledge(
         conn,
         actor_id,
@@ -461,8 +472,13 @@ def _expose_present_actors(
         conn, location_id, day=day, purpose=f"rumour:{rumour_id}",
         probability_snapshot=presence_snapshot,
     ))
+    prefetched = (
+        conn.execute("SELECT * FROM rumour_locations WHERE rumour_id=? AND location_id=?", (rumour_id, location_id)).fetchone(),
+        conn.execute("SELECT * FROM rumours WHERE id=?", (rumour_id,)).fetchone(),
+        {int(r[0]) for r in conn.execute("SELECT actor_id FROM rumour_exposures WHERE rumour_id=?", (rumour_id,))},
+    )
     for actor_id in sorted(present_ids):
-        expose_actor_to_rumour(conn, rumour_id, actor_id, day, location_id)
+        expose_actor_to_rumour(conn, rumour_id, actor_id, day, location_id, prefetched=prefetched)
 
     # Network members can receive information more readily in a place covered by their network.
     channels = conn.execute(
@@ -480,7 +496,7 @@ def _expose_present_actors(
         for member in members:
             actor_id = int(member["actor_id"])
             if actor_id in present_ids:
-                expose_actor_to_rumour(conn, rumour_id, actor_id, day, location_id, channel_id=cid)
+                expose_actor_to_rumour(conn, rumour_id, actor_id, day, location_id, channel_id=cid, prefetched=prefetched)
 
 
 def process_due_transmissions(conn: sqlite3.Connection, through_day: int) -> int:
@@ -514,7 +530,7 @@ def process_due_transmissions(conn: sqlite3.Connection, through_day: int) -> int
                 (rid, loc, due, due, float(row["prevalence"]), float(row["fidelity"]), int(row["hop_count"])),
             )
             conn.execute("UPDATE rumour_transmissions SET status='delivered' WHERE id=?", (row["id"],))
-            _information_link(conn, due, "transmission", int(row["id"]), "location_presence", loc, "arrived_at")
+            # PERF-01: no write-only transmission->location "arrived_at" link; rumour_locations records arrival.
             cache_key = (loc, due)
             if cache_key not in presence_cache:
                 from .presence import presence_probability_snapshot
