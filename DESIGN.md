@@ -374,6 +374,15 @@ Future combat, health, economic, and social resolution must allow:
 
 The simulation should not treat tragedy as a broken campaign. A dead player character may eventually become one historical person in a world that can continue under a new camera character.
 
+**The followed character's fortune** (owner, 2026-10-09). There is one exception to "not lucky about what happens next", and it covers death only:
+
+> **When death and survival are both plausible outcomes for the character the camera is following, that character survives, and pays for it.**
+
+- *Plausible* means plausible for these people, this place and these means. Wounded instead of killed, captured instead of executed, crippled, ruined, exiled, left for dead and found. If no plausible outcome lets them live (executed by an enemy with every reason to do it, alone against an army, a wound no available healer could treat), they die.
+- The fortune covers survival only. It never makes the character win, prosper, be believed, or be liked. Every other outcome follows the ordinary rules above.
+- It belongs to whoever the camera is following at that moment. If the character dies anyway and the camera passes to a successor (see "Narrative-camera succession" below), the successor has it from then on; the dead character keeps nothing.
+- It is a deliberate exception to "named characters get no special treatment". It exists because the story being told is about someone who lived long enough to be followed. It is recorded on each resolution where it applied, so it is visible, never silent.
+
 ### 27.4 Experienced World Principle
 
 > **The World Bible establishes what is true. Play determines what becomes known.**
