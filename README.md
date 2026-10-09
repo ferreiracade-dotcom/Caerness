@@ -9,7 +9,9 @@
 **Current opening-world seed:** `game/seeds/Caerness_Initial_World_State_Seed_v1_4.json`  
 **Status:** focused WORLDHIST-01A Stage 2 acceptance passed; Schema 107 adds review fixes and FAMILY-02 sex resolution; Schema 108 adds opening family life and relationships, canon-anchored named mortality, and Veinborn/training realism (see `WORLDHIST01A_SCHEMA108_OPENING_HISTORY_MORTALITY_CULTIVATION_2026-09-23.md`); fresh Schema-108 integrated ONEYEAR acceptance is still pending.
 
-This README is the authoritative starting point for anyone resuming development from this package. Older handoffs, acceptance reports and roadmaps remain in the repository as historical evidence, but **their schema numbers and “current” labels must not override this file**.
+> **Agents: read `AGENTS.md` first** — current status (PERF-01 in progress, POP-01 designed), owner rules and runbook.
+
+This README is the authoritative engine handoff for anyone resuming development from this package. Older handoffs, acceptance reports and roadmaps remain in the repository as historical evidence, but **their schema numbers and “current” labels must not override this file**.
 
 ---
 

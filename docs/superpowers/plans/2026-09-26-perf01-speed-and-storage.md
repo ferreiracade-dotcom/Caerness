@@ -4,6 +4,11 @@
 
 **Goal:** Keep Caerness fast and small over a long campaign, so it can live on the phone. The user will not install it until this is fixed.
 
+**Status (2026-10-09):** Tasks 1–4 done plus extras (news fading, audit retention, slim context snapshot,
+set-based fading, report-table indexes, exposure prefetch, implied rumour provenance note). Year-3 season ~33–37 s,
+3-year save ~96–101 MB (~20 MB/yr and falling). Remaining: batch rumour exposure; drop per-hearer rumour text in
+legacy `knowledge`; re-measure; phone benchmark. See AGENTS.md §2.
+
 **Evidence (2026-09-26, PC).**
 - At the opening a season takes 13 s. From a day-2,790 save it took 453 s, and the save was 716 MB (about 95 MB per year).
 - About 390 MB of the ~455 MB of data is the rumour/knowledge/belief system: one person hearing one rumour writes about nine rows, and nothing is ever forgotten.
