@@ -39,6 +39,8 @@ Next for PERF-01:
 
 Then POP-01 plans 2–4 (background store + life rules; cultivation + renewal ladder + Sixth depth; tiers + migration) — write each plan from the spec after phone numbers exist.
 
+> Since 2026-10-09 the target is laptop first. PERF-01 still matters there (late-game slowdown grows with save age, not just device speed), but its targets and the "after phone numbers exist" gate above should be re-set against laptop numbers. That decision is the owner's.
+
 ## 3. Owner's rules (binding)
 
 - **World Bible plausibility beats real-world realism.** The World Bible is the current truth, not immutable: change a canon figure only when it is clearly the cause of a problem, and record it.
@@ -47,7 +49,8 @@ Then POP-01 plans 2–4 (background store + life rules; cultivation + renewal la
 - Model circumstances by **actual means and access**, never by a group label (not all underworld or remote people are poor).
 - No recognized same-sex household unions (judged too common/unaccepted); Veinborn ≠ cultivator; aptitudes are bell-shaped; groups marry at different, canon-grounded rates.
 - **Named characters get no special treatment**: same rules at every tier (POP-01).
-- **Phone-only target**: OnePlus 12, 12 GB, CPU, with a local 3–4B model loaded; quality over speed, but no 20–30 minute waits. Never end a narration node on a bare "continue" when nothing needs the player.
+- **Laptop first, phone later** (owner decision 2026-10-09, replacing "phone-only"): build the best version for the owner's laptop, then scale it down for the phone (OnePlus 12, 12 GB, CPU, local 3–4B model). Scaling down should mean turning dials (how many people are simulated individually, model size, context size), not separate code, so keep phone limits in mind when designing. Quality over speed, but no 20–30 minute waits on either. Never end a narration node on a bare "continue" when nothing needs the player.
+- **Prefer what a person in the world would plausibly do over a player setting** (owner, 2026-10-09). Example: a character reads a letter when it reaches them and answers it as they plausibly would; time stops for the player only when a real decision is needed, not because of an interruption preference.
 - Don't trust README/acceptance claims: verify with data. Systems that "never happen" are usually silently disconnected (check graph reachability, join keys, endpoints) before tuning rates.
 - Commit and push when the owner asks; use branches for feature work.
 
