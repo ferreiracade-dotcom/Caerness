@@ -113,10 +113,19 @@ Verified facts are marked **[code]**; everything else is recommendation.
 - **Map button and zoom:** realm, region, city wards, your base; detail is what you know.
 - **Side panels on demand:** people, matters, holdings and base, party or crew; institutional panels appear only for someone who actually runs something.
 
+## 11a. Art scope (owner decision, 2026-10-10)
+
+Art is for **people and places**, as in CK3, plus a few **key moments**. Everything dynamic stays in text.
+
+- **People:** a portrait for every character the followed character meets, built from layers. The portrait reflects state: age, rank and dress, organisation colours and emblems, and visible marks. If a text fight leaves a scar or costs an arm, the engine records it, and the portrait shows it from then on.
+- **Places:** a background per location kind (clan hall, courtyard, inn, road, market, throne room, field), with known places able to get their own.
+- **Key moments:** a staged picture, not a bespoke illustration. People are placed on a background by rank and role: an audience before the emperor, two armies facing each other under their banners and colours, a formal challenge at a gate, a gang boss arriving with his men.
+- **Not drawn:** fights, movement and action. These stay in prose, and their results are drawn afterwards through the state they change.
+
 ## 12. Revised order
 
 1. **Intent interpreter (new, first).** Free text to engine actions with validation, starting with the murim set: attack or duel, spar, threaten, give an order, ask for or offer a deal, train. Without it, any interface sits on top of improvised outcomes.
 2. **Play screen stage 1:** location view with placeholder portraits staged by rank, event pop-up with free text and suggested actions, notifications corner, schematic map (stage 1 of §6), time controls.
-3. **Appearance and colours as state:** visual identity per character, organisation colours and emblems, deference rules feeding the staging.
-4. **Art pipeline:** a small layered portrait set in a manhwa style for the Hearth and murim cast first, then backgrounds for a handful of location kinds (clan hall, courtyard, inn, road, market).
+3. **Appearance and colours as state:** visual identity per character, visible marks from lasting injuries (from `harm_incidents` and `health_conditions`), organisation colours and emblems, deference rules feeding the staging.
+4. **Art pipeline:** a small layered portrait set in a manhwa style for the Hearth and murim cast first, then backgrounds for a handful of location kinds (clan hall, courtyard, inn, road, market), then the key-moment stagings (§11a).
 5. Agents, letters and reports (the delegation spec) slot in alongside 2, because the notifications corner needs them.
