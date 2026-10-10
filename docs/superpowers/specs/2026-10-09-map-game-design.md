@@ -1,6 +1,6 @@
 # The map game: one map, many scales, your knowledge
 
-**Status:** proposed on 2026-10-09 from the owner's direction in conversation; awaiting the owner's review. Nothing here is implemented.
+**Status:** proposed on 2026-10-09 from the owner's direction in conversation; widened on 2026-10-10 by the owner's CK3 / Suzerain / manhwa direction (§8 to §11). Awaiting the owner's review. Nothing here is implemented.
 **Related:** story-layer spec (`2026-10-09-story-layer-design.md`: speaker cards, sifting), World Bible coverage (`docs/research/2026-10-09-world-bible-narrator-coverage.md`), the delegation and correspondence system (to be specified; this spec gives it its panels).
 
 ## 1. What the owner asked for
@@ -63,8 +63,60 @@
 
 Each stage is measured the way the scene brief was: what the map shows must be exactly what the followed character knows (a probe compares the drawn map to the knowledge tables).
 
-## 7. Open questions for the owner
+## 7. Open questions for the owner (2026-10-09)
 
 1. For stage 1, is a schematic map (places and roads, laid out roughly by region) acceptable until geography is settled, or would you rather settle rough geography first?
 2. Should playing at the realm level (a king or emperor) be available from the start, or only once the individual and city levels work?
 3. Which city after Aldergate should get wards first?
+
+## 8. Owner direction, 2026-10-10: CK3 to look at, Suzerain to read, manhwa to see
+
+The owner, partly through a discussion with another assistant (summarised as a "design vision" note), widened the request:
+
+- The game should look and feel like CK3, not like a chat window: a map, a court or location view with people in it, outfits and emblems, and event pop-ups in the corner.
+- **Event pop-ups carry the narrator's prose** (Suzerain-style), and the player answers by typing, not by picking from four options. Moving on the map, travelling and opening panels are done with the mouse.
+- **Narrative first.** Most time is spent in scenes; the map is how you get between them and see where things stand.
+- **The wanderer is the default.** Everyone is an individual. A clan martial artist is a wanderer tied to a place; only someone at the top lives in an institutional view, and even a king can walk into a tavern.
+- **Scale follows involvement:** ward-level cities for underworld and merchant play, a clan's compound and nearby town, kingdom view for rulers.
+- **A base you build** (CK3's domicile): a merchant's house, a gang's headquarters, a clan compound.
+- **Visual style:** 2D, manhwa-inspired (the owner names *Absolute Sword Sense*), not 3D. Social staging is a core reason for visuals: bows, guards outside, who stands closest to the boss, colours and emblems, "power should be visible".
+
+## 9. Evaluation against the code (verified on schema 109, 2026-10-10)
+
+Verified facts are marked **[code]**; everything else is recommendation.
+
+| Vision item | What exists | What is missing |
+|---|---|---|
+| Player attempts, engine decides ("I cut off his arm") | **[code]** A duel engine with intents and exchanges (`combat.py`: `create_duel`, `submit_duel_intent`, `duel_exchanges`); harm with persistent outcomes and lasting impairment (`harm_incidents` to `health_conditions`, `health.py`); player actions as proposals that are begun and finalised with causal links (`actions.py`) | **[code]** Free text never reaches the duel engine. The player-action parser recognises only travel, wait, investigate, talk and observe by keyword; anything else is recorded as "freeform intent requires a richer action interpreter; no permanent state is guessed", so the narrator improvises the outcome. This is the exact failure in the Master Han encounter, and it is the largest gap in the whole vision. |
+| Bounded AI co-referee | Model gateway: model proposes, engine validates, SQLite records; resolution on first look (DESIGN §15.1) | An **intent interpreter**: free text to one or more engine actions (attack, threaten, bribe, give an order, promise, buy, train), each validated and resolved by the system that owns it. Genuinely novel undertakings are composed from existing parts (organisation, employees, routes, agreements). A 3–4B local model can classify intent into a closed list reliably; it should not judge outcomes. |
+| NPC portraits with persistent identity, injuries and age | **[code]** Age, health conditions, rank (`institution_memberships`), mannerisms and speech (`character_embodiment`) | Appearance: build, face, hair, scars, clothing. Listed already as "visual identity" in the World Bible coverage report (§ missing simulation state). |
+| Social staging | World Bible Part 0 (Presence; formality as the response to power) and Part 3 (etiquette, "Same bows. Different room."); culture briefs reach the narrator (SCENE-01) | Data the UI can draw: who escorts whom, guards posted, seating and placement by rank, deference owed between two people, organisation colours and emblems (already on the SPEECH-01 list). |
+| Wanderer default, institution views only at the top | Every actor is a character with memberships; presence; travel plans | Travelling party; the base (domicile) as held property, which is the same gap as "who holds what" in §3. |
+| Ward-level cities | **[code]** Aldergate's 12 underworld wards with turf, rackets and policing | Wards for other cities; districts linked to wards. |
+| Long time advances and interruptions | **[code]** `timeskip.py` with `interruption_policy` (all / meaningful / critical_only) and delegation | Replace the setting with plausibility (owner rule, 2026-10-09). The vision's "wake me if…" conditions fit as orders given to people ("tell me at once if the Ma clan moves"), which is plausible and works the same for NPC bosses. |
+| Information shown matches what the character knows | **[code]** Knowledge and belief tables; `player_information_hub` | The map and panels must read only from those (§2 principle 1). |
+
+## 10. Where I disagree or would narrow
+
+1. **CK3's own models and outfits cannot be used.** They are Paradox's proprietary assets, in a proprietary engine format. A CK3 mod is no route either: CK3 scripting cannot host free-text input, a language model or the Python simulation, so the mod would lose what makes Caerness different. CK3 is the design reference; the art must be Caerness's own.
+2. **Layered 2D portraits, not generated images per scene.** CK3 itself builds portraits from layers (body, face, hair, clothing, headgear). The same approach in 2D, manhwa style: a modest set of drawn layers (faces, hair, robes and coats by culture and rank, emblems tinted with organisation colours, scars and a missing arm as overlays), assembled from state. The result is consistent forever and costs nothing at run time. Generating new images per scene on a GTX 1050 Ti would be slow and would drift between scenes, which is the inconsistency problem again.
+3. **Dynamic scenes (the vision's level B) start as staging, not animation.** Portraits placed on a location background by rank and role (the master seated, elders beside, disciples in lines, guards at the door), with a few pose variants (standing, bowing, kneeling, seated, wounded). That gives most of "power should be visible" without animation work.
+4. **Watabou.** Its generated maps may be used freely, but its generator code is GPL-3.0. Run it as a separate tool and import its exported JSON/SVG as data; do not copy the code into the engine. The cities must be generated to fit the simulation's facts (Aldergate's 12 wards), not the other way round.
+5. **"The AI may introduce new persistent details"** only in the existing form: the engine resolves a detail on first look, records it, and it never changes. The narrator never decides outcomes or adds commitments the player did not make (SPEAKER_RULE; the commitment check still to be built).
+
+## 11. The play screen (laptop)
+
+- **Centre:** the current location as a scene: background, people present as layered portraits staged by rank and relationship. Click a person for their card (what *you* know of them). In travel or when zoomed out, the map takes the centre.
+- **Event pop-up:** the narrator's prose in a framed window over the scene, with a text box to answer. Under it, two or three engine-suggested actions as shortcuts (never the only options). Important scenes can expand to full screen.
+- **Bottom right:** letters, reports, rumours and summons waiting, with the date each was sent and arrived. Opening one either informs (a line) or opens a pop-up if a decision is needed.
+- **Top bar:** date, time controls (time runs until your character would plausibly stop), your standing.
+- **Map button and zoom:** realm, region, city wards, your base; detail is what you know.
+- **Side panels on demand:** people, matters, holdings and base, party or crew; institutional panels appear only for someone who actually runs something.
+
+## 12. Revised order
+
+1. **Intent interpreter (new, first).** Free text to engine actions with validation, starting with the murim set: attack or duel, spar, threaten, give an order, ask for or offer a deal, train. Without it, any interface sits on top of improvised outcomes.
+2. **Play screen stage 1:** location view with placeholder portraits staged by rank, event pop-up with free text and suggested actions, notifications corner, schematic map (stage 1 of §6), time controls.
+3. **Appearance and colours as state:** visual identity per character, organisation colours and emblems, deference rules feeding the staging.
+4. **Art pipeline:** a small layered portrait set in a manhwa style for the Hearth and murim cast first, then backgrounds for a handful of location kinds (clan hall, courtyard, inn, road, market).
+5. Agents, letters and reports (the delegation spec) slot in alongside 2, because the notifications corner needs them.
