@@ -133,14 +133,21 @@ def context(c, actor, institution_id=None):
     scene = build_scene_packet(c, canon_limit=3)
     if institution_id is None:
         organisations = [dict(r) for r in c.execute("SELECT id,name FROM actors WHERE actor_type='institution' AND status='active'") if institution_decision_actor(c, int(r['id'])) == actor]
-        return {'scene': scene, 'organisations': organisations}
+        return {'scene': scene, 'organisations': organisations,
+                'competence_domains':[r[0] for r in c.execute('SELECT domain_key FROM competence_domains ORDER BY domain_key')]}
     authority(c, actor, institution_id)
+    sites=[]
+    for row in c.execute("SELECT id,name,asset_kind,location_id,metadata_json FROM strategic_assets WHERE owner_institution_actor_id=? AND status='active'",(institution_id,)):
+        site={k:row[k] for k in ('id','name','asset_kind','location_id')}
+        site['established_work_slots']=json.loads(row['metadata_json']).get('work_slots',0)
+        site['occupied_work_slots']=int(c.execute("SELECT COUNT(*) FROM civilian_projects WHERE status IN ('active','paused') AND json_extract(metadata_json,'$.site_id')=?",(row['id'],)).fetchone()[0])
+        sites.append(site)
     return {
         'institution_id': institution_id,
         'members': [dict(r) for r in c.execute("SELECT a.id,a.name,m.role_text FROM institution_memberships m JOIN actors a ON a.id=m.member_actor_id WHERE m.institution_actor_id=? AND m.status='active' AND a.status='active'", (institution_id,))],
         'resources': [dict(r) for r in c.execute('SELECT resource_type,amount,unit FROM resources WHERE actor_id=?', (institution_id,))],
         'roles': [dict(r) for r in c.execute("SELECT id,title,domain_key,capacity_slots FROM institutional_roles WHERE institution_actor_id=? AND status='active'", (institution_id,))],
-        'sites': [dict(r) for r in c.execute("SELECT id,name,asset_kind,location_id FROM strategic_assets WHERE owner_institution_actor_id=? AND status='active'", (institution_id,))],
+        'sites': sites,
         'information_basis': 'Your organisation records. Private NPC motives, opinions and hidden resources are excluded.'
     }
 
@@ -288,7 +295,7 @@ def commission_work(c,owner,plan_id,step_key,args):
     if not site or site['asset_kind'] not in spec['site_kinds'] or site['location_id'] != offering[0]:
         raise ValueError('Secure a suitable owned site in the provider location first. No land rights were invented.')
     slots = json.loads(site['metadata_json']).get('work_slots',0)
-    occupied = c.execute("SELECT COUNT(*) FROM ai_work_links w JOIN civilian_projects p ON p.id=w.project_id WHERE w.site_id=? AND p.status IN ('active','paused')",(site['id'],)).fetchone()[0]
+    occupied = c.execute("SELECT COUNT(*) FROM civilian_projects WHERE status IN ('active','paused') AND json_extract(metadata_json,'$.site_id')=?",(site['id'],)).fetchone()[0]
     if occupied >= slots: raise ValueError('The site has no established work capacity available.')
     present(c,owner,q['provider_actor_id'])
     score = skill(c,q['provider_actor_id'],q['domain'])
