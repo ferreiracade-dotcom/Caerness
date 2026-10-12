@@ -1,0 +1,19 @@
+survey: same reusable operations, real consent/resources/site, 82.0% at day 30, completion + reload at day 90 PASS
+yard: same reusable operations, real consent/resources/site, 41.0% at day 30, completion + reload at day 90 PASS
+Nontransactional conversation, ambiguity and session reload PASS
+Incomplete/contradictory/unsupported plans and no unrestricted write tool PASS
+Compound terms retained and unresolved commitment blocked PASS
+Resource preflight and recipient-owned refusal without reroll PASS
+Reviewed quotation fingerprint prevents silent repricing PASS
+Scoped site discovery and existing native-work occupancy prevent overbooking PASS
+Native functional capacity constrains work without exposing diagnosis PASS
+New staff titles do not create institutional sovereignty or head authority PASS
+Counteroffer and explicit recipient-only answer through reusable capability PASS
+Partial commitment, immutable prefix, revised scope and world-driven pause PASS
+Later conversational conditions cannot disappear from revised plan coverage PASS
+Transactional resource conservation and knowledge/owner boundary PASS
+Camera succession does not roll back consequences or leak prior private plans PASS
+GENERAL AI PLANNING: PASS
+
+Configured HTTP adapter: discover capabilities → inspect scoped context → plan → stop for player review → validated execution PASS
+Model outputs in this test are scripted; this is integration evidence, not a real LLM reasoning-quality evaluation.
