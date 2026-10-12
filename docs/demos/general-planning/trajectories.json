@@ -1,0 +1,1126 @@
+{
+  "survey": {
+    "COMMITTED": {
+      "status": "resolved",
+      "plan": {
+        "id": 1,
+        "session_id": 1,
+        "revision": 1,
+        "digest": "a37af9afe73100c760cb33ed4ebbdb220094e3a7f553e2b64c2f0cbb9b713a93",
+        "status": "active",
+        "original_instruction": "Have Mara compile a merchant route-and-price report. Establish a responsibility for her, reserve twelve capital and four paper, and use our archive. Delegate the work and return any unspent reserve.",
+        "summary": "Propose Market and road report through a new responsibility, a consenting existing professional, the published quotation, existing company resources and its owned site. Return unspent reserves after completion.",
+        "unresolved": [],
+        "proposed_steps": [
+          {
+            "arguments": {
+              "domain": "commerce",
+              "institution_id": 902,
+              "remit": "Market and road report",
+              "title": "Commercial Report Steward"
+            },
+            "depends_on": [],
+            "id": "role",
+            "operation": "define_role"
+          },
+          {
+            "arguments": {
+              "institution_id": 902,
+              "offering_id": 51,
+              "person_id": 903,
+              "quotation_digest": "19de4feccd664e2f189bf3002d31aac1ef91b9b70435dc4a126f6fbb6ccdf2fc",
+              "role_id": {
+                "ref": "role.role_id"
+              },
+              "scope": "Market and road report"
+            },
+            "depends_on": [
+              "role"
+            ],
+            "id": "consent",
+            "operation": "offer_service"
+          },
+          {
+            "arguments": {
+              "institution_id": 902,
+              "resources": {
+                "capital": 12,
+                "paper": 4
+              }
+            },
+            "depends_on": [
+              "consent"
+            ],
+            "id": "budget",
+            "operation": "allocate_resources"
+          },
+          {
+            "arguments": {
+              "allocation_id": {
+                "ref": "budget.allocation_id"
+              },
+              "engagement_id": {
+                "ref": "consent.engagement_id"
+              },
+              "institution_id": 902,
+              "offering_id": 51,
+              "quotation_digest": "19de4feccd664e2f189bf3002d31aac1ef91b9b70435dc4a126f6fbb6ccdf2fc",
+              "site_id": 1,
+              "title": "Market and road report"
+            },
+            "depends_on": [
+              "consent",
+              "budget"
+            ],
+            "id": "work",
+            "operation": "commission_work"
+          },
+          {
+            "arguments": {
+              "allocation_id": {
+                "ref": "budget.allocation_id"
+              }
+            },
+            "depends_on": [
+              "work",
+              "budget"
+            ],
+            "id": "refund",
+            "operation": "refund_resources"
+          }
+        ],
+        "steps": {
+          "budget": {
+            "status": "completed",
+            "result": {
+              "allocation_id": 1,
+              "state": "completed",
+              "summary": "Existing resources were reserved for the plan."
+            }
+          },
+          "consent": {
+            "status": "completed",
+            "result": {
+              "appointment_id": 1,
+              "engagement_id": 1,
+              "interaction_id": 1,
+              "proposal_id": 1,
+              "state": "completed",
+              "summary": "The responsibility and conditional service were accepted."
+            }
+          },
+          "refund": {
+            "status": "pending",
+            "result": {}
+          },
+          "role": {
+            "status": "completed",
+            "result": {
+              "role_id": 1,
+              "state": "completed",
+              "summary": "Established the responsibility: Commercial Report Steward."
+            }
+          },
+          "work": {
+            "status": "active",
+            "result": {
+              "project_id": 1,
+              "state": "active",
+              "summary": "Work began on Market and road report. Completion is still pending; the quoted resources were consumed."
+            }
+          }
+        },
+        "review_scope": [
+          "Establish 'Commercial Report Steward' as a staff responsibility in [DEMO] Caravan Office. Remit: Market and road report. This grants no other rights.",
+          "Ask [DEMO] Mara Vale to accept a responsibility and conditional service for [DEMO] Caravan Office. Scope: Market and road report. Consent is not guaranteed; no gift or pay promise is included.",
+          "Reserve existing stock of [DEMO] Caravan Office: {\"capital\": 12, \"paper\": 4}. No currency conversion or new resources.",
+          "Attempt 'Market and road report' using the selected owned site, accepted service and reserved resources. Quoted requirements: 10 capital, 4 paper; a target of 30 days and a suitable building. Completion requires world time and sustained means.",
+          "Return only the unspent balance of this plan reserve to its original organisation."
+        ],
+        "authorization_notice": "Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing."
+      }
+    },
+    "AFTER 30 DAYS": {
+      "id": 1,
+      "session_id": 1,
+      "revision": 1,
+      "digest": "a37af9afe73100c760cb33ed4ebbdb220094e3a7f553e2b64c2f0cbb9b713a93",
+      "status": "active",
+      "original_instruction": "Have Mara compile a merchant route-and-price report. Establish a responsibility for her, reserve twelve capital and four paper, and use our archive. Delegate the work and return any unspent reserve.",
+      "summary": "Propose Market and road report through a new responsibility, a consenting existing professional, the published quotation, existing company resources and its owned site. Return unspent reserves after completion.",
+      "unresolved": [],
+      "proposed_steps": [
+        {
+          "arguments": {
+            "domain": "commerce",
+            "institution_id": 902,
+            "remit": "Market and road report",
+            "title": "Commercial Report Steward"
+          },
+          "depends_on": [],
+          "id": "role",
+          "operation": "define_role"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "offering_id": 51,
+            "person_id": 903,
+            "quotation_digest": "19de4feccd664e2f189bf3002d31aac1ef91b9b70435dc4a126f6fbb6ccdf2fc",
+            "role_id": {
+              "ref": "role.role_id"
+            },
+            "scope": "Market and road report"
+          },
+          "depends_on": [
+            "role"
+          ],
+          "id": "consent",
+          "operation": "offer_service"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "resources": {
+              "capital": 12,
+              "paper": 4
+            }
+          },
+          "depends_on": [
+            "consent"
+          ],
+          "id": "budget",
+          "operation": "allocate_resources"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            },
+            "engagement_id": {
+              "ref": "consent.engagement_id"
+            },
+            "institution_id": 902,
+            "offering_id": 51,
+            "quotation_digest": "19de4feccd664e2f189bf3002d31aac1ef91b9b70435dc4a126f6fbb6ccdf2fc",
+            "site_id": 1,
+            "title": "Market and road report"
+          },
+          "depends_on": [
+            "consent",
+            "budget"
+          ],
+          "id": "work",
+          "operation": "commission_work"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            }
+          },
+          "depends_on": [
+            "work",
+            "budget"
+          ],
+          "id": "refund",
+          "operation": "refund_resources"
+        }
+      ],
+      "steps": {
+        "budget": {
+          "status": "completed",
+          "result": {
+            "allocation_id": 1,
+            "state": "completed",
+            "summary": "Existing resources were reserved for the plan."
+          }
+        },
+        "consent": {
+          "status": "completed",
+          "result": {
+            "appointment_id": 1,
+            "engagement_id": 1,
+            "interaction_id": 1,
+            "proposal_id": 1,
+            "state": "completed",
+            "summary": "The responsibility and conditional service were accepted."
+          }
+        },
+        "refund": {
+          "status": "pending",
+          "result": {}
+        },
+        "role": {
+          "status": "completed",
+          "result": {
+            "role_id": 1,
+            "state": "completed",
+            "summary": "Established the responsibility: Commercial Report Steward."
+          }
+        },
+        "work": {
+          "status": "active",
+          "result": {
+            "progress": 82.0,
+            "project_id": 1,
+            "state": "active",
+            "summary": "Work began on Market and road report. Completion is still pending; the quoted resources were consumed."
+          }
+        }
+      },
+      "review_scope": [
+        "Establish 'Commercial Report Steward' as a staff responsibility in [DEMO] Caravan Office. Remit: Market and road report. This grants no other rights.",
+        "Ask [DEMO] Mara Vale to accept a responsibility and conditional service for [DEMO] Caravan Office. Scope: Market and road report. Consent is not guaranteed; no gift or pay promise is included.",
+        "Reserve existing stock of [DEMO] Caravan Office: {\"capital\": 12, \"paper\": 4}. No currency conversion or new resources.",
+        "Attempt 'Market and road report' using the selected owned site, accepted service and reserved resources. Quoted requirements: 10 capital, 4 paper; a target of 30 days and a suitable building. Completion requires world time and sustained means.",
+        "Return only the unspent balance of this plan reserve to its original organisation."
+      ],
+      "authorization_notice": "Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing."
+    },
+    "AFTER 90 DAYS": {
+      "id": 1,
+      "session_id": 1,
+      "revision": 1,
+      "digest": "a37af9afe73100c760cb33ed4ebbdb220094e3a7f553e2b64c2f0cbb9b713a93",
+      "status": "completed",
+      "original_instruction": "Have Mara compile a merchant route-and-price report. Establish a responsibility for her, reserve twelve capital and four paper, and use our archive. Delegate the work and return any unspent reserve.",
+      "summary": "Propose Market and road report through a new responsibility, a consenting existing professional, the published quotation, existing company resources and its owned site. Return unspent reserves after completion.",
+      "unresolved": [],
+      "proposed_steps": [
+        {
+          "arguments": {
+            "domain": "commerce",
+            "institution_id": 902,
+            "remit": "Market and road report",
+            "title": "Commercial Report Steward"
+          },
+          "depends_on": [],
+          "id": "role",
+          "operation": "define_role"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "offering_id": 51,
+            "person_id": 903,
+            "quotation_digest": "19de4feccd664e2f189bf3002d31aac1ef91b9b70435dc4a126f6fbb6ccdf2fc",
+            "role_id": {
+              "ref": "role.role_id"
+            },
+            "scope": "Market and road report"
+          },
+          "depends_on": [
+            "role"
+          ],
+          "id": "consent",
+          "operation": "offer_service"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "resources": {
+              "capital": 12,
+              "paper": 4
+            }
+          },
+          "depends_on": [
+            "consent"
+          ],
+          "id": "budget",
+          "operation": "allocate_resources"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            },
+            "engagement_id": {
+              "ref": "consent.engagement_id"
+            },
+            "institution_id": 902,
+            "offering_id": 51,
+            "quotation_digest": "19de4feccd664e2f189bf3002d31aac1ef91b9b70435dc4a126f6fbb6ccdf2fc",
+            "site_id": 1,
+            "title": "Market and road report"
+          },
+          "depends_on": [
+            "consent",
+            "budget"
+          ],
+          "id": "work",
+          "operation": "commission_work"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            }
+          },
+          "depends_on": [
+            "work",
+            "budget"
+          ],
+          "id": "refund",
+          "operation": "refund_resources"
+        }
+      ],
+      "steps": {
+        "budget": {
+          "status": "completed",
+          "result": {
+            "allocation_id": 1,
+            "state": "completed",
+            "summary": "Existing resources were reserved for the plan."
+          }
+        },
+        "consent": {
+          "status": "completed",
+          "result": {
+            "appointment_id": 1,
+            "engagement_id": 1,
+            "interaction_id": 1,
+            "proposal_id": 1,
+            "state": "completed",
+            "summary": "The responsibility and conditional service were accepted."
+          }
+        },
+        "refund": {
+          "status": "completed",
+          "result": {
+            "state": "completed",
+            "summary": "Remaining unspent resources were returned; prior spending remains historical."
+          }
+        },
+        "role": {
+          "status": "completed",
+          "result": {
+            "role_id": 1,
+            "state": "completed",
+            "summary": "Established the responsibility: Commercial Report Steward."
+          }
+        },
+        "work": {
+          "status": "completed",
+          "result": {
+            "progress": 100.0,
+            "project_id": 1,
+            "state": "completed",
+            "summary": "The native world simulation completed the delegated work."
+          }
+        }
+      },
+      "review_scope": [
+        "Establish 'Commercial Report Steward' as a staff responsibility in [DEMO] Caravan Office. Remit: Market and road report. This grants no other rights.",
+        "Ask [DEMO] Mara Vale to accept a responsibility and conditional service for [DEMO] Caravan Office. Scope: Market and road report. Consent is not guaranteed; no gift or pay promise is included.",
+        "Reserve existing stock of [DEMO] Caravan Office: {\"capital\": 12, \"paper\": 4}. No currency conversion or new resources.",
+        "Attempt 'Market and road report' using the selected owned site, accepted service and reserved resources. Quoted requirements: 10 capital, 4 paper; a target of 30 days and a suitable building. Completion requires world time and sustained means.",
+        "Return only the unspent balance of this plan reserve to its original organisation."
+      ],
+      "authorization_notice": "Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing."
+    },
+    "RELOADED": {
+      "id": 1,
+      "session_id": 1,
+      "revision": 1,
+      "digest": "a37af9afe73100c760cb33ed4ebbdb220094e3a7f553e2b64c2f0cbb9b713a93",
+      "status": "completed",
+      "original_instruction": "Have Mara compile a merchant route-and-price report. Establish a responsibility for her, reserve twelve capital and four paper, and use our archive. Delegate the work and return any unspent reserve.",
+      "summary": "Propose Market and road report through a new responsibility, a consenting existing professional, the published quotation, existing company resources and its owned site. Return unspent reserves after completion.",
+      "unresolved": [],
+      "proposed_steps": [
+        {
+          "arguments": {
+            "domain": "commerce",
+            "institution_id": 902,
+            "remit": "Market and road report",
+            "title": "Commercial Report Steward"
+          },
+          "depends_on": [],
+          "id": "role",
+          "operation": "define_role"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "offering_id": 51,
+            "person_id": 903,
+            "quotation_digest": "19de4feccd664e2f189bf3002d31aac1ef91b9b70435dc4a126f6fbb6ccdf2fc",
+            "role_id": {
+              "ref": "role.role_id"
+            },
+            "scope": "Market and road report"
+          },
+          "depends_on": [
+            "role"
+          ],
+          "id": "consent",
+          "operation": "offer_service"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "resources": {
+              "capital": 12,
+              "paper": 4
+            }
+          },
+          "depends_on": [
+            "consent"
+          ],
+          "id": "budget",
+          "operation": "allocate_resources"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            },
+            "engagement_id": {
+              "ref": "consent.engagement_id"
+            },
+            "institution_id": 902,
+            "offering_id": 51,
+            "quotation_digest": "19de4feccd664e2f189bf3002d31aac1ef91b9b70435dc4a126f6fbb6ccdf2fc",
+            "site_id": 1,
+            "title": "Market and road report"
+          },
+          "depends_on": [
+            "consent",
+            "budget"
+          ],
+          "id": "work",
+          "operation": "commission_work"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            }
+          },
+          "depends_on": [
+            "work",
+            "budget"
+          ],
+          "id": "refund",
+          "operation": "refund_resources"
+        }
+      ],
+      "steps": {
+        "budget": {
+          "status": "completed",
+          "result": {
+            "allocation_id": 1,
+            "state": "completed",
+            "summary": "Existing resources were reserved for the plan."
+          }
+        },
+        "consent": {
+          "status": "completed",
+          "result": {
+            "appointment_id": 1,
+            "engagement_id": 1,
+            "interaction_id": 1,
+            "proposal_id": 1,
+            "state": "completed",
+            "summary": "The responsibility and conditional service were accepted."
+          }
+        },
+        "refund": {
+          "status": "completed",
+          "result": {
+            "state": "completed",
+            "summary": "Remaining unspent resources were returned; prior spending remains historical."
+          }
+        },
+        "role": {
+          "status": "completed",
+          "result": {
+            "role_id": 1,
+            "state": "completed",
+            "summary": "Established the responsibility: Commercial Report Steward."
+          }
+        },
+        "work": {
+          "status": "completed",
+          "result": {
+            "progress": 100.0,
+            "project_id": 1,
+            "state": "completed",
+            "summary": "The native world simulation completed the delegated work."
+          }
+        }
+      },
+      "review_scope": [
+        "Establish 'Commercial Report Steward' as a staff responsibility in [DEMO] Caravan Office. Remit: Market and road report. This grants no other rights.",
+        "Ask [DEMO] Mara Vale to accept a responsibility and conditional service for [DEMO] Caravan Office. Scope: Market and road report. Consent is not guaranteed; no gift or pay promise is included.",
+        "Reserve existing stock of [DEMO] Caravan Office: {\"capital\": 12, \"paper\": 4}. No currency conversion or new resources.",
+        "Attempt 'Market and road report' using the selected owned site, accepted service and reserved resources. Quoted requirements: 10 capital, 4 paper; a target of 30 days and a suitable building. Completion requires world time and sustained means.",
+        "Return only the unspent balance of this plan reserve to its original organisation."
+      ],
+      "authorization_notice": "Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing."
+    }
+  },
+  "yard": {
+    "COMMITTED": {
+      "status": "resolved",
+      "plan": {
+        "id": 1,
+        "session_id": 1,
+        "revision": 1,
+        "digest": "00d0178948e312c8c98dfa92b3d8e6a9dad062e353780d696ad8b64ba66de020",
+        "status": "active",
+        "original_instruction": "I want a new practice yard for promising fighters. Have our qualified builder oversee construction on company land, use twenty capital and ten timber, and return any unspent reserve when the work is finished.",
+        "summary": "Propose New practice yard through a new responsibility, a consenting existing professional, the published quotation, existing company resources and its owned site. Return unspent reserves after completion.",
+        "unresolved": [],
+        "proposed_steps": [
+          {
+            "arguments": {
+              "domain": "craft",
+              "institution_id": 902,
+              "remit": "New practice yard",
+              "title": "Development Overseer"
+            },
+            "depends_on": [],
+            "id": "role",
+            "operation": "define_role"
+          },
+          {
+            "arguments": {
+              "institution_id": 902,
+              "offering_id": 52,
+              "person_id": 904,
+              "quotation_digest": "1960d5fcc54ede4000b55033882754502cd0d71c44e635aec308706266c7eef4",
+              "role_id": {
+                "ref": "role.role_id"
+              },
+              "scope": "New practice yard"
+            },
+            "depends_on": [
+              "role"
+            ],
+            "id": "consent",
+            "operation": "offer_service"
+          },
+          {
+            "arguments": {
+              "institution_id": 902,
+              "resources": {
+                "capital": 20,
+                "timber": 10
+              }
+            },
+            "depends_on": [
+              "consent"
+            ],
+            "id": "budget",
+            "operation": "allocate_resources"
+          },
+          {
+            "arguments": {
+              "allocation_id": {
+                "ref": "budget.allocation_id"
+              },
+              "engagement_id": {
+                "ref": "consent.engagement_id"
+              },
+              "institution_id": 902,
+              "offering_id": 52,
+              "quotation_digest": "1960d5fcc54ede4000b55033882754502cd0d71c44e635aec308706266c7eef4",
+              "site_id": 2,
+              "title": "New practice yard"
+            },
+            "depends_on": [
+              "consent",
+              "budget"
+            ],
+            "id": "work",
+            "operation": "commission_work"
+          },
+          {
+            "arguments": {
+              "allocation_id": {
+                "ref": "budget.allocation_id"
+              }
+            },
+            "depends_on": [
+              "work",
+              "budget"
+            ],
+            "id": "refund",
+            "operation": "refund_resources"
+          }
+        ],
+        "steps": {
+          "budget": {
+            "status": "completed",
+            "result": {
+              "allocation_id": 1,
+              "state": "completed",
+              "summary": "Existing resources were reserved for the plan."
+            }
+          },
+          "consent": {
+            "status": "completed",
+            "result": {
+              "appointment_id": 1,
+              "engagement_id": 1,
+              "interaction_id": 1,
+              "proposal_id": 1,
+              "state": "completed",
+              "summary": "The responsibility and conditional service were accepted."
+            }
+          },
+          "refund": {
+            "status": "pending",
+            "result": {}
+          },
+          "role": {
+            "status": "completed",
+            "result": {
+              "role_id": 1,
+              "state": "completed",
+              "summary": "Established the responsibility: Development Overseer."
+            }
+          },
+          "work": {
+            "status": "active",
+            "result": {
+              "project_id": 1,
+              "state": "active",
+              "summary": "Work began on New practice yard. Completion is still pending; the quoted resources were consumed."
+            }
+          }
+        },
+        "review_scope": [
+          "Establish 'Development Overseer' as a staff responsibility in [DEMO] Caravan Office. Remit: New practice yard. This grants no other rights.",
+          "Ask [DEMO] Rurik Bell to accept a responsibility and conditional service for [DEMO] Caravan Office. Scope: New practice yard. Consent is not guaranteed; no gift or pay promise is included.",
+          "Reserve existing stock of [DEMO] Caravan Office: {\"capital\": 20, \"timber\": 10}. No currency conversion or new resources.",
+          "Attempt 'New practice yard' using the selected owned site, accepted service and reserved resources. Quoted requirements: 20 capital, 10 timber; a target of 60 days and a suitable land. Completion requires world time and sustained means.",
+          "Return only the unspent balance of this plan reserve to its original organisation."
+        ],
+        "authorization_notice": "Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing."
+      }
+    },
+    "AFTER 30 DAYS": {
+      "id": 1,
+      "session_id": 1,
+      "revision": 1,
+      "digest": "00d0178948e312c8c98dfa92b3d8e6a9dad062e353780d696ad8b64ba66de020",
+      "status": "active",
+      "original_instruction": "I want a new practice yard for promising fighters. Have our qualified builder oversee construction on company land, use twenty capital and ten timber, and return any unspent reserve when the work is finished.",
+      "summary": "Propose New practice yard through a new responsibility, a consenting existing professional, the published quotation, existing company resources and its owned site. Return unspent reserves after completion.",
+      "unresolved": [],
+      "proposed_steps": [
+        {
+          "arguments": {
+            "domain": "craft",
+            "institution_id": 902,
+            "remit": "New practice yard",
+            "title": "Development Overseer"
+          },
+          "depends_on": [],
+          "id": "role",
+          "operation": "define_role"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "offering_id": 52,
+            "person_id": 904,
+            "quotation_digest": "1960d5fcc54ede4000b55033882754502cd0d71c44e635aec308706266c7eef4",
+            "role_id": {
+              "ref": "role.role_id"
+            },
+            "scope": "New practice yard"
+          },
+          "depends_on": [
+            "role"
+          ],
+          "id": "consent",
+          "operation": "offer_service"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "resources": {
+              "capital": 20,
+              "timber": 10
+            }
+          },
+          "depends_on": [
+            "consent"
+          ],
+          "id": "budget",
+          "operation": "allocate_resources"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            },
+            "engagement_id": {
+              "ref": "consent.engagement_id"
+            },
+            "institution_id": 902,
+            "offering_id": 52,
+            "quotation_digest": "1960d5fcc54ede4000b55033882754502cd0d71c44e635aec308706266c7eef4",
+            "site_id": 2,
+            "title": "New practice yard"
+          },
+          "depends_on": [
+            "consent",
+            "budget"
+          ],
+          "id": "work",
+          "operation": "commission_work"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            }
+          },
+          "depends_on": [
+            "work",
+            "budget"
+          ],
+          "id": "refund",
+          "operation": "refund_resources"
+        }
+      ],
+      "steps": {
+        "budget": {
+          "status": "completed",
+          "result": {
+            "allocation_id": 1,
+            "state": "completed",
+            "summary": "Existing resources were reserved for the plan."
+          }
+        },
+        "consent": {
+          "status": "completed",
+          "result": {
+            "appointment_id": 1,
+            "engagement_id": 1,
+            "interaction_id": 1,
+            "proposal_id": 1,
+            "state": "completed",
+            "summary": "The responsibility and conditional service were accepted."
+          }
+        },
+        "refund": {
+          "status": "pending",
+          "result": {}
+        },
+        "role": {
+          "status": "completed",
+          "result": {
+            "role_id": 1,
+            "state": "completed",
+            "summary": "Established the responsibility: Development Overseer."
+          }
+        },
+        "work": {
+          "status": "active",
+          "result": {
+            "progress": 41.0,
+            "project_id": 1,
+            "state": "active",
+            "summary": "Work began on New practice yard. Completion is still pending; the quoted resources were consumed."
+          }
+        }
+      },
+      "review_scope": [
+        "Establish 'Development Overseer' as a staff responsibility in [DEMO] Caravan Office. Remit: New practice yard. This grants no other rights.",
+        "Ask [DEMO] Rurik Bell to accept a responsibility and conditional service for [DEMO] Caravan Office. Scope: New practice yard. Consent is not guaranteed; no gift or pay promise is included.",
+        "Reserve existing stock of [DEMO] Caravan Office: {\"capital\": 20, \"timber\": 10}. No currency conversion or new resources.",
+        "Attempt 'New practice yard' using the selected owned site, accepted service and reserved resources. Quoted requirements: 20 capital, 10 timber; a target of 60 days and a suitable land. Completion requires world time and sustained means.",
+        "Return only the unspent balance of this plan reserve to its original organisation."
+      ],
+      "authorization_notice": "Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing."
+    },
+    "AFTER 90 DAYS": {
+      "id": 1,
+      "session_id": 1,
+      "revision": 1,
+      "digest": "00d0178948e312c8c98dfa92b3d8e6a9dad062e353780d696ad8b64ba66de020",
+      "status": "completed",
+      "original_instruction": "I want a new practice yard for promising fighters. Have our qualified builder oversee construction on company land, use twenty capital and ten timber, and return any unspent reserve when the work is finished.",
+      "summary": "Propose New practice yard through a new responsibility, a consenting existing professional, the published quotation, existing company resources and its owned site. Return unspent reserves after completion.",
+      "unresolved": [],
+      "proposed_steps": [
+        {
+          "arguments": {
+            "domain": "craft",
+            "institution_id": 902,
+            "remit": "New practice yard",
+            "title": "Development Overseer"
+          },
+          "depends_on": [],
+          "id": "role",
+          "operation": "define_role"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "offering_id": 52,
+            "person_id": 904,
+            "quotation_digest": "1960d5fcc54ede4000b55033882754502cd0d71c44e635aec308706266c7eef4",
+            "role_id": {
+              "ref": "role.role_id"
+            },
+            "scope": "New practice yard"
+          },
+          "depends_on": [
+            "role"
+          ],
+          "id": "consent",
+          "operation": "offer_service"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "resources": {
+              "capital": 20,
+              "timber": 10
+            }
+          },
+          "depends_on": [
+            "consent"
+          ],
+          "id": "budget",
+          "operation": "allocate_resources"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            },
+            "engagement_id": {
+              "ref": "consent.engagement_id"
+            },
+            "institution_id": 902,
+            "offering_id": 52,
+            "quotation_digest": "1960d5fcc54ede4000b55033882754502cd0d71c44e635aec308706266c7eef4",
+            "site_id": 2,
+            "title": "New practice yard"
+          },
+          "depends_on": [
+            "consent",
+            "budget"
+          ],
+          "id": "work",
+          "operation": "commission_work"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            }
+          },
+          "depends_on": [
+            "work",
+            "budget"
+          ],
+          "id": "refund",
+          "operation": "refund_resources"
+        }
+      ],
+      "steps": {
+        "budget": {
+          "status": "completed",
+          "result": {
+            "allocation_id": 1,
+            "state": "completed",
+            "summary": "Existing resources were reserved for the plan."
+          }
+        },
+        "consent": {
+          "status": "completed",
+          "result": {
+            "appointment_id": 1,
+            "engagement_id": 1,
+            "interaction_id": 1,
+            "proposal_id": 1,
+            "state": "completed",
+            "summary": "The responsibility and conditional service were accepted."
+          }
+        },
+        "refund": {
+          "status": "completed",
+          "result": {
+            "state": "completed",
+            "summary": "Remaining unspent resources were returned; prior spending remains historical."
+          }
+        },
+        "role": {
+          "status": "completed",
+          "result": {
+            "role_id": 1,
+            "state": "completed",
+            "summary": "Established the responsibility: Development Overseer."
+          }
+        },
+        "work": {
+          "status": "completed",
+          "result": {
+            "progress": 100.0,
+            "project_id": 1,
+            "state": "completed",
+            "summary": "The native world simulation completed the delegated work."
+          }
+        }
+      },
+      "review_scope": [
+        "Establish 'Development Overseer' as a staff responsibility in [DEMO] Caravan Office. Remit: New practice yard. This grants no other rights.",
+        "Ask [DEMO] Rurik Bell to accept a responsibility and conditional service for [DEMO] Caravan Office. Scope: New practice yard. Consent is not guaranteed; no gift or pay promise is included.",
+        "Reserve existing stock of [DEMO] Caravan Office: {\"capital\": 20, \"timber\": 10}. No currency conversion or new resources.",
+        "Attempt 'New practice yard' using the selected owned site, accepted service and reserved resources. Quoted requirements: 20 capital, 10 timber; a target of 60 days and a suitable land. Completion requires world time and sustained means.",
+        "Return only the unspent balance of this plan reserve to its original organisation."
+      ],
+      "authorization_notice": "Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing."
+    },
+    "RELOADED": {
+      "id": 1,
+      "session_id": 1,
+      "revision": 1,
+      "digest": "00d0178948e312c8c98dfa92b3d8e6a9dad062e353780d696ad8b64ba66de020",
+      "status": "completed",
+      "original_instruction": "I want a new practice yard for promising fighters. Have our qualified builder oversee construction on company land, use twenty capital and ten timber, and return any unspent reserve when the work is finished.",
+      "summary": "Propose New practice yard through a new responsibility, a consenting existing professional, the published quotation, existing company resources and its owned site. Return unspent reserves after completion.",
+      "unresolved": [],
+      "proposed_steps": [
+        {
+          "arguments": {
+            "domain": "craft",
+            "institution_id": 902,
+            "remit": "New practice yard",
+            "title": "Development Overseer"
+          },
+          "depends_on": [],
+          "id": "role",
+          "operation": "define_role"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "offering_id": 52,
+            "person_id": 904,
+            "quotation_digest": "1960d5fcc54ede4000b55033882754502cd0d71c44e635aec308706266c7eef4",
+            "role_id": {
+              "ref": "role.role_id"
+            },
+            "scope": "New practice yard"
+          },
+          "depends_on": [
+            "role"
+          ],
+          "id": "consent",
+          "operation": "offer_service"
+        },
+        {
+          "arguments": {
+            "institution_id": 902,
+            "resources": {
+              "capital": 20,
+              "timber": 10
+            }
+          },
+          "depends_on": [
+            "consent"
+          ],
+          "id": "budget",
+          "operation": "allocate_resources"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            },
+            "engagement_id": {
+              "ref": "consent.engagement_id"
+            },
+            "institution_id": 902,
+            "offering_id": 52,
+            "quotation_digest": "1960d5fcc54ede4000b55033882754502cd0d71c44e635aec308706266c7eef4",
+            "site_id": 2,
+            "title": "New practice yard"
+          },
+          "depends_on": [
+            "consent",
+            "budget"
+          ],
+          "id": "work",
+          "operation": "commission_work"
+        },
+        {
+          "arguments": {
+            "allocation_id": {
+              "ref": "budget.allocation_id"
+            }
+          },
+          "depends_on": [
+            "work",
+            "budget"
+          ],
+          "id": "refund",
+          "operation": "refund_resources"
+        }
+      ],
+      "steps": {
+        "budget": {
+          "status": "completed",
+          "result": {
+            "allocation_id": 1,
+            "state": "completed",
+            "summary": "Existing resources were reserved for the plan."
+          }
+        },
+        "consent": {
+          "status": "completed",
+          "result": {
+            "appointment_id": 1,
+            "engagement_id": 1,
+            "interaction_id": 1,
+            "proposal_id": 1,
+            "state": "completed",
+            "summary": "The responsibility and conditional service were accepted."
+          }
+        },
+        "refund": {
+          "status": "completed",
+          "result": {
+            "state": "completed",
+            "summary": "Remaining unspent resources were returned; prior spending remains historical."
+          }
+        },
+        "role": {
+          "status": "completed",
+          "result": {
+            "role_id": 1,
+            "state": "completed",
+            "summary": "Established the responsibility: Development Overseer."
+          }
+        },
+        "work": {
+          "status": "completed",
+          "result": {
+            "progress": 100.0,
+            "project_id": 1,
+            "state": "completed",
+            "summary": "The native world simulation completed the delegated work."
+          }
+        }
+      },
+      "review_scope": [
+        "Establish 'Development Overseer' as a staff responsibility in [DEMO] Caravan Office. Remit: New practice yard. This grants no other rights.",
+        "Ask [DEMO] Rurik Bell to accept a responsibility and conditional service for [DEMO] Caravan Office. Scope: New practice yard. Consent is not guaranteed; no gift or pay promise is included.",
+        "Reserve existing stock of [DEMO] Caravan Office: {\"capital\": 20, \"timber\": 10}. No currency conversion or new resources.",
+        "Attempt 'New practice yard' using the selected owned site, accepted service and reserved resources. Quoted requirements: 20 capital, 10 timber; a target of 60 days and a suitable land. Completion requires world time and sustained means.",
+        "Return only the unspent balance of this plan reserve to its original organisation."
+      ],
+      "authorization_notice": "Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing."
+    }
+  }
+}

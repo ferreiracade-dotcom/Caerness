@@ -1,0 +1,86 @@
+{
+  "implementation_revision": "3acde1dc1b9900dd56b134f5ac3513d8fc52bcd1",
+  "base_pr3_review_fix_revision": "3aea6ef",
+  "master_revision": "b1185903d6a23cbe1ba49bb5755d1a42a762582a",
+  "opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
+  "canonical_changes": false,
+  "focused_checks": {
+    "pr3-review-fixes": {
+      "passed": 4,
+      "failed": 0,
+      "summed_test_seconds": 10.2
+    },
+    "planning-complete-focused": {
+      "passed": 7,
+      "failed": 0,
+      "summed_test_seconds": 34.8
+    },
+    "planning-final-verified": {
+      "passed": 6,
+      "failed": 0,
+      "summed_test_seconds": 22.1
+    },
+    "planning-delivery-focused": {
+      "passed": 5,
+      "failed": 0,
+      "summed_test_seconds": 19.6
+    }
+  },
+  "latest_full_suite": {
+    "status": "running",
+    "path": "runs/planning-delivery-regression"
+  },
+  "prior_release_full_suite": {
+    "revision": "54a929d",
+    "pass": 128,
+    "fail": 0
+  },
+  "configured_model": {
+    "backend": "openai_compatible",
+    "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+    "real_endpoint_health": "connection refused",
+    "real_llm_reasoning_tested": false,
+    "fake_http_model_adapter_tested": true
+  },
+  "browser": {
+    "viewport": [
+      390,
+      844
+    ],
+    "checked": [
+      "two reviewed plans authorized",
+      "30-day native progress",
+      "90-day native completion",
+      "reload continuity",
+      "no JavaScript errors"
+    ],
+    "scripted_model_proposals": true
+  },
+  "benchmark": {
+    "label": "general-planning",
+    "device": {
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "machine": "x86_64",
+      "python": "3.12.14",
+      "numpy": "2.3.5",
+      "sqlite": "3.53.1",
+      "cpu_count": 3
+    },
+    "segments": [
+      {
+        "days": 1,
+        "wall_secs": 0.147,
+        "secs_per_day": 0.147,
+        "day_reached": 1,
+        "peak_rss_mb": 35.3
+      },
+      {
+        "days": 7,
+        "wall_secs": 0.075,
+        "secs_per_day": 0.011,
+        "day_reached": 7,
+        "peak_rss_mb": 35.3
+      }
+    ]
+  }
+}

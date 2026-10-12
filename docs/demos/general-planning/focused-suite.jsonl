@@ -1,0 +1,6 @@
+{"test": "ai_planning_test", "status": "PASS", "secs": 11.4}
+{"test": "opportunity01_negotiation_test", "status": "PASS", "secs": 1.5}
+{"test": "orgagency_conflict01_test", "status": "PASS", "secs": 1.6}
+{"test": "planning_model_integration_test", "status": "PASS", "secs": 0.8}
+{"test": "player_appointment_test", "status": "PASS", "secs": 4.3}
+TOTAL {"PASS": 5}
