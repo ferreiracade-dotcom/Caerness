@@ -64,7 +64,8 @@ def main():
         project=done['steps']['work']['result']['project_id']
         table='cultural_objects' if example=='survey' else 'buildings'
         assert c.execute(f'SELECT 1 FROM {table} WHERE project_id=?',(project,)).fetchone()
-        assert c.execute(f'SELECT owner_actor_id FROM {table} WHERE project_id=?',(project,)).fetchone()[0]==ids['institution'], 'Company-funded work must not become the commander\'s personal property.'
+        owner_column='current_owner_actor_id' if example=='survey' else 'owner_actor_id'
+        assert c.execute(f'SELECT {owner_column} FROM {table} WHERE project_id=?',(project,)).fetchone()[0]==ids['institution'], 'Company-funded work must not become the commander\'s personal property.'
         before=c.execute('SELECT COUNT(*) FROM ai_plan_events').fetchone()[0]
         execute_plan(c,pid)
         assert c.execute('SELECT COUNT(*) FROM ai_plan_events').fetchone()[0]==before
@@ -163,6 +164,13 @@ def main():
     unavailable=approve_plan(c,p['id'],p['digest'])['plan']
     assert unavailable['status']=='blocked' and not c.execute('SELECT 1 FROM civilian_projects').fetchone()
     c.close(); print('Native functional capacity constrains work without exposing diagnosis PASS')
+
+    c,ids=fixture(); spec=composed_spec(ids,'survey'); spec['steps'][0]['arguments']['title']='Head of Reports'
+    p=proposed(c,ids,spec=spec)['plan']; approve_plan(c,p['id'],p['digest'])
+    c.execute("UPDATE organization_regimes SET status='ended' WHERE institution_actor_id=?",(ids['institution'],))
+    from engine.opportunity import institution_decision_actor
+    assert institution_decision_actor(c,ids['institution']) is None, 'A staff title must not manufacture governing authority.'
+    c.close(); print('New staff titles do not create institutional sovereignty or head authority PASS')
 
     # Counteroffers remain a player decision, through the same capability framework.
     c,ids=fixture(); out=proposed(c,ids); p=out['plan']

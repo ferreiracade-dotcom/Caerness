@@ -59,10 +59,19 @@ def institution_decision_actor(conn: sqlite3.Connection, institution_actor_id: i
                 return int(institution_actor_id)
             if str(slot["authority_kind"]) in {"unresolved_incumbent", "vacant"}:
                 return None
+    # Older saves may invoke this during migration before the proposal table exists.
+    plan_guard = ""
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='opportunity_proposals'").fetchone():
+        plan_guard = """AND NOT EXISTS (
+            SELECT 1 FROM opportunity_proposals p
+            WHERE p.id=json_extract(institution_memberships.metadata_json,'$.proposal_id')
+              AND json_extract(p.metadata_json,'$.ai_plan_guard') IS NOT NULL
+        )"""
     row = conn.execute(
-        """SELECT member_actor_id FROM institution_memberships
+        f"""SELECT member_actor_id FROM institution_memberships
            WHERE institution_actor_id=? AND status='active'
              AND (lower(coalesce(role_text,'')) GLOB '*head*' OR lower(coalesce(role_text,'')) GLOB '*master*')
+             {plan_guard}
            ORDER BY id LIMIT 1""",
         (institution_actor_id,),
     ).fetchone()
