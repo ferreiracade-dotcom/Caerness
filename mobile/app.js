@@ -31,6 +31,7 @@ function renderState() {
 
   const m = state.matters || {intentions:[], obligations:[]};
   $('mattersBody').innerHTML = [
+    ...(m.appointments || []).map(x => card(x.title, `${x.holder_name} • ${x.institution_name}`, `Held since day ${x.started_day}`)),
     ...(m.obligations || []).map(o => card(o.description, o.due_day == null ? 'No fixed date' : `Due day ${o.due_day}`, o.notes)),
     ...(m.intentions || []).map(i => card(i.description, `${i.status}${i.target_actor_name ? ` • ${i.target_actor_name}`:''}${i.target_location_name ? ` • ${i.target_location_name}`:''}`, i.possession_name || ''))
   ].join('') || '<p class="muted">Nothing currently needs carrying in your head.</p>';

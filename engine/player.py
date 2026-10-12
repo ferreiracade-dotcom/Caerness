@@ -162,6 +162,9 @@ def _pending_player_interactions(conn: sqlite3.Connection, actor_id: int) -> lis
         item = dict(row)
         try:
             item["terms"] = json.loads(item.pop("terms_json") or "{}")
+            # Social utility inputs belong to the resolver, never NPC dialogue.
+            item["terms"].pop("burden", None)
+            item["terms"].pop("incentive", None)
         except Exception:
             item["terms"] = {}
         out.append(item)
@@ -218,6 +221,8 @@ def build_scene_packet(
     known_rumours = _known_rumours(conn, player_actor_id, rumour_limit)
     attention = pending_attention(conn, player_actor_id, mark_shown=False, limit=12)
     matters = active_matters(conn, player_actor_id)
+    from .player_appointments import known_appointments
+    matters["appointments"] = known_appointments(conn, player_actor_id)
     professional_context = build_scene_competence_packet(conn, player_actor_id, request_text or "")
     health_context = build_health_packet(conn, player_actor_id)
     religious_context = religion_context(conn, player_actor_id, location_id)

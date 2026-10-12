@@ -110,10 +110,13 @@ def _task_contract(task_type: str, request_id: int) -> dict[str, Any]:
             "task_type": task_type,
             "request_id": request_id,
             "proposal": {
-                "action_type": "observe|wait|travel|speak|investigate|respond|attempt",
+                "action_type": "observe|wait|travel|speak|investigate|respond|appoint|attempt",
                 "confidence": "0.0-1.0",
                 "target_actor_name": None,
                 "target_location_name": None,
+                "institution_name": None,
+                "role_title": None,
+                "additional_terms": False,
                 "interaction_id": None,
                 "response_choice": "accept|reject|counter|null",
                 "duration_days": 0,
@@ -165,6 +168,8 @@ def _common_rules(task_type: str) -> list[str]:
     else:
         base.extend([
             "Interpret intent only. Do not decide success, NPC reaction, or create consequences.",
+            "For an appointment offer use appoint with target_actor_name, institution_name and exact existing role_title from appointment_options. Do not reduce it to speak or observe.",
+            "additional_terms must be true for promised money, transfers, new roles/divisions or any consequence beyond filling the existing role; these are not yet executable. Never discard such terms.",
             "Use only persisted actor/location/interaction names or IDs that are supported by the scene/canon context.",
             "If the intent cannot be represented safely by the allowed action types, use action_type=attempt and needs_interpretation=true.",
         ])
@@ -234,9 +239,11 @@ def create_action_request(conn: sqlite3.Connection, raw_text: str, provider: str
     payload = {
         "raw_player_input": raw_text,
         "scene": scene,
-        "allowed_action_types": ["observe", "wait", "travel", "speak", "investigate", "respond", "attempt"],
+        "allowed_action_types": ["observe", "wait", "travel", "speak", "investigate", "respond", "appoint", "attempt"],
         "important_boundary": "Interpret what the player attempts. Do not resolve success or mutate world state.",
     }
+    from .player_appointments import appointment_options
+    payload["appointment_options"] = appointment_options(conn, int(get_player(conn)["player_actor_id"]))
     return create_request(conn, "action_interpretation", payload, provider=provider, target_kind="scene_packet", target_id=scene["scene_packet_id"])
 
 
@@ -355,7 +362,7 @@ def _match_named(conn: sqlite3.Connection, table: str, name: str | None) -> sqli
 def proposal_from_action_response(conn: sqlite3.Connection, raw_text: str, response: dict[str, Any]) -> PlayerActionProposal:
     p = response["proposal"]
     action_type = str(p.get("action_type") or "attempt")
-    allowed = {"observe", "wait", "travel", "speak", "investigate", "respond", "attempt"}
+    allowed = {"observe", "wait", "travel", "speak", "investigate", "respond", "appoint", "attempt"}
     if action_type not in allowed:
         raise ValueError(f"Unsupported player action_type: {action_type}")
     confidence = max(0.0, min(1.0, float(p.get("confidence", 0.5))))
@@ -363,6 +370,15 @@ def proposal_from_action_response(conn: sqlite3.Connection, raw_text: str, respo
     purpose = str(p.get("purpose") or raw_text)
     note = str(p.get("note") or "")
     needs = bool(p.get("needs_interpretation", False))
+    if action_type == "attempt":
+        needs = True
+        note = note or "This intention has no validated executor yet. Nothing has been carried out."
+    if action_type == "observe" and HeuristicPlayerActionProvider().propose(conn, raw_text).needs_interpretation:
+        needs = True
+        note = "The requested intention cannot be replaced with observation. No action was carried out; clarify or revise the proposal."
+    if action_type in {"speak", "wait"} and re.search(r"\b(appoint\w*|promot\w*|responsibilit\w*|delegate\w*|offer)\b|\bin charge\b", raw_text, re.I):
+        needs = True
+        note = "The appointment intention was not represented by this interpretation. No appointment was made."
     target_actor = _match_named(conn, "actors", p.get("target_actor_name"))
     target_location = _match_named(conn, "locations", p.get("target_location_name"))
     interaction_id = int(p["interaction_id"]) if p.get("interaction_id") is not None else None
@@ -427,6 +443,9 @@ def proposal_from_action_response(conn: sqlite3.Connection, raw_text: str, respo
         route_location_names=route_names,
         needs_interpretation=needs,
         note=note,
+        institution_name=str(p["institution_name"]) if p.get("institution_name") else None,
+        role_title=str(p["role_title"]) if p.get("role_title") else None,
+        additional_terms=bool(p.get("additional_terms", False)),
     )
 
 

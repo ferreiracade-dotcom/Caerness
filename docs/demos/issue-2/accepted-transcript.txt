@@ -1,0 +1,9 @@
+Isolated demonstration. Fictional test characters; bounded model stub, real SQLite executor.
+PLAYER: I approach Mara Vale and offer her the Training Captain responsibility.
+GAME: Mara Vale accepted the offer and now holds Training Captain. The appointment is recorded. Unverified word nearby says: Word is circulating about offer resolved: [demo] player wanderer / mara vale; the details are inconsistent. The scene settles at Toll's Reach.
+PLAYER: I wait here for 7 days.
+GAME: The player chooses to remain in place while 7 day(s) pass. Unverified word nearby says: Word is circulating about offer resolved: [demo] player wanderer / mara vale; the details are inconsistent. The scene settles at Toll's Reach.
+PLAYER: I look around.
+GAME: The player takes stock of the current scene. Unverified word nearby says: Word is circulating about offer resolved: [demo] player wanderer / mara vale; the details are inconsistent. The scene settles at Toll's Reach.
+REOPENED SAVE, DAY 7
+MATTERS: [{"id": 1, "holder_name": "Mara Vale", "institution_name": "[DEMO] River Lantern Escort Company", "title": "Training Captain", "started_day": 0, "status": "active"}]

@@ -146,6 +146,8 @@ def mobile_state(conn: sqlite3.Connection) -> dict[str, Any]:
     turns = recent_turns(conn, 30) if player else []
     hub = player_information_hub(conn) if player else {"player": None, "attention": [], "matters": {}, "people": [], "places": [], "claims": []}
     if player:
+        from .player_appointments import known_appointments
+        hub.setdefault("matters", {})["appointments"] = known_appointments(conn, int(player["player_actor_id"]))
         # Mobile popups are contextual attention, not a permanent quest HUD. Return them once
         # and mark them shown; the underlying Matter/Intention remains available in reference screens.
         hub["attention"] = pending_attention(conn, int(player["player_actor_id"]), mark_shown=True, limit=12)

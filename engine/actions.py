@@ -29,6 +29,9 @@ class PlayerActionProposal:
     route_location_names: tuple[str, ...] = ()
     needs_interpretation: bool = False
     note: str = ""
+    institution_name: str | None = None
+    role_title: str | None = None
+    additional_terms: bool = False
 
 
 @dataclass(frozen=True)
@@ -181,6 +184,16 @@ class HeuristicPlayerActionProvider:
                         purpose=raw_text,
                     )
 
+        # Existing responses resolve first (including 'I accept the offer'). New
+        # consequential offers reach the interpreter before approach/speak/wait.
+        if any(re.search(pattern, low) for pattern in (
+            r"\bappoint", r"\bpromot", r"\bdelegate", r"\bresponsibilit",
+            r"\boffer\b", r"\bput .+ in charge\b", r"\bmake .+ (?:master|captain|commander)\b",
+        )):
+            return PlayerActionProposal(raw_text, "attempt", 0.5, purpose=raw_text,
+                needs_interpretation=True,
+                note="This proposal needs an intention interpreter; no appointment or promise has been made yet.")
+
         locations = conn.execute("SELECT id,name,kind FROM locations ORDER BY length(name) DESC").fetchall()
         location = _named_match(list(locations), raw_text)
         if location is not None and any(v in low for v in ("travel", "go to", "head to", "ride to", "walk to", "leave for", "journey to", "set out for")):
@@ -243,7 +256,9 @@ def _insert_player_action(conn: sqlite3.Connection, player_id: int, day: int, pr
                interaction_id,response_choice,proposed_json,status,duration_days
            ) VALUES (?,?,?,?,?,?,?,?,?,'proposed',?)""",
         (
-            day, player_id, proposal.raw_text, proposal.action_type, proposal.target_actor_id,
+            # Schema 108 stores domain intentions under attempt; the typed proposal
+            # and result preserve appoint. Existing saves need no schema rewrite.
+            day, player_id, proposal.raw_text, "attempt" if proposal.action_type == "appoint" else proposal.action_type, proposal.target_actor_id,
             proposal.target_location_id, proposal.interaction_id, proposal.response_choice,
             json.dumps(asdict(proposal)), proposal.duration_days,
         ),
@@ -252,9 +267,10 @@ def _insert_player_action(conn: sqlite3.Connection, player_id: int, day: int, pr
 
 
 def _record_result(conn: sqlite3.Connection, action_id: int, day: int, status: str, result: dict[str, Any]) -> None:
+    stored_status = {"blocked": "invalid", "refused": "failed", "countered": "applied"}.get(status, status)
     conn.execute(
         "UPDATE player_actions SET day_resolved=?,status=?,result_json=? WHERE id=?",
-        (day, status, json.dumps(result), action_id),
+        (day, stored_status, json.dumps(result), action_id),
     )
 
 
@@ -292,6 +308,14 @@ def begin_player_action(
 
     if proposal.action_type == "observe":
         result = PlayerActionResult(action_id, "applied", "observe", "The player takes stock of the current scene.", detail={})
+        _record_result(conn, action_id, day, result.status, asdict(result))
+        return proposal, result
+
+    if proposal.action_type == "appoint":
+        from .player_appointments import execute_appointment
+        result = execute_appointment(conn, player_id, day, action_id, proposal)
+        if result.interaction_id:
+            _causal_link(conn, day, action_id, "interaction", result.interaction_id, "proposed")
         _record_result(conn, action_id, day, result.status, asdict(result))
         return proposal, result
 
