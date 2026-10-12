@@ -2,7 +2,8 @@
 
 **Date:** 2026-10-12  
 **Status:** implementation brief only; no engine implementation authorised by this planning branch  
-**Parent audit:** `docs/reviews/2026-10-12-player-first-simulation-audit.md`  
+**Parent audit:** `docs/reviews/2026-10-12-player-first-simulation-audit.md`
+**Owner's updated design decisions:** `docs/plans/2026-10-12-narrative-direction-clarifications.md` — read before implementation; narrows and qualifies earlier absolute no-plot-armour language.  
 **Primary repo:** `ferreiracade-dotcom/Caerness`
 
 ## Product objective
@@ -13,14 +14,16 @@ Create an enjoyable, persistent, free-form character-life RPG. The **player is t
 
 ## Non-negotiable game design
 
-1. World state, law of consequences, knowledge and chronology are authoritative. Narration cannot quietly create entities, relationships, holdings, contracts, wealth or victories. Do not grant player advantage merely because the camera follows them.
+1. World state, law of consequences, knowledge and chronology are authoritative. Narration cannot quietly create entities, relationships, holdings, contracts, wealth or victories. **The owner now permits narrow, credible protagonist fortune in encounter incidence and genuinely uncertain survival, but never guaranteed success, weakened enemies, fabricated prerequisites or rewritten history.** See the updated design-decisions note.
 2. NPC agency is real; relationships contain mixed feelings; loyalty and refusal are possible; significance and attention alter simulation resolution, not eligibility for success.
 3. Free-form intent is unrestricted but may be infeasible. Never silently convert an unsupported proposal into mere observation or claim it happened. Explain blockers in-world and allow alternatives, revisions or longer processes.
 4. Conversations may continue for many turns within the same scene, including sensitive, quiet, ordinary or emotionally important exchanges. Scene progression is not forced by the agent's need for plot.
 5. Player can advance hours, days, months and years without performing repetitive work. Meaningful decisions and causal interruptions can stop a skip; delegations proceed without micromanagement.
 6. Individual ability and institutional/social/material standing are distinct. A great spearman need not be a ruler; a successful patron need not be an extraordinary fighter.
 7. Information is situated and may be incomplete or wrong. NPCs recognise the protagonist only if their actual information and social situation warrant it. Fame is not universal.
-8. All UI choices are optional prompts, not a closed action menu. No fake victory loops, arbitrary success or mandatory administrative spreadsheets.
+8. Authored content is welcome: the existing World Bible, crafted cultures, places, institutions and opening hooks provide rich constraints. Do not turn these into predetermined compulsory arcs.
+9. The narrative game must be complete and delightful without Unreal. Defer all 3D development; illustrations are optional supporting material and not a product gate.
+10. All UI choices are optional prompts, not a closed action menu. No fake victory loops, arbitrary success or mandatory administrative spreadsheets.
 
 ## Work sequencing (agent executes, user reviews)
 
@@ -52,6 +55,7 @@ Create an enjoyable, persistent, free-form character-life RPG. The **player is t
 ### Track D — narrator and mobile game UX
 
 - Design scene packet to prioritise salient independent activity: places have routines, construction, small changes, inhabitants, sounds, ongoing work and local social protocols. Do not generate random decorative anomalies without causal support.
+- Implement **bounded opportunity incidence** separately from narration salience, only when legitimate existing circumstances permit a chance encounter or development. Keep a recordable eligibility and weighting explanation, and test absence of protagonist-guaranteed success. Soft survival preference is allowed only for truly ambiguous lethal outcomes and must not erase accumulating consequences.
 - Responsive narrative density: brief for familiar routine movement, rich for new/changed surroundings or player attention, deliberately slow for chosen conversations; no automatic time leap.
 - Character-competence layer handles routine tasks and speech mediation; no technical combat writing or manual procurement.
 - Ensure phone text is readable, can be spoken and navigated with minimal interaction; explore voice/input integration if available, but no mandatory remote cloud or fragile manual copy/paste as the only reliable mode.
