@@ -32,6 +32,7 @@ class PlayerActionProposal:
     institution_name: str | None = None
     role_title: str | None = None
     additional_terms: bool = False
+    review_action_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -56,6 +57,16 @@ class PlayerActionProvider(Protocol):
 
 def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
+
+
+def is_appointment_request(conn: sqlite3.Connection, text: str) -> bool:
+    """Legacy appointment bridge only; unrelated offers remain ordinary input."""
+    low = _normalize(text)
+    if re.search(r"\b(?:appoint|promote)\b", low):
+        return True
+    return bool(re.search(r"\boffer\b", low) and any(
+        str(row[0]).lower() in low for row in conn.execute("SELECT title FROM institutional_roles WHERE status='active'")
+    ))
 
 
 def _extract_duration_days(text: str, default: int = 1) -> int:
@@ -186,10 +197,7 @@ class HeuristicPlayerActionProvider:
 
         # Existing responses resolve first (including 'I accept the offer'). New
         # consequential offers reach the interpreter before approach/speak/wait.
-        if any(re.search(pattern, low) for pattern in (
-            r"\bappoint", r"\bpromot", r"\bdelegate", r"\bresponsibilit",
-            r"\boffer\b", r"\bput .+ in charge\b", r"\bmake .+ (?:master|captain|commander)\b",
-        )):
+        if is_appointment_request(conn, raw_text):
             return PlayerActionProposal(raw_text, "attempt", 0.5, purpose=raw_text,
                 needs_interpretation=True,
                 note="This proposal needs an intention interpreter; no appointment or promise has been made yet.")
@@ -267,7 +275,7 @@ def _insert_player_action(conn: sqlite3.Connection, player_id: int, day: int, pr
 
 
 def _record_result(conn: sqlite3.Connection, action_id: int, day: int, status: str, result: dict[str, Any]) -> None:
-    stored_status = {"blocked": "invalid", "refused": "failed", "countered": "applied"}.get(status, status)
+    stored_status = {"blocked": "invalid", "refused": "failed", "countered": "applied", "needs_confirmation": "proposed"}.get(status, status)
     conn.execute(
         "UPDATE player_actions SET day_resolved=?,status=?,result_json=? WHERE id=?",
         (day, stored_status, json.dumps(result), action_id),
@@ -312,6 +320,13 @@ def begin_player_action(
         return proposal, result
 
     if proposal.action_type == "appoint":
+        if proposal.review_action_id is None:
+            result = PlayerActionResult(action_id, "needs_confirmation", "appoint",
+                f"Proposed scope: offer {proposal.role_title or 'an existing role'} to {proposal.target_actor_name or 'the named person'}. "
+                "This includes no gifts, transfers, pay or additional promises. Review this limited scope against your full instruction before confirming; nothing has been offered yet.",
+                detail={"committed": False, "review_action_id": action_id, "original_instruction": raw_text})
+            _record_result(conn, action_id, day, result.status, asdict(result))
+            return proposal, result
         from .player_appointments import execute_appointment
         result = execute_appointment(conn, player_id, day, action_id, proposal)
         if result.interaction_id:
@@ -410,6 +425,22 @@ def begin_player_action(
     )
     _record_result(conn, action_id, day, result.status, asdict(result))
     return proposal, result
+
+
+def confirm_appointment_scope(conn: sqlite3.Connection, action_id: int) -> dict[str, Any]:
+    """Only a direct player confirmation endpoint calls this; model fields cannot."""
+    from dataclasses import replace
+    from .model_gateway import FixedActionProvider
+    from .turns import play_turn
+    player = get_player(conn)
+    row = conn.execute("SELECT * FROM player_actions WHERE id=?", (action_id,)).fetchone()
+    if not player or not row or row["player_actor_id"] != player["player_actor_id"] or row["status"] != "proposed":
+        raise ValueError("This scope review is not pending for the current player.")
+    proposal = PlayerActionProposal(**json.loads(row["proposed_json"]))
+    if proposal.action_type != "appoint":
+        raise ValueError("This is not an appointment scope review.")
+    conn.execute("UPDATE player_actions SET status='applied' WHERE id=?", (action_id,))
+    return play_turn(conn, proposal.raw_text, action_provider=FixedActionProvider(replace(proposal, review_action_id=action_id)))
 
 
 def finalize_player_action(conn: sqlite3.Connection, proposal: PlayerActionProposal, result: PlayerActionResult) -> PlayerActionResult:

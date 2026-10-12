@@ -38,6 +38,11 @@ def demo_input(conn, text, **kwargs):
     if applied['status'] == 'not_applied':
         return {'status': 'complete', 'narration': applied['summary']}
     turn = applied['turn']
+    if turn['action_result']['status'] == 'needs_confirmation':
+        from engine.actions import confirm_appointment_scope
+        print('PLAYER SCOPE REVIEW:', turn['action_result']['summary'])
+        print('SCRIPTED PLAYER CHOICE: Confirm this appointment-only offer.')
+        turn = confirm_appointment_scope(conn, turn['action_result']['action_id'])
     narration = TemplateNarratorProvider().narrate(turn['narration_envelope'])
     nreq = applied['next_request']['request_id']
     import_response(conn, nreq, json.dumps(dict(task_type='narration', request_id=nreq, narration=narration)))

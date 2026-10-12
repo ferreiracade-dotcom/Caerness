@@ -31,6 +31,7 @@ function renderState() {
 
   const m = state.matters || {intentions:[], obligations:[]};
   $('mattersBody').innerHTML = [
+    ...(state.scope_reviews || []).map(x => `<div class="card"><p>${esc(x.detail.original_instruction)}</p><p>${esc(x.summary)}</p><button data-confirm-appointment="${esc(x.action_id)}">Confirm this offer only</button></div>`),
     ...(m.appointments || []).map(x => card(x.title, `${x.holder_name} • ${x.institution_name}`, `Held since day ${x.started_day}`)),
     ...(m.obligations || []).map(o => card(o.description, o.due_day == null ? 'No fixed date' : `Due day ${o.due_day}`, o.notes)),
     ...(m.intentions || []).map(i => card(i.description, `${i.status}${i.target_actor_name ? ` • ${i.target_actor_name}`:''}${i.target_location_name ? ` • ${i.target_location_name}`:''}`, i.possession_name || ''))
@@ -44,6 +45,14 @@ function renderState() {
 function card(title, meta='', body='') {
   return `<div class="card"><div class="card-title">${esc(title)}</div>${meta?`<div class="meta">${esc(meta)}</div>`:''}${body?`<div>${esc(body)}</div>`:''}</div>`;
 }
+document.addEventListener('click', async e => {
+  const button = e.target.closest('[data-confirm-appointment]');
+  if (!button) return;
+  try {
+    await api('/api/appointment-confirm', {method:'POST', body:JSON.stringify({action_id:Number(button.dataset.confirmAppointment)})});
+    await refresh();
+  } catch (error) { alert(error.message); }
+});
 function renderWorld() {
   if (!state) return;
   let html = '';

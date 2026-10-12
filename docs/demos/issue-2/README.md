@@ -3,6 +3,14 @@
 This is the first playable appointment loop for issue #2. In the isolated example,
 you command an escort company and approach an existing officer, Mara Vale:
 
+PR #3 review correction: ordinary offers no longer trigger the appointment bridge.
+Every interpreted appointment first displays its limited appointment-only scope
+alongside the complete original instruction. The player must explicitly confirm
+that scope in Matters before an offer is made. Thus even a model that omits a
+promised horse cannot silently carry out only the appointment. The prior screenshots
+and original full-suite evidence below describe the initial slice; the review-fix
+tests additionally cover non-appointment offers and incomplete interpretations.
+
 > I approach Mara Vale and offer her the Training Captain responsibility.
 
 When she accepts, the game records her office and membership. After seven days and

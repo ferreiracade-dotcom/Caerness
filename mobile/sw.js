@@ -1,4 +1,4 @@
-const CACHE = 'caerness-ui-appointments-v1';
+const CACHE = 'caerness-ui-appointments-v2';
 const ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))));
 self.addEventListener('activate', event => event.waitUntil(

@@ -7,7 +7,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-from .actions import HeuristicPlayerActionProvider, PlayerActionProposal, shortest_route
+from .actions import HeuristicPlayerActionProvider, PlayerActionProposal, shortest_route, is_appointment_request
 from .decisions import DecisionProposal, apply_decision, build_actor_context, candidate_to_proposal
 from .decision_runtime import generate_candidates, record_external_selection
 from .player import build_scene_packet, get_player, sync_player_location
@@ -376,7 +376,7 @@ def proposal_from_action_response(conn: sqlite3.Connection, raw_text: str, respo
     if action_type == "observe" and HeuristicPlayerActionProvider().propose(conn, raw_text).needs_interpretation:
         needs = True
         note = "The requested intention cannot be replaced with observation. No action was carried out; clarify or revise the proposal."
-    if action_type in {"speak", "wait"} and re.search(r"\b(appoint\w*|promot\w*|responsibilit\w*|delegate\w*|offer)\b|\bin charge\b", raw_text, re.I):
+    if action_type in {"speak", "wait"} and is_appointment_request(conn, raw_text):
         needs = True
         note = "The appointment intention was not represented by this interpretation. No appointment was made."
     target_actor = _match_named(conn, "actors", p.get("target_actor_name"))

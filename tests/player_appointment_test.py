@@ -38,7 +38,7 @@ def fixture():
     return c, commander, holder, institution, role
 
 
-def offer(c, text="I approach Mara Vale and offer her the Training Captain responsibility.", **changes):
+def offer(c, text="I approach Mara Vale and offer her the Training Captain responsibility.", confirm=True, **changes):
     queued = bridge_play(c, text, 'generic')
     assert queued['status'] == 'awaiting_action_interpretation'
     p = dict(action_type='appoint', confidence=.98, target_actor_name='Mara Vale',
@@ -46,7 +46,12 @@ def offer(c, text="I approach Mara Vale and offer her the Training Captain respo
              additional_terms=False, purpose=text)
     p.update(changes)
     import_response(c, queued['request_id'], json.dumps(dict(task_type='action_interpretation', request_id=queued['request_id'], proposal=p)))
-    return apply_model_request(c, queued['request_id'])
+    result = apply_model_request(c, queued['request_id'])
+    if confirm and result.get('turn', {}).get('action_result', {}).get('status') == 'needs_confirmation':
+        from engine.actions import confirm_appointment_scope
+        turn = confirm_appointment_scope(c, result['turn']['action_result']['action_id'])
+        result['turn'] = turn
+    return result
 
 
 def main():
@@ -112,6 +117,19 @@ def main():
     c, *_ = fixture()
     result = offer(c, text='I offer Mara Vale the Training Captain responsibility and pay her 100 gold.')['turn']['action_result']
     assert result['status'] == 'blocked' and not result['detail']['committed']
+    c.close()
+    c, *_ = fixture()
+    incomplete = offer(c, text='I offer Mara Vale Training Captain and promise her my black horse.', confirm=False)
+    assert incomplete['turn']['action_result']['status'] == 'needs_confirmation'
+    assert 'black horse' in incomplete['turn']['action_result']['detail']['original_instruction']
+    assert not c.execute('SELECT 1 FROM institutional_appointments').fetchone()
+    from engine.actions import HeuristicPlayerActionProvider
+    from engine.model_gateway import proposal_from_action_response
+    for text in ('I approach Mara Vale and offer her a seat.', 'I ask Mara Vale about the merchant offer.', 'I wait for the offer to arrive.'):
+        p = HeuristicPlayerActionProvider().propose(c, text)
+        assert not p.needs_interpretation, (text, p)
+        interpreted = proposal_from_action_response(c, text, {'proposal': {'action_type': p.action_type, 'target_actor_name':'Mara Vale'}})
+        assert not interpreted.needs_interpretation, interpreted
     c.close()
 
     for constraint in ('authority', 'resources', 'membership', 'competence', 'absent', 'unknown_role', 'extra_terms'):

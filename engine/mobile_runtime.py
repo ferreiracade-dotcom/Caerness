@@ -165,6 +165,7 @@ def mobile_state(conn: sqlite3.Connection) -> dict[str, Any]:
         "turns": turns,
         "attention": hub.get("attention", []),
         "matters": hub.get("matters", {}),
+        "scope_reviews": [json.loads(r[0]) for r in conn.execute("SELECT result_json FROM player_actions WHERE player_actor_id=? AND status='proposed' AND result_json IS NOT NULL", (int(player["player_actor_id"]),)).fetchall()] if player else [],
         "people": hub.get("people", []),
         "places": hub.get("places", []),
         "claims": hub.get("claims", []),
