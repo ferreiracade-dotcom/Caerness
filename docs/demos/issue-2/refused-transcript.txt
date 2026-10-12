@@ -1,0 +1,9 @@
+Isolated demonstration. Fictional test characters; bounded model stub, real SQLite executor.
+PLAYER: I approach Mara Vale and offer her the Training Captain responsibility.
+GAME: Mara Vale declined the offer of Training Captain. No appointment was made. Unverified word nearby says: Word is circulating about offer refused: [demo] player wanderer / mara vale; the details are inconsistent. The scene settles at Toll's Reach.
+PLAYER: I wait here for 7 days.
+GAME: The player chooses to remain in place while 7 day(s) pass. Unverified word nearby says: Word is circulating about offer refused: [demo] player wanderer / mara vale; the details are inconsistent. The scene settles at Toll's Reach.
+PLAYER: I look around.
+GAME: The player takes stock of the current scene. Unverified word nearby says: Word is circulating about offer refused: [demo] player wanderer / mara vale; the details are inconsistent. The scene settles at Toll's Reach.
+REOPENED SAVE, DAY 7
+MATTERS: []

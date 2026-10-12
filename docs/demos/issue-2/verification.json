@@ -1,0 +1,122 @@
+{
+  "base_revision": "b1185903d6a23cbe1ba49bb5755d1a42a762582a",
+  "implementation_revision": "dc746d12f90066c9767575d961ee7ec2edc82ea5",
+  "opening_database_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
+  "focused_checks": {
+    "issue2-last-focused": {
+      "tests": [
+        {
+          "test": "action_test",
+          "status": "PASS",
+          "secs": 6.3
+        },
+        {
+          "test": "interaction_test",
+          "status": "PASS",
+          "secs": 3.5
+        },
+        {
+          "test": "model_gateway_test",
+          "status": "PASS",
+          "secs": 1.1
+        },
+        {
+          "test": "opportunity01_negotiation_test",
+          "status": "PASS",
+          "secs": 3.2
+        },
+        {
+          "test": "player_appointment_test",
+          "status": "PASS",
+          "secs": 7.2
+        },
+        {
+          "test": "v07_test",
+          "status": "PASS",
+          "secs": 2.2
+        }
+      ],
+      "seconds_sum": 23.5
+    }
+  },
+  "baseline_benchmark": {
+    "label": "issue2-baseline",
+    "device": {
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "machine": "x86_64",
+      "python": "3.12.14",
+      "numpy": "2.3.5",
+      "sqlite": "3.53.1",
+      "cpu_count": 3
+    },
+    "segments": [
+      {
+        "days": 1,
+        "wall_secs": 0.123,
+        "secs_per_day": 0.123,
+        "day_reached": 1,
+        "peak_rss_mb": 35.1
+      },
+      {
+        "days": 7,
+        "wall_secs": 0.136,
+        "secs_per_day": 0.019,
+        "day_reached": 7,
+        "peak_rss_mb": 35.1
+      }
+    ]
+  },
+  "final_benchmark": {
+    "label": "issue2-final",
+    "device": {
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "machine": "x86_64",
+      "python": "3.12.14",
+      "numpy": "2.3.5",
+      "sqlite": "3.53.1",
+      "cpu_count": 3
+    },
+    "segments": [
+      {
+        "days": 1,
+        "wall_secs": 0.286,
+        "secs_per_day": 0.286,
+        "day_reached": 1,
+        "peak_rss_mb": 35.1
+      },
+      {
+        "days": 7,
+        "wall_secs": 0.233,
+        "secs_per_day": 0.033,
+        "day_reached": 7,
+        "peak_rss_mb": 35.1
+      }
+    ]
+  },
+  "browser_checks": [
+    "390x844 viewport: offer, seven-day wait, reload, saved appointment in Matters, no JavaScript errors",
+    "old service-worker cache removed and updated Matters rendered"
+  ],
+  "model_access": "bounded stub for interpreter; template narrator; no live LLM quality claim",
+  "full_regressions": {
+    "master_baseline": {
+      "pass": 125,
+      "fail": 0,
+      "timeout": 0,
+      "summed_test_seconds": 471.4,
+      "log": "master_baseline-suite.jsonl",
+      "scratch_temp_directory": "runs/issue2-baseline-tmp"
+    },
+    "feature": {
+      "pass": 126,
+      "fail": 0,
+      "timeout": 0,
+      "summed_test_seconds": 475.4,
+      "log": "feature-suite.jsonl",
+      "scratch_temp_directory": "runs/issue2-clean-tmp"
+    }
+  },
+  "final_checks": "Full isolated suites plus final action/model/social rerun (6/6), final appointment targeted test including competence constraint, JavaScript syntax and cache-upgrade browser checks.",
+  "performance_note": "Short benchmarks are smoke measurements on a cloud CPU, not phone measurements or evidence of optimisation. Concurrent regression runs affect timing.",
+  "initial_environment_blocker": "The first sandboxed suite had a loopback socket denial in v07_test. Fully isolated suites with socket permission both pass; superseded runs are not acceptance evidence."
+}

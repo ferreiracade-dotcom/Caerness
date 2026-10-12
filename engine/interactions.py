@@ -358,6 +358,12 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
     rel = relationship_view(conn, proposer, recipient)
     drives = _drives(conn, recipient)
     terms = json.loads(interaction["terms_json"] or "{}")
+    opportunity_pid = terms.get("opportunity_proposal_id")
+    if opportunity_pid:
+        meta = conn.execute("SELECT metadata_json FROM opportunity_proposals WHERE id=?", (opportunity_pid,)).fetchone()
+        if meta and json.loads(meta[0]).get("player_appointment"):
+            # Consent follows the recipient's own opinion, independently of command.
+            rel = relationship_view(conn, recipient, proposer)
     incentive = float(terms.get("incentive", 0.0))
     burden = float(terms.get("burden", 0.0))
     rng = _rng(conn, int(interaction["id"]) * 17 + recipient, day)

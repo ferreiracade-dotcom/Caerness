@@ -201,6 +201,10 @@ def counter_proposal(
         parent_proposal_id=original_proposal_id, source_kind="counter_proposal", source_id=original_proposal_id,
         metadata={"counter_to": original_proposal_id},
     )
+    original_metadata = _loads(p["metadata_json"], {})
+    if original_metadata.get("player_appointment"):
+        original_metadata["counter_to"] = original_proposal_id
+        conn.execute("UPDATE opportunity_proposals SET metadata_json=? WHERE id=?", (_j(original_metadata), cid))
     originals = conn.execute("SELECT * FROM opportunity_proposal_terms WHERE proposal_id=? ORDER BY execution_order,id", (original_proposal_id,)).fetchall()
     overrides = {(x.get("term_kind"), x.get("subject_kind"), x.get("subject_id")): x for x in (term_overrides or [])}
     for t in originals:
@@ -390,6 +394,19 @@ def accept_proposal(conn: sqlite3.Connection, proposal_id: int, accepting_actor_
     terms = conn.execute("SELECT * FROM opportunity_proposal_terms WHERE proposal_id=? ORDER BY execution_order,id", (proposal_id,)).fetchall()
     if not terms:
         raise ValueError("proposal has no terms")
+    metadata = _loads(p["metadata_json"], {})
+    if metadata.get("player_appointment"):
+        # Revalidate at commit, including after a counterproposal or delayed response.
+        from .player_appointments import validate_appointment
+        role = validate_appointment(conn, int(metadata["appointing_actor_id"]), int(metadata["holder_actor_id"]), int(metadata["role_id"]))
+        if len(terms) != 1 or str(terms[0]["term_kind"]) != "appointment":
+            raise ValueError("Extra appointment terms are not executable in this flow.")
+        value = _loads(terms[0]["value_json"], {})
+        expected = {"role_id": int(role["id"]), "holder_actor_id": int(metadata["holder_actor_id"]),
+            "institution_actor_id": int(role["institution_actor_id"]), "title": str(role["title"]),
+            "appointment_kind": str(role["role_kind"]), "obligations": _loads(role["remit_json"], {})}
+        if value != expected:
+            raise ValueError("The counterproposal changed unsupported appointment terms.")
     executed: list[dict[str, Any]] = []
     conn.execute("SAVEPOINT opportunity_accept")
     try:

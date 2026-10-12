@@ -158,6 +158,13 @@ class CaernessHandler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         try:
             body = self._read_json()
+            if path == "/api/appointment-confirm":
+                from .actions import confirm_appointment_scope
+                with connect() as conn:
+                    result = confirm_appointment_scope(conn, int(body["action_id"]))
+                    conn.commit()
+                self._send_json({"status": "complete", "turn": result, "narration": result["narration"]})
+                return
             if path == "/api/play":
                 text = str(body.get("text") or "")
                 mode = str(body.get("mode") or "auto")

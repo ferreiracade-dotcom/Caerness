@@ -61,7 +61,7 @@ def run():
         assert conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0] == day_before
         assert "Claude Bridge Request" in Path(ares["packet_path"]).read_text(encoding="utf-8")
 
-        # Claude can safely interpret that as observation if the model cannot ground the custom action.
+        # Unsupported bargains must not silently become observation.
         response = f'''```json
 {{
   "task_type": "action_interpretation",
@@ -83,11 +83,11 @@ def run():
 ```'''
         import_response(conn, ares["request_id"], response)
         applied_action = apply_model_request(conn, ares["request_id"])
-        assert applied_action["status"] == "applied"
-        assert applied_action["next_request"]["provider"] == "claude"
+        assert applied_action["status"] == "not_applied"
+        assert "cannot be replaced" in applied_action["summary"]
 
         # The same pending request can be exported for the other web-chat model without changing engine semantics.
-        cross_path = export_request(conn, applied_action["next_request"]["request_id"], provider="chatgpt")
+        cross_path = export_request(conn, ares["request_id"], provider="chatgpt")
         cross_text = Path(cross_path).read_text(encoding="utf-8")
         assert "ChatGPT Bridge Request" in cross_text
 
@@ -114,7 +114,8 @@ def run():
         assert conn.execute("SELECT COUNT(*) FROM decisions WHERE id=?", (dapplied["decision_id"],)).fetchone()[0] == 1
         assert conn.execute("SELECT COUNT(*) FROM decision_evaluations WHERE decision_id=?",(dapplied["decision_id"],)).fetchone()[0] == 1
 
-        assert model_status(conn)["request_counts"].get("applied", 0) >= 3
+        assert model_status(conn)["request_counts"].get("applied", 0) >= 2
+        assert model_status(conn)["request_counts"].get("error", 0) == 1
         conn.commit()
 
     print("model_gateway_test: PASS")

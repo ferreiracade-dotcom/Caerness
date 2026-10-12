@@ -40,7 +40,7 @@ def assess_handoff(
     pending = post_scene.get("pending_player_interactions") or []
     new_pending = _new_ids(pre_scene.get("pending_player_interactions") or [], pending)
 
-    if action_result.get("status") in {"needs_interpretation", "invalid", "failed"}:
+    if action_result.get("status") in {"needs_interpretation", "needs_confirmation", "invalid", "failed", "blocked", "refused", "countered"}:
         return AgencyAssessment("hard", "The player's intended action cannot proceed without clarification or a new choice.", 100.0, False)
     if decision_cues:
         return AgencyAssessment("hard", "Established competence reached a meaningful fork that the engine must not choose for the player.", 96.0, False)

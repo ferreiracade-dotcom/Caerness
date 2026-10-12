@@ -1,0 +1,14 @@
+PLAYER: I approach Mara Vale and offer her the Training Captain responsibility.
+ENGINE: Mara Vale accepted the offer and now holds Training Captain. The appointment is recorded.
+AFTER 7 DAYS + SAVE/RELOAD: [{'id': 1, 'holder_name': 'Mara Vale', 'institution_name': '[DEMO] River Lantern Escort Company', 'title': 'Training Captain', 'started_day': 0, 'status': 'active'}]
+REFUSAL: Mara Vale declined the offer of Training Captain. No appointment was made.
+COUNTERPROPOSAL: Mara Vale countered the offer of Training Captain. No appointment has been made; the counterproposal awaits your response.
+AUTHORITY: You do not hold the authority to appoint someone for this organisation.
+RESOURCES: The organisation lacks the capital required for this responsibility.
+MEMBERSHIP: The recipient is not an existing member of this organisation; recruitment is a separate proposal.
+COMPETENCE: The recipient has not demonstrated the competence required for this role.
+ABSENT: The subordinate is not available for a direct offer here. Meet them before presenting it.
+UNKNOWN_ROLE: That responsibility is unknown or ambiguous. Specify one existing organisation and role; no new role was created.
+EXTRA_TERMS: This first appointment flow cannot yet execute extra pay, transfers or a new division. Nothing has been promised or created.
+CONSENT WITHOUT COMMIT: The subordinate consented, but the appointment could not be committed because its prerequisites changed. No appointment was created.
+PLAYER APPOINTMENT: PASS
