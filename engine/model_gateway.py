@@ -182,6 +182,10 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
     label = _provider_label(provider)
     contract = _task_contract(task_type, request_id)
     rules = _common_rules(task_type)
+    if payload.get("protocol") == "world_plan_v1":
+        from .planning_gateway import contract as planning_contract
+        contract = planning_contract(request_id)
+        rules = list(payload["rules"])
     return "\n".join([
         f"# Caerness Engine — {label} Bridge Request #{request_id}",
         "",
@@ -496,6 +500,10 @@ def apply_model_request(conn: sqlite3.Connection, request_id: int) -> dict[str, 
     input_data = json.loads(row["input_json"])
     task = str(row["task_type"])
     provider = str(row["provider"])
+
+    if input_data.get("protocol") == "world_plan_v1":
+        from .planning_gateway import apply_response
+        return apply_response(conn, row, response, input_data)
 
     if task == "action_interpretation":
         raw_text = str(input_data["raw_player_input"])

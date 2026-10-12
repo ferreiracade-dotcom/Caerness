@@ -64,6 +64,8 @@ def process_player_input(
     *,
     mode: str = "auto",
     force_local: bool = False,
+    session_id: int | None = None,
+    plan_id: int | None = None,
 ) -> dict[str, Any]:
     """Phone-first orchestration for one player input.
 
@@ -76,6 +78,9 @@ def process_player_input(
     text = text.strip()
     if not text:
         raise ValueError("Player input may not be empty.")
+    if mode in {"planner", "plan_chatgpt", "plan_claude"}:
+        from .planning_gateway import play
+        return play(conn, text, session_id, plan_id, provider={"planner":"local", "plan_chatgpt":"chatgpt", "plan_claude":"claude"}[mode],force_local=force_local)
     if consume_interrupt(conn):
         # A previous interrupt request is considered consumed at the next safe player-input boundary.
         pass
@@ -159,6 +164,12 @@ def mobile_state(conn: sqlite3.Connection) -> dict[str, Any]:
         ).fetchone()
         latest_handoff = dict(row) if row else None
     cfg = runtime_config(conn)
+    from .ai_planning import available, plan_view
+    planning = []
+    sessions = []
+    if player and available(conn):
+        planning = [plan_view(conn,int(r[0])) for r in conn.execute("SELECT id FROM ai_plans WHERE owner_actor_id=? ORDER BY id DESC LIMIT 20",(player["player_actor_id"],))]
+        sessions = [{"id":r["id"],"messages":json.loads(r["messages_json"])} for r in conn.execute("SELECT id,messages_json FROM ai_sessions WHERE owner_actor_id=? ORDER BY id DESC LIMIT 5",(player["player_actor_id"],))]
     return {
         "world": {"day": current_day(conn), "name": "Caerness"},
         "player": hub.get("player"),
@@ -166,6 +177,8 @@ def mobile_state(conn: sqlite3.Connection) -> dict[str, Any]:
         "attention": hub.get("attention", []),
         "matters": hub.get("matters", {}),
         "scope_reviews": [json.loads(r[0]) for r in conn.execute("SELECT result_json FROM player_actions WHERE player_actor_id=? AND status='proposed' AND result_json IS NOT NULL", (int(player["player_actor_id"]),)).fetchall()] if player else [],
+        "plans": planning,
+        "conversations": sessions,
         "people": hub.get("people", []),
         "places": hub.get("places", []),
         "claims": hub.get("claims", []),

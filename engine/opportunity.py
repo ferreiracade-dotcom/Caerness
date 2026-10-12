@@ -202,7 +202,7 @@ def counter_proposal(
         metadata={"counter_to": original_proposal_id},
     )
     original_metadata = _loads(p["metadata_json"], {})
-    if original_metadata.get("player_appointment"):
+    if original_metadata.get("player_appointment") or original_metadata.get("ai_plan_guard"):
         original_metadata["counter_to"] = original_proposal_id
         conn.execute("UPDATE opportunity_proposals SET metadata_json=? WHERE id=?", (_j(original_metadata), cid))
     originals = conn.execute("SELECT * FROM opportunity_proposal_terms WHERE proposal_id=? ORDER BY execution_order,id", (original_proposal_id,)).fetchall()
@@ -349,6 +349,8 @@ def _execute_term(conn: sqlite3.Connection, p: sqlite3.Row, term: sqlite3.Row, d
         if conn.total_changes == 0: raise ValueError("asset transfer target unavailable")
         return {"asset_id": sid, "new_owner_kind": holder_kind, "new_owner_id": holder_id}
     if kind == "service_commitment":
+        plan_guard = _loads(p["metadata_json"], {}).get("ai_plan_guard")
+        client_institution = int(plan_guard["institution"]) if plan_guard else p["proposer_institution_actor_id"]
         provider_kind = skind if skind in {"actor","institution","enterprise"} else str(value.get("provider_kind") or "actor")
         provider_id = sid if sid is not None else int(value.get("provider_id") or 0)
         if not provider_id: raise ValueError("service commitment lacks provider")
@@ -356,8 +358,8 @@ def _execute_term(conn: sqlite3.Connection, p: sqlite3.Row, term: sqlite3.Row, d
         cur = conn.execute(
             """INSERT INTO service_engagements(client_actor_id,client_institution_actor_id,provider_kind,provider_id,domain_key,service_kind,scope_json,compensation_json,exclusivity,started_day,end_day,status,source_proposal_id,metadata_json)
                VALUES (?,?,?,?,?,?,?,?,?,?,?,'active',?,?)""",
-            (int(p["proposer_actor_id"]) if p["proposer_institution_actor_id"] is None else None,
-             int(p["proposer_institution_actor_id"]) if p["proposer_institution_actor_id"] is not None else None,
+            (int(p["proposer_actor_id"]) if client_institution is None else None,
+             int(client_institution) if client_institution is not None else None,
              provider_kind,provider_id,str(p["domain_key"]),str(value.get("service_kind") or p["domain_key"]),
              _j(value.get("scope",{})),_j(value.get("compensation",{})),max(0,min(1,float(value.get("exclusivity") or 0))),
              day,day+int(duration) if duration is not None else None,int(p["id"]),_j({"opportunity01":True})),
@@ -395,6 +397,9 @@ def accept_proposal(conn: sqlite3.Connection, proposal_id: int, accepting_actor_
     if not terms:
         raise ValueError("proposal has no terms")
     metadata = _loads(p["metadata_json"], {})
+    if metadata.get("ai_plan_guard"):
+        from .world_capabilities import validate_guard
+        validate_guard(conn, metadata, terms)
     if metadata.get("player_appointment"):
         # Revalidate at commit, including after a counterproposal or delayed response.
         from .player_appointments import validate_appointment

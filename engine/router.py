@@ -30,7 +30,7 @@ def _clamp(v: float) -> float:
 
 def _scene_features(payload: dict[str, Any]) -> dict[str, float]:
     # Accept either a scene packet, narration payload, or wrapper.
-    scene = payload.get("scene_after") or payload.get("scene") or payload.get("narration_envelope", {}).get("scene_after") or payload
+    scene = payload.get("scene_after") or payload.get("scene") or payload.get("narration_envelope", {}).get("scene_after") or (payload.get("context",{}).get("scene") if payload.get("protocol")=="world_plan_v1" else None) or payload
     present = scene.get("present_actors") or []
     pending = scene.get("pending_player_interactions") or []
     events = scene.get("known_events") or []

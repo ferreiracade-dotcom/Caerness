@@ -44,6 +44,7 @@ h3 { font-size: 16px; margin: 0 0 8px; }
 .composer { position: fixed; z-index: 20; left: 0; right: 0; bottom: calc(52px + env(safe-area-inset-bottom)); display: flex; gap: 8px; padding: 9px 12px; background: rgba(21,19,16,.98); border-top: 1px solid var(--line); }
 .composer textarea { flex: 1; resize: none; max-height: 144px; min-height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); padding: 11px 12px; outline: none; font: 16px/1.35 ui-sans-serif, system-ui, sans-serif; }
 .composer textarea:focus { border-color: #6f6048; }
+.composer select { width: 90px; flex-shrink: 0; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; }
 .composer button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--accent); color: #18140e; font: 700 23px ui-sans-serif, system-ui, sans-serif; }
 .bottomnav { position: fixed; z-index: 21; left: 0; right: 0; bottom: 0; height: calc(52px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(5,1fr); background: #171410; border-top: 1px solid var(--line); }
 .bottomnav button { border: 0; background: transparent; color: var(--muted); font: 12px ui-sans-serif, system-ui, sans-serif; }

@@ -527,6 +527,8 @@ def build_default_process_registry(*, eager_requery: bool = True):
     reg.register(ProcessSpec("logistics", next_logistics_due_day, process_due_logistics))
     reg.register(ProcessSpec("merchant", next_merchant_due_day, process_due_merchant))
     reg.register(ProcessSpec("craft", next_craft_due_day, process_due_craft))
+    from .ai_planning import next_planning_due_day, process_due_planning
+    reg.register(ProcessSpec("ai_planning", next_planning_due_day, process_due_planning))
     reg.register(ProcessSpec("civilian", next_civilian_due_day, process_due_civilian))
     reg.register(ProcessSpec("profession", next_profession_due_day, process_due_profession))
     reg.register(ProcessSpec("service_fulfillment", next_service_due_day, process_due_services))
@@ -557,7 +559,7 @@ def build_default_process_registry(*, eager_requery: bool = True):
 
 
 _REGISTRY_BLOCK_A = (
-    "resolution", "world", "ecology", "agriculture", "logistics", "merchant", "craft", "civilian", "profession", "service_fulfillment", "growth",
+    "ai_planning", "resolution", "world", "ecology", "agriculture", "logistics", "merchant", "craft", "civilian", "profession", "service_fulfillment", "growth",
     "underworld", "underworld_medicine", "law", "war", "groundbinding", "health", "psychology", "hollow",
 )
 _REGISTRY_BLOCK_B = ("religion", "patronage", "politics", "conflict", "organization_lifecycle", "seeking", "attention", "education", "cultivation", "tournament", "spectacle", "information", "memory")

@@ -3,8 +3,11 @@ let referral = null;
 let worldTab = 'people';
 let controller = null;
 let ledger = null;
+let planningSession = null;
+let revisingPlan = null;
 
 const $ = (id) => document.getElementById(id);
+$('newIdea').addEventListener('click', () => { revisingPlan = null; $('input').focus(); });
 function esc(v='') { return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 async function api(path, options={}) {
   const res = await fetch(path, {headers:{'Content-Type':'application/json'}, ...options});
@@ -25,12 +28,21 @@ function renderState() {
       <div class="player-line">${esc(t.raw_input)}</div>
       <div class="narration">${esc(t.narration_text || '')}</div>
     </article>`).join('');
+  const conversations = state.conversations || [];
+  if (!planningSession && conversations.length) planningSession = conversations[0].id;
+  const activeConversation = conversations.find(x => x.id === planningSession);
+  if (activeConversation) {
+    $('emptyScene').classList.add('hidden');
+    $('transcript').innerHTML += activeConversation.messages.filter(x => ['player','assistant'].includes(x.role)).map(x =>
+      `<article class="turn"><div class="daytag">Day ${esc(x.day)}</div><div class="${x.role === 'player' ? 'player-line' : 'narration'}">${esc(typeof x.text === 'string' ? x.text : x.text.proposed_scope || '')}</div></article>`).join('');
+  }
 
   $('attention').innerHTML = (state.attention || []).slice(0,5).map(c => `
     <div class="attention-card ${esc(c.cue_type)}">${esc(c.text)}</div>`).join('');
 
   const m = state.matters || {intentions:[], obligations:[]};
   $('mattersBody').innerHTML = [
+    ...(state.plans || []).map(x => `<div class="card"><b>${esc(x.summary)}</b><p>Original instruction: ${esc(x.original_instruction)}</p><p>${esc(x.status)}</p>${x.status === 'draft' ? `<p>${esc(x.authorization_notice)}</p>${x.review_scope.map(t => `<p>${esc(t)}</p>`).join('')}` : ''}${x.unresolved.map(t => `<p>Unresolved: ${esc(t)}</p>`).join('')}${Object.values(x.steps).filter(s => s.result.summary).map(s => `<p>${esc(s.result.summary)}${s.result.progress == null ? '' : ` (${Math.round(s.result.progress)}% recorded progress)`}</p>`).join('')}${x.status === 'draft' && !x.unresolved.length ? `<button data-approve-plan="${x.id}" data-digest="${esc(x.digest)}">Authorize only these operations</button>` : ''}<button data-revise-plan="${x.id}" data-session="${x.session_id}">Discuss or revise</button></div>`),
     ...(state.scope_reviews || []).map(x => `<div class="card"><p>${esc(x.detail.original_instruction)}</p><p>${esc(x.summary)}</p><button data-confirm-appointment="${esc(x.action_id)}">Confirm this offer only</button></div>`),
     ...(m.appointments || []).map(x => card(x.title, `${x.holder_name} • ${x.institution_name}`, `Held since day ${x.started_day}`)),
     ...(m.obligations || []).map(o => card(o.description, o.due_day == null ? 'No fixed date' : `Due day ${o.due_day}`, o.notes)),
@@ -46,6 +58,20 @@ function card(title, meta='', body='') {
   return `<div class="card"><div class="card-title">${esc(title)}</div>${meta?`<div class="meta">${esc(meta)}</div>`:''}${body?`<div>${esc(body)}</div>`:''}</div>`;
 }
 document.addEventListener('click', async e => {
+  const revise = e.target.closest('[data-revise-plan]');
+  if (revise) {
+    planningSession = Number(revise.dataset.session); revisingPlan = Number(revise.dataset.revisePlan);
+    $('input').focus(); return;
+  }
+  const approve = e.target.closest('[data-approve-plan]');
+  if (approve) {
+    try {
+      const data = await api('/api/plan-approve', {method:'POST', body:JSON.stringify({plan_id:Number(approve.dataset.approvePlan),digest:approve.dataset.digest})});
+      if (data.summary) alert(data.summary);
+      await refresh();
+    } catch (error) { alert(error.message); }
+    return;
+  }
   const button = e.target.closest('[data-confirm-appointment]');
   if (!button) return;
   try {
@@ -128,7 +154,9 @@ function showReferral(data) {
 async function submit(text, forceLocal=false) {
   setBusy(true);
   try {
-    const data = await api('/api/play', {method:'POST', body:JSON.stringify({text, mode:'auto', force_local:forceLocal})});
+    const planning = $('playMode').value === 'planner';
+    const data = await api(planning ? '/api/plan-play' : '/api/play', {method:'POST', body:JSON.stringify({text, mode:$('playMode').value, force_local:forceLocal, session_id:planningSession, plan_id:revisingPlan})});
+    if (data.session_id) planningSession = data.session_id;
     if (data.status === 'external_recommended') showReferral(data);
     await refresh();
   } catch (e) {

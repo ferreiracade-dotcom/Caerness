@@ -361,7 +361,7 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
     opportunity_pid = terms.get("opportunity_proposal_id")
     if opportunity_pid:
         meta = conn.execute("SELECT metadata_json FROM opportunity_proposals WHERE id=?", (opportunity_pid,)).fetchone()
-        if meta and json.loads(meta[0]).get("player_appointment"):
+        if meta and (json.loads(meta[0]).get("player_appointment") or json.loads(meta[0]).get("ai_plan_guard")):
             # Consent follows the recipient's own opinion, independently of command.
             rel = relationship_view(conn, recipient, proposer)
     incentive = float(terms.get("incentive", 0.0))

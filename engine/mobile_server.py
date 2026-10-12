@@ -179,6 +179,25 @@ class CaernessHandler(BaseHTTPRequestHandler):
                     result["backup"] = backup
                 self._send_json(result)
                 return
+            if path == "/api/plan-play":
+                from .planning_gateway import play
+                with connect() as conn:
+                    result = play(conn,str(body.get("text") or ""),body.get("session_id"),body.get("plan_id"),force_local=bool(body.get("force_local",False)))
+                    conn.commit()
+                self._send_json(result)
+                return
+            if path == "/api/plan-approve":
+                from .ai_planning import approve_plan
+                from .planning_gateway import feedback_request, record_execution_narration
+                with connect() as conn:
+                    result = approve_plan(conn,int(body["plan_id"]),str(body["digest"]))
+                    if result.get("plan"):
+                        result.update(record_execution_narration(conn,result["plan"]))
+                        if result["plan"]["status"] in ("blocked","refused","awaiting_response"):
+                            result["planning_feedback_request"] = feedback_request(conn,result["plan"])
+                    conn.commit()
+                self._send_json(result)
+                return
             if path == "/api/interrupt":
                 with connect() as conn:
                     request_interrupt(conn)
@@ -188,7 +207,12 @@ class CaernessHandler(BaseHTTPRequestHandler):
             if path.startswith("/api/model/") and path.endswith("/local"):
                 request_id = int(path.split("/")[3])
                 with connect() as conn:
-                    result = run_request_local(conn, request_id, force=bool(body.get("force", False)), apply=bool(body.get("apply", True)))
+                    row=conn.execute("SELECT input_json FROM model_requests WHERE id=?",(request_id,)).fetchone()
+                    if row and json.loads(row[0]).get("protocol")=="world_plan_v1" and bool(body.get("apply",True)):
+                        from .planning_gateway import run_local
+                        result=run_local(conn,request_id,force=bool(body.get("force",False)))
+                    else:
+                        result = run_request_local(conn, request_id, force=bool(body.get("force", False)), apply=bool(body.get("apply", True)))
                     conn.commit()
                 self._send_json(result)
                 return
@@ -201,7 +225,11 @@ class CaernessHandler(BaseHTTPRequestHandler):
                     followup = None
                     if body.get("auto_continue", True) and isinstance(applied, dict) and applied.get("next_request"):
                         next_id = int(applied["next_request"]["request_id"])
-                        followup = run_request_local(conn, next_id, force=False, apply=True)
+                        next_row = conn.execute("SELECT input_json FROM model_requests WHERE id=?",(next_id,)).fetchone()
+                        if json.loads(next_row[0]).get("protocol") == "world_plan_v1":
+                            followup = referral_for_request(conn,next_id,{"recommendation":"external_recommended"},reason="Continue the same planning conversation with the tool feedback.")
+                        else:
+                            followup = run_request_local(conn, next_id, force=False, apply=True)
                         if isinstance(followup, dict) and followup.get("status") == "external_recommended":
                             followup = referral_for_request(conn, next_id, followup["assessment"], reason=followup.get("message", ""))
                     conn.commit()
