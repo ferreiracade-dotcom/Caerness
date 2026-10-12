@@ -93,5 +93,22 @@
     "summed_test_seconds": 20.9,
     "notes": "After the full gate, scoped domain/site discovery and existing-work occupancy were checked by the planner/model/negotiation/organisation/appointment tests."
   },
-  "resolved_test_issue": "An added ownership assertion initially used owner_actor_id for cultural_objects. The test was corrected to its native current_owner_actor_id column; the final checks pass."
+  "resolved_test_issue": "An added ownership assertion initially used owner_actor_id for cultural_objects. The test was corrected to its native current_owner_actor_id column; the final checks pass.",
+  "package_verification": {
+    "source_revision": "f06f861fd2179699ad49db69961db8f1a187a089",
+    "file": "caerness-general-planning-demo.zip",
+    "sha256": "4b271f65abeba7a3ee877a6d440730803d0383607da017b011e7cf6730c71658",
+    "bytes": 12263206,
+    "zip_integrity": "PASS",
+    "extracted_planning_test": "PASS",
+    "extracted_examples": {
+      "survey": {
+        "RELOADED": "completed"
+      },
+      "yard": {
+        "RELOADED": "completed"
+      }
+    },
+    "extracted_opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7"
+  }
 }
