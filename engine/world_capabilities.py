@@ -302,7 +302,7 @@ def commission_work(c,owner,plan_id,step_key,args):
         if reserved.get(resource,0)-spent.get(resource,0) < amount: raise ValueError(f'The accepted quotation requires more {resource}.')
         spent[resource] = spent.get(resource,0)+amount
     c.execute('UPDATE ai_resource_allocations SET spent_json=? WHERE id=?',(dump(spent),allocation['id']))
-    pid = create_project(c,args['title'],spec['project_kind'],patron_actor_id=owner,creator_actor_id=q['provider_actor_id'],
+    pid = create_project(c,args['title'],spec['project_kind'],patron_actor_id=args['institution_id'],creator_actor_id=q['provider_actor_id'],
         location_id=site['location_id'],target_day=day(c)+spec['duration_days'],quality_potential=score,
         funding=100,material_access=100,skilled_labor=score*capacity/100,
         metadata={'ai_plan_id':plan_id,'site_id':int(site['id']),'institution_actor_id':args['institution_id'],

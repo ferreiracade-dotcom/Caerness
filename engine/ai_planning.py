@@ -179,6 +179,8 @@ def approve_plan(c,plan_id,expected_digest):
     c.execute("UPDATE ai_plans SET approved_digest=?,status='approved',updated_day=? WHERE id=?",(expected_digest,day(c),plan_id))
     event(c,plan_id,'player_authorized',{'digest':expected_digest})
     execute_plan(c,plan_id)
+    if current_actor(c)!=row['owner_actor_id']:
+        return {'status':'camera_changed','summary':'The camera character changed during world time. Consequences remain saved; the new character does not automatically inherit the old private plan context.'}
     return {'status':'resolved','plan':plan_view(c,plan_id)}
 
 

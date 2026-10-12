@@ -64,6 +64,7 @@ def main():
         project=done['steps']['work']['result']['project_id']
         table='cultural_objects' if example=='survey' else 'buildings'
         assert c.execute(f'SELECT 1 FROM {table} WHERE project_id=?',(project,)).fetchone()
+        assert c.execute(f'SELECT owner_actor_id FROM {table} WHERE project_id=?',(project,)).fetchone()[0]==ids['institution'], 'Company-funded work must not become the commander\'s personal property.'
         before=c.execute('SELECT COUNT(*) FROM ai_plan_events').fetchone()[0]
         execute_plan(c,pid)
         assert c.execute('SELECT COUNT(*) FROM ai_plan_events').fetchone()[0]==before
@@ -225,6 +226,20 @@ def main():
     from engine.player import set_player
     set_player(c,ids['builder']); expect_error(lambda:plan_view(c,p['id']))
     c.close(); print('Transactional resource conservation and knowledge/owner boundary PASS')
+    c,ids=fixture(); s=session(c); source='Let one day pass.'
+    spec={'source_text':source,'summary':source,'coverage':[{'start':0,'end':len(source),'handling':'planned','step_ids':['time']}], 'unresolved':[],
+          'steps':[{'id':'time','operation':'advance_time','arguments':{'days':1},'depends_on':[]}]}
+    p=draft_plan(c,s['id'],source,spec)
+    from unittest.mock import patch
+    def changed_camera(conn,days):
+        conn.execute('UPDATE world_state SET current_day=current_day+?',(days,))
+        set_player(conn,ids['builder'])
+    with patch('engine.simulation.advance_connection',side_effect=changed_camera):
+        out=approve_plan(c,p['id'],p['digest'])
+    assert out['status']=='camera_changed'
+    assert c.execute('SELECT current_day FROM world_state').fetchone()[0]==1
+    assert c.execute('SELECT status FROM ai_plans WHERE id=?',(p['id'],)).fetchone()[0]=='completed'
+    c.close(); print('Camera succession does not roll back consequences or leak prior private plans PASS')
     print('GENERAL AI PLANNING: PASS')
 
 
