@@ -88,7 +88,15 @@ def main():
     out=ScriptedModel([{'mode':'clarify','text':'Which organisation and what budget do you authorize?'}]).run(c,req)
     assert out['status']=='needs_clarification'
     c.commit(); c.close(); c=connect()
-    assert len(json.loads(session(c,sid)['messages_json']))==8
+    assert len(json.loads(session(c,sid)['messages_json']))==9
+    # A clarification goal survives a context window, and follow-up conditions are bound.
+    for i in range(26):
+        req=start_request(c,f'We are still discussing, remark {i}.','generic',sid)
+        ScriptedModel([{'mode':'discuss','text':'No commitments have been made.'}]).run(c,req)
+    req=start_request(c,'Also promise my black horse.','generic',sid)
+    packet=json.loads(c.execute('SELECT input_json FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])
+    assert 'Arrange it sometime' in packet['planning_goal'] and 'black horse' in packet['planning_goal']
+    assert packet['unresolved_intentions']
     c.close(); print('Nontransactional conversation, ambiguity and session reload PASS')
 
     # Incomplete and contradictory AI responses cannot disappear into an easier action.
@@ -149,6 +157,12 @@ def main():
     assert not c.execute('SELECT 1 FROM ai_resource_allocations').fetchone()
     c.close(); print('Reviewed quotation fingerprint prevents silent repricing PASS')
 
+    c,ids=fixture(); p=proposed(c,ids)['plan']
+    c.execute('UPDATE actor_health_profiles SET functional_capacity=0 WHERE actor_id=?',(ids['mara'],))
+    unavailable=approve_plan(c,p['id'],p['digest'])['plan']
+    assert unavailable['status']=='blocked' and not c.execute('SELECT 1 FROM civilian_projects').fetchone()
+    c.close(); print('Native functional capacity constrains work without exposing diagnosis PASS')
+
     # Counteroffers remain a player decision, through the same capability framework.
     c,ids=fixture(); out=proposed(c,ids); p=out['plan']
     c.execute('UPDATE relationships SET trust=0,stance=0,obligation=0 WHERE actor_a_id=? AND actor_b_id=?',(ids['mara'],ids['owner']))
@@ -186,6 +200,15 @@ def main():
     paused=copy.deepcopy(corrected); paused['steps'][3]['arguments']['title']='Pretend no earlier work existed'
     expect_error(lambda:draft_plan(c,p['session_id'],spec['source_text'],paused,p['id']))
     c.close(); print('Partial commitment, immutable prefix, revised scope and world-driven pause PASS')
+
+    c,ids=fixture(); p=proposed(c,ids)['plan']
+    req=start_request(c,'And promise her my black horse.','generic',p['session_id'],p['id'])
+    payload=json.loads(c.execute('SELECT input_json FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])
+    assert payload['planning_goal'].startswith(p['original_instruction']) and payload['planning_goal'].endswith('And promise her my black horse.')
+    incomplete=composed_spec(ids,'survey')
+    out=ScriptedModel([{'mode':'plan','plan':incomplete}]).run(c,req)
+    assert out['status']=='awaiting_action_interpretation' and not c.execute('SELECT 1 FROM institutional_appointments').fetchone()
+    c.close(); print('Later conversational conditions cannot disappear from revised plan coverage PASS')
 
     # An unavailable later resource cannot leave a half-debited allocation.
     c,ids=fixture(); out=proposed(c,ids); p=out['plan']

@@ -43,6 +43,8 @@ def fixture():
     set_player(c,owner,'General planning demonstration')
     start_regime(c,institution,leader_actor_id=owner)
     for person,domain,role in ((mara,'commerce','caravan factor'),(builder,'craft','builder')):
+        from engine.health import ensure_health_profile
+        ensure_health_profile(c,person,metadata={'explicit_demo_fixture':True})
         ensure_reciprocal_relationship(c,owner,person,0,trust=85,stance=70,familiarity=80,loyalty=65)
         add_presence_habit(c,person,loc,habit_kind='workplace',weight=1,confidence=1)
         c.execute("INSERT INTO institution_memberships(institution_actor_id,member_actor_id,membership_kind,role_text,joined_day) VALUES (?,?,'service',?,0)",(institution,person,role))

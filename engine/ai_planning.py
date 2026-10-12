@@ -108,7 +108,8 @@ def draft_plan(c, session_id, source, spec, plan_id=None):
             (session_id,s['owner_actor_id'],source,dump(spec),hashed,day(c),day(c))).lastrowid)
     else:
         old = owned_plan(c,plan_id)
-        if old['session_id'] != session_id or old['source_text'] != source: raise ValueError('A revision must preserve the plan owner, conversation and original intention.')
+        if old['session_id'] != session_id or (old['source_text'] != source and not source.startswith(old['source_text']+'\nFollow-up: ')):
+            raise ValueError('A revision must preserve the plan owner, conversation and complete prior intention. Amendments are appended, never substituted.')
         steps = {x['id']:x for x in spec['steps']}
         for r in c.execute('SELECT * FROM ai_plan_steps WHERE plan_id=?',(plan_id,)):
             result=json.loads(r['result_json'])
@@ -119,7 +120,7 @@ def draft_plan(c, session_id, source, spec, plan_id=None):
             result=json.loads(r['result_json'])
             if not any(result.get(k) for k in ('project_id','allocation_id','appointment_id','engagement_id')):
                 c.execute('DELETE FROM ai_plan_steps WHERE plan_id=? AND step_key=?',(plan_id,r['step_key']))
-        c.execute("UPDATE ai_plans SET revision=revision+1,spec_json=?,digest=?,approved_digest=NULL,status='draft',updated_day=? WHERE id=?",(dump(spec),hashed,day(c),plan_id))
+        c.execute("UPDATE ai_plans SET revision=revision+1,source_text=?,spec_json=?,digest=?,approved_digest=NULL,status='draft',updated_day=? WHERE id=?",(source,dump(spec),hashed,day(c),plan_id))
     for step in spec['steps']:
         c.execute('INSERT OR IGNORE INTO ai_plan_steps(plan_id,step_key,spec_json) VALUES (?,?,?)',(plan_id,step['id'],dump(step)))
     event(c,plan_id,'drafted',{'spec':spec,'digest':hashed})
@@ -244,11 +245,16 @@ def process_due_planning(c,today,**kwargs):
     if not available(c): return {'plans_reviewed':0}
     # Native projects must not keep progressing after their actual means vanish.
     for work in c.execute("SELECT w.*,p.status FROM ai_work_links w JOIN civilian_projects p ON p.id=w.project_id WHERE p.status='active'").fetchall():
+        from .world_capabilities import work_capacity, skill
         engagement=c.execute("SELECT s.provider_id,s.status,a.status actor_status,a.current_location_id,s.client_institution_actor_id FROM service_engagements s JOIN actors a ON a.id=s.provider_id WHERE s.id=?",(work['service_engagement_id'],)).fetchone()
         site=c.execute('SELECT status,location_id,owner_institution_actor_id FROM strategic_assets WHERE id=?',(work['site_id'],)).fetchone()
-        if not engagement or not site or engagement['status']!='active' or engagement['actor_status']!='active' or site['status']!='active' or engagement['current_location_id']!=site['location_id'] or site['owner_institution_actor_id']!=engagement['client_institution_actor_id']:
+        if not engagement or not site or engagement['status']!='active' or engagement['actor_status']!='active' or work_capacity(c,int(engagement['provider_id']))<=0 or site['status']!='active' or engagement['current_location_id']!=site['location_id'] or site['owner_institution_actor_id']!=engagement['client_institution_actor_id']:
             c.execute("UPDATE civilian_projects SET status='paused' WHERE id=?",(work['project_id'],))
             event(c,work['plan_id'],'work_paused',{'project_id':work['project_id'],'summary':'The established personnel or site prerequisite is no longer satisfied.'})
+        else:
+            domain=c.execute('SELECT domain_key FROM service_engagements WHERE id=?',(work['service_engagement_id'],)).fetchone()[0]
+            labor=skill(c,int(engagement['provider_id']),domain)*work_capacity(c,int(engagement['provider_id']))/100
+            c.execute('UPDATE civilian_projects SET skilled_labor=? WHERE id=?',(labor,work['project_id']))
     rows=c.execute("SELECT id FROM ai_plans WHERE approved_digest=digest AND status IN ('approved','active','awaiting_response')").fetchall()
     for row in rows: execute_plan(c,int(row[0]))
     return {'plans_reviewed':len(rows)}

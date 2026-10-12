@@ -7,7 +7,7 @@ let planningSession = null;
 let revisingPlan = null;
 
 const $ = (id) => document.getElementById(id);
-$('newIdea').addEventListener('click', () => { revisingPlan = null; $('input').focus(); });
+$('newIdea').addEventListener('click', () => { revisingPlan = null; planningSession = null; $('input').focus(); });
 function esc(v='') { return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 async function api(path, options={}) {
   const res = await fetch(path, {headers:{'Content-Type':'application/json'}, ...options});

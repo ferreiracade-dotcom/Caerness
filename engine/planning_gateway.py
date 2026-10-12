@@ -24,17 +24,30 @@ def contract(request_id):
     }}
 
 
-def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, feedback=None, record_input=True, rounds=0):
+def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, feedback=None, record_input=True, rounds=0, goal_override=None):
     from .model_gateway import create_request
     s=plans.session(c,session_id); sid=s['id']
     if record_input: plans.message(c,sid,'player',text)
     existing=plans.plan_view(c,plan_id) if plan_id is not None else None
     if existing and existing['session_id']!=sid: raise ValueError('Resume the conversation that owns this plan.')
-    payload={'protocol':PROTOCOL,'raw_player_input':text,'planning_goal':existing['original_instruction'] if existing else text,
+    memory=json.loads(plans.session(c,sid)['messages_json'])
+    handled={m['text']['planned_intention'] for m in memory if isinstance(m['text'],dict) and 'planned_intention' in m['text']}
+    all_pending=list(dict.fromkeys(m['text']['unresolved_intention'] for m in memory if isinstance(m['text'],dict) and 'unresolved_intention' in m['text']))
+    pending=[x for x in all_pending if not any(y==x or y.startswith(x+'\nFollow-up: ') for y in handled)
+             and not any(y!=x and y.startswith(x+'\nFollow-up: ') for y in all_pending)]
+    prior=existing['original_instruction'] if existing else (pending[-1] if pending else None)
+    if existing and pending and pending[-1].startswith(existing['original_instruction']+'\nFollow-up: '): prior=pending[-1]
+    goal=goal_override or (prior+'\nFollow-up: '+text if prior and record_input else prior or text)
+    if prior and record_input:
+        # Bind follow-up conditions before the model can misclassify them as chat.
+        plans.message(c,sid,'system',{'unresolved_intention':goal})
+        pending=[goal]
+    payload={'protocol':PROTOCOL,'raw_player_input':text,'planning_goal':goal,
         'session_id':sid,'plan_id':plan_id,'rounds':rounds,'conversation':json.loads(plans.session(c,sid)['messages_json'])[-24:],
         'context':context(c,s['owner_actor_id']), 'current_plan':existing,
         'read_tools':READ_TOOLS,'capabilities':[cap.schema() for cap in CAPABILITIES.values()],
         'feedback':feedback or [],
+        'unresolved_intentions':pending,
         'rules':[
             'Understand the whole intention, including unusual arrangements. Compose capabilities; do not look for a predefined gameplay verb.',
             'Inspect relevant permissions, people, quotations, resources and sites before planning. Unknown is not available.',
@@ -61,7 +74,7 @@ def apply_response(c, row, response, payload):
         if rounds>6:
             plans.message(c,sid,'system','The planning round limit was reached. The original goal remains unresolved; no world operation was executed.')
             return {'status':'needs_clarification','session_id':sid,'summary':'The planning round limit was reached; the goal remains unresolved.'}
-        req=start_request(c,payload['raw_player_input'],row['provider'],sid,payload.get('plan_id'),feedback,False,rounds)
+        req=start_request(c,payload['raw_player_input'],row['provider'],sid,payload.get('plan_id'),feedback,False,rounds,goal_override=payload['planning_goal'])
         return {'status':'awaiting_action_interpretation','session_id':sid,'feedback':feedback,'next_request':req}
     try:
         if mode=='inspect':
@@ -85,11 +98,13 @@ def apply_response(c, row, response, payload):
         elif mode in ('discuss','clarify'):
             if set(p)!={'mode','text'} or not isinstance(p['text'],str) or not p['text'].strip(): raise ValueError('Discussion/clarification requires text only, without operations.')
             plans.message(c,sid,'assistant',p['text'])
+            if mode=='clarify': plans.message(c,sid,'system',{'unresolved_intention':payload['planning_goal'],'question':p['text']})
             output={'status':'discussed' if mode=='discuss' else 'needs_clarification','session_id':sid,'narration':p['text'],
                     'world_changes':False,'summary':'No commitment or acceptance was inferred from this exchange.'}
         elif mode=='plan':
             if set(p)!={'mode','plan'}: raise ValueError('Plan mode requires a structured plan only.')
             view=plans.draft_plan(c,sid,payload['planning_goal'],p['plan'],payload.get('plan_id'))
+            plans.message(c,sid,'system',{'planned_intention':payload['planning_goal'],'plan_id':view['id']})
             plans.message(c,sid,'assistant',{'proposed_scope':view['summary'],'unresolved':view['unresolved']})
             output={'status':'awaiting_plan_review','session_id':sid,'plan':view,
                     'narration':view['summary']+' Nothing has been committed. Review this proposed scope against your full instruction.'}

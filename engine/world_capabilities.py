@@ -47,6 +47,11 @@ def skill(c, actor, domain):
     return float(row[0]) if row else 0.0
 
 
+def work_capacity(c,actor):
+    row=c.execute('SELECT functional_capacity FROM actor_health_profiles WHERE actor_id=?',(actor,)).fetchone()
+    return float(row[0]) if row else 0.0
+
+
 @dataclass(frozen=True)
 class Capability:
     name: str
@@ -198,6 +203,7 @@ def validate_service(c, owner, institution, person, role_id, offering_id, quotat
         raise ValueError('The selected person or responsibility does not match this quotation.')
     if skill(c, person, role['domain_key']) < float(q['work_order']['minimum_skill']):
         raise ValueError('The person has not demonstrated the required competence.')
+    if work_capacity(c,person)<=0: raise ValueError('The person does not have established functional capacity for this work.')
     return role, q
 
 
@@ -287,6 +293,8 @@ def commission_work(c,owner,plan_id,step_key,args):
     present(c,owner,q['provider_actor_id'])
     score = skill(c,q['provider_actor_id'],q['domain'])
     if score < spec['minimum_skill']: raise ValueError('The responsible person cannot perform the quoted work.')
+    capacity=work_capacity(c,q['provider_actor_id'])
+    if capacity<=0: raise ValueError('The responsible person cannot currently perform the work.')
     if c.execute("SELECT 1 FROM civilian_projects WHERE creator_actor_id=? AND status IN ('active','paused')",(q['provider_actor_id'],)).fetchone():
         raise ValueError('The responsible person is already occupied by active work; do not count them twice.')
     reserved = json.loads(allocation['resources_json']); spent = json.loads(allocation['spent_json'])
@@ -296,7 +304,7 @@ def commission_work(c,owner,plan_id,step_key,args):
     c.execute('UPDATE ai_resource_allocations SET spent_json=? WHERE id=?',(dump(spent),allocation['id']))
     pid = create_project(c,args['title'],spec['project_kind'],patron_actor_id=owner,creator_actor_id=q['provider_actor_id'],
         location_id=site['location_id'],target_day=day(c)+spec['duration_days'],quality_potential=score,
-        funding=100,material_access=100,skilled_labor=score,
+        funding=100,material_access=100,skilled_labor=score*capacity/100,
         metadata={'ai_plan_id':plan_id,'site_id':int(site['id']),'institution_actor_id':args['institution_id'],
                   'consumed_resources':spec['resources'],'building_kind':'other'})
     c.execute('INSERT INTO ai_work_links(project_id,plan_id,site_id,offering_id,service_engagement_id) VALUES (?,?,?,?,?)',
