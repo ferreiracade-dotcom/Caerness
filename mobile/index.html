@@ -20,12 +20,12 @@
   <main>
     <section id="scene" class="panel active">
       <div id="attention"></div>
+      <select id="conversationPicker" aria-label="Saved conversations"></select><button id="newIdea" type="button">New conversation</button>
       <div id="transcript" class="transcript"></div>
       <div id="emptyScene" class="empty hidden">No campaign scene yet.</div>
     </section>
 
     <section id="matters" class="panel">
-      <button id="newIdea" type="button">Start a new idea</button>
       <h2>Matters</h2>
       <p class="muted">Commitments and intentions your character would naturally remember.</p>
       <div id="mattersBody"></div>
@@ -55,6 +55,8 @@
       <div class="settings-card">
         <h3>Runtime</h3>
         <div id="runtimeBody"></div>
+        <p class="muted">A capable connected model can narrate directly. API keys stay in the server environment, never in this browser or save.</p>
+        <form id="modelSetup"><label>Model endpoint<input id="modelEndpoint" type="url" placeholder="https://your-provider/v1/chat/completions"></label><label>Model name<input id="modelName" placeholder="Your available model"></label><button>Save model settings</button><button id="testModel" type="button">Check connection</button><p id="modelStatus" role="status"></p></form>
       </div>
     </section>
   </main>
@@ -77,7 +79,7 @@
   </div>
 
   <form id="composer" class="composer">
-    <select id="playMode" aria-label="Play mode"><option value="planner">AI narrative play</option><option value="auto">Existing play</option><option value="rules">Offline rules</option></select>
+    <select id="playMode" aria-label="Play mode"><option value="narrative">AI narrative play</option><option value="planner">Plan review mode</option><option value="auto">Existing play</option><option value="rules">Offline rules</option></select>
     <textarea id="input" rows="1" aria-label="Player action"></textarea>
     <button id="send" type="submit" aria-label="Send">↑</button>
   </form>

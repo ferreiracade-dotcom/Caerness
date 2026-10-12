@@ -3,11 +3,13 @@ let referral = null;
 let worldTab = 'people';
 let controller = null;
 let ledger = null;
-let planningSession = null;
+let planningSession = Number(localStorage.getItem("caernessSession")) || null;
+let newConversation = false;
+let cameraActor = null;
 let revisingPlan = null;
 
 const $ = (id) => document.getElementById(id);
-$('newIdea').addEventListener('click', () => { revisingPlan = null; planningSession = null; $('input').focus(); });
+$('newIdea').addEventListener('click', () => { revisingPlan = null; planningSession = null; newConversation = true; localStorage.removeItem("caernessSession"); $('input').focus(); });
 function esc(v='') { return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 async function api(path, options={}) {
   const res = await fetch(path, {headers:{'Content-Type':'application/json'}, ...options});
@@ -29,7 +31,12 @@ function renderState() {
       <div class="narration">${esc(t.narration_text || '')}</div>
     </article>`).join('');
   const conversations = state.conversations || [];
-  if (!planningSession && conversations.length) planningSession = conversations[0].id;
+  if (cameraActor && cameraActor !== p?.actor_id) { planningSession=null; newConversation=true; }
+  cameraActor=p?.actor_id;
+  if (planningSession && !conversations.some(x=>x.id===planningSession)) planningSession=null;
+  $('conversationPicker').innerHTML='<option value="">New conversation</option>'+conversations.map(x=>`<option value="${x.id}">${esc(x.messages.find(m=>m.role==='player')?.text?.slice(0,60)||'Conversation')} • #${x.id}</option>`).join('');
+  $('conversationPicker').value=planningSession||'';
+  if (!planningSession && !newConversation && conversations.length) planningSession = conversations[0].id;
   const activeConversation = conversations.find(x => x.id === planningSession);
   if (activeConversation) {
     $('emptyScene').classList.add('hidden');
@@ -37,12 +44,14 @@ function renderState() {
       `<article class="turn"><div class="daytag">Day ${esc(x.day)}</div><div class="${x.role === 'player' ? 'player-line' : 'narration'}">${esc(typeof x.text === 'string' ? x.text : x.text.proposed_scope || '')}</div></article>`).join('');
   }
 
+  const review=(state.plans||[]).find(x=>x.session_id===planningSession && x.status==='draft');
+  if (review) $('transcript').innerHTML+=`<article class="turn"><div class="narration"><b>Proposed scope</b>${review.review_scope.map(t=>`<p>${esc(t)}</p>`).join('')}${(review.scope_verification?.omissions||[]).map(t=>`<p>Still missing: ${esc(t)}</p>`).join('')}${!review.unresolved.length && review.scope_verification?.complete!==false ? `<button data-approve-plan="${review.id}" data-digest="${esc(review.digest)}">Proceed with this scope</button>` : ''}<button data-revise-plan="${review.id}" data-session="${review.session_id}">Keep discussing</button></div></article>`;
   $('attention').innerHTML = (state.attention || []).slice(0,5).map(c => `
     <div class="attention-card ${esc(c.cue_type)}">${esc(c.text)}</div>`).join('');
 
   const m = state.matters || {intentions:[], obligations:[]};
   $('mattersBody').innerHTML = [
-    ...(state.plans || []).map(x => `<div class="card"><b>${esc(x.summary)}</b><p>Original instruction: ${esc(x.original_instruction)}</p><p>${esc(x.status)}</p>${x.status === 'draft' ? `<p>${esc(x.authorization_notice)}</p>${x.review_scope.map(t => `<p>${esc(t)}</p>`).join('')}` : ''}${x.unresolved.map(t => `<p>Unresolved: ${esc(t)}</p>`).join('')}${Object.values(x.steps).filter(s => s.result.summary).map(s => `<p>${esc(s.result.summary)}${s.result.progress == null ? '' : ` (${Math.round(s.result.progress)}% recorded progress)`}</p>`).join('')}${x.status === 'draft' && !x.unresolved.length ? `<button data-approve-plan="${x.id}" data-digest="${esc(x.digest)}">Authorize only these operations</button>` : ''}<button data-revise-plan="${x.id}" data-session="${x.session_id}">Discuss or revise</button></div>`),
+    ...(state.plans || []).map(x => `<div class="card"><b>${esc(x.summary)}</b><p>Original instruction: ${esc(x.original_instruction)}</p><p>${esc(x.status)}</p>${x.status === 'draft' ? `<p>${esc(x.authorization_notice)}</p>${x.review_scope.map(t => `<p>${esc(t)}</p>`).join('')}` : ''}${x.source_handling?.filter(h=>h.handling !== 'planned').map(h=>`<p>Not executed (${esc(h.handling)}): ${esc(h.text)}</p>`).join('') || ''}${(x.scope_verification?.omissions || []).map(t=>`<p>Missing from scope: ${esc(t)}</p>`).join('')}${x.unresolved.map(t => `<p>Unresolved: ${esc(t)}</p>`).join('')}${Object.values(x.steps).filter(s => s.result.summary).map(s => `<p>${esc(s.result.summary)}${s.result.progress == null ? '' : ` (${Math.round(s.result.progress)}% recorded progress)`}</p>`).join('')}${x.status === 'draft' && !x.unresolved.length && x.scope_verification?.complete !== false ? `<button data-approve-plan="${x.id}" data-digest="${esc(x.digest)}">Authorize only these operations</button>` : ''}<button data-revise-plan="${x.id}" data-session="${x.session_id}">Discuss or revise</button></div>`),
     ...(state.scope_reviews || []).map(x => `<div class="card"><p>${esc(x.detail.original_instruction)}</p><p>${esc(x.summary)}</p><button data-confirm-appointment="${esc(x.action_id)}">Confirm this offer only</button></div>`),
     ...(m.appointments || []).map(x => card(x.title, `${x.holder_name} • ${x.institution_name}`, `Held since day ${x.started_day}`)),
     ...(m.obligations || []).map(o => card(o.description, o.due_day == null ? 'No fixed date' : `Due day ${o.due_day}`, o.notes)),
@@ -52,6 +61,8 @@ function renderState() {
   renderWorld();
   $('youBody').innerHTML = p ? card(p.name, p.location || '', 'The interface shows what this character knows or is carrying forward, not hidden world truth.') : '<p class="muted">No player configured.</p>';
   const r = state.runtime || {};
+  if (!$('modelEndpoint').value) $('modelEndpoint').value=r.model_endpoint||'';
+  if (!$('modelName').value) $('modelName').value=r.local_model||'';
   $('runtimeBody').innerHTML = `<div class="meta">${esc(r.device_profile || '')}<br>${esc(r.local_backend || '')} • ${esc(r.local_model || '')}<br>Story time only: ${r.story_time_only ? 'yes' : 'no'}<br>Referral: ${esc(r.referral_sensitivity || '')}</div>`;
 }
 function card(title, meta='', body='') {
@@ -66,7 +77,7 @@ document.addEventListener('click', async e => {
   const approve = e.target.closest('[data-approve-plan]');
   if (approve) {
     try {
-      const data = await api('/api/plan-approve', {method:'POST', body:JSON.stringify({plan_id:Number(approve.dataset.approvePlan),digest:approve.dataset.digest})});
+      const data = await api('/api/plan-approve', {method:'POST', body:JSON.stringify({plan_id:Number(approve.dataset.approvePlan),digest:approve.dataset.digest,narrative:$('playMode').value==='narrative'})});
       if (data.summary) alert(data.summary);
       await refresh();
     } catch (error) { alert(error.message); }
@@ -154,9 +165,10 @@ function showReferral(data) {
 async function submit(text, forceLocal=false) {
   setBusy(true);
   try {
-    const planning = $('playMode').value === 'planner';
-    const data = await api(planning ? '/api/plan-play' : '/api/play', {method:'POST', body:JSON.stringify({text, mode:$('playMode').value, force_local:forceLocal, session_id:planningSession, plan_id:revisingPlan})});
-    if (data.session_id) planningSession = data.session_id;
+    const narrative = $('playMode').value === 'narrative';
+    const planning = narrative || $('playMode').value === 'planner';
+    const data = await api(narrative ? '/api/narrative-play' : planning ? '/api/plan-play' : '/api/play', {method:'POST', body:JSON.stringify({text, mode:$('playMode').value, force_local:forceLocal, session_id:planningSession, plan_id:revisingPlan})});
+    if (data.session_id) { planningSession = data.session_id; newConversation=false; localStorage.setItem("caernessSession",planningSession); }
     if (data.status === 'external_recommended') showReferral(data);
     await refresh();
   } catch (e) {
@@ -220,3 +232,7 @@ document.querySelectorAll('.subtabs button').forEach(b => b.addEventListener('cl
 refresh().catch(e => $('worldline').textContent=e.message);
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+$('conversationPicker').addEventListener('change', e=>{planningSession=Number(e.target.value)||null;newConversation=!planningSession;revisingPlan=null;localStorage.setItem('caernessSession',planningSession||'');renderState();});
+$('modelSetup').addEventListener('submit',async e=>{e.preventDefault();try{await api('/api/runtime',{method:'POST',body:JSON.stringify({local_backend:'openai_compatible',local_endpoint:$('modelEndpoint').value,local_model:$('modelName').value})});$('modelStatus').textContent='Model settings saved. Credentials remain in the server environment.';await refresh();}catch(e){$('modelStatus').textContent=e.message;}});
+$('testModel').addEventListener('click',async()=>{try{const h=await api('/api/local-health');$('modelStatus').textContent=h.ok?'Endpoint available. Start a conversation to test this model.':h.error||h.status;}catch(e){$('modelStatus').textContent=e.message;}});

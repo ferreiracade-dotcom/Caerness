@@ -1,0 +1,97 @@
+{
+  "label": "four active tracking fixtures; cProfile on both; not a phone benchmark",
+  "measurements": [
+    {
+      "days": 90,
+      "tracking": false,
+      "wall_seconds": 4.852,
+      "planning_cumulative_seconds": 0,
+      "planning_review_calls": 0,
+      "initial_active_plans": 0,
+      "final_active_plans": 0,
+      "final_day": 90,
+      "save_age_days": 0
+    },
+    {
+      "days": 90,
+      "tracking": true,
+      "wall_seconds": 4.808,
+      "planning_cumulative_seconds": 0.052,
+      "planning_review_calls": 90,
+      "initial_active_plans": 4,
+      "final_active_plans": 4,
+      "final_day": 90,
+      "save_age_days": 0,
+      "relative_overhead_percent": -0.9
+    },
+    {
+      "days": 365,
+      "tracking": false,
+      "wall_seconds": 35.529,
+      "planning_cumulative_seconds": 0,
+      "planning_review_calls": 0,
+      "initial_active_plans": 0,
+      "final_active_plans": 0,
+      "final_day": 365,
+      "save_age_days": 0
+    },
+    {
+      "days": 365,
+      "tracking": true,
+      "wall_seconds": 34.582,
+      "planning_cumulative_seconds": 0.248,
+      "planning_review_calls": 365,
+      "initial_active_plans": 4,
+      "final_active_plans": 4,
+      "final_day": 365,
+      "save_age_days": 0,
+      "relative_overhead_percent": -2.7
+    },
+    {
+      "days": 90,
+      "tracking": false,
+      "wall_seconds": 12.378,
+      "planning_cumulative_seconds": 0,
+      "planning_review_calls": 0,
+      "initial_active_plans": 0,
+      "final_active_plans": 0,
+      "final_day": 1185,
+      "save_age_days": 1095
+    },
+    {
+      "days": 90,
+      "tracking": true,
+      "wall_seconds": 13.465,
+      "planning_cumulative_seconds": 0.077,
+      "planning_review_calls": 90,
+      "initial_active_plans": 4,
+      "final_active_plans": 4,
+      "final_day": 1185,
+      "save_age_days": 1095,
+      "relative_overhead_percent": 8.8
+    },
+    {
+      "days": 365,
+      "tracking": false,
+      "wall_seconds": 57.036,
+      "planning_cumulative_seconds": 0,
+      "planning_review_calls": 0,
+      "initial_active_plans": 0,
+      "final_active_plans": 0,
+      "final_day": 1460,
+      "save_age_days": 1095
+    },
+    {
+      "days": 365,
+      "tracking": true,
+      "wall_seconds": 57.546,
+      "planning_cumulative_seconds": 0.262,
+      "planning_review_calls": 365,
+      "initial_active_plans": 4,
+      "final_active_plans": 4,
+      "final_day": 1460,
+      "save_age_days": 1095,
+      "relative_overhead_percent": 0.9
+    }
+  ]
+}

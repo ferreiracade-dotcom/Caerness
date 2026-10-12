@@ -1,0 +1,2 @@
+Environment-selected remote model, HTTPS-only credentials, redacted errors and no credential forwarding PASS
+Accepted scoped delegation can begin at its real site after the commanding player leaves PASS

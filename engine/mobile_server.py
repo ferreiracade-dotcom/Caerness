@@ -179,6 +179,13 @@ class CaernessHandler(BaseHTTPRequestHandler):
                     result["backup"] = backup
                 self._send_json(result)
                 return
+            if path == "/api/narrative-play":
+                from .narrative_runtime import play
+                with connect() as conn:
+                    result = play(conn, body.get("text", ""), body.get("session_id"), body.get("plan_id"))
+                    conn.commit()
+                self._send_json(result)
+                return
             if path == "/api/plan-play":
                 from .planning_gateway import play
                 with connect() as conn:
@@ -191,7 +198,15 @@ class CaernessHandler(BaseHTTPRequestHandler):
                 from .planning_gateway import feedback_request, record_execution_narration
                 with connect() as conn:
                     result = approve_plan(conn,int(body["plan_id"]),str(body["digest"]))
-                    if result.get("plan"):
+                    if result.get("plan") and body.get("narrative"):
+                        from .narrative_runtime import after_execution
+                        from .planning_gateway import run_local
+                        queued=after_execution(conn,result)
+                        try:
+                            result=run_local(conn,queued['next_request']['request_id'],force=runtime_config(conn).get('remote_model',False))
+                        except (ConnectionError,RuntimeError,ValueError):
+                            result={**queued,'summary':'The consequences are saved. Narration is awaiting the configured model.'}
+                    elif result.get("plan"):
                         result.update(record_execution_narration(conn,result["plan"]))
                         if result["plan"]["status"] in ("blocked","refused","awaiting_response"):
                             result["planning_feedback_request"] = feedback_request(conn,result["plan"])
@@ -208,9 +223,13 @@ class CaernessHandler(BaseHTTPRequestHandler):
                 request_id = int(path.split("/")[3])
                 with connect() as conn:
                     row=conn.execute("SELECT input_json FROM model_requests WHERE id=?",(request_id,)).fetchone()
-                    if row and json.loads(row[0]).get("protocol")=="world_plan_v1" and bool(body.get("apply",True)):
+                    if row and json.loads(row[0]).get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"} and bool(body.get("apply",True)):
                         from .planning_gateway import run_local
-                        result=run_local(conn,request_id,force=bool(body.get("force",False)))
+                        try:
+                            result=run_local(conn,request_id,force=bool(body.get("force",False)))
+                        except (ConnectionError,RuntimeError,ValueError):
+                            latest=conn.execute("SELECT id FROM model_requests WHERE target_kind='ai_session' AND target_id=(SELECT target_id FROM model_requests WHERE id=?) AND status IN ('pending','responded') ORDER BY id DESC LIMIT 1",(request_id,)).fetchone()
+                            result=referral_for_request(conn,latest[0] if latest else request_id,{'recommendation':'external_recommended'},reason='Model continuation unavailable. Confirmed outcomes and the conversation remain saved.')
                     else:
                         result = run_request_local(conn, request_id, force=bool(body.get("force", False)), apply=bool(body.get("apply", True)))
                     conn.commit()
@@ -226,7 +245,7 @@ class CaernessHandler(BaseHTTPRequestHandler):
                     if body.get("auto_continue", True) and isinstance(applied, dict) and applied.get("next_request"):
                         next_id = int(applied["next_request"]["request_id"])
                         next_row = conn.execute("SELECT input_json FROM model_requests WHERE id=?",(next_id,)).fetchone()
-                        if json.loads(next_row[0]).get("protocol") == "world_plan_v1":
+                        if json.loads(next_row[0]).get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"}:
                             followup = referral_for_request(conn,next_id,{"recommendation":"external_recommended"},reason="Continue the same planning conversation with the tool feedback.")
                         else:
                             followup = run_request_local(conn, next_id, force=False, apply=True)

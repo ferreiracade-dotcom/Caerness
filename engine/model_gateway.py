@@ -182,9 +182,13 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
     label = _provider_label(provider)
     contract = _task_contract(task_type, request_id)
     rules = _common_rules(task_type)
-    if payload.get("protocol") == "world_plan_v1":
+    if payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"}:
         from .planning_gateway import contract as planning_contract
-        contract = planning_contract(request_id)
+        if payload.get("protocol", "").startswith("narrative_"):
+            from .narrative_runtime import contract as narrative_contract
+            contract = narrative_contract(request_id, payload)
+        else:
+            contract = planning_contract(request_id)
         rules = list(payload["rules"])
     return "\n".join([
         f"# Caerness Engine — {label} Bridge Request #{request_id}",
@@ -501,6 +505,9 @@ def apply_model_request(conn: sqlite3.Connection, request_id: int) -> dict[str, 
     task = str(row["task_type"])
     provider = str(row["provider"])
 
+    if input_data.get("protocol", "").startswith("narrative_"):
+        from .narrative_runtime import apply_response
+        return apply_response(conn, row, response, input_data)
     if input_data.get("protocol") == "world_plan_v1":
         from .planning_gateway import apply_response
         return apply_response(conn, row, response, input_data)
@@ -629,7 +636,7 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
         target_kind=str(row["target_kind"]) if row["target_kind"] is not None else None,
         target_id=int(row["target_id"]) if row["target_id"] is not None else None,
     )
-    if assessment.recommendation in {"external_recommended", "external_strongly_recommended"} and not force:
+    if assessment.recommendation in {"external_recommended", "external_strongly_recommended"} and not force and not runtime_config(conn).get("remote_model"):
         chatgpt_path = export_request(conn, request_id, provider="chatgpt")
         claude_path = export_request(conn, request_id, provider="claude")
         return {
@@ -666,11 +673,14 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
             ],
             require_json=True,
         )
+        conn.execute('CREATE TABLE IF NOT EXISTS ai_model_calls(id INTEGER PRIMARY KEY,request_id INTEGER,backend TEXT,model TEXT,latency_seconds REAL,prompt_tokens INTEGER,completion_tokens INTEGER)')
+        conn.execute('INSERT INTO ai_model_calls(request_id,backend,model,latency_seconds,prompt_tokens,completion_tokens) VALUES (?,?,?,?,?,?)',(request_id,result.backend,result.model,result.latency_seconds,result.prompt_tokens,result.completion_tokens))
         response = import_response(conn, request_id, result.text)
         out = {
             "status": "responded",
             "assessment": assessment.as_dict(),
             "backend": result.backend,
+            "model_latency_seconds": result.latency_seconds,
             "model": result.model,
             "prompt_tokens": result.prompt_tokens,
             "completion_tokens": result.completion_tokens,
