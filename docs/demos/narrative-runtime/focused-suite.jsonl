@@ -1,7 +1,7 @@
-{"test": "ai_planning_test", "status": "PASS", "secs": 11.0}
-{"test": "narrative_authority_test", "status": "PASS", "secs": 0.2}
+{"test": "ai_planning_test", "status": "PASS", "secs": 11.5}
+{"test": "narrative_authority_test", "status": "PASS", "secs": 0.3}
 {"test": "narrative_runtime_test", "status": "PASS", "secs": 2.1}
 {"test": "planning_model_integration_test", "status": "PASS", "secs": 0.8}
-{"test": "player_appointment_test", "status": "PASS", "secs": 4.4}
+{"test": "player_appointment_test", "status": "PASS", "secs": 4.5}
 {"test": "v07_test", "status": "PASS", "secs": 1.7}
 TOTAL {"PASS": 6}

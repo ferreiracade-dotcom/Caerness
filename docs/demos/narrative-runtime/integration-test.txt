@@ -5,4 +5,6 @@ Fully covered but semantically incomplete plan remains unexecuted, including dir
 Durable delegation and budget retain meaningful review PASS
 Scoped established travel → native shared world time/arrival → narration PASS
 Credential transport, private history exclusion and native travel PASS
+Narration service failure preserves confirmed consequences and resumable response without replay PASS
+Explicit HTTP stub transport timing (not real model latency): [{"calls": 54, "seconds": 0.3867}]
 NARRATIVE RUNTIME INTEGRATION PASS; real-model reasoning/literary acceptance remains UNTESTED
