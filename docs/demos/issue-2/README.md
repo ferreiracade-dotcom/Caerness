@@ -79,6 +79,12 @@ new roles, hiring outsiders, payment promises and resource transfers are explici
 blocked pending their own validated executors. Full multi-turn conversations,
 delegated projects, director/fortune rules and Unreal remain subsequent tasks.
 
+The unchanged packaged day-0 database currently contains 324 institutional
+memberships but no `institutional_roles` definitions. The demo therefore establishes
+its organisational role in its explicitly isolated fixture. In ordinary campaigns,
+this bridge can fill roles established by the existing institutional planning APIs;
+it will not invent a role because the opening does not contain one.
+
 ## Reproduce verification
 
 ```sh
