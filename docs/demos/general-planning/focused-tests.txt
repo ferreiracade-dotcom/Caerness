@@ -5,6 +5,7 @@ Incomplete/contradictory/unsupported plans and no unrestricted write tool PASS
 Compound terms retained and unresolved commitment blocked PASS
 Resource preflight and recipient-owned refusal without reroll PASS
 Reviewed quotation fingerprint prevents silent repricing PASS
+Scoped site discovery and existing native-work occupancy prevent overbooking PASS
 Native functional capacity constrains work without exposing diagnosis PASS
 New staff titles do not create institutional sovereignty or head authority PASS
 Counteroffer and explicit recipient-only answer through reusable capability PASS

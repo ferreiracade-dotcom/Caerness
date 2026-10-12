@@ -1,5 +1,5 @@
 {
-  "implementation_revision": "3acde1dc1b9900dd56b134f5ac3513d8fc52bcd1",
+  "implementation_revision": "974ac7d3e60d8f3f5c85d40d912b5e1368c1df9f",
   "base_pr3_review_fix_revision": "3aea6ef",
   "master_revision": "b1185903d6a23cbe1ba49bb5755d1a42a762582a",
   "opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
@@ -27,8 +27,12 @@
     }
   },
   "latest_full_suite": {
-    "status": "running",
-    "path": "runs/planning-delivery-regression"
+    "revision": "3acde1dc1b9900dd56b134f5ac3513d8fc52bcd1",
+    "passed": 128,
+    "failed": 0,
+    "timeouts": 0,
+    "summed_test_seconds": 424.6,
+    "log": "regression-suite.jsonl"
   },
   "prior_release_full_suite": {
     "revision": "54a929d",
@@ -82,5 +86,12 @@
         "peak_rss_mb": 35.3
       }
     ]
-  }
+  },
+  "final_focused_checks": {
+    "passed": 5,
+    "failed": 0,
+    "summed_test_seconds": 20.9,
+    "notes": "After the full gate, scoped domain/site discovery and existing-work occupancy were checked by the planner/model/negotiation/organisation/appointment tests."
+  },
+  "resolved_test_issue": "An added ownership assertion initially used owner_actor_id for cultural_objects. The test was corrected to its native current_owner_actor_id column; the final checks pass."
 }

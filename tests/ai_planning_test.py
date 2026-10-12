@@ -159,6 +159,18 @@ def main():
     assert not c.execute('SELECT 1 FROM ai_resource_allocations').fetchone()
     c.close(); print('Reviewed quotation fingerprint prevents silent repricing PASS')
 
+    c,ids=fixture()
+    from engine.civilian import create_project
+    for i in range(2):
+        create_project(c,f'Existing independent work {i}','manuscript',patron_actor_id=ids['institution'],
+                       metadata={'site_id':ids['archive']})
+    records=context(c,ids['owner'],ids['institution'])
+    assert next(x for x in records['sites'] if x['id']==ids['archive'])['occupied_work_slots']==2
+    p=proposed(c,ids)['plan']; busy=approve_plan(c,p['id'],p['digest'])['plan']
+    assert busy['status']=='blocked' and 'capacity' in busy['steps']['work']['result']['summary']
+    assert c.execute('SELECT COUNT(*) FROM civilian_projects').fetchone()[0]==2
+    c.close(); print('Scoped site discovery and existing native-work occupancy prevent overbooking PASS')
+
     c,ids=fixture(); p=proposed(c,ids)['plan']
     c.execute('UPDATE actor_health_profiles SET functional_capacity=0 WHERE actor_id=?',(ids['mara'],))
     unavailable=approve_plan(c,p['id'],p['digest'])['plan']
