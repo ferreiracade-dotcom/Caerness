@@ -1,0 +1,21 @@
+{
+  "github_archive_root": "ferreiracade-dotcom-Caerness-874e02a",
+  "launch_probe_exit": 0,
+  "scope": "Linux launch/health probe only, no new inference or claim of Windows/CUDA acceptance.",
+  "existing_campaign_and_pending_requests_preserved": true,
+  "counts": {
+    "ai_sessions": 6,
+    "model_requests": 26,
+    "resources": 0,
+    "events": 0,
+    "day": 0,
+    "unfinished": [
+      [
+        9,
+        "pending"
+      ]
+    ],
+    "history": "78189d51c4620cda927ff1e4245ee7661832909b05ecae123f61c8a2927d1ad1"
+  },
+  "canonical_opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7"
+}
