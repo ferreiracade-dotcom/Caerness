@@ -1,0 +1,9 @@
+Character selection/create setup, private-field exclusion, repeat selection denial, older conversation retrieval and camera ownership PASS
+{
+  "ok": false,
+  "status": "unavailable",
+  "backend": "openai_compatible",
+  "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+  "model": "local-model",
+  "error": "Model service could not be reached."
+}

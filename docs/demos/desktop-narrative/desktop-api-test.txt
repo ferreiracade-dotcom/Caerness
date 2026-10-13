@@ -1,0 +1,7 @@
+Character selection/create setup, private-field exclusion, repeat selection denial, older conversation retrieval and camera ownership PASS
+127.0.0.1 - - [13/Oct/2026 05:52:35] "POST /api/campaign/select HTTP/1.1" 400 -
+127.0.0.1 - - [13/Oct/2026 05:52:35] "POST /api/campaign/select HTTP/1.1" 400 -
+127.0.0.1 - - [13/Oct/2026 05:52:35] "GET /api/campaign/characters?query=secret HTTP/1.1" 400 -
+127.0.0.1 - - [13/Oct/2026 05:52:35] "POST /api/campaign/select HTTP/1.1" 400 -
+127.0.0.1 - - [13/Oct/2026 05:52:35] "GET /api/conversation/999999 HTTP/1.1" 400 -
+127.0.0.1 - - [13/Oct/2026 05:52:35] "GET /api/conversation/1 HTTP/1.1" 400 -

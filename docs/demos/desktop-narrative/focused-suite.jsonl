@@ -1,0 +1,5 @@
+{"test": "desktop_client_test", "status": "PASS", "secs": 0.9}
+{"test": "narrative_authority_test", "status": "PASS", "secs": 0.2}
+{"test": "player_appointment_test", "status": "PASS", "secs": 4.2}
+{"test": "v07_test", "status": "PASS", "secs": 1.7}
+TOTAL {"PASS": 4}

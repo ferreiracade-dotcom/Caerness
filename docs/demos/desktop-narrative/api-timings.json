@@ -1,0 +1,41 @@
+{
+  "label": "Loopback browser API/retrieval, with reference/history fixtures; not model latency",
+  "measurements": [
+    {
+      "path": "/api/state",
+      "seconds": [
+        0.0149,
+        0.0085,
+        0.009,
+        0.0164,
+        0.0109
+      ],
+      "median_seconds": 0.0109,
+      "response_bytes": 2959
+    },
+    {
+      "path": "/api/ledger",
+      "seconds": [
+        0.0738,
+        0.0766,
+        0.0736,
+        0.077,
+        0.0734
+      ],
+      "median_seconds": 0.0738,
+      "response_bytes": 2822
+    },
+    {
+      "path": "/api/conversations",
+      "seconds": [
+        0.0118,
+        0.0074,
+        0.0068,
+        0.0067,
+        0.0069
+      ],
+      "median_seconds": 0.0069,
+      "response_bytes": 3396
+    }
+  ]
+}

@@ -1,3 +1,7 @@
+# Current product/platform direction — owner update, 13 October 2026
+
+Caerness is a narrative-first RPG primarily played in a desktop/laptop browser, with mobile-browser compatibility through the same client. Prefer capable AI reasoning, character portrayal and prose through the existing OpenAI-compatible interface. Local inference is optional: no phone-only, OnePlus or local 3–4B constraint applies. Keep the simulation authoritative and the machinery unobtrusive. 3D/Unreal is postponed indefinitely until the text game is genuinely enjoyable. Older version-specific descriptions below are historical; this update and AGENTS govern active development. The owner's bounded narrative-fortune clarification in PR #1 remains applicable; this platform change alters no outcome probabilities.
+
 # v0.26.1 pre-RC integration note
 
 The architectural principles below remain authoritative. v0.26.1 adds the product/integration layer needed to carry them into a v1.0 release candidate: a production bootstrap, versioned save migrations, save-safe testing, explicit mirrored-field ownership checks, phone-facing setup/inspection/diagnostics, domain-to-decision adapters, and realistic-scale 20/40/120-year validation. Historical crystallization is explicitly actor-first for v1.0.
@@ -436,7 +440,7 @@ departure
   -> open agency handoff
 ```
 
-On the OnePlus 12, the local narrator may produce this as three bounded generations to keep memory/output load comfortable. Those chunks are joined before presentation. The player never has to type `continue` simply because the local model reached an output limit.
+A constrained optional local runtime may split this into bounded generations. A capable connected model need not inherit that device constraint. Those chunks are joined before presentation. The player never has to type `continue` simply because the local model reached an output limit.
 
 The engine stores `narrative_segments` and `agency_checkpoints` so future UI/runtime code can separate fictional beats from player-turn boundaries.
 
@@ -487,9 +491,9 @@ The router separates four questions that AI-agent play often conflates:
 1. How difficult is the reasoning?
 2. How valuable would stronger prose be?
 3. How much context is required?
-4. How hard is this request on the current phone profile?
+4. What limits apply to the actual configured model service or optional local host?
 
-The OnePlus 12 / 12 GB default uses:
+The legacy optional local profile uses (not the default product target):
 
 ```text
 comfortable local context: 4096 estimated tokens
@@ -504,7 +508,7 @@ A route assessment can recommend:
 - external recommended;
 - external strongly recommended.
 
-The recommendation is advisory. The player can always force local execution. The UI explains whether the recommendation is primarily about reasoning, prose quality, or phone load.
+The recommendation is advisory. The player can always force local execution. The UI explains whether the recommendation is primarily about reasoning, prose quality, or optional local-host load.
 
 LLM self-reported confidence is not used as the primary signal. The engine relies on observable task complexity, context size, persisted stakes, and validation failure.
 
@@ -526,19 +530,9 @@ SQLite owns world truth
 
 A stronger model is a quality service, not a different ruleset.
 
-## 33. OnePlus 12 / 12 GB profile
+## 33. Platform-flexible model deployment
 
-The phone is treated as a constrained but capable simulation host.
-
-Design assumptions:
-
-- rules and SQLite handle most background activity;
-- a 3B–4B quantized instruct model is the comfortable local baseline;
-- larger models are optional rather than required;
-- canon is retrieved in small relevant chunks;
-- long narration may be split across several model calls;
-- external referral exists for rare heavy scenes;
-- CPU-compatible local inference is the baseline; GPU acceleration is optimization, not correctness.
+The desktop/laptop browser is the primary reading and interaction surface; mobile browsers use the same client. Rules and SQLite handle background activity. A capable connected OpenAI-compatible model handles free-form reasoning and narration. Model quality is not capped by phone memory or model size. Local services remain optional, and their limits are measured on the actual host. Retrieved context remains bounded and knowledge-safe irrespective of provider. Measure model latency separately from world-simulation time, and never treat a stub as real gameplay acceptance.
 
 ## 34. Story time only
 
@@ -554,7 +548,7 @@ This preserves a living independent world without punishing the player for not o
 
 The engine may know everything. The interface may show only what the character could reasonably know, remember, infer, possess, or access.
 
-The initial mobile UI uses four spaces:
+The shared browser UI keeps story and reference separate:
 
 - **Scene** — current narrative camera;
 - **Matters** — intentions and obligations;
@@ -597,7 +591,7 @@ This avoids both extremes:
 
 ## 37. Mobile runtime
 
-The phone UI is served on localhost by the standard-library HTTP server. v0.7 deliberately has no network authentication and therefore defaults to `127.0.0.1` only.
+The shared browser UI is served on localhost by the standard-library HTTP server. v0.7 deliberately has no network authentication and therefore defaults to `127.0.0.1` only.
 
 The mobile composition is:
 
@@ -608,7 +602,7 @@ browser/PWA
   -> local model endpoint
 ```
 
-The input box remains present instead of narration repeatedly asking for action. A referral modal can copy either a ChatGPT or Claude bridge packet to the clipboard. A returned structured response can be pasted/imported back into the same phone interface.
+The input box remains present instead of narration repeatedly asking for action. A referral modal can copy either a ChatGPT or Claude bridge packet to the clipboard. A returned structured response can be pasted/imported back into the same browser interface.
 
 ## 38. Save integrity and versioning
 

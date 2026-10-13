@@ -1,6 +1,8 @@
 # Caerness Narrative Engine Architecture
 ## Post-v0.7 Consolidated Design Specification
 
+**Current platform direction (13 October 2026):** desktop/laptop narrative play first, mobile-browser compatibility through one client; capable model quality over phone-local deployment. 3D/Unreal is postponed indefinitely until text play is genuinely enjoyable. The authority and knowledge invariants below remain in force.
+
 **Status:** design target after Engine v0.7  
 **Relationship to v0.7:** additive. This document does not replace v0.7's authority, persistence, model-gateway, information, competence, agency-handoff, or mobile-runtime rules. It defines the next architectural layer those systems must support.
 

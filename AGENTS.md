@@ -11,15 +11,19 @@ A persistent low-fantasy world simulation (a murim-style martial world plus West
 - Packaged opening world: `data/caerness.db` (schema 108, story day 0, 132 travel routes).
 - Design: `DESIGN.md`. Specs and plans for current work: `docs/superpowers/specs/`, `docs/superpowers/plans/`.
 
-## 2. Where work stands (2026-10-09)
+## 2. Where work stands (2026-10-13)
 
-Branches: **`master` is current.** `worldhist01a-stage1` and `pop01-phase0` are the feature branches it was fast-forwarded from (kept for history).
+**Current product direction:** a rich AI narrative RPG, primarily in a desktop/laptop browser, with the same responsive client usable on mobile. Capable model reasoning, prose and characters take priority over running inference on a particular device. 3D observation/Unreal is postponed indefinitely until text play is genuinely enjoyable.
+
+**Feature stack:** PR #3 → #4 → #5 (`feat/narrative-runtime`) → desktop narrative work. Preserve the latest dependency fixes; do not start this work from master or merge/retarget automatically. The simulation remains Python/SQLite. PR #5 connects an OpenAI-compatible model, saves conversations and supports validated general planning; actual real-model gameplay remains an acceptance gate, not an established success. Current desktop specification: `docs/plans/2026-10-13-desktop-narrative.md`.
+
+The simulation milestones below are historical status/performance evidence, not the immediate development sequence.
 
 | Stream | State | Where |
 |---|---|---|
 | Schema 108: opening family history, named/child mortality, Veinborn & training realism, ROUTES-01 travel graph, conflict fixes | Done, 125/125 suite | `WORLDHIST01A_SCHEMA108_OPENING_HISTORY_MORTALITY_CULTIVATION_2026-09-23.md`, README §Schema 108 |
-| **PERF-01**: long-run speed and save size so the game can live on a phone | **In progress** (below) | `docs/superpowers/plans/2026-09-26-perf01-speed-and-storage.md` |
-| **POP-01** Phase 0: phone runtime + benchmark tooling | Tooling done; **phone run not done** (owner will not install until PERF-01 targets are met) | `docs/superpowers/plans/2026-09-26-pop01-phase0-phone-benchmark.md`, `ANDROID_ONEPLUS12.md` |
+| **PERF-01**: long-run speed and save size for practical play | **In progress** (below) | `docs/superpowers/plans/2026-09-26-perf01-speed-and-storage.md` |
+| **POP-01** Phase 0: phone runtime + benchmark tooling | Legacy tooling done; physical-phone performance unverified (not a desktop acceptance gate) | `docs/superpowers/plans/2026-09-26-pop01-phase0-phone-benchmark.md`, `ANDROID_ONEPLUS12.md` |
 | **POP-01** population tiers (background → notable → named, weighted simulants, promotion by distinction/significance/relevance, summit renewal ladder, Sixth depth bands) | Designed and approved; not started | `docs/superpowers/specs/2026-09-26-population-tiers-design.md` |
 
 ### PERF-01 numbers (PC, `tools/bench_sim.py` / `tools/run_years.py`)
@@ -34,9 +38,9 @@ Done (each test-covered; behaviour-preserving changes verified identical): belie
 Next for PERF-01:
 1. Batch rumour exposure per place/day (rumour spreading is ~40% of run time). Verify with the 60-day fingerprint method (hash of exposures/knowledge/beliefs/rumour_locations before vs after must be identical).
 2. Stop storing each hearer's copy of rumour text in the legacy `knowledge.belief_text` (7 MB, only ~800 distinct texts); touches 7 modules.
-3. Re-measure 3 years (`tools/run_years.py`), run the suite, then ask the owner to run the phone benchmark (`ANDROID_ONEPLUS12.md` §1, §2, §11).
+3. Re-measure on the actual desktop deployment and run the suite. A physical-phone benchmark is optional compatibility evidence, not a gate for desktop play.
 
-Then POP-01 plans 2–4 (background store + life rules; cultivation + renewal ladder + Sixth depth; tiers + migration) — write each plan from the spec after phone numbers exist.
+These PERF/POP next steps are deferred behind the playable narrative milestone. Phone benchmarks and population work are not prerequisites for desktop play. Do not expand or refactor simulation in the desktop task.
 
 ## 3. Owner's rules (binding)
 
@@ -46,7 +50,7 @@ Then POP-01 plans 2–4 (background store + life rules; cultivation + renewal la
 - Model circumstances by **actual means and access**, never by a group label (not all underworld or remote people are poor).
 - No recognized same-sex household unions (judged too common/unaccepted); Veinborn ≠ cultivator; aptitudes are bell-shaped; groups marry at different, canon-grounded rates.
 - **Named characters get no special treatment**: same rules at every tier (POP-01).
-- **Phone-only target**: OnePlus 12, 12 GB, CPU, with a local 3–4B model loaded; quality over speed, but no 20–30 minute waits. Never end a narration node on a bare "continue" when nothing needs the player.
+- **Desktop-first, mobile-compatible narrative play**: one browser client and authoritative Python/SQLite engine. Prefer a capable remote/OpenAI-compatible model; local inference is optional. No OnePlus, CPU-only or 3–4B model requirement. Measure model latency separately from simulation time. Never end a narration node on a bare "continue" when nothing needs the player. Keep model settings and diagnostics out of the main story.
 - Don't trust README/acceptance claims: verify with data. Systems that "never happen" are usually silently disconnected (check graph reachability, join keys, endpoints) before tuning rates.
 - Commit and push when the owner asks; use branches for feature work.
 
@@ -56,6 +60,8 @@ PC interpreter used so far: `"$LOCALAPPDATA/Programs/Python/Python313/python.exe
 
 | Task | Command |
 |---|---|
+| Windows play | Double-click `Play Caerness.cmd`; see `WINDOWS_PLAY.md` |
+| Browser play | `python tools/narrative_play.py --configure --open-browser` (separate campaign save) |
 | Full isolated regression suite | `python tools/run_suite.py --out runs/suite` then `git restore game/campaign_01/model_requests/` (tests rewrite those files) |
 | One test | `CAERNESS_DB_PATH=/tmp/x.db PYTHONPATH=. python tests/<name>.py` |
 | Multi-year run with speed and size per checkpoint | `python tools/run_years.py --days 1095 --out runs/<name>` |

@@ -3,95 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#151310">
+  <meta name="theme-color" content="#151815">
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/style.css">
-  <title>Caerness</title>
+  <title>Caerness — A life in a living world</title>
 </head>
 <body>
+  <a class="skip-link" href="#input">Skip to your next action</a>
   <header class="topbar">
-    <div>
-      <div class="brand">CAERNESS</div>
-      <div id="worldline" class="worldline">Loading…</div>
-    </div>
-    <button id="interrupt" class="ghost hidden" type="button">Interrupt</button>
+    <div class="wordmark"><span class="seal" aria-hidden="true">C</span><div><div class="brand">CAERNESS</div><div class="brand-caption">A life in a living world</div></div></div>
+    <div id="worldline" class="worldline">Opening your chronicle…</div>
+    <div class="header-actions"><button id="interrupt" class="ghost hidden" type="button">Pause</button><button id="settingsButton" class="ghost" type="button" aria-label="Open settings">Settings</button></div>
   </header>
-
-  <main>
-    <section id="scene" class="panel active">
-      <div id="attention"></div>
-      <select id="conversationPicker" aria-label="Saved conversations"></select><button id="newIdea" type="button">New conversation</button>
-      <div id="transcript" class="transcript"></div>
-      <div id="emptyScene" class="empty hidden">No campaign scene yet.</div>
-    </section>
-
-    <section id="matters" class="panel">
-      <h2>Matters</h2>
-      <p class="muted">Commitments and intentions your character would naturally remember.</p>
-      <div id="mattersBody"></div>
-    </section>
-
-    <section id="world" class="panel">
-      <h2>World</h2>
-      <div class="subtabs">
-        <button data-worldtab="people" class="active">People</button>
-        <button data-worldtab="places">Places</button>
-        <button data-worldtab="claims">Knowledge</button>
-      </div>
-      <div id="worldBody"></div>
-    </section>
-
-
-    <section id="ledger" class="panel">
-      <h2>Ledger</h2>
-      <p class="muted">Campaign setup, your character's persistent condition, and save diagnostics.</p>
-      <div id="setupBody"></div>
-      <div id="ledgerBody"></div>
-    </section>
-
-    <section id="you" class="panel">
-      <h2>You</h2>
-      <div id="youBody"></div>
-      <div class="settings-card">
-        <h3>Runtime</h3>
-        <div id="runtimeBody"></div>
-        <p class="muted">A capable connected model can narrate directly. API keys stay in the server environment, never in this browser or save.</p>
-        <form id="modelSetup"><label>Model endpoint<input id="modelEndpoint" type="url" placeholder="https://your-provider/v1/chat/completions"></label><label>Model name<input id="modelName" placeholder="Your available model"></label><button>Save model settings</button><button id="testModel" type="button">Check connection</button><p id="modelStatus" role="status"></p></form>
-      </div>
-    </section>
-  </main>
-
-  <div id="referral" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="eyebrow">Higher-quality model recommended</div>
-      <h2 id="referralTitle">This section is unusually demanding.</h2>
-      <div id="referralScores" class="scoregrid"></div>
-      <ul id="referralReasons"></ul>
-      <div class="modal-actions">
-        <button id="copyChatGPT">Copy ChatGPT packet</button>
-        <button id="copyClaude">Copy Claude packet</button>
-        <button id="importExternal" class="secondary">Import AI response from clipboard</button>
-        <button id="runLocalAnyway" class="secondary">Run locally anyway</button>
-        <button id="closeReferral" class="ghost">Leave unresolved</button>
-      </div>
-      <p class="muted small">The world state already resolved only where safe. External narration or reasoning cannot silently rewrite it.</p>
-    </div>
+  <div class="workspace">
+    <nav class="bottomnav" aria-label="Story and notebook">
+      <div class="nav-heading">YOUR CHRONICLE</div>
+      <button data-panel="scene" class="active"><span aria-hidden="true">Ⅰ</span> Story</button>
+      <button data-panel="world"><span aria-hidden="true">Ⅱ</span> World</button>
+      <button data-panel="matters"><span aria-hidden="true">Ⅲ</span> Commitments</button>
+      <button data-panel="history"><span aria-hidden="true">Ⅳ</span> History</button>
+      <button data-panel="you"><span aria-hidden="true">Ⅴ</span> Character</button>
+      <div class="nav-foot"><span class="flourish" aria-hidden="true">◇</span><p>The world carries on.<br>Your story is your own.</p><button id="focusInput" class="ghost" type="button">Write an action <kbd>Ctrl K</kbd></button></div>
+    </nav>
+    <main id="playSurface">
+      <section id="scene" class="panel active" aria-label="Story">
+        <div class="chapter-header"><div><span class="eyebrow">THE STORY</span><h1 id="chapterTitle">Your life in Caerness</h1></div><button id="newIdea" class="ghost" type="button">New conversation</button></div>
+        <div id="storyScroll" class="story-scroll" tabindex="0" aria-label="Story reading area">
+          <div class="reading-column"><div id="attention"></div><div id="onboarding"></div><div id="transcript" class="transcript"></div><div id="emptyScene" class="empty hidden"><div class="ornament" aria-hidden="true">◇</div><h2>A world to inhabit</h2><p>Take in your surroundings. Speak to someone. Follow an ambition, or let the day remain quiet.</p><p>Your words guide your character; the world determines what follows.</p></div></div>
+        </div>
+        <form id="composer" class="composer">
+          <div class="composer-line"><label for="input">YOUR NEXT MOMENT</label><span id="playStatus" role="status" aria-live="polite"></span></div>
+          <div class="input-row"><textarea id="input" rows="2" aria-label="Player action" placeholder="Say something, do something, or simply stay a while…"></textarea><button id="send" type="submit" aria-label="Send action"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+          <div class="composer-hint"><span>Enter to send · Shift+Enter for a new line</span><button id="latest" class="ghost" type="button">Latest passage ↓</button></div>
+        </form>
+      </section>
+      <aside id="notebook" class="notebook" aria-label="Character notebook">
+        <div class="notebook-header"><span class="eyebrow">YOUR NOTEBOOK</span><button id="closeNotebook" class="ghost" aria-label="Close notebook">×</button></div>
+        <section id="world" class="panel"><h2>People & places</h2><p class="muted">What your character knows, rather than everything that is true.</p><div class="subtabs"><button data-worldtab="people" class="active">People</button><button data-worldtab="places">Places</button><button data-worldtab="claims">Knowledge</button></div><div id="worldBody"></div></section>
+        <section id="matters" class="panel"><h2>Commitments</h2><p class="muted">Promises, responsibilities and work already in motion.</p><div id="mattersBody"></div></section>
+        <section id="history" class="panel"><h2>Past conversations</h2><p class="muted">Return to a conversation without losing its earlier exchanges.</p><label for="conversationPicker">Resume a conversation</label><select id="conversationPicker" aria-label="Saved conversations"></select><div id="historyBody"></div></section>
+        <section id="you" class="panel"><h2>Your character</h2><div id="youBody"></div><div id="characterDetails"></div></section>
+      </aside>
+    </main>
   </div>
-
-  <form id="composer" class="composer">
-    <select id="playMode" aria-label="Play mode"><option value="narrative">AI narrative play</option><option value="planner">Plan review mode</option><option value="auto">Existing play</option><option value="rules">Offline rules</option></select>
-    <textarea id="input" rows="1" aria-label="Player action"></textarea>
-    <button id="send" type="submit" aria-label="Send">↑</button>
-  </form>
-
-  <nav class="bottomnav">
-    <button data-panel="scene" class="active">Scene</button>
-    <button data-panel="matters">Matters</button>
-    <button data-panel="world">World</button>
-    <button data-panel="ledger">Ledger</button>
-    <button data-panel="you">You</button>
-  </nav>
-
+  <dialog id="settingsDialog" aria-labelledby="settingsTitle">
+    <div class="dialog-heading"><div><span class="eyebrow">OUTSIDE THE STORY</span><h2 id="settingsTitle">Game settings</h2></div><button id="closeSettings" class="ghost" aria-label="Close settings">×</button></div>
+    <section class="settings-card"><h3>Reading</h3><label for="readingSize">Text size</label><select id="readingSize"><option value="standard">Standard</option><option value="large">Larger</option></select></section>
+    <section class="settings-card"><h3>AI connection</h3><p class="muted">A capable model supplies the conversation and prose. Credentials are entered in the launch window, never here.</p><form id="modelSetup"><label for="modelEndpoint">Service endpoint</label><input id="modelEndpoint" type="url" placeholder="https://api.openai.com/v1/chat/completions"><label for="modelName">Model name</label><input id="modelName" placeholder="Your available model"><div class="settings-actions"><button>Save connection</button><button id="testModel" type="button" class="secondary">Check connection</button></div><p id="modelStatus" role="status"></p></form></section>
+    <details class="settings-card"><summary>Advanced options & diagnostics</summary><label for="playMode">Play mode</label><select id="playMode"><option value="narrative">AI narrative play</option><option value="planner">Plan review mode</option><option value="auto">Legacy play</option><option value="rules">Offline rules (not AI narration)</option></select><div id="runtimeBody"></div><div id="ledgerBody"></div><div id="setupBody"></div></details>
+  </dialog>
+  <div id="referral" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="referralTitle">
+    <div class="modal-card"><div class="eyebrow">CONVERSATION PAUSED</div><h2 id="referralTitle">Connect your narrator</h2><p id="referralMessage"></p><p class="muted">For direct AI play, configure a reachable model service and enter its API key in the launch window. A ChatGPT subscription alone does not provide API access.</p><details><summary>Manual model handoff</summary><div id="referralScores" class="scoregrid"></div><ul id="referralReasons"></ul><div class="modal-actions"><button id="copyChatGPT">Copy ChatGPT packet</button><button id="copyClaude">Copy Claude packet</button><button id="importExternal" class="secondary">Import response from clipboard</button><button id="runLocalAnyway" class="secondary">Try configured model</button></div></details><button id="closeReferral" class="ghost">Return to the story</button></div>
+  </div>
   <script src="/app.js"></script>
 </body>
 </html>

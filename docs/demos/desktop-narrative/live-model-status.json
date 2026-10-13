@@ -1,0 +1,57 @@
+{
+  "real_model_available": false,
+  "model": "local-model",
+  "health": {
+    "ok": false,
+    "status": "unavailable",
+    "backend": "openai_compatible",
+    "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+    "model": "local-model",
+    "error": "Model service could not be reached."
+  },
+  "pair": {
+    "owner": 122,
+    "owner_name": "Robert Baird",
+    "npc": 641,
+    "npc_name": "Petra Fenn",
+    "started_day": -28411
+  },
+  "opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
+  "gates": {
+    "A": {
+      "status": "BLOCKED",
+      "reason": "No reachable configured model; no real-model gameplay evaluated."
+    },
+    "B": {
+      "status": "BLOCKED",
+      "reason": "No reachable configured model; no real-model gameplay evaluated."
+    },
+    "C": {
+      "status": "BLOCKED",
+      "reason": "No reachable configured model; no real-model gameplay evaluated."
+    },
+    "D": {
+      "status": "BLOCKED",
+      "reason": "No reachable configured model; no real-model gameplay evaluated."
+    }
+  },
+  "scripted_responses": false,
+  "inference_attempt": {
+    "status": "external_recommended",
+    "reason": "The configured model is unavailable or returned an invalid response. Your message and any confirmed outcomes are saved. Configure a capable endpoint or use the manual model packet.",
+    "player_input": "I pause to look around and consider starting a quiet conversation.",
+    "model_reply": null
+  },
+  "scenario_mapping": {
+    "ordinary_life": "BLOCKED",
+    "extended_conversation_20_turns": "BLOCKED",
+    "unusual_instruction": "BLOCKED",
+    "undertaking_time_return": "BLOCKED"
+  },
+  "missing_access": {
+    "runtime_secret_bindings": [],
+    "environment_API_keys_present": false,
+    "remote_endpoint_model_configured": false,
+    "default_loopback_model_service": "not reachable"
+  }
+}

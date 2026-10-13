@@ -1,7 +1,9 @@
 let state = null;
 let referral = null;
 let worldTab = 'people';
-let controller = null;
+let busy = false;
+let historyIndex = [];
+let currentPanel = 'scene';
 let ledger = null;
 let planningSession = Number(localStorage.getItem("caernessSession")) || null;
 let newConversation = false;
@@ -9,7 +11,7 @@ let cameraActor = null;
 let revisingPlan = null;
 
 const $ = (id) => document.getElementById(id);
-$('newIdea').addEventListener('click', () => { revisingPlan = null; planningSession = null; newConversation = true; localStorage.removeItem("caernessSession"); $('input').focus(); });
+$('newIdea').addEventListener('click', () => { if (busy) return; revisingPlan=null; planningSession=null; newConversation=true; localStorage.removeItem('caernessSession'); renderState(); openPanel('scene'); $('input').focus(); });
 function esc(v='') { return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 async function api(path, options={}) {
   const res = await fetch(path, {headers:{'Content-Type':'application/json'}, ...options});
@@ -18,68 +20,77 @@ async function api(path, options={}) {
   return data;
 }
 
+function prose(text='') {
+  // Formatting only: quoted speech differs visually, without inferring a speaker or facts.
+  return String(text).split(/\n\s*\n/).filter(Boolean).map(part=> {
+    const safe=esc(part);
+    const spoken=safe.replace(/(“[^“”\n]+”|&quot;[^\n]*?&quot;)/g,'<span class="spoken">$1</span>');
+    return /^[“"]/.test(part.trim()) ? `<blockquote class="dialogue">${spoken}</blockquote>` : `<p>${spoken}</p>`;
+  }).join('');
+}
+function reviewCard(x) {
+  const omissions=[...(x.unresolved||[]),...(x.scope_verification?.omissions||[])];
+  const permit=!omissions.length && x.scope_verification?.complete!==false;
+  return `<article class="decision-card"><span class="eyebrow">A MEANINGFUL DECISION</span><h3>Before you commit</h3><p>${esc(x.summary)}</p>${x.review_scope.map(t=>`<p>${esc(t)}</p>`).join('')}${omissions.map(t=>`<p class="missing">Still unresolved: ${esc(t)}</p>`).join('')}<details><summary>Your original intention and unexecuted terms</summary><p>${esc(x.original_instruction)}</p>${(x.source_handling||[]).filter(h=>h.handling!=='planned').map(h=>`<p>Not executed: ${esc(h.text)}</p>`).join('')}</details>${permit?`<button data-approve-plan="${x.id}" data-digest="${esc(x.digest)}">Proceed with these terms</button>`:''}<button class="secondary" data-revise-plan="${x.id}" data-session="${x.session_id}">Keep discussing</button></article>`;
+}
 function renderState() {
   if (!state) return;
-  const p = state.player;
-  $('worldline').textContent = p ? `Day ${state.world.day} • ${p.location || 'Unknown'} • ${p.name}` : `Day ${state.world.day} • No player configured`;
-  const turns = state.turns || [];
-  $('emptyScene').classList.toggle('hidden', turns.length > 0);
-  $('transcript').innerHTML = turns.map(t => `
-    <article class="turn">
-      <div class="daytag">Day ${t.day_started}${t.day_ended !== t.day_started ? `–${t.day_ended}`:''}</div>
-      <div class="player-line">${esc(t.raw_input)}</div>
-      <div class="narration">${esc(t.narration_text || '')}</div>
-    </article>`).join('');
-  const conversations = state.conversations || [];
-  if (cameraActor && cameraActor !== p?.actor_id) { planningSession=null; newConversation=true; }
+  const p=state.player;
+  $('worldline').textContent=p?`${p.location||'Unknown'} · Day ${state.world.day} · ${p.name}`:'A new life awaits';
+  $('chapterTitle').textContent=p?.location||'Your life in Caerness';
+  if (cameraActor && cameraActor!==p?.actor_id) { planningSession=null;newConversation=true; }
   cameraActor=p?.actor_id;
+  const conversations=state.conversations||[];
   if (planningSession && !conversations.some(x=>x.id===planningSession)) planningSession=null;
-  $('conversationPicker').innerHTML='<option value="">New conversation</option>'+conversations.map(x=>`<option value="${x.id}">${esc(x.messages.find(m=>m.role==='player')?.text?.slice(0,60)||'Conversation')} • #${x.id}</option>`).join('');
+  if (!planningSession && !newConversation && conversations.length) planningSession=conversations[0].id;
+  const index=historyIndex.length?historyIndex:conversations.map(x=>({id:x.id,title:x.messages.find(m=>m.role==='player')?.text,created_day:x.messages[0]?.day}));
+  $('conversationPicker').innerHTML='<option value="">New conversation</option>'+index.map(x=>`<option value="${x.id}">${esc(String(x.title||'Conversation').slice(0,65))}</option>`).join('');
   $('conversationPicker').value=planningSession||'';
-  if (!planningSession && !newConversation && conversations.length) planningSession = conversations[0].id;
-  const activeConversation = conversations.find(x => x.id === planningSession);
-  if (activeConversation) {
-    $('emptyScene').classList.add('hidden');
-    $('transcript').innerHTML += activeConversation.messages.filter(x => ['player','assistant'].includes(x.role)).map(x =>
-      `<article class="turn"><div class="daytag">Day ${esc(x.day)}</div><div class="${x.role === 'player' ? 'player-line' : 'narration'}">${esc(typeof x.text === 'string' ? x.text : x.text.proposed_scope || '')}</div></article>`).join('');
+  $('historyBody').innerHTML=index.map(x=>`<div class="card"><div class="meta">Day ${esc(x.created_day)}</div><div>${esc(String(x.title||'Conversation').slice(0,140))}</div><button data-resume-session="${x.id}">Resume conversation</button></div>`).join('')||'<p class="muted">Your conversations will remain here as your life unfolds.</p>';
+  const active=conversations.find(x=>x.id===planningSession);
+  const turns=state.turns||[];
+  if (active) {
+    $('transcript').innerHTML=active.messages.filter(x=>['player','assistant'].includes(x.role)).map(x=>`<article class="turn"><div class="daytag">Day ${esc(x.day)}</div>${x.role==='player'?`<div class="player-line"><span class="speaker-label">${esc(p?.name||'You')}</span>${esc(typeof x.text==='string'?x.text:'')}</div>`:`<div class="narration">${prose(typeof x.text==='string'?x.text:x.text.proposed_scope||'')}</div>`}</article>`).join('');
+  } else {
+    $('transcript').innerHTML=newConversation?'':turns.map(t=>`<article class="turn"><div class="daytag">Day ${esc(t.day_started)}${t.day_ended!==t.day_started?`–${esc(t.day_ended)}`:''}</div><div class="player-line"><span class="speaker-label">${esc(p?.name||'You')}</span>${esc(t.raw_input)}</div><div class="narration">${prose(t.narration_text||'')}</div></article>`).join('');
   }
-
   const review=(state.plans||[]).find(x=>x.session_id===planningSession && x.status==='draft');
-  if (review) $('transcript').innerHTML+=`<article class="turn"><div class="narration"><b>Proposed scope</b>${review.review_scope.map(t=>`<p>${esc(t)}</p>`).join('')}${(review.scope_verification?.omissions||[]).map(t=>`<p>Still missing: ${esc(t)}</p>`).join('')}${!review.unresolved.length && review.scope_verification?.complete!==false ? `<button data-approve-plan="${review.id}" data-digest="${esc(review.digest)}">Proceed with this scope</button>` : ''}<button data-revise-plan="${review.id}" data-session="${review.session_id}">Keep discussing</button></div></article>`;
-  $('attention').innerHTML = (state.attention || []).slice(0,5).map(c => `
-    <div class="attention-card ${esc(c.cue_type)}">${esc(c.text)}</div>`).join('');
-
-  const m = state.matters || {intentions:[], obligations:[]};
-  $('mattersBody').innerHTML = [
-    ...(state.plans || []).map(x => `<div class="card"><b>${esc(x.summary)}</b><p>Original instruction: ${esc(x.original_instruction)}</p><p>${esc(x.status)}</p>${x.status === 'draft' ? `<p>${esc(x.authorization_notice)}</p>${x.review_scope.map(t => `<p>${esc(t)}</p>`).join('')}` : ''}${x.source_handling?.filter(h=>h.handling !== 'planned').map(h=>`<p>Not executed (${esc(h.handling)}): ${esc(h.text)}</p>`).join('') || ''}${(x.scope_verification?.omissions || []).map(t=>`<p>Missing from scope: ${esc(t)}</p>`).join('')}${x.unresolved.map(t => `<p>Unresolved: ${esc(t)}</p>`).join('')}${Object.values(x.steps).filter(s => s.result.summary).map(s => `<p>${esc(s.result.summary)}${s.result.progress == null ? '' : ` (${Math.round(s.result.progress)}% recorded progress)`}</p>`).join('')}${x.status === 'draft' && !x.unresolved.length && x.scope_verification?.complete !== false ? `<button data-approve-plan="${x.id}" data-digest="${esc(x.digest)}">Authorize only these operations</button>` : ''}<button data-revise-plan="${x.id}" data-session="${x.session_id}">Discuss or revise</button></div>`),
-    ...(state.scope_reviews || []).map(x => `<div class="card"><p>${esc(x.detail.original_instruction)}</p><p>${esc(x.summary)}</p><button data-confirm-appointment="${esc(x.action_id)}">Confirm this offer only</button></div>`),
-    ...(m.appointments || []).map(x => card(x.title, `${x.holder_name} • ${x.institution_name}`, `Held since day ${x.started_day}`)),
-    ...(m.obligations || []).map(o => card(o.description, o.due_day == null ? 'No fixed date' : `Due day ${o.due_day}`, o.notes)),
-    ...(m.intentions || []).map(i => card(i.description, `${i.status}${i.target_actor_name ? ` • ${i.target_actor_name}`:''}${i.target_location_name ? ` • ${i.target_location_name}`:''}`, i.possession_name || ''))
-  ].join('') || '<p class="muted">Nothing currently needs carrying in your head.</p>';
-
+  if (review) $('transcript').innerHTML+=reviewCard(review);
+  $('emptyScene').classList.toggle('hidden',!!$('transcript').innerHTML||!p);
+  $('attention').innerHTML=(state.attention||[]).slice(0,4).map(c=>`<div class="attention-card ${esc(c.cue_type)}">${esc(c.text)}</div>`).join('');
+  const m=state.matters||{};
+  $('mattersBody').innerHTML=[
+    ...(state.plans||[]).map(x=>x.status==='draft'?reviewCard(x):`<div class="card"><div class="card-title">${esc(x.summary)}</div><div class="meta">${esc(x.status.replaceAll('_',' '))}</div>${Object.values(x.steps).filter(s=>s.result.summary).map(s=>`<p>${esc(s.result.summary)}${s.result.progress==null?'':` (${Math.round(s.result.progress)}%)`}</p>`).join('')}<button data-revise-plan="${x.id}" data-session="${x.session_id}">Discuss this undertaking</button></div>`),
+    ...(state.scope_reviews||[]).map(x=>`<div class="card"><p>${esc(x.detail.original_instruction)}</p><p>${esc(x.summary)}</p><button data-confirm-appointment="${x.action_id}">Confirm this offer only</button></div>`),
+    ...(m.appointments||[]).map(x=>card(x.title,`${x.holder_name} · ${x.institution_name}`,`Held since day ${x.started_day}`)),
+    ...(m.obligations||[]).map(o=>card(o.description,o.due_day==null?'No fixed date':`Due day ${o.due_day}`,o.notes)),
+    ...(m.intentions||[]).map(i=>card(i.description,i.status,i.possession_name||''))
+  ].join('')||'<p class="muted">No outstanding promises. A quiet day is yours to spend.</p>';
   renderWorld();
-  $('youBody').innerHTML = p ? card(p.name, p.location || '', 'The interface shows what this character knows or is carrying forward, not hidden world truth.') : '<p class="muted">No player configured.</p>';
-  const r = state.runtime || {};
+  $('youBody').innerHTML=p?card(p.name,p.location||'','Your circumstances and the people you know give shape to your life.'):'<p class="muted">Choose or create a character to begin.</p>';
+  const r=state.runtime||{};
   if (!$('modelEndpoint').value) $('modelEndpoint').value=r.model_endpoint||'';
   if (!$('modelName').value) $('modelName').value=r.local_model||'';
-  $('runtimeBody').innerHTML = `<div class="meta">${esc(r.device_profile || '')}<br>${esc(r.local_backend || '')} • ${esc(r.local_model || '')}<br>Story time only: ${r.story_time_only ? 'yes' : 'no'}<br>Referral: ${esc(r.referral_sensitivity || '')}</div>`;
+  $('runtimeBody').innerHTML=`<div class="meta">${esc(r.local_backend||'')} · ${esc(r.local_model||'')}<br>Story time advances through play only.</div>`;
 }
 function card(title, meta='', body='') {
   return `<div class="card"><div class="card-title">${esc(title)}</div>${meta?`<div class="meta">${esc(meta)}</div>`:''}${body?`<div>${esc(body)}</div>`:''}</div>`;
 }
 document.addEventListener('click', async e => {
+  if (busy) return;
+  const resume=e.target.closest('[data-resume-session]');
+  if (resume) { await resumeSession(Number(resume.dataset.resumeSession)); return; }
   const revise = e.target.closest('[data-revise-plan]');
   if (revise) {
     planningSession = Number(revise.dataset.session); revisingPlan = Number(revise.dataset.revisePlan);
-    $('input').focus(); return;
+    await refresh(); openPanel('scene'); $('input').focus(); return;
   }
   const approve = e.target.closest('[data-approve-plan]');
   if (approve) {
     try {
       const data = await api('/api/plan-approve', {method:'POST', body:JSON.stringify({plan_id:Number(approve.dataset.approvePlan),digest:approve.dataset.digest,narrative:$('playMode').value==='narrative'})});
-      if (data.summary) alert(data.summary);
-      await refresh();
+      $('playStatus').textContent=data.summary||'Decision saved.';
+      await refresh(); scrollLatest();
     } catch (error) { alert(error.message); }
     return;
   }
@@ -106,13 +117,14 @@ function kv(rows=[]) { return `<div class="kv">${rows.map(([k,v])=>`<span>${esc(
 function renderLedger() {
   if (!ledger) return;
   const setup = ledger.setup || {}; const ss = setup.setup || {}; const counts = setup.counts || {};
-  if (!ss.bootstrap_complete) {
+  if (!ss.bootstrap_complete && !(setup.available_locations && counts.named_characters)) {
     $('setupBody').innerHTML = `<div class="card"><div class="card-title">Set up Caerness</div><div class="meta">Load the versioned World-Bible-derived starting world. Open geography/calendar questions remain unseeded.</div><div class="setup-actions"><button id="bootstrapCampaign">Bootstrap Caerness</button></div></div>`;
     setTimeout(()=>{ const b=$('bootstrapCampaign'); if(b) b.onclick=bootstrapCampaign; },0);
-  } else if (!ss.player_setup_complete) {
-    $('setupBody').innerHTML = `<div class="card"><div class="card-title">Create your character</div><div class="meta">The world is seeded. Player identity is never invented by the bootstrap.</div><div class="setup-actions"><input id="playerName" placeholder="Character name"><input id="playerStart" value="Cairnholt" placeholder="Start location"><input id="playerAge" type="number" min="0" max="200" placeholder="Age (optional)"><button id="createPlayer">Create player character</button></div></div>`;
+  } else if (!state?.player) {
+    $('setupBody').innerHTML = `<div class="setup-card"><span class="eyebrow">BEGIN A LIFE</span><h2>Create your character</h2><div class="meta">Choose where your life begins. Your circumstances will persist as the world changes.</div><div class="setup-actions"><input id="playerName" placeholder="Character name"><input id="playerStart" value="Cairnholt" placeholder="Start location"><input id="playerAge" type="number" min="0" max="200" placeholder="Age (optional)"><button id="createPlayer">Begin your story</button></div><details><summary>Or inhabit an existing character</summary><p>Choose someone already living in this campaign. Their established circumstances remain intact.</p><input id="characterSearch" placeholder="Search by name" aria-label="Find an existing character"><div id="characterChoices"></div></details></div>`;
     setTimeout(()=>{ const b=$('createPlayer'); if(b) b.onclick=createPlayer; },0);
   } else { $('setupBody').innerHTML=''; }
+  $('onboarding').innerHTML=$('setupBody').innerHTML; $('setupBody').innerHTML='';
   const admin = ledger.admin || {};
   let html = card('Campaign integrity', `Engine ${admin.engine_version || ''} • schema ${admin.schema_version || ''}`, `${admin.contradiction_count || 0} detected save contradiction(s)`);
   html += card('Seeded world', `${counts.named_characters || 0} named characters • ${counts.institutions || 0} institutions • ${counts.locations || 0} places`, `${Math.round(counts.aggregate_population || 0).toLocaleString()} aggregate Hearth population`);
@@ -131,6 +143,13 @@ function renderLedger() {
     if(p.travel) html += card('Travel', `${p.travel.status} • ${p.travel.destination_name || 'destination'}`, `Next review day ${p.travel.next_review_day}`);
   }
   $('ledgerBody').innerHTML=html;
+  $('characterDetails').innerHTML=p?[
+    p.household?card(p.household.name,'Household',p.household.role||''):'',
+    ...(p.derived_motives||[]).map(x=>card(x.description,x.domain)),
+    ...(p.health?.conditions||[]).filter(x=>['active','recovering','chronic'].includes(x.status)).map(x=>card(x.label,x.status)),
+    ...(p.education?.enrollments||[]).filter(x=>['active','paused'].includes(x.status)).map(x=>card(x.name,x.status,x.teacher_name?`With ${x.teacher_name}`:'')),
+    ...(p.religion?.affiliations||[]).filter(x=>x.status==='active').map(x=>card(x.tradition,x.affiliation_kind))
+  ].join(''):'';
 }
 async function bootstrapCampaign(){
   if(!confirm('Bootstrap the production Caerness starting world?')) return;
@@ -142,27 +161,46 @@ async function createPlayer(){
   try { await api('/api/campaign/player',{method:'POST',body:JSON.stringify({name,start_location:start,age:age||null})}); await refresh(); } catch(e){ alert(e.message); }
 }
 async function refresh() {
-  [state,ledger] = await Promise.all([api('/api/state'),api('/api/ledger')]);
-  renderState(); renderLedger();
-  const hasPlayer=!!state.player; $('input').disabled=!hasPlayer; $('send').disabled=!hasPlayer;
-  $('input').placeholder=hasPlayer?'What do you do?':'Set up your campaign in Ledger first';
+  [state,ledger,historyIndex]=await Promise.all([api('/api/state'),api('/api/ledger'),api('/api/conversations')]);
+  if (planningSession && !newConversation && !state.conversations.some(x=>x.id===planningSession)) {
+    try { state.conversations.push(await api(`/api/conversation/${planningSession}`)); } catch (_) { planningSession=null; }
+  }
+  renderState();renderLedger();
+  $('input').disabled=!state.player||busy; $('send').disabled=!state.player||busy;
+  $('input').placeholder=state.player?'Say something, do something, or simply stay a while…':'Choose or create your character to begin';
 }
 function setBusy(v) {
-  document.body.classList.toggle('busy', v);
-  $('interrupt').classList.toggle('hidden', !v);
-  $('input').disabled = v;
+  busy=v;document.body.classList.toggle('busy',v);$('interrupt').classList.toggle('hidden',!v);
+  $('input').disabled=v||!state?.player;$('send').disabled=v||!state?.player;
+  if(v) $('playStatus').textContent='Your narrator is responding…';
+  else if($('playStatus').textContent==='Your narrator is responding…') $('playStatus').textContent='';
+}
+function scrollLatest() { requestAnimationFrame(()=>{ $('storyScroll').scrollTop=$('storyScroll').scrollHeight; }); }
+function openPanel(name) {
+  currentPanel=name;
+  document.body.classList.toggle('reference-closed',name==='scene');
+  document.querySelectorAll('.bottomnav button').forEach(b=>{b.classList.toggle('active',b.dataset.panel===name);b.setAttribute('aria-pressed',b.dataset.panel===name);});
+  document.querySelectorAll('#notebook .panel').forEach(p=>p.classList.toggle('active',p.id===name));
+}
+async function resumeSession(id) {
+  if(busy)return;
+  planningSession=id||null;newConversation=!planningSession;revisingPlan=null;
+  localStorage.setItem('caernessSession',planningSession||'');
+  await refresh();openPanel('scene');scrollLatest();$('input').focus();
 }
 function showReferral(data) {
   referral = data;
   const a = data.assessment || {};
-  $('referralTitle').textContent = a.recommendation === 'external_strongly_recommended' ? 'A stronger model is strongly recommended here.' : 'ChatGPT or Claude would likely improve this section.';
+  $('referralTitle').textContent='Your narrator is not connected';
+  $('referralMessage').textContent=data.reason||'Your message is saved. The configured model could not complete this response.';
   $('referralScores').innerHTML = [
-    ['Reasoning', a.reasoning_score], ['Narrative', a.narrative_score], ['Phone load', a.hardware_score], ['Context', a.context_tokens_estimate ? `${a.context_tokens_estimate} tok` : '—']
+    ['Reasoning', a.reasoning_score], ['Narrative', a.narrative_score], ['Local load', a.hardware_score], ['Context', a.context_tokens_estimate ? `${a.context_tokens_estimate} tok` : '—']
   ].map(([k,v])=>`<div class="score">${esc(k)}<strong>${esc(v ?? '—')}</strong></div>`).join('');
   $('referralReasons').innerHTML = (a.reasons || []).map(r=>`<li>${esc(r)}</li>`).join('');
   $('referral').classList.remove('hidden');
 }
 async function submit(text, forceLocal=false) {
+  if (busy) return;
   setBusy(true);
   try {
     const narrative = $('playMode').value === 'narrative';
@@ -170,9 +208,10 @@ async function submit(text, forceLocal=false) {
     const data = await api(narrative ? '/api/narrative-play' : planning ? '/api/plan-play' : '/api/play', {method:'POST', body:JSON.stringify({text, mode:$('playMode').value, force_local:forceLocal, session_id:planningSession, plan_id:revisingPlan})});
     if (data.session_id) { planningSession = data.session_id; newConversation=false; localStorage.setItem("caernessSession",planningSession); }
     if (data.status === 'external_recommended') showReferral(data);
-    await refresh();
+    await refresh(); scrollLatest();
   } catch (e) {
-    alert(e.message);
+    $('input').value=text;
+    $('playStatus').textContent=e.message;
   } finally { setBusy(false); }
 }
 
@@ -183,7 +222,7 @@ $('composer').addEventListener('submit', async e => {
   $('input').value = '';
   await submit(text);
 });
-$('input').addEventListener('input', e => { e.target.style.height='44px'; e.target.style.height=Math.min(144,e.target.scrollHeight)+'px'; });
+$('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();if(!busy&&$('input').value.trim())$('composer').requestSubmit();}});
 $('interrupt').addEventListener('click', async () => { try { await api('/api/interrupt',{method:'POST',body:'{}'}); } catch(e) {} });
 $('closeReferral').addEventListener('click', ()=> $('referral').classList.add('hidden'));
 $('runLocalAnyway').addEventListener('click', async ()=> {
@@ -219,10 +258,7 @@ $('importExternal').addEventListener('click', async ()=> {
   finally { setBusy(false); }
 });
 
-document.querySelectorAll('.bottomnav button').forEach(b => b.addEventListener('click', ()=> {
-  document.querySelectorAll('.bottomnav button').forEach(x=>x.classList.toggle('active',x===b));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===b.dataset.panel));
-}));
+document.querySelectorAll('.bottomnav button').forEach(b=>b.addEventListener('click',()=>openPanel(b.dataset.panel)));
 document.querySelectorAll('.subtabs button').forEach(b => b.addEventListener('click', ()=> {
   worldTab=b.dataset.worldtab;
   document.querySelectorAll('.subtabs button').forEach(x=>x.classList.toggle('active',x===b));
@@ -233,6 +269,24 @@ refresh().catch(e => $('worldline').textContent=e.message);
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
-$('conversationPicker').addEventListener('change', e=>{planningSession=Number(e.target.value)||null;newConversation=!planningSession;revisingPlan=null;localStorage.setItem('caernessSession',planningSession||'');renderState();});
+$('conversationPicker').addEventListener('change',e=>resumeSession(Number(e.target.value)));
 $('modelSetup').addEventListener('submit',async e=>{e.preventDefault();try{await api('/api/runtime',{method:'POST',body:JSON.stringify({local_backend:'openai_compatible',local_endpoint:$('modelEndpoint').value,local_model:$('modelName').value})});$('modelStatus').textContent='Model settings saved. Credentials remain in the server environment.';await refresh();}catch(e){$('modelStatus').textContent=e.message;}});
 $('testModel').addEventListener('click',async()=>{try{const h=await api('/api/local-health');$('modelStatus').textContent=h.ok?'Endpoint available. Start a conversation to test this model.':h.error||h.status;}catch(e){$('modelStatus').textContent=e.message;}});
+
+openPanel('scene');
+$('closeNotebook').addEventListener('click',()=>{openPanel('scene');$('input').focus();});
+$('focusInput').addEventListener('click',()=>{openPanel('scene');$('input').focus();});
+$('latest').addEventListener('click',scrollLatest);
+$('settingsButton').addEventListener('click',()=>$('settingsDialog').showModal());
+$('closeSettings').addEventListener('click',()=>$('settingsDialog').close());
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPanel('scene');$('input').focus();}
+  if(e.key==='Escape'){ $('referral').classList.add('hidden');openPanel('scene'); }
+  if(e.altKey&&['1','2','3','4','5'].includes(e.key)){e.preventDefault();openPanel(['scene','world','matters','history','you'][Number(e.key)-1]);}
+});
+$('readingSize').value=localStorage.getItem('caernessReadingSize')||'standard';
+function applyReadingSize(){document.documentElement.style.setProperty('--reading-size',$('readingSize').value==='large'?'23px':'');localStorage.setItem('caernessReadingSize',$('readingSize').value);}
+$('readingSize').addEventListener('change',applyReadingSize);applyReadingSize();
+let characterTimer;
+document.addEventListener('input',e=>{if(e.target.id==='characterSearch'){clearTimeout(characterTimer);characterTimer=setTimeout(async()=>{try{const rows=await api('/api/campaign/characters?query='+encodeURIComponent(e.target.value));$('characterChoices').innerHTML=rows.map(x=>`<div class="card"><b>${esc(x.name)}</b><div class="meta">${esc(x.location||'Unknown place')} · ${esc(x.role||'')}</div><button data-select-character="${x.id}">Inhabit this character</button></div>`).join('');}catch(error){$('characterChoices').textContent=error.message;}},250);}});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-select-character]');if(b){try{await api('/api/campaign/select',{method:'POST',body:JSON.stringify({actor_id:Number(b.dataset.selectCharacter)})});planningSession=null;newConversation=true;await refresh();$('input').focus();}catch(error){alert(error.message);}}});

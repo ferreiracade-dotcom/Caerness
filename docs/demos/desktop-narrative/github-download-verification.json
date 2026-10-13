@@ -1,0 +1,19 @@
+{
+  "verified_source_revision": "51dedec9bd2e77667420264cf4827188538d34a7",
+  "download": "https://github.com/ferreiracade-dotcom/Caerness/archive/refs/heads/feat/desktop-narrative.zip",
+  "authenticated_GitHub_archive_download": "PASS",
+  "zip_integrity": "PASS",
+  "required_files_present": [
+    "Play Caerness.cmd",
+    "requirements-play.txt",
+    "tools/narrative_play.py",
+    "engine/mobile_server.py",
+    "mobile/index.html",
+    "data/caerness.db",
+    "canon/world_bible_current.docx",
+    "WINDOWS_PLAY.md"
+  ],
+  "opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
+  "native_windows_smoke_test": "NOT RUN: Linux execution host, no existing repository Actions workflow listed; runner inventory API returned integration-access 403. No native Windows availability established.",
+  "scope": "Docs/download and future acceptance criteria only; no gameplay or simulation change."
+}

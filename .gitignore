@@ -5,3 +5,8 @@ __pycache__/
 dist/
 runs/
 runs_*.log
+
+# Local desktop dependencies and player saves
+.venv/
+game/narrative-session.db
+game/narrative_packets/

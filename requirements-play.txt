@@ -1,0 +1,2 @@
+# The existing simulation's sole third-party runtime requirement.
+numpy>=1.26,<3
