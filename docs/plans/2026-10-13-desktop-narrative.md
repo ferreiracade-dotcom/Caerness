@@ -109,3 +109,18 @@ See [desktop evidence and screenshots](../demos/desktop-narrative/README.md) for
 results and limitations. Nothing is merged automatically. A comfortable reader and
 a working configuration path are delivered; an enjoyable AI RPG is **not declared
 complete** until the real gameplay gate passes.
+
+## PR #6 review follow-up
+
+The owner confirmed the desktop correction and retained the blocked real-model gate.
+The repository/PR now links a complete directly downloadable GitHub branch ZIP, with
+Extract All and double-click instructions; acquisition no longer relies on an
+execution-workspace link. Native Windows execution remains untested: this workspace
+is Linux, no existing Actions workflow was listed, and runner inventory access was
+not available to the connected integration. This is not a Windows acceptance claim.
+
+The new loyal-forces clarification is recorded in
+[future narrative acceptance](2026-10-13-loyal-forces-narrative-acceptance.md).
+It adds prose tests for captains and their subordinate contingents, guards/colours,
+ordinary stronghold life, careers, construction and a formal muster. It does not
+expand PR #6 gameplay or authorize invented hierarchies, ranks or possessions.

@@ -2,7 +2,7 @@
 
 A free-form AI narrative RPG for desktop/laptop browsers, with mobile-browser compatibility. The AI supplies conversation, reasoning and prose; the Python/SQLite simulation supplies authoritative continuity and consequences.
 
-**Play on Windows:** extract the desktop package and double-click **Play Caerness.cmd**. [Windows setup and model access](WINDOWS_PLAY.md) explains the one-time setup and hidden API-key prompt. A capable remote/OpenAI-compatible model is preferred; a small phone-local model is not required. Live gameplay quality is not yet accepted: a working model service must be connected and evaluated.
+**Play on Windows:** [download the complete desktop ZIP from GitHub](https://github.com/ferreiracade-dotcom/Caerness/archive/refs/heads/feat/desktop-narrative.zip), extract it and double-click **Play Caerness.cmd**. [Windows setup and model access](WINDOWS_PLAY.md) explains the one-time setup and hidden API-key prompt. A capable remote/OpenAI-compatible model is preferred; a small phone-local model is not required. Live gameplay quality is not yet accepted: a working model service must be connected and evaluated.
 
 **Current direction (13 October 2026):** narrative quality and enjoyable desktop play first; one responsive web client. 3D/Unreal is postponed indefinitely until the text game is genuinely enjoyable. PR #5 and its PR #4/#3 dependencies are the starting point for the desktop branch. [Current desktop work and evidence](docs/plans/2026-10-13-desktop-narrative.md).
 

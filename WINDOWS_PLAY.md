@@ -9,7 +9,12 @@ accepted yet.
 
 1. Install **Python 3.12 or later** from [python.org](https://www.python.org/downloads/windows/).
    Include the Python launcher (`py`) in the installer options.
-2. Download the desktop package, extract it to a folder, and open that folder.
+2. [Download the complete desktop branch from GitHub](https://github.com/ferreiracade-dotcom/Caerness/archive/refs/heads/feat/desktop-narrative.zip).
+   If GitHub asks you to sign in, use the account that can access the repository.
+   Right-click the downloaded ZIP, choose **Extract All**, then open the extracted
+   folder containing **Play Caerness.cmd**. Do not launch from inside the ZIP.
+   This download includes the launcher, Python engine, browser client, opening
+   world, World Bible and dependency list; no Git commands or sandbox link are needed.
 3. Double-click **Play Caerness.cmd**. The first launch sets up the game's local
    Python environment and installs its existing NumPy dependency. Internet access is
    needed for that first setup. Subsequent launches reuse it.

@@ -1,5 +1,7 @@
 # Desktop reader and the live-model obstacle
 
+[Download the complete current desktop branch ZIP from GitHub](https://github.com/ferreiracade-dotcom/Caerness/archive/refs/heads/feat/desktop-narrative.zip). Extract All, open the extracted folder, then double-click **Play Caerness.cmd**. Sign in to GitHub if the repository requires access.
+
 The implemented client now supports desktop/laptop reading and keyboard play, with
 the same story/notebook interface responsive on a phone. Character setup and saved
 conversations are accessible; significant terms remain readable in the story.
