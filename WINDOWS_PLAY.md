@@ -1,5 +1,11 @@
 # Play Caerness free on Windows
 
+The narrative policy now permits compatible creative biographies, memories and
+significant new people/institutions. Important objective additions are reviewed and
+persisted in the campaign; ordinary anecdotes need no approval ceremony. See
+[supported invention and limits](docs/narrative-authoring.md). The package is ready
+for a controlled owner-side playtest; narrative quality is not yet accepted.
+
 No subscription, API key or paid account is needed. You need a Windows computer,
 enough memory for a local model, and internet access for the initial downloads.
 The game and model then run locally. A small CPU-only computer may be too slow for

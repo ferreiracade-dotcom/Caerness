@@ -35,7 +35,9 @@ def response_schema(request_id, payload):
     def array(items, **limits): return {'type':'array','items':items,**limits}
     string={'type':'string'}
     span=obj({'start':{'type':'integer','minimum':0},'end':{'type':'integer','minimum':0}})
-    if payload.get('protocol')=='narrative_scope_v1':
+    if payload.get('protocol')=='narrative_authoring_review_v1':
+        proposal=obj({'compatible':{'type':'boolean'},'independent':{'type':'boolean'},'issues':array(string),'reason':string})
+    elif payload.get('protocol')=='narrative_scope_v1':
         proposal=obj({'authorized':{'type':'boolean'},'complete':{'type':'boolean'},
             'evidence':array(span),'omissions':array(string),'reason':string})
     else:
@@ -51,6 +53,11 @@ def response_schema(request_id, payload):
         plan=obj({'source_text':string,'summary':string,'coverage':array(coverage),'unresolved':array(string),'steps':array(step)})
         discussion=obj({'mode':{'type':'string','enum':['discuss','clarify']},'text':{'type':'string','minLength':1}})
         modes=[discussion]
+        if payload.get('protocol')=='narrative_play_v1' and payload.get('phase')!='consequences':
+            from .narrative_authoring import schema
+            authorship=schema()
+            modes.append(obj({'mode':{'const':'discuss'},'text':{'type':'string','minLength':1},'details':authorship['details']}))
+            modes.append(obj({'mode':{'const':'author'},'authorship':obj(authorship)}))
         if payload.get('phase')!='consequences':
             if tools:modes.append(obj({'mode':{'const':'inspect'},'calls':array(call,minItems=1,maxItems=8)}))
             if operations:modes.append(obj({'mode':{'const':'plan'},'plan':plan}))

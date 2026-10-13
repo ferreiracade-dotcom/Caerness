@@ -146,7 +146,7 @@ def _task_contract(task_type: str, request_id: int) -> dict[str, Any]:
 def _common_rules(task_type: str) -> list[str]:
     base = [
         "Treat the supplied packet as authoritative for this bounded task.",
-        "Do not invent permanent canon, named institutions, locations, possessions, relationships, or world events not supported by the packet.",
+        "Preserve established canon and campaign truth. Compatible previously undescribed history and new consequential entities are permitted through graded campaign authorship; absence from the seed is not a contradiction. Never create action success, consent, resources or authority merely by narrating them.",
         "The player is the story's camera focus, not the world's causal center.",
         "The wider world has independent agendas and continues moving off camera.",
         "Never make an actor care about the player merely because the narrative camera follows the player.",
@@ -184,7 +184,7 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
     json_options = {"ensure_ascii": False, **({"separators": (",", ":")} if provider == "local" else {"indent": 2})}
     contract = _task_contract(task_type, request_id)
     rules = _common_rules(task_type)
-    if payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"}:
+    if payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
         from .planning_gateway import contract as planning_contract
         if payload.get("protocol", "").startswith("narrative_"):
             from .narrative_runtime import contract as narrative_contract
@@ -593,7 +593,7 @@ def _run_segmented_local_narration(conn: sqlite3.Connection, request_id: int, pa
         }
         prompt = "\n".join([
             "Write only immersive Caerness narration for this one beat of a larger continuous section.",
-            "Reality is already resolved in the supplied data. Do not invent permanent state or hidden facts.",
+            "Action outcomes are already resolved. Creative expression, connective tissue and attributed recollections are permitted; objective consequential additions require campaign authorship before future reliance. Never overwrite confirmed outcomes or expose hidden facts.",
             "Do not ask 'What do you do?' and do not present a menu of choices.",
             "Do not manufacture an NPC question merely to create a stopping point.",
             "Maintain continuity with previous_tail without repeating it.",
@@ -668,7 +668,7 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
     else:
         contract_packet = render_packet("local", request_id, str(row["task_type"]), payload)
         schema = None
-        if runtime_config(conn).get("free_local") and payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"}:
+        if runtime_config(conn).get("free_local") and payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
             from .planning_gateway import response_schema
             schema = response_schema(request_id, payload)
         result = chat_local(

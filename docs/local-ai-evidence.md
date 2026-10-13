@@ -1,5 +1,7 @@
 # Local AI evidence and acceptance status
 
+**Interpretation correction, owner reviews 5500949223/5501018499 on PR #7:** the categorical invention criticisms below are superseded. An undocumented winter recollection is permissible connective tissue; school duties may be a legitimate new claim or validated biographical addition. Mere absence from retrieved records is not a hallucination or proof the 4B model is unsuitable. Speed, awkward/repetitive prose, weak tool use and missing continuity mechanisms remain relevant observations. The raw transcripts/measurements are unchanged historical evidence. The blanket bans have now been corrected and a graded persistence path added: [current policy and implementation](narrative-authoring.md). References below to "failed grounding" or "invented" as categorical errors describe the earlier mistaken interpretation, not current acceptance rules. Larger-model/Windows gameplay quality remains unaccepted.
+
 **The integration has produced genuine local replies. The narrative RPG is not
 accepted, and no model is claimed to be the best Caerness narrator.**
 

@@ -5,6 +5,12 @@
 PR #6 and not evidence of implemented gameplay. Real-model access/ordinary narrative
 acceptance remain the immediate gate. 3D is deferred indefinitely.
 
+**Owner clarification on PR #7:** compatible previously undescribed people,
+institutions, memories and histories may emerge and become persistent campaign
+truth. The checks below protect actual troops, equipment, command and allegiance;
+they do not prohibit creative biographies or new independent institutions. See
+[creative campaign authorship](../narrative-authoring.md).
+
 The owner enjoys building, developing and witnessing loyal forces. Distinctive
 captains should command recognisable subordinate squads or elite contingents within
 the overall organisation. Memories and rivalries give people identity, but the

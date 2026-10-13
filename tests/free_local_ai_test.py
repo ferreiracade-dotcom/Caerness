@@ -24,8 +24,10 @@ def main():
     grammar=response_schema(42,{'protocol':'narrative_play_v1','read_tools':[{'name':'person'}],'capabilities':[{'name':'advance_time'}]})
     modes=grammar['properties']['proposal']['anyOf']
     assert set(modes[0]['properties'])=={'mode','text'} and modes[0]['additionalProperties'] is False
-    assert modes[1]['properties']['calls']['items']['properties']['tool']['enum']==['person']
-    assert modes[2]['properties']['plan']['properties']['steps']['items']['properties']['operation']['enum']==['advance_time']
+    inspection=next(m for m in modes if m['properties']['mode'].get('const')=='inspect')
+    planning=next(m for m in modes if m['properties']['mode'].get('const')=='plan')
+    assert inspection['properties']['calls']['items']['properties']['tool']['enum']==['person']
+    assert planning['properties']['plan']['properties']['steps']['items']['properties']['operation']['enum']==['advance_time']
     assert len(response_schema(42,{'phase':'consequences'})['properties']['proposal']['anyOf'])==1
     review=response_schema(42,{'protocol':'narrative_scope_v1'})
     assert review['properties']['proposal']['properties']['authorized']['type']=='boolean'

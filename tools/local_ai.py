@@ -18,7 +18,7 @@ OLLAMA = 'http://127.0.0.1:11434'
 # Conservative download ceilings, not measured inference memory or quality scores.
 # Explicit GGUF Q4_K_M tags avoid changing default backends/quantizations.
 MODELS = (
-    {'tag': 'qwen3.5:4b-q4_K_M', 'gb': 3.5, 'ram': 8, 'vram': 5, 'label': 'Diagnostic only: failed story-grounding tests'},
+    {'tag': 'qwen3.5:4b-q4_K_M', 'gb': 3.5, 'ram': 8, 'vram': 5, 'label': 'Diagnostic fallback: gameplay quality not yet accepted'},
     {'tag': 'qwen3.5:9b-q4_K_M', 'gb': 7, 'ram': 16, 'vram': 9, 'label': 'First gameplay candidate; compare prose before accepting'},
     {'tag': 'gemma4:12b-it-q4_K_M', 'gb': 9, 'ram': 24, 'vram': 12, 'label': 'Alternative gameplay candidate; compare with Qwen'},
     {'tag': 'gemma4:26b-a4b-it-q4_K_M', 'gb': 18, 'ram': 48, 'vram': 24, 'label': 'Larger comparison candidate, not automatically better'},

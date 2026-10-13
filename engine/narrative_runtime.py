@@ -1,4 +1,4 @@
-"""Narrative play atop the general planner. Prose is memory, never world authority."""
+"""Creative narrative play with graded campaign authorship and validated actions."""
 from __future__ import annotations
 
 import json
@@ -12,11 +12,13 @@ from .opportunity import institution_decision_actor
 RULES = [
     'You are the Caerness role-playing narrator. Respond to the meaning of arbitrary player language, not command keywords.',
     'Ordinary dialogue, questions, humour, affection, uncertainty and hypothetical ideas use discuss. Twenty exchanges may occur without a day passing, a social roll or a transaction.',
-    'Portray only people who are presently accessible. Retrieve person context for sustained NPC dialogue. Unknown biography stays unknown: do not invent eighteen years of marriages, possessions or achievements.',
-    'Use grounded surroundings, independent activity and cultural formality as lived detail, not encyclopedia exposition. Do not invent named people, weather events, possessions, histories or changes of rank.',
-    'General World Bible descriptions are not proof of local buildings, equipment or current events. When portraying institutions, use established followers, captains, subordinate contingents, colours and holdings only where the supplied evidence supports them. Quiet lived ownership needs no invented crisis or reward.',
-    'Temporary gestures, tone and dialogue are expressive fiction. They create no enduring agreements, discoveries, biography, loyalty or resources. A promise, substantive discovery or enduring fact needs a validated capability; missing capabilities remain unresolved.',
-    'Dialogue transcript is unverified speech, not evidence. A prior assistant allegation cannot make a fact true. Distinguish a player recollection from established history, a rumour from an event and perception from secret truth.',
+    'The World Bible is a foundation, not an exhaustive roster or biography. Invent compatible previously undescribed lives, memories, work, acquaintances, significant people, institutions and circumstances. Absence from retrieved records is not contradiction.',
+    'Improvise gestures, incidental atmosphere and ordinary anecdotes naturally in discuss, without approval or a database record for every detail. A plausible remembered winter can be subjective recollection, not a claim of verified history.',
+    'Retrieve person context for sustained NPC dialogue. Existing people must be accessible to converse; new people can be introduced through authorship, without requiring a prior named or latent seed entry.',
+    'Use authoring_schema for durable additions. discuss may include details containing subjective recollections/rumours for lightweight continuity. Use author with entities/details for new persistent identities or objective biographical/work facts; await engine consistency feedback before treating them as established.',
+    'Distinguish objective campaign facts, uncertain recollections and rumours. Promote consequential connective tissue through authorship before future outcomes depend on it. Preserve compatible details across conversations; never silently rewrite established history.',
+    'New people and institutions can be genuinely important with independent aims. Anti-convenience prevents guaranteed player success, not legitimate emergence. Authorship cannot grant player authority, allegiance, funds, property, mastery, consent, victories or completed actions; those require domain validation.',
+    'When portraying organisations, followers, contingents, colours and holdings, combine established campaign truth with compatible validated additions. Quiet lived ownership and ordinary life need no invented crisis or reward. Setting canon remains unchanged.',
     'Use established voice and qualitative relationships without caricature. Permit quiet scenes, disagreements, ordinary work and reciprocal initiative. No forced cliffhangers or repetitive what-do-you-do endings.',
     'Preserve meaningful player choices and their pacing. Do not create catastrophe to cure boredom or guaranteed success. Bounded narrative fortune is a design preference, not a license to alter persisted outcomes.',
     'Inspect only the supplied scoped tools. Compose discovered operations. Never silently replace an unsupported instruction with an easier goal. Keep every unmet condition explicitly unresolved.',
@@ -55,6 +57,7 @@ def memory(c, sid, query='', offset=None, limit=12):
 
 
 def person(c, owner, actor_id):
+    from .narrative_authoring import visible
     from .presence import actor_is_present_candidate
     from .player import get_player
     loc=get_player(c)['current_location_id']
@@ -72,7 +75,8 @@ def person(c, owner, actor_id):
     shared=[dict(r) for r in c.execute("SELECT e.id,e.day,e.title,e.summary FROM events e JOIN knowledge p ON p.truth_event_id=e.id AND p.knower_actor_id=? JOIN knowledge n ON n.truth_event_id=e.id AND n.knower_actor_id=? ORDER BY e.day DESC,e.id DESC LIMIT 8",(owner,actor_id))]
     memberships=[dict(r) for r in c.execute("SELECT a.name institution,m.role_text FROM institution_memberships m JOIN actors a ON a.id=m.institution_actor_id JOIN institution_memberships mine ON mine.institution_actor_id=m.institution_actor_id AND mine.member_actor_id=? AND mine.status='active' WHERE m.member_actor_id=? AND m.status='active' LIMIT 6",(owner,actor_id))]
     return {'identity':dict(actor),'expressive_profile':expression,'response_cues':relationships,'public_affiliations':memberships,
-            'shared_known_history':shared,'knowledge_rule':'Only shared known history is supplied. Unknown intervals are not empty, but cannot be invented. Private feelings guide portrayal, never prove consent or become omniscient exposition.'}
+            'shared_known_history':shared,'authored_continuity':visible(c,owner,actor_id),
+            'knowledge_rule':'These excerpts are not an exhaustive life. Plausible memories and previously undescribed history may be authored consistently; claims remain subjective until validated. Private feelings guide portrayal, never prove consent or reveal secret truth.'}
 
 
 def scene(c, text=''):
@@ -116,6 +120,14 @@ def read(c,sid,tool,args):
         value=person(c,owner,args['actor_id']);ensure(c)
         c.execute('INSERT OR IGNORE INTO narrative_participants VALUES (?,?)',(sid,args['actor_id']))
         return value
+    if tool=='authoring_schema' and not args:
+        from .narrative_authoring import schema
+        return {'schema':schema(),'rule':'Creative additions, not player action execution. New references use new:<entity id>; declare people before institutions. Ordinary recollections need no objective approval; protected state and player commitments still use domain operations.'}
+    if tool=='authoring_details' and set(args)<={'subject_id','offset','query'}:
+        from .narrative_authoring import visible
+        subject=args.get('subject_id')
+        if subject is not None and (type(subject)is not int or subject<1):raise ValueError('Invalid continuity subject.')
+        return visible(c,owner,subject,offset=args.get('offset',0),search=args.get('query',''))
     if tool=='memory' and set(args)<={'query','offset'}:
         if not isinstance(args.get('query',''),str):raise ValueError('Memory query must be text.')
         return memory(c,sid,**args)
@@ -141,20 +153,55 @@ def enrich(c,payload):
     payload['protocol']='narrative_play_v1'
     payload['rules']=RULES
     payload['conversation']=memory(c,payload['session_id'],payload['raw_player_input']) if len(payload['raw_player_input'])>1000 else memory(c,payload['session_id'])
+    from .narrative_authoring import visible
+    payload['authored_continuity']=visible(c,plans.current_actor(c))
     payload['capabilities']=[{'name':cap.name,'description':cap.description} for cap in CAPABILITIES.values()]
-    payload['read_tools']+=TOOLS+[{'name':'capabilities','arguments':{'names':'optional list of capability names'},'description':'Discover complete validated argument schemas and declared outputs before planning.'}]
+    payload['read_tools']+=TOOLS+[{'name':'authoring_schema','arguments':{},'description':'Discover graded continuity detail and new entity proposal fields; no player-action shortcut.'},{'name':'authoring_details','arguments':{'subject_id':'optional actor ID','offset':'optional page offset','query':'optional search text'},'description':'Retrieve your previously established facts/claims across conversations, retaining epistemic labels.'},{'name':'capabilities','arguments':{'names':'optional list of capability names'},'description':'Discover complete validated argument schemas and declared outputs before planning.'}]
     payload['open_plans']=[{k:p[k] for k in ('id','session_id','status','summary','unresolved')} for p in payload['open_plans']]
     return payload
 
 
 def contract(rid,payload):
+    if payload['protocol']=='narrative_authoring_review_v1':
+        return {'task_type':'action_interpretation','request_id':rid,'proposal':{'compatible':'boolean','independent':'boolean','issues':'[inconsistency or protected-action problems]','reason':'short explanation; do not disclose private constraints'}}
     if payload['protocol']=='narrative_scope_v1':
         return {'task_type':'action_interpretation','request_id':rid,'proposal':{'authorized':'boolean: an actual current player directive, not a question/discussion/hypothesis','complete':'boolean: ALL conditions match engine scope','evidence':'[{start:integer,end:integer}] exact spans of the ORIGINAL source authorizing this exact scope','omissions':'[important terms unsupported, silently changed or absent from the engine scope]','reason':'brief plain explanation'}}
     from .planning_gateway import contract as base
     value=base(rid)
+    value['proposal']['mode']='inspect|plan|discuss|clarify|author'
+    value['proposal']['authorship']='For author only: {entities:[new independent person/institution descriptors],details:[stable biography/work/acquaintance/history facts or attributed claims]}. Retrieve authoring_schema; no prose until commit feedback. discuss may include details for subjective claims only.'
     if payload.get('phase')=='consequences':
         value['proposal']={'mode':'discuss','text':'Rich player-facing prose of CONFIRMED outcomes; no new operations or promises.'}
     return value
+
+
+def _author_continue(c,payload,feedback):
+    from .planning_gateway import start_request
+    sid=payload['session_id'];plans.message(c,sid,'tool',{'authorship_feedback':feedback})
+    rounds=payload.get('rounds',0)+1
+    if rounds>6:return {'status':'needs_clarification','session_id':sid,'summary':'Authorship could not be established; the conversation and proposal remain saved.'}
+    req=start_request(c,payload['raw_player_input'],payload.get('provider','local'),sid,payload.get('plan_id'),[{'authorship_feedback':feedback}],False,rounds,goal_override=payload['planning_goal'],narrative=True)
+    return {'status':'awaiting_action_interpretation','session_id':sid,'next_request':req,'authorship':feedback}
+
+
+def _author_review(c,row,payload,spec):
+    from .narrative_authoring import prepare
+    from .model_gateway import create_request
+    from .canon import search_canon
+    prepared=prepare(c,payload['session_id'],spec)
+    query=' '.join([e['background']+' '+e['name'] for e in spec['entities']]+[d['text'] for d in spec['details']])
+    review={'protocol':'narrative_authoring_review_v1','session_id':payload['session_id'],
+        'authoring_id':prepared['id'],'digest':prepared['digest'],'proposal_to_check':spec,'constraints':prepared['constraints'],
+        'canon':[{'heading':x.heading_path,'text':x.text} for x in search_canon(query,limit=6,conn=c)],
+        'continuation':{k:payload[k] for k in ('session_id','raw_player_input','planning_goal','rounds','plan_id') if k in payload},
+        'rules':['Independently validate creative campaign authorship against supplied canon and saved constraints. Missing facts are not contradictions; compatible significant new people/institutions are permitted.',
+            'Reject contradictions to chronology, family, established anchors, physical context or independently established facts. A rumour/recollection can remain uncertain without becoming objective truth.',
+            'Reject disguised player action results: resources/property/authority, loyalty/consent, mastery, treaties, victory, instant work completion. Those require domain executors. Employment affiliation does not grant command or operational capacity.',
+            'New identity/history should make causal sense and have independent circumstances. Do not invent an ally, capacity or opportunity merely to guarantee the requested outcome, but do not reject legitimate emergence because it helps or matters.',
+            'Return compatible=false with issues if validation is unresolved. Do not disclose private constraint details in the reason. This is engine review, not a player approval ceremony.']}
+    review['continuation']['provider']=row['provider']
+    req=create_request(c,'action_interpretation',review,provider=row['provider'],target_kind='ai_session',target_id=payload['session_id'])
+    return {'status':'awaiting_action_interpretation','session_id':payload['session_id'],'next_request':req}
 
 
 def routine(c,view):
@@ -204,6 +251,27 @@ def apply_response(c,row,response,payload):
     from .planning_gateway import apply_response as base
     sid=payload['session_id']; plans.session(c,sid)
     p=response['proposal']
+    claims=None
+    if payload['protocol']=='narrative_authoring_review_v1':
+        from .narrative_authoring import commit
+        try:result=commit(c,payload['authoring_id'],payload['digest'],p)
+        except ValueError:result={'status':'rejected','reason':'Authorship constraints changed or the proposal was invalid; revise before relying on it.'}
+        c.execute("UPDATE model_requests SET status='applied',applied_summary='Authorship consistency checked' WHERE id=?",(row['id'],))
+        return _author_continue(c,payload['continuation'],result)
+    if p.get('mode')=='author':
+        if payload['protocol']!='narrative_play_v1' or payload.get('phase')=='consequences':raise ValueError('This response phase cannot propose authoring additions.')
+        try:
+            if set(p)!={'mode','authorship'}:raise ValueError('Author mode requires a structured authorship batch only.')
+            result=_author_review(c,row,payload,p['authorship'])
+        except ValueError as error:result=_author_continue(c,{**payload,'provider':row['provider']},{'status':'rejected','reason':str(error)})
+        c.execute("UPDATE model_requests SET status='applied',applied_summary='Campaign authorship proposed' WHERE id=?",(row['id'],))
+        return result
+    if p.get('mode')=='discuss' and 'details' in p:
+        from .narrative_authoring import record_claims
+        if set(p)!={'mode','text','details'}:raise ValueError('Discussion with claims needs text and details only.')
+        if payload['protocol']!='narrative_play_v1' or payload.get('phase')=='consequences':raise ValueError('This response phase only narrates confirmed outcomes.')
+        claims=record_claims(c,plans.current_actor(c),p['details'])
+        response={**response,'proposal':{'mode':'discuss','text':p['text']}}
     if payload['protocol']=='narrative_scope_v1':
         view=plans.plan_view(c,payload['plan_id'])
         if view['digest']!=payload['digest']:raise ValueError('Plan changed during scope verification.')
@@ -224,6 +292,7 @@ def apply_response(c,row,response,payload):
         return {'status':'awaiting_plan_review','session_id':sid,'plan':plans.plan_view(c,view['id']),'narration':message,'verification':p}
     if payload.get('phase')=='consequences' and p.get('mode')!='discuss':raise ValueError('After execution, narrate only confirmed consequences.')
     out=base(c,row,response,payload)
+    if claims:out['continuity_recorded']=claims
     if out.get('status')=='awaiting_plan_review':
         req=verification(c,out['plan'],row['provider'])
         return {'status':'awaiting_action_interpretation','session_id':sid,'next_request':req}
@@ -234,6 +303,9 @@ def play(c,text,session_id=None,plan_id=None,provider='local'):
     from .planning_gateway import start_request,run_local
     from .local_model import runtime_config
     if not isinstance(text,str) or not text.strip() or len(text)>8000:raise ValueError('Enter a bounded player message.')
+    from .narrative_authoring import ensure as authoring_schema
+    authoring_schema(c)
+    last_authorship=c.execute('SELECT COALESCE(MAX(id),0) FROM narrative_authorship').fetchone()[0]
     started=time.perf_counter()
     req=start_request(c,text,provider,session_id,plan_id,narrative=True)
     if provider!='local':return {'status':'awaiting_action_interpretation','next_request':req,'session_id':int(c.execute('SELECT target_id FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])}
@@ -247,5 +319,7 @@ def play(c,text,session_id=None,plan_id=None,provider='local'):
             out['reason']='The local narrator could not complete this turn. Your message and confirmed outcomes are saved. Check the local model or choose another; no paid service is required.'
             out['local_failure']={'type':type(error).__name__,'message':str(error)}
     out['session_id']=int(c.execute('SELECT target_id FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])
+    additions=[json.loads(r[0]) for r in c.execute("SELECT result_json FROM narrative_authorship WHERE session_id=? AND id>? AND status='applied' ORDER BY id",(out['session_id'],last_authorship))]
+    if additions:out['campaign_authorship']=additions;out['world_changes']=True
     out['total_seconds']=round(time.perf_counter()-started,4)
     return out
