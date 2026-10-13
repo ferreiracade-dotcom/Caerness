@@ -1,0 +1,4 @@
+{"test": "narrative_authoring_test", "status": "PASS", "secs": 0.6}
+{"test": "narrative_authority_test", "status": "PASS", "secs": 0.3}
+{"test": "narrative_runtime_test", "status": "PASS", "secs": 2.3}
+TOTAL {"PASS": 3}

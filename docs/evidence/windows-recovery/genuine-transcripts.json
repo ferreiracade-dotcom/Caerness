@@ -1,0 +1,1057 @@
+{
+  "scripted_model_responses": false,
+  "scope": "Agent-owned disposable campaign, no owner save. Initial/intermediate failures and final replies retained. Valid JSON/discuss status does not establish grounded investigation or enjoyable gameplay.",
+  "turns": [
+    {
+      "source": "transcript.json",
+      "test": "A",
+      "player": "To Petra Fenn: It has been a long time since we had a quiet conversation. How have you been?",
+      "status": "discussed",
+      "narration": "I've been carrying quite a lot of silence lately, Robert. It feels like we're just... existing in the same room without touching each other. How are you holding up? I'm trying to make sense of this world again.",
+      "failure": null,
+      "reason": null,
+      "seconds": 139.547,
+      "model_calls": [
+        {
+          "request_id": 1,
+          "latency_seconds": 139.4797,
+          "prompt_tokens": 2902,
+          "completion_tokens": 72
+        }
+      ],
+      "model_call_count": 1,
+      "orchestration_seconds": 0.0673,
+      "requests": [
+        {
+          "request_id": 1,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 1,
+            "proposal": {
+              "mode": "discuss",
+              "text": "I've been carrying quite a lot of silence lately, Robert. It feels like we're just... existing in the same room without touching each other. How are you holding up? I'm trying to make sense of this world again."
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "scene",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    },
+    {
+      "source": "transcript.json",
+      "test": "A",
+      "player": "To Petra Fenn: What do you remember most clearly about our early acquaintance?",
+      "status": "discussed",
+      "narration": "That's a heavy weight, Robert. Our first time together wasn't in a room; it was in the dust of Thistlewood, right before the smoke took us both. I remember you were... smaller then. Not in stature, but in the way you moved through things. You didn't fight like the others who came after. You just watched. There was this one moment where we were arguing about something trivial\u2014maybe a book title, maybe a sound\u2014and you stopped. Just went very still. I thought then that silence was your only defense mechanism. But looking back now, I think it was a kind of listening. The way the world spoke to you before it could speak back. That's what sticks with me. Not the words we exchanged, but the space between us where everything hung.",
+      "failure": null,
+      "reason": null,
+      "seconds": 91.057,
+      "model_calls": [
+        {
+          "request_id": 2,
+          "latency_seconds": 90.9939,
+          "prompt_tokens": 2992,
+          "completion_tokens": 187
+        }
+      ],
+      "model_call_count": 1,
+      "orchestration_seconds": 0.0631,
+      "requests": [
+        {
+          "request_id": 2,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 2,
+            "proposal": {
+              "mode": "discuss",
+              "text": "That's a heavy weight, Robert. Our first time together wasn't in a room; it was in the dust of Thistlewood, right before the smoke took us both. I remember you were... smaller then. Not in stature, but in the way you moved through things. You didn't fight like the others who came after. You just watched. There was this one moment where we were arguing about something trivial\u2014maybe a book title, maybe a sound\u2014and you stopped. Just went very still. I thought then that silence was your only defense mechanism. But looking back now, I think it was a kind of listening. The way the world spoke to you before it could speak back. That's what sticks with me. Not the words we exchanged, but the space between us where everything hung."
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "scene",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    },
+    {
+      "source": "transcript.json",
+      "test": "D",
+      "player": "I pause and take in the ordinary surroundings, without looking for trouble.",
+      "status": "discussed",
+      "narration": "The air here at Waymeet is different, Robert. Thistlewood was fire and ash; this feels like... settled dust. I look around at the others\u2014Benedict, Victor, those sect heads and recruits\u2014and they're all carrying their own heavy stones. Nobody's looking for trouble either. It's just a quiet pause in the day. You said you didn't want to look for trouble? That's what I like about it. Sometimes the best things are found when you just stop walking.",
+      "failure": null,
+      "reason": null,
+      "seconds": 146.338,
+      "model_calls": [
+        {
+          "request_id": 3,
+          "latency_seconds": 146.3028,
+          "prompt_tokens": 3209,
+          "completion_tokens": 127
+        }
+      ],
+      "model_call_count": 1,
+      "orchestration_seconds": 0.0352,
+      "requests": [
+        {
+          "request_id": 3,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 3,
+            "proposal": {
+              "mode": "discuss",
+              "text": "The air here at Waymeet is different, Robert. Thistlewood was fire and ash; this feels like... settled dust. I look around at the others\u2014Benedict, Victor, those sect heads and recruits\u2014and they're all carrying their own heavy stones. Nobody's looking for trouble either. It's just a quiet pause in the day. You said you didn't want to look for trouble? That's what I like about it. Sometimes the best things are found when you just stop walking."
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "scene",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    },
+    {
+      "source": "transcript.json",
+      "test": "D",
+      "player": "I greet someone who is actually nearby and ask about their day.",
+      "status": "discussed",
+      "narration": "I've been carrying quite a lot of silence lately, Robert. It feels like we're just... existing in the same room without touching each other. How are you holding up? I'm trying to make sense of this world again.",
+      "failure": null,
+      "reason": null,
+      "seconds": 65.359,
+      "model_calls": [
+        {
+          "request_id": 4,
+          "latency_seconds": 65.2928,
+          "prompt_tokens": 3362,
+          "completion_tokens": 72
+        }
+      ],
+      "model_call_count": 1,
+      "orchestration_seconds": 0.0662,
+      "requests": [
+        {
+          "request_id": 4,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 4,
+            "proposal": {
+              "mode": "discuss",
+              "text": "I've been carrying quite a lot of silence lately, Robert. It feels like we're just... existing in the same room without touching each other. How are you holding up? I'm trying to make sense of this world again."
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "scene",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    },
+    {
+      "source": "transcript.json",
+      "test": "D",
+      "player": "What nearby places can I reach by the established roads?",
+      "status": "external_recommended",
+      "narration": null,
+      "failure": {
+        "code": "context_limit",
+        "phase": "narrative_play_v1",
+        "request_id": 6
+      },
+      "reason": "This conversation exceeded the configured model context. Nothing was silently truncated. Increase context if memory permits, or start a new conversation.",
+      "seconds": 59.32,
+      "model_calls": [
+        {
+          "request_id": 5,
+          "latency_seconds": 59.257,
+          "prompt_tokens": 3459,
+          "completion_tokens": 33
+        }
+      ],
+      "model_call_count": 1,
+      "orchestration_seconds": 0.063,
+      "requests": [
+        {
+          "request_id": 5,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 5,
+            "proposal": {
+              "mode": "inspect",
+              "calls": [
+                {
+                  "tool": "scene",
+                  "arguments": {}
+                }
+              ]
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "scene",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities"
+          ]
+        },
+        {
+          "request_id": 6,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 1,
+          "status": "pending",
+          "response": null,
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "scene",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    },
+    {
+      "source": "current-pipeline.json",
+      "test": "observation",
+      "player": "I take a quiet moment to look around. Tell me what I can actually see, in two short paragraphs.",
+      "status": "discussed",
+      "narration": "The dust in Waymeet hangs low, a grey haze kicked up by the wheels of passing carts and the tread of boots on stone that has been worn smooth by decades of pilgrims. The settlement feels less like a village and more like a holding pattern, where the air tastes faintly of ozone and old iron. To my left, the shadow of a high tower cuts across the light, casting long, jagged shapes over the cobblestones; I can see the heavy oak doors of the Larkspur School still closed, their brass handles gleaming despite the gloom, while across the square, the Redmarsh-associated masters seem to be holding court in a cluster of tents that smell of wet wool and dried herbs. There is no urgency here, just the quiet hum of people waiting for something to happen.",
+      "failure": null,
+      "reason": null,
+      "seconds": 155.99185115699947,
+      "model_calls": [
+        {
+          "request_id": 17,
+          "latency_seconds": 155.963,
+          "prompt_tokens": 2888,
+          "completion_tokens": 189
+        }
+      ],
+      "model_call_count": 1,
+      "orchestration_seconds": 0.0289,
+      "requests": [
+        {
+          "request_id": 17,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 17,
+            "proposal": {
+              "mode": "discuss",
+              "text": "The dust in Waymeet hangs low, a grey haze kicked up by the wheels of passing carts and the tread of boots on stone that has been worn smooth by decades of pilgrims. The settlement feels less like a village and more like a holding pattern, where the air tastes faintly of ozone and old iron. To my left, the shadow of a high tower cuts across the light, casting long, jagged shapes over the cobblestones; I can see the heavy oak doors of the Larkspur School still closed, their brass handles gleaming despite the gloom, while across the square, the Redmarsh-associated masters seem to be holding court in a cluster of tents that smell of wet wool and dried herbs. There is no urgency here, just the quiet hum of people waiting for something to happen."
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    },
+    {
+      "source": "current-pipeline.json",
+      "test": "read_continuation",
+      "player": "Please check the published services of people actually nearby, and tell me whether there are any. Do not promise anything or spend money.",
+      "status": "needs_clarification",
+      "narration": null,
+      "failure": null,
+      "reason": null,
+      "seconds": 395.1678076080061,
+      "model_calls": [
+        {
+          "request_id": 18,
+          "latency_seconds": 121.9386,
+          "prompt_tokens": 2900,
+          "completion_tokens": 35
+        },
+        {
+          "request_id": 19,
+          "latency_seconds": 57.885,
+          "prompt_tokens": 3175,
+          "completion_tokens": 39
+        },
+        {
+          "request_id": 20,
+          "latency_seconds": 38.1821,
+          "prompt_tokens": 2931,
+          "completion_tokens": 38
+        },
+        {
+          "request_id": 21,
+          "latency_seconds": 38.253,
+          "prompt_tokens": 2967,
+          "completion_tokens": 38
+        },
+        {
+          "request_id": 22,
+          "latency_seconds": 44.4932,
+          "prompt_tokens": 3003,
+          "completion_tokens": 38
+        },
+        {
+          "request_id": 23,
+          "latency_seconds": 47.8026,
+          "prompt_tokens": 3039,
+          "completion_tokens": 38
+        },
+        {
+          "request_id": 24,
+          "latency_seconds": 46.278,
+          "prompt_tokens": 3075,
+          "completion_tokens": 38
+        }
+      ],
+      "model_call_count": 7,
+      "orchestration_seconds": 0.3353,
+      "requests": [
+        {
+          "request_id": 18,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 18,
+            "proposal": {
+              "mode": "inspect",
+              "calls": [
+                {
+                  "tool": "offerings",
+                  "arguments": {}
+                }
+              ]
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        },
+        {
+          "request_id": 19,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 1,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 19,
+            "proposal": {
+              "mode": "inspect",
+              "calls": [
+                {
+                  "tool": "people",
+                  "arguments": {
+                    "query": "martial_instruction"
+                  }
+                }
+              ]
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        },
+        {
+          "request_id": 20,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 2,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 20,
+            "proposal": {
+              "mode": "inspect",
+              "calls": [
+                {
+                  "tool": "people",
+                  "arguments": {
+                    "query": "martial_instruction"
+                  }
+                }
+              ]
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        },
+        {
+          "request_id": 21,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 3,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 21,
+            "proposal": {
+              "mode": "inspect",
+              "calls": [
+                {
+                  "tool": "people",
+                  "arguments": {
+                    "query": "martial_instruction"
+                  }
+                }
+              ]
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        },
+        {
+          "request_id": 22,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 4,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 22,
+            "proposal": {
+              "mode": "inspect",
+              "calls": [
+                {
+                  "tool": "people",
+                  "arguments": {
+                    "query": "martial_instruction"
+                  }
+                }
+              ]
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        },
+        {
+          "request_id": 23,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 5,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 23,
+            "proposal": {
+              "mode": "inspect",
+              "calls": [
+                {
+                  "tool": "people",
+                  "arguments": {
+                    "query": "martial_instruction"
+                  }
+                }
+              ]
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        },
+        {
+          "request_id": 24,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 6,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 24,
+            "proposal": {
+              "mode": "inspect",
+              "calls": [
+                {
+                  "tool": "people",
+                  "arguments": {
+                    "query": "martial_instruction"
+                  }
+                }
+              ]
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    },
+    {
+      "source": "final-pipeline.json",
+      "test": "read_continuation",
+      "player": "Please find out whether nearby people have any published services I could use. Tell me what is actually available without promising anything or spending money.",
+      "status": "discussed",
+      "narration": "I'm looking at the local roster here, Robert. We've got a cluster of masters and recruits in Waymeet right now\u2014Benedict Shaw, Victor Lorne, a few sect heads like Daniel Rook and Merrick Quill, plus Olan Mercer who's been busy pulling talent from the countryside. There's also an impressive group of younger students there, including Neris Wynn, Violet Ellis, Diana Corbett, and Ross Denham.\n\nBut you asked about *services* that have actually been published to the world, not just people hanging around the tavern. I can see them in the records, but they look like... private arrangements or personal favors rather than open shop offerings. There's no public bulletin board listing 'available tasks' for a survivor of Thistlewood specifically.\n\nBenedict Shaw, for instance, he's described as a keeper of deep inheritance. That sounds like something you'd need to ask him directly about, not just read in a directory. And Victor Lorne runs the school; he might offer apprenticeship or tutoring, but that's conditional on his students' availability and the school's current roster needs.\n\nI don't see any official 'job postings' floating around Waymeet right now. Most of what's available seems to be personal connections or specialized requests made directly to individuals. Would you like me to check if any of these masters have a specific capacity that might align with your background, or are we looking for something more formal? I can query the people present to see if they've mentioned needing help, but that's not the same as a published service.",
+      "failure": null,
+      "reason": null,
+      "seconds": 178.40661270599958,
+      "model_calls": [
+        {
+          "request_id": 25,
+          "latency_seconds": 178.368,
+          "prompt_tokens": 2903,
+          "completion_tokens": 355
+        }
+      ],
+      "model_call_count": 1,
+      "orchestration_seconds": 0.0386,
+      "requests": [
+        {
+          "request_id": 25,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 25,
+            "proposal": {
+              "mode": "discuss",
+              "text": "I'm looking at the local roster here, Robert. We've got a cluster of masters and recruits in Waymeet right now\u2014Benedict Shaw, Victor Lorne, a few sect heads like Daniel Rook and Merrick Quill, plus Olan Mercer who's been busy pulling talent from the countryside. There's also an impressive group of younger students there, including Neris Wynn, Violet Ellis, Diana Corbett, and Ross Denham.\n\nBut you asked about *services* that have actually been published to the world, not just people hanging around the tavern. I can see them in the records, but they look like... private arrangements or personal favors rather than open shop offerings. There's no public bulletin board listing 'available tasks' for a survivor of Thistlewood specifically.\n\nBenedict Shaw, for instance, he's described as a keeper of deep inheritance. That sounds like something you'd need to ask him directly about, not just read in a directory. And Victor Lorne runs the school; he might offer apprenticeship or tutoring, but that's conditional on his students' availability and the school's current roster needs.\n\nI don't see any official 'job postings' floating around Waymeet right now. Most of what's available seems to be personal connections or specialized requests made directly to individuals. Would you like me to check if any of these masters have a specific capacity that might align with your background, or are we looking for something more formal? I can query the people present to see if they've mentioned needing help, but that's not the same as a published service."
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    },
+    {
+      "source": "final-pipeline.json",
+      "test": "biography",
+      "player": "To Petra Fenn: Tell me a small memory of the ordinary life you led before we knew each other. There is no need for a grand adventure.",
+      "status": "discussed",
+      "narration": "The rain had turned the cobblestones of Waymeet into a slick mosaic, reflecting the grey light that filtered through the overcast sky. I found myself sitting on the edge of an old stone bench in the market square, the damp seeping slightly into my trousers. The memory isn't about a grand escape or a sudden discovery; it's about how quiet it was before the noise started.\n\nI remember being a child in the lower districts, watching the great gears of the city turn from the rooftops while everyone else stayed indoors for the storms. There was a baker named Olen who didn't care about your lineage or your debts\u2014just that you could pay with fresh bread or a few copper coins. We'd sit on his doorstep after work, listening to the rhythmic clatter of the masonry elevators as they moved up and down the central shaft. He'd tell stories about how the old foundations held firm when the earth shook, and I used to wonder if we were all built from the same stubborn clay.\n\nIt wasn't a life full of triumphs, just ordinary moments where you felt connected to something larger than yourself without needing to understand it. That's what I brought into our time together\u2014the idea that even in uncertainty, there's a pattern worth keeping.",
+      "failure": null,
+      "reason": null,
+      "seconds": 171.63206295500277,
+      "model_calls": [
+        {
+          "request_id": 26,
+          "latency_seconds": 171.6075,
+          "prompt_tokens": 3044,
+          "completion_tokens": 287
+        }
+      ],
+      "model_call_count": 1,
+      "orchestration_seconds": 0.0246,
+      "requests": [
+        {
+          "request_id": 26,
+          "protocol": "narrative_play_v1",
+          "phase": null,
+          "round": 0,
+          "status": "applied",
+          "response": {
+            "task_type": "action_interpretation",
+            "request_id": 26,
+            "proposal": {
+              "mode": "discuss",
+              "text": "The rain had turned the cobblestones of Waymeet into a slick mosaic, reflecting the grey light that filtered through the overcast sky. I found myself sitting on the edge of an old stone bench in the market square, the damp seeping slightly into my trousers. The memory isn't about a grand escape or a sudden discovery; it's about how quiet it was before the noise started.\n\nI remember being a child in the lower districts, watching the great gears of the city turn from the rooftops while everyone else stayed indoors for the storms. There was a baker named Olen who didn't care about your lineage or your debts\u2014just that you could pay with fresh bread or a few copper coins. We'd sit on his doorstep after work, listening to the rhythmic clatter of the masonry elevators as they moved up and down the central shaft. He'd tell stories about how the old foundations held firm when the earth shook, and I used to wonder if we were all built from the same stubborn clay.\n\nIt wasn't a life full of triumphs, just ordinary moments where you felt connected to something larger than yourself without needing to understand it. That's what I brought into our time together\u2014the idea that even in uncertainty, there's a pattern worth keeping."
+            }
+          },
+          "supplied_fields": [
+            "protocol",
+            "raw_player_input",
+            "planning_goal",
+            "session_id",
+            "plan_id",
+            "rounds",
+            "conversation",
+            "context",
+            "current_plan",
+            "read_tools",
+            "capabilities",
+            "feedback",
+            "unresolved_intentions",
+            "rules",
+            "open_plans",
+            "participants",
+            "authored_continuity",
+            "completed_reads",
+            "saved_read_results"
+          ],
+          "advertised_tools": [
+            "context",
+            "offerings",
+            "plan_status",
+            "people",
+            "person",
+            "memory",
+            "authoring_schema",
+            "authoring_details",
+            "capabilities",
+            "read_result"
+          ]
+        }
+      ],
+      "day_before": 0,
+      "day_after": 0
+    }
+  ]
+}

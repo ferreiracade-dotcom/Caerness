@@ -1,0 +1,7 @@
+{"test": "desktop_client_test", "status": "PASS", "secs": 1.0}
+{"test": "free_local_ai_test", "status": "PASS", "secs": 0.3}
+{"test": "narrative_authority_test", "status": "PASS", "secs": 0.3}
+{"test": "narrative_runtime_test", "status": "PASS", "secs": 2.2}
+{"test": "planning_model_integration_test", "status": "PASS", "secs": 0.7}
+{"test": "v07_test", "status": "PASS", "secs": 1.8}
+TOTAL {"PASS": 6}

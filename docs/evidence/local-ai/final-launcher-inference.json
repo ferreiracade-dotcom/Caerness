@@ -1,0 +1,72 @@
+{
+  "status": "REAL_INFERENCE_DIAGNOSTIC_PASSED",
+  "model": "caerness-diagnostic-4b",
+  "latency_seconds": 4.9614,
+  "prompt_tokens": 51,
+  "completion_tokens": 19,
+  "output_tokens_per_wall_second": 3.829564235901157,
+  "response": {
+    "ready": true,
+    "reply": "Hello!"
+  },
+  "gameplay_acceptance": "NOT_TESTED",
+  "hardware": {
+    "system": "Linux",
+    "ram_gib": 8.0,
+    "gpus": [],
+    "cpu_count": 3,
+    "disk_free_gib": 22.62332534790039,
+    "model_disk": "/home/agent/.ollama",
+    "warnings": []
+  },
+  "loaded_models": {
+    "models": [
+      {
+        "name": "caerness-diagnostic-4b:latest",
+        "model": "caerness-diagnostic-4b:latest",
+        "size": 3355422227,
+        "digest": "3a91e2f7bfd112f01bf5d3464467ec38b6000024c69ccb0d5aac03099ece8144",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "4.2B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-13T08:10:50.728143905Z",
+        "size_vram": 0,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "generation_diagnostic": {
+    "total_duration": 2792235126,
+    "load_duration": 2508059,
+    "prompt_eval_count": 30,
+    "prompt_eval_duration": 1469627000,
+    "eval_count": 10,
+    "eval_duration": 1273927000,
+    "duration_unit": "nanoseconds",
+    "wall_seconds": 2.804,
+    "generation_tokens_per_second": 7.849743352641085,
+    "runtime_process_memory": [
+      {
+        "pid": 3924,
+        "name": "ollama",
+        "VmHWM": 82034688,
+        "VmRSS": 27119616
+      },
+      {
+        "pid": 6617,
+        "name": "llama-server",
+        "VmHWM": 4767309824,
+        "VmRSS": 4767309824
+      }
+    ],
+    "gameplay_acceptance": "NOT_TESTED"
+  }
+}

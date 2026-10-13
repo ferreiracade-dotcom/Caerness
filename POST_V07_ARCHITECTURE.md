@@ -1,7 +1,13 @@
 # Caerness Narrative Engine Architecture
+
+**Owner authoring clarification, 13 October 2026 (PR #7):** §§18.5, 19–20 and 34–35 permit constrained progressive invention; the World Bible/opening are not exhaustive. Entirely new significant people, organisations, histories and circumstances may enter campaign truth without a prior named/latent seed entry. Ordinary recollections/gestures remain natural; objective consequential additions receive consistency checks, native identities and graded continuity persistence before future reliance. Preserve existing anchors/canon and action validation. Anti-convenience does not ban legitimate opportunities or important emergence. See `docs/narrative-authoring.md`; this supersedes earlier blanket no-invention interpretations.
 ## Post-v0.7 Consolidated Design Specification
 
 **Current platform direction (13 October 2026):** desktop/laptop narrative play first, mobile-browser compatibility through one client; capable model quality over phone-local deployment. 3D/Unreal is postponed indefinitely until text play is genuinely enjoyable. The authority and knowledge invariants below remain in force.
+
+**Current inference direction:** genuinely free local models through the existing OpenAI-compatible gateway; Ollama startup and LM Studio comparison. No mandatory paid API, cloud tags or credentials. Hardware-sized recommendations and explicit download consent; actual model-generated gameplay, not scripted responses, determines acceptance. Models can change without replacing a campaign.
+
+**Institutional presence:** portray organisations, developed followers, captains, colours, holdings and assemblies through knowledge-safe prose and compatibly authored campaign truth. Independent development and ownership matter. New significant institutions/history are permitted; authoring cannot bypass validation of player command, resources, troop allocations or NPC consent. This introduces no bespoke gameplay handlers or broad simulation expansion.
 
 **Status:** design target after Engine v0.7  
 **Relationship to v0.7:** additive. This document does not replace v0.7's authority, persistence, model-gateway, information, competence, agency-handoff, or mobile-runtime rules. It defines the next architectural layer those systems must support.

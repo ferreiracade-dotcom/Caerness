@@ -71,6 +71,8 @@ function renderState() {
   const r=state.runtime||{};
   if (!$('modelEndpoint').value) $('modelEndpoint').value=r.model_endpoint||'';
   if (!$('modelName').value) $('modelName').value=r.local_model||'';
+  if (!$('modelContext').value) $('modelContext').value=r.local_heavy_context_tokens||8192;
+  if (!$('modelOutput').value) $('modelOutput').value=r.local_max_output_tokens||1200;
   $('runtimeBody').innerHTML=`<div class="meta">${esc(r.local_backend||'')} · ${esc(r.local_model||'')}<br>Story time advances through play only.</div>`;
 }
 function card(title, meta='', body='') {
@@ -87,11 +89,14 @@ document.addEventListener('click', async e => {
   }
   const approve = e.target.closest('[data-approve-plan]');
   if (approve) {
+    setBusy(true);
     try {
       const data = await api('/api/plan-approve', {method:'POST', body:JSON.stringify({plan_id:Number(approve.dataset.approvePlan),digest:approve.dataset.digest,narrative:$('playMode').value==='narrative'})});
       $('playStatus').textContent=data.summary||'Decision saved.';
+      if(data.status==='external_recommended')showReferral(data);
       await refresh(); scrollLatest();
     } catch (error) { alert(error.message); }
+    finally {setBusy(false);}
     return;
   }
   const button = e.target.closest('[data-confirm-appointment]');
@@ -191,7 +196,8 @@ async function resumeSession(id) {
 function showReferral(data) {
   referral = data;
   const a = data.assessment || {};
-  $('referralTitle').textContent='Your narrator is not connected';
+  $('referralTitle').textContent=data.failure ? ({timeout:'The response timed out',unavailable:'Your model is unavailable',context_limit:'The conversation exceeds model context',invalid_response:'The model response was invalid',incomplete_response:'The model response was incomplete',out_of_memory:'The model ran out of memory',continuation_failed:'The continuation was interrupted',interrupted:'Conversation paused',repeated_read:'The model repeated a completed read'}[data.failure.code]||'Response interrupted') : 'A model response is needed';
+  if(data.failure) $('diagnosticStatus').textContent=`Request #${data.failure.request_id} · ${data.failure.phase} · ${data.failure.code}`;
   $('referralMessage').textContent=data.reason||'Your message is saved. The configured model could not complete this response.';
   $('referralScores').innerHTML = [
     ['Reasoning', a.reasoning_score], ['Narrative', a.narrative_score], ['Local load', a.hardware_score], ['Context', a.context_tokens_estimate ? `${a.context_tokens_estimate} tok` : '—']
@@ -207,6 +213,7 @@ async function submit(text, forceLocal=false) {
     const planning = narrative || $('playMode').value === 'planner';
     const data = await api(narrative ? '/api/narrative-play' : planning ? '/api/plan-play' : '/api/play', {method:'POST', body:JSON.stringify({text, mode:$('playMode').value, force_local:forceLocal, session_id:planningSession, plan_id:revisingPlan})});
     if (data.session_id) { planningSession = data.session_id; newConversation=false; localStorage.setItem("caernessSession",planningSession); }
+    if (data.input_not_recorded) $('input').value=text;
     if (data.status === 'external_recommended') showReferral(data);
     await refresh(); scrollLatest();
   } catch (e) {
@@ -223,14 +230,14 @@ $('composer').addEventListener('submit', async e => {
   await submit(text);
 });
 $('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();if(!busy&&$('input').value.trim())$('composer').requestSubmit();}});
-$('interrupt').addEventListener('click', async () => { try { await api('/api/interrupt',{method:'POST',body:'{}'}); } catch(e) {} });
+$('interrupt').addEventListener('click', async () => { try { await api('/api/interrupt',{method:'POST',body:'{}'});$('playStatus').textContent='Pause requested. The current model call may need to finish; confirmed actions are saved.'; } catch(e) {} });
 $('closeReferral').addEventListener('click', ()=> $('referral').classList.add('hidden'));
 $('runLocalAnyway').addEventListener('click', async ()=> {
   if (!referral) return;
   $('referral').classList.add('hidden');
   setBusy(true);
   try {
-    const data = await api(`/api/model/${referral.request_id}/local`, {method:'POST', body:JSON.stringify({force:true, apply:true})});
+    const data = await api(referral.failure ? '/api/narrative-retry' : `/api/model/${referral.request_id}/local`, {method:'POST', body:JSON.stringify({request_id:referral.request_id,force:true, apply:true})});
     if (data.status === 'external_recommended') showReferral(data);
     await refresh();
   } catch(e) { alert(e.message); }
@@ -270,8 +277,11 @@ refresh().catch(e => $('worldline').textContent=e.message);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
 $('conversationPicker').addEventListener('change',e=>resumeSession(Number(e.target.value)));
-$('modelSetup').addEventListener('submit',async e=>{e.preventDefault();try{await api('/api/runtime',{method:'POST',body:JSON.stringify({local_backend:'openai_compatible',local_endpoint:$('modelEndpoint').value,local_model:$('modelName').value})});$('modelStatus').textContent='Model settings saved. Credentials remain in the server environment.';await refresh();}catch(e){$('modelStatus').textContent=e.message;}});
+$('modelSetup').addEventListener('submit',async e=>{e.preventDefault();try{await api('/api/runtime',{method:'POST',body:JSON.stringify({local_backend:'openai_compatible',local_endpoint:$('modelEndpoint').value,local_model:$('modelName').value,local_heavy_context_tokens:Number($('modelContext').value),local_max_context_tokens:Math.min(6000,Number($('modelContext').value)),local_max_output_tokens:Number($('modelOutput').value)})});$('modelStatus').textContent='Model settings saved. Credentials remain in the server environment.';await refresh();}catch(e){$('modelStatus').textContent=e.message;}});
 $('testModel').addEventListener('click',async()=>{try{const h=await api('/api/local-health');$('modelStatus').textContent=h.ok?'Endpoint available. Start a conversation to test this model.':h.error||h.status;}catch(e){$('modelStatus').textContent=e.message;}});
+
+$('copyDiagnostics').addEventListener('click',async()=>{try{$('diagnosticStatus').textContent='Collecting non-secret hardware and request diagnostics…';const report=await api('/api/diagnostics?hardware=1');const text=JSON.stringify(report,null,2);$('diagnosticStatus').textContent=text;await navigator.clipboard.writeText(text);$('playStatus').textContent='Diagnostics copied. No dialogue, credentials or world facts included.';}catch(e){$('playStatus').textContent=e.message;}});
+$('retryNarrative').addEventListener('click',async()=>{if(busy)return;setBusy(true);try{const report=await api('/api/diagnostics'+(planningSession?'?session_id='+Number(planningSession):''));const pending=report.requests.find(r=>r.retryable);if(!pending)throw new Error('There is no unfinished response to retry.');const data=await api('/api/narrative-retry',{method:'POST',body:JSON.stringify({request_id:pending.request_id})});if(data.session_id){planningSession=data.session_id;localStorage.setItem('caernessSession',planningSession);}if(data.status==='external_recommended')showReferral(data);else{$('referral').classList.add('hidden');$('diagnosticStatus').textContent='Unfinished response completed. Earlier actions were not replayed.';}await refresh();scrollLatest();}catch(e){$('playStatus').textContent=e.message;}finally{setBusy(false);}});
 
 openPanel('scene');
 $('closeNotebook').addEventListener('click',()=>{openPanel('scene');$('input').focus();});

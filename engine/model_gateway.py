@@ -146,7 +146,7 @@ def _task_contract(task_type: str, request_id: int) -> dict[str, Any]:
 def _common_rules(task_type: str) -> list[str]:
     base = [
         "Treat the supplied packet as authoritative for this bounded task.",
-        "Do not invent permanent canon, named institutions, locations, possessions, relationships, or world events not supported by the packet.",
+        "Preserve established canon and campaign truth. Compatible previously undescribed history and new consequential entities are permitted through graded campaign authorship; absence from the seed is not a contradiction. Never create action success, consent, resources or authority merely by narrating them.",
         "The player is the story's camera focus, not the world's causal center.",
         "The wider world has independent agendas and continues moving off camera.",
         "Never make an actor care about the player merely because the narrative camera follows the player.",
@@ -180,9 +180,11 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
     if provider not in PROVIDERS:
         raise ValueError(f"Unsupported provider: {provider}")
     label = _provider_label(provider)
+    # Keep human review packets readable; local inference need not tokenize indentation.
+    json_options = {"ensure_ascii": False, **({"separators": (",", ":")} if provider == "local" else {"indent": 2})}
     contract = _task_contract(task_type, request_id)
     rules = _common_rules(task_type)
-    if payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"}:
+    if payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
         from .planning_gateway import contract as planning_contract
         if payload.get("protocol", "").startswith("narrative_"):
             from .narrative_runtime import contract as narrative_contract
@@ -190,8 +192,34 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
         else:
             contract = planning_contract(request_id)
         rules = list(payload["rules"])
+    if provider == 'local' and payload.get('protocol', '').startswith('narrative_'):
+        # Rules already appear above; do not tokenize a second identical copy.
+        payload = {k:v for k,v in payload.items() if k != 'rules'}
+        # Also compact already-saved interrupted requests from earlier versions.
+        # Only identical definitions/snapshots are shared; no content is dropped.
+        if 'read_tools' in payload:
+            unique=[]
+            for tool in payload['read_tools']:
+                if tool.get('name')=='scene' and payload.get('protocol')=='narrative_play_v1' and payload.get('context',{}).get('scene'):continue
+                if tool not in unique:unique.append(tool)
+            payload['read_tools']=unique
+        payload['feedback']=[dict(item,result={'from':'context','unchanged':True}) if item.get('tool')=='scene' and item.get('result')==payload.get('context') else item for item in payload.get('feedback',[])] if 'feedback' in payload else []
+        paged=[]
+        for index,item in enumerate(payload.get('feedback',[])):
+            value=item.get('result')
+            if payload.get('protocol')=='narrative_play_v1' and value is not None and len(json.dumps(value,ensure_ascii=False))>6000:
+                paged.append(dict(item,result={'saved_request_id':request_id,'index':index,'fields':list(value) if isinstance(value,dict) else None,'total_chars':len(json.dumps(value,ensure_ascii=False)),
+                    'rule':'Large result is saved in full. Use read_result with request_id/index, optional field path and explicit offset; retrieve relevant pages before relying on it. Nothing was silently truncated.'}))
+            else:paged.append(item)
+        payload['feedback']=paged
+        if payload.get('protocol')=='narrative_play_v1' and any(item.get('result',{}).get('saved_request_id')==request_id for item in paged if isinstance(item.get('result'),dict)) and not any(t['name']=='read_result' for t in payload.get('read_tools',[])):
+            payload['read_tools']=payload.get('read_tools',[])+[{'name':'read_result','arguments':{'request_id':'integer','index':'optional integer','path':'optional field-name list','offset':'optional character offset'},'description':'Read explicitly paged saved public results.'}]
+        # Stable rules/context precede changing turn fields, allowing runtime prefix
+        # caching. All fields remain present; no history or intent is truncated.
+        changing={'conversation','feedback','raw_player_input','planning_goal','rounds'}
+        payload={**{k:v for k,v in payload.items() if k not in changing},**{k:v for k,v in payload.items() if k in changing}}
     return "\n".join([
-        f"# Caerness Engine — {label} Bridge Request #{request_id}",
+        f"# Caerness Engine — {label} Bridge" if provider=='local' and payload.get('protocol','').startswith('narrative_') else f"# Caerness Engine — {label} Bridge Request #{request_id}",
         "",
         f"You are serving as a bounded `{task_type}` component for a persistent simulation.",
         "The SQLite engine, not you, owns world truth and state mutation.",
@@ -201,7 +229,7 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
         "",
         "## Task packet",
         "```json",
-        json.dumps(payload, indent=2, ensure_ascii=False, default=str),
+        json.dumps(payload, default=str, **json_options),
         "```",
         "",
         "## Required response contract",
@@ -209,7 +237,7 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
         "The engine is tolerant of fences if the chat UI adds them, but raw JSON is preferred.",
         "",
         "```json",
-        json.dumps(contract, indent=2, ensure_ascii=False),
+        json.dumps(contract, **json_options),
         "```",
         "",
         "Do not add fields that try to directly mutate the database.",
@@ -591,7 +619,7 @@ def _run_segmented_local_narration(conn: sqlite3.Connection, request_id: int, pa
         }
         prompt = "\n".join([
             "Write only immersive Caerness narration for this one beat of a larger continuous section.",
-            "Reality is already resolved in the supplied data. Do not invent permanent state or hidden facts.",
+            "Action outcomes are already resolved. Creative expression, connective tissue and attributed recollections are permitted; objective consequential additions require campaign authorship before future reliance. Never overwrite confirmed outcomes or expose hidden facts.",
             "Do not ask 'What do you do?' and do not present a menu of choices.",
             "Do not manufacture an NPC question merely to create a stopping point.",
             "Maintain continuity with previous_tail without repeating it.",
@@ -636,7 +664,7 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
         target_kind=str(row["target_kind"]) if row["target_kind"] is not None else None,
         target_id=int(row["target_id"]) if row["target_id"] is not None else None,
     )
-    if assessment.recommendation in {"external_recommended", "external_strongly_recommended"} and not force and not runtime_config(conn).get("remote_model"):
+    if assessment.recommendation in {"external_recommended", "external_strongly_recommended"} and not force and not (runtime_config(conn).get("remote_model") or runtime_config(conn).get("free_local")):
         chatgpt_path = export_request(conn, request_id, provider="chatgpt")
         claude_path = export_request(conn, request_id, provider="claude")
         return {
@@ -665,6 +693,10 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
         }
     else:
         contract_packet = render_packet("local", request_id, str(row["task_type"]), payload)
+        schema = None
+        if runtime_config(conn).get("free_local") and payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
+            from .planning_gateway import response_schema
+            schema = response_schema(request_id, payload)
         result = chat_local(
             conn,
             [
@@ -672,6 +704,7 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
                 {"role": "user", "content": contract_packet},
             ],
             require_json=True,
+            response_schema=schema,
         )
         conn.execute('CREATE TABLE IF NOT EXISTS ai_model_calls(id INTEGER PRIMARY KEY,request_id INTEGER,backend TEXT,model TEXT,latency_seconds REAL,prompt_tokens INTEGER,completion_tokens INTEGER)')
         conn.execute('INSERT INTO ai_model_calls(request_id,backend,model,latency_seconds,prompt_tokens,completion_tokens) VALUES (?,?,?,?,?,?)',(request_id,result.backend,result.model,result.latency_seconds,result.prompt_tokens,result.completion_tokens))

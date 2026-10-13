@@ -1,0 +1,45 @@
+{
+  "status": "REAL_INFERENCE_DIAGNOSTIC_PASSED",
+  "model": "caerness-diagnostic-4b",
+  "latency_seconds": 15.119,
+  "prompt_tokens": 51,
+  "completion_tokens": 19,
+  "output_tokens_per_wall_second": 1.2566968714862095,
+  "response": {
+    "ready": true,
+    "reply": "Hello!"
+  },
+  "gameplay_acceptance": "NOT_TESTED",
+  "hardware": {
+    "system": "Linux",
+    "ram_gib": 8.0,
+    "gpus": [],
+    "cpu_count": 3,
+    "disk_free_gib": 22.716663360595703,
+    "warnings": []
+  },
+  "loaded": {
+    "models": [
+      {
+        "name": "caerness-diagnostic-4b:latest",
+        "model": "caerness-diagnostic-4b:latest",
+        "size": 3355422227,
+        "digest": "3a91e2f7bfd112f01bf5d3464467ec38b6000024c69ccb0d5aac03099ece8144",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "4.2B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-13T07:17:27.819353743Z",
+        "size_vram": 0,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  }
+}
