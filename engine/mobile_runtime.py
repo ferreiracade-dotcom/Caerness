@@ -78,6 +78,9 @@ def process_player_input(
     text = text.strip()
     if not text:
         raise ValueError("Player input may not be empty.")
+    if mode == "narrative":
+        from .narrative_runtime import play
+        return play(conn,text,session_id,plan_id)
     if mode in {"planner", "plan_chatgpt", "plan_claude"}:
         from .planning_gateway import play
         return play(conn, text, session_id, plan_id, provider={"planner":"local", "plan_chatgpt":"chatgpt", "plan_claude":"claude"}[mode],force_local=force_local)
@@ -187,6 +190,9 @@ def mobile_state(conn: sqlite3.Connection) -> dict[str, Any]:
             "device_profile": cfg["device_profile"],
             "local_model": cfg["local_model"],
             "local_backend": cfg["local_backend"],
+            "model_endpoint": cfg["local_endpoint"],
+            "remote_model": cfg.get("remote_model",False),
+            "credential_available": cfg.get("credential_available",False),
             "referral_sensitivity": cfg["referral_sensitivity"],
             "story_time_only": not bool(cfg["realtime_calendar_progression"]),
         },

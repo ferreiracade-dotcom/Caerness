@@ -24,7 +24,7 @@ def contract(request_id):
     }}
 
 
-def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, feedback=None, record_input=True, rounds=0, goal_override=None):
+def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, feedback=None, record_input=True, rounds=0, goal_override=None, narrative=False):
     from .model_gateway import create_request
     s=plans.session(c,session_id); sid=s['id']
     if record_input: plans.message(c,sid,'player',text)
@@ -44,7 +44,7 @@ def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, fe
         pending=[goal]
     payload={'protocol':PROTOCOL,'raw_player_input':text,'planning_goal':goal,
         'session_id':sid,'plan_id':plan_id,'rounds':rounds,'conversation':json.loads(plans.session(c,sid)['messages_json'])[-24:],
-        'context':context(c,s['owner_actor_id']), 'current_plan':existing,
+        'context':{} if narrative else context(c,s['owner_actor_id']), 'current_plan':existing,
         'read_tools':READ_TOOLS,'capabilities':[cap.schema() for cap in CAPABILITIES.values()],
         'feedback':feedback or [],
         'unresolved_intentions':pending,
@@ -63,6 +63,9 @@ def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, fe
             'No future fortune/director system is implemented by this protocol. Follow the owner narrative-direction qualifications, not absolute survival prohibitions.',
         ]}
     payload['open_plans']=[plans.plan_view(c,int(r[0])) for r in c.execute("SELECT id FROM ai_plans WHERE owner_actor_id=? AND status!='completed' ORDER BY id DESC LIMIT 4",(s['owner_actor_id'],))]
+    if narrative:
+        from .narrative_runtime import enrich
+        enrich(c,payload)
     return create_request(c,'action_interpretation',payload,provider=provider,target_kind='ai_session',target_id=sid)
 
 
@@ -74,7 +77,7 @@ def apply_response(c, row, response, payload):
         if rounds>6:
             plans.message(c,sid,'system','The planning round limit was reached. The original goal remains unresolved; no world operation was executed.')
             return {'status':'needs_clarification','session_id':sid,'summary':'The planning round limit was reached; the goal remains unresolved.'}
-        req=start_request(c,payload['raw_player_input'],row['provider'],sid,payload.get('plan_id'),feedback,False,rounds,goal_override=payload['planning_goal'])
+        req=start_request(c,payload['raw_player_input'],row['provider'],sid,payload.get('plan_id'),feedback,False,rounds,goal_override=payload['planning_goal'],narrative=payload.get('protocol')=='narrative_play_v1')
         return {'status':'awaiting_action_interpretation','session_id':sid,'feedback':feedback,'next_request':req}
     try:
         if mode=='inspect':
@@ -91,6 +94,9 @@ def apply_response(c, row, response, payload):
                 elif tool=='offerings' and not args: value=known_offerings(c,s['owner_actor_id'])
                 elif tool=='plan_status' and set(args)=={'plan_id'} and type(args['plan_id'])is int:
                     value=plans.plan_view(c,args['plan_id'])
+                elif payload.get('protocol')=='narrative_play_v1':
+                    from .narrative_runtime import read
+                    value=read(c,sid,tool,args)
                 else: raise ValueError('Read tool or arguments unavailable; unrestricted database access is forbidden.')
                 results.append({'tool':tool,'arguments':args,'result':value})
             plans.message(c,sid,'tool',results)
@@ -116,7 +122,7 @@ def apply_response(c, row, response, payload):
     return output
 
 
-def run_local(c, request_id, max_rounds=7, force=False):
+def run_local(c, request_id, max_rounds=9, force=False):
     """Bounded real configured-model loop; stops at discussion/clarification/review."""
     from .model_gateway import run_request_local
     for _ in range(max_rounds):

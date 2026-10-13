@@ -1,0 +1,76 @@
+{
+  "implementation_revision": "2de4e4bbefe1afc40b04a099ad7d7da6ec8d40d4",
+  "base_pr4_revision": "80c3e0f76f10074d753cc702c792633c9404b94c",
+  "pr3_review_fixes_preserved": true,
+  "opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
+  "bible_sha256": "45947d046f816a95d118167e03a7d24872867b1521eb1a9414c5fe4349d995e3",
+  "canonical_changes": false,
+  "full_regression": {
+    "passed": 129,
+    "failed": 0,
+    "timeouts": 0,
+    "summed_test_seconds": 414.7
+  },
+  "full_regression_source_note": "Full regression during implementation; final six relevant checks repeated on the committed implementation revision after later contextual/UI/failure-boundary refinements.",
+  "final_focused": {
+    "passed": 6,
+    "failed": 0,
+    "timeouts": 0,
+    "summed_test_seconds": 20.9
+  },
+  "real_model": {
+    "credentials_or_runtime_model_bindings_available": false,
+    "health_and_actual_inference": "unavailable",
+    "gates_A_B_C_D": "BLOCKED",
+    "real_reasoning_literary_quality_latency_tested": false,
+    "scripted_outputs_not_equivalent": true
+  },
+  "http_test": {
+    "conversational_exchanges": 20,
+    "latency_label": "Explicit stub transport only; 54 calls / 0.3867 summed seconds. No real model latency claim.",
+    "confirmed_consequences_survive_narrator_failure": true
+  },
+  "phone_browser": {
+    "viewport": [
+      390,
+      844
+    ],
+    "conversational_exchanges": 20,
+    "reload_retains_session": true,
+    "new_conversation_distinct": true,
+    "old_conversation_resumable": true,
+    "model_setup_visible": true,
+    "day": 0,
+    "javascript_errors": [],
+    "model_outputs": "explicitly scripted transport test; not literary evidence"
+  },
+  "benchmark": {
+    "active_plans": 4,
+    "initial_and_three_year_save": true,
+    "90_and_365_days": true,
+    "planning_year_seconds": [
+      0.248,
+      0.262
+    ],
+    "late_repeat_planning_90_day_seconds": [
+      0.065,
+      0.066
+    ],
+    "late_repeat_native_sample_fingerprints_identical": true,
+    "model_calls": 0,
+    "phone_benchmark": false,
+    "profiling_and_single_host_noise_disclosed": true
+  },
+  "live_acceptance": "Connect a capable runtime endpoint and complete unscripted A\u2013D plus human literary review. Integration success is not gameplay acceptance.",
+  "extracted_package": {
+    "source_revision": "c6e656aaf92e33a5329dd40ccc952aed4652bafb",
+    "file": "caerness-narrative-runtime.zip",
+    "sha256": "153f2237130b7b1e5d8ab6785d8ccd9d15681bc159ecadb12a1119f510905f93",
+    "bytes": 12417387,
+    "zip_integrity": "PASS",
+    "narrative_runtime_test": "PASS",
+    "narrative_authority_test": "PASS",
+    "copy_safe_launcher_probe": "PASS; model remains unavailable",
+    "opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7"
+  }
+}

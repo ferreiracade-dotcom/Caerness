@@ -123,6 +123,9 @@ def describe_scope(c,owner,step):
         return f"Attempt '{args['title']}' using the selected owned site, accepted service and reserved resources. Quoted requirements: {quote_text}. Completion requires world time and sustained means."
     if op=='refund_resources': return 'Return only the unspent balance of this plan reserve to its original organisation.'
     if op=='advance_time': return f"Pass {args['days']} days for the entire world, including risks and unrelated developments."
+    if op=='travel':
+        row=c.execute('SELECT name FROM locations WHERE id=?',(args['destination_id'],)).fetchone()
+        return f"Travel to {row[0] if row else 'an unavailable destination'} using a disclosed established route; world time and its risks pass for everyone."
     if op=='answer_proposal': return f"Explicitly {args['choice']} the selected pending proposal addressed to you. Its existing terms and commit guards still apply."
     return CAPABILITIES[op].description
 
@@ -166,8 +169,17 @@ def known_offerings(c, actor):
     return out
 
 
-def quote(c, actor, offering_id):
+def quote(c, actor, offering_id, engagement_id=None):
     published = next((o for o in known_offerings(c, actor) if o['offering_id'] == offering_id), None)
+    if not published and engagement_id is not None:
+        service=c.execute("SELECT * FROM service_engagements WHERE id=? AND provider_kind='actor' AND status='active'",(engagement_id,)).fetchone()
+        if service and service['client_institution_actor_id'] is not None and json.loads(service['scope_json']).get('only_work_quotation')==offering_id:
+            authority(c,actor,int(service['client_institution_actor_id']))
+            row=c.execute("SELECT * FROM seekable_offerings WHERE id=? AND provider_actor_id=? AND status='active'",(offering_id,service['provider_id'])).fetchone()
+            if row:
+                work=json.loads(row['metadata_json']).get('work_order')
+                published={'offering_id':row['id'],'provider_actor_id':row['provider_actor_id'],'domain':row['domain_key'],'subject':row['subject_key'],'work_order':work,
+                           'quotation_digest':digest({'provider':row['provider_actor_id'],'domain':row['domain_key'],'subject':row['subject_key'],'work_order':work})}
     if not published or not published['work_order']:
         raise ValueError('No accessible, quantified work quotation exists. Negotiate a quotation rather than inventing its price or means.')
     q = published['work_order']
@@ -284,7 +296,7 @@ def allocate_resources(c, owner, plan_id, step_key, args):
 def commission_work(c,owner,plan_id,step_key,args):
     from .civilian import create_project
     authority(c,owner,args['institution_id'])
-    q = quote(c,owner,args['offering_id']); spec = q['work_order']
+    q = quote(c,owner,args['offering_id'],args['engagement_id']); spec = q['work_order']
     if q['quotation_digest']!=args['quotation_digest']: raise ValueError('The quoted work or price changed after review; do not spend under stale terms.')
     allocation = c.execute("SELECT * FROM ai_resource_allocations WHERE id=? AND plan_id=? AND institution_actor_id=? AND status='reserved'",(args['allocation_id'],plan_id,args['institution_id'])).fetchone()
     engagement = c.execute("SELECT * FROM service_engagements WHERE id=? AND client_institution_actor_id=? AND provider_kind='actor' AND status='active'",(args['engagement_id'],args['institution_id'])).fetchone()
@@ -297,7 +309,8 @@ def commission_work(c,owner,plan_id,step_key,args):
     slots = json.loads(site['metadata_json']).get('work_slots',0)
     occupied = c.execute("SELECT COUNT(*) FROM civilian_projects WHERE status IN ('active','paused') AND json_extract(metadata_json,'$.site_id')=?",(site['id'],)).fetchone()[0]
     if occupied >= slots: raise ValueError('The site has no established work capacity available.')
-    present(c,owner,q['provider_actor_id'])
+    worker_location=c.execute('SELECT current_location_id FROM actors WHERE id=?',(q['provider_actor_id'],)).fetchone()
+    if not worker_location or worker_location[0]!=site['location_id']:raise ValueError('The delegated worker must actually be at the work site.')
     score = skill(c,q['provider_actor_id'],q['domain'])
     if score < spec['minimum_skill']: raise ValueError('The responsible person cannot perform the quoted work.')
     capacity=work_capacity(c,q['provider_actor_id'])
@@ -351,3 +364,23 @@ def answer_proposal(c,owner,plan_id,step_key,args):
         raise ValueError('Only the actual recipient may answer this pending proposal with accept, reject or counter.')
     result=apply_player_response(c,args['interaction_id'],owner,args['choice'],day(c))
     return {'state':'completed','summary':result.summary}
+
+
+@capability('travel', 'Travel along an established route to a disclosed nearby place. Shared time, arrival and world consequences use the native turn executor.',
+            {'destination_id':'id'}, ('turn_id',))
+def travel(c,owner,plan_id,step_key,args):
+    from .actions import PlayerActionProposal, shortest_route
+    from .player import get_player
+    from .turns import resolve_turn_state
+    player=get_player(c); start=player['current_location_id']; destination=args['destination_id']
+    # Initially expose/permit nearby routes only; a model cannot guess secret distant IDs.
+    known=c.execute('SELECT 1 FROM location_links WHERE active=1 AND ((location_a_id=? AND location_b_id=?) OR (location_b_id=? AND location_a_id=?))',(start,destination,start,destination)).fetchone()
+    route=shortest_route(c,start,destination) if known else None
+    if not route:raise ValueError('No disclosed nearby route reaches this destination. Inspect routes or keep the travel goal unresolved.')
+    days,ids,names=route
+    if days>3650:raise ValueError('Use a bounded travel tranche.')
+    class ValidatedRoute:
+        def propose(self,conn,text):
+            return PlayerActionProposal(text,'travel',1.0,target_location_id=destination,target_location_name=names[-1],duration_days=days,route_location_ids=tuple(ids),route_location_names=tuple(names))
+    result=resolve_turn_state(c,'Travel to '+names[-1],action_provider=ValidatedRoute(),canon_limit=2)
+    return {'state':'completed','turn_id':result['turn_id'],'summary':result['result']['summary'] if 'result' in result else f'Travel resolved along the established route to {names[-1]}; {days} world days passed.'}

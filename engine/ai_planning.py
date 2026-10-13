@@ -139,9 +139,14 @@ def plan_view(c,plan_id,check_owner=True):
     spec=json.loads(row['spec_json'])
     steps={r['step_key']:{'status':r['status'],'result':json.loads(r['result_json'])} for r in c.execute('SELECT * FROM ai_plan_steps WHERE plan_id=?',(plan_id,))}
     from .world_capabilities import describe_scope
-    return {'id':row['id'],'session_id':row['session_id'],'revision':row['revision'],'digest':row['digest'],
+    verification=None
+    if c.execute("SELECT 1 FROM sqlite_master WHERE name='narrative_scope_reviews'").fetchone():
+        record=c.execute('SELECT verdict_json FROM narrative_scope_reviews WHERE plan_id=? AND digest=?',(plan_id,row['digest'])).fetchone()
+        if record: verification=json.loads(record[0])
+    return {'scope_verification':verification,'id':row['id'],'session_id':row['session_id'],'revision':row['revision'],'digest':row['digest'],
         'status':row['status'],'original_instruction':row['source_text'],'summary':spec['summary'],
         'unresolved':spec['unresolved'],'proposed_steps':spec['steps'],'steps':steps,
+        'source_handling':[{'text':row['source_text'][x['start']:x['end']],'handling':x['handling'],'step_ids':x['step_ids']} for x in spec['coverage']],
         'review_scope':[describe_scope(c,row['owner_actor_id'],s) for s in spec['steps']],
         'authorization_notice':'Authorize only the engine-listed operations below, not an unlisted consequence. If this scope omits a condition from your original instruction, discuss/revise it before authorizing.'}
 
@@ -161,6 +166,10 @@ def approve_plan(c,plan_id,expected_digest):
     row=owned_plan(c,plan_id)
     if row['status']!='draft' or expected_digest!=row['digest']: raise ValueError('The reviewed plan changed or was already approved. Review its current version.')
     spec=json.loads(row['spec_json']); check_spec(spec,row['source_text'])
+    if c.execute("SELECT 1 FROM sqlite_master WHERE name='narrative_scope_reviews'").fetchone():
+        review=c.execute('SELECT verdict_json FROM narrative_scope_reviews WHERE plan_id=? AND digest=?',(plan_id,expected_digest)).fetchone()
+        if review and not json.loads(review[0]).get('complete'):
+            raise ValueError('The scope has unresolved or unverified conditions. Revise it before authorizing.')
     if spec['unresolved']: raise ValueError('Unresolved conditions need clarification or an explicit revised scope before authorization.')
     # Preflight cumulative material reservations before any operation commits.
     from .world_capabilities import authority

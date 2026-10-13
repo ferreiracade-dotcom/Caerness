@@ -1,0 +1,14 @@
+{
+  "viewport": [
+    390,
+    844
+  ],
+  "conversational_exchanges": 20,
+  "reload_retains_session": true,
+  "new_conversation_distinct": true,
+  "old_conversation_resumable": true,
+  "model_setup_visible": true,
+  "day": 0,
+  "javascript_errors": [],
+  "model_outputs": "explicitly scripted transport test; not literary evidence"
+}

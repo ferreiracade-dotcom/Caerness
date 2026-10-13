@@ -1,0 +1,55 @@
+{
+  "label": "four active tracking fixtures; cProfile on both; not a phone benchmark",
+  "measurements": [
+    {
+      "native_fingerprint": "5a9bcc755bf71922df4bf42d99d9e25bafdc3e2e0008a9548e67f49aed5c9c02",
+      "days": 90,
+      "tracking": false,
+      "wall_seconds": 12.329,
+      "planning_cumulative_seconds": 0,
+      "planning_review_calls": 0,
+      "initial_active_plans": 0,
+      "final_active_plans": 0,
+      "final_day": 1185,
+      "save_age_days": 1095
+    },
+    {
+      "native_fingerprint": "5a9bcc755bf71922df4bf42d99d9e25bafdc3e2e0008a9548e67f49aed5c9c02",
+      "days": 90,
+      "tracking": true,
+      "wall_seconds": 12.806,
+      "planning_cumulative_seconds": 0.065,
+      "planning_review_calls": 90,
+      "initial_active_plans": 4,
+      "final_active_plans": 4,
+      "final_day": 1185,
+      "save_age_days": 1095,
+      "relative_overhead_percent": 3.9
+    },
+    {
+      "native_fingerprint": "5a9bcc755bf71922df4bf42d99d9e25bafdc3e2e0008a9548e67f49aed5c9c02",
+      "days": 90,
+      "tracking": false,
+      "wall_seconds": 13.596,
+      "planning_cumulative_seconds": 0,
+      "planning_review_calls": 0,
+      "initial_active_plans": 0,
+      "final_active_plans": 0,
+      "final_day": 1185,
+      "save_age_days": 1095
+    },
+    {
+      "native_fingerprint": "5a9bcc755bf71922df4bf42d99d9e25bafdc3e2e0008a9548e67f49aed5c9c02",
+      "days": 90,
+      "tracking": true,
+      "wall_seconds": 12.888,
+      "planning_cumulative_seconds": 0.066,
+      "planning_review_calls": 90,
+      "initial_active_plans": 4,
+      "final_active_plans": 4,
+      "final_day": 1185,
+      "save_age_days": 1095,
+      "relative_overhead_percent": -5.2
+    }
+  ]
+}

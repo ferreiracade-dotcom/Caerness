@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
+import time
+from urllib.parse import urlsplit
 import sqlite3
 import urllib.error
 import urllib.request
@@ -16,6 +19,7 @@ class LocalModelResult:
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
     raw: dict[str, Any] | None = None
+    latency_seconds: float = 0.0
 
 
 def runtime_config(conn: sqlite3.Connection) -> dict[str, Any]:
@@ -23,7 +27,14 @@ def runtime_config(conn: sqlite3.Connection) -> dict[str, Any]:
     if not row:
         conn.execute("INSERT INTO runtime_config(id) VALUES (1)")
         row = conn.execute("SELECT * FROM runtime_config WHERE id=1").fetchone()
-    return dict(row)
+    config = dict(row)
+    # Deployment overrides are non-secret; the key remains exclusively in memory.
+    for env, key in (("CAERNESS_MODEL_ENDPOINT", "local_endpoint"), ("CAERNESS_MODEL_NAME", "local_model")):
+        if os.environ.get(env): config[key] = os.environ[env]
+    if os.environ.get("CAERNESS_MODEL_ENDPOINT"): config["local_backend"] = "openai_compatible"
+    config["remote_model"] = urlsplit(str(config["local_endpoint"])).hostname not in {"localhost", "127.0.0.1", "::1"}
+    config["credential_available"] = bool(os.environ.get("CAERNESS_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY"))
+    return config
 
 
 def set_runtime_config(conn: sqlite3.Connection, **changes: Any) -> dict[str, Any]:
@@ -38,6 +49,8 @@ def set_runtime_config(conn: sqlite3.Connection, **changes: Any) -> dict[str, An
         raise ValueError(f"Unsupported runtime setting(s): {sorted(invalid)}")
     if "realtime_calendar_progression" in changes:
         raise ValueError("Real-world calendar progression is intentionally disabled in Caerness.")
+    if "local_endpoint" in changes:
+        _validate_endpoint(str(changes["local_endpoint"]))
     if changes:
         sets = ",".join(f"{k}=?" for k in changes) + ",updated_at=CURRENT_TIMESTAMP"
         conn.execute(f"UPDATE runtime_config SET {sets} WHERE id=1", tuple(changes.values()))
@@ -52,18 +65,44 @@ def estimate_tokens(value: Any) -> int:
     return max(1, int(len(value) / 3.4) + 1)
 
 
+def _validate_endpoint(url):
+    parsed = urlsplit(url)
+    if parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise ValueError("Model endpoint must not contain credentials, query parameters or fragments.")
+    if parsed.scheme != "https" and not (parsed.scheme == "http" and parsed.hostname in {"localhost", "127.0.0.1", "::1"}):
+        raise ValueError("Use HTTPS for remote models or HTTP on loopback for a local server.")
+    if not parsed.hostname: raise ValueError("Model endpoint requires a hostname.")
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None  # Never forward a bearer credential to another endpoint.
+
+
+def _urlopen(request, timeout):
+    return urllib.request.build_opener(_NoRedirect()).open(request, timeout=timeout)
+
+
+def _headers():
+    key = os.environ.get("CAERNESS_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    return {"Content-Type": "application/json", **({"Authorization": "Bearer " + key} if key else {})}
+
+
 def _post_json(url: str, payload: dict[str, Any], timeout: int) -> dict[str, Any]:
+    _validate_endpoint(url)
     request = urllib.request.Request(
         url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers=_headers(),
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        with _urlopen(request, timeout) as response:
             body = response.read().decode("utf-8")
-    except urllib.error.URLError as exc:
-        raise ConnectionError(f"Local model endpoint unavailable: {exc}") from exc
+    except urllib.error.HTTPError as exc:
+        raise ConnectionError(f"Model service returned HTTP {exc.code}; check credentials, model access and endpoint configuration.") from None
+    except (urllib.error.URLError, TimeoutError, OSError):
+        raise ConnectionError("Model service could not be reached or timed out. Check endpoint and connectivity.") from None
     data = json.loads(body)
     if not isinstance(data, dict):
         raise ValueError("Local model returned non-object JSON.")
@@ -77,6 +116,7 @@ def local_health(conn: sqlite3.Connection) -> dict[str, Any]:
 
     endpoint = str(cfg["local_endpoint"])
     timeout = min(5, int(cfg["local_timeout_seconds"]))
+    _validate_endpoint(endpoint)
     candidates: list[str] = []
     if cfg["local_backend"] == "openai_compatible":
         base = endpoint.split("/v1/chat/completions")[0].rstrip("/")
@@ -88,8 +128,8 @@ def local_health(conn: sqlite3.Connection) -> dict[str, Any]:
     last_error = ""
     for url in candidates:
         try:
-            req = urllib.request.Request(url, method="GET")
-            with urllib.request.urlopen(req, timeout=timeout) as response:
+            req = urllib.request.Request(url, headers=_headers(), method="GET")
+            with _urlopen(req, timeout) as response:
                 if 200 <= response.status < 300:
                     return {
                         "ok": True,
@@ -99,7 +139,7 @@ def local_health(conn: sqlite3.Connection) -> dict[str, Any]:
                         "model": cfg["local_model"],
                     }
         except Exception as exc:  # diagnostics only
-            last_error = str(exc)
+            last_error = f"HTTP {exc.code}" if isinstance(exc, urllib.error.HTTPError) else "Model service could not be reached."
     return {
         "ok": False,
         "status": "unavailable",
@@ -127,6 +167,7 @@ def chat_local(
     timeout = int(cfg["local_timeout_seconds"])
     max_tokens = int(max_tokens or cfg["local_max_output_tokens"])
 
+    started = time.perf_counter()
     if backend == "openai_compatible":
         payload: dict[str, Any] = {
             "model": model,
@@ -151,6 +192,7 @@ def chat_local(
             prompt_tokens=usage.get("prompt_tokens"),
             completion_tokens=usage.get("completion_tokens"),
             raw=data,
+            latency_seconds=round(time.perf_counter() - started, 4),
         )
 
     if backend == "ollama_native":
@@ -174,6 +216,7 @@ def chat_local(
             prompt_tokens=data.get("prompt_eval_count"),
             completion_tokens=data.get("eval_count"),
             raw=data,
+            latency_seconds=round(time.perf_counter() - started, 4),
         )
 
     raise ValueError(f"Unsupported local backend: {backend}")
