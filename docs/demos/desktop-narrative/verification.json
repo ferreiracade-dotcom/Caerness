@@ -60,5 +60,19 @@
   "windows_cmd_execution": "Not tested on Windows; Linux host. Command paths/flow and Python launcher validated as applicable.",
   "model_adapter": "Existing OpenAI-compatible adapter retained; no new provider or scripted gameplay demonstration",
   "planning_simulation": "Unchanged; previous active-plan evidence remains relevant",
-  "reading_fixtures": "Labelled authored Bible excerpts only; no invented AI prose or world outcomes."
+  "reading_fixtures": "Labelled authored Bible excerpts only; no invented AI prose or world outcomes.",
+  "implementation_revision": "d14261c1814ef0e81a544a53b4a8749e764bf2fb",
+  "package": {
+    "source_revision": "d14261c1814ef0e81a544a53b4a8749e764bf2fb",
+    "file": "caerness-desktop.zip",
+    "sha256": "43718c56ee66ebc393e3c16e47ecbcac80ee715eaa01316f57cdcaa408c1c4ae",
+    "bytes": 14063739,
+    "zip_integrity": "PASS",
+    "windows_cmd_line_endings": "CRLF in delivered ZIP",
+    "extracted_desktop_api_test": "PASS",
+    "extracted_launcher_probe": "PASS (correctly reports unavailable model)",
+    "save_path_with_spaces": "PASS",
+    "extracted_opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
+    "native_windows_execution": false
+  }
 }
