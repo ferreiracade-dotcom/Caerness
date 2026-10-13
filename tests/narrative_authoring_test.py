@@ -79,6 +79,15 @@ def main():
         assert c.execute('SELECT 1 FROM simulation_profiles WHERE actor_id=?',(teacher,)).fetchone()
         assert c.execute("SELECT 1 FROM goals WHERE actor_id=? AND status='active'",(teacher,)).fetchone()
         assert c.execute('SELECT 1 FROM institution_profiles WHERE actor_id=?',(school,)).fetchone()
+        assert c.execute('SELECT founded_day FROM institution_profiles WHERE actor_id=?',(school,)).fetchone()[0]==-5*365
+        formation_core=json.loads(c.execute("SELECT core_json FROM continuity_cores WHERE entity_kind='institution' AND entity_id=? AND core_type='general'",(school,)).fetchone()[0])
+        assert formation_core['preexisting_before_crystallization'] is True
+        membership=c.execute('SELECT membership_kind,provenance_json,metadata_json FROM institution_memberships WHERE institution_actor_id=? AND member_actor_id=?',(school,teacher)).fetchone()
+        assert membership['membership_kind']=='existing_member'
+        assert 'pre-existing organization crystallization' in json.loads(membership['provenance_json'])
+        assert json.loads(membership['metadata_json'])['preexisting'] is True
+        formation=json.loads(c.execute("SELECT detail_json FROM organization_lifecycle_events WHERE institution_actor_id=? AND event_type='formation'",(school,)).fetchone()[0])
+        assert formation['preexisting'] is True
         assert c.execute("SELECT 1 FROM goals WHERE actor_id=? AND status='active'",(school,)).fetchone()
         from engine.opportunity import institution_decision_actor
         assert institution_decision_actor(c,school)==teacher and institution_decision_actor(c,school)!=owner

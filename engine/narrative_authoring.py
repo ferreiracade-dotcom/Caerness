@@ -181,7 +181,7 @@ def _persist(c,owner,spec,authorship=None):
             from .resolution_controller import create_institution_candidate, update_institution_candidate, crystallize_institution_candidate
             leader=aid(e['leader_ref'])
             candidate=create_institution_candidate(c,e['subtype'],location_id=e['location_id'],proposed_name=e['name'],participants=[leader],
-                resources={'preexisting_organisation':True},evidence=[{'kind':'validated_campaign_authorship','authorship_id':authorship,'history':e['background'],'independent_goal':e['independent_goal']}])
+                resources={'preexisting_organization':True},evidence=[{'kind':'validated_campaign_authorship','authorship_id':authorship,'history':e['background'],'independent_goal':e['independent_goal']}])
             status=update_institution_candidate(c,candidate,significance_score=40)
             if status['status']!='eligible':raise ValueError('This institutional category needs additional native formation evidence; no successful institution was invented.')
             entity=crystallize_institution_candidate(c,candidate)
