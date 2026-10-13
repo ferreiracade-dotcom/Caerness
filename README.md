@@ -1,15 +1,23 @@
-# Caerness v0.60.0 — CURRENT DEVELOPMENT HANDOFF
+# Caerness — a life in a living world
 
-**Package state:** Schema 108 / WORLDHIST-01A Stage 2 + opening history, mortality and cultivation realism  
-**Engine version:** 0.60.0  
-**Live development database:** `data/caerness.db`  
-**Live story day:** 0  
-**Current code checkpoint:** `58ee22291d34bb1da59db951ca14dae233e71e8d`  
-**Current World Bible:** `canon/world_bible_current.docx`  
-**Current opening-world seed:** `game/seeds/Caerness_Initial_World_State_Seed_v1_4.json`  
+A free-form AI narrative RPG for desktop/laptop browsers, with mobile-browser compatibility. The AI supplies conversation, reasoning and prose; the Python/SQLite simulation supplies authoritative continuity and consequences.
+
+**Play on Windows:** extract the desktop package and double-click **Play Caerness.cmd**. [Windows setup and model access](WINDOWS_PLAY.md) explains the one-time setup and hidden API-key prompt. A capable remote/OpenAI-compatible model is preferred; a small phone-local model is not required. Live gameplay quality is not yet accepted: a working model service must be connected and evaluated.
+
+**Current direction (13 October 2026):** narrative quality and enjoyable desktop play first; one responsive web client. 3D/Unreal is postponed indefinitely until the text game is genuinely enjoyable. PR #5 and its PR #4/#3 dependencies are the starting point for the desktop branch. [Current desktop work and evidence](docs/plans/2026-10-13-desktop-narrative.md).
+
+## Simulation handoff (historical milestones below)
+
+**Package state:** Schema 108 / WORLDHIST-01A Stage 2 + opening history, mortality and cultivation realism
+**Engine version:** 0.60.0
+**Canonical opening database (never play/test in place):** `data/caerness.db`
+**Live story day:** 0
+**Historical simulation checkpoint:** `58ee22291d34bb1da59db951ca14dae233e71e8d`
+**Current World Bible:** `canon/world_bible_current.docx`
+**Current opening-world seed:** `game/seeds/Caerness_Initial_World_State_Seed_v1_4.json`
 **Status:** focused WORLDHIST-01A Stage 2 acceptance passed; Schema 107 adds review fixes and FAMILY-02 sex resolution; Schema 108 adds opening family life and relationships, canon-anchored named mortality, and Veinborn/training realism (see `WORLDHIST01A_SCHEMA108_OPENING_HISTORY_MORTALITY_CULTIVATION_2026-09-23.md`); fresh Schema-108 integrated ONEYEAR acceptance is still pending.
 
-> **Agents: read `AGENTS.md` first** — current status (PERF-01 in progress, POP-01 designed), owner rules and runbook.
+> **Agents: read `AGENTS.md` first** — current product priority, feature-stack dependencies, owner rules and runbook.
 
 This README is the authoritative engine handoff for anyone resuming development from this package. Older handoffs, acceptance reports and roadmaps remain in the repository as historical evidence, but **their schema numbers and “current” labels must not override this file**.
 
@@ -245,7 +253,7 @@ Major areas include:
 - `information.py`, `discovery.py`, `decision_runtime.py`, `decisions.py`, `agency.py`, `opportunity.py`, `seeking.py`, `service_fulfillment.py` — information-bounded agency and autonomous action;
 - `emergence.py`, `crystallization.py`, `attention.py`, `continuity.py` — resolution-tier movement, emergent importance, naming/crystallization and continuity;
 - `player.py`, `model_gateway.py`, `local_model.py`, `router.py`, `embodiment.py` — player camera, narration/model integration and interface mediation;
-- `mobile_runtime.py`, `mobile_server.py` — phone-first runtime support.
+- `mobile_runtime.py`, `mobile_server.py` — the shared desktop/mobile browser runtime (module names retained for compatibility).
 
 Do not create a second authority for a concept if an existing module already owns it. Several regressions in prior work came from two systems both trying to resolve the same death, succession, movement or consequence.
 
@@ -301,7 +309,7 @@ Load-bearing acceptance evidence for major gates. `acceptance_artifacts/README_C
 
 ### `mobile/`
 
-Phone-first browser UI/runtime assets: HTML, JavaScript, styles, manifest and service worker.
+Shared responsive desktop/mobile browser assets (directory name retained for compatibility): HTML, JavaScript, styles, manifest and service worker.
 
 ### `docs/`
 

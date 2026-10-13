@@ -11,6 +11,7 @@ def main():
  p=argparse.ArgumentParser(description=__doc__)
  p.add_argument('--save',default='game/narrative-session.db')
  p.add_argument('--endpoint');p.add_argument('--model');p.add_argument('--port',type=int,default=8765)
+ p.add_argument('--open-browser',action='store_true',help='Open the local game in your default desktop browser.')
  p.add_argument('--configure',action='store_true',help='Simple endpoint/model setup with a hidden key prompt; no key written to disk.')
  p.add_argument('--probe',action='store_true',help='Check model connectivity; does not claim actual gameplay.')
  a=p.parse_args()
@@ -43,5 +44,8 @@ def main():
  print('Campaign save:',save)
  print('API credentials are read from CAERNESS_MODEL_API_KEY or OPENAI_API_KEY; never stored in the save.')
  from engine.mobile_server import serve
- serve(port=a.port)
+ if a.open_browser:
+  import webbrowser
+  serve(port=a.port,on_ready=lambda:webbrowser.open_new_tab(f'http://127.0.0.1:{a.port}'))
+ else:serve(port=a.port)
 if __name__=='__main__':main()

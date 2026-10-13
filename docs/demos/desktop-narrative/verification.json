@@ -1,0 +1,64 @@
+{
+  "base_pr5_revision": "0409086c166ce23bad3aac46ed3c65b09174cf28",
+  "regression": {
+    "pass": 131,
+    "fail": 0,
+    "timeouts": 0,
+    "summed_seconds": 399.8
+  },
+  "focused_after_setup_fix": {
+    "pass": 4,
+    "fail": 0,
+    "timeouts": 0,
+    "summed_seconds": 7.0
+  },
+  "browser": {
+    "viewports": [
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "horizontal_overflow": false,
+        "input_visible": true,
+        "notebook_and_settings_accessible": true
+      },
+      {
+        "viewport": [
+          1920,
+          1080
+        ],
+        "horizontal_overflow": false,
+        "input_visible": true,
+        "notebook_and_settings_accessible": true
+      },
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "horizontal_overflow": false,
+        "input_visible": true,
+        "notebook_and_settings_accessible": true
+      }
+    ],
+    "first_time_existing_character_selection": true,
+    "older_than_five_conversations_resumable": true,
+    "keyboard_enter_shift_enter_ctrl_k_alt_tabs_escape": true,
+    "real_unavailable_model_message_saved": true,
+    "safe_prose_formatting": true,
+    "incomplete_decision_cannot_approve": true,
+    "javascript_errors": [],
+    "screenshot_content": "Labelled authored World Bible reference fixture; not a live-model transcript or gameplay demonstration."
+  },
+  "opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
+  "world_bible_sha256": "45947d046f816a95d118167e03a7d24872867b1521eb1a9414c5fe4349d995e3",
+  "canonical_changes": false,
+  "real_model_gameplay": "BLOCKED: no API credentials, remote binding or reachable local service",
+  "literary_quality": "NOT EVALUATED; no runtime-model reply",
+  "model_generation_latency": "NOT MEASURABLE; no runtime-model reply",
+  "windows_cmd_execution": "Not tested on Windows; Linux host. Command paths/flow and Python launcher validated as applicable.",
+  "model_adapter": "Existing OpenAI-compatible adapter retained; no new provider or scripted gameplay demonstration",
+  "planning_simulation": "Unchanged; previous active-plan evidence remains relevant",
+  "reading_fixtures": "Labelled authored Bible excerpts only; no invented AI prose or world outcomes."
+}

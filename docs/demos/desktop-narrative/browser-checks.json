@@ -1,0 +1,39 @@
+{
+  "viewports": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "horizontal_overflow": false,
+      "input_visible": true,
+      "notebook_and_settings_accessible": true
+    },
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "horizontal_overflow": false,
+      "input_visible": true,
+      "notebook_and_settings_accessible": true
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "horizontal_overflow": false,
+      "input_visible": true,
+      "notebook_and_settings_accessible": true
+    }
+  ],
+  "first_time_existing_character_selection": true,
+  "older_than_five_conversations_resumable": true,
+  "keyboard_enter_shift_enter_ctrl_k_alt_tabs_escape": true,
+  "real_unavailable_model_message_saved": true,
+  "safe_prose_formatting": true,
+  "incomplete_decision_cannot_approve": true,
+  "javascript_errors": [],
+  "screenshot_content": "Labelled authored World Bible reference fixture; not a live-model transcript or gameplay demonstration."
+}

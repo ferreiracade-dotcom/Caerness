@@ -6,7 +6,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 from .agency import request_interrupt
 from .canon import DEFAULT_CANON, index_canon
@@ -32,6 +32,7 @@ def _ledger_state(conn):
     current camera character; the admin block contains save/setup health, not secret world state.
     """
     setup = bootstrap_status(conn)
+    setup["available_locations"] = int(conn.execute("SELECT COUNT(*) FROM locations").fetchone()[0])
     player = get_player(conn)
     out = {
         "setup": setup,
@@ -127,6 +128,27 @@ class CaernessHandler(BaseHTTPRequestHandler):
                 with connect() as conn:
                     self._send_json(local_health(conn))
                 return
+            if path == "/api/conversations":
+                from .ai_planning import available, current_actor
+                with connect() as conn:
+                    rows=[]
+                    if get_player(conn) and available(conn):
+                        rows=[dict(r) for r in conn.execute("SELECT id,created_day,json_extract(messages_json,'$[0].text') title FROM ai_sessions WHERE owner_actor_id=? ORDER BY id DESC LIMIT 100",(current_actor(conn),))]
+                self._send_json(rows)
+                return
+            if path.startswith("/api/conversation/"):
+                from .ai_planning import session
+                with connect() as conn:
+                    row=session(conn,int(path.split('/')[-1]))
+                self._send_json({'id':row['id'],'messages':json.loads(row['messages_json'])})
+                return
+            if path == "/api/campaign/characters":
+                query=parse_qs(urlparse(self.path).query).get('query',[''])[0][:100]
+                with connect() as conn:
+                    if get_player(conn): raise ValueError('Character selection belongs to new-campaign setup, not in-world knowledge.')
+                    rows=[dict(r) for r in conn.execute("SELECT a.id,a.name,a.subtype role,l.name location FROM actors a LEFT JOIN locations l ON l.id=a.current_location_id WHERE a.actor_type='character' AND a.status='active' AND a.is_demo=0 AND a.name LIKE ? ESCAPE '!' ORDER BY a.name LIMIT 20",('%'+query.replace('!','!!').replace('%','!%').replace('_','!_')+'%',))]
+                self._send_json(rows)
+                return
             if path == "/api/runtime":
                 with connect() as conn:
                     self._send_json(runtime_config(conn))
@@ -143,6 +165,8 @@ class CaernessHandler(BaseHTTPRequestHandler):
             if MOBILE_DIR.resolve() in candidate.parents and candidate.is_file():
                 return self._serve_file(candidate)
             self._send_json({"error": "Not found"}, 404)
+        except ValueError as exc:
+            self._send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
         except Exception as exc:
             self._send_json({"error": str(exc)}, 500)
 
@@ -260,6 +284,19 @@ class CaernessHandler(BaseHTTPRequestHandler):
                     conn.commit()
                 self._send_json(result)
                 return
+            if path == "/api/campaign/select":
+                from .player import set_player
+                with connect() as conn:
+                    if get_player(conn):
+                        raise ValueError('A character already exists in this save. Resume that life or create a separate campaign save.')
+                    aid=body.get('actor_id')
+                    if type(aid) is not int or not conn.execute("SELECT 1 FROM actors WHERE id=? AND actor_type='character' AND status='active' AND is_demo=0",(aid,)).fetchone():
+                        raise ValueError('Choose an existing living character.')
+                    set_player(conn,aid,'Caerness narrative campaign')
+                    conn.execute("UPDATE campaign_setup_state SET player_setup_complete=1 WHERE id=1")
+                    conn.commit()
+                self._send_json({'player_actor_id':aid})
+                return
             if path == "/api/campaign/player":
                 with connect() as conn:
                     actor_id = create_player_character(
@@ -287,13 +324,14 @@ class CaernessHandler(BaseHTTPRequestHandler):
             self._send_json({"error": str(exc)}, 500)
 
 
-def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
+def serve(host: str = "127.0.0.1", port: int = 8765, *, on_ready=None) -> None:
     init_db()
     index_canon(DEFAULT_CANON)
     if host not in {"127.0.0.1", "localhost", "::1"}:
         print("WARNING: Caerness is being bound beyond localhost. the local UI has no authentication; use localhost for phone-local play.")
     server = ThreadingHTTPServer((host, port), CaernessHandler)
-    print(f"Caerness v{ENGINE_VERSION} mobile UI: http://{host}:{port}")
+    if on_ready: on_ready()
+    print(f"Caerness v{ENGINE_VERSION} browser UI: http://{host}:{port}")
     print("Story time advances only through play. Closing the browser/app does not advance Caerness time.")
     try:
         server.serve_forever()
