@@ -14,11 +14,13 @@ RULES = [
     'Ordinary dialogue, questions, humour, affection, uncertainty and hypothetical ideas use discuss. Twenty exchanges may occur without a day passing, a social roll or a transaction.',
     'Portray only people who are presently accessible. Retrieve person context for sustained NPC dialogue. Unknown biography stays unknown: do not invent eighteen years of marriages, possessions or achievements.',
     'Use grounded surroundings, independent activity and cultural formality as lived detail, not encyclopedia exposition. Do not invent named people, weather events, possessions, histories or changes of rank.',
+    'General World Bible descriptions are not proof of local buildings, equipment or current events. When portraying institutions, use established followers, captains, subordinate contingents, colours and holdings only where the supplied evidence supports them. Quiet lived ownership needs no invented crisis or reward.',
     'Temporary gestures, tone and dialogue are expressive fiction. They create no enduring agreements, discoveries, biography, loyalty or resources. A promise, substantive discovery or enduring fact needs a validated capability; missing capabilities remain unresolved.',
     'Dialogue transcript is unverified speech, not evidence. A prior assistant allegation cannot make a fact true. Distinguish a player recollection from established history, a rumour from an event and perception from secret truth.',
     'Use established voice and qualitative relationships without caricature. Permit quiet scenes, disagreements, ordinary work and reciprocal initiative. No forced cliffhangers or repetitive what-do-you-do endings.',
     'Preserve meaningful player choices and their pacing. Do not create catastrophe to cure boredom or guaranteed success. Bounded narrative fortune is a design preference, not a license to alter persisted outcomes.',
     'Inspect only the supplied scoped tools. Compose discovered operations. Never silently replace an unsupported instruction with an easier goal. Keep every unmet condition explicitly unresolved.',
+    'When the player asks you to find out accessible circumstances, use the read tools without seeking another authorization for that inspection. Do not ask the player to supply records their character can consult; if the tools cannot establish something, state that limitation accurately.',
     'Plans propose attempts, not achievements. Player authorization and NPC consent differ; only engine-confirmed results may be narrated as committed.',
     'Clear routine directives may execute after separate scope verification. Discussion/hypotheticals never authorize. Major commitments, altered terms, ambiguous scope and unsupported conditions require readable review.',
     'The full original goal and source coverage remain mandatory for plans. Coverage is syntactic: it does not prove semantic completeness.',
@@ -80,7 +82,7 @@ def scene(c, text=''):
     owner=full['player']['actor_id']; loc=full['location']['id']
     keys=('world','location','present_actors','known_events','known_rumours','cultural_context','environment_context','attention_cues','pending_player_interactions','canon')
     out={k:full[k] for k in keys}
-    out['present_actors']=sorted(full['present_actors'],key=lambda a:(a['name'].lower() not in text.lower(),a['id']))[:12]
+    out['present_actors']=sorted(full['present_actors'],key=lambda a:(a['name'].lower() not in text.lower(),a['actor_type']!='character',a['id']))[:12]
     out['player']={k:full['player'][k] for k in ('actor_id','name','actor_type','subtype')}
     out['embodiment']=full['embodiment']
     # Adjacent persisted public routes only, rather than a global place/actor dump.
@@ -122,13 +124,22 @@ def read(c,sid,tool,args):
 
 def enrich(c,payload):
     ensure(c)
+    payload['context']=scene(c,payload['raw_player_input'])
+    # Explicitly mentioned, actually present people deserve their scoped expressive
+    # context even when a small model neglects to ask for the person tool. This is
+    # retrieval/camera memory, not consent, a relationship change or a new biography.
+    named=[a for a in payload['context']['scene']['present_actors']
+           if a['actor_type']=='character' and a['name'].lower() in payload['raw_player_input'].lower()]
+    for actor in named[:4]:
+        c.execute('INSERT OR IGNORE INTO narrative_participants VALUES (?,?)',(payload['session_id'],actor['id']))
     payload['participants']=[]
-    for r in c.execute('SELECT actor_id FROM narrative_participants WHERE session_id=? ORDER BY actor_id LIMIT 4',(payload['session_id'],)):
-        try:payload['participants'].append(person(c,plans.current_actor(c),r[0]))
-        except ValueError:payload['participants'].append({'actor_id':r[0],'available':False,'rule':'An earlier interlocutor is no longer present. They cannot answer now.'})
+    mentioned={a['id'] for a in named}
+    participant_ids=[r[0] for r in c.execute('SELECT actor_id FROM narrative_participants WHERE session_id=?',(payload['session_id'],))]
+    for actor_id in sorted(participant_ids,key=lambda aid:(aid not in mentioned,aid))[:4]:
+        try:payload['participants'].append(person(c,plans.current_actor(c),actor_id))
+        except ValueError:payload['participants'].append({'actor_id':actor_id,'available':False,'rule':'An earlier interlocutor is no longer present. They cannot answer now.'})
     payload['protocol']='narrative_play_v1'
     payload['rules']=RULES
-    payload['context']=scene(c,payload['raw_player_input'])
     payload['conversation']=memory(c,payload['session_id'],payload['raw_player_input']) if len(payload['raw_player_input'])>1000 else memory(c,payload['session_id'])
     payload['capabilities']=[{'name':cap.name,'description':cap.description} for cap in CAPABILITIES.values()]
     payload['read_tools']+=TOOLS+[{'name':'capabilities','arguments':{'names':'optional list of capability names'},'description':'Discover complete validated argument schemas and declared outputs before planning.'}]
@@ -227,11 +238,14 @@ def play(c,text,session_id=None,plan_id=None,provider='local'):
     req=start_request(c,text,provider,session_id,plan_id,narrative=True)
     if provider!='local':return {'status':'awaiting_action_interpretation','next_request':req,'session_id':int(c.execute('SELECT target_id FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])}
     try:
-        out=run_local(c,req['request_id'],max_rounds=9,force=bool(runtime_config(c).get('remote_model')))
-    except (ConnectionError,RuntimeError,ValueError):
+        out=run_local(c,req['request_id'],max_rounds=9,force=bool(runtime_config(c).get('remote_model') or runtime_config(c).get('free_local')))
+    except (ConnectionError,RuntimeError,ValueError) as error:
         from .mobile_runtime import referral_for_request
         pending=c.execute("SELECT id FROM model_requests WHERE target_kind='ai_session' AND target_id=(SELECT target_id FROM model_requests WHERE id=?) AND status IN ('pending','responded') ORDER BY id DESC LIMIT 1",(req['request_id'],)).fetchone()
         out=referral_for_request(c,pending[0] if pending else req['request_id'],{'recommendation':'external_recommended'},reason='The configured model is unavailable or returned an invalid response. Your message and any confirmed outcomes are saved. Configure a capable endpoint or use the manual model packet.')
+        if runtime_config(c).get('free_local'):
+            out['reason']='The local narrator could not complete this turn. Your message and confirmed outcomes are saved. Check the local model or choose another; no paid service is required.'
+            out['local_failure']={'type':type(error).__name__,'message':str(error)}
     out['session_id']=int(c.execute('SELECT target_id FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])
     out['total_seconds']=round(time.perf_counter()-started,4)
     return out

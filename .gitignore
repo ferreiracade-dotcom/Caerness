@@ -10,3 +10,4 @@ runs_*.log
 .venv/
 game/narrative-session.db
 game/narrative_packets/
+game/local-inference-check.json

@@ -50,7 +50,8 @@ These PERF/POP next steps are deferred behind the playable narrative milestone. 
 - Model circumstances by **actual means and access**, never by a group label (not all underworld or remote people are poor).
 - No recognized same-sex household unions (judged too common/unaccepted); Veinborn ≠ cultivator; aptitudes are bell-shaped; groups marry at different, canon-grounded rates.
 - **Named characters get no special treatment**: same rules at every tier (POP-01).
-- **Desktop-first, mobile-compatible narrative play**: one browser client and authoritative Python/SQLite engine. Prefer a capable remote/OpenAI-compatible model; local inference is optional. No OnePlus, CPU-only or 3–4B model requirement. Measure model latency separately from simulation time. Never end a narration node on a bare "continue" when nothing needs the player. Keep model settings and diagnostics out of the main story.
+- **Desktop-first, mobile-compatible, free local narrative play**: one browser client and authoritative Python/SQLite engine. Default to Ollama through the existing OpenAI-compatible gateway; support LM Studio for comparison. No mandatory cloud inference, subscription, API key or token charges. Detect RAM/GPU/dedicated VRAM, explain model sizes and obtain explicit permission before downloads. Recommend hardware-sized candidates, never claim a model is best without genuine gameplay evidence. No OnePlus, CPU-only or 3–4B requirement. Measure model latency separately from simulation time. Keep settings and diagnostics out of the main story.
+- **Institutional presence matters:** portray established organisations, exceptional followers, captains and their subordinate contingents, distinctive colours, held fortresses and ceremonial assemblies through knowledge-safe prose grounded in actual world state. Ownership, hierarchy and independent development can be satisfying without a battle or quest reward. Missing arrangements remain missing; do not invent loyalty, uniforms, troops or history, or add request-specific handlers. See `docs/plans/2026-10-13-loyal-forces-narrative-acceptance.md`.
 - Don't trust README/acceptance claims: verify with data. Systems that "never happen" are usually silently disconnected (check graph reachability, join keys, endpoints) before tuning rates.
 - Commit and push when the owner asks; use branches for feature work.
 
@@ -61,7 +62,7 @@ PC interpreter used so far: `"$LOCALAPPDATA/Programs/Python/Python313/python.exe
 | Task | Command |
 |---|---|
 | Windows play | Double-click `Play Caerness.cmd`; see `WINDOWS_PLAY.md` |
-| Browser play | `python tools/narrative_play.py --configure --open-browser` (separate campaign save) |
+| Browser play | `python tools/narrative_play.py --local --open-browser` (separate campaign save; consent before downloads) |
 | Full isolated regression suite | `python tools/run_suite.py --out runs/suite` then `git restore game/campaign_01/model_requests/` (tests rewrite those files) |
 | One test | `CAERNESS_DB_PATH=/tmp/x.db PYTHONPATH=. python tests/<name>.py` |
 | Multi-year run with speed and size per checkpoint | `python tools/run_years.py --days 1095 --out runs/<name>` |

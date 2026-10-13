@@ -1,5 +1,10 @@
 # Caerness Engine v0.6 — ChatGPT / Claude Bridge Quickstart
 
+**Historical manual-bridge instructions.** Current desktop play uses free local
+Ollama/LM Studio through the existing gateway; follow [WINDOWS_PLAY.md](WINDOWS_PLAY.md).
+The reset/demo commands below describe an older development workflow, not setup for
+the packaged opening or a played campaign. The free-local launcher uses a save copy.
+
 v0.6 is deliberately **API-optional**. You can use a normal ChatGPT or Claude chat as the high-quality model layer without paying for API calls.
 
 The engine remains authoritative. ChatGPT/Claude receive bounded packets and return structured responses. They do not own the database, world clock, hidden state, or canon.

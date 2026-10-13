@@ -180,6 +180,8 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
     if provider not in PROVIDERS:
         raise ValueError(f"Unsupported provider: {provider}")
     label = _provider_label(provider)
+    # Keep human review packets readable; local inference need not tokenize indentation.
+    json_options = {"ensure_ascii": False, **({"separators": (",", ":")} if provider == "local" else {"indent": 2})}
     contract = _task_contract(task_type, request_id)
     rules = _common_rules(task_type)
     if payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"}:
@@ -201,7 +203,7 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
         "",
         "## Task packet",
         "```json",
-        json.dumps(payload, indent=2, ensure_ascii=False, default=str),
+        json.dumps(payload, default=str, **json_options),
         "```",
         "",
         "## Required response contract",
@@ -209,7 +211,7 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
         "The engine is tolerant of fences if the chat UI adds them, but raw JSON is preferred.",
         "",
         "```json",
-        json.dumps(contract, indent=2, ensure_ascii=False),
+        json.dumps(contract, **json_options),
         "```",
         "",
         "Do not add fields that try to directly mutate the database.",
@@ -636,7 +638,7 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
         target_kind=str(row["target_kind"]) if row["target_kind"] is not None else None,
         target_id=int(row["target_id"]) if row["target_id"] is not None else None,
     )
-    if assessment.recommendation in {"external_recommended", "external_strongly_recommended"} and not force and not runtime_config(conn).get("remote_model"):
+    if assessment.recommendation in {"external_recommended", "external_strongly_recommended"} and not force and not (runtime_config(conn).get("remote_model") or runtime_config(conn).get("free_local")):
         chatgpt_path = export_request(conn, request_id, provider="chatgpt")
         claude_path = export_request(conn, request_id, provider="claude")
         return {
@@ -665,6 +667,10 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
         }
     else:
         contract_packet = render_packet("local", request_id, str(row["task_type"]), payload)
+        schema = None
+        if runtime_config(conn).get("free_local") and payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"}:
+            from .planning_gateway import response_schema
+            schema = response_schema(request_id, payload)
         result = chat_local(
             conn,
             [
@@ -672,6 +678,7 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
                 {"role": "user", "content": contract_packet},
             ],
             require_json=True,
+            response_schema=schema,
         )
         conn.execute('CREATE TABLE IF NOT EXISTS ai_model_calls(id INTEGER PRIMARY KEY,request_id INTEGER,backend TEXT,model TEXT,latency_seconds REAL,prompt_tokens INTEGER,completion_tokens INTEGER)')
         conn.execute('INSERT INTO ai_model_calls(request_id,backend,model,latency_seconds,prompt_tokens,completion_tokens) VALUES (?,?,?,?,?,?)',(request_id,result.backend,result.model,result.latency_seconds,result.prompt_tokens,result.completion_tokens))

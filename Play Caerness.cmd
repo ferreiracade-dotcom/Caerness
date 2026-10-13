@@ -19,7 +19,7 @@ if errorlevel 1 goto setup_failed
 echo Keep this window open while you play. Close it to stop the game.
 echo Your campaign is saved separately from the starting world.
 echo.
-".venv\Scripts\python.exe" tools\narrative_play.py --configure --open-browser
+".venv\Scripts\python.exe" tools\narrative_play.py --local --open-browser %*
 if errorlevel 1 goto setup_failed
 exit /b 0
 :no_python
@@ -30,6 +30,6 @@ exit /b 1
 :setup_failed
 echo.
 echo The game could not start. Read the message above for the missing requirement.
-echo Your API key is not saved. Your campaign, if created, remains in game\narrative-session.db.
+echo Your campaign remains in game\narrative-session.db. No paid account or API key is required.
 pause
 exit /b 1

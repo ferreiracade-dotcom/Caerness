@@ -24,6 +24,40 @@ def contract(request_id):
     }}
 
 
+def response_schema(request_id, payload):
+    """Syntax for the existing protocol, dynamically scoped to advertised tools/operations.
+
+    Grammar constrains shape, never consent, source coverage or feasibility. Those
+    remain independently checked by the existing engine executors and scope review.
+    """
+    def obj(properties, required=None):
+        return {'type':'object','properties':properties,'required':required or list(properties),'additionalProperties':False}
+    def array(items, **limits): return {'type':'array','items':items,**limits}
+    string={'type':'string'}
+    span=obj({'start':{'type':'integer','minimum':0},'end':{'type':'integer','minimum':0}})
+    if payload.get('protocol')=='narrative_scope_v1':
+        proposal=obj({'authorized':{'type':'boolean'},'complete':{'type':'boolean'},
+            'evidence':array(span),'omissions':array(string),'reason':string})
+    else:
+        tools=[t['name'] for t in payload.get('read_tools',[]) if t.get('name')]
+        operations=[t['name'] for t in payload.get('capabilities',[]) if t.get('name')]
+        # Arguments remain engine-validated against dynamically discoverable domain
+        # schemas; a syntactically valid arbitrary object has no mutation authority.
+        arguments={'type':'object','additionalProperties':True}
+        call=obj({'tool':{'type':'string','enum':tools},'arguments':arguments})
+        step=obj({'id':string,'operation':{'type':'string','enum':operations},'arguments':arguments,'depends_on':array(string)})
+        coverage=obj({'start':{'type':'integer','minimum':0},'end':{'type':'integer','minimum':0},
+            'handling':{'type':'string','enum':['planned','unresolved','context']},'step_ids':array(string)})
+        plan=obj({'source_text':string,'summary':string,'coverage':array(coverage),'unresolved':array(string),'steps':array(step)})
+        discussion=obj({'mode':{'type':'string','enum':['discuss','clarify']},'text':{'type':'string','minLength':1}})
+        modes=[discussion]
+        if payload.get('phase')!='consequences':
+            if tools:modes.append(obj({'mode':{'const':'inspect'},'calls':array(call,minItems=1,maxItems=8)}))
+            if operations:modes.append(obj({'mode':{'const':'plan'},'plan':plan}))
+        proposal={'anyOf':modes}
+    return obj({'task_type':{'const':'action_interpretation'},'request_id':{'const':request_id},'proposal':proposal})
+
+
 def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, feedback=None, record_input=True, rounds=0, goal_override=None, narrative=False):
     from .model_gateway import create_request
     s=plans.session(c,session_id); sid=s['id']

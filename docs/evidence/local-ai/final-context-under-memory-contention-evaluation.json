@@ -1,0 +1,91 @@
+{
+  "real_model_available": true,
+  "model": "caerness-diagnostic-4b",
+  "health": {
+    "ok": true,
+    "status": "available",
+    "backend": "openai_compatible",
+    "endpoint": "http://127.0.0.1:11434/v1/chat/completions",
+    "model": "caerness-diagnostic-4b"
+  },
+  "pair": {
+    "owner": 122,
+    "owner_name": "Robert Baird",
+    "npc": 641,
+    "npc_name": "Petra Fenn",
+    "started_day": -28411
+  },
+  "opening_sha256": "b6a32c0727ab8d7595872aac1d643bd81fd4a78bde4fa9bcd272e3a9197438b7",
+  "gates": {
+    "A": {
+      "status": "BLOCKED",
+      "turns": 1,
+      "required_turns": 20
+    },
+    "B": {
+      "status": "NOT_RUN"
+    },
+    "C": {
+      "status": "NOT_RUN"
+    },
+    "D": {
+      "status": "NOT_RUN"
+    }
+  },
+  "scripted_responses": false,
+  "hardware": {
+    "system": "Linux",
+    "ram_gib": 8.0,
+    "gpus": [],
+    "cpu_count": 3,
+    "disk_free_gib": 22.628963470458984,
+    "model_disk": "/home/agent/.ollama",
+    "warnings": []
+  },
+  "ollama_version": {
+    "version": "0.40.3"
+  },
+  "model_details": {
+    "parent_model": "qwen3.5:4b-q4_K_M",
+    "format": "gguf",
+    "family": "qwen35",
+    "families": [
+      "qwen35"
+    ],
+    "parameter_size": "4.2B",
+    "quantization_level": "Q4_K_M",
+    "runner": "llamacpp"
+  },
+  "loaded_models": {
+    "models": [
+      {
+        "name": "caerness-diagnostic-4b:latest",
+        "model": "caerness-diagnostic-4b:latest",
+        "size": 3355422227,
+        "digest": "3a91e2f7bfd112f01bf5d3464467ec38b6000024c69ccb0d5aac03099ece8144",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "4.2B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-13T07:57:46.243999978Z",
+        "size_vram": 0,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "runtime_process_memory": [
+    {
+      "pid": 3924,
+      "name": "ollama",
+      "VmHWM": 82034688,
+      "VmRSS": 21663744
+    }
+  ]
+}

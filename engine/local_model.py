@@ -34,6 +34,11 @@ def runtime_config(conn: sqlite3.Connection) -> dict[str, Any]:
     if os.environ.get("CAERNESS_MODEL_ENDPOINT"): config["local_backend"] = "openai_compatible"
     config["remote_model"] = urlsplit(str(config["local_endpoint"])).hostname not in {"localhost", "127.0.0.1", "::1"}
     config["credential_available"] = bool(os.environ.get("CAERNESS_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY"))
+    config["free_local"] = config.get("device_profile") == "desktop_free_local"
+    if config["free_local"]:
+        if config["remote_model"] or 'cloud' in str(config["local_model"]).lower():
+            raise ValueError("Free local play requires a loopback server and a local model. Use explicit remote configuration to change this.")
+        config["credential_available"] = False
     return config
 
 
@@ -83,23 +88,27 @@ def _urlopen(request, timeout):
     return urllib.request.build_opener(_NoRedirect()).open(request, timeout=timeout)
 
 
-def _headers():
+def _headers(*, local_only=False):
+    if local_only or os.environ.get("CAERNESS_FREE_LOCAL") == "1":
+        return {"Content-Type": "application/json"}
     key = os.environ.get("CAERNESS_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY")
     return {"Content-Type": "application/json", **({"Authorization": "Bearer " + key} if key else {})}
 
 
-def _post_json(url: str, payload: dict[str, Any], timeout: int) -> dict[str, Any]:
+def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=False) -> dict[str, Any]:
     _validate_endpoint(url)
     request = urllib.request.Request(
         url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers=_headers(),
+        headers=_headers(local_only=local_only),
         method="POST",
     )
     try:
         with _urlopen(request, timeout) as response:
             body = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
+        if local_only:
+            raise ConnectionError(f"Local model service returned HTTP {exc.code}; check the installed model, runtime version and available memory. No API key is required.") from None
         raise ConnectionError(f"Model service returned HTTP {exc.code}; check credentials, model access and endpoint configuration.") from None
     except (urllib.error.URLError, TimeoutError, OSError):
         raise ConnectionError("Model service could not be reached or timed out. Check endpoint and connectivity.") from None
@@ -128,7 +137,7 @@ def local_health(conn: sqlite3.Connection) -> dict[str, Any]:
     last_error = ""
     for url in candidates:
         try:
-            req = urllib.request.Request(url, headers=_headers(), method="GET")
+            req = urllib.request.Request(url, headers=_headers(local_only=cfg.get("free_local", False)), method="GET")
             with _urlopen(req, timeout) as response:
                 if 200 <= response.status < 300:
                     return {
@@ -157,6 +166,7 @@ def chat_local(
     max_tokens: int | None = None,
     temperature: float = 0.65,
     require_json: bool = False,
+    response_schema: dict[str, Any] | None = None,
 ) -> LocalModelResult:
     cfg = runtime_config(conn)
     backend = str(cfg["local_backend"])
@@ -166,6 +176,13 @@ def chat_local(
     model = str(cfg["local_model"])
     timeout = int(cfg["local_timeout_seconds"])
     max_tokens = int(max_tokens or cfg["local_max_output_tokens"])
+    if cfg.get("free_local") and estimate_tokens(messages) + max_tokens > 8192:
+        raise ValueError("This request exceeds the configured 8K local context. No truncated interpretation was applied.")
+    if cfg.get("free_local") and urlsplit(endpoint).port == 11434:
+        parsed = urlsplit(endpoint)
+        info = _post_json(f"{parsed.scheme}://{parsed.netloc}/api/show", {"model": model}, min(timeout, 10), local_only=True)
+        if info.get("remote_model") or info.get("remote_host"):
+            raise ValueError("This model alias delegates to a cloud service; free local inference was not started.")
 
     started = time.perf_counter()
     if backend == "openai_compatible":
@@ -179,12 +196,19 @@ def chat_local(
         if require_json:
             # llama.cpp and several compatible servers accept this; servers that ignore it are still validated later.
             payload["response_format"] = {"type": "json_object"}
-        data = _post_json(endpoint, payload, timeout)
+        if response_schema is not None:
+            payload["response_format"] = {"type": "json_schema", "json_schema": {
+                "name": "caerness_response", "strict": True, "schema": response_schema}}
+        if cfg.get("free_local") and urlsplit(endpoint).port == 11434:
+            payload["reasoning_effort"] = "none"
+        data = _post_json(endpoint, payload, timeout, local_only=cfg.get("free_local", False))
         try:
             text = str(data["choices"][0]["message"]["content"])
         except Exception as exc:
             raise ValueError("OpenAI-compatible local response lacked choices[0].message.content") from exc
         usage = data.get("usage") or {}
+        if data["choices"][0].get("finish_reason") == "length":
+            raise ValueError("Model output reached its token limit; no incomplete response was applied.")
         return LocalModelResult(
             text=text,
             backend=backend,

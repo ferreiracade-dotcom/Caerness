@@ -53,6 +53,10 @@ def audit(c):
 
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--out',required=True);p.add_argument('--player');p.add_argument('--npc');p.add_argument('--approve-reviewed',action='store_true',help='Test-player approval of complete, displayed scopes; no approval of unresolved scopes.')
+ p.add_argument('--local',action='store_true',help='Use the configured local endpoint without paid-model referrals.')
+ p.add_argument('--gates',default='A,B,C,D',help='Comma-separated acceptance cases; omitted cases are NOT_RUN.')
+ p.add_argument('--conversation-turns',type=int,default=20,choices=range(1,21),metavar='1..20')
+ p.add_argument('--timeout',type=int,default=300,help='Per-model-call timeout, separate from engine timing.')
  a=p.parse_args();out=Path(a.out).resolve();out.mkdir(parents=True,exist_ok=True);save=out/'session.db'
  if save.exists():p.error('Use a fresh output directory to preserve prior evidence.')
  shutil.copy2(ROOT/'data/caerness.db',save);os.environ['CAERNESS_DB_PATH']=str(save)
@@ -65,12 +69,26 @@ def main():
  from engine.ai_planning import approve_plan
  init_db()
  with connect() as c:
+  if a.local:
+   from tools.local_ai import configure_save,hardware,api
+   os.environ['CAERNESS_FREE_LOCAL']='1'
+   endpoint=os.environ.get('CAERNESS_MODEL_ENDPOINT','http://127.0.0.1:11434/v1/chat/completions')
+   model=os.environ.get('CAERNESS_MODEL_NAME')
+   if not model:p.error('Select a loaded model with CAERNESS_MODEL_NAME, or use Test Local AI.cmd.')
+   configure_save(c,endpoint,model)
+   from engine.local_model import set_runtime_config
+   set_runtime_config(c,local_timeout_seconds=a.timeout)
   set_model_config(c,packet_dir=str(out/'packets'))
   row=c.execute("SELECT a.id owner,a.name owner_name,b.id npc,b.name npc_name,r.started_day FROM relationships r JOIN actors a ON a.id=r.actor_a_id JOIN actors b ON b.id=r.actor_b_id WHERE a.actor_type='character' AND b.actor_type='character' AND a.status='active' AND b.status='active' AND a.current_location_id=b.current_location_id AND r.familiarity>=50 AND (? IS NULL OR a.name=?) AND (? IS NULL OR b.name=?) ORDER BY r.started_day,a.id LIMIT 1",(a.player,a.player,a.npc,a.npc)).fetchone()
   if not row:p.error('No co-located established pair matches. Select a different existing player/NPC; do not invent a history.')
   set_player(c,row['owner'],'Live narrative evaluation');c.commit()
   health=local_health(c)
-  manifest={'real_model_available':health['ok'],'model':runtime_config(c)['local_model'],'health':health,'pair':dict(row),'opening_sha256':hashlib.sha256((ROOT/'data/caerness.db').read_bytes()).hexdigest(),'gates':{},'scripted_responses':False}
+  manifest={'real_model_available':health['ok'],'model':runtime_config(c)['local_model'],'health':health,'pair':dict(row),'opening_sha256':hashlib.sha256((ROOT/'data/caerness.db').read_bytes()).hexdigest(),'gates':{gate:{'status':'NOT_RUN'} for gate in ('A','B','C','D')},'scripted_responses':False}
+  if a.local:
+   manifest['hardware']=hardware()
+   if ':11434/' in endpoint:
+    manifest['ollama_version']=api('/api/version');manifest['model_details']=api('/api/show',{'model':model}).get('details')
+  (out/'evaluation.json').write_text(json.dumps(manifest,indent=2))
   if not health['ok']:
    # Try actual inference too: an arbitrary authenticated server might not support /models.
    result=play(c,'I pause to look around and consider starting a quiet conversation.')
@@ -81,7 +99,8 @@ def main():
     (out/'evaluation.json').write_text(json.dumps(manifest,indent=2));print(json.dumps(manifest,indent=2));return
    manifest['real_model_available']=True
   sid=None;transcript=[]
-  for gate,inputs in [('A',CONVERSATION),*OTHER.items()]:
+  for gate,inputs in [('A',CONVERSATION[:a.conversation_turns]),*OTHER.items()]:
+   if gate not in a.gates.split(','):continue
    records=[]
    for text in inputs:
     if gate=='A':text=f'To {row["npc_name"]}: '+text
@@ -97,10 +116,20 @@ def main():
     record['model_latency']=[dict(r) for r in c.execute('SELECT request_id,latency_seconds,prompt_tokens,completion_tokens FROM ai_model_calls WHERE request_id>? ORDER BY id',(first,))] if c.execute("SELECT 1 FROM sqlite_master WHERE name='ai_model_calls'").fetchone() else []
     records.append(record);transcript.append(record)
     (out/'transcript.json').write_text(json.dumps(transcript,indent=2))
+    manifest['gates'][gate]={'status':'IN_PROGRESS_NOT_ACCEPTED','turns':len(records),'required_turns':20 if gate=='A' else len(inputs)}
+    (out/'evaluation.json').write_text(json.dumps(manifest,indent=2))
     print(gate,result['status'],round(time.perf_counter()-start,2),flush=True)
     if result['status']=='external_recommended':break
-   manifest['gates'][gate]={'status':'RECORDED_REQUIRES_QUALITATIVE_REVIEW','turns':len(records)}
+   expected=20 if gate=='A' else len(inputs)
+   failed=any(r['result']['status']=='external_recommended' for r in records)
+   manifest['gates'][gate]={'status':'BLOCKED' if failed else ('INCOMPLETE' if len(records)<expected else 'RECORDED_REQUIRES_QUALITATIVE_REVIEW'),'turns':len(records),'required_turns':expected}
+   (out/'evaluation.json').write_text(json.dumps(manifest,indent=2))
   c.commit()
  (out/'evaluation.json').write_text(json.dumps(manifest,indent=2))
  with connect() as c:(out/'reload-state.json').write_text(json.dumps(audit(c),indent=2))
+ if a.local and ':11434/' in endpoint:
+  manifest['loaded_models']=api('/api/ps')
+  from tools.local_ai import process_memory
+  manifest['runtime_process_memory']=process_memory()
+  (out/'evaluation.json').write_text(json.dumps(manifest,indent=2))
 if __name__=='__main__':main()
