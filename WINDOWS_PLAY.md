@@ -52,6 +52,68 @@ Keep LM Studio running. Caerness does not automate or claim to verify its downlo
 - Close the game, then use **Change Local Model.cmd** to select another model. Your character, relationships and campaign remain intact.
 - Your save is **game/narrative-session.db**. Back it up while the game is stopped. The opening **data/caerness.db** stays untouched. Keep the extracted folder when updating. Real-world absence never advances game time.
 
+## Updating after the first Windows playtest
+
+1. Close Caerness and its launcher. Keep the old folder as a backup.
+2. Download and extract the updated branch ZIP into a **new** folder.
+3. Copy the old **game** folder into the new folder, retaining its files. This preserves
+   your campaign, pending responses, history and any SQLite journal files. Do not
+   delete files ending in `-wal` or `-shm`, and do not copy a running campaign.
+4. Launch **Play Caerness.cmd** in the new folder. Your installed model is reused;
+   there is no compulsory download or new campaign.
+5. Open **Settings → Advanced options & diagnostics → Retry unfinished response**.
+   This resumes the latest unfinished response in the selected conversation, rather
+   than sending your original action again. Completed requests are never replayed.
+
+Failures now distinguish timeout, unavailable service, invalid/incomplete output,
+context overflow, reported memory exhaustion and a failed/repeated continuation.
+The request ID and phase appear in diagnostics. **Copy Diagnostics** copies model
+settings, RAM/GPU/driver information, loaded Ollama GPU allocation and recent
+request counts/timings. It excludes dialogue, world facts, credentials, endpoints
+and personal folder paths. Paste this report into the review/chat when asking for help.
+Hardware collection can take a little while; no Python or SQLite commands are needed.
+
+The pause button stops at a safe boundary; an in-flight model call may still need
+to finish or time out. A received response can then be resumed without another
+model call. Confirmed actions and pending continuations are committed before the
+next slow call, so closing the launcher does not force already-completed actions
+to repeat.
+
+## GTX 1050 Ti / 16 GB RAM: realistic next test
+
+Your Windows installation worked. CPU-only **9B is not a practical default**: your
+test timed out, with roughly 205 seconds of prompt processing and 2.1 generated
+tokens/second. Keep the installed 4B for the software recovery check, but its
+storytelling/planning quality and CPU latency have **not** passed gameplay acceptance.
+The launcher no longer recommends 9B solely because it fits system RAM.
+
+Ollama's [current NVIDIA support documentation](https://docs.ollama.com/gpu) lists
+the GTX 1050 Ti (compute capability 6.1). It specifies driver **570 or newer** for
+capabilities 5.0–6.2. Check/install the latest compatible Windows driver using
+NVIDIA's official installer, restart Windows, then quit Ollama from its tray icon
+before launching Caerness. When starting a new Ollama server on NVIDIA Windows,
+Caerness defaults to **Vulkan disabled**, leaving CUDA available. It does not kill
+an existing server or silently override an explicit environment setting.
+
+Disabling Vulkan does **not** itself disable CUDA. Whether CUDA actually loads on
+your PC remains to be verified; `size_vram` in Copy Diagnostics shows whether Ollama
+allocated GPU memory. A 4 GB card must not be assumed to fit 9B efficiently.
+
+A free alternative is **LM Studio with a local 4B Q4_K_M GGUF and its NVIDIA CUDA
+runtime**, checking actual GPU offload in its loading controls. Text-only loading
+can avoid unnecessary vision-projector memory where supported. Match Caerness's
+context budget to the server; output/context controls are in Settings. The Ollama
+alias defaults to 8192 and the launcher preserves saved custom budgets when reusing
+the same model. Larger context is not a cure for slow CPU inference.
+
+Smaller models may fit/speed up more easily, but that is a quality trade-off, not a
+demonstrated solution. Using another existing computer with more GPU memory is also
+free of token charges. No paid API is required. If CUDA/LM Studio cannot make the
+4B sufficiently fast **and** reliable, this CPU configuration has not met the goal;
+there is no evidence that merely increasing the timeout will make it enjoyable.
+
+[Reproduced failures, tests and genuine measurements](docs/windows-gameplay-recovery.md).
+
 Free-local setup rejects non-loopback endpoints, cloud tags and Ollama aliases with
 remote-model metadata. Inherited cloud API keys are not sent to the local service.
 When it starts Ollama itself, it sets `OLLAMA_NO_CLOUD=1`; for an already-running
@@ -88,6 +150,6 @@ stay outside the main story. [Runtime/model assessment](docs/local-ai.md) and
 - **Context/output limit:** the turn is refused rather than silently dropping conditions. Narrow the request or start another conversation; old conversations stay saved.
 - **Slow replies:** close other applications and compare a smaller model. The loaded-model diagnostic reports GPU allocation; speed depends strongly on hardware.
 
-Windows installation/GPU execution and the larger-model literary comparison remain
-owner-side acceptance gates. Linux inference and mocked policy tests are separate
+Windows installation/launch succeeded in the owner's test. CUDA offload and the
+larger-model literary comparison remain owner-side acceptance gates. Linux inference and mocked policy tests are separate
 kinds of evidence. A working local server alone does not mean the game is enjoyable.

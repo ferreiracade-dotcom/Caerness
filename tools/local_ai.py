@@ -62,10 +62,10 @@ def hardware():
         except (OSError, ValueError):
             result['warnings'].append('RAM could not be measured.')
     try:
-        rows = command(['nvidia-smi', '--query-gpu=name,memory.total', '--format=csv,noheader,nounits'])
+        rows = command(['nvidia-smi', '--query-gpu=name,memory.total,driver_version', '--format=csv,noheader,nounits'])
         for line in rows.splitlines():
-            name, mib = line.rsplit(',', 1)
-            result['gpus'].append({'name': name.strip(), 'vram_gib': float(mib) / 1024, 'source': 'nvidia-smi'})
+            name, mib, driver = line.rsplit(',', 2)
+            result['gpus'].append({'name': name.strip(), 'vram_gib': float(mib) / 1024, 'driver_version':driver.strip(), 'source': 'nvidia-smi'})
     except (OSError, ValueError, subprocess.SubprocessError):
         if platform.system() == 'Windows':
             try:
@@ -172,6 +172,10 @@ def ensure_ollama():
         api('/api/version', timeout=2)
     except (OSError, ValueError):
         env = dict(os.environ, OLLAMA_NO_CLOUD='1', OLLAMA_HOST='127.0.0.1:11434', OLLAMA_NUM_PARALLEL='1')
+        # Prefer the supported NVIDIA CUDA path on Windows; do not retry a known
+        # unstable Vulkan backend. Explicit user settings still take precedence.
+        if platform.system()=='Windows' and any('nvidia' in g['name'].lower() or g.get('source')=='nvidia-smi' for g in hardware()['gpus']):
+            env.setdefault('OLLAMA_VULKAN','0')
         subprocess.Popen([exe, 'serve'], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for _ in range(30):
             try:
@@ -202,7 +206,11 @@ def prepare_ollama(hw, preferred=None, change=False, input_fn=input):
     print('Installed models:', ', '.join(m['name'] for m in known) or 'none')
     if not choices:
         raise ValueError('No safe automatic recommendation for this hardware. Use LM Studio to inspect hardware, or upgrade memory.')
-    recommended = next((m for m in choices if m['tag'].startswith('qwen3.5:9b')), choices[0])
+    vram=max((g.get('vram_gib') or 0 for g in hw['gpus']),default=0)
+    accelerated=[m for m in choices if vram>=m['vram']]
+    recommended=next((m for m in accelerated if m['tag'].startswith('qwen3.5:9b')),accelerated[0] if accelerated else choices[0])
+    if not accelerated:
+        print('No candidate fits entirely within detected VRAM. Start with the smallest model; RAM capacity alone does not make 9B responsive. CPU/partial offload remains an unaccepted speed/quality compromise.')
     selection = input_fn(f"Model number or installed local name [{recommended['tag']}]: ").strip() or recommended['tag']
     if selection.isdigit():
         index = int(selection) - 1
@@ -227,14 +235,16 @@ def prepare_ollama(hw, preferred=None, change=False, input_fn=input):
 
 
 def configure_save(conn, endpoint, model):
-    from engine.local_model import set_runtime_config
+    from engine.local_model import set_runtime_config,runtime_config
     from urllib.parse import urlsplit
     if urlsplit(endpoint).hostname not in {'127.0.0.1', 'localhost', '::1'}:
         raise ValueError('Free local setup requires a loopback endpoint.')
     local_name(model)
+    prior=runtime_config(conn)
+    budgets={k:prior[k] for k in ('local_max_context_tokens','local_heavy_context_tokens','local_max_output_tokens')} if prior.get('free_local') and prior['local_model']==model and prior['local_endpoint']==endpoint else {'local_max_context_tokens':6000,'local_heavy_context_tokens':8192,'local_max_output_tokens':1200}
     return set_runtime_config(conn, device_profile='desktop_free_local', local_backend='openai_compatible',
         local_endpoint=endpoint, local_model=model, local_timeout_seconds=300,
-        local_max_context_tokens=6000, local_heavy_context_tokens=6900, local_max_output_tokens=1200,
+        **budgets,
         referral_for_quality=0, referral_for_reasoning=0, referral_for_hardware=0)
 
 

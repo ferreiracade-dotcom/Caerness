@@ -40,6 +40,10 @@ def main():
   assert len(api('/api/state')['conversations'])==5
   assert len(api('/api/conversations'))==8
   assert api(f'/api/conversation/{first}')['messages'][0]['text']=='Existing conversation 0'
+  diagnostics=api('/api/diagnostics')
+  assert diagnostics['format']=='caerness-diagnostics-v1' and 'runtime' in diagnostics
+  assert 'Existing conversation' not in json.dumps(diagnostics)
+  denied('/api/narrative-retry',{'request_id':999999})
   denied('/api/conversation/999999')
   with connect() as c:
    from engine.player import set_player

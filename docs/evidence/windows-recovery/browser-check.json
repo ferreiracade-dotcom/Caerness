@@ -1,0 +1,9 @@
+{
+  "fixture": "Explicit timeout UI fixture, no model inference",
+  "desktop": "1440x900",
+  "phone": "390x844",
+  "clipboard_redaction": true,
+  "settings_form_valid": true,
+  "phone_no_horizontal_overflow": true,
+  "browser_errors": []
+}

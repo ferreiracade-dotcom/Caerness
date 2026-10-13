@@ -2,6 +2,16 @@
 
 A free-form AI narrative RPG for desktop/laptop browsers, with mobile-browser compatibility. The AI supplies conversation, reasoning and prose; the Python/SQLite simulation supplies authoritative continuity and consequences.
 
+## Windows playtest recovery
+
+The latest PR #7 update fixes growing read catalogues, oversized/redundant narrative
+continuations and escaped-transport context estimates. It saves model-round progress,
+supports safe unfinished-response retry and provides privacy-safe **Copy Diagnostics**.
+See [Windows recovery and genuine test results](docs/windows-gameplay-recovery.md)
+and [campaign-preserving update instructions](WINDOWS_PLAY.md). CPU-only 4B/9B
+performance and real-model reasoning remain unaccepted; a working endpoint is not
+proof of an enjoyable game.
+
 **Creative campaign authorship:** the World Bible is a foundation, not a closed catalogue. Plausible new memories, biographies, important people and institutions are permitted. The runtime now distinguishes light expression, attributed recollections/rumours and consistency-reviewed objective additions, preserving important details across conversations. It does not turn invented wealth, authority or agreements into automatic player success. [What is supported and what remains limited](docs/narrative-authoring.md).
 
 **Play free on Windows:** [download the complete local-AI branch ZIP](https://github.com/ferreiracade-dotcom/Caerness/archive/refs/heads/feat/free-local-ai.zip), extract it and double-click **Play Caerness.cmd**. [Windows instructions](WINDOWS_PLAY.md) explain hardware detection, permission before downloads, Ollama startup and the actual inference check. No paid account or API key is required. **Play with LM Studio.cmd** supports model comparison; **Change Local Model.cmd** preserves the campaign. Local model quality remains subject to genuine gameplay acceptance, not server reachability.

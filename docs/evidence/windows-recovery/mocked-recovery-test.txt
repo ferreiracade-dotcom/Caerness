@@ -1,0 +1,7 @@
+observation one call {'request_id': 13, 'estimated_prompt_tokens': 4152, 'schema_tokens_estimate': 2}
+conversation one call {'request_id': 14, 'estimated_prompt_tokens': 4166, 'schema_tokens_estimate': 2}
+read continuation timeout + reload + same-request retry, no duplicated input [{'request_id': 15, 'estimated_prompt_tokens': 4164, 'schema_tokens_estimate': 2}, {'request_id': 16, 'estimated_prompt_tokens': 4424, 'schema_tokens_estimate': 2}, {'request_id': 16, 'estimated_prompt_tokens': 4424, 'schema_tokens_estimate': 2}]
+Explicit pause preserves parsed response; resume applies it with zero extra model calls PASS
+Repeated unchanged read stops after two calls; retry does not repeat its engine operation PASS
+Committed day preserved through interruption/reload/retry; no action replay PASS
+NARRATIVE RECOVERY PASS: all inference replies above were explicit stubs.

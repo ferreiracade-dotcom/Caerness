@@ -1,5 +1,14 @@
 # Local AI evidence and acceptance status
 
+## Latest Windows recovery evidence
+
+The owner successfully installed and launched on Windows, but a successfully applied
+4B read was followed by a pending continuation and a misleading connection modal.
+The focused follow-up reproduced that pattern with genuine inference and corrected
+the runtime. See [recovery evidence and limitations](windows-gameplay-recovery.md).
+Windows CUDA and enjoyable local gameplay remain open gates; the older report below
+is historical evidence, not the current launch or error-recovery status.
+
 **Interpretation correction, owner reviews 5500949223/5501018499 on PR #7:** the categorical invention criticisms below are superseded. An undocumented winter recollection is permissible connective tissue; school duties may be a legitimate new claim or validated biographical addition. Mere absence from retrieved records is not a hallucination or proof the 4B model is unsuitable. Speed, awkward/repetitive prose, weak tool use and missing continuity mechanisms remain relevant observations. The raw transcripts/measurements are unchanged historical evidence. The blanket bans have now been corrected and a graded persistence path added: [current policy and implementation](narrative-authoring.md). References below to "failed grounding" or "invented" as categorical errors describe the earlier mistaken interpretation, not current acceptance rules. Larger-model/Windows gameplay quality remains unaccepted.
 
 **The integration has produced genuine local replies. The narrative RPG is not

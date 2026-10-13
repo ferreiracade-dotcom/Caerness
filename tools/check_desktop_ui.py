@@ -60,7 +60,7 @@ async def main():
   await page.locator('#input').fill('A multiline intention');await page.keyboard.press('Shift+Enter');await page.keyboard.type('with its conditions retained.');assert '\n' in await page.locator('#input').input_value()
   # Pressing Enter sends unchanged text to the real (unavailable) runtime; no canned AI response.
   await page.keyboard.press('Enter');await page.wait_for_function("!busy && !document.getElementById('referral').classList.contains('hidden')")
-  assert 'not connected' in await page.locator('#referralTitle').inner_text()
+  assert 'unavailable' in await page.locator('#referralTitle').inner_text()
   await page.locator('#closeReferral').click()
   await page.evaluate(f'resumeSession({oldid})')
   await page.keyboard.press('Alt+2');assert await page.locator('#world').is_visible()

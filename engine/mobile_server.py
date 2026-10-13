@@ -128,6 +128,22 @@ class CaernessHandler(BaseHTTPRequestHandler):
                 with connect() as conn:
                     self._send_json(local_health(conn))
                 return
+            if path == "/api/diagnostics":
+                from .narrative_diagnostics import report
+                with connect() as conn:
+                    selected=parse_qs(urlparse(self.path).query).get('session_id',[None])[0]
+                    diagnostic=report(conn,int(selected) if selected is not None else None)
+                if parse_qs(urlparse(self.path).query).get('hardware')==['1']:
+                    from tools.local_ai import hardware,api
+                    hw=hardware()
+                    diagnostic['hardware']={k:hw[k] for k in ('system','ram_gib','gpus','cpu_count','warnings')}
+                    if diagnostic['runtime']['local_backend']=='openai_compatible':
+                        try:
+                            diagnostic['ollama_loaded_models']=[{k:m.get(k) for k in ('name','size','size_vram','context_length')} for m in api('/api/ps',timeout=2).get('models',[])]
+                        except (OSError,ValueError):
+                            diagnostic['ollama_loaded_models']='Unavailable; server may be LM Studio.'
+                self._send_json(diagnostic)
+                return
             if path == "/api/conversations":
                 from .ai_planning import available, current_actor
                 with connect() as conn:
@@ -210,6 +226,13 @@ class CaernessHandler(BaseHTTPRequestHandler):
                     conn.commit()
                 self._send_json(result)
                 return
+            if path == "/api/narrative-retry":
+                from .narrative_runtime import resume
+                with connect() as conn:
+                    result=resume(conn,int(body['request_id']))
+                    conn.commit()
+                self._send_json(result)
+                return
             if path == "/api/plan-play":
                 from .planning_gateway import play
                 with connect() as conn:
@@ -223,13 +246,10 @@ class CaernessHandler(BaseHTTPRequestHandler):
                 with connect() as conn:
                     result = approve_plan(conn,int(body["plan_id"]),str(body["digest"]))
                     if result.get("plan") and body.get("narrative"):
-                        from .narrative_runtime import after_execution
-                        from .planning_gateway import run_local
+                        from .narrative_runtime import after_execution,resume
                         queued=after_execution(conn,result)
-                        try:
-                            result=run_local(conn,queued['next_request']['request_id'],force=runtime_config(conn).get('remote_model',False))
-                        except (ConnectionError,RuntimeError,ValueError):
-                            result={**queued,'summary':'The consequences are saved. Narration is awaiting the configured model.'}
+                        conn.commit()
+                        result=resume(conn,queued['next_request']['request_id'])
                     elif result.get("plan"):
                         result.update(record_execution_narration(conn,result["plan"]))
                         if result["plan"]["status"] in ("blocked","refused","awaiting_response"):
@@ -247,11 +267,14 @@ class CaernessHandler(BaseHTTPRequestHandler):
                 request_id = int(path.split("/")[3])
                 with connect() as conn:
                     row=conn.execute("SELECT input_json FROM model_requests WHERE id=?",(request_id,)).fetchone()
-                    if row and json.loads(row[0]).get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1"} and bool(body.get("apply",True)):
+                    if row and json.loads(row[0]).get('protocol','').startswith('narrative_') and bool(body.get('apply',True)):
+                        from .narrative_runtime import resume
+                        result=resume(conn,request_id)
+                    elif row and json.loads(row[0]).get("protocol") == "world_plan_v1" and bool(body.get("apply",True)):
                         from .planning_gateway import run_local
                         try:
                             result=run_local(conn,request_id,force=bool(body.get("force",False)))
-                        except (ConnectionError,RuntimeError,ValueError):
+                        except (ConnectionError,TimeoutError,RuntimeError,ValueError):
                             latest=conn.execute("SELECT id FROM model_requests WHERE target_kind='ai_session' AND target_id=(SELECT target_id FROM model_requests WHERE id=?) AND status IN ('pending','responded') ORDER BY id DESC LIMIT 1",(request_id,)).fetchone()
                             result=referral_for_request(conn,latest[0] if latest else request_id,{'recommendation':'external_recommended'},reason='Model continuation unavailable. Confirmed outcomes and the conversation remain saved.')
                     else:

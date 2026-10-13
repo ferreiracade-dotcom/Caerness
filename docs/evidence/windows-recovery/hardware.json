@@ -1,0 +1,48 @@
+{
+  "hardware": {
+    "system": "Linux",
+    "ram_gib": 8.0,
+    "gpus": [],
+    "cpu_count": 3,
+    "disk_free_gib": 23.20749282836914,
+    "warnings": []
+  },
+  "loaded_models": {
+    "models": [
+      {
+        "name": "caerness-qwen3-5-4b-q4_K_M:latest",
+        "model": "caerness-qwen3-5-4b-q4_K_M:latest",
+        "size": 3355422227,
+        "digest": "3a91e2f7bfd112f01bf5d3464467ec38b6000024c69ccb0d5aac03099ece8144",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "4.2B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-13T15:40:52.815410891Z",
+        "size_vram": 0,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "runtime_process_memory": [
+    {
+      "pid": 9932,
+      "name": "ollama",
+      "VmHWM": 72327168,
+      "VmRSS": 32559104
+    },
+    {
+      "pid": 10204,
+      "name": "llama-server",
+      "VmHWM": 6426337280,
+      "VmRSS": 6426337280
+    }
+  ]
+}

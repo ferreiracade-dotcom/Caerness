@@ -1,0 +1,332 @@
+{
+  "source": "Numerical timing fields extracted from the owned Ollama log. No environment, paths or prompt log lines exported.",
+  "unit": "seconds",
+  "note": "Evaluated prefill tokens may be fewer than full prompt usage because of caching. Task IDs are Ollama IDs, not Caerness request IDs. Completed calls appear in sequence; interrupted calls can lack final timings.",
+  "calls": [
+    {
+      "ollama_task_id": 0,
+      "prefill": {
+        "seconds": 120.09527,
+        "evaluated_tokens": 2902,
+        "tokens_per_second": 24.16
+      },
+      "generation": {
+        "seconds": 12.38524,
+        "evaluated_tokens": 72,
+        "tokens_per_second": 5.73
+      }
+    },
+    {
+      "ollama_task_id": 76,
+      "prefill": {
+        "seconds": 50.55764,
+        "evaluated_tokens": 1114,
+        "tokens_per_second": 22.03
+      },
+      "generation": {
+        "seconds": 40.34248,
+        "evaluated_tokens": 187,
+        "tokens_per_second": 4.61
+      }
+    },
+    {
+      "ollama_task_id": 266,
+      "prefill": {
+        "seconds": 125.08328999999999,
+        "evaluated_tokens": 3209,
+        "tokens_per_second": 25.65
+      },
+      "generation": {
+        "seconds": 20.99469,
+        "evaluated_tokens": 127,
+        "tokens_per_second": 6.0
+      }
+    },
+    {
+      "ollama_task_id": 398,
+      "prefill": {
+        "seconds": 50.40158,
+        "evaluated_tokens": 1177,
+        "tokens_per_second": 23.35
+      },
+      "generation": {
+        "seconds": 14.800690000000001,
+        "evaluated_tokens": 72,
+        "tokens_per_second": 4.8
+      }
+    },
+    {
+      "ollama_task_id": 473,
+      "prefill": {
+        "seconds": 52.175599999999996,
+        "evaluated_tokens": 1121,
+        "tokens_per_second": 21.49
+      },
+      "generation": {
+        "seconds": 6.987760000000001,
+        "evaluated_tokens": 33,
+        "tokens_per_second": 4.58
+      }
+    },
+    {
+      "ollama_task_id": 509,
+      "prefill": {
+        "seconds": 100.21985000000001,
+        "evaluated_tokens": 2219,
+        "tokens_per_second": 22.14
+      },
+      "generation": {
+        "seconds": 7.77697,
+        "evaluated_tokens": 33,
+        "tokens_per_second": 4.11
+      }
+    },
+    {
+      "ollama_task_id": 546,
+      "prefill": {
+        "seconds": 145.77933,
+        "evaluated_tokens": 3561,
+        "tokens_per_second": 24.43
+      },
+      "generation": {
+        "seconds": 5.5761199999999995,
+        "evaluated_tokens": 33,
+        "tokens_per_second": 5.74
+      }
+    },
+    {
+      "ollama_task_id": 587,
+      "prefill": {
+        "seconds": 148.23958,
+        "evaluated_tokens": 3538,
+        "tokens_per_second": 23.87
+      },
+      "generation": {
+        "seconds": 6.697010000000001,
+        "evaluated_tokens": 33,
+        "tokens_per_second": 4.78
+      }
+    },
+    {
+      "ollama_task_id": 625,
+      "prefill": {
+        "seconds": 111.37636,
+        "evaluated_tokens": 2839,
+        "tokens_per_second": 25.49
+      },
+      "generation": {
+        "seconds": 5.789479999999999,
+        "evaluated_tokens": 35,
+        "tokens_per_second": 5.87
+      }
+    },
+    {
+      "ollama_task_id": 664,
+      "prefill": {
+        "seconds": 53.338300000000004,
+        "evaluated_tokens": 1315,
+        "tokens_per_second": 24.65
+      },
+      "generation": {
+        "seconds": 5.95505,
+        "evaluated_tokens": 35,
+        "tokens_per_second": 5.71
+      }
+    },
+    {
+      "ollama_task_id": 702,
+      "prefill": {
+        "seconds": 41.735150000000004,
+        "evaluated_tokens": 1024,
+        "tokens_per_second": 24.54
+      },
+      "generation": {
+        "seconds": 5.409020000000001,
+        "evaluated_tokens": 35,
+        "tokens_per_second": 6.29
+      }
+    },
+    {
+      "ollama_task_id": 739,
+      "prefill": {
+        "seconds": 40.239779999999996,
+        "evaluated_tokens": 1024,
+        "tokens_per_second": 25.45
+      },
+      "generation": {
+        "seconds": 6.0356499999999995,
+        "evaluated_tokens": 35,
+        "tokens_per_second": 5.63
+      }
+    },
+    {
+      "ollama_task_id": 776,
+      "prefill": {
+        "seconds": 41.29296,
+        "evaluated_tokens": 1024,
+        "tokens_per_second": 24.8
+      },
+      "generation": {
+        "seconds": 5.66481,
+        "evaluated_tokens": 35,
+        "tokens_per_second": 6.0
+      }
+    },
+    {
+      "ollama_task_id": 813,
+      "prefill": {
+        "seconds": 41.48912,
+        "evaluated_tokens": 1024,
+        "tokens_per_second": 24.68
+      },
+      "generation": {
+        "seconds": 17.09416,
+        "evaluated_tokens": 97,
+        "tokens_per_second": 5.62
+      }
+    },
+    {
+      "ollama_task_id": 912,
+      "prefill": {
+        "seconds": 44.9938,
+        "evaluated_tokens": 1089,
+        "tokens_per_second": 24.2
+      },
+      "generation": {
+        "seconds": 10.93189,
+        "evaluated_tokens": 35,
+        "tokens_per_second": 3.11
+      }
+    },
+    {
+      "ollama_task_id": 950,
+      "prefill": {
+        "seconds": 117.18696000000001,
+        "evaluated_tokens": 2888,
+        "tokens_per_second": 24.64
+      },
+      "generation": {
+        "seconds": 38.60318,
+        "evaluated_tokens": 189,
+        "tokens_per_second": 4.87
+      }
+    },
+    {
+      "ollama_task_id": 1143,
+      "prefill": {
+        "seconds": 115.79388,
+        "evaluated_tokens": 2900,
+        "tokens_per_second": 25.04
+      },
+      "generation": {
+        "seconds": 5.92195,
+        "evaluated_tokens": 35,
+        "tokens_per_second": 5.74
+      }
+    },
+    {
+      "ollama_task_id": 1182,
+      "prefill": {
+        "seconds": 50.93399,
+        "evaluated_tokens": 1299,
+        "tokens_per_second": 25.5
+      },
+      "generation": {
+        "seconds": 6.864520000000001,
+        "evaluated_tokens": 39,
+        "tokens_per_second": 5.54
+      }
+    },
+    {
+      "ollama_task_id": 1224,
+      "prefill": {
+        "seconds": 31.8594,
+        "evaluated_tokens": 780,
+        "tokens_per_second": 24.48
+      },
+      "generation": {
+        "seconds": 6.2169799999999995,
+        "evaluated_tokens": 38,
+        "tokens_per_second": 5.95
+      }
+    },
+    {
+      "ollama_task_id": 1264,
+      "prefill": {
+        "seconds": 31.50914,
+        "evaluated_tokens": 816,
+        "tokens_per_second": 25.9
+      },
+      "generation": {
+        "seconds": 6.6644499999999995,
+        "evaluated_tokens": 38,
+        "tokens_per_second": 5.55
+      }
+    },
+    {
+      "ollama_task_id": 1304,
+      "prefill": {
+        "seconds": 38.10317,
+        "evaluated_tokens": 852,
+        "tokens_per_second": 22.36
+      },
+      "generation": {
+        "seconds": 6.30585,
+        "evaluated_tokens": 38,
+        "tokens_per_second": 5.87
+      }
+    },
+    {
+      "ollama_task_id": 1344,
+      "prefill": {
+        "seconds": 40.68647,
+        "evaluated_tokens": 888,
+        "tokens_per_second": 21.83
+      },
+      "generation": {
+        "seconds": 7.02301,
+        "evaluated_tokens": 38,
+        "tokens_per_second": 5.27
+      }
+    },
+    {
+      "ollama_task_id": 1384,
+      "prefill": {
+        "seconds": 39.47725,
+        "evaluated_tokens": 924,
+        "tokens_per_second": 23.41
+      },
+      "generation": {
+        "seconds": 6.703180000000001,
+        "evaluated_tokens": 38,
+        "tokens_per_second": 5.52
+      }
+    },
+    {
+      "ollama_task_id": 1424,
+      "prefill": {
+        "seconds": 115.14013,
+        "evaluated_tokens": 2903,
+        "tokens_per_second": 25.21
+      },
+      "generation": {
+        "seconds": 63.06932,
+        "evaluated_tokens": 355,
+        "tokens_per_second": 5.61
+      }
+    },
+    {
+      "ollama_task_id": 1783,
+      "prefill": {
+        "seconds": 121.96584,
+        "evaluated_tokens": 3044,
+        "tokens_per_second": 24.96
+      },
+      "generation": {
+        "seconds": 49.41142,
+        "evaluated_tokens": 287,
+        "tokens_per_second": 5.79
+      }
+    }
+  ]
+}

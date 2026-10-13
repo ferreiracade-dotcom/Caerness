@@ -10,23 +10,19 @@ from .world_capabilities import CAPABILITIES, dump, day
 from .opportunity import institution_decision_actor
 
 RULES = [
-    'You are the Caerness role-playing narrator. Respond to the meaning of arbitrary player language, not command keywords.',
-    'Ordinary dialogue, questions, humour, affection, uncertainty and hypothetical ideas use discuss. Twenty exchanges may occur without a day passing, a social roll or a transaction.',
-    'The World Bible is a foundation, not an exhaustive roster or biography. Invent compatible previously undescribed lives, memories, work, acquaintances, significant people, institutions and circumstances. Absence from retrieved records is not contradiction.',
-    'Improvise gestures, incidental atmosphere and ordinary anecdotes naturally in discuss, without approval or a database record for every detail. A plausible remembered winter can be subjective recollection, not a claim of verified history.',
-    'Retrieve person context for sustained NPC dialogue. Existing people must be accessible to converse; new people can be introduced through authorship, without requiring a prior named or latent seed entry.',
-    'Use authoring_schema for durable additions. discuss may include details containing subjective recollections/rumours for lightweight continuity. Use author with entities/details for new persistent identities or objective biographical/work facts; await engine consistency feedback before treating them as established.',
-    'Distinguish objective campaign facts, uncertain recollections and rumours. Promote consequential connective tissue through authorship before future outcomes depend on it. Preserve compatible details across conversations; never silently rewrite established history.',
-    'New people and institutions can be genuinely important with independent aims. Anti-convenience prevents guaranteed player success, not legitimate emergence. Authorship cannot grant player authority, allegiance, funds, property, mastery, consent, victories or completed actions; those require domain validation.',
-    'When portraying organisations, followers, contingents, colours and holdings, combine established campaign truth with compatible validated additions. Quiet lived ownership and ordinary life need no invented crisis or reward. Setting canon remains unchanged.',
-    'Use established voice and qualitative relationships without caricature. Permit quiet scenes, disagreements, ordinary work and reciprocal initiative. No forced cliffhangers or repetitive what-do-you-do endings.',
-    'Preserve meaningful player choices and their pacing. Do not create catastrophe to cure boredom or guaranteed success. Bounded narrative fortune is a design preference, not a license to alter persisted outcomes.',
-    'Inspect only the supplied scoped tools. Compose discovered operations. Never silently replace an unsupported instruction with an easier goal. Keep every unmet condition explicitly unresolved.',
-    'When the player asks you to find out accessible circumstances, use the read tools without seeking another authorization for that inspection. Do not ask the player to supply records their character can consult; if the tools cannot establish something, state that limitation accurately.',
-    'Plans propose attempts, not achievements. Player authorization and NPC consent differ; only engine-confirmed results may be narrated as committed.',
-    'Clear routine directives may execute after separate scope verification. Discussion/hypotheticals never authorize. Major commitments, altered terms, ambiguous scope and unsupported conditions require readable review.',
-    'The full original goal and source coverage remain mandatory for plans. Coverage is syntactic: it does not prove semantic completeness.',
+    'Narrate Caerness, a low-fantasy martial/cultivation world with murim-style societies and Western kingdoms, as a free-form character-life RPG. Understand arbitrary language; ordinary dialogue, questions, humour and hypotheticals use discuss, without transactions, consent rolls or time passing.',
+    'The World Bible is foundational, not exhaustive. Improvise compatible gestures, atmosphere, anecdotes and previously undescribed memories naturally. Absence is not contradiction. Distinguish subjective recollections/rumours from objective facts.',
+    'Compatible significant new people, institutions, biographies and histories are permitted. Discover authoring_schema and use author for consequential objective additions; await validated persistence before relying on them. discuss may carry attributed subjective details. Never rewrite established canon/history.',
+    'New people and institutions have independent aims. Anti-convenience prevents guaranteed player success, not emergence. Authorship cannot grant player funds, property, troops, mastery, command, allegiance, consent, agreements, victory or completed work; use validated domain operations.',
+    'Use supplied personality, culture, relationships, status and memories for distinctive voices, quiet scenes, humour and independent viewpoints. No caricature, repetitive descriptions, forced crisis, cliffhangers or formulaic what-do-you-do endings. Portray organisations and lived ownership through campaign truth and validated additions.',
+    'Player wording supplies meaning/tone, not necessarily literal speech or verbal skill. Render through the character\'s established voice. Small expressive gestures are allowed; never invent hidden self-knowledge or major personal commitments. Respect meaningful choices, pacing and bounded narrative-fortune preferences.',
+    'Scene and participants are already retrieved. If sufficient for observation/dialogue, finish in discuss now. Do not retrieve them again. Batch genuinely missing information in inspect; use feedback rather than repeating reads. Person, memory, canon and authoring tools preserve knowledge boundaries; no omniscience.',
+    'For an ordinary quiet observation or short exchange, usually write one or two varied paragraphs. Follow the player\'s requested depth and pace; complex instructions retain all conditions.',
+    'Answer the current player message, not an earlier turn. Do not repeat previous dialogue verbatim. Narrate surroundings when the player observes; use an NPC voice only when that person is speaking. Continuing participants need not dominate every scene.',
+    'Use only advertised tools and compose discovered capabilities. Investigate accessible circumstances when asked, without asking permission again. Missing means stay missing; preserve every unmet condition, never silently substitute an easier intention.',
+    'Plan attempts, not achievements. Questions/hypotheticals do not authorize; clear directives ordinarily do. NPC consent differs from player authorization. Routine directives need independent scope verification; major commitments, changed terms and ambiguity require readable review. All plans retain exact original goal/source coverage; coverage alone does not prove completeness. Narrate confirmed results only.',
 ]
+
 
 
 def ensure(c):
@@ -49,11 +45,14 @@ def memory(c, sid, query='', offset=None, limit=12):
         chosen.sort(key=lambda m:m['index'])
     else:
         # Early anchors plus ample recent dialogue. Older passages remain retrievable.
-        indices=sorted(set(range(min(4,len(rows)))) | set(range(max(0,len(rows)-32),len(rows))))
+        indices=sorted(set(range(min(4,len(rows)))) | set(range(max(0,len(rows)-16),len(rows))))
         chosen=[rows[i] for i in indices]
     # Tool dumps are not re-sent each conversational turn. Specific tools can be called again.
-    return {'total_messages':len(rows),'excerpts':[m for m in chosen if m['role']!='tool'],
-            'history_status':'Exact excerpts, not exhaustive context. Search or page memory for older details.'}
+    excerpts=[m for m in chosen if m['role']!='tool']
+    return {'total_messages':len(rows),'excerpts':excerpts,
+            'selection':'page' if offset is not None else 'search' if query else 'early_anchors_and_16_recent',
+            'omitted_messages':len(rows)-len(excerpts),
+            'history_status':'Exact excerpts, not exhaustive context. Omitted messages remain saved in full; search or page memory for older details. Unresolved goals/conditions are supplied separately without truncation.'}
 
 
 def person(c, owner, actor_id):
@@ -89,6 +88,11 @@ def scene(c, text=''):
     out['present_actors']=sorted(full['present_actors'],key=lambda a:(a['name'].lower() not in text.lower(),a['actor_type']!='character',a['id']))[:12]
     out['player']={k:full['player'][k] for k in ('actor_id','name','actor_type','subtype')}
     out['embodiment']=full['embodiment']
+    # Preserve expressive state and relationships; technical policy is already in
+    # narrator rules. Avoid repeating the input and long duplicate policy strings.
+    out['embodiment']={k:v for k,v in out['embodiment'].items() if k not in ('rendering_rules','current_player_wording')}
+    if out['embodiment'].get('profile'):
+        out['embodiment']['profile']={k:v for k,v in out['embodiment']['profile'].items() if k not in ('expression_policy','source_kind','updated_day')}
     # Adjacent persisted public routes only, rather than a global place/actor dump.
     destinations=[]
     for r in c.execute('SELECT l.id,l.name FROM location_links ll JOIN locations l ON l.id=CASE WHEN ll.location_a_id=? THEN ll.location_b_id ELSE ll.location_a_id END WHERE ll.active=1 AND (ll.location_a_id=? OR ll.location_b_id=?) LIMIT 12',(loc,loc,loc)):
@@ -106,6 +110,22 @@ TOOLS=[{'name':'people','arguments':{'query':'optional text'},'description':'Fin
 
 def read(c,sid,tool,args):
     owner=plans.session(c,sid)['owner_actor_id']
+    if tool=='read_result' and set(args)<={'request_id','index','path','offset'}:
+        rid=args.get('request_id');index=args.get('index',0);offset=args.get('offset',0);path=args.get('path',[])
+        if any(type(v)is not int or v<0 for v in (rid,index,offset)) or not isinstance(path,list) or len(path)>8 or any(not isinstance(k,str) for k in path):raise ValueError('Use a saved request ID, result index, nonnegative offset and optional field path.')
+        row=c.execute("SELECT r.input_json,r.day FROM model_requests r JOIN ai_sessions s ON s.id=r.target_id WHERE r.id=? AND r.target_kind='ai_session' AND s.owner_actor_id=?",(rid,owner)).fetchone()
+        if not row:raise ValueError('That read result is not yours.')
+        packet=json.loads(row['input_json'])
+        if packet.get('protocol')!='narrative_play_v1':raise ValueError('Private review constraints are not readable narrative records.')
+        feedback=packet.get('feedback',[])
+        if index>=len(feedback) or 'result' not in feedback[index]:raise ValueError('No saved read result at that index.')
+        value=feedback[index]['result']
+        for key in path:
+            if not isinstance(value,dict) or key not in value:raise ValueError('Unknown result field; inspect the supplied field names.')
+            value=value[key]
+        text=dump(value);end=min(len(text),offset+3000)
+        if offset>len(text):raise ValueError('Read offset exceeds result length.')
+        return {'request_id':rid,'index':index,'path':path,'snapshot_day':row['day'],'fields':list(value) if isinstance(value,dict) else None,'text':text[offset:end],'total_chars':len(text),'more':end<len(text),'next_offset':end if end<len(text) else None,'rule':'Saved observation, not a current-state check. Retrieve remaining relevant pages before relying on this material.'}
     if tool=='people' and set(args)<={'query'}:
         from .player import _present_actors,get_player
         query=args.get('query','')
@@ -157,7 +177,40 @@ def enrich(c,payload):
     payload['authored_continuity']=visible(c,plans.current_actor(c))
     payload['capabilities']=[{'name':cap.name,'description':cap.description} for cap in CAPABILITIES.values()]
     payload['read_tools']+=TOOLS+[{'name':'authoring_schema','arguments':{},'description':'Discover graded continuity detail and new entity proposal fields; no player-action shortcut.'},{'name':'authoring_details','arguments':{'subject_id':'optional actor ID','offset':'optional page offset','query':'optional search text'},'description':'Retrieve your previously established facts/claims across conversations, retaining epistemic labels.'},{'name':'capabilities','arguments':{'names':'optional list of capability names'},'description':'Discover complete validated argument schemas and declared outputs before planning.'}]
+    # Every narrative packet already contains this exact current scene. Keep the
+    # manual read interface, but do not offer an unnecessary extra model round.
+    payload['read_tools']=[tool for tool in payload['read_tools'] if tool['name']!='scene']
+    payload['read_tools'].append({'name':'read_result','arguments':{'request_id':'integer','index':'optional integer','path':'optional field-name list','offset':'optional character offset'},'description':'Retrieve explicitly paged large saved public read results; never private reviewer constraints.'})
+    messages=json.loads(plans.session(c,payload['session_id'])['messages_json'])
+    reads=[]
+    for message in reversed(messages):
+        if message['role']=='player':break
+        value=message['text']
+        if message['role']=='tool' and isinstance(value,dict) and value.get('authorship_feedback',{}).get('status')=='applied':break
+        if message['role']=='tool' and isinstance(value,list):
+            reads.extend({'tool':item['tool'],'arguments':item['arguments']} for item in value if isinstance(item,dict) and 'tool' in item and 'arguments' in item)
+    payload['completed_reads']=reads
+    saved=[]
+    for row in c.execute("SELECT id,input_json FROM model_requests WHERE target_kind='ai_session' AND target_id=? ORDER BY id DESC LIMIT 16",(payload['session_id'],)):
+        prior=json.loads(row['input_json'])
+        if prior.get('protocol')!='narrative_play_v1':continue
+        if prior.get('raw_player_input')!=payload['raw_player_input']:break
+        for index,item in enumerate(prior.get('feedback',[])):
+            if 'tool' in item and 'result' in item:saved.append({'request_id':row['id'],'index':index,'tool':item['tool'],'arguments':item.get('arguments',{})})
+        if prior.get('rounds',0)==0:break
+    payload['saved_read_results']=saved
+    consumed={r['tool'] for r in reads if not r['arguments']}
+    payload['read_tools']=[t for t in payload['read_tools'] if t['name'] not in consumed or t['arguments']]
+    for tool in payload['read_tools']:
+        if tool['name']=='context':
+            tool={**tool,'arguments':{'institution_id':'required integer: an organisation you command'},'description':'Your commanded institution records. Ordinary scene is already in context.'}
+            payload['read_tools']=[tool if t['name']=='context' else t for t in payload['read_tools']]
     payload['open_plans']=[{k:p[k] for k in ('id','session_id','status','summary','unresolved')} for p in payload['open_plans']]
+    # The exact read remains in the engine journal. Send a shared snapshot once,
+    # with an explicit reference, rather than doubling scene/person context.
+    payload['feedback']=[dict(item,result={'from':'context','unchanged':True}) if item.get('tool')=='scene' and item.get('result')==payload['context']
+        else dict(item,result={'from':'participants','actor_id':item['result']['identity']['id'],'unchanged':True}) if item.get('tool')=='person' and item.get('result') in payload['participants']
+        else item for item in payload.get('feedback',[])]
     return payload
 
 
@@ -299,6 +352,25 @@ def apply_response(c,row,response,payload):
     return out
 
 
+def resume(c,request_id):
+    """Resume only the saved continuation; never recreate the player's directive."""
+    from .planning_gateway import run_local
+    from .local_model import runtime_config
+    from .narrative_diagnostics import paused
+    row=c.execute("SELECT r.target_id,r.input_json,r.status FROM model_requests r JOIN ai_sessions s ON s.id=r.target_id WHERE r.id=? AND r.target_kind='ai_session' AND s.owner_actor_id=?",(request_id,plans.current_actor(c))).fetchone()
+    if not row or row['status'] not in ('pending','responded'):raise ValueError('Only your unfinished conversation can be retried; completed requests are never replayed.')
+    sid=row['target_id']
+    newer=c.execute("SELECT 1 FROM model_requests WHERE target_kind='ai_session' AND target_id=? AND id>?",(sid,request_id)).fetchone()
+    if newer:raise ValueError('A newer continuation exists. Retry the latest unfinished request instead.')
+    started=time.perf_counter()
+    try:out=run_local(c,request_id,max_rounds=9,force=bool(runtime_config(c).get('remote_model') or runtime_config(c).get('free_local')),checkpoint=True)
+    except (ConnectionError,TimeoutError,RuntimeError,ValueError):
+        pending=c.execute("SELECT id FROM model_requests WHERE target_kind='ai_session' AND target_id=? AND status IN ('pending','responded') ORDER BY id DESC LIMIT 1",(sid,)).fetchone()
+        out=paused(c,pending[0] if pending else request_id)
+    out['session_id']=sid;out['total_seconds']=round(time.perf_counter()-started,4)
+    return out
+
+
 def play(c,text,session_id=None,plan_id=None,provider='local'):
     from .planning_gateway import start_request,run_local
     from .local_model import runtime_config
@@ -307,17 +379,16 @@ def play(c,text,session_id=None,plan_id=None,provider='local'):
     authoring_schema(c)
     last_authorship=c.execute('SELECT COALESCE(MAX(id),0) FROM narrative_authorship').fetchone()[0]
     started=time.perf_counter()
+    if session_id is not None:
+        plans.session(c,session_id)
+        pending=c.execute("SELECT id,status FROM model_requests WHERE target_kind='ai_session' AND target_id=? ORDER BY id DESC LIMIT 1",(session_id,)).fetchone()
+        if pending and pending['status'] in ('pending','responded'):
+            from .narrative_diagnostics import paused
+            out=paused(c,pending['id']);out.update(session_id=session_id,input_not_recorded=True)
+            return out
     req=start_request(c,text,provider,session_id,plan_id,narrative=True)
     if provider!='local':return {'status':'awaiting_action_interpretation','next_request':req,'session_id':int(c.execute('SELECT target_id FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])}
-    try:
-        out=run_local(c,req['request_id'],max_rounds=9,force=bool(runtime_config(c).get('remote_model') or runtime_config(c).get('free_local')))
-    except (ConnectionError,RuntimeError,ValueError) as error:
-        from .mobile_runtime import referral_for_request
-        pending=c.execute("SELECT id FROM model_requests WHERE target_kind='ai_session' AND target_id=(SELECT target_id FROM model_requests WHERE id=?) AND status IN ('pending','responded') ORDER BY id DESC LIMIT 1",(req['request_id'],)).fetchone()
-        out=referral_for_request(c,pending[0] if pending else req['request_id'],{'recommendation':'external_recommended'},reason='The configured model is unavailable or returned an invalid response. Your message and any confirmed outcomes are saved. Configure a capable endpoint or use the manual model packet.')
-        if runtime_config(c).get('free_local'):
-            out['reason']='The local narrator could not complete this turn. Your message and confirmed outcomes are saved. Check the local model or choose another; no paid service is required.'
-            out['local_failure']={'type':type(error).__name__,'message':str(error)}
+    out=resume(c,req['request_id'])
     out['session_id']=int(c.execute('SELECT target_id FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])
     additions=[json.loads(r[0]) for r in c.execute("SELECT result_json FROM narrative_authorship WHERE session_id=? AND id>? AND status='applied' ORDER BY id",(out['session_id'],last_authorship))]
     if additions:out['campaign_authorship']=additions;out['world_changes']=True

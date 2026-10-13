@@ -192,8 +192,34 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
         else:
             contract = planning_contract(request_id)
         rules = list(payload["rules"])
+    if provider == 'local' and payload.get('protocol', '').startswith('narrative_'):
+        # Rules already appear above; do not tokenize a second identical copy.
+        payload = {k:v for k,v in payload.items() if k != 'rules'}
+        # Also compact already-saved interrupted requests from earlier versions.
+        # Only identical definitions/snapshots are shared; no content is dropped.
+        if 'read_tools' in payload:
+            unique=[]
+            for tool in payload['read_tools']:
+                if tool.get('name')=='scene' and payload.get('protocol')=='narrative_play_v1' and payload.get('context',{}).get('scene'):continue
+                if tool not in unique:unique.append(tool)
+            payload['read_tools']=unique
+        payload['feedback']=[dict(item,result={'from':'context','unchanged':True}) if item.get('tool')=='scene' and item.get('result')==payload.get('context') else item for item in payload.get('feedback',[])] if 'feedback' in payload else []
+        paged=[]
+        for index,item in enumerate(payload.get('feedback',[])):
+            value=item.get('result')
+            if payload.get('protocol')=='narrative_play_v1' and value is not None and len(json.dumps(value,ensure_ascii=False))>6000:
+                paged.append(dict(item,result={'saved_request_id':request_id,'index':index,'fields':list(value) if isinstance(value,dict) else None,'total_chars':len(json.dumps(value,ensure_ascii=False)),
+                    'rule':'Large result is saved in full. Use read_result with request_id/index, optional field path and explicit offset; retrieve relevant pages before relying on it. Nothing was silently truncated.'}))
+            else:paged.append(item)
+        payload['feedback']=paged
+        if payload.get('protocol')=='narrative_play_v1' and any(item.get('result',{}).get('saved_request_id')==request_id for item in paged if isinstance(item.get('result'),dict)) and not any(t['name']=='read_result' for t in payload.get('read_tools',[])):
+            payload['read_tools']=payload.get('read_tools',[])+[{'name':'read_result','arguments':{'request_id':'integer','index':'optional integer','path':'optional field-name list','offset':'optional character offset'},'description':'Read explicitly paged saved public results.'}]
+        # Stable rules/context precede changing turn fields, allowing runtime prefix
+        # caching. All fields remain present; no history or intent is truncated.
+        changing={'conversation','feedback','raw_player_input','planning_goal','rounds'}
+        payload={**{k:v for k,v in payload.items() if k not in changing},**{k:v for k,v in payload.items() if k in changing}}
     return "\n".join([
-        f"# Caerness Engine — {label} Bridge Request #{request_id}",
+        f"# Caerness Engine — {label} Bridge" if provider=='local' and payload.get('protocol','').startswith('narrative_') else f"# Caerness Engine — {label} Bridge Request #{request_id}",
         "",
         f"You are serving as a bounded `{task_type}` component for a persistent simulation.",
         "The SQLite engine, not you, owns world truth and state mutation.",

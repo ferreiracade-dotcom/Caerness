@@ -2,6 +2,10 @@
 from __future__ import annotations
 
 import json
+import threading
+import time
+
+_LOCAL_RUN_LOCK=threading.Lock()
 
 from . import ai_planning as plans
 from .world_capabilities import CAPABILITIES, context, known_offerings
@@ -42,11 +46,19 @@ def response_schema(request_id, payload):
             'evidence':array(span),'omissions':array(string),'reason':string})
     else:
         tools=[t['name'] for t in payload.get('read_tools',[]) if t.get('name')]
+        if payload.get('protocol')=='narrative_play_v1' and payload.get('context',{}).get('scene'):
+            tools=[tool for tool in tools if tool!='scene']
+        if payload.get('protocol')=='narrative_play_v1' and 'read_result' not in tools and any(len(json.dumps(item.get('result'),ensure_ascii=False))>6000 for item in payload.get('feedback',[])):tools.append('read_result')
         operations=[t['name'] for t in payload.get('capabilities',[]) if t.get('name')]
         # Arguments remain engine-validated against dynamically discoverable domain
         # schemas; a syntactically valid arbitrary object has no mutation authority.
         arguments={'type':'object','additionalProperties':True}
         call=obj({'tool':{'type':'string','enum':tools},'arguments':arguments})
+        if payload.get('protocol')=='narrative_play_v1' and 'context' in tools:
+            remaining=[tool for tool in tools if tool!='context']
+            variants=[obj({'tool':{'const':'context'},'arguments':obj({'institution_id':{'type':'integer','minimum':1}})})]
+            if remaining:variants.append(obj({'tool':{'type':'string','enum':remaining},'arguments':arguments}))
+            call={'anyOf':variants}
         step=obj({'id':string,'operation':{'type':'string','enum':operations},'arguments':arguments,'depends_on':array(string)})
         coverage=obj({'start':{'type':'integer','minimum':0},'end':{'type':'integer','minimum':0},
             'handling':{'type':'string','enum':['planned','unresolved','context']},'step_ids':array(string)})
@@ -54,8 +66,9 @@ def response_schema(request_id, payload):
         discussion=obj({'mode':{'type':'string','enum':['discuss','clarify']},'text':{'type':'string','minLength':1}})
         modes=[discussion]
         if payload.get('protocol')=='narrative_play_v1' and payload.get('phase')!='consequences':
-            from .narrative_authoring import schema
-            authorship=schema()
+            # Discover detailed authoring fields only when needed. The engine always
+            # validates them; repeating every nested field burdens ordinary dialogue.
+            authorship={'entities':array(arguments,maxItems=4),'details':array(arguments,maxItems=8)}
             modes.append(obj({'mode':{'const':'discuss'},'text':{'type':'string','minLength':1},'details':authorship['details']}))
             modes.append(obj({'mode':{'const':'author'},'authorship':obj(authorship)}))
         if payload.get('phase')!='consequences':
@@ -86,7 +99,7 @@ def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, fe
     payload={'protocol':PROTOCOL,'raw_player_input':text,'planning_goal':goal,
         'session_id':sid,'plan_id':plan_id,'rounds':rounds,'conversation':json.loads(plans.session(c,sid)['messages_json'])[-24:],
         'context':{} if narrative else context(c,s['owner_actor_id']), 'current_plan':existing,
-        'read_tools':READ_TOOLS,'capabilities':[cap.schema() for cap in CAPABILITIES.values()],
+        'read_tools':list(READ_TOOLS),'capabilities':[cap.schema() for cap in CAPABILITIES.values()],
         'feedback':feedback or [],
         'unresolved_intentions':pending,
         'rules':[
@@ -113,6 +126,9 @@ def start_request(c, text, provider='chatgpt', session_id=None, plan_id=None, fe
 def apply_response(c, row, response, payload):
     p=response['proposal']; mode=p.get('mode')
     sid=int(payload['session_id']); s=plans.session(c,sid)
+    if mode=='inspect' and isinstance(p.get('calls'),list) and any(isinstance(call,dict) and {'tool':call.get('tool'),'arguments':call.get('arguments')} in payload.get('completed_reads',[]) for call in p['calls']):
+        error=RuntimeError('The model repeated an unchanged read instead of using its result.');error.code='repeated_read'
+        raise error
     def follow(feedback):
         rounds=int(payload.get('rounds',0))+1
         if rounds>6:
@@ -131,7 +147,12 @@ def apply_response(c, row, response, payload):
                 if tool=='context' and set(args)<= {'institution_id'}:
                     inst=args.get('institution_id')
                     if inst is not None and (type(inst)is not int or inst<1): raise ValueError('Invalid organisation ID.')
-                    value=context(c,s['owner_actor_id'],inst)
+                    if payload.get('protocol')=='narrative_play_v1' and inst is None:
+                        # Narrative scene is already current and scoped. The legacy
+                        # planner scene includes a large roster/policy/ledger dump.
+                        value={'scene':{'from':'context.scene','unchanged':True},'organisations':payload['context'].get('organisations',[]),
+                            'competence_domains':[r[0] for r in c.execute('SELECT domain_key FROM competence_domains ORDER BY domain_key')]}
+                    else:value=context(c,s['owner_actor_id'],inst)
                 elif tool=='offerings' and not args: value=known_offerings(c,s['owner_actor_id'])
                 elif tool=='plan_status' and set(args)=={'plan_id'} and type(args['plan_id'])is int:
                     value=plans.plan_view(c,args['plan_id'])
@@ -163,15 +184,53 @@ def apply_response(c, row, response, payload):
     return output
 
 
-def run_local(c, request_id, max_rounds=9, force=False):
+def run_local(c, request_id, max_rounds=9, force=False, checkpoint=False):
+    if not _LOCAL_RUN_LOCK.acquire(blocking=False):raise RuntimeError('Another model response is already in progress. Wait for it before retrying.')
+    try:return _run_local(c,request_id,max_rounds,force,checkpoint)
+    finally:_LOCAL_RUN_LOCK.release()
+
+
+def _run_local(c, request_id, max_rounds=9, force=False, checkpoint=False):
     """Bounded real configured-model loop; stops at discussion/clarification/review."""
-    from .model_gateway import run_request_local
+    from .model_gateway import run_request_local,apply_model_request
+    def interrupted():
+        from .agency import consume_interrupt
+        if not checkpoint or not consume_interrupt(c):return None
+        from .narrative_diagnostics import record_failure,paused
+        error=RuntimeError('Paused at the requested safe boundary.');error.code='interrupted'
+        record_failure(c,request_id,error);c.commit()
+        return paused(c,request_id)
     for _ in range(max_rounds):
-        result=run_request_local(c,request_id,force=force,apply=True)
+        if checkpoint:c.commit() # Save the pending continuation before slow inference.
+        stopped=interrupted()
+        if stopped:return stopped
+        row=c.execute('SELECT status FROM model_requests WHERE id=?',(request_id,)).fetchone()
+        if not row or row['status'] not in ('pending','responded'):raise ValueError('Only an unfinished request can be resumed; completed actions are not replayed.')
+        started=time.perf_counter()
+        try:
+            result=run_request_local(c,request_id,force=force,apply=False) if row['status']=='pending' else {'status':'responded'}
+        except (ConnectionError,TimeoutError,RuntimeError,ValueError) as error:
+            from .narrative_diagnostics import record_failure
+            record_failure(c,request_id,error,elapsed=time.perf_counter()-started)
+            if checkpoint:c.commit()
+            raise
         if result.get('status')=='external_recommended':
             from .mobile_runtime import referral_for_request
             return referral_for_request(c,request_id,result['assessment'],reason=result.get('message','A stronger model is recommended for this plan.'))
-        applied=result.get('applied',result)
+        stopped=interrupted()
+        if stopped:return stopped
+        c.execute('SAVEPOINT model_application')
+        try:
+            applied=apply_model_request(c,request_id)
+            c.execute('RELEASE model_application')
+        except Exception as error:
+            c.execute('ROLLBACK TO model_application');c.execute('RELEASE model_application')
+            c.execute("UPDATE model_requests SET status='pending' WHERE id=?",(request_id,))
+            from .narrative_diagnostics import record_failure
+            record_failure(c,request_id,error)
+            if checkpoint:c.commit()
+            raise ValueError('The model response could not be applied; the unfinished request is safe to retry.') from error
+        if checkpoint:c.commit()
         if applied.get('status')!='awaiting_action_interpretation': return applied
         request_id=applied['next_request']['request_id']
     return {'status':'needs_clarification','summary':'The model planning loop reached its bound. No plan was authorized.'}

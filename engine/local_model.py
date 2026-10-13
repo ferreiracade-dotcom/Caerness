@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import time
+import socket
 from urllib.parse import urlsplit
 import sqlite3
 import urllib.error
@@ -20,6 +21,17 @@ class LocalModelResult:
     completion_tokens: int | None = None
     raw: dict[str, Any] | None = None
     latency_seconds: float = 0.0
+
+
+class ModelResponseError(ValueError):
+    def __init__(self,message,code,usage,latency):
+        super().__init__(message)
+        self.code=code
+        self.measurements={'prompt_tokens':_token_count(usage.get('prompt_tokens')),'completion_tokens':_token_count(usage.get('completion_tokens')),'latency_seconds':round(latency,4)}
+
+
+def _token_count(value):
+    return value if type(value)is int and value>=0 else None
 
 
 def runtime_config(conn: sqlite3.Connection) -> dict[str, Any]:
@@ -107,11 +119,19 @@ def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=Fa
         with _urlopen(request, timeout) as response:
             body = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
+        # Classify service failures without forwarding its possibly private body.
+        detail=exc.read(8192).decode('utf-8',errors='replace').lower()
+        if any(x in detail for x in ('out of memory','not enough memory','insufficient memory','cuda out','requires more system memory','failed to allocate','cannot allocate memory')):
+            error=ConnectionError('Model service reported insufficient memory.');error.code='out_of_memory';error.measurements={'http_status':exc.code};raise error from None
         if local_only:
-            raise ConnectionError(f"Local model service returned HTTP {exc.code}; check the installed model, runtime version and available memory. No API key is required.") from None
-        raise ConnectionError(f"Model service returned HTTP {exc.code}; check credentials, model access and endpoint configuration.") from None
-    except (urllib.error.URLError, TimeoutError, OSError):
-        raise ConnectionError("Model service could not be reached or timed out. Check endpoint and connectivity.") from None
+            message=f"Local model service returned HTTP {exc.code}; check the installed model, runtime version and available memory. No API key is required."
+        else:message=f"Model service returned HTTP {exc.code}; check credentials, model access and endpoint configuration."
+        error=ConnectionError(message);error.code='continuation_failed' if exc.code>=500 else 'unavailable';error.measurements={'http_status':exc.code}
+        raise error from None
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        if isinstance(exc,(TimeoutError,socket.timeout)) or isinstance(getattr(exc,'reason',None),(TimeoutError,socket.timeout)):
+            raise TimeoutError('Model request timed out.') from None
+        raise ConnectionError("Model service could not be reached. Check endpoint and connectivity.") from None
     data = json.loads(body)
     if not isinstance(data, dict):
         raise ValueError("Local model returned non-object JSON.")
@@ -176,8 +196,11 @@ def chat_local(
     model = str(cfg["local_model"])
     timeout = int(cfg["local_timeout_seconds"])
     max_tokens = int(max_tokens or cfg["local_max_output_tokens"])
-    if cfg.get("free_local") and estimate_tokens(messages) + max_tokens > 8192:
-        raise ValueError("This request exceeds the configured 8K local context. No truncated interpretation was applied.")
+    # Chat models tokenize content, not JSON transport escaping. Local structured
+    # output schemas compile to grammar, not input tokens. Reserve template margin.
+    input_estimate=sum(estimate_tokens(m['content'])+8 for m in messages)+64
+    if cfg.get("free_local") and input_estimate + max_tokens > int(cfg['local_heavy_context_tokens']):
+        raise ValueError("This request exceeds the configured local context budget. No truncated interpretation was applied.")
     if cfg.get("free_local") and urlsplit(endpoint).port == 11434:
         parsed = urlsplit(endpoint)
         info = _post_json(f"{parsed.scheme}://{parsed.netloc}/api/show", {"model": model}, min(timeout, 10), local_only=True)
@@ -202,19 +225,22 @@ def chat_local(
         if cfg.get("free_local") and urlsplit(endpoint).port == 11434:
             payload["reasoning_effort"] = "none"
         data = _post_json(endpoint, payload, timeout, local_only=cfg.get("free_local", False))
+        usage=data.get('usage') if isinstance(data.get('usage'),dict) else {}
         try:
-            text = str(data["choices"][0]["message"]["content"])
+            choice=data['choices'][0]
+            text = choice['message']['content']
+            if not isinstance(text,str) or not text.strip():raise ValueError('Missing text')
+            finish=choice.get('finish_reason')
         except Exception as exc:
-            raise ValueError("OpenAI-compatible local response lacked choices[0].message.content") from exc
-        usage = data.get("usage") or {}
-        if data["choices"][0].get("finish_reason") == "length":
-            raise ValueError("Model output reached its token limit; no incomplete response was applied.")
+            raise ModelResponseError('The model response lacked usable message content.','invalid_response',usage,time.perf_counter()-started) from None
+        if finish == "length":
+            raise ModelResponseError("Model output reached its token limit; no incomplete response was applied.",'incomplete_response',usage,time.perf_counter()-started)
         return LocalModelResult(
             text=text,
             backend=backend,
             model=model,
-            prompt_tokens=usage.get("prompt_tokens"),
-            completion_tokens=usage.get("completion_tokens"),
+            prompt_tokens=_token_count(usage.get("prompt_tokens")),
+            completion_tokens=_token_count(usage.get("completion_tokens")),
             raw=data,
             latency_seconds=round(time.perf_counter() - started, 4),
         )
@@ -228,7 +254,10 @@ def chat_local(
         }
         if require_json:
             payload["format"] = "json"
-        data = _post_json(endpoint, payload, timeout)
+        if response_schema is not None:payload['format']=response_schema
+        if cfg.get('free_local'):payload['think']=False
+        data = _post_json(endpoint, payload, timeout,local_only=cfg.get('free_local',False))
+        if data.get('done_reason')=='length':raise ModelResponseError('Model output reached its token limit; no incomplete response was applied.','incomplete_response',{'prompt_tokens':data.get('prompt_eval_count'),'completion_tokens':data.get('eval_count')},time.perf_counter()-started)
         try:
             text = str(data["message"]["content"])
         except Exception as exc:
@@ -237,8 +266,8 @@ def chat_local(
             text=text,
             backend=backend,
             model=model,
-            prompt_tokens=data.get("prompt_eval_count"),
-            completion_tokens=data.get("eval_count"),
+            prompt_tokens=_token_count(data.get("prompt_eval_count")),
+            completion_tokens=_token_count(data.get("eval_count")),
             raw=data,
             latency_seconds=round(time.perf_counter() - started, 4),
         )
