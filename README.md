@@ -1,6 +1,6 @@
 # Caerness — a life in a living world
 
-**Optional free cloud or local AI:** double-click `Play Caerness.cmd` / `Choose AI.cmd` to select GroqCloud, Google Gemini, OpenRouter, Ollama or LM Studio. The same campaign and conversations continue across model changes. Keys are pasted privately in the launch window and kept in memory. Keep billing disabled; no paid fallback. See [FREE_CLOUD_PLAY.md](FREE_CLOUD_PLAY.md). Cloud quality/speed remain untested without provider access; a connection test is not gameplay acceptance.
+**Optional free cloud or local AI:** double-click `Play Caerness.cmd` / `Choose AI.cmd` to select GroqCloud, Google Gemini, OpenRouter, Ollama or LM Studio. The same campaign and conversations continue across model changes. Keys are pasted privately in the launch window and kept in memory. Keep billing disabled; no paid fallback. See [FREE_CLOUD_PLAY.md](FREE_CLOUD_PLAY.md). Actual Groq conversation is recorded; quota limits blocked full action/time acceptance. Gemini/OpenRouter gameplay remains untested. A connection test is not gameplay acceptance.
 
 A free-form AI narrative RPG for desktop/laptop browsers, with mobile-browser compatibility. The AI supplies conversation, reasoning and prose; the Python/SQLite simulation supplies authoritative continuity and consequences.
 

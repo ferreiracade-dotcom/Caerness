@@ -7,7 +7,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'tools'))
 from planning_demo import fixture
 from engine import ai_planning as plans
 from engine.planning_gateway import READ_TOOLS,start_request,response_schema
-from engine.narrative_runtime import play,resume,read,memory
+from engine.narrative_runtime import play,resume,read,memory,relevant_history
 from engine.narrative_diagnostics import report,classify
 from engine.local_model import LocalModelResult,estimate_tokens,set_runtime_config,chat_local,_post_json
 from engine.db import connect
@@ -41,6 +41,19 @@ def main():
   window=memory(c,history['id'])
   assert window['omitted_messages']==20 and len(window['excerpts'])==20
   assert any('line 12' in str(m['text']) for m in memory(c,history['id'],query='line 12')['excerpts'])
+  anchored=plans.session(c)
+  plans.message(c,anchored['id'],'assistant','The pattern is a lattice; I liked its negative space and quiet echo.')
+  for i in range(24):plans.message(c,anchored['id'],'assistant','A different topic about ordinary life '+str(i))
+  recalled=relevant_history(c,anchored['id'],'What did you like about that original pattern?',memory(c,anchored['id']))
+  # First anchors may already include the source; no duplicate is necessary.
+  assert not recalled
+  more=plans.session(c)
+  for i in range(6):plans.message(c,more['id'],'assistant','Early opening '+str(i))
+  plans.message(c,more['id'],'assistant','The pattern is a lattice; I liked its negative space and quiet echo.')
+  for i in range(24):plans.message(c,more['id'],'assistant','A different topic about ordinary life '+str(i))
+  recalled=relevant_history(c,more['id'],'What did you like about that original pattern?',memory(c,more['id']))
+  assert len(recalled)==1 and 'lattice' in recalled[0]['text'] and recalled[0]['index']==6
+  assert 'not objective world truth' in recalled[0]['authority']
   large={'visible':{'records':['a long public record '*500+'PAGINGTAIL']}}
   req=start_request(c,'Read these records.',provider='local',narrative=True,feedback=[{'tool':'context','arguments':{},'result':large}])
   payload=json.loads(c.execute('SELECT input_json FROM model_requests WHERE id=?',(req['request_id'],)).fetchone()[0])

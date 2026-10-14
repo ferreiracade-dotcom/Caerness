@@ -1,20 +1,19 @@
 {
   "date": "2026-10-14",
-  "evidence_type": "Acceptance gate status, NOT inference",
-  "provider_keys_available": false,
-  "real_provider_requests": 0,
-  "cases": {
-    "observation": "BLOCKED: no provider keys",
-    "npc_conversation": "BLOCKED: no provider keys",
-    "investigation": "BLOCKED: no provider keys",
-    "unfamiliar_instruction": "BLOCKED: no provider keys",
-    "creative_development": "BLOCKED: no provider keys",
-    "complex_undertaking": "BLOCKED: no provider keys",
-    "interruption": "BLOCKED: no provider keys",
-    "long_dialogue": "BLOCKED: no provider keys"
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "evidence_type": "Actual model gameplay on disposable campaign; see groq-live",
+  "cloud_credentials_persisted": false,
+  "other_providers": "Gemini/OpenRouter live access not available; mock tested only",
+  "gates": {
+    "observation": "RECORDED_ONE_CALL",
+    "npc_conversation": "RECORDED_TWENTY_PLUS_TURNS_WITH_QUALITATIVE_LIMITATIONS",
+    "independent_investigation": "ACTUAL_PEOPLE_OFFERINGS_READS; CONTINUATION_QUOTA_BLOCKED",
+    "unfamiliar_instruction": "ORIGINAL_CONDITIONS_PRESERVED; PARTIAL_INVESTIGATION",
+    "creative_development": "ATTRIBUTED_DIALOGUE_PERSISTED; NATIVE_IDENTITY_AUTHORING_NOT_DEMONSTRATED",
+    "complex_undertaking": "BLOCKED_BY_FREE_DAILY_QUOTA",
+    "interruption": "ACTUAL_QUOTA_RETRY_PRESERVED_READ_PREFIX; WORLD_COMMIT_RECOVERY_MOCK_ONLY",
+    "longer_dialogue": "SAVE_RELOAD_PASSED; EARLY_RECALL_FAILED_THEN_FIXED_AND_RETESTED"
   },
-  "latency": "NOT_MEASURED",
-  "tokens_per_second": "NOT_MEASURED",
-  "narrative_quality": "NOT_EVALUATED",
-  "mock_token_counts": "111 input / 22 output are synthetic test fixtures"
+  "complete_gameplay_acceptance": false
 }

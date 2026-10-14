@@ -139,17 +139,109 @@ def validate(config):
     if not choice:raise ProviderError('The selected model is no longer verified free; choose another explicitly.')
     return choice
 
+def provider_schema(value):
+    """Equivalent typed enums for constants in OpenAI-compatible schema subsets.
+
+    Groq best-effort ignored untyped const-only metadata in genuine gameplay.
+    Do not remove request binding or restrict general operation argument objects.
+    """
+    if isinstance(value,list):return [provider_schema(v) for v in value]
+    if not isinstance(value,dict):return value
+    value={k:provider_schema(v) for k,v in value.items()}
+    if 'const' in value:
+        fixed=value.pop('const');value['enum']=[fixed]
+        kinds={bool:'boolean',int:'integer',float:'number',str:'string',list:'array',dict:'object',type(None):'null'}
+        value.setdefault('type',kinds[type(fixed)])
+    return value
+
+def groq_schema(value):
+    """Close the provider schema without limiting general domain arguments.
+
+    Only open argument/authoring objects cross the wire as JSON strings. Prose,
+    source coverage, request binding and control modes remain ordinary typed JSON.
+    The original engine schema determines decoding, and domain checks still govern.
+    """
+    if isinstance(value,list):return [groq_schema(v) for v in value]
+    if not isinstance(value,dict):return value
+    if value.get('type')=='object' and value.get('additionalProperties') is True:
+        return {'type':'string','description':'JSON-encoded object, decoded and validated by the engine. Encode all original argument fields exactly.'}
+    result={k:groq_schema(v) for k,v in value.items()}
+    variants=result.get('anyOf',[])
+    # Native discuss permits either text alone or optional continuity details.
+    # Groq requires unique discriminator values. One discuss shape with an empty
+    # details array represents absence; clarify retains its original two fields.
+    detailed=next((v for v in variants if v.get('properties',{}).get('mode',{}).get('enum')==['discuss'] and 'details' in v.get('properties',{})),None)
+    if detailed:
+        for variant in variants:
+            modes=variant.get('properties',{}).get('mode',{}).get('enum')
+            if modes and len(modes)>1 and 'discuss' in modes:variant['properties']['mode']['enum']=[m for m in modes if m!='discuss']
+    return result
+
+def _strict_json(text):
+    def invalid_constant(value):raise ValueError('Non-JSON numerical constant')
+    def unique_fields(pairs):
+        out={}
+        for key,value in pairs:
+            if key in out:raise ValueError('Duplicate JSON field')
+            out[key]=value
+        return out
+    return json.loads(text,parse_constant=invalid_constant,object_pairs_hook=unique_fields)
+
+def _decode_wire(schema,value):
+    if 'const' in schema and (type(value)is not type(schema['const']) or value!=schema['const']):raise ValueError('Wrong fixed value')
+    if 'enum' in schema and value not in schema['enum']:raise ValueError('Wrong enum')
+    if 'anyOf' in schema:
+        for branch in schema['anyOf']:
+            try:return _decode_wire(branch,value)
+            except (ValueError,TypeError,KeyError):pass
+        raise ValueError('No matching proposal form')
+    kind=schema.get('type')
+    if kind=='object' and schema.get('additionalProperties') is True:
+        if not isinstance(value,str):raise ValueError('Encoded arguments required')
+        decoded=_strict_json(value)
+        if not isinstance(decoded,dict):raise ValueError('Arguments must decode to an object')
+        return decoded
+    if kind=='object':
+        if not isinstance(value,dict):raise ValueError('Object required')
+        fields=schema.get('properties',{})
+        if set(value)!=set(schema.get('required',fields)):raise ValueError('Missing or extra fields')
+        return {k:_decode_wire(fields[k],v) for k,v in value.items()}
+    if kind=='array':
+        if not isinstance(value,list):raise ValueError('Array required')
+        return [_decode_wire(schema['items'],v) for v in value]
+    if kind=='string' and not isinstance(value,str):raise ValueError('String required')
+    if kind=='integer' and type(value)is not int:raise ValueError('Integer required')
+    if kind=='boolean' and type(value)is not bool:raise ValueError('Boolean required')
+    return value
+
+def decode_response(config,text,schema):
+    if provider_id(config)!='groq' or schema is None:return text
+    try:
+        decoded=_decode_wire(schema,_strict_json(text))
+        proposal=decoded.get('proposal',{})
+        if proposal.get('mode')=='discuss' and proposal.get('details')==[]:proposal.pop('details')
+        return json.dumps(decoded,ensure_ascii=False)
+    except (ValueError,KeyError,TypeError):
+        raise ProviderError('The model returned an invalid structured response or encoded argument object. Nothing was applied.','invalid_response') from None
+
 def adapt_payload(config,payload,schema):
     choice=validate(config)
     provider=provider_id(config)
     if not choice:return payload
-    if schema and choice['format']=='schema':
+    if provider=='groq' and schema:
+        payload['response_format']={'type':'json_schema','json_schema':{'name':'caerness_response','strict':True,'schema':groq_schema(provider_schema(schema))}}
+        payload['messages']=[dict(m) for m in payload['messages']]
+        guidance='\nGROQ WIRE FORMAT: Follow the strict response schema. Wherever the schema declares an argument, entity or detail object as a string, encode that object as JSON inside the string. The engine decodes it and applies the original field/domain checks. Narrative text and exact source_text remain ordinary strings; do not alter source fields. Choose one proposal form only, without unused fields.'
+        if any('details' in variant.get('properties',{}) for variant in schema.get('properties',{}).get('proposal',{}).get('anyOf',[])):
+            guidance+=' For discuss include details:[] when there are no continuity facts to record; it means ordinary dialogue only.'
+        payload['messages'][-1]['content']+=guidance
+    elif schema and choice['format']=='schema':
         # Caerness schemas contain general-purpose argument objects, outside the
         # closed-object strict subset. Provider best-effort schema + unchanged
         # engine validation avoids either restricting capabilities or lying about strictness.
-        payload['response_format']={'type':'json_schema','json_schema':{'name':'caerness_response','strict':False,'schema':schema}}
+        payload['response_format']={'type':'json_schema','json_schema':{'name':'caerness_response','strict':False,'schema':provider_schema(schema)}}
     else:payload['response_format']={'type':'json_object'}
-    if provider=='groq':payload['reasoning_effort']='low';payload['include_reasoning']=False
+    if provider=='groq':payload['reasoning_effort']='medium';payload['include_reasoning']=False
     elif provider=='gemini':payload['reasoning_effort']='low'
     else:
         # One explicit free model, no model list, paid endpoint or model fallback.

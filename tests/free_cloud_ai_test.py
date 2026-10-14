@@ -37,6 +37,20 @@ def catalogs(url,**kw):
 def main():
     c,ids=fixture();seen=[];queue=[]
     secret='private-provider-key-SENTINEL'
+    from engine.planning_gateway import response_schema
+    shape=response_schema(7,{'protocol':'narrative_play_v1','read_tools':[{'name':'context'},{'name':'person'}],'capabilities':[{'name':'advance_time'}]})
+    converted=providers.groq_schema(providers.provider_schema(shape))
+    seen_modes=[]
+    for branch in converted['properties']['proposal']['anyOf']:
+        modes=branch['properties']['mode']['enum'];assert not set(modes)&set(seen_modes);seen_modes+=modes
+    cfg={'device_profile':'desktop_free_cloud_groq'}
+    decoded=json.loads(providers.decode_response(cfg,json.dumps({'task_type':'action_interpretation','request_id':7,'proposal':{'mode':'discuss','text':'Ordinary talk','details':[]}}),shape))
+    assert set(decoded['proposal'])=={'mode','text'}
+    for wire in ('[]','{bad','{"actor_id":1,"actor_id":2}','{"value":NaN}','{"value":Infinity}'):
+        try:providers.decode_response(cfg,json.dumps({'task_type':'action_interpretation','request_id':7,'proposal':{'mode':'inspect','calls':[{'tool':'person','arguments':wire}]}}),shape);raise AssertionError('Bad encoded arguments accepted')
+        except providers.ProviderError:pass
+    context=json.loads(providers.decode_response(cfg,json.dumps({'task_type':'action_interpretation','request_id':7,'proposal':{'mode':'inspect','calls':[{'tool':'context','arguments':{'institution_id':1}}]}}),shape))
+    assert context['proposal']['calls'][0]['arguments']=={'institution_id':1}
     class MockProvider(BaseHTTPRequestHandler):
         def log_message(self,*args):pass
         def do_POST(self):
@@ -49,8 +63,13 @@ def main():
                 self.end_headers();self.wfile.write(json.dumps(body).encode());return
             rid=re.search(r'"request_id":\s*(\d+)',payload['messages'][-1]['content'])
             if isinstance(value,str):text=value
-            else:text=json.dumps({'task_type':'action_interpretation','request_id':int(rid.group(1)),'proposal':value})
-            data={'choices':[{'message':{'content':text},'finish_reason':'stop'}],'usage':{'prompt_tokens':111,'completion_tokens':22}}
+            else:
+                if payload.get('response_format',{}).get('json_schema',{}).get('strict'):
+                    value=dict(value)
+                    if value.get('mode')=='inspect':value['calls']=[{**call,'arguments':json.dumps(call['arguments'])} for call in value['calls']]
+                    if value.get('mode')=='plan':value['plan']={**value['plan'],'steps':[{**step,'arguments':json.dumps(step['arguments'])} for step in value['plan']['steps']]}
+                text=json.dumps({'task_type':'action_interpretation','request_id':int(rid.group(1)),'proposal':value})
+            data={'choices':[{'message':{'content':text},'finish_reason':'stop'}],'usage':{'prompt_tokens':111,'completion_tokens':22,'prompt_tokens_details':{'cached_tokens':40},'completion_tokens_details':{'reasoning_tokens':2},'completion_time':.5,'ignored_private_field':secret}}
             self.send_response(200);self.send_header('x-ratelimit-remaining-tokens','5432');self.send_header('X-Private-Key',secret);self.end_headers();self.wfile.write(json.dumps(data).encode())
     server=ThreadingHTTPServer(('127.0.0.1',0),MockProvider);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
     original_open=__import__('engine.local_model',fromlist=['_urlopen'])._urlopen
@@ -69,11 +88,22 @@ def main():
             out=play(c,'I look around without looking for trouble.')
             assert out['status']=='discussed' and len(seen)==before+1
             sent=seen[-1];assert sent['headers']['Authorization']=='Bearer '+secret
-            assert sent['payload']['model']==model and sent['payload']['response_format']['type']=='json_schema'
-            assert sent['payload']['response_format']['json_schema']['strict'] is False
+            assert sent['headers']['User-Agent']=='Caerness/1.0'
+            assert sent['payload']['model']==model
+            if provider=='groq':
+                assert sent['payload']['response_format']['type']=='json_schema' and sent['payload']['response_format']['json_schema']['strict'] is True
+                assert 'GROQ WIRE FORMAT:' in sent['payload']['messages'][-1]['content']
+                assert 'never combine forms or add unused/null fields' in sent['payload']['messages'][-1]['content']
+            else:
+                assert sent['payload']['response_format']['type']=='json_schema'
+                assert sent['payload']['response_format']['json_schema']['strict'] is False
+                shape=sent['payload']['response_format']['json_schema']['schema']['properties']
+                assert shape['task_type']=={'type':'string','enum':['action_interpretation']}
+                assert shape['request_id']['type']=='integer' and len(shape['request_id']['enum'])==1
             if provider=='openrouter':assert sent['payload']['provider']=={'require_parameters':True,'max_price':{'prompt':0,'completion':0},'allow_fallbacks':False}
             safe=report(c);assert secret not in json.dumps(safe) and 'X-Private-Key' not in json.dumps(safe)
             assert safe['requests'][0]['calls'][0]['reported_rate_limits']['x-ratelimit-remaining-tokens']==5432
+            assert safe['requests'][0]['calls'][0]['provider_usage']=={'cached_prompt_tokens':40,'reasoning_tokens':2,'provider_generation_seconds':.5,'generation_tokens_per_second':44}
             print(provider,'mock observation: 1 call, synthetic 111 input / 22 output tokens')
         # Paid/missing/free-suffix-with-extra-fee/no-JSON models cannot be selected.
         assert [m['id'] for m in providers.discover('openrouter')]==[FREE]
@@ -96,6 +126,10 @@ def main():
         # Invalid successful reply remains distinguishable and retryable.
         queue[:]=['{not-json'];out=play(c,'I listen.');assert out['failure']['code']=='invalid_response'
         queue[:]=[discussion];assert resume(c,out['request_id'])['status']=='discussed'
+        for malformed in ({'proposal':discussion},{'task_type':'action_interpretation','request_id':999999,'proposal':discussion}):
+            today=plans.day(c);queue[:]=[json.dumps(malformed)]
+            out=play(c,'I quietly listen.');assert out['failure']['code']=='invalid_response' and plans.day(c)==today
+            queue[:]=[discussion];assert resume(c,out['request_id'])['status']=='discussed'
         queue[:]=[(307,{'error':{'message':secret}})];before=len(seen)
         out=play(c,'I pause to look around.')
         assert out['failure']['code']=='continuation_failed' and len(seen)==before+1
@@ -107,7 +141,7 @@ def main():
         today=plans.day(c);queue[:]=[{'mode':'plan','plan':plan},verdict,(503,{'error':{'message':secret}})]
         out=play(c,text);assert plans.day(c)==today+1 and out['failure']['code']=='continuation_failed'
         queue[:]=[discussion];assert resume(c,out['request_id'])['status']=='discussed' and plans.day(c)==today+1
-        for status,body,code in [(401,{'error':{'message':secret}},'authentication'),(402,{'error':{}},'quota_exhausted'),(404,{'error':{}},'model_unavailable'),(422,{'error':{'message':'response_format '+secret}},'provider_contract')]:
+        for status,body,code in [(401,{'error':{'message':secret}},'authentication'),(402,{'error':{}},'quota_exhausted'),(404,{'error':{}},'model_unavailable'),(422,{'error':{'message':'response_format '+secret}},'provider_contract'),(400,{'error':{'code':'json_validate_failed','message':secret}},'invalid_response'),(403,{'error':{'message':'error code: 1010'}},'provider_access'),(429,{'error':{'message':'tokens per day (TPD): Please try again in 12m59.76s.'}},'quota_exhausted')]:
             queue[:]=[(status,body)];out=play(c,'I observe.');assert out['failure']['code']==code
             assert secret not in json.dumps(out['diagnostics'])
         queue[:]=[discussion]

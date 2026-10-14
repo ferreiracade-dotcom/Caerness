@@ -1,0 +1,8 @@
+{
+  "http_status": 429,
+  "detail": {
+    "message": "Rate limit reached for model `openai/gpt-oss-120b` in organization `[PROVIDER_ACCOUNT]` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 197437, Requested 4368. Please try again in 12m59.76s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing",
+    "type": "tokens",
+    "code": "rate_limit_exceeded"
+  }
+}

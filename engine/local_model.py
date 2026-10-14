@@ -4,6 +4,8 @@ import json
 import os
 import time
 import socket
+import math
+import re
 from urllib.parse import urlsplit
 import sqlite3
 import urllib.error
@@ -104,15 +106,16 @@ def _urlopen(request, timeout):
 
 
 def _headers(*, local_only=False, provider=None):
+    base={'Content-Type':'application/json','User-Agent':'Caerness/1.0'}
     if provider:
         from .ai_providers import key_for, ProviderError
         key=key_for(provider)
         if not key:raise ProviderError('Enter the provider key in the launch window.', 'authentication')
-        return {'Content-Type':'application/json','Authorization':'Bearer '+key}
+        return {**base,'Authorization':'Bearer '+key}
     if local_only or os.environ.get("CAERNESS_FREE_LOCAL") == "1":
-        return {"Content-Type": "application/json"}
+        return base
     key = os.environ.get("CAERNESS_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    return {"Content-Type": "application/json", **({"Authorization": "Bearer " + key} if key else {})}
+    return {**base, **({"Authorization": "Bearer " + key} if key else {})}
 
 
 def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=False, provider=None) -> dict[str, Any]:
@@ -137,13 +140,20 @@ def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=Fa
         if provider:
             from .ai_providers import ProviderError
             code='continuation_failed'
-            if exc.code in (401,403):code='authentication'
-            elif exc.code==402 or 'insufficient_quota' in detail or 'quota exhausted' in detail:code='quota_exhausted'
+            if 'json_validate_failed' in detail:code='invalid_response'
+            elif 'error code: 1010' in detail:code='provider_access'
+            elif exc.code in (401,403):code='authentication'
+            elif exc.code==402 or 'insufficient_quota' in detail or 'quota exhausted' in detail or (exc.code==429 and ('per day (tpd)' in detail or 'per day (rpd)' in detail)):code='quota_exhausted'
             elif exc.code==429:code='rate_limit'
             elif exc.code==404:code='model_unavailable'
             elif 'context' in detail and any(x in detail for x in ('limit','exceed','long')):code='context_limit'
             elif exc.code in (400,422):code='provider_contract'
-            raise ProviderError('The cloud request failed. See safe diagnostics; no provider or paid model was substituted.',code,{'http_status':exc.code,**safe_rate_headers(exc.headers)}) from None
+            measurements={'http_status':exc.code,**safe_rate_headers(exc.headers)}
+            wait=re.search(r'please try again in ((?:[0-9]+(?:\.[0-9]+)?(?:ms|[hms]))+)',detail)
+            if wait:
+                seconds=sum(float(number)*{'h':3600,'m':60,'s':1,'ms':.001}[unit] for number,unit in re.findall(r'([0-9]+(?:\.[0-9]+)?)(ms|[hms])',wait.group(1)))
+                if math.isfinite(seconds):measurements['provider_retry_after_seconds']=seconds
+            raise ProviderError('The cloud request failed. See safe diagnostics; no provider or paid model was substituted.',code,measurements) from None
         if any(x in detail for x in ('out of memory','not enough memory','insufficient memory','cuda out','requires more system memory','failed to allocate','cannot allocate memory')):
             error=ConnectionError('Model service reported insufficient memory.');error.code='out_of_memory';error.measurements={'http_status':exc.code};raise error from None
         if local_only:
@@ -176,6 +186,22 @@ def safe_rate_headers(headers):
             number=float(value)
             if 0<=number<1e12:result[name]=number
         except (TypeError,ValueError):pass
+    return result
+
+def safe_provider_usage(data):
+    """Optional provider measurements only; no inferred balance or raw metadata."""
+    usage=data.get('usage') if isinstance(data.get('usage'),dict) else {}
+    result={}
+    for field,path in (('cached_prompt_tokens',('prompt_tokens_details','cached_tokens')),('reasoning_tokens',('completion_tokens_details','reasoning_tokens'))):
+        detail=usage.get(path[0]) if isinstance(usage.get(path[0]),dict) else {}
+        value=_token_count(detail.get(path[1]))
+        if value is not None:result[field]=value
+    for source,target in (('queue_time','provider_queue_seconds'),('prompt_time','provider_prompt_seconds'),('completion_time','provider_generation_seconds'),('cost','reported_cost_usd')):
+        value=usage.get(source)
+        if type(value) in (int,float) and math.isfinite(value) and value>=0:result[target]=value
+    elapsed=result.get('provider_generation_seconds')
+    tokens=_token_count(usage.get('completion_tokens'))
+    if elapsed and tokens is not None:result['generation_tokens_per_second']=round(tokens/elapsed,3)
     return result
 
 
@@ -236,7 +262,7 @@ def chat_local(
     response_schema: dict[str, Any] | None = None,
 ) -> LocalModelResult:
     cfg = runtime_config(conn)
-    from .ai_providers import provider_id,validate,adapt_payload
+    from .ai_providers import provider_id,validate,adapt_payload,decode_response
     cloud=provider_id(cfg)
     cloud_choice=validate(cfg) if cloud else None
     backend = str(cfg["local_backend"])
@@ -294,6 +320,10 @@ def chat_local(
             raise ModelResponseError("Model output reached its token limit; no incomplete response was applied.",'incomplete_response',usage,time.perf_counter()-started)
         if cloud and finish not in ('stop',):
             raise ModelResponseError('The provider did not finish a usable JSON response.','invalid_response',usage,time.perf_counter()-started)
+        if cloud:
+            try:text=decode_response(cfg,text,response_schema)
+            except ConnectionError:
+                raise ModelResponseError('The model returned an invalid structured response or encoded argument object.','invalid_response',usage,time.perf_counter()-started) from None
         return LocalModelResult(
             text=text,
             backend=backend,

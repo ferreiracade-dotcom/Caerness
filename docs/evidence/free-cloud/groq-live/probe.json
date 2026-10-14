@@ -1,0 +1,14 @@
+{
+  "provider": "groq",
+  "status": "REAL_INFERENCE_DIAGNOSTIC_PASSED",
+  "model": "openai/gpt-oss-120b",
+  "latency_seconds": 0.4059,
+  "prompt_tokens": 158,
+  "completion_tokens": 39,
+  "output_tokens_per_wall_second": 96.08277900960829,
+  "response": {
+    "ready": true,
+    "reply": "Hello!"
+  },
+  "gameplay_acceptance": "NOT_TESTED"
+}

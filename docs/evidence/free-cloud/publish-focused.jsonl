@@ -1,0 +1,8 @@
+{"test": "desktop_client_test", "status": "PASS", "secs": 1.0}
+{"test": "free_cloud_ai_test", "status": "PASS", "secs": 1.5}
+{"test": "free_cloud_setup_test", "status": "PASS", "secs": 0.3}
+{"test": "free_local_ai_test", "status": "PASS", "secs": 0.4}
+{"test": "narrative_authoring_test", "status": "PASS", "secs": 0.6}
+{"test": "narrative_recovery_test", "status": "PASS", "secs": 0.7}
+{"test": "narrative_runtime_test", "status": "PASS", "secs": 2.0}
+TOTAL {"PASS": 7}
