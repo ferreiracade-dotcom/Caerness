@@ -19,7 +19,7 @@ RULES = [
     'Scene and participants are already retrieved. If sufficient for observation/dialogue, finish in discuss now. Do not retrieve them again. Batch genuinely missing information in inspect; use feedback rather than repeating reads. Person, memory, canon and authoring tools preserve knowledge boundaries; no omniscience.',
     'For an ordinary quiet observation or short exchange, usually write one or two varied paragraphs. Follow the player\'s requested depth and pace; complex instructions retain all conditions.',
     'Answer the current player message, not an earlier turn. Do not repeat previous dialogue verbatim. Narrate surroundings when the player observes; use an NPC voice only when that person is speaking. Continuing participants need not dominate every scene.',
-    'Use only advertised tools and compose discovered capabilities. Investigate accessible circumstances when asked, without asking permission again. Missing means stay missing; preserve every unmet condition, never silently substitute an easier intention.',
+    'Use only advertised tools and compose discovered capabilities. When authorized to find or investigate something, actually inspect available world tools unless the supplied context already answers it; do not substitute a checklist telling the player to investigate. Missing means stay missing; preserve every unmet condition, never silently substitute an easier intention.',
     'Plan attempts, not achievements. Questions/hypotheticals do not authorize; clear directives ordinarily do. NPC consent differs from player authorization. Routine directives need independent scope verification; major commitments, changed terms and ambiguity require readable review. All plans retain exact original goal/source coverage; coverage alone does not prove completeness. Narrate confirmed results only.',
 ]
 
@@ -53,6 +53,26 @@ def memory(c, sid, query='', offset=None, limit=12):
             'selection':'page' if offset is not None else 'search' if query else 'early_anchors_and_16_recent',
             'omitted_messages':len(rows)-len(excerpts),
             'history_status':'Exact excerpts, not exhaustive context. Omitted messages remain saved in full; search or page memory for older details. Unresolved goals/conditions are supplied separately without truncation.'}
+
+def relevant_history(c,sid,query,window):
+    """One exact older dialogue passage matched to the current topic, not facts invented by a summarizer."""
+    import math
+    stop=set('the a an and or but to of in on at by for with from is was are were be been it its i me my you your we our they their this that these those what when where how why do did does have has had can could would should not so just about tell think remember conversation earlier beginning first really something said spoke'.split())
+    words=set(re.findall(r'\w+',query.lower()))-stop
+    rows=json.loads(plans.session(c,sid)['messages_json'])
+    documents=[set(re.findall(r'\w+',m['text'].lower())) if m['role'] in ('player','assistant') and isinstance(m['text'],str) else set() for m in rows]
+    present={m['index'] for m in window['excerpts']}
+    scored=[]
+    for index,(m,doc) in enumerate(zip(rows,documents)):
+        if index in present or m['role']!='assistant' or not isinstance(m['text'],str):continue
+        matches=words&doc
+        score=sum(math.log((len(rows)+1)/(1+sum(word in d for d in documents))) for word in matches)
+        if score>=2.5:scored.append((score,index,m))
+    if not scored:return []
+    _,index,m=max(scored,key=lambda item:(item[0],-item[1]))
+    base={'index':index,'day':m.get('day'),'role':m['role'],'authority':'Exact earlier dialogue, not objective world truth'}
+    if len(m['text'])<=1800:return [{**base,'text':m['text']}]
+    return [{**base,'total_chars':len(m['text']),'retrieve':'Use memory with offset='+str(index)+' to read the complete older passage. It was not silently truncated.'}]
 
 
 def person(c, owner, actor_id):
@@ -173,6 +193,7 @@ def enrich(c,payload):
     payload['protocol']='narrative_play_v1'
     payload['rules']=RULES
     payload['conversation']=memory(c,payload['session_id'],payload['raw_player_input']) if len(payload['raw_player_input'])>1000 else memory(c,payload['session_id'])
+    payload['conversation']['relevant_older_dialogue']=relevant_history(c,payload['session_id'],payload['raw_player_input'],payload['conversation'])
     from .narrative_authoring import visible
     payload['authored_continuity']=visible(c,plans.current_actor(c))
     payload['capabilities']=[{'name':cap.name,'description':cap.description} for cap in CAPABILITIES.values()]

@@ -1,0 +1,25 @@
+{
+  "evidence_type": "UI fixture, NOT actual model responses",
+  "sizes": [
+    {
+      "width": 1440,
+      "height": 900,
+      "no_horizontal_overflow": true,
+      "valid_response_budget_form": true
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "no_horizontal_overflow": true,
+      "valid_response_budget_form": true
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "no_horizontal_overflow": true,
+      "valid_response_budget_form": true
+    }
+  ],
+  "errors": [],
+  "no_browser_key_input": true
+}

@@ -184,6 +184,7 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
     json_options = {"ensure_ascii": False, **({"separators": (",", ":")} if provider == "local" else {"indent": 2})}
     contract = _task_contract(task_type, request_id)
     rules = _common_rules(task_type)
+    proposal_forms=[]
     if payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
         from .planning_gateway import contract as planning_contract
         if payload.get("protocol", "").startswith("narrative_"):
@@ -192,6 +193,20 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
         else:
             contract = planning_contract(request_id)
         rules = list(payload["rules"])
+        if '|' in str(contract.get('proposal',{}).get('mode','')):
+            # The old illustration combined mutually exclusive fields, which real
+            # models copied as unused calls/plan/authorship fields in dialogue.
+            # Keep a valid simple illustration and describe alternative shapes
+            # separately; no intent or domain operation is selected by Python.
+            original=contract['proposal']
+            from .planning_gateway import response_schema
+            variants=response_schema(request_id,payload)['properties']['proposal'].get('anyOf',[])
+            for variant in variants:
+                properties=variant['properties'];mode=properties['mode']
+                names=mode.get('enum',[mode.get('const')])
+                detail={k:original.get(k,'Optional attributed continuity details; retrieve authoring_schema for exact fields.') for k in properties if k!='mode'}
+                proposal_forms.append({'modes':names,'required_fields':list(properties),'field_guidance':detail})
+            contract={**contract,'proposal':{'mode':'discuss','text':'Write the actual dialogue/narration here; this is ONE shape, not a choice of intent.'}}
     if provider == 'local' and payload.get('protocol', '').startswith('narrative_'):
         # Rules already appear above; do not tokenize a second identical copy.
         payload = {k:v for k,v in payload.items() if k != 'rules'}
@@ -235,6 +250,7 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
         "## Required response contract",
         "Return **one JSON object only**. No markdown fence and no text before or after it.",
         "The engine is tolerant of fences if the chat UI adds them, but raw JSON is preferred.",
+        *(["The illustration below shows discussion only. Choose the appropriate proposal form for the actual intention; never combine forms or add unused/null fields.","Allowed proposal forms (reference, not response fields):",json.dumps(proposal_forms,**json_options)] if proposal_forms else []),
         "",
         "```json",
         json.dumps(contract, **json_options),
@@ -694,7 +710,7 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
     else:
         contract_packet = render_packet("local", request_id, str(row["task_type"]), payload)
         schema = None
-        if runtime_config(conn).get("free_local") and payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
+        if (runtime_config(conn).get("free_local") or runtime_config(conn).get('ai_provider') in {'groq','gemini','openrouter'}) and payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
             from .planning_gateway import response_schema
             schema = response_schema(request_id, payload)
         result = chat_local(
@@ -707,7 +723,13 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
             response_schema=schema,
         )
         conn.execute('CREATE TABLE IF NOT EXISTS ai_model_calls(id INTEGER PRIMARY KEY,request_id INTEGER,backend TEXT,model TEXT,latency_seconds REAL,prompt_tokens INTEGER,completion_tokens INTEGER)')
+        for name in ('provider','usage_json'):
+            if name not in {r[1] for r in conn.execute('PRAGMA table_info(ai_model_calls)')}:conn.execute(f'ALTER TABLE ai_model_calls ADD COLUMN {name} TEXT')
         conn.execute('INSERT INTO ai_model_calls(request_id,backend,model,latency_seconds,prompt_tokens,completion_tokens) VALUES (?,?,?,?,?,?)',(request_id,result.backend,result.model,result.latency_seconds,result.prompt_tokens,result.completion_tokens))
+        call_id=conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+        from .local_model import safe_provider_usage
+        usage={'rate_limits':(result.raw or {}).get('_caerness_transport',{}),'provider_usage':safe_provider_usage(result.raw or {})}
+        conn.execute('UPDATE ai_model_calls SET provider=?,usage_json=? WHERE id=?',(runtime_config(conn).get('ai_provider','custom'),json.dumps(usage),call_id))
         response = import_response(conn, request_id, result.text)
         out = {
             "status": "responded",

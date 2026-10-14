@@ -1,0 +1,11 @@
+{
+  "code_head": "0ea404c55ae9a1fd558ded4ba9df8f0d310fa00c",
+  "source_zip_bytes": 14739856,
+  "fixture": "Disposable UI campaign, not owner save",
+  "required_launchers_and_docs_present": true,
+  "existing_campaign_fingerprint_before": "884ba96069f0c29734b4307bdc1dfec73ffd17f0e95172d10371efd61e9a00b3",
+  "existing_campaign_fingerprint_after": "884ba96069f0c29734b4307bdc1dfec73ffd17f0e95172d10371efd61e9a00b3",
+  "private_key_absent_restart": "authentication required, no inference attempted",
+  "genuine_cloud_inference": false,
+  "passed": true
+}

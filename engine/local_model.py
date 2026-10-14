@@ -4,6 +4,8 @@ import json
 import os
 import time
 import socket
+import math
+import re
 from urllib.parse import urlsplit
 import sqlite3
 import urllib.error
@@ -47,6 +49,9 @@ def runtime_config(conn: sqlite3.Connection) -> dict[str, Any]:
     config["remote_model"] = urlsplit(str(config["local_endpoint"])).hostname not in {"localhost", "127.0.0.1", "::1"}
     config["credential_available"] = bool(os.environ.get("CAERNESS_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY"))
     config["free_local"] = config.get("device_profile") == "desktop_free_local"
+    from .ai_providers import provider_id, key_for
+    config['ai_provider'] = provider_id(config) or ('local' if config['free_local'] else 'custom')
+    if provider_id(config):config['credential_available'] = bool(key_for(provider_id(config)))
     if config["free_local"]:
         if config["remote_model"] or 'cloud' in str(config["local_model"]).lower():
             raise ValueError("Free local play requires a loopback server and a local model. Use explicit remote configuration to change this.")
@@ -100,27 +105,58 @@ def _urlopen(request, timeout):
     return urllib.request.build_opener(_NoRedirect()).open(request, timeout=timeout)
 
 
-def _headers(*, local_only=False):
+def _headers(*, local_only=False, provider=None):
+    base={'Content-Type':'application/json','User-Agent':'Caerness/1.0'}
+    if provider:
+        from .ai_providers import key_for, ProviderError
+        key=key_for(provider)
+        if not key:raise ProviderError('Enter the provider key in the launch window.', 'authentication')
+        return {**base,'Authorization':'Bearer '+key}
     if local_only or os.environ.get("CAERNESS_FREE_LOCAL") == "1":
-        return {"Content-Type": "application/json"}
+        return base
     key = os.environ.get("CAERNESS_MODEL_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    return {"Content-Type": "application/json", **({"Authorization": "Bearer " + key} if key else {})}
+    return {**base, **({"Authorization": "Bearer " + key} if key else {})}
 
 
-def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=False) -> dict[str, Any]:
+def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=False, provider=None) -> dict[str, Any]:
     _validate_endpoint(url)
+    if provider:
+        from .ai_providers import PROVIDERS,ProviderError
+        if provider not in PROVIDERS or url!=PROVIDERS[provider]['endpoint'] or local_only:
+            raise ProviderError('Cloud credentials are restricted to the selected official endpoint.')
     request = urllib.request.Request(
         url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers=_headers(local_only=local_only),
+        headers=_headers(local_only=local_only,provider=provider),
         method="POST",
     )
     try:
         with _urlopen(request, timeout) as response:
             body = response.read().decode("utf-8")
+            transport = safe_rate_headers(response.headers)
     except urllib.error.HTTPError as exc:
         # Classify service failures without forwarding its possibly private body.
         detail=exc.read(8192).decode('utf-8',errors='replace').lower()
+        if provider:
+            from .ai_providers import ProviderError
+            code='continuation_failed'
+            if 'json_validate_failed' in detail:code='invalid_response'
+            elif 'error code: 1010' in detail:code='provider_access'
+            elif exc.code in (401,403):code='authentication'
+            elif exc.code==402 or 'insufficient_quota' in detail or 'quota exhausted' in detail or (exc.code==429 and ('per day (tpd)' in detail or 'per day (rpd)' in detail)):code='quota_exhausted'
+            elif exc.code==429:code='rate_limit'
+            elif exc.code==404:code='model_unavailable'
+            elif 'context' in detail and any(x in detail for x in ('limit','exceed','long')):code='context_limit'
+            elif exc.code in (400,422):code='provider_contract'
+            measurements={'http_status':exc.code,**safe_rate_headers(exc.headers)}
+            if provider=='gemini':
+                code, google_measurements = gemini_error_details(detail, code)
+                measurements.update(google_measurements)
+            wait=re.search(r'please try again in ((?:[0-9]+(?:\.[0-9]+)?(?:ms|[hms]))+)',detail)
+            if wait:
+                seconds=sum(float(number)*{'h':3600,'m':60,'s':1,'ms':.001}[unit] for number,unit in re.findall(r'([0-9]+(?:\.[0-9]+)?)(ms|[hms])',wait.group(1)))
+                if math.isfinite(seconds):measurements['provider_retry_after_seconds']=seconds
+            raise ProviderError('The cloud request failed. See safe diagnostics; no provider or paid model was substituted.',code,measurements) from None
         if any(x in detail for x in ('out of memory','not enough memory','insufficient memory','cuda out','requires more system memory','failed to allocate','cannot allocate memory')):
             error=ConnectionError('Model service reported insufficient memory.');error.code='out_of_memory';error.measurements={'http_status':exc.code};raise error from None
         if local_only:
@@ -135,11 +171,99 @@ def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=Fa
     data = json.loads(body)
     if not isinstance(data, dict):
         raise ValueError("Local model returned non-object JSON.")
+    if provider and isinstance(data.get('error'),dict):
+        from .ai_providers import ProviderError
+        status=data['error'].get('code')
+        code={401:'authentication',403:'authentication',402:'quota_exhausted',429:'rate_limit',404:'model_unavailable',400:'provider_contract',422:'provider_contract'}.get(status,'continuation_failed')
+        measurements={'http_status':status if type(status)is int else None,**transport}
+        if provider=='gemini':
+            code, google_measurements=gemini_error_details(json.dumps(data),code)
+            measurements.update(google_measurements)
+        raise ProviderError('The cloud provider returned an error instead of a completion; no outcome was applied.',code,measurements)
+    if provider:data['_caerness_transport']=transport
     return data
+
+
+def gemini_error_details(body, code):
+    """Interpret documented Google error types; export only a numeric wait.
+
+    Do not export descriptions, quota identifiers/dimensions, project IDs or URLs.
+    Catalog access does not establish an inference quota. Zero must be explicit.
+    """
+    try:
+        error=json.loads(body).get('error',{})
+    except (ValueError,AttributeError):return code,{}
+    if not isinstance(error,dict):return code,{}
+    message=str(error.get('message','')).lower()
+    status=str(error.get('status','')).upper()
+    measurements={}
+    if status=='FAILED_PRECONDITION' and ('free tier' in message or 'free_tier' in message):
+        code='free_quota_unavailable'
+    if status=='RESOURCE_EXHAUSTED' and code=='continuation_failed':code='rate_limit'
+    details=error.get('details',[])
+    if not isinstance(details,list):return code,measurements
+    for detail in details:
+        if not isinstance(detail,dict):continue
+        kind=str(detail.get('@type','')).lower()
+        if kind.endswith('google.rpc.retryinfo'):
+            match=re.fullmatch(r'([0-9]+(?:\.[0-9]+)?)s',str(detail.get('retryDelay',detail.get('retrydelay',''))))
+            if match:
+                seconds=float(match.group(1))
+                if math.isfinite(seconds) and seconds<1e12:measurements['provider_retry_after_seconds']=seconds
+        if kind.endswith('google.rpc.quotafailure'):
+            violations=detail.get('violations',[])
+            if not isinstance(violations,list):continue
+            for item in violations:
+                if not isinstance(item,dict):continue
+                ident=str(item.get('quotaId',item.get('quotaid',''))).lower()
+                metric=str(item.get('quotaMetric',item.get('quotametric',''))).lower()
+                value=item.get('quotaValue',item.get('quotavalue'))
+                if value in (0,'0') and value is not False and ('free' in ident or 'free' in metric):
+                    code='free_quota_unavailable'
+                elif code=='rate_limit' and 'perday' in ident.replace('_','').replace('-',''):
+                    code='quota_exhausted'
+    # Some responses state the zero limit in the message rather than a quotaValue.
+    if code in ('rate_limit','quota_exhausted') and 'free_tier' in message and re.search(r'limit:\s*0(?:\D|$)',message):
+        code='free_quota_unavailable'
+    return code,measurements
+
+
+def safe_rate_headers(headers):
+    """Only numerical quota headers, with explicit provider units; never arbitrary headers."""
+    result={}
+    for name in ('retry-after','x-ratelimit-limit-requests','x-ratelimit-remaining-requests','x-ratelimit-limit-tokens','x-ratelimit-remaining-tokens'):
+        value=headers.get(name) if headers else None
+        try:
+            number=float(value)
+            if 0<=number<1e12:result[name]=number
+        except (TypeError,ValueError):pass
+    return result
+
+def safe_provider_usage(data):
+    """Optional provider measurements only; no inferred balance or raw metadata."""
+    usage=data.get('usage') if isinstance(data.get('usage'),dict) else {}
+    result={}
+    for field,path in (('cached_prompt_tokens',('prompt_tokens_details','cached_tokens')),('reasoning_tokens',('completion_tokens_details','reasoning_tokens'))):
+        detail=usage.get(path[0]) if isinstance(usage.get(path[0]),dict) else {}
+        value=_token_count(detail.get(path[1]))
+        if value is not None:result[field]=value
+    for source,target in (('queue_time','provider_queue_seconds'),('prompt_time','provider_prompt_seconds'),('completion_time','provider_generation_seconds'),('cost','reported_cost_usd')):
+        value=usage.get(source)
+        if type(value) in (int,float) and math.isfinite(value) and value>=0:result[target]=value
+    elapsed=result.get('provider_generation_seconds')
+    tokens=_token_count(usage.get('completion_tokens'))
+    if elapsed and tokens is not None:result['generation_tokens_per_second']=round(tokens/elapsed,3)
+    return result
 
 
 def local_health(conn: sqlite3.Connection) -> dict[str, Any]:
     cfg = runtime_config(conn)
+    if cfg.get('ai_provider') in {'groq','gemini','openrouter'}:
+        from .ai_providers import validate,ProviderError
+        try:
+            validate(cfg)
+            return {'ok':True,'status':'catalog_verified_not_inference','backend':cfg['local_backend'],'model':cfg['local_model']}
+        except ProviderError as error:return {'ok':False,'status':error.code,'error':str(error)}
     if cfg["local_backend"] == "disabled":
         return {"ok": False, "status": "disabled", "backend": "disabled", "model": cfg["local_model"]}
 
@@ -157,7 +281,7 @@ def local_health(conn: sqlite3.Connection) -> dict[str, Any]:
     last_error = ""
     for url in candidates:
         try:
-            req = urllib.request.Request(url, headers=_headers(local_only=cfg.get("free_local", False)), method="GET")
+            req = urllib.request.Request(url, headers=_headers(local_only=not cfg.get('remote_model')), method="GET")
             with _urlopen(req, timeout) as response:
                 if 200 <= response.status < 300:
                     return {
@@ -189,6 +313,9 @@ def chat_local(
     response_schema: dict[str, Any] | None = None,
 ) -> LocalModelResult:
     cfg = runtime_config(conn)
+    from .ai_providers import provider_id,validate,adapt_payload,decode_response
+    cloud=provider_id(cfg)
+    cloud_choice=validate(cfg) if cloud else None
     backend = str(cfg["local_backend"])
     if backend == "disabled":
         raise RuntimeError("Local model backend is disabled.")
@@ -199,7 +326,11 @@ def chat_local(
     # Chat models tokenize content, not JSON transport escaping. Local structured
     # output schemas compile to grammar, not input tokens. Reserve template margin.
     input_estimate=sum(estimate_tokens(m['content'])+8 for m in messages)+64
-    if cfg.get("free_local") and input_estimate + max_tokens > int(cfg['local_heavy_context_tokens']):
+    if cloud_choice:
+        max_tokens=min(max_tokens,cloud_choice['output'])
+        # Remote schemas may count towards provider context. Never silently trim history.
+        input_estimate+=estimate_tokens(response_schema) if response_schema else 0
+    if (cfg.get("free_local") or cloud) and input_estimate + max_tokens > min(int(cfg['local_heavy_context_tokens']),cloud_choice['context'] if cloud_choice else int(cfg['local_heavy_context_tokens'])):
         raise ValueError("This request exceeds the configured local context budget. No truncated interpretation was applied.")
     if cfg.get("free_local") and urlsplit(endpoint).port == 11434:
         parsed = urlsplit(endpoint)
@@ -224,7 +355,10 @@ def chat_local(
                 "name": "caerness_response", "strict": True, "schema": response_schema}}
         if cfg.get("free_local") and urlsplit(endpoint).port == 11434:
             payload["reasoning_effort"] = "none"
-        data = _post_json(endpoint, payload, timeout, local_only=cfg.get("free_local", False))
+        if cloud:
+            payload=adapt_payload(cfg,payload,response_schema)
+            data=_post_json(endpoint,payload,timeout,provider=cloud)
+        else:data = _post_json(endpoint, payload, timeout, local_only=not cfg.get('remote_model'))
         usage=data.get('usage') if isinstance(data.get('usage'),dict) else {}
         try:
             choice=data['choices'][0]
@@ -235,6 +369,12 @@ def chat_local(
             raise ModelResponseError('The model response lacked usable message content.','invalid_response',usage,time.perf_counter()-started) from None
         if finish == "length":
             raise ModelResponseError("Model output reached its token limit; no incomplete response was applied.",'incomplete_response',usage,time.perf_counter()-started)
+        if cloud and finish not in ('stop',):
+            raise ModelResponseError('The provider did not finish a usable JSON response.','invalid_response',usage,time.perf_counter()-started)
+        if cloud:
+            try:text=decode_response(cfg,text,response_schema)
+            except ConnectionError:
+                raise ModelResponseError('The model returned an invalid structured response or encoded argument object.','invalid_response',usage,time.perf_counter()-started) from None
         return LocalModelResult(
             text=text,
             backend=backend,
@@ -256,7 +396,7 @@ def chat_local(
             payload["format"] = "json"
         if response_schema is not None:payload['format']=response_schema
         if cfg.get('free_local'):payload['think']=False
-        data = _post_json(endpoint, payload, timeout,local_only=cfg.get('free_local',False))
+        data = _post_json(endpoint, payload, timeout,local_only=not cfg.get('remote_model'))
         if data.get('done_reason')=='length':raise ModelResponseError('Model output reached its token limit; no incomplete response was applied.','incomplete_response',{'prompt_tokens':data.get('prompt_eval_count'),'completion_tokens':data.get('eval_count')},time.perf_counter()-started)
         try:
             text = str(data["message"]["content"])

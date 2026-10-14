@@ -8,6 +8,8 @@ Caerness is a narrative-first RPG primarily played in a desktop/laptop browser, 
 
 # v0.26.1 pre-RC integration note
 
+**Optional inference update, 14 October 2026:** the same authoritative game can use free cloud GroqCloud/Gemini/OpenRouter or local Ollama/LM Studio, without campaign replacement or mandatory payment. Privacy/free-account confirmation and provider-specific structured contracts apply. Real-model prose/reasoning remain an acceptance gate. See `FREE_CLOUD_PLAY.md` and `docs/free-cloud-ai.md`.
+
 The architectural principles below remain authoritative. v0.26.1 adds the product/integration layer needed to carry them into a v1.0 release candidate: a production bootstrap, versioned save migrations, save-safe testing, explicit mirrored-field ownership checks, phone-facing setup/inspection/diagnostics, domain-to-decision adapters, and realistic-scale 20/40/120-year validation. Historical crystallization is explicitly actor-first for v1.0.
 
 ---

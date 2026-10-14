@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-14",
+  "evidence_type": "Actual Groq model responses on disposable opening-world copy",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "billing": "Owner confirmed Free plan, billing disabled; no upgrade/fallback",
+  "completed_runtime_model_calls": 33,
+  "known_prompt_tokens": 185356,
+  "known_completion_tokens": 15376,
+  "call_latency_seconds": {
+    "min": 0.8014,
+    "median": 1.5488,
+    "max": 2.7159
+  },
+  "instrumented_http_status_counts": {
+    "200": 27,
+    "400": 3,
+    "429": 27
+  },
+  "capture_limits": "HTTP instrumentation started after early probe/observation and initial failed metadata response; accepted dialogue and all database model-call records are complete. Failed HTTP generations do not supply token counts. Transcript retry labels reflect development stages; engine-requests supplies exact IDs and source inputs.",
+  "conversation_player_messages": 24,
+  "conversation_narrator_messages": 24,
+  "world_day_after": 0,
+  "new_teacher_native_actor_count": 0,
+  "new_workshop_native_actor_count": 0,
+  "persisted_subjective_detail_count": 0,
+  "pending_requests": [
+    {
+      "id": 31,
+      "status": "pending",
+      "target_id": 2
+    },
+    {
+      "id": 32,
+      "status": "pending",
+      "target_id": 3
+    }
+  ],
+  "interpretation": "Narrative conversation and retry are demonstrated. Tool investigation is partial; objective creative identity persistence, complex execution and passage of time remain live acceptance gates blocked by free daily quota."
+}

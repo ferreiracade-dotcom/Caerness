@@ -1,0 +1,37 @@
+{
+  "player": "I take a slow walk through the place where I am staying. What do I notice about the people and the ordinary life around me?",
+  "elapsed_seconds": 2.9277,
+  "status": "external_recommended",
+  "diagnostics": {
+    "format": "caerness-diagnostics-v1",
+    "privacy": "No prompts, dialogue, world facts, credentials or endpoints included.",
+    "runtime": {
+      "ai_provider": "gemini",
+      "local_backend": "openai_compatible",
+      "local_model": "gemini-3.8-flash",
+      "local_timeout_seconds": 90,
+      "local_max_output_tokens": 2048,
+      "local_heavy_context_tokens": 32768
+    },
+    "requests": [
+      {
+        "request_id": 1,
+        "status": "pending",
+        "retryable": true,
+        "phase": "narrative_play_v1",
+        "round": 0,
+        "failure": {
+          "code": "continuation_failed",
+          "phase": "narrative_play_v1",
+          "elapsed_seconds": 2.8589,
+          "created_at": "2026-10-14 11:10:39",
+          "measurements": {
+            "http_status": 503
+          },
+          "error_type": "ProviderError"
+        },
+        "calls": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "format": "caerness-cloud-probe-v1",
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
+  "phase": "probe",
+  "gameplay_acceptance": "NOT_TESTED",
+  "status": "FAILED",
+  "code": "model_unavailable",
+  "explanation": "This cloud model is unavailable. Choose another verified free model explicitly; your campaign remains saved.",
+  "latency_seconds": 0.3133,
+  "http_status": 404,
+  "measurements": {}
+}

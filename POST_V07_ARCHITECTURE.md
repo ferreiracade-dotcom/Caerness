@@ -1,5 +1,7 @@
 # Caerness Narrative Engine Architecture
 
+**Optional free cloud update, 14 October 2026:** GroqCloud, Gemini and verified zero-priced OpenRouter variants are transports for the existing narrative/planning engine alongside Ollama/LM Studio. Provider choice never replaces a campaign or bypasses authority. Keys remain server-side/in memory; privacy/billing-disabled account confirmation precedes cloud play. No paid/provider fallback. Earlier local deployment guidance is an option, not a cloud prohibition. See `docs/free-cloud-ai.md`; live acceptance still requires actual inference evidence.
+
 **Owner authoring clarification, 13 October 2026 (PR #7):** §§18.5, 19–20 and 34–35 permit constrained progressive invention; the World Bible/opening are not exhaustive. Entirely new significant people, organisations, histories and circumstances may enter campaign truth without a prior named/latent seed entry. Ordinary recollections/gestures remain natural; objective consequential additions receive consistency checks, native identities and graded continuity persistence before future reliance. Preserve existing anchors/canon and action validation. Anti-convenience does not ban legitimate opportunities or important emergence. See `docs/narrative-authoring.md`; this supersedes earlier blanket no-invention interpretations.
 ## Post-v0.7 Consolidated Design Specification
 

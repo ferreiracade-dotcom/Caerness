@@ -1,5 +1,7 @@
 # Caerness — a life in a living world
 
+**Optional free cloud or local AI:** double-click `Play Caerness.cmd` / `Choose AI.cmd` to select GroqCloud, Google Gemini, OpenRouter, Ollama or LM Studio. The same campaign and conversations continue across model changes. Keys are pasted privately in the launch window and kept in memory. Keep billing disabled; no paid fallback. See [FREE_CLOUD_PLAY.md](FREE_CLOUD_PLAY.md). Actual Groq conversation is recorded; quota limits blocked full action/time acceptance. Gemini/OpenRouter gameplay remains untested. A connection test is not gameplay acceptance.
+
 A free-form AI narrative RPG for desktop/laptop browsers, with mobile-browser compatibility. The AI supplies conversation, reasoning and prose; the Python/SQLite simulation supplies authoritative continuity and consequences.
 
 ## Windows playtest recovery
@@ -14,9 +16,9 @@ proof of an enjoyable game.
 
 **Creative campaign authorship:** the World Bible is a foundation, not a closed catalogue. Plausible new memories, biographies, important people and institutions are permitted. The runtime now distinguishes light expression, attributed recollections/rumours and consistency-reviewed objective additions, preserving important details across conversations. It does not turn invented wealth, authority or agreements into automatic player success. [What is supported and what remains limited](docs/narrative-authoring.md).
 
-**Play free on Windows:** [download the complete local-AI branch ZIP](https://github.com/ferreiracade-dotcom/Caerness/archive/refs/heads/feat/free-local-ai.zip), extract it and double-click **Play Caerness.cmd**. [Windows instructions](WINDOWS_PLAY.md) explain hardware detection, permission before downloads, Ollama startup and the actual inference check. No paid account or API key is required. **Play with LM Studio.cmd** supports model comparison; **Change Local Model.cmd** preserves the campaign. Local model quality remains subject to genuine gameplay acceptance, not server reachability.
+**Play on Windows:** [download the complete cloud/local branch ZIP](https://github.com/ferreiracade-dotcom/Caerness/archive/refs/heads/feat/free-cloud-ai.zip), extract it and double-click **Play Caerness.cmd**. [Cloud instructions](FREE_CLOUD_PLAY.md) explain free accounts, hidden keys and privacy; [local instructions](WINDOWS_PLAY.md) explain hardware checks, consent before downloads and Ollama/LM Studio. Local play requires no account/key. **Change Local Model.cmd** preserves the campaign. Actual gameplay quality remains an acceptance gate, not server reachability.
 
-**Current direction (13 October 2026):** enjoyable desktop play using genuinely free local AI; one responsive web client. 3D/Unreal is postponed indefinitely. This branch starts from the latest PR #6 desktop corrections and retains #5/#4/#3. [Local runtime/model assessment](docs/local-ai.md), [test evidence](docs/local-ai-evidence.md), [desktop work](docs/plans/2026-10-13-desktop-narrative.md).
+**Current direction (14 October 2026):** enjoyable desktop play using optional free cloud or genuinely local AI; one responsive web client. 3D/Unreal is postponed indefinitely. This branch starts from PR #7's latest recovery corrections and retains #6/#5/#4/#3. [Cloud assessment](docs/free-cloud-ai.md), [local assessment](docs/local-ai.md), [local evidence](docs/local-ai-evidence.md), [desktop work](docs/plans/2026-10-13-desktop-narrative.md).
 
 ## Simulation handoff (historical milestones below)
 
