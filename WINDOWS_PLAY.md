@@ -1,5 +1,7 @@
 # Play Caerness free on Windows
 
+**14 October update:** `Play Caerness.cmd` opens a cloud/local selector. Choose Ollama to retain existing local setup, or use `Play with Ollama.cmd` directly. LM Studio and Change Local Model launchers remain local-only. For optional free cloud accounts, hidden keys and campaign-preserving switching, see [FREE_CLOUD_PLAY.md](FREE_CLOUD_PLAY.md). No mandatory API account or payment is introduced.
+
 The narrative policy now permits compatible creative biographies, memories and
 significant new people/institutions. Important objective additions are reviewed and
 persisted in the campaign; ordinary anecdotes need no approval ceremony. See
@@ -15,7 +17,7 @@ enjoyable play; model files are not their full inference memory requirement.
 
 1. Install **Python 3.12 or later** from [python.org](https://www.python.org/downloads/windows/), including the Python launcher (`py`).
 2. [Download the complete local-AI ZIP](https://github.com/ferreiracade-dotcom/Caerness/archive/refs/heads/feat/free-local-ai.zip). Sign in to GitHub if required, choose **Extract All**, and open the extracted folder.
-3. Double-click **Play Caerness.cmd**. It prepares the Python environment/NumPy, then checks RAM, GPU and dedicated VRAM. Keep its window open while playing.
+3. Double-click **Play with Ollama.cmd**, or select **Ollama — Local AI** in **Play Caerness.cmd**. It prepares Python/NumPy, then checks RAM, GPU and dedicated VRAM. Keep its window open while playing.
 4. If Ollama is missing, permit opening the [official Windows installer](https://ollama.com/download/windows), install it, then return and press Enter. Windows 10 22H2 or later is required. Local models require no Ollama account.
 5. Choose a displayed model. The launcher explains estimated download size and GPU-memory candidacy. **Type YES** to permit a download; Enter or any other answer declines. Installed models are reused.
 6. The launcher references downloaded weights with a bounded **8K context** and tests a **real structured model reply**. First loading can take a while. It will not open the game if that check fails. The diagnostic is saved in **game/local-inference-check.json**; it is not proof of gameplay quality.
@@ -59,7 +61,7 @@ Keep LM Studio running. Caerness does not automate or claim to verify its downlo
 3. Copy the old **game** folder into the new folder, retaining its files. This preserves
    your campaign, pending responses, history and any SQLite journal files. Do not
    delete files ending in `-wal` or `-shm`, and do not copy a running campaign.
-4. Launch **Play Caerness.cmd** in the new folder. Your installed model is reused;
+4. Launch **Play with Ollama.cmd** in the new folder (or choose Ollama in the AI selector). Your installed model is reused;
    there is no compulsory download or new campaign.
 5. Open **Settings → Advanced options & diagnostics → Retry unfinished response**.
    This resumes the latest unfinished response in the selected conversation, rather

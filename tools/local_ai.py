@@ -248,14 +248,14 @@ def configure_save(conn, endpoint, model):
         referral_for_quality=0, referral_for_reasoning=0, referral_for_hardware=0)
 
 
-def inference_probe(conn):
+def inference_probe(conn, *, max_tokens=120):
     from engine.local_model import chat_local
     schema = {'type': 'object', 'properties': {'ready': {'type': 'boolean'}, 'reply': {'type': 'string'}},
               'required': ['ready', 'reply'], 'additionalProperties': False}
     result = chat_local(conn, [
         {'role': 'system', 'content': 'Return JSON matching the requested schema. No reasoning text. This is a connection diagnostic, not gameplay.'},
         {'role': 'user', 'content': 'Set ready to true and reply to a short greeting in plain English.'}],
-        max_tokens=120, require_json=True, response_schema=schema)
+        max_tokens=max_tokens, require_json=True, response_schema=schema)
     parsed = json.loads(result.text)
     if set(parsed) != {'ready', 'reply'} or parsed['ready'] is not True or not isinstance(parsed['reply'], str) or not parsed['reply'].strip():
         raise ValueError('Model inference did not satisfy the structured diagnostic. No successful gameplay is claimed.')

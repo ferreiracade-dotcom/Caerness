@@ -187,6 +187,7 @@ def mobile_state(conn: sqlite3.Connection) -> dict[str, Any]:
         "claims": hub.get("claims", []),
         "agency_handoff": latest_handoff,
         "runtime": {
+            "ai_provider":cfg.get('ai_provider','custom'),
             "local_heavy_context_tokens":cfg['local_heavy_context_tokens'],
             "local_max_output_tokens":cfg['local_max_output_tokens'],
             "device_profile": cfg["device_profile"],

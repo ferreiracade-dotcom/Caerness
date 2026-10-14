@@ -13,6 +13,8 @@ A persistent low-fantasy world simulation (a murim-style martial world plus West
 
 ## 2. Where work stands (2026-10-13)
 
+**Optional free cloud inference (14 October):** `Play Caerness.cmd` / `Choose AI.cmd` select GroqCloud, Gemini, OpenRouter, Ollama or LM Studio while preserving the same campaign. See `FREE_CLOUD_PLAY.md` and `docs/free-cloud-ai.md`. Keys are provider-bound/server-memory only; require verified free choices, explicit privacy/free-account confirmation and no paid/provider fallback. Local inference stays independent. Groq/Gemini billing-disabled status requires owner verification; live cloud gameplay remains unproven without actual replies. Local-only safeguards apply to selected local mode, not explicitly selected cloud play.
+
 **Current product direction:** a rich AI narrative RPG, primarily in a desktop/laptop browser, with the same responsive client usable on mobile. Capable model reasoning, prose and characters take priority over running inference on a particular device. 3D observation/Unreal is postponed indefinitely until text play is genuinely enjoyable.
 
 **Feature stack:** PR #3 → #4 → #5 (`feat/narrative-runtime`) → desktop narrative work. Preserve the latest dependency fixes; do not start this work from master or merge/retarget automatically. The simulation remains Python/SQLite. PR #5 connects an OpenAI-compatible model, saves conversations and supports validated general planning; actual real-model gameplay remains an acceptance gate, not an established success. Current desktop specification: `docs/plans/2026-10-13-desktop-narrative.md`.

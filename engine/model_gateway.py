@@ -694,7 +694,7 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
     else:
         contract_packet = render_packet("local", request_id, str(row["task_type"]), payload)
         schema = None
-        if runtime_config(conn).get("free_local") and payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
+        if (runtime_config(conn).get("free_local") or runtime_config(conn).get('ai_provider') in {'groq','gemini','openrouter'}) and payload.get("protocol") in {"world_plan_v1", "narrative_play_v1", "narrative_scope_v1", "narrative_authoring_review_v1"}:
             from .planning_gateway import response_schema
             schema = response_schema(request_id, payload)
         result = chat_local(
@@ -707,7 +707,11 @@ def run_request_local(conn: sqlite3.Connection, request_id: int, *, force: bool 
             response_schema=schema,
         )
         conn.execute('CREATE TABLE IF NOT EXISTS ai_model_calls(id INTEGER PRIMARY KEY,request_id INTEGER,backend TEXT,model TEXT,latency_seconds REAL,prompt_tokens INTEGER,completion_tokens INTEGER)')
+        for name in ('provider','usage_json'):
+            if name not in {r[1] for r in conn.execute('PRAGMA table_info(ai_model_calls)')}:conn.execute(f'ALTER TABLE ai_model_calls ADD COLUMN {name} TEXT')
         conn.execute('INSERT INTO ai_model_calls(request_id,backend,model,latency_seconds,prompt_tokens,completion_tokens) VALUES (?,?,?,?,?,?)',(request_id,result.backend,result.model,result.latency_seconds,result.prompt_tokens,result.completion_tokens))
+        call_id=conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+        conn.execute('UPDATE ai_model_calls SET provider=?,usage_json=? WHERE id=?',(runtime_config(conn).get('ai_provider','custom'),json.dumps((result.raw or {}).get('_caerness_transport',{})),call_id))
         response = import_response(conn, request_id, result.text)
         out = {
             "status": "responded",

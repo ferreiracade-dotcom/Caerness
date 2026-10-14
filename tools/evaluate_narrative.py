@@ -54,6 +54,8 @@ def audit(c):
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--out',required=True);p.add_argument('--player');p.add_argument('--npc');p.add_argument('--approve-reviewed',action='store_true',help='Test-player approval of complete, displayed scopes; no approval of unresolved scopes.')
  p.add_argument('--local',action='store_true',help='Use the configured local endpoint without paid-model referrals.')
+ p.add_argument('--cloud-provider',choices=['groq','gemini','openrouter'],help='Use an already consented provider key in this Python process.')
+ p.add_argument('--model',help='Explicit verified free cloud model.')
  p.add_argument('--gates',default='A,B,C,D',help='Comma-separated acceptance cases; omitted cases are NOT_RUN.')
  p.add_argument('--conversation-turns',type=int,default=20,choices=range(1,21),metavar='1..20')
  p.add_argument('--timeout',type=int,default=300,help='Per-model-call timeout, separate from engine timing.')
@@ -69,6 +71,9 @@ def main():
  from engine.ai_planning import approve_plan
  init_db()
  with connect() as c:
+  if a.cloud_provider:
+   from engine.ai_providers import activate,key_for
+   activate(c,a.cloud_provider,a.model,key_for(a.cloud_provider),consent=True,free_account=True)
   if a.local:
    from tools.local_ai import configure_save,hardware,api
    os.environ['CAERNESS_FREE_LOCAL']='1'
@@ -83,7 +88,7 @@ def main():
   if not row:p.error('No co-located established pair matches. Select a different existing player/NPC; do not invent a history.')
   set_player(c,row['owner'],'Live narrative evaluation');c.commit()
   health=local_health(c)
-  manifest={'real_model_available':health['ok'],'model':runtime_config(c)['local_model'],'health':health,'pair':dict(row),'opening_sha256':hashlib.sha256((ROOT/'data/caerness.db').read_bytes()).hexdigest(),'gates':{gate:{'status':'NOT_RUN'} for gate in ('A','B','C','D')},'scripted_responses':False}
+  manifest={'real_model_available':False,'provider':runtime_config(c).get('ai_provider'),'model':runtime_config(c)['local_model'],'health':health,'pair':dict(row),'opening_sha256':hashlib.sha256((ROOT/'data/caerness.db').read_bytes()).hexdigest(),'gates':{gate:{'status':'NOT_RUN'} for gate in ('A','B','C','D')},'scripted_responses':False}
   if a.local:
    manifest['hardware']=hardware()
    if ':11434/' in endpoint:
@@ -114,6 +119,10 @@ def main():
     c.commit();record['after']=audit(c)
     record['model_requests']=[dict(r) for r in c.execute('SELECT id,input_json,response_json,status,applied_summary FROM model_requests WHERE id>? ORDER BY id',(first,))]
     record['model_latency']=[dict(r) for r in c.execute('SELECT request_id,latency_seconds,prompt_tokens,completion_tokens FROM ai_model_calls WHERE request_id>? ORDER BY id',(first,))] if c.execute("SELECT 1 FROM sqlite_master WHERE name='ai_model_calls'").fetchone() else []
+    if record['model_latency']:manifest['real_model_available']=True
+    record['model_call_count']=len(record['model_latency'])
+    record['input_tokens']=sum(r['prompt_tokens'] or 0 for r in record['model_latency'])
+    record['output_tokens']=sum(r['completion_tokens'] or 0 for r in record['model_latency'])
     records.append(record);transcript.append(record)
     (out/'transcript.json').write_text(json.dumps(transcript,indent=2))
     manifest['gates'][gate]={'status':'IN_PROGRESS_NOT_ACCEPTED','turns':len(records),'required_turns':20 if gate=='A' else len(inputs)}

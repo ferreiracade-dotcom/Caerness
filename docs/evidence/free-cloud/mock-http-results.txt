@@ -1,0 +1,5 @@
+groq mock observation: 1 call, synthetic 111 input / 22 output tokens
+gemini mock observation: 1 call, synthetic 111 input / 22 output tokens
+openrouter mock observation: 1 call, synthetic 111 input / 22 output tokens
+read + quota failure + reload + safe retry: 3 total mock calls, no repeated read
+Mock quota/auth/schema/timeout/redaction, state preservation and local credential isolation PASS

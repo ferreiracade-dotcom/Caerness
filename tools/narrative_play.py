@@ -14,6 +14,7 @@ def main():
  p.add_argument('--endpoint');p.add_argument('--model');p.add_argument('--port',type=int,default=8765)
  p.add_argument('--open-browser',action='store_true',help='Open the local game in your default desktop browser.')
  p.add_argument('--configure',action='store_true',help='Simple endpoint/model setup with a hidden key prompt; no key written to disk.')
+ p.add_argument('--choose-ai',action='store_true',help='Choose free cloud or local AI in the launch window; preserve this campaign.')
  p.add_argument('--local',action='store_true',help='Free local setup; never asks for an API key.')
  p.add_argument('--change-model',action='store_true',help='Choose another local model without replacing the campaign.')
  p.add_argument('--local-server',choices=['ollama','lmstudio'],default='ollama')
@@ -21,12 +22,16 @@ def main():
  p.add_argument('--probe',action='store_true',help='Check model connectivity; does not claim actual gameplay.')
  a=p.parse_args()
  if a.local and a.configure:p.error('Choose local setup or explicit remote setup, not both.')
+ if a.choose_ai and (a.local or a.configure):p.error('Choose the AI selector or a direct local/custom launcher, not both.')
+ if a.choose_ai and (a.endpoint or a.model):p.error('Use the selector’s advanced custom option for endpoint/model overrides; free presets cannot be overridden.')
  if a.local and (a.endpoint or a.model):p.error('Local setup selects a verified local model. Use --change-model rather than endpoint/model overrides.')
  if a.change_model and not a.local:p.error('--change-model requires --local.')
  if a.configure:
+  os.environ.pop('CAERNESS_FREE_LOCAL',None)
   import getpass
-  a.endpoint=input('Model endpoint [https://api.openai.com/v1/chat/completions]: ').strip() or 'https://api.openai.com/v1/chat/completions'
-  a.model=input('Available model name [gpt-4.1]: ').strip() or 'gpt-4.1'
+  a.endpoint=input('Advanced custom endpoint (may be paid; no default): ').strip()
+  a.model=input('Explicit available model ID (no default): ').strip()
+  if not a.endpoint or not a.model:raise ValueError('An explicit custom endpoint and model are required. Choose AI.cmd offers verified free presets.')
   if not (os.environ.get('CAERNESS_MODEL_API_KEY') or os.environ.get('OPENAI_API_KEY')):
    key=getpass.getpass('API key (hidden, kept only for this running session; blank for an unauthenticated local server): ')
    if key:os.environ['CAERNESS_MODEL_API_KEY']=key
@@ -40,6 +45,25 @@ def main():
  from engine.model_gateway import set_model_config
  init_db()
  with connect() as c:
+  if a.choose_ai:
+   from tools.choose_ai import choose
+   selected=choose(c,save.parent)
+   if selected in ('ollama','lmstudio'):a.local=True;a.local_server=selected
+   elif selected=='custom':
+    import getpass
+    a.endpoint=input('Custom OpenAI-compatible HTTPS endpoint (may be paid): ').strip()
+    a.model=input('Exact model ID: ').strip()
+    if not a.endpoint or not a.model:raise ValueError('Custom endpoint and model are required.')
+    key=getpass.getpass('Custom API key (hidden; kept only in memory): ')
+    if key:os.environ['CAERNESS_MODEL_API_KEY']=key
+   else:
+    c.commit()
+    from tools.local_ai import inference_probe
+    print('Testing actual provider inference (not proof of RPG quality)...',flush=True)
+    evidence=inference_probe(c,max_tokens=512)
+    import json
+    (save.parent/'cloud-inference-check.json').write_text(json.dumps({'provider':selected,**evidence},indent=2),encoding='utf-8')
+    print(f"Structured test reply passed in {evidence['latency_seconds']:.1f} seconds. Resume your existing story in the browser.")
   if a.local:
    import json
    from tools.local_ai import hardware,prepare_ollama,configure_save,inference_probe,local_name
@@ -101,14 +125,19 @@ def main():
    import json
    print(json.dumps(local_health(c),indent=2));return
  print('Campaign save:',save)
- print('Free local inference; no API key or paid account required.' if a.local else 'API credentials are read from environment variables; never stored in the save.')
+ print('Free local inference; no API key or paid account required.' if a.local else 'Cloud/custom credentials remain server-side and are never stored in the save. Close this window to forget session keys.')
  if a.evaluate:
-  if not a.local:p.error('Use --local for the owner-side local evaluation.')
-  os.environ['CAERNESS_MODEL_ENDPOINT']=endpoint;os.environ['CAERNESS_MODEL_NAME']=model
+  if not a.local and not a.choose_ai:p.error('Select local or free-cloud AI before evaluation.')
+  if a.local:os.environ['CAERNESS_MODEL_ENDPOINT']=endpoint;os.environ['CAERNESS_MODEL_NAME']=model
   from datetime import datetime
   from tools.evaluate_narrative import main as evaluate
   output=ROOT/'runs'/('local-gameplay-'+datetime.now().strftime('%Y%m%d-%H%M%S'))
-  sys.argv=['evaluate_narrative','--local','--approve-reviewed','--out',str(output)]
+  if a.local:sys.argv=['evaluate_narrative','--local','--approve-reviewed','--out',str(output)]
+  elif selected in ('groq','gemini','openrouter'):
+   from engine.local_model import runtime_config
+   with connect() as c:chosen_model=runtime_config(c)['local_model']
+   sys.argv=['evaluate_narrative','--cloud-provider',selected,'--model',chosen_model,'--approve-reviewed','--out',str(output)]
+  else:p.error('Custom evaluation is separate from verified free cloud.')
   print('Recording real gameplay in',output,'— this runs twenty dialogue turns and can take a while.',flush=True)
   evaluate();return
  from engine.mobile_server import serve

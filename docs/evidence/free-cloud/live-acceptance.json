@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-14",
+  "evidence_type": "Acceptance gate status, NOT inference",
+  "provider_keys_available": false,
+  "real_provider_requests": 0,
+  "cases": {
+    "observation": "BLOCKED: no provider keys",
+    "npc_conversation": "BLOCKED: no provider keys",
+    "investigation": "BLOCKED: no provider keys",
+    "unfamiliar_instruction": "BLOCKED: no provider keys",
+    "creative_development": "BLOCKED: no provider keys",
+    "complex_undertaking": "BLOCKED: no provider keys",
+    "interruption": "BLOCKED: no provider keys",
+    "long_dialogue": "BLOCKED: no provider keys"
+  },
+  "latency": "NOT_MEASURED",
+  "tokens_per_second": "NOT_MEASURED",
+  "narrative_quality": "NOT_EVALUATED",
+  "mock_token_counts": "111 input / 22 output are synthetic test fixtures"
+}

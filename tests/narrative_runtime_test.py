@@ -55,7 +55,9 @@ def main():
    c.commit(); from engine.db import connect
    c.close();c=connect();assert len(json.loads(plans.session(c,sid)['messages_json']))>=81
    print('20 conversational HTTP exchanges + old source retrieval + reload, without social rolls/time/commitments PASS (scripted responses)')
-   assert auth and all(x=='Bearer test-secret-not-real' for x in auth)
+   # Loopback inference must not receive an inherited cloud credential, even in
+   # advanced/custom mode. Positive authenticated cloud transport is tested separately.
+   assert auth and all(x is None for x in auth)
    assert 'test-secret-not-real' not in '\n'.join(packets)+json.dumps(runtime_config(c))
   # Explicit directive vs hypothetical uses independent verification, never regex recognition.
   def timespec(source,days=2):

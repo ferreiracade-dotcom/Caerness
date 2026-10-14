@@ -16,10 +16,11 @@ if not errorlevel 1 goto launch
 ".venv\Scripts\python.exe" -m pip install -r requirements-play.txt
 if errorlevel 1 goto setup_failed
 :launch
+if not defined CAERNESS_SETUP_OPTION set "CAERNESS_SETUP_OPTION=--choose-ai"
 echo Keep this window open while you play. Close it to stop the game.
 echo Your campaign is saved separately from the starting world.
 echo.
-".venv\Scripts\python.exe" tools\narrative_play.py --local --open-browser %*
+".venv\Scripts\python.exe" tools\narrative_play.py %CAERNESS_SETUP_OPTION% --open-browser %*
 if errorlevel 1 goto setup_failed
 exit /b 0
 :no_python
@@ -30,6 +31,6 @@ exit /b 1
 :setup_failed
 echo.
 echo The game could not start. Read the message above for the missing requirement.
-echo Your campaign remains in game\narrative-session.db. No paid account or API key is required.
+echo Your campaign remains in game\narrative-session.db. Local AI needs no key; optional free cloud AI needs a free developer key.
 pause
 exit /b 1

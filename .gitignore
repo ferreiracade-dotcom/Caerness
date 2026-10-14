@@ -11,3 +11,5 @@ runs_*.log
 game/narrative-session.db
 game/narrative_packets/
 game/local-inference-check.json
+game/cloud-inference-check.json
+game/ai-choice.json
