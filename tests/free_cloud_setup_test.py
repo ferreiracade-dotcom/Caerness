@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import io
 import tempfile
 import urllib.error
 import warnings
@@ -66,6 +67,28 @@ def main():
         diagnostic=json.loads((Path(temp)/'cloud-inference-check.json').read_text())
         assert diagnostic['provider']=='groq' and secret not in json.dumps(diagnostic)
         assert p.key_for('groq')==secret
+        # A failed probe must leave a safe artifact before browser startup.
+        from tools.local_ai import cloud_inference_check
+        from engine.ai_providers import ProviderError
+        failures=[ProviderError(secret+' https://private.invalid/user?key=secret','provider_contract',{'http_status':400,'retry-after':2,'private':secret}),
+                  ProviderError(secret,'free_quota_unavailable',{'http_status':429,'provider_retry_after_seconds':8}),
+                  TimeoutError(secret),ValueError(secret+' invalid JSON')]
+        for failure in failures:
+            output=io.StringIO()
+            with patch('tools.local_ai.inference_probe',side_effect=failure),patch('sys.stdout',output):
+                try:cloud_inference_check(c,temp);raise AssertionError('Failed probe accepted')
+                except ProviderError:pass
+            report=json.loads((Path(temp)/'cloud-inference-check.json').read_text())
+            assert report['status']=='FAILED' and report['phase']=='probe'
+            assert secret not in output.getvalue()+json.dumps(report)
+            assert 'private.invalid' not in output.getvalue()+json.dumps(report)
+        assert report['code']=='invalid_response'
+        # Failure inside the launcher follows the same path and preserves save.
+        answers=iter(['1','YES','FREE','1'])
+        with patch.object(sys,'argv',['narrative_play','--choose-ai','--probe','--save',str(campaign)]),patch('tools.choose_ai.choose',side_effect=lambda conn,folder:choose(conn,folder,input_fn=lambda _:next(answers),password_fn=lambda _:secret)),patch('tools.local_ai.inference_probe',side_effect=ProviderError(secret,'rate_limit',{'http_status':429})),patch('sys.stdout',io.StringIO()):
+            try:launch();raise AssertionError('Failed launcher probe accepted')
+            except ProviderError:pass
+        assert campaign.exists() and json.loads((Path(temp)/'cloud-inference-check.json').read_text())['http_status']==429
     p.clear_keys();p._catalogs.clear();c.close()
     print('Setup privacy/billing consent, stale-env clearing, hidden keys, provider/local switching, expiring free review and offline fail-closed PASS (no inference)')
 if __name__=='__main__':main()

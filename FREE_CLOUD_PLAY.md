@@ -30,6 +30,8 @@ Cloud receives necessary scene/character/canon context, conversation excerpts, u
 
 ## Failures and real gameplay testing
 
+**If setup fails before the browser opens:** the launch window now prints a safe report with provider, model, phase, error category, HTTP status when known and supplied retry time. It also saves **`game/cloud-inference-check.json`**, on success or failure. Open that file in Notepad and copy its contents for support; it contains no key, raw provider error, dialogue, campaign facts or personal paths. If saving fails, copy the report from the launch window instead. Do not send your campaign database or API key. Model discovery alone does not prove inference access. If Google explicitly reports zero free quota, check the selected project's limits in [AI Studio](https://aistudio.google.com/rate-limit?timeRange=last-28-days); keep billing disabled rather than upgrading.
+
 Use **Settings → Advanced options & diagnostics → Copy Diagnostics**. Reports contain provider/model, request/phase, timing, tokens, numerical rate headers and error category, excluding keys, endpoints, dialogue and campaign facts.
 
 - Rate/token limit: wait before retrying; numerical `retry-after` appears when supplied. Daily limits may require a daily reset. Caerness does not invent reset times or balances.

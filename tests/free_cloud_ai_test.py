@@ -154,6 +154,29 @@ def main():
         with patch('engine.local_model._urlopen',side_effect=TimeoutError(secret)):
             out=play(c,'I wait to hear a reply.');assert out['failure']['code']=='timeout'
         assert resume(c,out['request_id'])['status']=='discussed'
+        # Google can enumerate models while rejecting inference: retain exact
+        # category/status and only Google's numeric RetryInfo, never raw bodies.
+        cases=[(400,{'status':'INVALID_ARGUMENT','message':'response_format '+secret},'provider_contract'),
+               (401,{'status':'UNAUTHENTICATED','message':secret},'authentication'),
+               (403,{'status':'PERMISSION_DENIED','message':secret},'authentication'),
+               (429,{'status':'RESOURCE_EXHAUSTED','details':[{'@type':'type.googleapis.com/google.rpc.QuotaFailure','violations':[{'quotaId':'GenerateRequestsPerMinutePerProjectPerModel-FreeTier','quotaValue':'0','quotaDimensions':{'project':secret}}]},{'@type':'type.googleapis.com/google.rpc.RetryInfo','retryDelay':'8.25s'}]},'free_quota_unavailable'),
+               (429,{'status':'RESOURCE_EXHAUSTED','details':[{'@type':'type.googleapis.com/google.rpc.QuotaFailure','violations':[{'quotaId':'GenerateRequestsPerDayPerProject-FreeTier','quotaValue':'20'}]}]},'quota_exhausted'),
+               (429,{'status':'RESOURCE_EXHAUSTED','message':secret},'rate_limit'),
+               (503,{'status':'UNAVAILABLE','message':secret},'continuation_failed')]
+        for status,body,expected in cases:
+            queue[:]=[(status,{'error':{'code':status,**body}})]
+            try:_post_json(providers.PROVIDERS['gemini']['endpoint'],{},5,provider='gemini');raise AssertionError('Google error accepted')
+            except providers.ProviderError as error:
+                assert error.code==expected,(error.code,expected)
+                assert error.measurements['http_status']==status
+                assert secret not in str(error)+json.dumps(error.measurements)
+                if expected=='free_quota_unavailable':assert error.measurements['provider_retry_after_seconds']==8.25
+        # Exact outgoing parameters for both owner-tested model families.
+        for model in ('gemini-3.8-flash','gemini-2.5-flash'):
+            with patch('engine.ai_providers.validate',return_value={'format':'schema'}):
+                payload=providers.adapt_payload({'device_profile':'desktop_free_cloud_gemini','local_model':model},{'model':model,'max_tokens':512,'messages':[]},shape)
+            assert payload['reasoning_effort']=='low' and payload['max_tokens']==512
+            assert payload['response_format']['type']=='json_schema'
         # Local switch never uses vault or inherited cloud key, and preserves story history.
         history=c.execute('SELECT messages_json FROM ai_sessions ORDER BY id').fetchall()
         providers.clear_keys()

@@ -264,3 +264,65 @@ def inference_probe(conn, *, max_tokens=120):
             'completion_tokens': result.completion_tokens,
             'output_tokens_per_wall_second': result.completion_tokens / result.latency_seconds if result.completion_tokens and result.latency_seconds else None,
             'response': parsed, 'gameplay_acceptance': 'NOT_TESTED'}
+
+
+def cloud_inference_check(conn, folder, *, max_tokens=512):
+    """Always produce a shareable probe report, including transport/validation failures.
+
+    Never serialize the exception, model reply, endpoint, headers or campaign.
+    The launcher can fail before the browser's Copy Diagnostics becomes available.
+    """
+    import math
+    import time
+    from engine.local_model import runtime_config
+    from engine.narrative_diagnostics import classify, MESSAGES
+    cfg = runtime_config(conn)
+    provider = cfg.get('ai_provider')
+    # Free presets restrict model IDs; do not export arbitrary custom settings.
+    if provider not in ('groq', 'gemini', 'openrouter'):
+        raise ValueError('Cloud probe requires a selected free-cloud provider.')
+    report = {'format': 'caerness-cloud-probe-v1', 'provider': provider,
+              'model': cfg['local_model'], 'phase': 'probe',
+              'gameplay_acceptance': 'NOT_TESTED'}
+    started = time.perf_counter()
+    failure = None
+    try:
+        evidence = inference_probe(conn, max_tokens=max_tokens)
+        report.update({k: evidence[k] for k in ('status', 'latency_seconds', 'prompt_tokens', 'completion_tokens')})
+    except (OSError, ValueError, RuntimeError, KeyError, TypeError) as error:
+        failure = error
+        code = classify(error)
+        explanation = {
+            'continuation_failed': 'The cloud service could not complete the connection test. Try again later; no gameplay action was attempted and no provider was substituted.',
+            'timeout': 'The cloud connection test timed out. Try again later or explicitly choose another free provider/local AI.',
+            'unavailable': 'The cloud service could not be reached. Check internet connectivity and provider availability.',
+            'invalid_response': 'The connection test returned an invalid structured response. Share this safe diagnostic; no gameplay action was attempted.',
+            'incomplete_response': 'The model stopped before completing the structured connection test. Share this safe diagnostic; no incomplete response was applied.',
+        }.get(code, MESSAGES[code])
+        report.update(status='FAILED', code=code, explanation=explanation,
+                      latency_seconds=round(time.perf_counter() - started, 4))
+        measurements = getattr(error, 'measurements', {})
+        status = measurements.get('http_status')
+        if type(status) is int and 100 <= status <= 599:
+            report['http_status'] = status
+        safe = {}
+        for field in ('retry-after', 'provider_retry_after_seconds', 'x-ratelimit-limit-requests',
+                      'x-ratelimit-remaining-requests', 'x-ratelimit-limit-tokens', 'x-ratelimit-remaining-tokens',
+                      'prompt_tokens', 'completion_tokens'):
+            value = measurements.get(field)
+            if type(value) in (int, float) and math.isfinite(value) and 0 <= value < 1e12:
+                safe[field] = value
+        report['measurements'] = safe
+    path = Path(folder) / 'cloud-inference-check.json'
+    try:
+        path.write_text(json.dumps(report, indent=2), encoding='utf-8')
+        print('Safe diagnostic saved: game/cloud-inference-check.json (in your campaign folder).')
+    except OSError:
+        print('Could not save the diagnostic file. Copy the safe report below instead.')
+    if failure is not None:
+        print('Cloud connection test failed. Copy this safe report for support:')
+        print(json.dumps(report, indent=2))
+        from engine.ai_providers import ProviderError
+        raise ProviderError(f"{provider} / {cfg['local_model']} / probe: {report['code']}. {report['explanation']}",
+                            report['code'], report.get('measurements')) from None
+    return report

@@ -58,11 +58,9 @@ def main():
     if key:os.environ['CAERNESS_MODEL_API_KEY']=key
    else:
     c.commit()
-    from tools.local_ai import inference_probe
+    from tools.local_ai import cloud_inference_check
     print('Testing actual provider inference (not proof of RPG quality)...',flush=True)
-    evidence=inference_probe(c,max_tokens=512)
-    import json
-    (save.parent/'cloud-inference-check.json').write_text(json.dumps({'provider':selected,**evidence},indent=2),encoding='utf-8')
+    evidence=cloud_inference_check(c,save.parent,max_tokens=512)
     print(f"Structured test reply passed in {evidence['latency_seconds']:.1f} seconds. Resume your existing story in the browser.")
   if a.local:
    import json

@@ -1,0 +1,11 @@
+{
+  "format": "caerness-cloud-probe-v1",
+  "provider": "gemini",
+  "model": "gemini-3.8-flash",
+  "phase": "probe",
+  "gameplay_acceptance": "NOT_TESTED",
+  "status": "REAL_INFERENCE_DIAGNOSTIC_PASSED",
+  "latency_seconds": 52.5582,
+  "prompt_tokens": 36,
+  "completion_tokens": 16
+}

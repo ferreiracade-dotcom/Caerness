@@ -1,0 +1,4 @@
+{"test": "free_cloud_ai_test", "status": "PASS", "secs": 1.9}
+{"test": "free_cloud_setup_test", "status": "PASS", "secs": 0.4}
+{"test": "narrative_recovery_test", "status": "PASS", "secs": 0.7}
+TOTAL {"PASS": 3}

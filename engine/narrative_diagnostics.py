@@ -2,6 +2,7 @@
 import json
 
 MESSAGES={
+    'free_quota_unavailable':'Google reports no available free inference quota or free-tier eligibility for this project/model. Model discovery can still work. Check your project and model limits in Google AI Studio; keep billing disabled. Choose another free provider or local AI explicitly if needed. No reset time or paid fallback is assumed.',
     'authentication':'The cloud provider did not accept this key or account. Restart Choose AI.cmd and enter the key privately in the launch window.',
     'rate_limit':'The provider’s free request or token rate limit was reached. Wait before retrying; earlier outcomes are saved. Copy Diagnostics may include its retry-after seconds.',
     'quota_exhausted':'The provider’s available free quota is exhausted. Wait for its reset or explicitly select another free provider or local AI. No paid fallback was attempted.',

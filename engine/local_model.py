@@ -149,6 +149,9 @@ def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=Fa
             elif 'context' in detail and any(x in detail for x in ('limit','exceed','long')):code='context_limit'
             elif exc.code in (400,422):code='provider_contract'
             measurements={'http_status':exc.code,**safe_rate_headers(exc.headers)}
+            if provider=='gemini':
+                code, google_measurements = gemini_error_details(detail, code)
+                measurements.update(google_measurements)
             wait=re.search(r'please try again in ((?:[0-9]+(?:\.[0-9]+)?(?:ms|[hms]))+)',detail)
             if wait:
                 seconds=sum(float(number)*{'h':3600,'m':60,'s':1,'ms':.001}[unit] for number,unit in re.findall(r'([0-9]+(?:\.[0-9]+)?)(ms|[hms])',wait.group(1)))
@@ -172,9 +175,57 @@ def _post_json(url: str, payload: dict[str, Any], timeout: int, *, local_only=Fa
         from .ai_providers import ProviderError
         status=data['error'].get('code')
         code={401:'authentication',403:'authentication',402:'quota_exhausted',429:'rate_limit',404:'model_unavailable',400:'provider_contract',422:'provider_contract'}.get(status,'continuation_failed')
-        raise ProviderError('The cloud provider returned an error instead of a completion; no outcome was applied.',code,{'http_status':status if type(status)is int else None,**transport})
+        measurements={'http_status':status if type(status)is int else None,**transport}
+        if provider=='gemini':
+            code, google_measurements=gemini_error_details(json.dumps(data),code)
+            measurements.update(google_measurements)
+        raise ProviderError('The cloud provider returned an error instead of a completion; no outcome was applied.',code,measurements)
     if provider:data['_caerness_transport']=transport
     return data
+
+
+def gemini_error_details(body, code):
+    """Interpret documented Google error types; export only a numeric wait.
+
+    Do not export descriptions, quota identifiers/dimensions, project IDs or URLs.
+    Catalog access does not establish an inference quota. Zero must be explicit.
+    """
+    try:
+        error=json.loads(body).get('error',{})
+    except (ValueError,AttributeError):return code,{}
+    if not isinstance(error,dict):return code,{}
+    message=str(error.get('message','')).lower()
+    status=str(error.get('status','')).upper()
+    measurements={}
+    if status=='FAILED_PRECONDITION' and ('free tier' in message or 'free_tier' in message):
+        code='free_quota_unavailable'
+    if status=='RESOURCE_EXHAUSTED' and code=='continuation_failed':code='rate_limit'
+    details=error.get('details',[])
+    if not isinstance(details,list):return code,measurements
+    for detail in details:
+        if not isinstance(detail,dict):continue
+        kind=str(detail.get('@type','')).lower()
+        if kind.endswith('google.rpc.retryinfo'):
+            match=re.fullmatch(r'([0-9]+(?:\.[0-9]+)?)s',str(detail.get('retryDelay',detail.get('retrydelay',''))))
+            if match:
+                seconds=float(match.group(1))
+                if math.isfinite(seconds) and seconds<1e12:measurements['provider_retry_after_seconds']=seconds
+        if kind.endswith('google.rpc.quotafailure'):
+            violations=detail.get('violations',[])
+            if not isinstance(violations,list):continue
+            for item in violations:
+                if not isinstance(item,dict):continue
+                ident=str(item.get('quotaId',item.get('quotaid',''))).lower()
+                metric=str(item.get('quotaMetric',item.get('quotametric',''))).lower()
+                value=item.get('quotaValue',item.get('quotavalue'))
+                if value in (0,'0') and value is not False and ('free' in ident or 'free' in metric):
+                    code='free_quota_unavailable'
+                elif code=='rate_limit' and 'perday' in ident.replace('_','').replace('-',''):
+                    code='quota_exhausted'
+    # Some responses state the zero limit in the message rather than a quotaValue.
+    if code in ('rate_limit','quota_exhausted') and 'free_tier' in message and re.search(r'limit:\s*0(?:\D|$)',message):
+        code='free_quota_unavailable'
+    return code,measurements
 
 
 def safe_rate_headers(headers):

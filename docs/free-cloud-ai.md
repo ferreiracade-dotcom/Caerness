@@ -2,6 +2,8 @@
 
 Research date: **14 October 2026**. `feat/free-cloud-ai` is based on PR #7 `feat/free-local-ai` at `10587dcec2f198353893f1d6dba10511094d9d62`, preserving its dependencies and recovery corrections. No simulation expansion, canonical changes or merges.
 
+**Latest Gemini owner review:** both original Windows failures remain unexplained because the old launcher hid status/category. Failed setup now prints and saves a privacy-safe `game/cloud-inference-check.json` before browser startup. Actual follow-up access produced a 3.8 structured probe in 52.5582 seconds, 2.5 inference HTTP 404 despite catalog presence, and 3.8 scene HTTP 503 on both initial request and saved-turn retry. See [complete safe results](evidence/free-cloud/gemini-review/README.md). This is not successful Gemini gameplay or proof of the original Windows cause. Documented request options remain unchanged; explicit zero free-project quota is distinguished without suggesting billing.
+
 ## Current official provider assessment
 
 | Provider | Compatibility and candidate | Limits and billing | Privacy |
