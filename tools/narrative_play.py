@@ -28,12 +28,12 @@ def main():
  if a.change_model and not a.local:p.error('--change-model requires --local.')
  if a.configure:
   os.environ.pop('CAERNESS_FREE_LOCAL',None)
-  import getpass
+  from tools.choose_ai import hidden_key
   a.endpoint=input('Advanced custom endpoint (may be paid; no default): ').strip()
   a.model=input('Explicit available model ID (no default): ').strip()
   if not a.endpoint or not a.model:raise ValueError('An explicit custom endpoint and model are required. Choose AI.cmd offers verified free presets.')
   if not (os.environ.get('CAERNESS_MODEL_API_KEY') or os.environ.get('OPENAI_API_KEY')):
-   key=getpass.getpass('API key (hidden, kept only for this running session; blank for an unauthenticated local server): ')
+   key=hidden_key('API key (hidden, kept only for this running session; blank for an unauthenticated local server): ')
    if key:os.environ['CAERNESS_MODEL_API_KEY']=key
  save=Path(a.save).resolve()
  if save==(ROOT/'data/caerness.db').resolve():p.error('Use a campaign copy, never the canonical opening.')
@@ -50,11 +50,11 @@ def main():
    selected=choose(c,save.parent)
    if selected in ('ollama','lmstudio'):a.local=True;a.local_server=selected
    elif selected=='custom':
-    import getpass
+    from tools.choose_ai import hidden_key
     a.endpoint=input('Custom OpenAI-compatible HTTPS endpoint (may be paid): ').strip()
     a.model=input('Exact model ID: ').strip()
     if not a.endpoint or not a.model:raise ValueError('Custom endpoint and model are required.')
-    key=getpass.getpass('Custom API key (hidden; kept only in memory): ')
+    key=hidden_key('Custom API key (hidden; kept only in memory): ')
     if key:os.environ['CAERNESS_MODEL_API_KEY']=key
    else:
     c.commit()
