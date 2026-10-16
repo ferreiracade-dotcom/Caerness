@@ -164,8 +164,27 @@ def run():
             kind_ = conn.execute("SELECT relation_kind FROM underworld_relations WHERE organization_a_id=? AND organization_b_id=?", (a_, b_)).fetchone()
             if r["status"] == "applied":
                 assert kind_ and kind_[0] == "truce", (r, kind_ and kind_[0])
+            elif r["status"] == "countered":
+                # A counter is an open negotiation: a pending offer to the protagonist he can answer with respond.
+                cid = r["counter_interaction_id"]
+                row = conn.execute("SELECT status,recipient_actor_id FROM interactions WHERE id=?", (cid,)).fetchone()
+                assert row and row[0] == "pending" and row[1] == me, (r, row and tuple(row))
+                assert kind_ is None or kind_[0] != "truce"
             else:
                 assert r["status"] == "refused" and (kind_ is None or kind_[0] != "truce"), (r, kind_ and kind_[0])
+                st = conn.execute("SELECT status FROM interactions WHERE id=?", (r["interaction_id"],)).fetchone()
+                assert st[0] != "countered", ("a counter must come back as countered, not refused", r)
+            # Accepting a counter-offer completes the original operation (here: the truce).
+            import json as _json
+            from engine.interactions import apply_player_response
+            dday = conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]
+            cur = conn.execute(
+                "INSERT INTO interactions(proposer_actor_id,recipient_actor_id,interaction_type,status,created_day,response_due_day,urgency,stakes,terms_json,rationale) "
+                "VALUES (?,?,'negotiation','pending',?,?,2,3,?,'counter')",
+                (rboss, me, dday, dday + 1, _json.dumps({"what": "truce", "player_operation": {"op": "demand", "details": {"what": "truce"}}})))
+            apply_player_response(conn, int(cur.lastrowid), me, "accept", dday)
+            kind_ = conn.execute("SELECT relation_kind FROM underworld_relations WHERE organization_a_id=? AND organization_b_id=?", (a_, b_)).fetchone()
+            assert kind_ and kind_[0] == "truce", ("accepting the counter must record the truce", kind_ and kind_[0])
             # the accepted branch itself (the answer above is chance): truce, tribute and split write the relation
             for what_, kind2 in (("truce", "truce"), ("tribute", "tributary"), ("split", "hostile_peace")):
                 rr = po._concede(conn, me, rboss, "The boss", what_, {"amount": "modest", "terms": "north bank is mine"}, None, [], outfit, rival, 0, False)

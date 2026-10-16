@@ -837,6 +837,12 @@ def apply_player_response(
                 conn.execute("UPDATE interactions SET resolution_summary=? WHERE id=?", (summary, interaction_id))
         except Exception as exc:
             conn.execute("INSERT OR REPLACE INTO runtime_flags(key,value,updated_at) VALUES ('last_domain_action_error',?,CURRENT_TIMESTAMP)", (str(exc),))
+        # A counter to one of the protagonist's own operations (hire, lend, demand) completes that operation.
+        from .player_operations import settle_accepted
+        settled = settle_accepted(conn, interaction, player_actor_id)
+        if settled is not None:
+            summary += f" {settled.get('summary', '')}"
+            conn.execute("UPDATE interactions SET resolution_summary=? WHERE id=?", (summary, interaction_id))
         adjust_relationship(
             conn, proposer, player_actor_id, day,
             trust_delta=2.0 if kind not in {"demand", "threat"} else -1.0,

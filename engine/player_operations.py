@@ -10,7 +10,7 @@ import sqlite3
 from typing import Any, Callable
 
 from . import ledger
-from .interactions import _capacity, _log_event, create_interaction, resolve_interaction
+from .interactions import InteractionResult, _capacity, _log_event, create_interaction, resolve_interaction
 from .relationships import adjust_relationship_pair
 
 OPERATIONS = ("pay", "hire", "lend", "demand", "attack", "trade", "order")
@@ -153,12 +153,12 @@ def _hire(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         except ValueError as e:
             return _refuse(str(e))
     day = _day(conn)
-    iid = create_interaction(conn, me, target, "offer", day, stakes=2, rationale=intent,
-                             terms={"incentive": min(2.0, amount / 1.5), "operation": "hire"})
-    pending = conn.execute("SELECT status FROM interactions WHERE id=?", (iid,)).fetchone()
-    if not pending or str(pending[0]) != "pending":
-        return _refuse(f"{name} will not hear the offer again so soon.")
-    res = resolve_interaction(conn, iid, day)
+    iid, res = _offer(conn, me, target, "offer", day, intent, {"incentive": min(2.0, amount / 1.5)}, op="hire", d=d)
+    if iid is None:
+        return res
+    countered = _countered(conn, me, target, iid, res)
+    if countered:
+        return countered
     if res.response != "accept":
         summary = f"{name} turned the offer down."
         _record(conn, me, "Offer refused", summary, targets=(target,))
@@ -235,13 +235,33 @@ def _dismiss(conn, me, target, into, name, where) -> dict:
 RATES = {"low": 0.02, "usual": 0.05, "steep": 0.12}
 
 
-def _offer(conn, me: int, target: int, kind: str, day: int, intent: str, terms: dict, stakes: int = 2):
-    """Create an interaction and resolve it at once. Returns (interaction_id, result) or (None, refusal dict)."""
+def _offer(conn, me: int, target: int, kind: str, day: int, intent: str, terms: dict, stakes: int = 2, *,
+           op: str, d: dict):
+    """Create an interaction and resolve it at once. Returns (interaction_id, result) or (None, refusal dict).
+
+    The operation travels in the terms, so a counter-offer the protagonist later accepts completes it
+    (settle_accepted). When ``d`` carries ``_accepted`` the other side has already agreed: no new interaction.
+    """
+    if d.get("_accepted"):
+        iid = int(d["_accepted"])
+        return iid, InteractionResult(iid, "accepted", "accept", "The counter-offer was accepted.")
+    clean = {k: v for k, v in d.items() if not str(k).startswith("_")}
+    terms = {**terms, "player_operation": {"op": op, "details": clean}}
     iid = create_interaction(conn, me, target, kind, day, stakes=stakes, rationale=intent, terms=terms)
     pending = conn.execute("SELECT status FROM interactions WHERE id=?", (iid,)).fetchone()
     if not pending or str(pending[0]) != "pending":
         return None, _refuse(f"{_name(conn, target)} will not hear it again so soon.")
     return iid, resolve_interaction(conn, iid, day)
+
+
+def _countered(conn, me: int, target: int, iid: int, res) -> dict | None:
+    """A counter is an open negotiation: a pending offer back to the protagonist, answered with respond."""
+    if res.response != "counter":
+        return None
+    summary = f"{_name(conn, target)} answers with terms of their own."
+    _record(conn, me, "Counter-offer", summary, targets=(target,))
+    return {"status": "countered", "summary": summary, "interaction_id": iid,
+            "counter_interaction_id": res.child_interaction_id, "answer": res.summary}
 
 
 def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
@@ -268,9 +288,12 @@ def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         return _refuse(f"{name} is not here to be asked.")
     day = _day(conn)
     need = 1.0 if ledger.balance(conn, ("person", target)) < amount else 0.0
-    iid, res = _offer(conn, me, target, "offer", day, intent, {"incentive": 1.0 + need, "operation": "lend"})
+    iid, res = _offer(conn, me, target, "offer", day, intent, {"incentive": 1.0 + need}, op="lend", d=d)
     if iid is None:
         return res
+    countered = _countered(conn, me, target, iid, res)
+    if countered:
+        return countered
     if res.response != "accept":
         summary = f"{name} would not take the loan."
         _record(conn, me, "Loan refused", summary, targets=(target,))
@@ -406,10 +429,13 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     openly = bool(d.get("open"))
     kind = "negotiation" if what in OUTFIT_TERMS else ("threat" if openly else "demand")
     day = _day(conn)
-    iid, res = _offer(conn, me, target, kind, day, intent, {"coercion": round(force, 3), "what": what},
+    iid, res = _offer(conn, me, target, kind, day, intent, {"coercion": round(force, 3), "what": what}, op="demand", d=d,
                       stakes=3 if their_outfit else 2)
     if iid is None:
         return res
+    countered = _countered(conn, me, target, iid, res)
+    if countered:
+        return countered
     if res.response not in ("comply", "accept"):
         if openly and my_outfit is not None:
             from .underworld_rebuild import add_heat
@@ -474,6 +500,18 @@ def _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_ou
         status, summary = "applied", f"{name} gives way on the {what}."
     _record(conn, me, "Demand met", summary, severity=2 if openly else 1, targets=(target,))
     return {"status": status, "summary": summary, "interaction_id": iid}
+
+
+def settle_accepted(conn: sqlite3.Connection, interaction, player_actor_id: int) -> dict | None:
+    """The protagonist accepted a counter-offer to one of his operations: carry the operation out on its terms."""
+    import json
+    terms = json.loads(interaction["terms_json"] or "{}")
+    po = terms.get("player_operation")
+    if not isinstance(po, dict) or po.get("op") not in ("hire", "lend", "demand"):
+        return None
+    details = {**(po.get("details") or {}), "_accepted": int(interaction["id"])}
+    return execute(conn, int(player_actor_id), str(po["op"]), target_actor_id=int(interaction["proposer_actor_id"]),
+                   details=details, intent=str(interaction["rationale"] or "accepted counter-offer"))
 
 
 # ---------------------------------------------------------------- dispatch
