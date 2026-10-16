@@ -31,6 +31,11 @@ def _name(conn, actor_id: int) -> str:
     return str(row[0]) if row else "someone"
 
 
+def _authority(me: int, d: dict) -> int:
+    """Whose money and standing an operation draws on: the protagonist when a subordinate carries out his order."""
+    return int(d.get("_principal", me))
+
+
 def _refuse(summary: str) -> dict[str, Any]:
     return {"status": "refused", "summary": summary}
 
@@ -68,18 +73,19 @@ def _record(conn, actor_id: int, title: str, summary: str, *, severity: int = 1,
 # ---------------------------------------------------------------- pay
 
 def _pay(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
+    boss = _authority(me, d)
     try:
-        src = ledger.parse_holder(d.get("from") or "me", me, conn)
+        src = ledger.parse_holder(d.get("from") or "me", boss, conn)
         to_ref = d.get("to") or (f"person:{target}" if target is not None else None)
         if to_ref is None:
             return _refuse("Say who is to be paid.")
-        dst = ledger.parse_holder(to_ref, me, conn)
+        dst = ledger.parse_holder(to_ref, boss, conn)
         amount = ledger.amount_of(d.get("amount", ""))
     except ValueError as e:
         return _refuse(str(e))
     if src == dst:
         return _refuse("That would be paying money to the same pocket.")
-    if not ledger.can_draw(conn, me, src):
+    if not ledger.can_draw(conn, boss, src):
         return _refuse("He has no right to draw on that purse.")
     if dst[0] == "person" and not _living(conn, dst[1]):
         return _refuse("There is no living person there to be paid.")
@@ -89,10 +95,10 @@ def _pay(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         ledger.transfer(conn, src, dst, amount, flow_kind=flow, purpose=purpose)
     except ValueError as e:
         if "not enough" in str(e):
-            return _refuse(f"There is not enough in {_holder_label(conn, src, me)} for a {ledger.scale_word(amount)} sum.")
+            return _refuse(f"There is not enough in {_holder_label(conn, src, boss)} for a {ledger.scale_word(amount)} sum.")
         return _refuse(str(e))
     word = ledger.scale_word(amount)
-    summary = f"A {word} sum passes from {_holder_label(conn, src, me)} to {_holder_label(conn, dst, me)}."
+    summary = f"A {word} sum passes from {_holder_label(conn, src, boss)} to {_holder_label(conn, dst, boss)}."
     _record(conn, me, "Payment made", summary, targets=(dst[1],) if dst[0] == "person" and dst[1] != me else ())
     return {"status": "applied", "summary": summary, "amount": word}
 
@@ -126,20 +132,21 @@ def _hire(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         return _refuse("There is no living person named to take on.")
     if target == me:
         return _refuse("He cannot hire himself.")
+    boss = _authority(me, d)
     try:
-        into = ledger.parse_holder(d.get("into", ""), me, conn)
+        into = ledger.parse_holder(d.get("into", ""), boss, conn)
     except ValueError:
         return _refuse("Say where: business:<id>, outfit:<id> or household:<id>.")
     if into[0] == "person":
         return _refuse("Say where: business:<id>, outfit:<id> or household:<id>.")
-    if not ledger.can_draw(conn, me, into):
+    if not ledger.can_draw(conn, boss, into):
         return _refuse("He has no authority to take people on there.")
     role = str(d.get("role") or "").strip().lower()
     name = _name(conn, target)
     where = _holder_label(conn, into, me)
     if role == "none":
         return _dismiss(conn, me, target, into, name, where)
-    mine = _is_my_person(conn, me, target, into)
+    mine = _is_my_person(conn, boss, target, into)
     if mine:
         return _reassign(conn, me, target, into, role, name, where)
     if not _same_place(conn, me, target):
@@ -268,8 +275,9 @@ def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     if target is None or not _living(conn, target) or target == me:
         return _refuse("There is no living person named to lend to.")
     name = _name(conn, target)
+    boss = _authority(me, d)
     try:
-        src = ledger.parse_holder(d.get("from") or "me", me, conn)
+        src = ledger.parse_holder(d.get("from") or "me", boss, conn)
         amount = ledger.amount_of(d.get("amount", ""))
     except ValueError as e:
         return _refuse(str(e))
@@ -280,10 +288,10 @@ def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         due_days = max(1, int(d.get("due_days") or 90))
     except (TypeError, ValueError):
         return _refuse("due_days must be a number of days.")
-    if (src[0] == "person" and src[1] != me) or not ledger.can_draw(conn, me, src):
+    if (src[0] == "person" and src[1] != boss) or not ledger.can_draw(conn, boss, src):
         return _refuse("He has no right to draw on that purse.")
     if ledger.balance(conn, src) + 1e-9 < amount:
-        return _refuse(f"There is not enough in {_holder_label(conn, src, me)} for a {ledger.scale_word(amount)} loan.")
+        return _refuse(f"There is not enough in {_holder_label(conn, src, boss)} for a {ledger.scale_word(amount)} loan.")
     if not _same_place(conn, me, target):
         return _refuse(f"{name} is not here to be asked.")
     day = _day(conn)
@@ -304,12 +312,12 @@ def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     if src[0] == "business":
         kw["lender_enterprise_id"] = src[1]
     else:
-        kw["lender_actor_id"] = me
+        kw["lender_actor_id"] = boss
     cid = civilian_life.create_credit_agreement(conn, principal=amount, interest_rate_per_30=RATES[rate_word],
                                                 due_day=day + due_days, metadata={"source": f"{src[0]}:{src[1]}"}, **kw)
     if src[0] == "business":  # create_credit_agreement debits the lender enterprise itself; the ledger already did
         conn.execute("UPDATE civilian_enterprises SET cash=cash+? WHERE id=?", (amount, src[1]))
-    summary = f"{name} took a {ledger.scale_word(amount)} loan at {rate_word} interest from {_holder_label(conn, src, me)}."
+    summary = f"{name} took a {ledger.scale_word(amount)} loan at {rate_word} interest from {_holder_label(conn, src, boss)}."
     _record(conn, me, "Loan made", summary, targets=(target,))
     return {"status": "applied", "summary": summary, "interaction_id": iid, "credit_agreement_id": cid}
 
@@ -351,7 +359,7 @@ def _backer_list(conn, me: int, target: int | None, d: dict) -> list[tuple[int |
         crew = conn.execute("SELECT * FROM underworld_crews WHERE id=?", (int(raw),)).fetchone()
         if crew is None:
             return f"unknown crew {raw}"
-        if not ledger.can_draw(conn, me, ("outfit", int(crew["organization_id"]))):
+        if not ledger.can_draw(conn, _authority(me, d), ("outfit", int(crew["organization_id"]))):
             return "That crew does not answer to him."
         leader = crew["leader_actor_id"]
         if leader is not None:
@@ -412,7 +420,8 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
             amount = ledger.amount_of(d.get("amount", ""))
         except ValueError as e:
             return _refuse(str(e))
-    my_outfit = _my_outfit(conn, me)
+    boss = _authority(me, d)
+    my_outfit = _my_outfit(conn, boss)
     their_outfit = None
     if what in OUTFIT_TERMS or what == "tribute":
         if my_outfit is None:
@@ -423,7 +432,7 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         their_outfit = int(row[0])
     debts: list = []
     if what == "debt":
-        debts = _open_debts(conn, me, target)
+        debts = _open_debts(conn, boss, target)
         if not debts:
             return _refuse(f"{name} owes him nothing.")
         if d.get("amount"):
@@ -435,6 +444,8 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     if isinstance(backers, str):
         return _refuse(backers)
     force = coercion(conn, me, backers, target)
+    if d.get("_reluctant"):  # a man doing it against his will leans on them less
+        force = max(0.0, force - 1.0)
     openly = bool(d.get("open"))
     kind = "negotiation" if what in OUTFIT_TERMS else ("threat" if openly else "demand")
     day = _day(conn)
@@ -463,7 +474,7 @@ def _open_debts(conn, me: int, target: int) -> list:
 
 
 def _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_outfit, iid, openly) -> dict:
-    mine: ledger.Holder = ("person", me)
+    mine: ledger.Holder = ("person", _authority(me, d))
     theirs: ledger.Holder = ("person", target)
     if what == "payment":
         paid = ledger.transfer(conn, theirs, mine, amount, flow_kind="other", purpose="payment demanded", allow_partial=True)
@@ -491,7 +502,7 @@ def _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_ou
             remaining -= got
         if paid <= 0:
             return {"status": "refused", "summary": f"{name} gave way but has nothing to give.", "interaction_id": iid}
-        still = sum(float(r["outstanding"]) for r in _open_debts(conn, me, target))
+        still = sum(float(r["outstanding"]) for r in _open_debts(conn, _authority(me, d), target))
         status = "partial" if still > 1e-9 else "applied"
         summary = f"{name} pays back a {ledger.scale_word(paid)} sum" + (", and still owes." if status == "partial" else ", and the debt is settled.")
     elif what in OUTFIT_TERMS:
@@ -516,7 +527,7 @@ def settle_accepted(conn: sqlite3.Connection, interaction, player_actor_id: int)
     import json
     terms = json.loads(interaction["terms_json"] or "{}")
     po = terms.get("player_operation")
-    if not isinstance(po, dict) or po.get("op") not in ("hire", "lend", "demand"):
+    if not isinstance(po, dict) or po.get("op") not in ("hire", "lend", "demand", "trade"):
         return None
     details = {**(po.get("details") or {}), "_accepted": int(interaction["id"])}
     return execute(conn, int(player_actor_id), str(po["op"]), target_actor_id=int(interaction["proposer_actor_id"]),
@@ -551,7 +562,7 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         business = conn.execute("SELECT * FROM civilian_enterprises WHERE id=?", (int(raw),)).fetchone()
         if business is None:
             return _refuse(f"unknown business {raw}")
-        if business["owner_actor_id"] == me or ledger.can_draw(conn, me, ("business", int(business["id"]))):
+        if business["owner_actor_id"] == _authority(me, d) or ledger.can_draw(conn, _authority(me, d), ("business", int(business["id"]))):
             return _refuse("He will not wreck what is his own.")
         here = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()[0]
         if business["location_id"] is None or here != business["location_id"]:
@@ -569,7 +580,7 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     rng = _attack_rng(conn, me, victim if business is None else f"b{business['id']}", d, day)
 
     attackers = [(me, _capacity(conn, me))] + [(i, c) for i, c in backers if i is not None]
-    att_cap = _capacity(conn, me) + sum(c for _, c in backers)
+    att_cap = _capacity(conn, me) + sum(c for _, c in backers) * (0.7 if d.get("_reluctant") else 1.0)
     if business is None:
         backing = {i for i, _ in backers}
         prot_ids, extra = _protectors(conn, victim, exclude=me)
@@ -633,7 +644,7 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
             conn, me, int(foe), day,
             a_to_b={"trust_delta": -12.0, "stance_delta": -15.0, "resentment_delta": 8.0},
             b_to_a={"trust_delta": -15.0, "stance_delta": -18.0, "fear_delta": 5.0, "resentment_delta": 12.0})
-    outfit = _my_outfit(conn, me)
+    outfit = _my_outfit(conn, _authority(me, d))
     if outfit is not None:
         from .underworld_rebuild import add_heat
         if business is None:
@@ -643,19 +654,176 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     return {"status": "applied", "outcome": outcome, "hurt": hurt, "summary": summary, "event_id": event_id}
 
 
+# ---------------------------------------------------------------- trade
+
+def _clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+
+def _trade(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
+    deal = str(d.get("deal") or "").lower()
+    if deal not in ("buy", "sell"):
+        return _refuse("deal must be buy or sell.")
+    ref = str(d.get("business") or "")
+    raw = ref.partition(":")[2] if ref.startswith("business:") else ""
+    if not raw.isdigit():
+        return _refuse("Name the business as business:<id>.")
+    biz = conn.execute("SELECT * FROM civilian_enterprises WHERE id=?", (int(raw),)).fetchone()
+    if biz is None:
+        return _refuse(f"unknown business {raw}")
+    boss = _authority(me, d)
+    if target is None or target in (me, boss) or not _living(conn, target):
+        return _refuse("There is no living person named to deal with.")
+    name = _name(conn, target)
+    if not _same_place(conn, me, target):
+        return _refuse(f"{name} is not here to deal with.")
+    try:
+        price = ledger.amount_of(d.get("amount", ""))
+    except ValueError as e:
+        return _refuse(str(e))
+    value = float(biz["capital"]) + float(biz["cash"]) - float(biz["debt"])
+    word = ledger.scale_word(price)
+    if deal == "buy":
+        if biz["owner_actor_id"] != target:
+            return _refuse(f"{biz['name']} is not {name}'s to sell.")
+        try:
+            payer = ledger.parse_holder(d.get("from") or "me", boss, conn)
+        except ValueError as e:
+            return _refuse(str(e))
+        payee: ledger.Holder = ("person", target)
+        if not ledger.can_draw(conn, boss, payer):
+            return _refuse("He has no right to draw on that purse.")
+        if ledger.balance(conn, payer) + 1e-9 < price:
+            return _refuse(f"There is not enough in {_holder_label(conn, payer, boss)} for a {word} price.")
+        incentive = 2.0 * (price - value) / max(1.0, value)
+        new_owner = boss
+    else:
+        if biz["owner_actor_id"] != boss:
+            return _refuse("He cannot sell what is not his.")
+        try:
+            payee = ledger.parse_holder(d.get("to") or "me", boss, conn)
+        except ValueError as e:
+            return _refuse(str(e))
+        payer = ("person", target)
+        if ledger.balance(conn, payer) + 1e-9 < price:
+            return _refuse(f"{name} cannot afford a {word} price.")
+        incentive = 2.0 * (value - price) / max(1.0, value)
+        new_owner = target
+    day = _day(conn)
+    iid, res = _offer(conn, me, target, "offer", day, intent, {"incentive": _clamp(incentive, -2.0, 2.0)}, op="trade", d=d)
+    if iid is None:
+        return res
+    countered = _countered(conn, me, target, iid, res)
+    if countered:
+        return countered
+    if res.response != "accept":
+        summary = f"{name} would not agree a price for {biz['name']}."
+        _record(conn, me, "Sale refused", summary, targets=(target,))
+        return {"status": "refused", "summary": summary, "interaction_id": iid}
+    try:
+        ledger.transfer(conn, payer, payee, price, flow_kind="other", purpose=f"sale of {biz['name']}")
+    except ValueError as e:
+        return _refuse(str(e))
+    old_owner = biz["owner_actor_id"]
+    conn.execute("UPDATE civilian_enterprises SET owner_actor_id=?, updated_day=? WHERE id=?", (new_owner, day, biz["id"]))
+    if old_owner is not None:
+        conn.execute("DELETE FROM enterprise_staff WHERE enterprise_id=? AND actor_id=? AND role='owner'", (biz["id"], old_owner))
+    from .merchant import add_enterprise_staff
+    add_enterprise_staff(conn, int(biz["id"]), int(new_owner), role="owner", authority=100)
+    summary = (f"{biz['name']} passes to him for a {word} price." if deal == "buy"
+               else f"{biz['name']} passes to {name} for a {word} price.")
+    _record(conn, me, "Business traded", summary, targets=(target,))
+    return {"status": "applied", "summary": summary, "interaction_id": iid, "amount": word}
+
+
+# ---------------------------------------------------------------- order
+
+ORDERABLE = ("pay", "demand", "attack", "lend", "hire")
+ATTACK_DANGER = {"drive_off": 1, "beat": 2, "kill": 3}
+
+
+def _is_subordinate(conn, boss: int, sub: int) -> bool:
+    if sub == boss:
+        return False
+    for r in conn.execute("SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active'", (sub,)):
+        if ledger.can_draw(conn, boss, ("outfit", int(r[0]))):
+            return True
+    return conn.execute("SELECT 1 FROM enterprise_staff s JOIN civilian_enterprises e ON e.id=s.enterprise_id "
+                        "WHERE s.actor_id=? AND s.status='active' AND e.owner_actor_id=?", (sub, boss)).fetchone() is not None
+
+
+def _obedience(conn, boss: int, sub: int, do: str, toward: int | None, d: dict) -> str:
+    """'yes', 'reluctantly' or 'refused': would this man carry out a risky order?"""
+    stronger = toward is not None and _capacity(conn, toward) > _capacity(conn, sub)
+    if do == "attack":
+        base = ATTACK_DANGER.get(str(d.get("intent_kind") or "beat").lower(), 2)
+    elif do == "demand" and (d.get("open") or stronger):
+        base = 1
+    else:
+        return "yes"
+    danger = base + (1 if stronger else 0)
+    drives = conn.execute("SELECT loyalty,aggression,risk_tolerance FROM actor_drives WHERE actor_id=?", (sub,)).fetchone()
+    loyalty, aggression, risk = (float(drives[0]), float(drives[1]), float(drives[2])) if drives else (0.5, 0.5, 0.5)
+    from .relationships import relationship_view
+    fear = relationship_view(conn, sub, boss)["fear"]
+    import random
+    seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
+    call_id = d.get("_call_id")
+    rng = random.Random(f"order:{seed}:{call_id}" if call_id else f"order:{seed}:{boss}:{sub}:{do}:{toward}:{_day(conn)}")
+    will = 1.2 * loyalty + 0.6 * fear / 100.0 + 0.4 * aggression - 0.5 * danger * (1.0 - risk) + rng.uniform(-0.2, 0.2)
+    return "refused" if will < 0.35 else ("reluctantly" if will < 0.55 else "yes")
+
+
+def _order(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
+    do = str(d.get("do") or "").lower()
+    if do not in ORDERABLE:
+        return _refuse(f"do must be one of {', '.join(ORDERABLE)}.")
+    if target is None or not _living(conn, target) or not _is_subordinate(conn, me, target):
+        return _refuse("He has no subordinate like that to give orders to.")
+    sub = int(target)
+    name = _name(conn, sub)
+    toward = d.get("toward")
+    if toward is not None:
+        try:
+            toward = int(toward)
+        except (TypeError, ValueError):
+            return _refuse("toward must be an actor id.")
+        if not _living(conn, toward):
+            return _refuse("There is no living person to direct that toward.")
+        if not _same_place(conn, sub, toward):
+            return _refuse(f"{name} is not in town with them.")
+    mood = _obedience(conn, me, sub, do, toward, d)
+    if mood == "refused":
+        adjust_relationship_pair(conn, me, sub, _day(conn), a_to_b={"trust_delta": -4.0})
+        summary = f"{name} would not do it."
+        _record(conn, me, "Order refused", summary, targets=(sub,))
+        return {"status": "refused", "summary": summary, "report": summary, "by": name, "obeyed": "refused"}
+    inner = {k: v for k, v in d.items() if k not in ("do", "toward")}
+    inner["_principal"] = me
+    if mood == "reluctantly":
+        inner["_reluctant"] = True
+    res = execute(conn, sub, do, target_actor_id=toward, details=inner, intent=intent, _trusted=True)
+    out = dict(res)
+    out.update({"report": res.get("summary", ""), "by": name, "obeyed": mood})
+    return out
+
+
 # ---------------------------------------------------------------- dispatch
 
-_HANDLERS: dict[str, Callable[..., dict]] = {"pay": _pay, "hire": _hire, "lend": _lend, "demand": _demand, "attack": _attack}
+_HANDLERS: dict[str, Callable[..., dict]] = {"pay": _pay, "hire": _hire, "lend": _lend, "demand": _demand, "attack": _attack,
+                                              "trade": _trade, "order": _order}
 
 
 def execute(conn: sqlite3.Connection, actor_id: int, op: str, *, target_actor_id: int | None,
-            details: dict, intent: str) -> dict:
+            details: dict, intent: str, _trusted: bool = False) -> dict:
     handler = _HANDLERS.get(op)
     if handler is None:
         if op in OPERATIONS:
             return _refuse("That kind of action is not available yet.")
         return _refuse(f"Unknown operation; use one of {', '.join(OPERATIONS)}.")
     d = details if isinstance(details, dict) else {}
+    if not _trusted:  # only an order given through _order may borrow the protagonist's authority
+        d = {k: v for k, v in d.items() if k not in ("_principal", "_reluctant")}
     try:
         return handler(conn, int(actor_id), target_actor_id, d, intent)
     except ValueError as e:

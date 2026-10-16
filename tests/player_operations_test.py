@@ -234,6 +234,99 @@ def run():
             r = po.execute(conn, me, "attack", target_actor_id=by, details={"intent_kind": "beat"}, intent="x")
             assert r["status"] == "refused", r
             conn.execute("UPDATE actors SET status='active' WHERE id=?", (by,))
+
+            # ---- order and trade (Task 5)
+            from engine.relationships import relationship_view
+            leader = w["crew_leader"]
+            conn.execute("UPDATE underworld_personnel SET status='active' WHERE actor_id=?", (leader,))
+            conn.execute("UPDATE underworld_personnel SET status='expelled' WHERE actor_id=?", (by,))
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id IN (?,?)", (loc, by, leader))
+            cash = lambda a: ledger.balance(conn, ("person", a))
+
+            def drives(aid, loyalty, risk, aggression):
+                conn.execute("UPDATE actor_drives SET loyalty=?, risk_tolerance=?, aggression=? WHERE actor_id=?", (loyalty, risk, aggression, aid))
+
+            # a stranger is not a subordinate
+            r = po.execute(conn, me, "order", target_actor_id=by, details={"do": "demand", "toward": leader, "what": "other"}, intent="x")
+            assert r["status"] == "refused" and "subordinate" in r["summary"], r
+            drives(leader, 0.95, 0.9, 0.5)
+            # an order to demand a debt: the leader acts, the protagonist collects
+            civilian_life.create_credit_agreement(conn, principal=8.0, lender_actor_id=me, borrower_actor_id=by, due_day=999999)
+            conn.execute("UPDATE resources SET amount=5 WHERE actor_id=? AND resource_type='cash'", (by,))
+            m0, l0 = cash(me), cash(leader)
+            r = po.execute(conn, me, "order", target_actor_id=leader,
+                           details={"do": "demand", "toward": by, "what": "debt", "_call_id": "ord-1"}, intent="Collect what he owes me.")
+            assert r["by"] == po._name(conn, leader) and r["obeyed"] == "yes" and "report" in r, r
+            assert r["status"] in ("applied", "partial", "refused", "countered"), r
+            assert abs(cash(leader) - l0) < 1e-9, "the proceeds belong to the protagonist, not the subordinate"
+            if r["status"] in ("applied", "partial"):
+                assert cash(me) > m0, r
+            else:
+                assert abs(cash(me) - m0) < 1e-9, r
+            # an order to pay draws on the protagonist's purse, not the subordinate's
+            m0, l0 = cash(me), cash(leader)
+            r = po.execute(conn, me, "order", target_actor_id=leader,
+                           details={"do": "pay", "toward": by, "to": f"person:{by}", "from": "me", "amount": "small"}, intent="Give him this.")
+            assert r["status"] == "applied" and r["obeyed"] == "yes", r
+            assert abs(m0 - cash(me) - 1.0) < 1e-9 and abs(cash(leader) - l0) < 1e-9, (m0, cash(me), l0, cash(leader))
+            # the subordinate cannot reach a purse the protagonist does not control
+            r = po.execute(conn, me, "order", target_actor_id=leader,
+                           details={"do": "pay", "toward": by, "to": f"person:{by}", "from": f"business:{other_id}", "amount": "small"}, intent="x")
+            assert r["status"] == "refused", r
+            # not in town
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (far, by))
+            r = po.execute(conn, me, "order", target_actor_id=leader, details={"do": "demand", "toward": by, "what": "other"}, intent="x")
+            assert r["status"] == "refused" and "not in town" in r["summary"], r
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (loc, by))
+            # disloyal and timid: he will not kill for him
+            drives(leader, 0.05, 0.1, 0.1)
+            h0 = conn.execute("SELECT COUNT(*) FROM harm_incidents").fetchone()[0]
+            trust0 = relationship_view(conn, me, leader)["trust"]
+            r = po.execute(conn, me, "order", target_actor_id=leader,
+                           details={"do": "attack", "toward": by, "intent_kind": "kill", "_call_id": "ord-2"}, intent="Kill him.")
+            assert r["obeyed"] == "refused" and r["status"] == "refused" and r["by"] == po._name(conn, leader), r
+            assert conn.execute("SELECT COUNT(*) FROM harm_incidents").fetchone()[0] == h0
+            assert relationship_view(conn, me, leader)["trust"] < trust0
+            # loyal and bold: it is done in his name
+            drives(leader, 0.95, 0.9, 0.5)
+            r = po.execute(conn, me, "order", target_actor_id=leader,
+                           details={"do": "attack", "toward": by, "intent_kind": "beat", "_call_id": "ord-3"}, intent="Beat him.")
+            assert r["obeyed"] in ("yes", "reluctantly") and r["status"] == "applied" and r["hurt"], r
+            assert conn.execute("SELECT COUNT(*) FROM harm_incidents").fetchone()[0] == h0 + len(r["hurt"])
+
+            # trade: a sale the buyer cannot pay for
+            conn.execute("UPDATE resources SET amount=0 WHERE actor_id=? AND resource_type='cash'", (by,))
+            conn.execute("DELETE FROM underworld_leader_wealth WHERE actor_id=?", (by,))
+            from engine.merchant import add_enterprise_staff
+            add_enterprise_staff(conn, biz, me, role="owner", authority=100)
+            r = po.execute(conn, me, "trade", target_actor_id=by,
+                           details={"deal": "sell", "business": f"business:{biz}", "amount": "fortune"}, intent="Buy me out.")
+            assert r["status"] == "refused" and "afford" in r["summary"], r
+            assert conn.execute("SELECT owner_actor_id FROM civilian_enterprises WHERE id=?", (biz,)).fetchone()[0] == me
+            # buy another's shop; the stall is only his own to sell
+            conn.execute("UPDATE resources SET amount=amount+100 WHERE actor_id=? AND resource_type='cash'", (me,))
+            m0, b0_ = cash(me), cash(by)
+            r = po.execute(conn, me, "trade", target_actor_id=by,
+                           details={"deal": "buy", "business": f"business:{rival_shop}", "amount": "fortune"}, intent="Name your price.")
+            owner = conn.execute("SELECT owner_actor_id FROM civilian_enterprises WHERE id=?", (rival_shop,)).fetchone()[0]
+            if r["status"] == "applied":
+                assert owner == me and abs(m0 - cash(me) - 60.0) < 1e-9 and abs(cash(by) - b0_ - 60.0) < 1e-9, r
+                assert not re.search(r"\d", r["summary"]), r
+            else:
+                assert r["status"] in ("refused", "countered") and owner == by and abs(cash(me) - m0) < 1e-9, r
+            assert po.execute(conn, me, "trade", target_actor_id=by, details={"deal": "buy", "business": f"business:{biz}", "amount": "small"}, intent="x")["status"] == "refused"
+            assert po.execute(conn, me, "trade", target_actor_id=by, details={"deal": "sell", "business": f"business:{other_id}", "amount": "small"}, intent="x")["status"] == "refused"
+            # sell for a price the buyer can pay: either way the books agree
+            conn.execute("UPDATE resources SET amount=amount+100 WHERE actor_id=? AND resource_type='cash'", (by,))
+            m0, b0_ = cash(me), cash(by)
+            r = po.execute(conn, me, "trade", target_actor_id=by,
+                           details={"deal": "sell", "business": f"business:{biz}", "amount": "small"}, intent="Take the stall.")
+            owner = conn.execute("SELECT owner_actor_id FROM civilian_enterprises WHERE id=?", (biz,)).fetchone()[0]
+            staff = conn.execute("SELECT 1 FROM enterprise_staff WHERE enterprise_id=? AND actor_id=? AND role='owner' AND status='active'", (biz, me)).fetchone()
+            if r["status"] == "applied":
+                assert owner == by and staff is None and abs(cash(me) - m0 - 1.0) < 1e-9 and abs(b0_ - cash(by) - 1.0) < 1e-9, r
+            else:
+                assert r["status"] in ("refused", "countered") and owner == me and staff is not None, r
     print("player_operations_test passed")
 
 
