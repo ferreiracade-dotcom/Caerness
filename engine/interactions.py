@@ -473,6 +473,12 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
             # The domain-action ledger records normal validation failures; this guard prevents
             # an observability/integration error from rolling back the interaction itself.
             conn.execute("INSERT OR REPLACE INTO runtime_flags(key,value,updated_at) VALUES ('last_domain_action_error',?,CURRENT_TIMESTAMP)", (str(exc),))
+        if "player_operation" in terms:  # the protagonist's own offer, accepted by the other side during the simulation
+            from .player_operations import settle_npc_accepted
+            settled = settle_npc_accepted(conn, interaction)
+            if settled is not None:
+                summary += f" {settled.get('summary', '')}"
+                conn.execute("UPDATE interactions SET resolution_summary=? WHERE id=?", (summary, interaction["id"]))
         if agreement_id is not None:
             _link(conn, day, "interaction", int(interaction["id"]), "agreement", agreement_id, "created")
         event_id = None

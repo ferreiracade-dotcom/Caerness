@@ -63,7 +63,7 @@ def _debit(conn: sqlite3.Connection, h: Holder, amount: float) -> None:
     elif kind == "outfit":
         conn.execute("UPDATE underworld_organizations SET treasury=MAX(0,treasury-?) WHERE id=?", (amount, i))
     else:
-        conn.execute("UPDATE households SET liquidity=MAX(0,liquidity-?) WHERE id=?", (amount, i))
+        conn.execute("UPDATE households SET liquidity=MAX(0,liquidity-?),wealth=MAX(0,wealth-?) WHERE id=?", (amount, amount, i))
 
 
 def _credit(conn: sqlite3.Connection, h: Holder, amount: float) -> None:
@@ -133,4 +133,4 @@ def can_draw(conn: sqlite3.Connection, me: int, h: Holder) -> bool:
         return conn.execute(
             "SELECT 1 FROM underworld_personnel WHERE actor_id=? AND organization_id=? AND status='active' AND role_kind IN ('boss','underboss')",
             (int(me), i)).fetchone() is not None
-    return conn.execute("SELECT 1 FROM households WHERE id=? AND head_actor_id=?", (i, int(me))).fetchone() is not None
+    return conn.execute("SELECT 1 FROM households WHERE id=? AND head_actor_id=? AND status='active'", (i, int(me))).fetchone() is not None

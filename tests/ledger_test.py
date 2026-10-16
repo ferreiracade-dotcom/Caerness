@@ -65,6 +65,19 @@ def run():
             assert ledger.can_draw(conn, me, ("business", e))
             assert not ledger.can_draw(conn, me, ("business", e2))
             assert not ledger.can_draw(conn, me, ("person", other))
+
+            # household debit lowers wealth as well as liquidity, matching credit
+            hh = civilian.create_household(conn, "Ledger House", head_actor_id=me, liquidity=5)
+            conn.execute("UPDATE households SET wealth=20 WHERE id=?", (hh,))
+            ledger.transfer(conn, ("household", hh), ("person", me), 2, flow_kind="other", purpose="t")
+            row = conn.execute("SELECT liquidity,wealth FROM households WHERE id=?", (hh,)).fetchone()
+            assert abs(row[0] - 3) < 1e-9 and abs(row[1] - 18) < 1e-9, tuple(row)
+            ledger.transfer(conn, ("person", me), ("household", hh), 2, flow_kind="other", purpose="t")
+            row = conn.execute("SELECT liquidity,wealth FROM households WHERE id=?", (hh,)).fetchone()
+            assert abs(row[0] - 5) < 1e-9 and abs(row[1] - 20) < 1e-9, tuple(row)
+            # a dissolved household cannot be drawn on
+            conn.execute("UPDATE households SET status='dissolved' WHERE id=?", (hh,))
+            assert not ledger.can_draw(conn, me, ("household", hh))
     print("ledger_test passed")
 
 

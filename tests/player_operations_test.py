@@ -334,5 +334,112 @@ def run():
     print("player_operations_test passed")
 
 
+def run_review_fixes():
+    with tempfile.TemporaryDirectory() as tmp:
+        db = Path(tmp) / "ops2.db"
+        shutil.copy2(ROOT / "data" / "caerness.db", db)
+        os.environ["CAERNESS_DB_PATH"] = str(db)
+        from engine.db import connect, init_db
+        from engine import interactions, ledger, player_operations as po
+        from engine.merchant import add_enterprise_staff
+        from fixtures_protagonist import make_boss
+
+        init_db()
+        with connect() as conn:
+            conn.execute("PRAGMA busy_timeout=30000")
+            w = make_boss(conn)
+            me, by, outfit, biz, hh = w["me"], w["bystander"], w["outfit"], w["business"], w["household"]
+            day = po._day(conn)
+            count = lambda t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+
+            # 2: a dissolved household cannot take on people, and nothing is left behind
+            conn.execute("UPDATE households SET status='dissolved' WHERE id=?", (hh,))
+            i0, r0 = count("interactions"), count("relationships")
+            r = po.execute(conn, me, "hire", target_actor_id=by, details={"into": f"household:{hh}", "role": "retainer", "amount": "modest"}, intent="x")
+            assert r["status"] == "refused", r
+            assert count("interactions") == i0 and count("relationships") == r0, "refusal left rows behind"
+            conn.execute("UPDATE households SET status='active' WHERE id=?", (hh,))
+
+            # 2: a handler that fails half way is rolled back; non-ValueErrors are re-raised after rollback
+            def half_done(c, m, t, d, i):
+                po.create_interaction(c, m, by, "offer", day, stakes=1, rationale="x", terms={})
+                raise ValueError("halfway")
+            saved = po._HANDLERS["hire"]
+            po._HANDLERS["hire"] = half_done
+            r = po.execute(conn, me, "hire", target_actor_id=by, details={}, intent="x")
+            assert r["status"] == "refused" and "halfway" in r["summary"] and count("interactions") == i0, r
+
+            def boom(c, m, t, d, i):
+                po.create_interaction(c, m, by, "offer", day, stakes=1, rationale="x", terms={})
+                raise RuntimeError("boom")
+            po._HANDLERS["hire"] = boom
+            try:
+                po.execute(conn, me, "hire", target_actor_id=by, details={}, intent="x")
+                raise AssertionError("expected RuntimeError")
+            except RuntimeError:
+                pass
+            assert count("interactions") == i0
+            po._HANDLERS["hire"] = saved
+
+            # 3: loans come from his purse or a house of business only
+            cr0 = count("credit_agreements")
+            for src in (f"outfit:{outfit}", f"household:{hh}"):
+                r = po.execute(conn, me, "lend", target_actor_id=by, details={"from": src, "amount": "small"}, intent="x")
+                assert r["status"] == "refused" and "own purse or one of his houses" in r["summary"], r
+            assert count("interactions") == i0 and count("credit_agreements") == cr0
+
+            # 5: the other party accepts the protagonist's own offer later, during the simulation
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (w["location"], by))
+            terms = {"player_operation": {"op": "lend", "details": {"amount": "small"}}, "incentive": 8}
+            iid = interactions.create_interaction(conn, me, by, "offer", day, stakes=1, rationale="A loan, if you will.", terms=terms)
+            assert conn.execute("SELECT status FROM interactions WHERE id=?", (iid,)).fetchone()[0] == "pending"
+            ledger._credit(conn, ("person", me), 20)
+            m0, b0 = ledger.balance(conn, ("person", me)), ledger.balance(conn, ("person", by))
+            res = interactions.resolve_interaction(conn, iid, day)
+            assert res.response == "accept", res
+            row = conn.execute("SELECT * FROM credit_agreements WHERE borrower_actor_id=? AND lender_actor_id=?", (by, me)).fetchone()
+            assert row is not None and count("credit_agreements") == cr0 + 1, res.summary
+            assert abs(m0 - ledger.balance(conn, ("person", me)) - 1.0) < 1e-9 and abs(ledger.balance(conn, ("person", by)) - b0 - 1.0) < 1e-9
+            # the immediate path still settles exactly once
+            cr1 = count("credit_agreements")
+            conn.execute("UPDATE interactions SET status='expired' WHERE status='pending'")
+            r = po.execute(conn, me, "lend", target_actor_id=by, details={"amount": "small", "_call_id": "x"}, intent="Another.")
+            assert count("credit_agreements") == cr1 + (1 if r["status"] == "applied" else 0), r
+
+            # 6: obedience calibration
+            leader = w["crew_leader"]
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id IN (?,?)", (w["location"], leader, by))
+            add_enterprise_staff(conn, biz, by, role="clerk", authority=40)
+            for aid in (leader, by):
+                conn.execute("UPDATE actor_drives SET loyalty=.56, aggression=.44, risk_tolerance=.51 WHERE actor_id=?", (aid,))
+                conn.execute("UPDATE relationships SET fear=0 WHERE actor_a_id=? AND actor_b_id=?", (aid, me))
+            crew = [po._obedience(conn, me, leader, "attack", by, {"intent_kind": "kill", "_call_id": f"order-{i}"}) for i in range(10)]
+            assert sum(x in ("yes", "reluctantly") for x in crew) >= 9, crew
+            clerk = [po._obedience(conn, me, by, "attack", leader, {"intent_kind": "kill", "_call_id": f"order-{i}"}) for i in range(10)]
+            assert sum(x in ("refused", "reluctantly") for x in clerk) >= 9, clerk
+
+            # 1: rank. As underboss he cannot order or remove the boss above him
+            conn.execute("UPDATE underworld_personnel SET role_kind='underboss' WHERE actor_id=?", (me,))
+            conn.execute("UPDATE underworld_organizations SET current_leader_actor_id=? WHERE id=?", (leader, outfit))
+            conn.execute("UPDATE underworld_personnel SET role_kind='boss' WHERE actor_id=?", (leader,))
+            for details in ({"into": f"outfit:{outfit}", "role": "none"}, {"into": f"outfit:{outfit}", "role": "member"}):
+                r = po.execute(conn, me, "hire", target_actor_id=leader, details=details, intent="x")
+                assert r["status"] == "refused", (details, r)
+            got = conn.execute("SELECT status,role_kind FROM underworld_personnel WHERE actor_id=?", (leader,)).fetchone()
+            assert (got[0], got[1]) == ("active", "boss"), tuple(got)
+            r = po.execute(conn, me, "order", target_actor_id=leader, details={"do": "pay", "to": "me", "amount": "small"}, intent="x")
+            assert r["status"] == "refused" and "subordinate" in r["summary"], r
+            # as a factor of a business he cannot remove or demote the owner
+            conn.execute("UPDATE civilian_enterprises SET owner_actor_id=? WHERE id=?", (leader, biz))
+            add_enterprise_staff(conn, biz, leader, role="owner", authority=100)
+            add_enterprise_staff(conn, biz, me, role="factor", authority=60)
+            for role in ("none", "clerk"):
+                r = po.execute(conn, me, "hire", target_actor_id=leader, details={"into": f"business:{biz}", "role": role}, intent="x")
+                assert r["status"] == "refused", (role, r)
+            assert conn.execute("SELECT authority FROM enterprise_staff WHERE enterprise_id=? AND actor_id=?", (biz, leader)).fetchone()[0] == 100
+    print("player_operations review fixes passed")
+
+
 if __name__ == "__main__":
     run()
+    run_review_fixes()

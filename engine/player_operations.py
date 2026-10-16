@@ -109,18 +109,57 @@ def _outfit_row(conn, actor_id: int):
     return conn.execute("SELECT * FROM underworld_personnel WHERE actor_id=? AND status='active'", (actor_id,)).fetchone()
 
 
+def _outranks(conn, me: int, target: int, holding: ledger.Holder) -> bool:
+    """True when ``me`` stands above ``target`` in that holding (so may order, demote or dismiss him)."""
+    kind, i = holding
+    if target == me:
+        return False
+    if kind == "outfit":
+        org = conn.execute("SELECT current_leader_actor_id FROM underworld_organizations WHERE id=?", (i,)).fetchone()
+        leader = org[0] if org else None
+        if leader is not None and int(leader) == target:
+            return False
+        if leader is not None and int(leader) == me:
+            return True
+        def rank(a):
+            r = conn.execute("SELECT role_kind FROM underworld_personnel WHERE actor_id=? AND organization_id=? AND status='active'", (a, i)).fetchone()
+            return OUTFIT_RANK.index(str(r[0])) if r and str(r[0]) in OUTFIT_RANK else -1
+        return rank(target) < rank(me)
+    if kind == "business":
+        biz = conn.execute("SELECT owner_actor_id FROM civilian_enterprises WHERE id=?", (i,)).fetchone()
+        owner = biz[0] if biz else None
+        if owner is not None and int(owner) == target:
+            return False
+        if owner is not None and int(owner) == me:
+            return True
+        def auth(a):
+            r = conn.execute("SELECT authority FROM enterprise_staff WHERE enterprise_id=? AND actor_id=? AND status='active'", (i, a)).fetchone()
+            return float(r[0]) if r else 0.0
+        return auth(target) < auth(me)
+    row = conn.execute("SELECT head_actor_id FROM households WHERE id=?", (i,)).fetchone()
+    return bool(row) and row[0] is not None and int(row[0]) == me
+
+
 def _is_my_person(conn, me: int, target: int, into: ledger.Holder) -> bool:
     """Target already works for a holding the protagonist controls (tier 1)."""
     for r in conn.execute("SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active'", (target,)):
-        if ledger.can_draw(conn, me, ("outfit", int(r[0]))):
+        if ledger.can_draw(conn, me, ("outfit", int(r[0]))) and _outranks(conn, me, target, ("outfit", int(r[0]))):
             return True
     for r in conn.execute("SELECT enterprise_id FROM enterprise_staff WHERE actor_id=? AND status='active'", (target,)):
-        if ledger.can_draw(conn, me, ("business", int(r[0]))):
+        if ledger.can_draw(conn, me, ("business", int(r[0]))) and _outranks(conn, me, target, ("business", int(r[0]))):
             return True
     for r in conn.execute("SELECT household_id FROM household_service_terms WHERE actor_id=? AND status='active'", (target,)):
-        if ledger.can_draw(conn, me, ("household", int(r[0]))):
+        if ledger.can_draw(conn, me, ("household", int(r[0]))) and _outranks(conn, me, target, ("household", int(r[0]))):
             return True
     return False
+
+
+def _serves_in(conn, target: int, holding: ledger.Holder) -> bool:
+    kind, i = holding
+    sql = {"outfit": "SELECT 1 FROM underworld_personnel WHERE actor_id=? AND organization_id=? AND status='active'",
+           "business": "SELECT 1 FROM enterprise_staff WHERE actor_id=? AND enterprise_id=? AND status='active'",
+           "household": "SELECT 1 FROM household_service_terms WHERE actor_id=? AND household_id=? AND status='active'"}[kind]
+    return conn.execute(sql, (target, i)).fetchone() is not None
 
 
 def _sour(conn, me: int, target: int, weight: float) -> None:
@@ -144,6 +183,8 @@ def _hire(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     role = str(d.get("role") or "").strip().lower()
     name = _name(conn, target)
     where = _holder_label(conn, into, me)
+    if _serves_in(conn, target, into) and not _outranks(conn, boss, target, into):
+        return _refuse(f"{name} does not answer to him there.")
     if role == "none":
         return _dismiss(conn, me, target, into, name, where)
     mine = _is_my_person(conn, boss, target, into)
@@ -258,7 +299,33 @@ def _offer(conn, me: int, target: int, kind: str, day: int, intent: str, terms: 
     pending = conn.execute("SELECT status FROM interactions WHERE id=?", (iid,)).fetchone()
     if not pending or str(pending[0]) != "pending":
         return None, _refuse(f"{_name(conn, target)} will not hear it again so soon.")
-    return iid, resolve_interaction(conn, iid, day)
+    global _OFFERING
+    _OFFERING += 1  # the caller settles an immediate acceptance itself
+    try:
+        return iid, resolve_interaction(conn, iid, day)
+    finally:
+        _OFFERING -= 1
+
+
+_OFFERING = 0
+
+
+def settle_npc_accepted(conn: sqlite3.Connection, interaction) -> dict | None:
+    """The other party accepted the protagonist's own pending offer later, during the simulation: carry it out."""
+    import json
+    if _OFFERING:
+        return None
+    terms = json.loads(interaction["terms_json"] or "{}")
+    po = terms.get("player_operation")
+    if not isinstance(po, dict) or po.get("op") not in ("hire", "lend", "demand", "trade"):
+        return None
+    row = conn.execute("SELECT player_actor_id FROM player_state WHERE id=1").fetchone()
+    if not row or row[0] is None or int(row[0]) != int(interaction["proposer_actor_id"]):
+        return None
+    details = {**(po.get("details") or {}), "_accepted": int(interaction["id"])}
+    return execute(conn, int(interaction["proposer_actor_id"]), str(po["op"]),
+                   target_actor_id=int(interaction["recipient_actor_id"]), details=details,
+                   intent=str(interaction["rationale"] or "accepted offer"), _trusted=True)
 
 
 def _countered(conn, me: int, target: int, iid: int, res) -> dict | None:
@@ -288,6 +355,8 @@ def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         due_days = max(1, int(d.get("due_days") or 90))
     except (TypeError, ValueError):
         return _refuse("due_days must be a number of days.")
+    if src[0] in ("outfit", "household"):
+        return _refuse("Loans are made from his own purse or one of his houses.")
     if (src[0] == "person" and src[1] != boss) or not ledger.can_draw(conn, boss, src):
         return _refuse("He has no right to draw on that purse.")
     if ledger.balance(conn, src) + 1e-9 < amount:
@@ -746,10 +815,21 @@ def _is_subordinate(conn, boss: int, sub: int) -> bool:
     if sub == boss:
         return False
     for r in conn.execute("SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active'", (sub,)):
-        if ledger.can_draw(conn, boss, ("outfit", int(r[0]))):
+        if ledger.can_draw(conn, boss, ("outfit", int(r[0]))) and _outranks(conn, boss, sub, ("outfit", int(r[0]))):
             return True
     return conn.execute("SELECT 1 FROM enterprise_staff s JOIN civilian_enterprises e ON e.id=s.enterprise_id "
                         "WHERE s.actor_id=? AND s.status='active' AND e.owner_actor_id=?", (sub, boss)).fetchone() is not None
+
+
+HARD_ROLES = ("crew_leader", "enforcer", "lieutenant", "underboss")
+
+
+def _role_bonus(conn, boss: int, sub: int) -> float:
+    """Men whose trade is violence take an order to fight more readily than a clerk does."""
+    row = conn.execute("SELECT role_kind FROM underworld_personnel WHERE actor_id=? AND status='active' LIMIT 1", (sub,)).fetchone()
+    if row is not None:
+        return 0.25 if str(row[0]) in HARD_ROLES else 0.10
+    return 0.0
 
 
 def _obedience(conn, boss: int, sub: int, do: str, toward: int | None, d: dict) -> str:
@@ -770,7 +850,9 @@ def _obedience(conn, boss: int, sub: int, do: str, toward: int | None, d: dict) 
     seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
     call_id = d.get("_call_id")
     rng = random.Random(f"order:{seed}:{call_id}" if call_id else f"order:{seed}:{boss}:{sub}:{do}:{toward}:{_day(conn)}")
-    will = 1.2 * loyalty + 0.6 * fear / 100.0 + 0.4 * aggression - 0.5 * danger * (1.0 - risk) + rng.uniform(-0.2, 0.2)
+    role_bonus = _role_bonus(conn, boss, sub)
+    will = (0.9 * loyalty + 0.6 * fear / 100.0 + 0.4 * aggression + role_bonus
+            - 0.18 * danger * (1.0 - risk) + rng.uniform(-0.15, 0.15))
     return "refused" if will < 0.35 else ("reluctantly" if will < 0.55 else "yes")
 
 
@@ -824,7 +906,16 @@ def execute(conn: sqlite3.Connection, actor_id: int, op: str, *, target_actor_id
     d = details if isinstance(details, dict) else {}
     if not _trusted:  # internal keys (authority borrowed by an order, an agreement already given) never come from callers
         d = {k: v for k, v in d.items() if k not in ("_principal", "_reluctant", "_accepted")}
+    conn.execute("SAVEPOINT player_op")
     try:
-        return handler(conn, int(actor_id), target_actor_id, d, intent)
+        result = handler(conn, int(actor_id), target_actor_id, d, intent)
     except ValueError as e:
+        conn.execute("ROLLBACK TO SAVEPOINT player_op")
+        conn.execute("RELEASE SAVEPOINT player_op")
         return _refuse(str(e))
+    except BaseException:
+        conn.execute("ROLLBACK TO SAVEPOINT player_op")
+        conn.execute("RELEASE SAVEPOINT player_op")
+        raise
+    conn.execute("RELEASE SAVEPOINT player_op")
+    return result
