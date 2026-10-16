@@ -531,7 +531,7 @@ def settle_accepted(conn: sqlite3.Connection, interaction, player_actor_id: int)
         return None
     details = {**(po.get("details") or {}), "_accepted": int(interaction["id"])}
     return execute(conn, int(player_actor_id), str(po["op"]), target_actor_id=int(interaction["proposer_actor_id"]),
-                   details=details, intent=str(interaction["rationale"] or "accepted counter-offer"))
+                   details=details, intent=str(interaction["rationale"] or "accepted counter-offer"), _trusted=True)
 
 
 # ---------------------------------------------------------------- attack
@@ -822,8 +822,8 @@ def execute(conn: sqlite3.Connection, actor_id: int, op: str, *, target_actor_id
             return _refuse("That kind of action is not available yet.")
         return _refuse(f"Unknown operation; use one of {', '.join(OPERATIONS)}.")
     d = details if isinstance(details, dict) else {}
-    if not _trusted:  # only an order given through _order may borrow the protagonist's authority
-        d = {k: v for k, v in d.items() if k not in ("_principal", "_reluctant")}
+    if not _trusted:  # internal keys (authority borrowed by an order, an agreement already given) never come from callers
+        d = {k: v for k, v in d.items() if k not in ("_principal", "_reluctant", "_accepted")}
     try:
         return handler(conn, int(actor_id), target_actor_id, d, intent)
     except ValueError as e:
