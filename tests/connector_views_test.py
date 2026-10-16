@@ -89,6 +89,9 @@ def run():
                    WHERE ? IN (u.actor_a_id,u.actor_b_id) AND u.status='active'""", (sp["id"], sp["id"])).fetchone()[0]
             assert _who(conn, sp).startswith(f"spouse of {partner} ("), _who(conn, sp)
 
+            # Partial matches never surface engine stand-ins such as "[STRUCTURAL] ... grain hinterland".
+            assert not any(n.startswith("[") for n in lookup(conn, "grain hinterland").get("candidates", [])), lookup(conn, "grain hinterland")
+            assert lookup(conn, "grain hinterland")["found"] is False
             # Sex and organisation are shown, so the GM cannot guess them from names (owner play check 2026-10-16).
             for p in compact_scene(conn)["present"]:
                 sex = conn.execute("SELECT demographic_sex FROM actor_life_profiles WHERE actor_id=?", (p["id"],)).fetchone()

@@ -297,6 +297,26 @@ def _children_of_either_parent(conn: sqlite3.Connection, actor_a: int, actor_b: 
     return sorted(out)
 
 
+def _family_name(name: str) -> str | None:
+    tokens = [t for t in str(name or "").split() if not t.isdigit()]
+    return tokens[-1] if len(tokens) >= 2 and not tokens[0].startswith("[") else None
+
+
+def _newborn_name(conn: sqlite3.Connection, father: int, mother: int, sex: str, key: str) -> str:
+    """A newborn's given name of their sex and the father's family name (else the mother's), unique in the world."""
+    from .demographic_sex import FEMALE_GIVEN_NAMES, MALE_GIVEN_NAMES
+    import hashlib
+    names = {int(r[0]): str(r[1]) for r in conn.execute("SELECT id,name FROM actors WHERE id IN (?,?)", (father, mother))}
+    family = _family_name(names.get(father, "")) or _family_name(names.get(mother, ""))
+    pool = sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
+    start = int(hashlib.sha256(key.encode()).hexdigest(), 16) % len(pool)
+    for given in pool[start:] + pool[:start]:
+        name = f"{given} {family}" if family else given
+        if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
+            return name
+    return f"{pool[start]} {family or ''} {key.rsplit(':', 3)[-3]}".replace("  ", " ").strip()
+
+
 def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str | None = None,
                    demographic_sex: str | None = None, day: int | None = None) -> int:
     row = conn.execute("SELECT * FROM household_unions WHERE id=? AND status='active'", (union_id,)).fetchone()
@@ -320,16 +340,14 @@ def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str |
     hid = row["household_id"]
     existing = _existing_children(conn, a, b)
     siblings = _children_of_either_parent(conn, a, b)
-    if child_name is None:
-        hname = conn.execute("SELECT name FROM households WHERE id=?", (hid,)).fetchone() if hid else None
-        base = str(hname[0]) if hname else f"Union {union_id}"
-        # Several couples can share one household (royal and great households), so the union is part of the name.
-        child_name = f"[Latent child] {base} D{birth_day}-U{union_id}-{len(existing)+1}"
+    world_seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
+    birth_key = f"birth:{world_seed}:{union_id}:{birth_day}:{len(existing)+1}"
     if demographic_sex is None:
         # FAMILY-02: a newborn is never left unresolved; seeded 50/50 like the background population.
         from .demographic_sex import seeded_sex
-        world_seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
-        demographic_sex = seeded_sex(f"birth:{world_seed}:{union_id}:{birth_day}:{len(existing)+1}")
+        demographic_sex = seeded_sex(birth_key)
+    if child_name is None:
+        child_name = _newborn_name(conn, a if int(birth_parent) == b else b, int(birth_parent), demographic_sex, birth_key)
     loc = conn.execute("SELECT location_id FROM households WHERE id=?", (hid,)).fetchone() if hid else None
     location_id = int(loc[0]) if loc and loc[0] is not None else None
     cur = conn.execute(

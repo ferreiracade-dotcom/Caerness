@@ -201,7 +201,9 @@ def _find(conn, table: str, q: str):
     if q.isdigit():
         return conn.execute(f"SELECT * FROM {table} WHERE id=?", (int(q),)).fetchall()
     rows = conn.execute(f"SELECT * FROM {table} WHERE name=? COLLATE NOCASE", (q,)).fetchall()
-    return rows or conn.execute(f"SELECT * FROM {table} WHERE name LIKE ? ESCAPE '!' ORDER BY id LIMIT 5", (_like(q),)).fetchall()
+    # Engine stand-ins ("[STRUCTURAL] ... grain hinterland") are aggregates, not people or places to meet.
+    return rows or conn.execute(f"SELECT * FROM {table} WHERE name LIKE ? ESCAPE '!' AND name NOT LIKE '[%' ORDER BY id LIMIT 5",
+                                (_like(q),)).fetchall()
 
 
 def lookup(conn, query: str) -> dict:

@@ -415,6 +415,23 @@ def _resolve_enterprise_status(conn: sqlite3.Connection, day: int) -> None:
 
 
 
+_BUSINESS_LABEL = {"wholesaler": "warehouse", "inn": "inn", "physician_practice": "physic house", "smithy": "smithy",
+                   "moneylender": "counting house", "food_shop": "cookshop"}
+
+
+def _emergent_business_name(conn: sqlite3.Connection, operator_id: int, archetype: str, location_id: int | None) -> str:
+    """A new business takes its operator's name, as small concerns do: "Harrow's inn", else "Bren Harrow's inn"."""
+    person = str(conn.execute("SELECT name FROM actors WHERE id=?", (int(operator_id),)).fetchone()[0])
+    tokens = [t for t in person.split() if not t.isdigit()]
+    label = _BUSINESS_LABEL.get(archetype, archetype.replace("_", " "))
+    place = conn.execute("SELECT name FROM locations WHERE id=?", (location_id,)).fetchone() if location_id is not None else None
+    for name in (f"{tokens[-1]}'s {label}", f"{' '.join(tokens)}'s {label}",
+                 f"{' '.join(tokens)}'s {label}, {place[0] if place else ''}".rstrip(", ")):
+        if not conn.execute("SELECT 1 FROM civilian_enterprises WHERE name=?", (name,)).fetchone():
+            return name
+    return f"{' '.join(tokens)}'s {label} {int(operator_id)}"
+
+
 def _commercial_emergence_archetype(ctx: sqlite3.Row) -> str:
     choices = [
         (float(ctx["trade_flow"]), "wholesaler"),
@@ -529,13 +546,13 @@ def _review_latent_commercial_emergence(conn: sqlite3.Connection, day: int) -> d
         )
         if operator_id is None:
             continue
-        label = f"[STRUCTURAL] {ctx['location_name']} {archetype.replace('_',' ')} concern {year_index}-{operator_id}"
+        label = _emergent_business_name(conn, operator_id, archetype, loc)
         capital = round(12.0 + opportunity * 0.16 + rng.uniform(-2.0, 3.0), 3)
         cash = round(7.0 + opportunity * 0.09 + rng.uniform(-1.5, 2.0), 3)
         broad_kind = {"wholesaler":"other","inn":"service","physician_practice":"service","smithy":"workshop","moneylender":"service","food_shop":"shop"}[archetype]
         eid = create_enterprise(conn, label, broad_kind,
                                 owner_actor_id=operator_id, location_id=loc, capital=max(8.0,capital), cash=max(4.0,cash), reputation=45+rng.random()*12, admin_quality=42+rng.random()*18, labor_capacity=42+rng.random()*20, risk_tolerance=35+rng.random()*40,
-                                metadata={"emergent_business":True,"background_operator_actor_id":operator_id,"authority":"ENGINE_DERIVED_FROM_PREEXISTING_POPBACK_PLUS_CAMPAIGN_CALIBRATION","display_name_status":"STRUCTURAL_LABEL_NOT_CANON_NAME","opportunity_score":opportunity,"institutional_form":"ordinary_firm","population_delta":0})
+                                metadata={"emergent_business":True,"background_operator_actor_id":operator_id,"authority":"ENGINE_DERIVED_FROM_PREEXISTING_POPBACK_PLUS_CAMPAIGN_CALIBRATION","display_name_status":"GENERATED_NAME_NOT_CANON","opportunity_score":opportunity,"institutional_form":"ordinary_firm","population_delta":0})
         configure_enterprise_business(conn, eid, archetype, quality=46+rng.random()*12, price_position=45+rng.random()*12, capacity=35+rng.random()*18, clientele_fit=45+rng.random()*15, service_reliability=45+rng.random()*15, regulatory_pressure=10+rng.random()*15, cadence_days=30, metadata={"authority":"ENGINE_DERIVED_STRUCTURAL_BUSINESS","background_operator_actor_id":operator_id,"population_delta":0})
         if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='enterprise_ecology_state'").fetchone():
             conn.execute("""INSERT INTO enterprise_ecology_state(enterprise_id,founded_day,crystallized_day,structural_origin,last_review_day,metadata_json)

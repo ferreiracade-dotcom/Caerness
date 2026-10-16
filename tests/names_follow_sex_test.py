@@ -51,6 +51,28 @@ def run():
               (f"{prof['given_name']} {prof['family_name']}",int(c.execute("SELECT id FROM locations LIMIT 1").fetchone()[0])))
     nm=_unique_actor_name(c,prof)
     assert not any(ch.isdigit() for ch in nm) and nm.split()[0] in FIRST_MALE and nm.endswith(prof['family_name']), nm
+    # Newborns get a real given name of their sex and the father's family name, never a placeholder.
+    from engine.household_life import set_life_profile, create_union, register_birth
+    from engine.demographic_sex import FEMALE_GIVEN_NAMES, MALE_GIVEN_NAMES
+    loc0=int(c.execute("SELECT id FROM locations ORDER BY id LIMIT 1").fetchone()[0])
+    def adult(name,sex):
+        x=int(c.execute("INSERT INTO actors(name,actor_type,current_location_id,status) VALUES (?,'character',?,'active')",(name,loc0)).lastrowid)
+        set_life_profile(c,x,birth_day=-30*365,demographic_sex=sex,family_formation_eligible=True); return x
+    u=create_union(c,adult('Maren Holt','female'),adult('Edgar Brannock','male'))
+    kids=[register_birth(c,u,demographic_sex=sx) for sx in ('female','male','male')]
+    for kid,sx in zip(kids,('female','male','male')):
+        nm=c.execute("SELECT name FROM actors WHERE id=?",(kid,)).fetchone()[0]
+        assert '[' not in nm and nm.endswith(' Brannock') and nm.split()[0] in (FEMALE_GIVEN_NAMES if sx=='female' else MALE_GIVEN_NAMES), nm
+    assert len({c.execute("SELECT name FROM actors WHERE id=?",(k,)).fetchone()[0] for k in kids})==3
+    assert not c.execute("SELECT 1 FROM life_events WHERE event_kind='birth' AND summary LIKE '[%'").fetchone()
+
+    # Businesses that form during play are named after their operator, not a structural label.
+    from engine.civilian import _emergent_business_name
+    nm=_emergent_business_name(c,kids[0] and adult('Hollis Varr','male'),'inn',loc0)
+    assert nm=="Varr's inn", nm
+    c.execute("INSERT INTO civilian_enterprises(name,enterprise_kind,location_id,created_day,updated_day) VALUES (?,'service',?,0,0)",(nm,loc0))
+    assert _emergent_business_name(c,adult('Ivo Varr','male'),'inn',loc0)=="Ivo Varr's inn"
+
     # Old worlds: recreate the bug on one revealed identity and repair it.
     aid,given,family,sex,pid,uid=c.execute(
         """SELECT a.id,p.given_name,p.family_name,p.demographic_sex,p.partition_id,p.local_uid
