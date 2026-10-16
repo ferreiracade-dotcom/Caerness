@@ -11,7 +11,19 @@ A persistent low-fantasy world simulation (a murim-style martial world plus West
 - Packaged opening world: `data/caerness.db` (schema 108, story day 0, 132 travel routes).
 - Design: `DESIGN.md`. Specs and plans for current work: `docs/superpowers/specs/`, `docs/superpowers/plans/`.
 
-## 2. Where work stands (2026-10-09)
+## 2. Where work stands
+
+### Current direction (2026-10-16): play through Claude
+
+The owner now plays **only through the Claude desktop app (Windows, Claude Pro) via a local MCP connector**. Claude is the game master and prose; the engine is memory, plausibility and the living world. Requirements: `D:\Theology\Caerness_Agreed_Narrative_Design_Baseline_2026-10-16.md` (16 agreed areas) and `D:\Theology\Caerness_Repository_Audit_2026-10-16.md`.
+
+- **Active branch:** `feat/claude-connector` (from `master`).
+- **Design (approved):** `docs/superpowers/specs/2026-10-16-claude-connector-design.md`.
+- **Next work:** `docs/superpowers/plans/2026-10-16-claude-connector-step1.md` (connector + first playable scene).
+- The Codex `feat/*` branches and `master`'s old player/narration layer are a **parts bin**, not a base. The engine does not model minute mechanics: Claude supplies understanding, the engine remembers and enforces what has consequences. No bespoke per-activity verbs.
+- PERF-01 and POP-01 below continue but are no longer the priority; phone numbers matter only for how long time skips take.
+
+### Earlier streams (2026-10-09)
 
 Branches: **`master` is current.** `worldhist01a-stage1` and `pop01-phase0` are the feature branches it was fast-forwarded from (kept for history).
 
@@ -46,7 +58,7 @@ Then POP-01 plans 2–4 (background store + life rules; cultivation + renewal la
 - Model circumstances by **actual means and access**, never by a group label (not all underworld or remote people are poor).
 - No recognized same-sex household unions (judged too common/unaccepted); Veinborn ≠ cultivator; aptitudes are bell-shaped; groups marry at different, canon-grounded rates.
 - **Named characters get no special treatment**: same rules at every tier (POP-01).
-- **Phone-only target**: OnePlus 12, 12 GB, CPU, with a local 3–4B model loaded; quality over speed, but no 20–30 minute waits. Never end a narration node on a bare "continue" when nothing needs the player.
+- **Interface (2026-10-16): Claude desktop app via local MCP, PC only** (the earlier phone-only/local-model target is superseded). No 20–30 minute waits. Never end narration on a bare "continue" when nothing needs the player.
 - Don't trust README/acceptance claims: verify with data. Systems that "never happen" are usually silently disconnected (check graph reachability, join keys, endpoints) before tuning rates.
 - Commit and push when the owner asks; use branches for feature work.
 
