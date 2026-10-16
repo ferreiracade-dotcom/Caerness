@@ -41,6 +41,27 @@ def _call(fn) -> dict:
             return {"error": str(e) or type(e).__name__}
 
 
+def _snapshot_before_advance() -> None:
+    """Throttled backup before time passes. Runs inside _call (stdout already guarded, lock held).
+
+    A snapshot that fails its integrity check stops the advance (the campaign may be damaged);
+    any other backup trouble is logged and play continues.
+    """
+    from connector.backup import SnapshotIntegrityError, pre_advance_snapshot
+    from connector.settings import Settings
+    from engine.db import database_path
+
+    backup_dir = Settings.from_env().backup_dir
+    if backup_dir is None:
+        return
+    try:
+        pre_advance_snapshot(database_path(), backup_dir)
+    except SnapshotIntegrityError as e:
+        raise RuntimeError(f"the campaign failed its integrity check before advancing; not advancing ({e})") from e
+    except Exception as e:  # backups must not stop play
+        print(f"pre-advance snapshot failed: {e}", file=sys.stderr)
+
+
 def resume() -> dict:
     """Caerness game: call first when the user says resume or wants to play; returns the GM rulebook and current scene."""
     from connector.session import resume as _resume
@@ -72,7 +93,11 @@ def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None
 def advance(call_id: str, days: int, purpose: str) -> dict:
     """Let days pass (max 30 per call); stops early at real interruptions."""
     from connector.timeflow import advance as _advance
-    return _call(lambda c: _advance(c, call_id, days, purpose))
+
+    def go(conn):
+        _snapshot_before_advance()
+        return _advance(conn, call_id, days, purpose)
+    return _call(go)
 
 
 def note(call_id: str, subject_kind: str, subject_id: int | None, text: str) -> dict:

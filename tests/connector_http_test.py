@@ -120,6 +120,20 @@ def run():
                 results = [f.result() for f in futs]
             assert all("error" not in x and x["present"] for x in results), results
 
+        # Wire test: one preadvance snapshot per interval when CAERNESS_BACKUP_DIR is set.
+        snaps_dir = Path(tmp) / "backups"
+        os.environ["CAERNESS_BACKUP_DIR"] = str(snaps_dir)
+        try:
+            with TestClient(build_app(Settings.from_env({}), allowed_hosts=[HOST]), base_url="https://" + HOST) as client:
+                r1 = call_tool(client, "advance", {"call_id": "h-adv-1", "days": 1, "purpose": "wait"})
+                assert "error" not in r1, r1
+                assert len(list(snaps_dir.glob("*-preadvance.db"))) == 1
+                r2 = call_tool(client, "advance", {"call_id": "h-adv-2", "days": 1, "purpose": "wait"})
+                assert "error" not in r2, r2
+                assert len(list(snaps_dir.glob("*-preadvance.db"))) == 1
+        finally:
+            os.environ.pop("CAERNESS_BACKUP_DIR", None)
+
         # The per-call advance cap comes from CAERNESS_MAX_ADVANCE_DAYS.
         from connector.timeflow import advance, max_advance_days
         os.environ["CAERNESS_MAX_ADVANCE_DAYS"] = "7"
