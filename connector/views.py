@@ -148,7 +148,16 @@ def _holdings(conn, me: int) -> dict:
         lo, mid, hi = conn.execute(
             "SELECT MIN(capital),AVG(capital),MAX(capital) FROM civilian_enterprises WHERE status='active'").fetchone()
         scale = f"engine money units; businesses in this world hold {lo:.0f}-{hi:.0f} capital, average {mid:.0f}"
-    return _drop_none({"money_scale": scale, "businesses": businesses or None, "organisations": orgs or None,
+    from engine.ledger import balance, scale_word
+    boss = conn.execute(
+        "SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active' AND role_kind IN ('boss','underboss') LIMIT 1",
+        (me,)).fetchone()
+    spend = {"purse": scale_word(balance(conn, ("person", me)))}
+    if boss:
+        spend["outfit_treasury"] = scale_word(balance(conn, ("outfit", int(boss[0]))))
+    if businesses:
+        spend["business_cash"] = {b["name"]: scale_word(float(b.get("cash") or 0)) for b in businesses}
+    return _drop_none({"money_scale": scale, "means": spend, "businesses": businesses or None, "organisations": orgs or None,
                        "household": household, "personal_means": means})
 
 

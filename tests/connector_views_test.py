@@ -127,6 +127,11 @@ def run():
             assert any(st["name"] == who["name"] and st["role"] == "manager" for st in biz[0]["staff"]), biz
             lb = lookup(conn, "Test Lantern House")
             assert lb["found"] and lb["kind"] == "business" and lb["basics"]["owner"], lb
+            from engine.ledger import SCALES
+            mn = h["means"]
+            assert mn["purse"] in set(SCALES) | {"nothing"}, mn
+            assert mn["business_cash"]["Test Lantern House"] in set(SCALES) | {"nothing"}, mn
+            assert not any(c.isdigit() for c in json.dumps(mn)), mn
             assert _j(compact_scene(conn)) <= 4000
     print("connector_views_test passed")
 
