@@ -465,6 +465,31 @@ def create_partition(
     return int(cur.lastrowid)
 
 
+def extend_partition(conn: sqlite3.Connection, partition_id: int, batch: int) -> list[int]:
+    """Draw ``batch`` more identities from the source population into the reservoir (blind to any demand).
+
+    New identities get the same age and sex distributions as the first sample, with a seed derived from the
+    reservoir's size so the draw is reproducible.  The reservoir never exceeds the source population.
+    """
+    row, state = load_partition(conn, partition_id)
+    population = int(conn.execute("SELECT population_estimate FROM background_population_sources WHERE id=?",
+                                  (int(row["source_id"]),)).fetchone()[0])
+    n = max(0, min(int(batch), population - state.sample_size))
+    if n == 0:
+        return []
+    rng = np.random.default_rng((int(row["seed"]) * 2654435761 + state.sample_size) & _U64_MASK)
+    start = state.sample_size
+    uid = np.arange(start + 1, start + n + 1, dtype=np.int64)
+    state.uid = np.concatenate([state.uid, uid])
+    state.age_days = np.concatenate([state.age_days, _sample_age_days(rng, n).astype(state.age_days.dtype)])
+    state.alive = np.concatenate([state.alive, np.ones(n, dtype=np.bool_)])
+    state.demographic_sex = np.concatenate([state.demographic_sex, rng.integers(0, 2, size=n, dtype=np.uint8)])
+    state.exposure_score = np.concatenate([state.exposure_score, np.zeros(n, dtype=np.float32)])
+    state.active_uids = np.concatenate([state.active_uids, np.arange(start, start + n, dtype=np.int64)])
+    save_partition(conn, partition_id, state, last_step_day=int(row["last_step_day"]), next_step_day=int(row["next_step_day"]))
+    return uid.tolist()
+
+
 def load_partition(conn: sqlite3.Connection, partition_id: int) -> tuple[sqlite3.Row, PartitionState]:
     row = conn.execute("SELECT * FROM background_population_partitions WHERE id=?", (partition_id,)).fetchone()
     if not row:

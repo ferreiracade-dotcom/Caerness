@@ -96,6 +96,47 @@ def _profile_stage(seed: int, uid: int, hearth: bool, sex: str | None) -> tuple[
     return 1, "Fifth"
 
 
+def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int, seed: int, state: Any, day: int) -> int:
+    """Give every reservoir identity without one its demand-independent profile; returns how many were made."""
+    sid = int(source["id"])
+    created_profiles = 0
+    for uid in state.uid.tolist():
+        uid = int(uid)
+        if conn.execute("SELECT 1 FROM background_person_profiles WHERE partition_id=? AND local_uid=?", (pid, uid)).fetchone():
+            continue
+        snap = state.snapshot(uid)
+        occupation = _pick(_OCCUPATIONS, seed, uid, "occupation")
+        loc = _source_location(conn, source, seed, uid)
+        from .cultivation import location_in_hearth
+        open_core, stage = _profile_stage(seed, uid, location_in_hearth(conn, loc), snap["demographic_sex"])
+        given = given_name_for(seed, uid, snap["demographic_sex"])
+        family = _pick(_LAST, seed, uid, "family")
+        # The local uid is not visible in ordinary naming unless a collision must be resolved.
+        # Store the stable identity's ordinary name before any demand appears.
+        base = f"{given} {family}"
+        # Profiles may share names; uniqueness is enforced only when an identity becomes tracked.
+        conn.execute(
+            """INSERT INTO background_person_profiles(
+                 partition_id,local_uid,source_id,current_location_id,given_name,family_name,birth_day,
+                 demographic_sex,occupation_domain,social_archetype,open_core,current_stage,
+                 command_aptitude,economic_aptitude,medical_aptitude,teaching_aptitude,criminal_familiarity,
+                 status,seeded_day,metadata_json)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'background',?,?)""",
+            (
+                pid,uid,sid,loc,given,family,day-int(snap["age_days"]),snap["demographic_sex"],occupation,
+                f"ordinary_{occupation}",open_core,stage,
+                round(_score(seed,uid,"command")*100,6),
+                round(_score(seed,uid,"economic")*100,6),
+                round(_score(seed,uid,"medical")*100,6),
+                round(_score(seed,uid,"teaching")*100,6),
+                round(_score(seed,uid,"criminal")*100,6),
+                day,_j({"profiled_before_demand":True,"stable_name":base,"population_delta":0}),
+            ),
+        )
+        created_profiles += 1
+    return created_profiles
+
+
 def activate_background_people(conn: sqlite3.Connection) -> dict[str, int]:
     """Ensure disjoint identity reservoirs and demand-independent profiles exist.
 
@@ -127,40 +168,7 @@ def activate_background_people(conn: sqlite3.Connection) -> dict[str, int]:
         pid = int(part["id"])
         _, state = load_partition(conn, pid)
         seed = int(part["seed"])
-        for uid in state.uid.tolist():
-            uid = int(uid)
-            if conn.execute("SELECT 1 FROM background_person_profiles WHERE partition_id=? AND local_uid=?", (pid, uid)).fetchone():
-                continue
-            snap = state.snapshot(uid)
-            occupation = _pick(_OCCUPATIONS, seed, uid, "occupation")
-            loc = _source_location(conn, source, seed, uid)
-            from .cultivation import location_in_hearth
-            open_core, stage = _profile_stage(seed, uid, location_in_hearth(conn, loc), snap["demographic_sex"])
-            given = given_name_for(seed, uid, snap["demographic_sex"])
-            family = _pick(_LAST, seed, uid, "family")
-            # The local uid is not visible in ordinary naming unless a collision must be resolved.
-            # Store the stable identity's ordinary name before any demand appears.
-            base = f"{given} {family}"
-            # Profiles may share names; uniqueness is enforced only when an identity becomes tracked.
-            conn.execute(
-                """INSERT INTO background_person_profiles(
-                     partition_id,local_uid,source_id,current_location_id,given_name,family_name,birth_day,
-                     demographic_sex,occupation_domain,social_archetype,open_core,current_stage,
-                     command_aptitude,economic_aptitude,medical_aptitude,teaching_aptitude,criminal_familiarity,
-                     status,seeded_day,metadata_json)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'background',?,?)""",
-                (
-                    pid,uid,sid,loc,given,family,day-int(snap["age_days"]),snap["demographic_sex"],occupation,
-                    f"ordinary_{occupation}",open_core,stage,
-                    round(_score(seed,uid,"command")*100,6),
-                    round(_score(seed,uid,"economic")*100,6),
-                    round(_score(seed,uid,"medical")*100,6),
-                    round(_score(seed,uid,"teaching")*100,6),
-                    round(_score(seed,uid,"criminal")*100,6),
-                    day,_j({"profiled_before_demand":True,"stable_name":base,"population_delta":0}),
-                ),
-            )
-            created_profiles += 1
+        created_profiles += _profile_identities(conn, source, pid, seed, state, day)
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('personeco01_activation_version','1')")
     total = int(conn.execute("SELECT COUNT(*) FROM background_person_profiles").fetchone()[0])
     return {"background_partitions_created": created_partitions, "background_person_profiles_created": created_profiles, "background_person_profiles": total}
@@ -233,6 +241,28 @@ def _candidate_rows(
     return conn.execute(sql, args).fetchall()
 
 
+_GROWTH_BATCH = 32
+_GROWTH_BATCHES = 4
+# Bound on resolvable identities per settlement, so demands that can never be met locally (a Fifth in a
+# small town) stop drawing more people; far above what a campaign reveals in one place.
+_RESERVOIR_CAP = 2048
+
+
+def grow_identity_reservoir(conn: sqlite3.Connection, location_id: int, batch: int = _GROWTH_BATCH) -> int:
+    """Draw ``batch`` more identities of the settlement's own population and profile them; returns how many."""
+    from .background_population import extend_partition
+    source = conn.execute("SELECT * FROM background_population_sources WHERE location_id=? ORDER BY id LIMIT 1",
+                          (int(location_id),)).fetchone()
+    if source is None:
+        return 0
+    part = conn.execute("SELECT id,seed FROM background_population_partitions WHERE source_id=?", (int(source["id"]),)).fetchone()
+    size = int(conn.execute("SELECT sample_size FROM background_population_partitions WHERE id=?", (int(part["id"]),)).fetchone()[0]) if part else 0
+    if part is None or size >= _RESERVOIR_CAP or not extend_partition(conn, int(part["id"]), min(batch, _RESERVOIR_CAP - size)):
+        return 0
+    _, state = load_partition(conn, int(part["id"]))
+    return _profile_identities(conn, source, int(part["id"]), int(part["seed"]), state, _day(conn))
+
+
 def find_background_candidate(
     conn: sqlite3.Connection, *, location_id: int | None = None, occupation_domains: Iterable[str] | None = None,
     min_age: int = 18, max_age: int = 85, require_open_core: bool | None = None,
@@ -244,6 +274,15 @@ def find_background_candidate(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
         require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex,
     )
+    for _ in range(_GROWTH_BATCHES):
+        # A settlement's first sample is small; when nobody in it fits, draw more of its real population
+        # (blind to this demand) before looking anywhere else.
+        if rows or location_id is None or not grow_identity_reservoir(conn, int(location_id)):
+            break
+        rows = _candidate_rows(
+            conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
+            require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex,
+        )
     if not rows and location_id is not None:
         # The world may reveal someone from the same broader population bucket rather than conjure
         # a local person.  Prefer exact location, but broaden only to already-profiled identities.
