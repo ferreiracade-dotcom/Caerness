@@ -22,3 +22,35 @@ CREATE TABLE IF NOT EXISTS connector_meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+-- Continuity across chats (spec §8): reminders, never sources of truth.
+CREATE TABLE IF NOT EXISTS campaign_recaps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    world_day INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    threads_json TEXT NOT NULL DEFAULT '[]',
+    call_id TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS standing_rules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    world_day INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','retired')),
+    call_id TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS character_sheet (
+    field TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    world_day INTEGER NOT NULL,
+    call_id TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS error_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    world_day INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','fixed','declined')),
+    call_id TEXT NOT NULL
+);

@@ -44,13 +44,13 @@ def run():
         assert "error" not in a and a["status"] == "applied", a
         adv = server.advance("s-adv-1", 1, "wait")
         assert "error" not in adv, adv
-        n = server.note("s-note-1", "actor", who["id"], "keeps a limp")
+        n = server.note("s-note-1", "keeps a limp", subject_kind="actor", subject_id=who["id"])
         assert "error" not in n, n
 
         # Errors become dicts, not exceptions.
-        assert "error" in server.note("s-note-2", "actor", 99999999, "ghost")
+        assert "error" in server.note("s-note-2", "ghost", subject_kind="actor", subject_id=99999999)
         assert "error" in server.advance("s-adv-2", 0, "nothing")
-        assert "error" in server.note("s-note-1", "actor", who["id"], "different text")  # call_id reuse
+        assert "error" in server.note("s-note-1", "different text", subject_kind="actor", subject_id=who["id"])  # call_id reuse
 
         # The same tools through the MCP layer return JSON text.
         res = asyncio.run(server.mcp.call_tool("lookup", {"query": who["name"]}))

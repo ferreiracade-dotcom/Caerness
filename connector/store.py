@@ -88,3 +88,60 @@ def notes_for(conn, subject_kind: str, subject_id: int, limit: int = 5) -> list[
         (subject_kind, int(subject_id), limit),
     ).fetchall()
     return [r["text"] for r in reversed(rows)]
+
+
+NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error")
+SHEET_FIELDS = ("appearance", "voice", "temperament", "ambitions", "habits", "history", "standing")
+_CLIP = {"recap": 600, "thread": 160, "sheet": 400, "rule": 300, "error": 500}
+
+
+def _clip(text, n: int) -> str:
+    text = " ".join(str(text or "").split())
+    return text if len(text) <= n else text[: n - 1].rstrip() + "…"
+
+
+def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "general", subject_id: int | None = None,
+           threads: list[str] | None = None, field: str | None = None) -> dict:
+    """Record something that should last across chats. Does not commit: callers run it inside run_once."""
+    if kind not in NOTE_TYPES:
+        raise ValueError(f"kind must be one of {NOTE_TYPES}")
+    if kind == "detail":
+        return add_note(conn, subject_kind, subject_id, text, call_id)
+    body = _clip(text, _CLIP[kind])
+    if not body:
+        raise ValueError("text must not be empty")
+    day = _day(conn)
+    if kind == "recap":
+        open_threads = [_clip(t, _CLIP["thread"]) for t in (threads or []) if str(t or "").strip()][:8]
+        conn.execute("INSERT INTO campaign_recaps(world_day,text,threads_json,call_id) VALUES (?,?,?,?)",
+                     (day, body, json.dumps(open_threads, ensure_ascii=False), call_id))
+        return {"saved": "recap", "threads": len(open_threads), "summary": f"Recap saved: {body[:80]}"}
+    if kind == "sheet":
+        if field not in SHEET_FIELDS:
+            raise ValueError(f"field must be one of {SHEET_FIELDS}")
+        conn.execute("INSERT INTO character_sheet(field,text,world_day,call_id) VALUES (?,?,?,?) "
+                     "ON CONFLICT(field) DO UPDATE SET text=excluded.text,world_day=excluded.world_day,call_id=excluded.call_id",
+                     (field, body, day, call_id))
+        return {"saved": "sheet", "field": field, "summary": f"Sheet {field} saved"}
+    table = "standing_rules" if kind == "rule" else "error_reports"
+    conn.execute(f"INSERT INTO {table}(world_day,text,call_id) VALUES (?,?,?)", (day, body, call_id))
+    return {"saved": kind, "summary": f"{kind.capitalize()} saved: {body[:80]}"}
+
+
+def continuity(conn) -> dict:
+    """The story so far for a new chat: recent recaps, open threads, the protagonist's sheet, standing rules."""
+    recaps = conn.execute("SELECT text,threads_json FROM campaign_recaps ORDER BY id DESC LIMIT 3").fetchall()
+    out: dict = {}
+    if recaps:
+        live = {"recent": [r["text"] for r in reversed(recaps)]}
+        threads = json.loads(recaps[0]["threads_json"] or "[]")
+        if threads:
+            live["open_threads"] = threads
+        out["live_thread"] = live
+    sheet = {r["field"]: r["text"] for r in conn.execute("SELECT field,text FROM character_sheet")}
+    if sheet:
+        out["character_sheet"] = {f: sheet[f] for f in SHEET_FIELDS if f in sheet}
+    rules = [r["text"] for r in conn.execute("SELECT text FROM standing_rules WHERE status='active' ORDER BY id")]
+    if rules:
+        out["standing_rules"] = rules
+    return out

@@ -106,14 +106,18 @@ def advance(call_id: str, days: int, purpose: str) -> dict:
     return _call(go)
 
 
-def note(call_id: str, subject_kind: str, subject_id: int | None, text: str) -> dict:
-    """Record a lasting improvised detail about an actor, location or general."""
+def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "general", subject_id: int | None = None,
+         threads: list[str] | None = None, field: str | None = None) -> dict:
+    """Caerness game: record what should last. kind=detail (a fact about an actor/location/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved), sheet (protagonist's field), error (an engine or GM mistake)."""
     from connector import store
 
+    request = {"kind": kind, "text": text, "subject_kind": subject_kind, "subject_id": subject_id,
+               "threads": threads, "field": field}
+
     def go(conn):
-        return store.run_once(conn, call_id, "note",
-                              {"subject_kind": subject_kind, "subject_id": subject_id, "text": text},
-                              lambda: store.add_note(conn, subject_kind, subject_id, text, call_id))
+        return store.run_once(conn, call_id, "note", request,
+                              lambda: store.record(conn, kind, text, call_id, subject_kind=subject_kind,
+                                                   subject_id=subject_id, threads=threads, field=field))
     return _call(go)
 
 
