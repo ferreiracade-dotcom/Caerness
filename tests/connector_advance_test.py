@@ -47,11 +47,9 @@ def run():
         results.append(big)
         took = time.time() - t0
         assert big["elapsed_days"] <= 30
-        assert big["remaining_days"] == 15
+        assert big["remaining_days"] == 45 - big["elapsed_days"]
         if not big["interrupted"]:
             assert big["elapsed_days"] == 30, big
-        else:
-            assert big["remaining_days"] == 15
         print(f"45-day request took {took:.1f}s, elapsed {big['elapsed_days']}")
 
         try:

@@ -35,8 +35,8 @@ def advance(conn, call_id: str, days: int, purpose: str) -> dict:
                "interrupted": interrupted, "noticed": noticed, "operation_id": call_id}
         if interrupted and run["interruptions"]:
             out["interruption"] = _clip(run["interruptions"][0]["reason"], 300)
-        if days > MAX_ADVANCE_DAYS:
-            out["remaining_days"] = days - MAX_ADVANCE_DAYS
+        if days > end - start:  # an interruption also leaves the rest of the request undone
+            out["remaining_days"] = days - (end - start)
         return out
 
     return store.run_once(conn, call_id, "advance", {"days": days, "purpose": purpose}, go)
