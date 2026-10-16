@@ -114,7 +114,7 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
             from engine import player_operations
             me = int(get_player(conn)["player_actor_id"])
             out = player_operations.execute(conn, me, action_type, target_actor_id=target_actor_id,
-                                            details=details or {}, intent=intent.strip())
+                                            details={**(details or {}), "_call_id": call_id}, intent=intent.strip())
             summary = " ".join(str(out.get("summary", "")).split())
             res = {k: v for k, v in out.items() if v is not None and k != "summary"}
             res.update({"status": out["status"], "action_type": action_type,

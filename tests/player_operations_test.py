@@ -191,6 +191,49 @@ def run():
                 kind_ = conn.execute("SELECT relation_kind FROM underworld_relations WHERE organization_a_id=? AND organization_b_id=?", (a_, b_)).fetchone()
                 assert rr["status"] == "applied" and kind_[0] == kind2, (what_, rr, kind_[0])
             assert po.execute(conn, me, "demand", target_actor_id=by, details={"what": "bogus"}, intent="x")["status"] == "refused"
+            # ---- attack
+            from engine import civilian
+            from connector.acting import act
+            from connector.store import ensure_connector_schema
+            ensure_connector_schema(conn)
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id IN (?,?)", (loc, by, w["crew_leader"]))
+            crew_ref = f"crew:{w['crew']}"
+            r = po.execute(conn, me, "attack", target_actor_id=None, details={"business": f"business:{biz}", "intent_kind": "beat"}, intent="x")
+            assert r["status"] == "refused" and "own" in r["summary"], r
+            rival_shop = civilian.create_enterprise(conn, "Fixture Rival Shop", "shop", owner_actor_id=by, location_id=loc, capital=10, cash=3)
+            cap0 = conn.execute("SELECT capital FROM civilian_enterprises WHERE id=?", (rival_shop,)).fetchone()[0]
+            ev_n = conn.execute("SELECT COUNT(*) FROM events WHERE event_type='player_operation'").fetchone()[0]
+            r = po.execute(conn, me, "attack", target_actor_id=None,
+                           details={"business": f"business:{rival_shop}", "intent_kind": "beat", "crew": crew_ref}, intent="Smash the stall.")
+            assert r["status"] == "applied" and r["outcome"] == "won", r
+            cap1 = conn.execute("SELECT capital FROM civilian_enterprises WHERE id=?", (rival_shop,)).fetchone()[0]
+            assert abs(cap1 - cap0 * 0.85) < 1e-9, (cap0, cap1)
+            assert conn.execute("SELECT COUNT(*) FROM events WHERE event_type='player_operation'").fetchone()[0] == ev_n + 1
+            r = po.execute(conn, me, "attack", target_actor_id=None, details={"business": "business:999999"}, intent="x")
+            assert r["status"] == "refused", r
+            r = po.execute(conn, me, "attack", target_actor_id=by,
+                           details={"with": [w["crew_leader"], w["crew_leader"]], "intent_kind": "beat"}, intent="x")
+            assert r["status"] == "refused" and "twice" in r["summary"], r
+            other = int(conn.execute("SELECT id FROM locations WHERE id<>? ORDER BY id LIMIT 1", (loc,)).fetchone()[0])
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (other, by))
+            r = po.execute(conn, me, "attack", target_actor_id=by, details={"intent_kind": "beat"}, intent="x")
+            assert r["status"] == "refused" and "not here" in r["summary"], r
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (loc, by))
+            h0 = conn.execute("SELECT COUNT(*) FROM harm_incidents").fetchone()[0]
+            d_ = {"intent_kind": "beat", "crew": crew_ref}
+            res = act(conn, "atk-1", "attack", "I beat him.", target_actor_id=by, details=d_)
+            assert res["status"] == "applied" and res["outcome"] in ("won", "lost", "stalemate"), res
+            assert res["hurt"] and not re.search(r"\d", res["summary"]), res
+            h1 = conn.execute("SELECT COUNT(*) FROM harm_incidents").fetchone()[0]
+            assert h1 == h0 + len(res["hurt"]), (h0, h1, res)
+            assert conn.execute("SELECT 1 FROM events WHERE id=?", (res["event_id"],)).fetchone(), res
+            again = act(conn, "atk-1", "attack", "I beat him.", target_actor_id=by, details=d_)
+            assert again["replayed"] is True
+            assert conn.execute("SELECT COUNT(*) FROM harm_incidents").fetchone()[0] == h1
+            conn.execute("UPDATE actors SET status='deceased' WHERE id=?", (by,))
+            r = po.execute(conn, me, "attack", target_actor_id=by, details={"intent_kind": "beat"}, intent="x")
+            assert r["status"] == "refused", r
+            conn.execute("UPDATE actors SET status='active' WHERE id=?", (by,))
     print("player_operations_test passed")
 
 

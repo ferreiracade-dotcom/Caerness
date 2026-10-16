@@ -327,9 +327,9 @@ def _my_outfit(conn, me: int) -> int | None:
     return int(row[0]) if row else None
 
 
-def _backers(conn, me: int, target: int, d: dict) -> list[float] | str:
-    """Capacities of those standing with him, or a refusal string."""
-    caps: list[float] = []
+def _backer_list(conn, me: int, target: int | None, d: dict) -> list[tuple[int | None, float]] | str:
+    """Those standing with him as (actor id, or None for an unnamed crew hand; capacity), or a refusal string."""
+    out: list[tuple[int | None, float]] = []
     seen = {me, target}
     for raw in d.get("with") or []:
         try:
@@ -341,7 +341,7 @@ def _backers(conn, me: int, target: int, d: dict) -> list[float] | str:
         seen.add(aid)
         if not _living(conn, aid) or not _same_place(conn, me, aid):
             return f"{_name(conn, aid)} is not here to stand with him."
-        caps.append(_capacity(conn, aid))
+        out.append((aid, _capacity(conn, aid)))
     crew_ref = d.get("crew")
     if crew_ref:
         ref = str(crew_ref)
@@ -359,9 +359,28 @@ def _backers(conn, me: int, target: int, d: dict) -> list[float] | str:
                 return "The same person is named twice."
             if not _living(conn, int(leader)) or not _same_place(conn, me, int(leader)):
                 return "The crew is not here."
-            caps.append(_capacity(conn, int(leader)))
-        caps.extend([1.0] * int(min(float(crew["size_estimate"]), 8)))
-    return caps
+            out.append((int(leader), _capacity(conn, int(leader))))
+        out.extend([(None, 1.0)] * int(min(float(crew["size_estimate"]), 8)))
+    return out
+
+
+def _backers(conn, me: int, target: int | None, d: dict) -> list[float] | str:
+    """Capacities of those standing with him, or a refusal string."""
+    got = _backer_list(conn, me, target, d)
+    return got if isinstance(got, str) else [c for _, c in got]
+
+
+def _protectors(conn, recipient: int, exclude: int | None = None) -> tuple[list[int], float]:
+    """Household members present with the recipient (actor ids) and the extra weight of the recipient's outfit."""
+    ids: list[int] = []
+    for r in conn.execute("SELECT DISTINCT hm.actor_id FROM household_members hm JOIN household_members me2 ON me2.household_id=hm.household_id "
+                          "WHERE me2.actor_id=? AND hm.status='active' AND me2.status='active' AND hm.actor_id<>?", (recipient, recipient)):
+        aid = int(r[0])
+        if aid not in ids and aid != exclude and _living(conn, aid) and _same_place(conn, recipient, aid):
+            ids.append(aid)
+    org = conn.execute("SELECT o.violence_capacity FROM underworld_personnel p JOIN underworld_organizations o ON o.id=p.organization_id "
+                       "WHERE p.actor_id=? AND p.status='active' LIMIT 1", (recipient,)).fetchone()
+    return ids, (float(org[0]) / 25.0 if org else 0.0)
 
 
 def coercion(conn, proposer: int, backers: list, recipient: int) -> float:
@@ -372,18 +391,8 @@ def coercion(conn, proposer: int, backers: list, recipient: int) -> float:
     total = _capacity(conn, proposer)
     for b in backers:
         total += _capacity(conn, b) if isinstance(b, int) else float(b)
-    protection = 0.0
-    seen: set[int] = set()
-    for r in conn.execute("SELECT DISTINCT hm.actor_id FROM household_members hm JOIN household_members me2 ON me2.household_id=hm.household_id "
-                          "WHERE me2.actor_id=? AND hm.status='active' AND me2.status='active' AND hm.actor_id<>?", (recipient, recipient)):
-        aid = int(r[0])
-        if aid not in seen and aid != proposer and _living(conn, aid) and _same_place(conn, recipient, aid):
-            seen.add(aid)
-            protection += _capacity(conn, aid)
-    org = conn.execute("SELECT o.violence_capacity FROM underworld_personnel p JOIN underworld_organizations o ON o.id=p.organization_id "
-                       "WHERE p.actor_id=? AND p.status='active' LIMIT 1", (recipient,)).fetchone()
-    if org:
-        protection += float(org[0]) / 25.0
+    ids, extra = _protectors(conn, recipient, exclude=proposer)
+    protection = sum(_capacity(conn, aid) for aid in ids) + extra
     ratio = total / max(0.5, _capacity(conn, recipient) + protection)
     return min(3.0, max(0.0, 1.5 * math.log2(max(ratio, 1e-9)) + 1.0))
 
@@ -514,9 +523,129 @@ def settle_accepted(conn: sqlite3.Connection, interaction, player_actor_id: int)
                    details=details, intent=str(interaction["rationale"] or "accepted counter-offer"))
 
 
+# ---------------------------------------------------------------- attack
+
+INTENT_KINDS = ("drive_off", "beat", "kill")
+HARM_SEVERITY = {"drive_off": 15, "beat": 45, "kill": 90}
+CAPITAL_LOSS = {"drive_off": 0.05, "beat": 0.15, "kill": 0.4}
+
+
+def _attack_rng(conn, me: int, subject, d: dict, day: int):
+    import random
+    seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
+    call_id = d.get("_call_id")
+    return random.Random(f"attack:{seed}:{call_id}" if call_id else f"attack:{seed}:{me}:{subject}:{day}")
+
+
+def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
+    kind = str(d.get("intent_kind") or "beat").lower()
+    if kind not in INTENT_KINDS:
+        return _refuse(f"intent_kind must be one of {', '.join(INTENT_KINDS)}.")
+    business = None
+    victim = None
+    if d.get("business"):
+        ref = str(d["business"])
+        raw = ref.partition(":")[2] if ref.startswith("business:") else ""
+        if not raw.isdigit():
+            return _refuse("Name the place as business:<id>.")
+        business = conn.execute("SELECT * FROM civilian_enterprises WHERE id=?", (int(raw),)).fetchone()
+        if business is None:
+            return _refuse(f"unknown business {raw}")
+        if business["owner_actor_id"] == me or ledger.can_draw(conn, me, ("business", int(business["id"]))):
+            return _refuse("He will not wreck what is his own.")
+        here = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()[0]
+        if business["location_id"] is None or here != business["location_id"]:
+            return _refuse(f"{business['name']} is not here.")
+    else:
+        if target is None or target == me or not _living(conn, target):
+            return _refuse("There is no living person named to attack.")
+        if not _same_place(conn, me, target):
+            return _refuse(f"{_name(conn, target)} is not here.")
+        victim = target
+    backers = _backer_list(conn, me, victim, d)
+    if isinstance(backers, str):
+        return _refuse(backers)
+    day = _day(conn)
+    rng = _attack_rng(conn, me, victim if business is None else f"b{business['id']}", d, day)
+
+    attackers = [(me, _capacity(conn, me))] + [(i, c) for i, c in backers if i is not None]
+    att_cap = _capacity(conn, me) + sum(c for _, c in backers)
+    if business is None:
+        backing = {i for i, _ in backers}
+        prot_ids, extra = _protectors(conn, victim, exclude=me)
+        defenders = [victim] + [a for a in prot_ids if a not in backing]
+        label = _name(conn, victim)
+    else:
+        defenders = [int(r[0]) for r in conn.execute(
+            "SELECT s.actor_id FROM enterprise_staff s JOIN actors a ON a.id=s.actor_id "
+            "WHERE s.enterprise_id=? AND s.status='active' AND a.current_location_id=? ORDER BY s.actor_id",
+            (business["id"], business["location_id"])) if int(r[0]) != me and _living(conn, int(r[0]))]
+        extra = _protectors(conn, int(business["owner_actor_id"]))[1] if business["owner_actor_id"] is not None else 0.0
+        label = str(business["name"])
+    def_cap = sum(_capacity(conn, a) for a in defenders) + extra
+    roll = att_cap / max(0.01, def_cap) * rng.uniform(0.75, 1.25)
+
+    lesser = attackers[1:] or attackers  # a lone attacker takes his own knocks; otherwise the weakest follower does
+    weakest = min(lesser, key=lambda t: (t[1], t[0]))[0]
+    front = defenders[0] if defenders else None
+    plan: list[tuple[int, float]] = []
+    if roll > 1.35:
+        outcome = "won"
+        if front is not None:
+            plan.append((front, HARM_SEVERITY[kind]))
+    elif roll < 0.75:
+        outcome = "lost"
+        plan.append((weakest, 35))
+    else:
+        outcome = "stalemate"
+        plan.append((weakest, 20))
+        if front is not None:
+            plan.append((front, 20))
+
+    heavy = kind == "kill"
+    if business is None:
+        verb = {"drive_off": "drove off", "beat": "beat", "kill": "went for the life of"}[kind]
+        summary = {"won": f"He {verb} {label} and carried the day.", "lost": f"He moved on {label} and was beaten back.",
+                   "stalemate": f"The clash with {label} ended with neither side the master."}[outcome]
+    else:
+        verb = {"drive_off": "frightened off the custom of", "beat": "wrecked", "kill": "set fire to"}[kind]
+        summary = {"won": f"He {verb} {label}.", "lost": f"The people of {label} drove him off.",
+                   "stalemate": f"The fight at {label} ended with nothing decided."}[outcome]
+    event_id = _record(conn, me, "Attack" if business is None else "Attack on a place", summary,
+                       severity=4 if heavy else 3, targets=(victim,) if victim is not None else ())
+
+    if business is not None and outcome == "won":
+        conn.execute("UPDATE civilian_enterprises SET capital=capital-capital*?, reputation=MAX(0,reputation-8), "
+                     "labor_capacity=MAX(0,labor_capacity-10), updated_day=? WHERE id=?", (CAPITAL_LOSS[kind], day, business["id"]))
+    from . import harm
+    hurt = []
+    for aid, sev in plan:
+        if not _living(conn, aid):
+            continue
+        spot = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (aid,)).fetchone()[0]
+        inc = harm.record_harm(conn, aid, source_kind="player_operation", source_ref_id=event_id, severity=sev,
+                               intent_class="hostile", location_id=spot)
+        hurt.append({"name": _name(conn, aid), "how": inc["outcome"]})
+
+    foe = victim if business is None else business["owner_actor_id"]
+    if foe is not None and int(foe) != me:
+        adjust_relationship_pair(
+            conn, me, int(foe), day,
+            a_to_b={"trust_delta": -12.0, "stance_delta": -15.0, "resentment_delta": 8.0},
+            b_to_a={"trust_delta": -15.0, "stance_delta": -18.0, "fear_delta": 5.0, "resentment_delta": 12.0})
+    outfit = _my_outfit(conn, me)
+    if outfit is not None:
+        from .underworld_rebuild import add_heat
+        if business is None:
+            add_heat(conn, outfit, public=3, violence=10 if heavy else 4, investigative=6 if heavy else 0)
+        else:
+            add_heat(conn, outfit, public=4, violence=8 if heavy else 4, investigative=5 if heavy else 0)
+    return {"status": "applied", "outcome": outcome, "hurt": hurt, "summary": summary, "event_id": event_id}
+
+
 # ---------------------------------------------------------------- dispatch
 
-_HANDLERS: dict[str, Callable[..., dict]] = {"pay": _pay, "hire": _hire, "lend": _lend, "demand": _demand}
+_HANDLERS: dict[str, Callable[..., dict]] = {"pay": _pay, "hire": _hire, "lend": _lend, "demand": _demand, "attack": _attack}
 
 
 def execute(conn: sqlite3.Connection, actor_id: int, op: str, *, target_actor_id: int | None,
