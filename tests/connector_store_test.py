@@ -65,7 +65,8 @@ def run():
         conn.commit()
         assert n["subject_kind"] == "actor" and n["note_id"]
         assert notes_for(conn, "actor", actor) == ["keeps bees"]
-        add_note(conn, "general", None, "weather is dry", "n2")
+        g = add_note(conn, "general", None, "weather is dry", "n2")
+        assert None not in g.values() and "subject_id" not in g, g
         for args in (("actor", 99999999, "x"), ("location", 99999999, "x"), ("actor", actor, "y" * 501),
                      ("actor", actor, "   "), ("bogus", None, "x")):
             try:

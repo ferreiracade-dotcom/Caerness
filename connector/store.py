@@ -77,8 +77,9 @@ def add_note(conn, subject_kind: str, subject_id: int | None, text: str, call_id
         "INSERT INTO gm_notes(subject_kind,subject_id,text,world_day,call_id) VALUES (?,?,?,?,?)",
         (subject_kind, subject_id, text, _day(conn), call_id),
     )
-    return {"note_id": int(cur.lastrowid), "subject_kind": subject_kind, "subject_id": subject_id,
-            "summary": f"Noted ({subject_kind}): {text[:80]}"}
+    out = {"note_id": int(cur.lastrowid), "subject_kind": subject_kind, "subject_id": subject_id,
+           "summary": f"Noted ({subject_kind}): {text[:80]}"}
+    return {k: v for k, v in out.items() if v is not None}
 
 
 def notes_for(conn, subject_kind: str, subject_id: int, limit: int = 5) -> list[str]:
