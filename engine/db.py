@@ -4473,8 +4473,10 @@ def _migration_108(conn: sqlite3.Connection) -> None:
 def _migration_109(conn: sqlite3.Connection) -> None:
     """NAMES-01: background identities carry a given name of their recorded sex (the name was drawn without it)."""
     if _has_table(conn, "background_person_profiles") and _has_table(conn, "background_population_partitions"):
-        from .person_ecology import repair_generated_name_sex
+        from .person_ecology import repair_generated_name_sex, redraw_unresolved_profile_cores
         repair_generated_name_sex(conn)
+        # Stages among unrevealed identities now follow canon headcounts; nobody has met them, so any day is safe.
+        redraw_unresolved_profile_cores(conn)
 
 
 _MIGRATIONS: dict[int, Migration] = {
@@ -4586,7 +4588,7 @@ _MIGRATIONS: dict[int, Migration] = {
     106: ("worldhist01a_social_org_succession", "WORLDHIST-01A REL-02 social memory, ORGPRESS-01 event projection and SUCCESSION-02 authority transitions", _migration_106),
     107: ("family02_sex_resolution", "FAMILY-02 demographic-sex resolution for named characters (canon text, canon rule, given name, seeded roll)", _migration_107),
     108: ("opening01_family_relationships", "OPENING-01 relationship start dates, opening family life (marriage, widowhood, spouses, latent children) and opening relationships", _migration_108),
-    109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed", _migration_109),
+    109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed; unrevealed stages follow canon headcounts", _migration_109),
 }
 
 

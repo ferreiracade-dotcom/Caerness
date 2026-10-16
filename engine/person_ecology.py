@@ -75,6 +75,18 @@ def given_name_for(seed: int, uid: int, sex: str | None) -> str:
     return _pick(FIRST_FEMALE if sex == "female" else FIRST_MALE, seed, uid, "given")
 
 
+# Canon staged headcounts (AGENTS.md): Hearth, and the rest of the continent (global minus Hearth).  Sixth is
+# never drawn for a background identity; the few Sixths are known people.
+_STAGED_HEADCOUNTS = {
+    True: (("First", 330_000), ("Temper", 122_500), ("Third", 24_750), ("Breach", 2_800), ("Fifth", 300)),
+    False: (("First", 1_320_000), ("Temper", 227_500), ("Third", 20_250), ("Breach", 1_200), ("Fifth", 50)),
+}
+_STAGED_HEADCOUNT_TOTAL = {k: float(sum(n for _, n in v)) for k, v in _STAGED_HEADCOUNTS.items()}
+_STAGED_CUMULATIVE = {
+    k: tuple((stage, float(sum(n for _, n in v[: i + 1]))) for i, (stage, _) in enumerate(v)) for k, v in _STAGED_HEADCOUNTS.items()
+}
+
+
 def _profile_stage(seed: int, uid: int, hearth: bool, sex: str | None) -> tuple[int, str | None]:
     # Identity traits are drawn before demand, at the World Bible's population anchors: Veinborn are 35%
     # of the Hearth and ~8% elsewhere, and only some Veinborn ever became staged (sex-weighted, as canon's
@@ -84,15 +96,10 @@ def _profile_stage(seed: int, uid: int, hearth: bool, sex: str | None) -> tuple[
         return 0, None
     if _score(seed, uid, "staged") >= staged_probability(sex, hearth, False):
         return 1, None
-    x = _score(seed, uid, "stage")
-    if x < .58:
-        return 1, "First"
-    if x < .86:
-        return 1, "Temper"
-    if x < .965:
-        return 1, "Third"
-    if x < .994:
-        return 1, "Breach"
+    x = _score(seed, uid, "stage") * _STAGED_HEADCOUNT_TOTAL[bool(hearth)]
+    for stage, cumulative in _STAGED_CUMULATIVE[bool(hearth)]:
+        if x < cumulative:
+            return 1, stage
     return 1, "Fifth"
 
 
@@ -175,7 +182,7 @@ def activate_background_people(conn: sqlite3.Connection) -> dict[str, int]:
 
 
 def redraw_unresolved_profile_cores(conn: sqlite3.Connection) -> int:
-    """Re-draw Core/Stage for still-background identities with the canon-anchored rule (day 0 only)."""
+    """Re-draw Core/Stage for still-background identities with the canon-anchored rule (they are unobserved)."""
     changed = 0
     from .cultivation import location_in_hearth
     for r in conn.execute("""SELECT p.partition_id,p.local_uid,p.current_location_id,p.demographic_sex,p.open_core,p.current_stage,pt.seed

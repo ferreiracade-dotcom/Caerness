@@ -38,6 +38,17 @@ def run():
         assert abs(opens/n-veinborn)<.02,(hearth,opens/n)
         assert abs(stg/opens-staged)<.04,(hearth,stg/opens)
         assert .60<=male_stg/stg<=.72,(hearth,male_stg/stg)
+    # Stages among the staged follow canon headcounts (Hearth ~330k/122.5k/24.75k/2.8k/300; elsewhere the
+    # remainder of 1.65M/350k/45k/4k/350), so a growing sample never reveals masters at many times canon.
+    for hearth,third,breach,fifth in ((True,.0515,.0058,.00062),(False,.0129,.00076,.00003)):
+        n=200000; counts={}
+        for uid in range(n):
+            o,st=_profile_stage(11,uid,hearth,'male')
+            if st: counts[st]=counts.get(st,0)+1
+        staged=sum(counts.values())
+        assert abs(counts.get('Third',0)/staged-third)<third*.25,(hearth,counts)
+        assert abs(counts.get('Breach',0)/staged-breach)<max(breach*.5,.0006),(hearth,counts)
+        assert counts.get('Fifth',0)/staged<max(fifth*4,.0003),(hearth,counts)
     # Staged share across the continent lands near canon's 2.05M of 4.79M (~43%).
     hearth_pop,outer_pop=3.5,48.5
     staged_total=hearth_pop*VEINBORN_SHARE[True]*.60+outer_pop*VEINBORN_SHARE[False]*.37
