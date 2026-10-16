@@ -9,7 +9,8 @@ from mcp.server.mcpserver import MCPServer
 
 mcp = MCPServer(
     "caerness",
-    instructions="Caerness game connector. At the start of a Caerness chat call resume and follow the rulebook it returns.",
+    instructions=("Caerness is the user's text role-playing game. When the user says \"resume\", \"play\" or mentions Caerness, "
+                  "call the resume tool first and follow the game-master rulebook it returns."),
 )
 
 
@@ -30,21 +31,21 @@ def _call(fn) -> dict:
 
 @mcp.tool(structured_output=False)
 def resume() -> dict:
-    """Start of every chat: returns the GM rulebook, how to play, and the current scene."""
+    """Caerness game: call first when the user says resume or wants to play; returns the GM rulebook and current scene."""
     from connector.session import resume as _resume
     return _call(_resume)
 
 
 @mcp.tool(structured_output=False)
 def scene() -> dict:
-    """Current scene: place, people present, news, competence, condition, notes."""
+    """Caerness game: current scene (place, people present, news, competence, condition, notes)."""
     from connector.views import compact_scene
     return _call(compact_scene)
 
 
 @mcp.tool(structured_output=False)
 def lookup(query: str) -> dict:
-    """What the protagonist knows about a person or place, by name or id."""
+    """Caerness game: what the protagonist knows about a person or place, by name or id."""
     from connector.views import lookup as _lookup
     return _call(lambda c: _lookup(c, query))
 
