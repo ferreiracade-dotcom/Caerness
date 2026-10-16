@@ -8,11 +8,19 @@ import threading
 
 from mcp.server.mcpserver import MCPServer
 
-mcp = MCPServer(
-    "caerness",
-    instructions=("Caerness is the user's text role-playing game. When the user says \"resume\", \"play\" or mentions Caerness, "
-                  "call the resume tool first and follow the game-master rulebook it returns."),
-)
+INSTRUCTIONS = ("Caerness is the user's text role-playing game. When the user says \"resume\", \"play\" or mentions Caerness, "
+                "call the resume tool first and follow the game-master rulebook it returns.")
+
+
+def make_mcp(**kwargs) -> MCPServer:
+    """A fresh MCPServer (the HTTP deployment passes auth settings); call register_tools on it."""
+    return MCPServer("caerness", instructions=INSTRUCTIONS, **kwargs)
+
+
+def register_tools(server: MCPServer) -> MCPServer:
+    for fn in (resume, scene, lookup, act, advance, note):
+        server.tool(structured_output=False)(fn)
+    return server
 
 
 _CALL_LOCK = threading.Lock()  # one campaign writer at a time; also guards the global stdout redirect
@@ -33,28 +41,24 @@ def _call(fn) -> dict:
             return {"error": str(e) or type(e).__name__}
 
 
-@mcp.tool(structured_output=False)
 def resume() -> dict:
     """Caerness game: call first when the user says resume or wants to play; returns the GM rulebook and current scene."""
     from connector.session import resume as _resume
     return _call(_resume)
 
 
-@mcp.tool(structured_output=False)
 def scene() -> dict:
     """Caerness game: current scene (place, people present, news, competence, condition, notes)."""
     from connector.views import compact_scene
     return _call(compact_scene)
 
 
-@mcp.tool(structured_output=False)
 def lookup(query: str) -> dict:
     """Caerness game: what the protagonist knows about a person or place, by name or id."""
     from connector.views import lookup as _lookup
     return _call(lambda c: _lookup(c, query))
 
 
-@mcp.tool(structured_output=False)
 def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None = None,
         target_location_id: int | None = None, interaction_id: int | None = None,
         response_choice: str | None = None) -> dict:
@@ -65,14 +69,12 @@ def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None
                                 response_choice=response_choice))
 
 
-@mcp.tool(structured_output=False)
 def advance(call_id: str, days: int, purpose: str) -> dict:
     """Let days pass (max 30 per call); stops early at real interruptions."""
     from connector.timeflow import advance as _advance
     return _call(lambda c: _advance(c, call_id, days, purpose))
 
 
-@mcp.tool(structured_output=False)
 def note(call_id: str, subject_kind: str, subject_id: int | None, text: str) -> dict:
     """Record a lasting improvised detail about an actor, location or general."""
     from connector import store
@@ -82,6 +84,9 @@ def note(call_id: str, subject_kind: str, subject_id: int | None, text: str) -> 
                               {"subject_kind": subject_kind, "subject_id": subject_id, "text": text},
                               lambda: store.add_note(conn, subject_kind, subject_id, text, call_id))
     return _call(go)
+
+
+mcp = register_tools(make_mcp())  # the stdio server
 
 
 def main() -> None:
