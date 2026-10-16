@@ -49,6 +49,18 @@ def run():
             assert r["how_to_play"].count("\n") == 4 and r["how_to_play"].startswith("1. Check established facts")
             assert len(json.dumps(r, ensure_ascii=False)) <= 12000
             assert conn.execute("SELECT value FROM connector_meta WHERE key='last_resume_at'").fetchone()
+            # Nothing stored yet: no story, and the GM is asked to draft the sheet.
+            assert "story" not in r and "sheet_missing" in r, r.keys()
+            from connector import store
+            store.record(conn, "recap", "Willem rode in at dusk.", "rr1", threads=["Rooks probing"])
+            store.record(conn, "rule", "Never ask me to name subordinates.", "rr2")
+            store.record(conn, "sheet", "Heavy-set, close-cropped grey hair.", "rr3", field="appearance")
+            conn.commit()
+            r = resume(conn)
+            assert r["story"]["live_thread"]["open_threads"] == ["Rooks probing"], r["story"]
+            assert r["story"]["standing_rules"] == ["Never ask me to name subordinates."]
+            assert "sheet_missing" not in r
+            assert len(json.dumps(r, ensure_ascii=False)) <= 14000
     print("connector_resume_test passed")
 
 

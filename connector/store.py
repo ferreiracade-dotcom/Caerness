@@ -145,3 +145,19 @@ def continuity(conn) -> dict:
     if rules:
         out["standing_rules"] = rules
     return out
+
+
+HINT_AFTER_CALLS = 40
+
+
+def bump_calls(conn, tool: str) -> int:
+    """Count tool calls since the last resume (stored, so restarts keep it); resume resets the count."""
+    if tool == "resume":
+        n = 0
+    else:
+        row = conn.execute("SELECT value FROM connector_meta WHERE key='calls_since_resume'").fetchone()
+        n = (int(row[0]) if row else 0) + 1
+    conn.execute("INSERT INTO connector_meta(key,value) VALUES ('calls_since_resume',?) "
+                 "ON CONFLICT(key) DO UPDATE SET value=excluded.value", (str(n),))
+    conn.commit()
+    return n

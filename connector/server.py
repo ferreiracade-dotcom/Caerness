@@ -26,15 +26,25 @@ def register_tools(server: MCPServer) -> MCPServer:
 _CALL_LOCK = threading.Lock()  # one campaign writer at a time; also guards the global stdout redirect
 
 
-def _call(fn) -> dict:
+FRESH_CHAT_HINT = "A good moment to suggest a fresh chat once this scene ends."
+
+
+def _call(fn, tool: str) -> dict:
     """Run fn(conn) with stdout redirected to stderr (stdout is the MCP protocol channel)."""
     with _CALL_LOCK, contextlib.redirect_stdout(sys.stderr):
         try:
+            from connector import store
             from connector.campaign import connect_campaign
 
             conn = connect_campaign()
             try:
-                return fn(conn)
+                result = fn(conn)
+                if isinstance(result, dict) and "error" not in result:
+                    n = store.bump_calls(conn, tool)
+                    long_chat = n >= store.HINT_AFTER_CALLS and n % 10 == 0
+                    if long_chat or (tool == "advance" and int(result.get("elapsed_days") or 0) >= 7):
+                        result["fresh_chat_hint"] = FRESH_CHAT_HINT
+                return result
             finally:
                 conn.close()
         except Exception as e:  # tools never raise tracebacks at the model
@@ -65,25 +75,25 @@ def _snapshot_before_advance() -> None:
 def resume() -> dict:
     """Caerness game: call first when the user says resume or wants to play; returns the GM rulebook and current scene."""
     from connector.session import resume as _resume
-    return _call(_resume)
+    return _call(_resume, "resume")
 
 
 def scene() -> dict:
     """Caerness game: current scene (place, people present, news, competence, condition, notes)."""
     from connector.views import compact_scene
-    return _call(compact_scene)
+    return _call(compact_scene, "scene")
 
 
 def lookup(query: str) -> dict:
     """Caerness game: what the protagonist knows about a person or place, by name or id."""
     from connector.views import lookup as _lookup
-    return _call(lambda c: _lookup(c, query))
+    return _call(lambda c: _lookup(c, query), "lookup")
 
 
 def lore(query: str) -> dict:
     """Caerness game: World Bible passages on the setting (cultivation stages, institutions, places, customs, history)."""
     from connector.lore import lore as _lore
-    return _call(lambda c: _lore(c, query))
+    return _call(lambda c: _lore(c, query), "lore")
 
 
 def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None = None,
@@ -93,7 +103,7 @@ def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None
     from connector.acting import act as _act
     return _call(lambda c: _act(c, call_id, action_type, intent, target_actor_id=target_actor_id,
                                 target_location_id=target_location_id, interaction_id=interaction_id,
-                                response_choice=response_choice))
+                                response_choice=response_choice), "act")
 
 
 def advance(call_id: str, days: int, purpose: str) -> dict:
@@ -103,7 +113,7 @@ def advance(call_id: str, days: int, purpose: str) -> dict:
     def go(conn):
         _snapshot_before_advance()
         return _advance(conn, call_id, days, purpose)
-    return _call(go)
+    return _call(go, "advance")
 
 
 def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "general", subject_id: int | None = None,
@@ -118,7 +128,7 @@ def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "gen
         return store.run_once(conn, call_id, "note", request,
                               lambda: store.record(conn, kind, text, call_id, subject_kind=subject_kind,
                                                    subject_id=subject_id, threads=threads, field=field))
-    return _call(go)
+    return _call(go, "note")
 
 
 mcp = register_tools(make_mcp())  # the stdio server

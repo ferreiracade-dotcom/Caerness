@@ -44,6 +44,22 @@ def run():
         assert "error" not in a and a["status"] == "applied", a
         adv = server.advance("s-adv-1", 1, "wait")
         assert "error" not in adv, adv
+        assert "fresh_chat_hint" not in adv
+
+        # Fresh-chat hint: after 40 calls since resume (then every 10), or after a skip of a week or more.
+        from connector import store
+        server.resume()
+        with connect_campaign() as conn:
+            assert conn.execute("SELECT value FROM connector_meta WHERE key='calls_since_resume'").fetchone()[0] == "0"
+            for _ in range(38):
+                store.bump_calls(conn, "scene")
+        assert "fresh_chat_hint" not in server.scene()  # call 39
+        assert "fresh_chat_hint" in server.scene()      # call 40
+        assert "fresh_chat_hint" not in server.scene()  # call 41
+        server.resume()
+        assert "fresh_chat_hint" not in server.scene()
+        week = server.advance("s-adv-7", 7, "wait a week")
+        assert "error" not in week and week["elapsed_days"] >= 7 and "fresh_chat_hint" in week, week
         n = server.note("s-note-1", "keeps a limp", subject_kind="actor", subject_id=who["id"])
         assert "error" not in n, n
 
