@@ -1,0 +1,80 @@
+from __future__ import annotations
+
+import json
+import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+
+def _j(x) -> int:
+    return len(json.dumps(x, ensure_ascii=False))
+
+
+def run():
+    with tempfile.TemporaryDirectory() as tmp:
+        db = Path(tmp) / "views.db"
+        shutil.copy2(ROOT / "data" / "caerness.db", db)
+        os.environ["CAERNESS_DB_PATH"] = str(db)
+        from engine.db import connect, init_db
+        from engine.player import set_player
+        from connector.store import add_note, ensure_connector_schema
+        from connector.views import compact_scene, lookup
+
+        init_db()
+        with connect() as conn:
+            conn.execute("PRAGMA busy_timeout=30000")
+            ensure_connector_schema(conn)
+            row = conn.execute(
+                "SELECT id FROM actors WHERE actor_type='character' AND current_location_id IS NOT NULL ORDER BY id LIMIT 1"
+            ).fetchone()
+            set_player(conn, int(row["id"]))
+            conn.commit()
+            packets_before = conn.execute("SELECT COUNT(*) FROM scene_packets").fetchone()[0]
+
+            s = compact_scene(conn)
+            for k in ("day", "location", "protagonist", "present", "pending", "news", "competence", "condition", "notes", "recent_operations"):
+                assert k in s, k
+            for k in ("narrator_rules", "embodiment", "canon", "player", "scene_packet_id"):
+                assert k not in s, k
+            assert _j(s) <= 4000, _j(s)
+            assert not any(v is None for v in s.values())
+            assert s["protagonist"]["id"] == int(row["id"]) and s["location"]["name"]
+            assert len(s["present"]) >= 1, "opening location should have people present"
+            assert conn.execute("SELECT COUNT(*) FROM scene_packets").fetchone()[0] == packets_before
+
+            who = s["present"][0]
+            r = lookup(conn, who["name"])
+            assert r["found"] is True and r["kind"] == "actor" and r["name"] == who["name"]
+            assert _j(r) <= 2000, _j(r)
+            assert "truth_event_id" not in json.dumps(r)
+            assert lookup(conn, str(who["id"]))["id"] == who["id"]
+            assert lookup(conn, "zzzz-nobody") == {"found": False, "candidates": []}
+            part = lookup(conn, who["name"].split()[0][:4])
+            assert part["found"] in (True, False)
+            assert len(part.get("candidates", [])) <= 5
+
+            # Non-ASCII names round-trip exactly (the opening world has some in location names).
+            odd = conn.execute(
+                "SELECT name FROM actors WHERE name GLOB '*[^ -~]*' UNION ALL SELECT name FROM locations WHERE name GLOB '*[^ -~]*' LIMIT 1"
+            ).fetchone()
+            assert odd is not None, "opening world should contain a non-ASCII name"
+            lr = lookup(conn, odd[0])
+            assert lr["found"] is True and lr["name"] == odd[0]
+            assert json.loads(json.dumps(lr, ensure_ascii=False))["name"] == odd[0]
+
+            add_note(conn, "actor", who["id"], "owes the miller two sacks", "n1")
+            conn.commit()
+            s2 = compact_scene(conn)
+            assert any("owes the miller" in n["text"] and n["about"] == who["name"] for n in s2["notes"])
+            assert "owes the miller" in json.dumps(lookup(conn, who["name"])["notes"])
+            assert _j(s2) <= 4000
+    print("connector_views_test passed")
+
+
+if __name__ == "__main__":
+    run()
