@@ -26,11 +26,11 @@ def _who(conn, a) -> str:
     """One line on who someone is; kin and partners say whose, so nobody is mistaken for the protagonist's."""
     role = str(a["subtype"] or a["actor_type"] or "").replace("_", " ")
     partner = conn.execute(
-        """SELECT b.name FROM household_unions u JOIN actors b ON b.id=CASE WHEN u.actor_a_id=? THEN u.actor_b_id ELSE u.actor_a_id END
+        """SELECT b.name,b.subtype FROM household_unions u JOIN actors b ON b.id=CASE WHEN u.actor_a_id=? THEN u.actor_b_id ELSE u.actor_a_id END
            WHERE ? IN (u.actor_a_id,u.actor_b_id) AND u.status='active' ORDER BY u.started_day DESC LIMIT 1""",
         (a["id"], a["id"])).fetchone()
     if partner and role in ("spouse", "partner", "widow", "widower", ""):
-        return _clip(f"{role or 'spouse'} of {partner[0]}", 80)
+        return _clip(f"{role or 'spouse'} of {partner[0]} ({str(partner[1] or 'local').replace('_', ' ')})", 100)
     return _clip(role, 80)
 
 
@@ -140,8 +140,10 @@ def compact_scene(conn) -> dict:
     conn.commit()
     day = int(p["world"]["day"])
     me, loc = p["player"], p["location"]
-    present = [{"id": a["id"], "name": a["name"], "who": _who(conn, a)}
-               for a in p["present_actors"][: _LIMITS["present"]]]
+    people = [a for a in p["present_actors"] if a.get("actor_type") == "character"]
+    present = [{"id": a["id"], "name": a["name"], "who": _who(conn, a)} for a in people[: _LIMITS["present"]]]
+    institutions = [{"id": a["id"], "name": a["name"], "what": _who(conn, a)}
+                    for a in p["present_actors"] if a.get("actor_type") != "character"][:8]
     events = [f"day {e['day']}: {_clip(e['title'], 100)}" for e in p["known_events"][-_LIMITS["news"]:]]
     rumours = ["rumour: " + _clip(r["text"], 110) for r in p["known_rumours"][-_LIMITS["news"]:]]
     notes = []
@@ -156,6 +158,7 @@ def compact_scene(conn) -> dict:
         "protagonist": _drop_none({"id": me["actor_id"], "name": me["name"], "age": _age(conn, me["actor_id"], day),
                                    "role": _clip(me.get("subtype") or me.get("actor_type"), 100)}),
         "present": present,
+        "institutions_here": institutions,
         "pending": [_pending(i) for i in p["pending_player_interactions"][:5]],
         "news": {"events": events, "rumours": rumours},
         "competence": _competence(p["professional_context"]),

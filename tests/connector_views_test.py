@@ -45,6 +45,11 @@ def run():
             assert not any(v is None for v in s.values())
             assert s["protagonist"]["id"] == int(row["id"]) and s["location"]["name"]
             assert len(s["present"]) >= 1, "opening location should have people present"
+            # People and organisations are separate lists (owner play check 2026-10-16).
+            ids = [a["id"] for a in s["present"]]
+            kinds = {r[0] for r in conn.execute(f"SELECT actor_type FROM actors WHERE id IN ({','.join('?'*len(ids))})", ids)}
+            assert kinds == {"character"}, kinds
+            assert "institutions_here" in s
             assert conn.execute("SELECT COUNT(*) FROM scene_packets").fetchone()[0] == packets_before
 
             who = s["present"][0]
@@ -82,7 +87,7 @@ def run():
             partner = conn.execute(
                 """SELECT b.name FROM household_unions u JOIN actors b ON b.id=CASE WHEN u.actor_a_id=? THEN u.actor_b_id ELSE u.actor_a_id END
                    WHERE ? IN (u.actor_a_id,u.actor_b_id) AND u.status='active'""", (sp["id"], sp["id"])).fetchone()[0]
-            assert _who(conn, sp) == f"spouse of {partner}", _who(conn, sp)
+            assert _who(conn, sp).startswith(f"spouse of {partner} ("), _who(conn, sp)
 
             # What the protagonist owns and runs is in the scene (owner play check 2026-10-16).
             from engine.civilian import create_enterprise

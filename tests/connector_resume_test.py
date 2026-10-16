@@ -26,7 +26,7 @@ def run():
             assert needle in rb or needle.lower() in rb.lower(), needle
         # Owner play check 2026-10-16: silence in the engine is not emptiness; no engine talk in the fiction.
         for needle in ("Where the engine is silent, invent", "lived history", "Never mention the engine",
-                       "open straight into a scene", "comes up in a chat", "No engine figure ever appears in the prose"):
+                       "open straight into a scene", "Don't invent visitors", "comes up in a chat", "No engine figure ever appears in the prose"):
             assert needle in rb, needle
         assert rb.startswith("You are the game master for Caerness.")
         spec = (ROOT / "docs/superpowers/specs/2026-10-16-claude-connector-design.md").read_text(encoding="utf-8")
