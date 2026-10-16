@@ -22,6 +22,18 @@ def _age(conn, actor_id: int, day: int):
     return int((day - r[0]) // 365) if r and r[0] is not None else None
 
 
+def _who(conn, a) -> str:
+    """One line on who someone is; kin and partners say whose, so nobody is mistaken for the protagonist's."""
+    role = str(a["subtype"] or a["actor_type"] or "").replace("_", " ")
+    partner = conn.execute(
+        """SELECT b.name FROM household_unions u JOIN actors b ON b.id=CASE WHEN u.actor_a_id=? THEN u.actor_b_id ELSE u.actor_a_id END
+           WHERE ? IN (u.actor_a_id,u.actor_b_id) AND u.status='active' ORDER BY u.started_day DESC LIMIT 1""",
+        (a["id"], a["id"])).fetchone()
+    if partner and role in ("spouse", "partner", "widow", "widower", ""):
+        return _clip(f"{role or 'spouse'} of {partner[0]}", 80)
+    return _clip(role, 80)
+
+
 def _pending(item: dict) -> dict:
     terms = item.get("terms") or {}
     about = terms.get("purpose") or terms.get("subject") or item.get("recipient_name")
@@ -128,7 +140,7 @@ def compact_scene(conn) -> dict:
     conn.commit()
     day = int(p["world"]["day"])
     me, loc = p["player"], p["location"]
-    present = [{"id": a["id"], "name": a["name"], "who": _clip(a.get("subtype") or a.get("actor_type"), 80)}
+    present = [{"id": a["id"], "name": a["name"], "who": _who(conn, a)}
                for a in p["present_actors"][: _LIMITS["present"]]]
     events = [f"day {e['day']}: {_clip(e['title'], 100)}" for e in p["known_events"][-_LIMITS["news"]:]]
     rumours = ["rumour: " + _clip(r["text"], 110) for r in p["known_rumours"][-_LIMITS["news"]:]]
@@ -184,7 +196,7 @@ def lookup(conn, query: str) -> dict:
     out = {"found": True, "kind": kind, "id": int(r["id"]), "name": r["name"]}
     if kind == "actor":
         where = conn.execute("SELECT name FROM locations WHERE id=?", (r["current_location_id"],)).fetchone()
-        out["basics"] = _drop_none({"type": r["actor_type"], "role": _clip(r["subtype"], 100), "status": r["status"],
+        out["basics"] = _drop_none({"type": r["actor_type"], "role": _who(conn, r), "status": r["status"],
                                     "last_known_place": where[0] if where else None})
     elif kind == "business":
         owner = conn.execute("SELECT name FROM actors WHERE id=COALESCE(?,?)", (r["owner_actor_id"], r["institution_actor_id"])).fetchone()

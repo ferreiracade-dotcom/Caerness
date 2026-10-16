@@ -74,6 +74,16 @@ def run():
             assert "owes the miller" in json.dumps(lookup(conn, who["name"])["notes"])
             assert _j(s2) <= 4000
 
+            # A spouse is described as whose spouse, never a bare "spouse" (owner play check 2026-10-16).
+            from connector.views import _who
+            sp = conn.execute(
+                """SELECT a.* FROM actors a JOIN household_unions u ON a.id IN (u.actor_a_id,u.actor_b_id)
+                   WHERE a.subtype='spouse' AND u.status='active' LIMIT 1""").fetchone()
+            partner = conn.execute(
+                """SELECT b.name FROM household_unions u JOIN actors b ON b.id=CASE WHEN u.actor_a_id=? THEN u.actor_b_id ELSE u.actor_a_id END
+                   WHERE ? IN (u.actor_a_id,u.actor_b_id) AND u.status='active'""", (sp["id"], sp["id"])).fetchone()[0]
+            assert _who(conn, sp) == f"spouse of {partner}", _who(conn, sp)
+
             # What the protagonist owns and runs is in the scene (owner play check 2026-10-16).
             from engine.civilian import create_enterprise
             from engine.merchant import add_enterprise_staff
