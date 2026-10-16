@@ -1,0 +1,18 @@
+# HTTPS termination for the Caerness connector. CAERNESS_HOST comes from /etc/caerness/host.env
+# (loaded into caddy.service by caddy-override.conf). Caddy obtains and renews the certificate itself
+# (HTTP-01 on port 80), so ports 80 and 443 must be reachable.
+{$CAERNESS_HOST} {
+	encode zstd gzip
+
+	request_body {
+		max_size 1MB
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+	}
+
+	reverse_proxy 127.0.0.1:8765 {
+		flush_interval -1
+	}
+}

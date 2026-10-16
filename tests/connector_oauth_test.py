@@ -81,6 +81,12 @@ def run():
             pass
         else:
             raise AssertionError("missing passphrase hash accepted")
+        try:  # the env example ships a placeholder; it must not start a server
+            build_server(Settings(public_url=BASE, auth_db_path=Path(tmp) / "x.db", passphrase_hash="CHANGE_ME"))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("placeholder passphrase hash accepted")
 
         offset = [0.0]
 

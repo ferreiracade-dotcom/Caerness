@@ -44,7 +44,7 @@ def build_server(settings: Settings, provider=None) -> MCPServer:
         from connector.auth_store import AuthStore
         from connector.oauth import OwnerOAuthProvider, register_login_routes
 
-        if not settings.passphrase_hash:
+        if not (settings.passphrase_hash or "").startswith("scrypt$"):
             raise ValueError("CAERNESS_PASSPHRASE_HASH is required when CAERNESS_PUBLIC_URL is set "
                              "(run python -m connector.set_passphrase)")
         provider = provider or OwnerOAuthProvider(AuthStore(settings.auth_db_path), settings)

@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Caerness snapshot
+
+[Timer]
+OnCalendar=*-*-* 04:30:00 UTC
+Persistent=true
+Unit=caerness-backup.service
+
+[Install]
+WantedBy=timers.target

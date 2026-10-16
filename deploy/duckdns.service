@@ -1,0 +1,14 @@
+[Unit]
+Description=Update the DuckDNS record with this instance's public IP
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+DynamicUser=yes
+EnvironmentFile=/etc/caerness/host.env
+ExecStart=/opt/caerness/deploy/duckdns-update.sh
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes

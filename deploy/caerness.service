@@ -1,0 +1,27 @@
+[Unit]
+Description=Caerness connector (MCP over Streamable HTTP, behind Caddy)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=caerness
+Group=caerness
+WorkingDirectory=/opt/caerness
+EnvironmentFile=/etc/caerness/caerness.env
+Environment=CAERNESS_CAMPAIGN_DIR=/var/lib/caerness/campaigns
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/caerness/.venv/bin/python /opt/caerness/connector/run_server.py --transport http --host 127.0.0.1 --port 8765
+Restart=always
+RestartSec=3
+# Let an in-flight advance finish before systemd gives up on a stop or restart.
+TimeoutStopSec=120
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/caerness
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
