@@ -89,6 +89,26 @@ def run():
                    WHERE ? IN (u.actor_a_id,u.actor_b_id) AND u.status='active'""", (sp["id"], sp["id"])).fetchone()[0]
             assert _who(conn, sp).startswith(f"spouse of {partner} ("), _who(conn, sp)
 
+            # Sex and organisation are shown, so the GM cannot guess them from names (owner play check 2026-10-16).
+            for p in compact_scene(conn)["present"]:
+                sex = conn.execute("SELECT demographic_sex FROM actor_life_profiles WHERE actor_id=?", (p["id"],)).fetchone()
+                if sex and sex[0] in ("female", "male"):
+                    assert p["sex"] in ({"female": ("woman", "girl"), "male": ("man", "boy")}[sex[0]]), p
+            boss = conn.execute(
+                """SELECT a.name,o.name,p.role_kind,lp.demographic_sex FROM underworld_personnel p
+                   JOIN underworld_organizations o ON o.id=p.organization_id JOIN actors a ON a.id=p.actor_id
+                   JOIN actor_life_profiles lp ON lp.actor_id=a.id
+                   WHERE p.status='active' AND p.role_kind='crew_leader' ORDER BY a.id LIMIT 1""").fetchone()
+            lb = lookup(conn, boss[0])["basics"]
+            assert any(m.startswith(f"crew leader, {boss[1]}") for m in lb["member_of"]), lb
+            assert lb["sex"] == ("woman" if boss[3] == "female" else "man"), lb
+            member = conn.execute(
+                """SELECT a.name,i.name FROM institution_memberships m JOIN actors a ON a.id=m.member_actor_id
+                   JOIN actors i ON i.id=m.institution_actor_id WHERE m.status='active' AND a.actor_type='character'
+                     AND (SELECT COUNT(*) FROM actors x WHERE x.name=a.name)=1 ORDER BY a.id LIMIT 1""").fetchone()
+            if member:
+                assert any(member[1] in m for m in lookup(conn, member[0])["basics"]["member_of"]), member
+
             # What the protagonist owns and runs is in the scene (owner play check 2026-10-16).
             from engine.civilian import create_enterprise
             from engine.merchant import add_enterprise_staff

@@ -34,6 +34,28 @@ def _who(conn, a) -> str:
     return _clip(role, 80)
 
 
+def _sex(conn, actor_id: int, day: int):
+    r = conn.execute("SELECT demographic_sex,birth_day FROM actor_life_profiles WHERE actor_id=?", (actor_id,)).fetchone()
+    if not r or r[0] not in ("female", "male"):
+        return None
+    young = r[1] is not None and (day - r[1]) < 16 * 365
+    return {"female": "girl" if young else "woman", "male": "boy" if young else "man"}[r[0]]
+
+
+def _member_of(conn, actor_id: int) -> list[str]:
+    """Organisations someone belongs to, as "role, organisation", so nobody is placed in the wrong outfit."""
+    out = []
+    for role, org, crew in conn.execute(
+            """SELECT p.role_kind,o.name,c.name FROM underworld_personnel p JOIN underworld_organizations o ON o.id=p.organization_id
+               LEFT JOIN underworld_crews c ON c.id=p.crew_id WHERE p.actor_id=? AND p.status='active'""", (actor_id,)):
+        out.append(f"{str(role).replace('_', ' ')}, {org}" + (f" ({crew})" if crew else ""))
+    for role, kind, inst in conn.execute(
+            """SELECT m.role_text,m.membership_kind,i.name FROM institution_memberships m JOIN actors i ON i.id=m.institution_actor_id
+               WHERE m.member_actor_id=? AND m.status='active' ORDER BY m.id LIMIT 3""", (actor_id,)):
+        out.append(_clip(f"{role or str(kind).replace('_', ' ')}, {inst}", 80))
+    return out[:4]
+
+
 def _pending(item: dict) -> dict:
     terms = item.get("terms") or {}
     about = terms.get("purpose") or terms.get("subject") or item.get("recipient_name")
@@ -141,7 +163,9 @@ def compact_scene(conn) -> dict:
     day = int(p["world"]["day"])
     me, loc = p["player"], p["location"]
     people = [a for a in p["present_actors"] if a.get("actor_type") == "character"]
-    present = [{"id": a["id"], "name": a["name"], "who": _who(conn, a)} for a in people[: _LIMITS["present"]]]
+    present = [_drop_none({"id": a["id"], "name": a["name"], "sex": _sex(conn, a["id"], day), "who": _who(conn, a),
+                           "member_of": "; ".join(_member_of(conn, a["id"])) or None})
+               for a in people[: _LIMITS["present"]]]
     institutions = [{"id": a["id"], "name": a["name"], "what": _who(conn, a)}
                     for a in p["present_actors"] if a.get("actor_type") != "character"][:8]
     events = [f"day {e['day']}: {_clip(e['title'], 100)}" for e in p["known_events"][-_LIMITS["news"]:]]
@@ -199,7 +223,9 @@ def lookup(conn, query: str) -> dict:
     out = {"found": True, "kind": kind, "id": int(r["id"]), "name": r["name"]}
     if kind == "actor":
         where = conn.execute("SELECT name FROM locations WHERE id=?", (r["current_location_id"],)).fetchone()
-        out["basics"] = _drop_none({"type": r["actor_type"], "role": _who(conn, r), "status": r["status"],
+        day = conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]
+        out["basics"] = _drop_none({"type": r["actor_type"], "sex": _sex(conn, int(r["id"]), day), "role": _who(conn, r),
+                                    "member_of": _member_of(conn, int(r["id"])) or None, "status": r["status"],
                                     "last_known_place": where[0] if where else None})
     elif kind == "business":
         owner = conn.execute("SELECT name FROM actors WHERE id=COALESCE(?,?)", (r["owner_actor_id"], r["institution_actor_id"])).fetchone()
