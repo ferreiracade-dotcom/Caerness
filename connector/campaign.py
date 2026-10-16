@@ -40,6 +40,12 @@ def open_campaign(name: str) -> Path:
     init_db()
     with connect() as conn:
         ensure_connector_schema(conn)
+        has_canon = conn.execute("SELECT COUNT(*) FROM canon_chunks").fetchone()[0]
+    if not has_canon:  # the packaged world ships without the World Bible index; `lore` needs it
+        from engine.canon import DEFAULT_CANON, index_canon
+
+        if DEFAULT_CANON.exists():
+            index_canon(DEFAULT_CANON)
     return path
 
 

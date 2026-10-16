@@ -76,7 +76,7 @@ def run():
             r = rpc(client, "tools/list")
             assert r.status_code == 200, r.text
             names = sorted(t["name"] for t in r.json()["result"]["tools"])
-            assert names == ["act", "advance", "lookup", "note", "resume", "scene"], names
+            assert names == ["act", "advance", "lookup", "lore", "note", "resume", "scene"], names
 
             res = call_tool(client, "resume")
             assert "rulebook" in res, list(res)

@@ -28,7 +28,7 @@ def run():
             conn.commit()
 
         tools = asyncio.run(server.mcp.list_tools())
-        assert sorted(t.name for t in tools) == ["act", "advance", "lookup", "note", "resume", "scene"]
+        assert sorted(t.name for t in tools) == ["act", "advance", "lookup", "lore", "note", "resume", "scene"]
         size = len(json.dumps([t.model_dump(by_alias=True, exclude_none=True) for t in tools], ensure_ascii=False))
         print(f"tool definitions: {size} chars")
         assert size <= 6000, size

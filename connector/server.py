@@ -18,7 +18,7 @@ def make_mcp(**kwargs) -> MCPServer:
 
 
 def register_tools(server: MCPServer) -> MCPServer:
-    for fn in (resume, scene, lookup, act, advance, note):
+    for fn in (resume, scene, lookup, lore, act, advance, note):
         server.tool(structured_output=False)(fn)
     return server
 
@@ -78,6 +78,12 @@ def lookup(query: str) -> dict:
     """Caerness game: what the protagonist knows about a person or place, by name or id."""
     from connector.views import lookup as _lookup
     return _call(lambda c: _lookup(c, query))
+
+
+def lore(query: str) -> dict:
+    """Caerness game: World Bible passages on the setting (cultivation stages, institutions, places, customs, history)."""
+    from connector.lore import lore as _lore
+    return _call(lambda c: _lore(c, query))
 
 
 def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None = None,
