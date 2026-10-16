@@ -98,12 +98,12 @@ def lore(query: str) -> dict:
 
 def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None = None,
         target_location_id: int | None = None, interaction_id: int | None = None,
-        response_choice: str | None = None) -> dict:
-    """Attempt a consequential action (observe, speak, investigate, respond, travel); narrate only what returns."""
+        response_choice: str | None = None, details: dict | None = None) -> dict:
+    """Attempt a consequential action; narrate only what returns. Types: observe, speak, investigate, respond, travel, pay, hire, lend, demand, attack, trade, order. details: from/to ('me','business:<id>','outfit:<id>','household:<id>','person:<id>'), amount (token|small|modest|substantial|large|fortune), role, what, with (ids), crew, intent_kind, deal, business, do."""
     from connector.acting import act as _act
     return _call(lambda c: _act(c, call_id, action_type, intent, target_actor_id=target_actor_id,
                                 target_location_id=target_location_id, interaction_id=interaction_id,
-                                response_choice=response_choice), "act")
+                                response_choice=response_choice, details=details), "act")
 
 
 def advance(call_id: str, days: int, purpose: str) -> dict:

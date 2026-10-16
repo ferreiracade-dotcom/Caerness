@@ -7,7 +7,8 @@ from engine.player import get_player, sync_player_location
 from engine.presence import actor_is_present_candidate
 from engine.turns import resolve_turn_state
 
-ACT_TYPES = ("observe", "speak", "investigate", "respond", "travel")
+OPERATION_TYPES = ("pay", "hire", "lend", "demand", "attack", "trade", "order")
+ACT_TYPES = ("observe", "speak", "investigate", "respond", "travel") + OPERATION_TYPES
 RESPONSES = ("accept", "reject", "counter")
 MAX_INTENT = 500
 
@@ -64,6 +65,10 @@ class StructuredActionProvider:
                                     note="" if ok else "Target is not plausibly present for a direct conversation here.", **base)
 
 
+def _day(conn) -> int:
+    return int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+
+
 def _refuse(action_type, summary, call_id) -> dict:
     return {"status": "refused", "action_type": str(action_type), "summary": summary, "operation_id": call_id}
 
@@ -95,15 +100,27 @@ def _validate(conn, action_type, intent, target_actor_id, target_location_id, in
 
 def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: int | None = None,
         target_location_id: int | None = None, interaction_id: int | None = None,
-        response_choice: str | None = None, duration_days: int = 0) -> dict:
+        response_choice: str | None = None, duration_days: int = 0,
+        details: dict | None = None) -> dict:
     request = {"action_type": action_type, "intent": intent, "target_actor_id": target_actor_id,
                "target_location_id": target_location_id, "interaction_id": interaction_id,
-               "response_choice": response_choice, "duration_days": duration_days}
+               "response_choice": response_choice, "duration_days": duration_days, "details": details or {}}
 
     def go() -> dict:
         problem = _validate(conn, action_type, intent, target_actor_id, target_location_id, interaction_id, response_choice)
         if problem:
             return _refuse(action_type, problem, call_id)
+        if action_type in OPERATION_TYPES:
+            from engine import player_operations
+            me = int(get_player(conn)["player_actor_id"])
+            out = player_operations.execute(conn, me, action_type, target_actor_id=target_actor_id,
+                                            details=details or {}, intent=intent.strip())
+            summary = " ".join(str(out.get("summary", "")).split())
+            res = {k: v for k, v in out.items() if v is not None and k != "summary"}
+            res.update({"status": out["status"], "action_type": action_type,
+                        "summary": summary if len(summary) <= 600 else summary[:599] + "…",
+                        "elapsed_days": 0, "day_started": _day(conn), "day_ended": _day(conn), "operation_id": call_id})
+            return res
         provider = StructuredActionProvider(
             action_type, target_actor_id=target_actor_id, target_location_id=target_location_id,
             interaction_id=interaction_id, response_choice=response_choice, duration_days=duration_days)

@@ -82,6 +82,22 @@ def run():
         r = act(conn, "a8", "respond", "Maybe.", interaction_id=1, response_choice="dither")
         assert r["status"] != "applied" and _n(conn) == n1
 
+        # operations: pay is idempotent per call_id
+        from engine import civilian, ledger
+        pid = int(conn.execute("SELECT player_actor_id FROM player_state WHERE id=1").fetchone()[0])
+        biz = civilian.create_enterprise(conn, "Act Test Stall", "shop", owner_actor_id=pid, cash=10)
+        varen = next(i for n, i in ids.items() if i != pid)
+        b0 = ledger.balance(conn, ("business", biz))
+        det = {"from": f"business:{biz}", "to": f"person:{varen}", "amount": "small"}
+        r = act(conn, "op-1", "pay", "I pay Varen", details=det)
+        assert r["status"] == "applied" and "operation_id" in r and r["elapsed_days"] == 0, r
+        assert abs(ledger.balance(conn, ("business", biz)) - (b0 - 1)) < 1e-9
+        again = act(conn, "op-1", "pay", "I pay Varen", details=det)
+        assert again["replayed"] is True and abs(ledger.balance(conn, ("business", biz)) - (b0 - 1)) < 1e-9
+        r = act(conn, "op-2", "pay", "", details=det)
+        assert r["status"] == "refused"
+        results.append(r)
+
         for res in results:
             assert len(json.dumps(res, ensure_ascii=False)) <= 2400
             assert not any(v is None for v in res.values())
