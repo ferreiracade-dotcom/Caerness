@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 108
+SCHEMA_VERSION = 109
 
 
 def _running_tests() -> bool:
@@ -4470,6 +4470,13 @@ def _migration_108(conn: sqlite3.Connection) -> None:
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('tenyear02_gate_epoch','ONEYEAR_WORLDHIST01A_SCHEMA108')")
 
 
+def _migration_109(conn: sqlite3.Connection) -> None:
+    """NAMES-01: background identities carry a given name of their recorded sex (the name was drawn without it)."""
+    if _has_table(conn, "background_person_profiles") and _has_table(conn, "background_population_partitions"):
+        from .person_ecology import repair_generated_name_sex
+        repair_generated_name_sex(conn)
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4579,6 +4586,7 @@ _MIGRATIONS: dict[int, Migration] = {
     106: ("worldhist01a_social_org_succession", "WORLDHIST-01A REL-02 social memory, ORGPRESS-01 event projection and SUCCESSION-02 authority transitions", _migration_106),
     107: ("family02_sex_resolution", "FAMILY-02 demographic-sex resolution for named characters (canon text, canon rule, given name, seeded roll)", _migration_107),
     108: ("opening01_family_relationships", "OPENING-01 relationship start dates, opening family life (marriage, widowhood, spouses, latent children) and opening relationships", _migration_108),
+    109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed", _migration_109),
 }
 
 

@@ -11,6 +11,7 @@ actor; it never adds a person to population totals.
 import hashlib
 import json
 import random
+import re
 import sqlite3
 from typing import Any, Iterable
 
@@ -18,9 +19,12 @@ from .background_population import create_partition, load_partition
 from .continuity import upsert_continuity_core, set_resolution
 from .health import ensure_health_profile
 
-_FIRST = (
+# Given names follow the identity's already-drawn sex (players read these names as gendered).
+FIRST_MALE = (
     "Alden","Bren","Caro","Darian","Elias","Garran","Hale","Iven","Joren","Kellan",
     "Lucan","Marek","Nolan","Orin","Perrin","Rafe","Soren","Tomas","Varen","Willem",
+)
+FIRST_FEMALE = (
     "Ada","Bera","Celia","Dara","Elin","Fara","Greta","Hessa","Iria","Jana",
     "Kara","Lena","Mira","Nessa","Orla","Petra","Rina","Sela","Tara","Vera",
 )
@@ -65,6 +69,10 @@ def _source_location(conn: sqlite3.Connection, source: sqlite3.Row, seed: int, u
         return None
     idx = min(len(rows)-1, int(_score(seed, uid, "location") * len(rows)))
     return int(rows[idx][0])
+
+
+def given_name_for(seed: int, uid: int, sex: str | None) -> str:
+    return _pick(FIRST_FEMALE if sex == "female" else FIRST_MALE, seed, uid, "given")
 
 
 def _profile_stage(seed: int, uid: int, hearth: bool, sex: str | None) -> tuple[int, str | None]:
@@ -128,7 +136,7 @@ def activate_background_people(conn: sqlite3.Connection) -> dict[str, int]:
             loc = _source_location(conn, source, seed, uid)
             from .cultivation import location_in_hearth
             open_core, stage = _profile_stage(seed, uid, location_in_hearth(conn, loc), snap["demographic_sex"])
-            given = _pick(_FIRST, seed, uid, "given")
+            given = given_name_for(seed, uid, snap["demographic_sex"])
             family = _pick(_LAST, seed, uid, "family")
             # The local uid is not visible in ordinary naming unless a collision must be resolved.
             # Store the stable identity's ordinary name before any demand appears.
@@ -173,18 +181,29 @@ def redraw_unresolved_profile_cores(conn: sqlite3.Connection) -> int:
     return changed
 
 
+def _free_name(conn: sqlite3.Connection, given: str, family: str, sex: str | None, suffix: int) -> str:
+    """The identity's own name if free, else another name of the same sex, and a number only as a last resort."""
+    names = FIRST_FEMALE if sex == "female" else FIRST_MALE
+    start = names.index(given) if given in names else 0
+    for g in ((given,) if given not in names else ()) + names[start:] + names[:start]:
+        if not conn.execute("SELECT 1 FROM actors WHERE name=?", (f"{g} {family}",)).fetchone():
+            return f"{g} {family}"
+    return f"{given} {family} {suffix}"
+
+
 def _unique_actor_name(conn: sqlite3.Connection, profile: sqlite3.Row) -> str:
-    base = f"{profile['given_name']} {profile['family_name']}"
-    if not conn.execute("SELECT 1 FROM actors WHERE name=?", (base,)).fetchone():
-        return base
-    suffix = int(profile["partition_id"]) * 10000 + int(profile["local_uid"])
-    return f"{base} {suffix}"
+    name = _free_name(conn, str(profile["given_name"]), str(profile["family_name"]), profile["demographic_sex"],
+                      int(profile["partition_id"]) * 10000 + int(profile["local_uid"]))
+    if name.split(" ", 1)[0] != profile["given_name"]:
+        conn.execute("UPDATE background_person_profiles SET given_name=?,metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.stable_name',?) "
+                     "WHERE partition_id=? AND local_uid=?", (name.split(" ", 1)[0], name, int(profile["partition_id"]), int(profile["local_uid"])))
+    return name
 
 
 def _candidate_rows(
     conn: sqlite3.Connection, *, location_id: int | None = None, occupation_domains: Iterable[str] | None = None,
     min_age: int = 18, max_age: int = 85, require_open_core: bool | None = None,
-    required_stage: str | None = None,
+    required_stage: str | None = None, demographic_sex: str | None = None,
 ) -> list[sqlite3.Row]:
     day = _day(conn)
     where = ["p.status='background'", "l.actor_id IS NULL", "(l.status IS NULL OR l.status<>'dead')", "p.birth_day<=?", "p.birth_day>=?"]
@@ -199,6 +218,9 @@ def _candidate_rows(
     if require_open_core is not None:
         where.append("p.open_core=?")
         args.append(1 if require_open_core else 0)
+    if demographic_sex:
+        where.append("p.demographic_sex=?")
+        args.append(str(demographic_sex))
     if required_stage:
         order = {"First":1,"Temper":2,"Third":3,"Breach":4,"Fifth":5,"Sixth":6}
         allowed = [s for s,v in order.items() if v >= order.get(required_stage,1)]
@@ -216,10 +238,11 @@ def find_background_candidate(
     min_age: int = 18, max_age: int = 85, require_open_core: bool | None = None,
     required_stage: str | None = None, command_weight: float = 0, economic_weight: float = 0,
     medical_weight: float = 0, teaching_weight: float = 0, criminal_weight: float = 0,
+    demographic_sex: str | None = None,
 ) -> sqlite3.Row | None:
     rows = _candidate_rows(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
-        require_open_core=require_open_core, required_stage=required_stage,
+        require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex,
     )
     if not rows and location_id is not None:
         # The world may reveal someone from the same broader population bucket rather than conjure
@@ -238,6 +261,8 @@ def find_background_candidate(
                 where.append("p.occupation_domain IN (%s)" % ",".join("?" for _ in vals)); args.extend(vals)
             if require_open_core is not None:
                 where.append("p.open_core=?"); args.append(1 if require_open_core else 0)
+            if demographic_sex:
+                where.append("p.demographic_sex=?"); args.append(str(demographic_sex))
             rows = conn.execute(
                 f"""SELECT p.* FROM background_person_profiles p
                     JOIN background_population_sources s ON s.id=p.source_id
@@ -262,7 +287,7 @@ def resolve_background_person(
     min_age: int = 18, max_age: int = 85, require_open_core: bool | None = None,
     required_stage: str | None = None, subtype: str | None = None,
     command_weight: float = 0, economic_weight: float = 0, medical_weight: float = 0,
-    teaching_weight: float = 0, criminal_weight: float = 0,
+    teaching_weight: float = 0, criminal_weight: float = 0, demographic_sex: str | None = None,
 ) -> int | None:
     """Reveal one pre-existing POPBACK identity as a tracked actor.
 
@@ -273,7 +298,7 @@ def resolve_background_person(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
         require_open_core=require_open_core, required_stage=required_stage, command_weight=command_weight,
         economic_weight=economic_weight, medical_weight=medical_weight, teaching_weight=teaching_weight,
-        criminal_weight=criminal_weight,
+        criminal_weight=criminal_weight, demographic_sex=demographic_sex,
     )
     if profile is None:
         return None
@@ -357,3 +382,51 @@ def background_person_summary(conn: sqlite3.Connection) -> dict[str, int]:
         "resolved": int(conn.execute("SELECT COUNT(*) FROM background_person_profiles WHERE status='resolved'").fetchone()[0]),
         "provenance": int(conn.execute("SELECT COUNT(*) FROM person_resolution_provenance").fetchone()[0]),
     }
+
+
+def _rename_actor(conn: sqlite3.Connection, aid: int, old: str, new: str) -> None:
+    # The full name also appears in household names and life-event summaries; "<name> <digits>" is someone else.
+    pattern = re.compile(re.escape(old) + r"(?! \d)")
+    conn.execute("UPDATE actors SET name=? WHERE id=?", (new, aid))
+    for table, col in (("households", "name"), ("life_events", "summary")):
+        for rid, text in conn.execute(f"SELECT id,{col} FROM {table} WHERE instr({col},?)>0", (old,)).fetchall():
+            fixed = pattern.sub(new, str(text))
+            if fixed != text:
+                conn.execute(f"UPDATE {table} SET {col}=? WHERE id=?", (fixed, int(rid)))
+
+
+def repair_generated_name_sex(conn: sqlite3.Connection) -> dict[str, int]:
+    """Give background identities a given name of their recorded sex (worlds built before schema 109).
+
+    Sex is kept, because marriages, births and cultivation already depend on it; the name changes.
+    Revealed identities are renamed everywhere their full name was copied.  Canon people are untouched.
+    """
+    counts = {"profiles_renamed": 0, "actors_renamed": 0}
+    rows = conn.execute(
+        """SELECT p.partition_id,p.local_uid,p.given_name,p.family_name,p.demographic_sex,pt.seed,l.actor_id
+           FROM background_person_profiles p JOIN background_population_partitions pt ON pt.id=p.partition_id
+           LEFT JOIN background_population_identity_links l ON l.partition_id=p.partition_id AND l.local_uid=p.local_uid
+           ORDER BY p.partition_id,p.local_uid"""
+    ).fetchall()
+    for pid, uid, given, family, sex, seed, aid in rows:
+        if given in (FIRST_FEMALE if sex == "female" else FIRST_MALE):
+            continue
+        new_given = given_name_for(int(seed), int(uid), sex)
+        conn.execute(
+            """UPDATE background_person_profiles SET given_name=?,
+                 metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.stable_name',?) WHERE partition_id=? AND local_uid=?""",
+            (new_given, f"{new_given} {family}", int(pid), int(uid)),
+        )
+        counts["profiles_renamed"] += 1
+        if aid is None or conn.execute("SELECT 1 FROM source_identity_map WHERE entity_kind='actor' AND entity_id=?", (int(aid),)).fetchone():
+            continue
+        name = str(conn.execute("SELECT name FROM actors WHERE id=?", (int(aid),)).fetchone()[0])
+        if name.split(" ", 1)[0] != given:
+            continue
+        new = _free_name(conn, new_given, family, sex, int(pid) * 10000 + int(uid))
+        if new.split(" ", 1)[0] != new_given:
+            conn.execute("UPDATE background_person_profiles SET given_name=?,metadata_json=json_set(metadata_json,'$.stable_name',?) "
+                         "WHERE partition_id=? AND local_uid=?", (new.split(" ", 1)[0], new, int(pid), int(uid)))
+        _rename_actor(conn, int(aid), name, new)
+        counts["actors_renamed"] += 1
+    return counts
