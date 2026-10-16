@@ -4,6 +4,7 @@ from __future__ import annotations
 import contextlib
 import os
 import sys
+import threading
 
 from mcp.server.mcpserver import MCPServer
 
@@ -14,9 +15,12 @@ mcp = MCPServer(
 )
 
 
+_CALL_LOCK = threading.Lock()  # one campaign writer at a time; also guards the global stdout redirect
+
+
 def _call(fn) -> dict:
     """Run fn(conn) with stdout redirected to stderr (stdout is the MCP protocol channel)."""
-    with contextlib.redirect_stdout(sys.stderr):
+    with _CALL_LOCK, contextlib.redirect_stdout(sys.stderr):
         try:
             from connector.campaign import connect_campaign
 
