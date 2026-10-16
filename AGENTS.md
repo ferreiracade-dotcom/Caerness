@@ -23,6 +23,8 @@ The owner now plays **only through the Claude apps (desktop and phone, Claude Pr
 - The Codex `feat/*` branches and `master`'s old player/narration layer are a **parts bin**, not a base. The engine does not model minute mechanics: Claude supplies understanding, the engine remembers and enforces what has consequences. No bespoke per-activity verbs.
 - PERF-01 and POP-01 below continue but are no longer the priority; phone numbers matter only for how long time skips take.
 
+**Latest (2026-10-16, end of day):** step 1 and the remote connector are live; owner playtests found gaps. Next agent: read `docs/superpowers/plans/2026-10-16-connector-handoff.md` first.
+
 ### Earlier streams (2026-10-09)
 
 Branches: **`master` is current.** `worldhist01a-stage1` and `pop01-phase0` are the feature branches it was fast-forwarded from (kept for history).
