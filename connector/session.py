@@ -7,8 +7,8 @@ from connector.views import compact_scene
 from engine.player import get_player
 
 RULEBOOK_PATH = Path(__file__).with_name("rulebook.md")
-HOW_TO_PLAY = """1. Check facts with scene or lookup; never rely on memory for names, numbers, places or who knows what.
-2. Consequential intentions go through act first; narrate only what it returns.
+HOW_TO_PLAY = """1. Check established facts with scene or lookup; where the engine is silent, invent plausibly and never contradict it.
+2. Consequential intentions go through act first; then write the scene, dialogue and detail around what it returns.
 3. Passing time goes through advance; the player directs significant skips.
 4. Record lasting improvised details with note.
 5. Every act, advance and note needs a fresh call_id; reuse it only to retry the same call."""

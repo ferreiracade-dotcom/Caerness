@@ -73,6 +73,22 @@ def run():
             assert any("owes the miller" in n["text"] and n["about"] == who["name"] for n in s2["notes"])
             assert "owes the miller" in json.dumps(lookup(conn, who["name"])["notes"])
             assert _j(s2) <= 4000
+
+            # What the protagonist owns and runs is in the scene (owner play check 2026-10-16).
+            from engine.civilian import create_enterprise
+            from engine.merchant import add_enterprise_staff
+            me = int(row["id"])
+            eid = create_enterprise(conn, "Test Lantern House", "service", owner_actor_id=me,
+                                    location_id=s["location"]["id"], capital=31, cash=12, debt=2)
+            add_enterprise_staff(conn, eid, who["id"], role="manager")
+            conn.commit()
+            h = compact_scene(conn)["holdings"]
+            biz = [b for b in h["businesses"] if b["name"] == "Test Lantern House"]
+            assert biz and biz[0]["capital"] == 31 and biz[0]["cash"] == 12, h
+            assert any(st["name"] == who["name"] and st["role"] == "manager" for st in biz[0]["staff"]), biz
+            lb = lookup(conn, "Test Lantern House")
+            assert lb["found"] and lb["kind"] == "business" and lb["basics"]["owner"], lb
+            assert _j(compact_scene(conn)) <= 4000
     print("connector_views_test passed")
 
 

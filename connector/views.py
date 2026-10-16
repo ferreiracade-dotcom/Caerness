@@ -46,6 +46,61 @@ def _condition(h: dict) -> str:
     return _clip(", ".join(bits), 160)
 
 
+def _num(v):
+    return None if v is None else round(float(v), 1)
+
+
+def _business(conn, e, me: int | None = None) -> dict:
+    """One business as the engine records it: kind, money, staff, rackets run through it."""
+    kind = conn.execute(
+        """SELECT a.name FROM enterprise_business_profiles p JOIN business_archetypes a ON a.id=p.archetype_id
+           WHERE p.enterprise_id=?""", (e["id"],)).fetchone()
+    staff = [{"name": r[0], "role": r[1]} for r in conn.execute(
+        """SELECT a.name,s.role FROM enterprise_staff s JOIN actors a ON a.id=s.actor_id
+           WHERE s.enterprise_id=? AND s.status='active' AND s.actor_id<>? ORDER BY s.authority DESC LIMIT 4""",
+        (e["id"], me or 0))]
+    rackets = [f"{r[0].replace('_', ' ')}: {_num(r[1])}/30 days" for r in conn.execute(
+        "SELECT racket_kind,gross_income_per_30 FROM underworld_racket_sites WHERE enterprise_id=? AND status='active'", (e["id"],))]
+    return _drop_none({"id": e["id"], "name": e["name"], "kind": kind[0] if kind else e["enterprise_kind"],
+                       "capital": _num(e["capital"]), "cash": _num(e["cash"]), "debt": _num(e["debt"]) or None,
+                       "staff": staff or None, "rackets": rackets or None})
+
+
+def _holdings(conn, me: int) -> dict:
+    """What the protagonist owns and runs: businesses, organisations led, household, personal means."""
+    businesses = [_business(conn, e, me) for e in conn.execute(
+        """SELECT * FROM civilian_enterprises WHERE status='active' AND (owner_actor_id=? OR id IN
+             (SELECT enterprise_id FROM enterprise_partners WHERE actor_id=? AND status='active')) ORDER BY capital DESC LIMIT 6""",
+        (me, me))]
+    orgs = []
+    for o in conn.execute("SELECT * FROM underworld_organizations WHERE current_leader_actor_id=? AND status='active'", (me,)):
+        people = [f"{r[0]} ({r[1]})" for r in conn.execute(
+            """SELECT a.name,p.role_kind FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id
+               WHERE p.organization_id=? AND p.actor_id<>? AND p.status='active' ORDER BY p.authority DESC LIMIT 5""", (o["id"], me))]
+        orgs.append(_drop_none({"name": o["name"], "type": o["organization_type"], "members": int(o["member_count_estimate"] or 0),
+                                "treasury": _num(o["treasury"]), "violence_capacity": _num(o["violence_capacity"]),
+                                "key_people": people or None}))
+    hh = conn.execute(
+        """SELECT h.* FROM household_members m JOIN households h ON h.id=m.household_id
+           WHERE m.actor_id=? AND m.status='active' ORDER BY m.authority DESC LIMIT 1""", (me,)).fetchone()
+    household = None
+    if hh:
+        members = [f"{r[0]} ({r[1]})" for r in conn.execute(
+            """SELECT a.name,m.role FROM household_members m JOIN actors a ON a.id=m.actor_id
+               WHERE m.household_id=? AND m.actor_id<>? AND m.status='active' LIMIT 6""", (hh["id"], me))]
+        household = _drop_none({"name": hh["name"], "wealth": _num(hh["wealth"]), "liquidity": _num(hh["liquidity"]),
+                                "members": members or None})
+    w = conn.execute("SELECT liquid_wealth,property_value,lifestyle_level FROM underworld_leader_wealth WHERE actor_id=?", (me,)).fetchone()
+    means = _drop_none({"liquid": _num(w[0]), "property": _num(w[1]), "lifestyle": _num(w[2])}) if w else None
+    scale = None
+    if businesses:
+        lo, mid, hi = conn.execute(
+            "SELECT MIN(capital),AVG(capital),MAX(capital) FROM civilian_enterprises WHERE status='active'").fetchone()
+        scale = f"engine money units; businesses in this world hold {lo:.0f}-{hi:.0f} capital, average {mid:.0f}"
+    return _drop_none({"money_scale": scale, "businesses": businesses or None, "organisations": orgs or None,
+                       "household": household, "personal_means": means})
+
+
 def compact_scene(conn) -> dict:
     """Commits (it drops its own audit packet), so never call it inside a run_once callback."""
     from engine.player import build_scene_packet
@@ -76,6 +131,7 @@ def compact_scene(conn) -> dict:
         "news": {"events": events, "rumours": rumours},
         "competence": _competence(p["professional_context"]),
         "condition": _condition(p["health_context"]),
+        "holdings": _holdings(conn, int(me["actor_id"])),
         "notes": notes[: _LIMITS["notes"]],
         "recent_operations": store.recent_operations(conn),
     })
@@ -99,8 +155,8 @@ def lookup(conn, query: str) -> dict:
     q = str(query or "").strip()
     if not q:
         return {"found": False, "candidates": []}
-    actors, locs = _find(conn, "actors", q), _find(conn, "locations", q)
-    hits = [("actor", r) for r in actors] + [("location", r) for r in locs]
+    actors, locs, biz = _find(conn, "actors", q), _find(conn, "locations", q), _find(conn, "civilian_enterprises", q)
+    hits = [("actor", r) for r in actors] + [("location", r) for r in locs] + [("business", r) for r in biz]
     if len(hits) != 1:
         exact = [h for h in hits if h[1]["name"].lower() == q.lower()]
         if len(exact) == 1:
@@ -113,6 +169,12 @@ def lookup(conn, query: str) -> dict:
         where = conn.execute("SELECT name FROM locations WHERE id=?", (r["current_location_id"],)).fetchone()
         out["basics"] = _drop_none({"type": r["actor_type"], "role": _clip(r["subtype"], 100), "status": r["status"],
                                     "last_known_place": where[0] if where else None})
+    elif kind == "business":
+        owner = conn.execute("SELECT name FROM actors WHERE id=COALESCE(?,?)", (r["owner_actor_id"], r["institution_actor_id"])).fetchone()
+        where = conn.execute("SELECT name FROM locations WHERE id=?", (r["location_id"],)).fetchone()
+        b = _business(conn, r)
+        b.pop("id"); b.pop("name")
+        out["basics"] = _drop_none({**b, "owner": owner[0] if owner else None, "place": where[0] if where else None})
     else:
         out["basics"] = _drop_none({"kind": r["kind"], "owner": r["political_owner"], "notes": _clip(r["notes"], 160)})
     pl = get_player(conn)

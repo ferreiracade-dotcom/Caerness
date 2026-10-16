@@ -24,6 +24,10 @@ def run():
         rb = load_rulebook()
         for needle in ("Close third person, past tense", "Don't switch to italic reported speech", "narrate", "after `act`"):
             assert needle in rb or needle.lower() in rb.lower(), needle
+        # Owner play check 2026-10-16: silence in the engine is not emptiness; no engine talk in the fiction.
+        for needle in ("Where the engine is silent, invent", "lived history", "Never mention the engine",
+                       "open straight into a scene"):
+            assert needle in rb, needle
         assert rb.startswith("You are the game master for Caerness.")
         spec = (ROOT / "docs/superpowers/specs/2026-10-16-claude-connector-design.md").read_text(encoding="utf-8")
         body = rb.split("\n\n", 1)[1].strip()
@@ -42,7 +46,7 @@ def run():
             for k in ("rulebook", "campaign", "protagonist", "scene", "how_to_play"):
                 assert k in r, k
             assert r["campaign"] == "resume-test" and r["protagonist"]["id"] == int(row["id"])
-            assert r["how_to_play"].count("\n") == 4 and r["how_to_play"].startswith("1. Check facts")
+            assert r["how_to_play"].count("\n") == 4 and r["how_to_play"].startswith("1. Check established facts")
             assert len(json.dumps(r, ensure_ascii=False)) <= 12000
             assert conn.execute("SELECT value FROM connector_meta WHERE key='last_resume_at'").fetchone()
     print("connector_resume_test passed")
