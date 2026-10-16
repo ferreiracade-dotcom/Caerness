@@ -15,11 +15,11 @@ A persistent low-fantasy world simulation (a murim-style martial world plus West
 
 ### Current direction (2026-10-16): play through Claude
 
-The owner now plays **only through the Claude desktop app (Windows, Claude Pro) via a local MCP connector**. Claude is the game master and prose; the engine is memory, plausibility and the living world. Requirements: `D:\Theology\Caerness_Agreed_Narrative_Design_Baseline_2026-10-16.md` (16 agreed areas) and `D:\Theology\Caerness_Repository_Audit_2026-10-16.md`.
+The owner now plays **only through the Claude apps (desktop and phone, Claude Pro) via a custom connector hosted on an Oracle Cloud Always Free VM; stdio on the PC remains for development**. Claude is the game master and prose; the engine is memory, plausibility and the living world. Requirements: `D:\Theology\Caerness_Agreed_Narrative_Design_Baseline_2026-10-16.md` (16 agreed areas) and `D:\Theology\Caerness_Repository_Audit_2026-10-16.md`.
 
 - **Active branch:** `feat/claude-connector` (from `master`).
 - **Design (approved):** `docs/superpowers/specs/2026-10-16-claude-connector-design.md`.
-- **Next work:** `docs/superpowers/plans/2026-10-16-claude-connector-step1.md` (connector + first playable scene).
+- **Next work:** `docs/superpowers/plans/2026-10-16-claude-connector-step1.md` (connector + first playable scene), then `docs/superpowers/plans/2026-10-16-remote-connector-oracle.md` (remote hosting on Oracle Cloud Always Free, OAuth login, backups).
 - The Codex `feat/*` branches and `master`'s old player/narration layer are a **parts bin**, not a base. The engine does not model minute mechanics: Claude supplies understanding, the engine remembers and enforces what has consequences. No bespoke per-activity verbs.
 - PERF-01 and POP-01 below continue but are no longer the priority; phone numbers matter only for how long time skips take.
 
@@ -58,7 +58,7 @@ Then POP-01 plans 2–4 (background store + life rules; cultivation + renewal la
 - Model circumstances by **actual means and access**, never by a group label (not all underworld or remote people are poor).
 - No recognized same-sex household unions (judged too common/unaccepted); Veinborn ≠ cultivator; aptitudes are bell-shaped; groups marry at different, canon-grounded rates.
 - **Named characters get no special treatment**: same rules at every tier (POP-01).
-- **Interface (2026-10-16): Claude desktop app via local MCP, PC only** (the earlier phone-only/local-model target is superseded). No 20–30 minute waits. Never end narration on a bare "continue" when nothing needs the player.
+- **Interface (2026-10-16): the Claude apps (desktop and phone, Claude Pro) via a custom connector hosted on an Oracle Cloud Always Free VM; stdio on the PC remains for development** (the earlier phone-only/local-model target is superseded). No 20–30 minute waits. Never end narration on a bare "continue" when nothing needs the player.
 - Don't trust README/acceptance claims: verify with data. Systems that "never happen" are usually silently disconnected (check graph reachability, join keys, endpoints) before tuning rates.
 - Commit and push when the owner asks; use branches for feature work.
 

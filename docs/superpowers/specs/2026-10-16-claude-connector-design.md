@@ -20,6 +20,7 @@ Success: the owner plays a scene in the Claude desktop app and the facts are rig
 ## 2. Decisions already made by the owner
 
 - **One interface for now:** a local connector (MCP) used from a normal chat in the **Claude desktop app on Windows**, with Claude Pro. PC only. No paid hosting. (Phone through a free tunnel may come later; out of scope.)
+  - **Superseded 2026-10-16 (owner decision):** the connector is hosted remotely on an Oracle Cloud Always Free VM and used from any Claude app including mobile, via a custom connector; implementation plan `docs/superpowers/plans/2026-10-16-remote-connector-oracle.md`. "PC only", "no paid hosting" and "phone later" no longer apply (hosting stays free). stdio remains supported for local development.
 - **Tokens as low as reasonably possible** without hurting the play.
 - **Parts bin, not a base.** Neither the Codex `feat/*` stack nor `master`'s player/narration layer is the foundation. The connector is new and built on the engine (simulation, database, promotion ladder). Useful pieces are taken from either on merit. This overrides the audit's "Gate 0: build on the stacked branch". Source-control fact (checked 2026-10-16): `feat/free-cloud-ai` is `master` plus 27 commits; the simulation engine is identical on both, and the branches differ only in the narrative/AI layer (20 engine files such as `narrative_runtime.py`, `world_capabilities.py`, `narrative_authoring.py`) plus small edits to `actions.py`, `opportunity.py` and `player.py`. So the connector builds on `master`. A part taken from the Codex branch is brought over with its dependencies, schema and tests, and the source commit is recorded. No casual single-file cherry-picks.
 - **The engine does not model minute mechanics.** That is the AI's job. Three layers (agreed in the design conversation, ~lines 3880–3940 and 9825–9902):
@@ -43,7 +44,7 @@ Success: the owner plays a scene in the Claude desktop app and the facts are rig
 3. A fresh chat continues the same campaign in the same voice with no pasting.
 4. Every agreed principle has a home: GM rule, engine, connector, or backlog.
 
-**Non-goals (now):** phone access; a 3D/visual client; a new simulation subsystem; merging the Codex stack; replacing the browser notebook; PERF-01/POP-01 work (they continue separately).
+**Non-goals (now):** a 3D/visual client; a new simulation subsystem; merging the Codex stack; replacing the browser notebook; PERF-01/POP-01 work (they continue separately).
 
 **Anti-goals (failure even if it "works"):**
 - Claude narrates a consequential success the engine never recorded, and the story carries on as if it happened.
@@ -57,7 +58,7 @@ Success: the owner plays a scene in the Claude desktop app and the facts are rig
 
 ```
 Claude desktop app (normal chat)
-   │  MCP over stdio (launched by the app)
+   │  MCP over stdio (launched by the app); the transport can also be Streamable HTTP (remote hosting, 2026-10-16)
    ▼
 caerness-mcp  (new, thin: tool definitions, turn ledger, continuity store)
    │  Python calls, one SQLite connection
