@@ -389,6 +389,8 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
     if kind in {"demand", "threat"}:
         # Pragmatic recipients may comply with a costly demand without liking the proposer.
         score += 0.20 * drives["pragmatism"] - 0.30 * drives["aggression"]
+        # Force behind the demand (0-3, set by player operations); callers that never set it are unchanged.
+        score += 0.45 * max(0.0, min(3.0, float(terms.get("coercion", 0) or 0)))
 
     proposer_name = _name(conn, proposer)
     recipient_name = _name(conn, recipient)
