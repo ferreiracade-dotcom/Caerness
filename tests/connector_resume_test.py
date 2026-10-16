@@ -61,6 +61,16 @@ def run():
             assert r["story"]["standing_rules"] == ["Never ask me to name subordinates."]
             assert "sheet_missing" not in r
             assert len(json.dumps(r, ensure_ascii=False)) <= 14000
+            # Fully loaded continuity stays inside the resume budget.
+            for i in range(3):
+                store.record(conn, "recap", "r" * 900, f"full-r{i}", threads=["t" * 300] * 12)
+            for f in store.SHEET_FIELDS:
+                store.record(conn, "sheet", "s" * 900, f"full-s-{f}", field=f)
+            for i in range(20):
+                store.record(conn, "rule", "u" * 900 + str(i), f"full-u{i}")
+            conn.commit()
+            size = len(json.dumps(resume(conn), ensure_ascii=False))
+            assert size <= 18500, size
     print("connector_resume_test passed")
 
 

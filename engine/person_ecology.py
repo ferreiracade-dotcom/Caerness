@@ -432,7 +432,7 @@ def background_person_summary(conn: sqlite3.Connection) -> dict[str, int]:
 
 def _rename_actor(conn: sqlite3.Connection, aid: int, old: str, new: str) -> None:
     # The full name also appears in household names and life-event summaries; "<name> <digits>" is someone else.
-    pattern = re.compile(re.escape(old) + r"(?! \d)")
+    pattern = re.compile(re.escape(old) + r"(?!\w)(?! \d)")
     conn.execute("UPDATE actors SET name=? WHERE id=?", (new, aid))
     for table, col in (("households", "name"), ("life_events", "summary")):
         for rid, text in conn.execute(f"SELECT id,{col} FROM {table} WHERE instr({col},?)>0", (old,)).fetchall():

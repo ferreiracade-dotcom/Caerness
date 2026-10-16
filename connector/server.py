@@ -118,7 +118,7 @@ def advance(call_id: str, days: int, purpose: str) -> dict:
 
 def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "general", subject_id: int | None = None,
          threads: list[str] | None = None, field: str | None = None) -> dict:
-    """Caerness game: record what should last. kind=detail (a fact about an actor/location/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved), sheet (protagonist's field), error (an engine or GM mistake)."""
+    """Caerness game: record what should last. kind=detail (a fact about an actor/location/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake)."""
     from connector import store
 
     request = {"kind": kind, "text": text, "subject_kind": subject_kind, "subject_id": subject_id,

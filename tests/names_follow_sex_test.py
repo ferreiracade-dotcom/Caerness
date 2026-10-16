@@ -87,6 +87,7 @@ def run():
     other=int(c.execute("INSERT INTO actors(name,actor_type,current_location_id,status) VALUES (?,'character',?,'active')",(f"{old} 70001",loc)).lastrowid)
     c.execute("INSERT INTO households(name,created_day,updated_day) VALUES (?,0,0)",(f"{old} household",))
     c.execute("INSERT INTO life_events(day,actor_id,event_kind,summary) VALUES (0,?,'other',?)",(aid,f"{old} married; {old} 70001 attended."))
+    c.execute("INSERT INTO households(name,created_day,updated_day) VALUES (?,0,0)",(f"{old}ow household",))  # "Marr" vs "Marrow"
 
     counts=repair_generated_name_sex(c)
     assert counts['actors_renamed']==1 and counts['profiles_renamed']>=1, counts
@@ -94,6 +95,7 @@ def run():
     assert new.split()[0] in pool(sex) and new.endswith(family), new
     assert c.execute("SELECT name FROM actors WHERE id=?",(other,)).fetchone()[0]==f"{old} 70001"  # a different person
     assert c.execute("SELECT 1 FROM households WHERE name=?",(f"{new} household",)).fetchone()
+    assert c.execute("SELECT 1 FROM households WHERE name=?",(f"{old}ow household",)).fetchone()  # a longer name is someone else
     assert c.execute("SELECT summary FROM life_events WHERE event_kind='other' AND summary LIKE '%70001 attended.'").fetchone()[0]==f"{new} married; {old} 70001 attended."
     assert mismatches(c)==[]
     assert sum(repair_generated_name_sex(c).values())==0  # idempotent

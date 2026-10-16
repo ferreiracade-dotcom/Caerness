@@ -92,7 +92,8 @@ def notes_for(conn, subject_kind: str, subject_id: int, limit: int = 5) -> list[
 
 NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error")
 SHEET_FIELDS = ("appearance", "voice", "temperament", "ambitions", "habits", "history", "standing")
-_CLIP = {"recap": 600, "thread": 160, "sheet": 400, "rule": 300, "error": 500}
+_CLIP = {"recap": 600, "thread": 160, "sheet": 300, "rule": 300, "error": 500}
+MAX_RULES = 8  # newest active rules returned by resume
 
 
 def _clip(text, n: int) -> str:
@@ -123,6 +124,12 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
                      "ON CONFLICT(field) DO UPDATE SET text=excluded.text,world_day=excluded.world_day,call_id=excluded.call_id",
                      (field, body, day, call_id))
         return {"saved": "sheet", "field": field, "summary": f"Sheet {field} saved"}
+    if kind == "rule" and field == "retire":
+        row = conn.execute("SELECT id FROM standing_rules WHERE status='active' AND text=? ORDER BY id DESC LIMIT 1", (body,)).fetchone()
+        if not row:
+            raise ValueError("no active rule matches that text exactly")
+        conn.execute("UPDATE standing_rules SET status='retired' WHERE id=?", (int(row[0]),))
+        return {"saved": "rule", "retired": True, "summary": f"Rule retired: {body[:80]}"}
     table = "standing_rules" if kind == "rule" else "error_reports"
     conn.execute(f"INSERT INTO {table}(world_day,text,call_id) VALUES (?,?,?)", (day, body, call_id))
     return {"saved": kind, "summary": f"{kind.capitalize()} saved: {body[:80]}"}
@@ -141,7 +148,7 @@ def continuity(conn) -> dict:
     sheet = {r["field"]: r["text"] for r in conn.execute("SELECT field,text FROM character_sheet")}
     if sheet:
         out["character_sheet"] = {f: sheet[f] for f in SHEET_FIELDS if f in sheet}
-    rules = [r["text"] for r in conn.execute("SELECT text FROM standing_rules WHERE status='active' ORDER BY id")]
+    rules = [r["text"] for r in conn.execute("SELECT text FROM standing_rules WHERE status='active' ORDER BY id DESC LIMIT ?", (MAX_RULES,))][::-1]
     if rules:
         out["standing_rules"] = rules
     return out
