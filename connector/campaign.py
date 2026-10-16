@@ -24,7 +24,15 @@ def open_campaign(name: str) -> Path:
         raise ValueError("campaign name must match [A-Za-z0-9_-]{1,40}")
     path = campaign_dir() / f"{name}.db"
     if not path.exists():
-        shutil.copy2(PACKAGED_DB, path)
+        # Copy beside the target, then rename: a crash or a second server starting at the same
+        # moment never sees a half-copied campaign under the real name.
+        tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+        try:
+            shutil.copy2(PACKAGED_DB, tmp)
+            if not path.exists():
+                os.replace(tmp, path)
+        finally:
+            tmp.unlink(missing_ok=True)
     os.environ["CAERNESS_DB_PATH"] = str(path)
     from engine.db import connect, init_db
     from connector.store import ensure_connector_schema

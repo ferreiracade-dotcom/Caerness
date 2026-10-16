@@ -33,6 +33,26 @@ def run():
         assert p2 == p
         with connect_campaign() as conn:
             assert conn.execute("SELECT value FROM connector_meta WHERE key='marker'").fetchone()[0] == "1"
+        # A copy interrupted part-way must not leave a file later starts mistake for the campaign.
+        import shutil
+        import connector.campaign as cc
+
+        real_copy = shutil.copy2
+
+        def broken_copy(src, dst, *a, **k):
+            Path(dst).write_bytes(b"partial")
+            raise OSError("disk full")
+
+        shutil.copy2 = broken_copy
+        try:
+            try:
+                cc.open_campaign("t2")
+            except OSError:
+                pass
+        finally:
+            shutil.copy2 = real_copy
+        assert not (campaign_dir() / "t2.db").exists(), "half-copied campaign left in place"
+        assert cc.open_campaign("t2").stat().st_size > 1000
         for bad in ("bad name!", "", "x" * 41, "../x"):
             try:
                 open_campaign(bad)

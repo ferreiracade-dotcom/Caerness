@@ -47,6 +47,7 @@ def _condition(h: dict) -> str:
 
 
 def compact_scene(conn) -> dict:
+    """Commits (it drops its own audit packet), so never call it inside a run_once callback."""
     from engine.player import build_scene_packet
 
     p = build_scene_packet(conn)
