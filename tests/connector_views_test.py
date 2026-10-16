@@ -85,6 +85,7 @@ def run():
             h = compact_scene(conn)["holdings"]
             biz = [b for b in h["businesses"] if b["name"] == "Test Lantern House"]
             assert biz and biz[0]["capital"] == 31 and biz[0]["cash"] == 12, h
+            assert biz[0]["standing"].startswith("capital ") and "businesses" in biz[0]["standing"], biz
             assert any(st["name"] == who["name"] and st["role"] == "manager" for st in biz[0]["staff"]), biz
             lb = lookup(conn, "Test Lantern House")
             assert lb["found"] and lb["kind"] == "business" and lb["basics"]["owner"], lb

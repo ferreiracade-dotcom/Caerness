@@ -50,6 +50,10 @@ def _num(v):
     return None if v is None else round(float(v), 1)
 
 
+def _ordinal(n: int) -> str:
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
 def _business(conn, e, me: int | None = None) -> dict:
     """One business as the engine records it: kind, money, staff, rackets run through it."""
     kind = conn.execute(
@@ -61,7 +65,11 @@ def _business(conn, e, me: int | None = None) -> dict:
         (e["id"], me or 0))]
     rackets = [f"{r[0].replace('_', ' ')}: {_num(r[1])}/30 days" for r in conn.execute(
         "SELECT racket_kind,gross_income_per_30 FROM underworld_racket_sites WHERE enterprise_id=? AND status='active'", (e["id"],))]
-    return _drop_none({"id": e["id"], "name": e["name"], "kind": kind[0] if kind else e["enterprise_kind"],
+    rank, total = conn.execute(
+        """SELECT (SELECT COUNT(*) FROM civilian_enterprises WHERE status='active' AND capital>?)+1,
+                  (SELECT COUNT(*) FROM civilian_enterprises WHERE status='active')""", (e["capital"] or 0,)).fetchone()
+    standing = f"capital {_ordinal(rank)} of {total} businesses in the world"
+    return _drop_none({"id": e["id"], "name": e["name"], "kind": kind[0] if kind else e["enterprise_kind"], "standing": standing,
                        "capital": _num(e["capital"]), "cash": _num(e["cash"]), "debt": _num(e["debt"]) or None,
                        "staff": staff or None, "rackets": rackets or None})
 
@@ -77,7 +85,16 @@ def _holdings(conn, me: int) -> dict:
         people = [f"{r[0]} ({r[1]})" for r in conn.execute(
             """SELECT a.name,p.role_kind FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id
                WHERE p.organization_id=? AND p.actor_id<>? AND p.status='active' ORDER BY p.authority DESC LIMIT 5""", (o["id"], me))]
-        orgs.append(_drop_none({"name": o["name"], "type": o["organization_type"], "members": int(o["member_count_estimate"] or 0),
+        incomes = [r[0] or 0 for r in conn.execute(
+            """SELECT (SELECT SUM(gross_income_per_30) FROM underworld_racket_sites s WHERE s.organization_id=o.id AND s.status='active')
+               FROM underworld_organizations o WHERE o.status='active'""")]
+        mine = conn.execute("SELECT COALESCE(SUM(gross_income_per_30),0) FROM underworld_racket_sites WHERE organization_id=? AND status='active'",
+                            (o["id"],)).fetchone()[0]
+        sizes = [r[0] or 0 for r in conn.execute("SELECT member_count_estimate FROM underworld_organizations WHERE status='active'")]
+        standing = (f"racket income {_ordinal(sum(1 for x in incomes if x > mine) + 1)} of {len(incomes)} outfits; "
+                    f"size {_ordinal(sum(1 for x in sizes if x > (o['member_count_estimate'] or 0)) + 1)} of {len(sizes)}")
+        orgs.append(_drop_none({"name": o["name"], "type": o["organization_type"], "standing": standing,
+                                "members": int(o["member_count_estimate"] or 0),
                                 "treasury": _num(o["treasury"]), "violence_capacity": _num(o["violence_capacity"]),
                                 "key_people": people or None}))
     hh = conn.execute(
