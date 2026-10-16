@@ -74,6 +74,9 @@ PC interpreter used so far: `"$LOCALAPPDATA/Programs/Python/Python313/python.exe
 | Engine benchmark (1/7/90-day segments on copies) | `python tools/bench_sim.py --label pc [--db SAVE]` |
 | Profile N days | `python tools/profile_days.py SAVE.db 30` |
 | Which tables grew | `python tools/table_growth.py LATE.db data/caerness.db` |
+| Update the remote connector (on the VM) | `sudo /opt/caerness/deploy/update.sh` (runbook: `connector/README.md` "Remote hosting") |
+| Restore a connector backup (on the VM) | stop `caerness`; `python -m connector.import_campaign <snapshot> --campaign NAME --replace`; start `caerness` |
+| Export a campaign for the VM (laptop) | `python tools/export_campaign.py --campaign NAME --out FILE.db` |
 | Phone zip | `python tools/package_phone.py` (→ `dist/caerness_phone.zip`; also attached to the GitHub release) |
 
 `runs/`, `dist/`, `__pycache__/`, `*.db-wal/-shm` are git-ignored. Benchmark JSON results are committed in `benchmarks/results/`.
