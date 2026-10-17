@@ -8,7 +8,7 @@ A persistent low-fantasy world simulation (a murim-style martial world plus West
 
 - Engine: Python + SQLite (`engine/`), schema migrations in `engine/db.py` (`SCHEMA_VERSION`), schema in `engine/schema.sql` (re-applied idempotently by `init_db`, so new `IF NOT EXISTS` indexes reach old saves).
 - Canon: `canon/world_bible_current.docx` (the World Bible) and seeds in `canon/` and `game/seeds/`.
-- Packaged opening world: `data/caerness.db` (schema 108, story day 0, 132 travel routes).
+- Packaged opening world: `data/caerness.db` (schema 115, story day 0, 132 travel routes; households quantified and staffed, gap 5).
 - Design: `DESIGN.md`. Specs and plans for current work: `docs/superpowers/specs/`, `docs/superpowers/plans/`.
 
 ## 2. Where work stands
@@ -88,3 +88,5 @@ PC interpreter used so far: `"$LOCALAPPDATA/Programs/Python/Python313/python.exe
 - Global staged headcounts: First ~1.65M, Temper ~350k, Third ~45k, Breach ~4k, Fifth ~350, Sixth ~40. **Hearth**: ~330k / 122.5k / 24.75k / 2.8k / 300 / 38. Outside the Hearth the social offset applies (outer professional backbone = First; mature backbone = Temper; local master = Third).
 - Canon's 40 Sixths: median age ~88, oldest 119; typical attainment early-to-mid 60s; Blake Merrin (34) is the prodigy outlier. A stable 40 needs ~7–9 new Sixths a decade; POP-01 makes rarity live in the *depth* of Sixth (Peak Sixths ~3–6 alive) and lets the summit have eras.
 - Murim genre references the owner uses: Absolute Regression, Absolute Sword Sense, Chronicles of the Demon Faction, Heavenly Demon Cultivation Simulation, Murim Psychopath, Nano Machine, Reborn as the Heavenly Demon, Reincarnation of the Fist King, Return of the Mount Hua Sect, Surviving as a Genius on Borrowed Time, Myst Might Mayhem. Caerness deliberately rejects genre reverse-ageing in looks; the planned ladder renews the Vessel instead (Breach stasis, Fifth partial, Sixth full renewal; fertility unaffected).
+
+**Gap 5 (2026-10-18):** new protagonists are proposed whole to `author` kind=protagonist and only vetoed (`engine/veto.py`, `engine/new_character.py`, `connector/creation.md`); `author` is free text with scaling instead of caps; schema 115 quantifies and staffs every household (`engine/household_staff.py`); `tools/give_lived_past.py` repairs an existing protagonist (run on the server after deploying 115, `--apply` backs up first). Not done: `tests/new_character_acceptance_test.py`.
