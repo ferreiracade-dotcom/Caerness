@@ -56,6 +56,22 @@ def _member_of(conn, actor_id: int) -> list[str]:
     return out[:4]
 
 
+def _words(conn, observer: int | None, subject: int, place, shown: str = "") -> dict:
+    """Standing in words for a scene entry: what repeats the entry's own text, or is only the default, is left out."""
+    from engine.standing import standing
+
+    w = standing(conn, observer, subject, place)
+    if w.get("station") and w["station"].lower() in shown.lower():
+        w.pop("station")
+    if w.get("knows") == "does not know you":
+        w.pop("knows")  # absent means a stranger to the protagonist
+    if w.get("knows") == "knows you" and (w.get("kin") or w.get("house")):
+        w.pop("knows")  # kin and household know him
+    if w.get("age") == "adult":
+        w.pop("age")  # absent means an ordinary adult
+    return w
+
+
 def _pending(item: dict) -> dict:
     terms = item.get("terms") or {}
     about = terms.get("purpose") or terms.get("subject") or item.get("recipient_name")
@@ -173,9 +189,17 @@ def compact_scene(conn) -> dict:
     day = int(p["world"]["day"])
     me, loc = p["player"], p["location"]
     people = [a for a in p["present_actors"] if a.get("actor_type") == "character"]
-    present = [_drop_none({"id": a["id"], "name": a["name"], "sex": _sex(conn, a["id"], day), "who": _who(conn, a),
-                           "member_of": "; ".join(_member_of(conn, a["id"])) or None})
-               for a in people[: _LIMITS["present"]]]
+    here = loc["id"]
+    present = []
+    for a in people[: _LIMITS["present"]]:
+        who, member = _who(conn, a), "; ".join(_member_of(conn, a["id"])) or None
+        present.append(_drop_none({"id": a["id"], "name": a["name"], "sex": _sex(conn, a["id"], day), "who": who,
+                                   "member_of": member, **_words(conn, int(me["actor_id"]), a["id"], here, f"{who} {member or ''}")}))
+    from engine.manners_canon import manners_for
+    you_here = _words(conn, None, int(me["actor_id"]), here)
+    you_here.pop("age", None)
+    if you_here.get("station") and you_here["station"].lower() in str(me.get("subtype") or "").lower():
+        you_here.pop("station")  # already in protagonist.role
     institutions = [{"id": a["id"], "name": a["name"], "what": _who(conn, a)}
                     for a in p["present_actors"] if a.get("actor_type") != "character"][:8]
     events = [f"day {e['day']}: {_clip(e['title'], 100)}" for e in p["known_events"][-_LIMITS["news"]:]]
@@ -194,6 +218,8 @@ def compact_scene(conn) -> dict:
         "protagonist": _drop_none({"id": me["actor_id"], "name": me["name"], "age": _age(conn, me["actor_id"], day),
                                    "role": _clip(me.get("subtype") or me.get("actor_type"), 100)}),
         "present": present,
+        "manners": manners_for(conn, here),
+        "you_here": you_here or None,
         "institutions_here": institutions,
         "pending": [_pending(i) for i in p["pending_player_interactions"][:5]],
         "news": {"events": events, "rumours": rumours},
@@ -220,7 +246,6 @@ def _find(conn, table: str, q: str):
 
 def lookup(conn, query: str) -> dict:
     from engine.player import get_player
-    from engine.relationships import relationship_exists, relationship_view
 
     q = str(query or "").strip()
     if not q:
@@ -263,9 +288,13 @@ def lookup(conn, query: str) -> dict:
             (me, like)).fetchall()
         if known:
             out["known"] = [{"text": _clip(k[0], 160), "confidence": round(float(k[1]), 2), "learned_day": k[2]} for k in known]
-        if kind == "actor" and me != out["id"] and relationship_exists(conn, me, out["id"]):
-            rel = relationship_view(conn, me, out["id"])
-            out["relationship"] = {k: round(v) for k, v in rel.items() if abs(v) >= 0.5}
+        if kind == "actor" and me != out["id"]:
+            # Bands in words replace the rounded meters (the rulebook forbade showing those anyway).
+            from engine.standing import standing
+            here = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()
+            words = standing(conn, me, out["id"], here[0] if here else None)
+            if words:
+                out["standing"] = words
     notes = store.notes_for(conn, kind, out["id"])
     if notes:
         out["notes"] = [_clip(n, 160) for n in notes]
