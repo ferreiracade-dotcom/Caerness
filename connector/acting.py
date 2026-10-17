@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from connector import store
-from engine.actions import PlayerActionProposal, shortest_route
+from engine.actions import PlayerActionProposal, explain_no_route, shortest_route
 from engine.player import get_player, sync_player_location
 from engine.presence import actor_is_present_candidate
 from engine.turns import resolve_turn_state
@@ -46,7 +46,7 @@ class StructuredActionProvider:
             route = shortest_route(conn, here, int(loc["id"])) if here is not None else None
             if route is None:
                 return PlayerActionProposal(raw_text, "travel", 1.0, needs_interpretation=True,
-                                            note="No known route to that place.", **base)
+                                            note=explain_no_route(conn, here, int(loc["id"])), **base)
             days, ids, names = route
             return PlayerActionProposal(raw_text, "travel", 1.0, duration_days=days, route_location_ids=tuple(ids),
                                         route_location_names=tuple(names), **base)

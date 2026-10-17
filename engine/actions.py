@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import heapq
+import math
 import json
 import re
 import sqlite3
@@ -105,19 +106,36 @@ def _find_pending_player_interaction(conn: sqlite3.Connection, player_id: int, t
     return rows[0] if len(rows) == 1 else None
 
 
+def _travel_graph(conn: sqlite3.Connection) -> dict[int, list[tuple[int, float]]]:
+    """Edges by travel time. travel_routes is the world's graph; location_links (if any) is a fallback;
+    a district and its parent are joined at zero cost (local movement needs no route)."""
+    graph: dict[int, list[tuple[int, float]]] = {}
+    for row in conn.execute("SELECT from_location_id,to_location_id,base_days,bidirectional FROM travel_routes WHERE status IN ('open','restricted')"):
+        a, b, days = int(row[0]), int(row[1]), float(row[2])
+        graph.setdefault(a, []).append((b, days))
+        if row[3]:
+            graph.setdefault(b, []).append((a, days))
+    try:
+        for row in conn.execute("SELECT location_a_id,location_b_id,travel_days FROM location_links WHERE active=1"):
+            a, b, days = int(row[0]), int(row[1]), float(row[2])
+            graph.setdefault(a, []).append((b, days))
+            graph.setdefault(b, []).append((a, days))
+    except sqlite3.OperationalError:
+        pass
+    for row in conn.execute("SELECT id,parent_location_id FROM locations WHERE parent_location_id IS NOT NULL"):
+        graph.setdefault(int(row[0]), []).append((int(row[1]), 0.0))
+        graph.setdefault(int(row[1]), []).append((int(row[0]), 0.0))
+    return graph
+
+
 def shortest_route(conn: sqlite3.Connection, start_location_id: int, end_location_id: int) -> tuple[int, list[int], list[str]] | None:
     if start_location_id == end_location_id:
         name = conn.execute("SELECT name FROM locations WHERE id=?", (start_location_id,)).fetchone()[0]
         return 0, [start_location_id], [str(name)]
 
-    graph: dict[int, list[tuple[int, int]]] = {}
-    for row in conn.execute("SELECT location_a_id,location_b_id,travel_days FROM location_links WHERE active=1"):
-        a, b, days = int(row[0]), int(row[1]), int(row[2])
-        graph.setdefault(a, []).append((b, days))
-        graph.setdefault(b, []).append((a, days))
-
-    pq: list[tuple[int, int]] = [(0, start_location_id)]
-    dist = {start_location_id: 0}
+    graph = _travel_graph(conn)
+    pq: list[tuple[float, int]] = [(0.0, start_location_id)]
+    dist = {start_location_id: 0.0}
     prev: dict[int, int] = {}
     while pq:
         cost, node = heapq.heappop(pq)
@@ -127,7 +145,7 @@ def shortest_route(conn: sqlite3.Connection, start_location_id: int, end_locatio
             break
         for nxt, weight in graph.get(node, []):
             new_cost = cost + weight
-            if new_cost < dist.get(nxt, 10**9):
+            if new_cost < dist.get(nxt, 1e18):
                 dist[nxt] = new_cost
                 prev[nxt] = node
                 heapq.heappush(pq, (new_cost, nxt))
@@ -142,7 +160,28 @@ def shortest_route(conn: sqlite3.Connection, start_location_id: int, end_locatio
     for lid in path:
         row = conn.execute("SELECT name FROM locations WHERE id=?", (lid,)).fetchone()
         names.append(str(row[0]) if row else f"Location {lid}")
-    return int(dist[end_location_id]), path, names
+    days = math.ceil(dist[end_location_id] - 1e-9)  # whole days; local movement stays 0
+    return int(days), path, names
+
+
+def explain_no_route(conn: sqlite3.Connection, start_location_id: int | None, end_location_id: int) -> str:
+    """Say in words why no route is known, so the GM can improvise within it rather than meet a flat refusal."""
+    dest = conn.execute("SELECT name,kind FROM locations WHERE id=?", (end_location_id,)).fetchone()
+    if dest is None:
+        return "No such place is known."
+    name, kind = str(dest[0]), str(dest[1])
+    kinds = sorted({str(r[0]) for r in conn.execute(
+        "SELECT route_kind FROM travel_routes WHERE status IN ('open','restricted') AND (from_location_id=? OR to_location_id=?)",
+        (end_location_id, end_location_id))})
+    if start_location_id is None:
+        return f"The protagonist has no recorded position, so no route to {name} can be worked out."
+    if not kinds:
+        extra = " It lies across water, and no crossing is charted." if kind in ("island group", "sea", "lake") else ""
+        return (f"No road, pass, river or sea route to {name} is charted from here or from anywhere else the engine knows."
+                f"{extra} Any way there is unrecorded: a guide, a ship or a smuggler's path would have to be found in play.")
+    way = " and ".join(kinds)
+    return (f"{name} is joined to the known map only by {way} routes, and none of them connects to where the protagonist is. "
+            f"The missing link between here and there is unrecorded; it would take a ferry, a ship or an unmapped road to bridge it.")
 
 
 class HeuristicPlayerActionProvider:
@@ -188,7 +227,7 @@ class HeuristicPlayerActionProvider:
                 return PlayerActionProposal(raw_text, "travel", 0.95, target_location_id=int(location["id"]), target_location_name=str(location["name"]), needs_interpretation=True, note="Player has no persisted current location.")
             route = shortest_route(conn, current_location_id, int(location["id"]))
             if route is None:
-                return PlayerActionProposal(raw_text, "travel", 0.92, target_location_id=int(location["id"]), target_location_name=str(location["name"]), needs_interpretation=True, note="No persisted route connects the two locations.")
+                return PlayerActionProposal(raw_text, "travel", 0.92, target_location_id=int(location["id"]), target_location_name=str(location["name"]), needs_interpretation=True, note=explain_no_route(conn, current_location_id, int(location["id"])))
             days, ids, names = route
             return PlayerActionProposal(
                 raw_text, "travel", 0.99,
