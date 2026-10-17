@@ -8,6 +8,7 @@ from connector.views import compact_scene
 from engine.player import get_player
 
 RULEBOOK_PATH = Path(__file__).with_name("rulebook.md")
+CREATION_PATH = Path(__file__).with_name("creation.md")
 HOW_TO_PLAY = """1. Check established facts with scene or lookup, and the setting with lore; where the engine is silent, invent plausibly and never contradict it.
 2. Consequential intentions go through act first (pay, hire, lend, demand, attack, trade, order, or the scene actions); then write the scene, dialogue and detail around what it returns.
 3. Passing time goes through advance; the player directs significant skips.
@@ -21,11 +22,14 @@ def load_rulebook() -> str:
     return RULEBOOK_PATH.read_text(encoding="utf-8")
 
 
+def load_creation() -> str:
+    return CREATION_PATH.read_text(encoding="utf-8")
+
+
 def resume(conn) -> dict:
     player = get_player(conn)
-    if not player:
-        return {"needs_setup": True,
-                "how": 'Run: python connector/setup_campaign.py --campaign NAME --actor "Full Name"'}
+    if not player:  # a new campaign: design the protagonist with the player (creation text is returned only now)
+        return {"needs_character": True, "creation": load_creation(), "rulebook": load_rulebook()}
     scene = compact_scene(conn)
     conn.execute("INSERT INTO connector_meta(key,value) VALUES ('last_resume_at',datetime('now')) "
                  "ON CONFLICT(key) DO UPDATE SET value=excluded.value")

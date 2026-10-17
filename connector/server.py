@@ -133,7 +133,7 @@ def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "gen
 
 
 def author(call_id: str, kind: str, details: dict | None = None) -> dict:
-    """Caerness game: make something new real. kind: person (sex; age, work, stage, name, ties, wants, from_elsewhere), business, organisation, rumour. The engine decides whether it fits; refusals say why."""
+    """Caerness game: make something new real. kind is free text: person (age, work, name, stage, ties as {actor_id, as: relation in words}, wants, from_elsewhere; sex optional), business (name, trade, amount), organisation (name, type, members), rumour (text, spread), or protagonist (a whole proposal when the campaign has none; see the creation text). The engine only vetoes contradictions, scales down what the place cannot supply (scaled_down) and fills the rest; a refusal names the clash and has a reason_kind."""
     from connector.authoring import author as _author
     return _call(lambda c: _author(c, call_id, kind, details), "author")
 

@@ -39,7 +39,8 @@ def run():
         with connect() as conn:
             ensure_connector_schema(conn)
             r = resume(conn)
-            assert r == {"needs_setup": True, "how": r["how"]} and "setup_campaign.py" in r["how"]
+            assert set(r) == {"needs_character", "creation", "rulebook"} and r["needs_character"] is True, set(r)
+            assert 0 < len(r["creation"]) <= 1800 and "kind=\"protagonist\"" in r["creation"] and r["rulebook"].startswith("You are the game master")
             row = conn.execute(
                 "SELECT id FROM actors WHERE actor_type='character' AND current_location_id IS NOT NULL ORDER BY id LIMIT 1").fetchone()
             set_player(conn, int(row["id"]), campaign_name="resume-test")

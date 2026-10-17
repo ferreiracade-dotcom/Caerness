@@ -368,7 +368,7 @@ def _log(conn, me, title, summary, severity: int = 1):
 def _found(conn, me, intent, f, res, targets, committed, days, call_id) -> dict:
     """Founding something he owns belongs to the new-character work; here it is only planned, with no money taken."""
     out = _commit(conn, me, intent, {**f, "resources": {}}, {}, targets, committed, days, "plan")
-    out["summary"] = "Setting something up under his own name is only planned for now; nothing was spent. " + out["summary"]
+    out["summary"] = "Founding something new under his own name is done with author (a business or outfit in proportion to the place, paid from his purse); here it is only planned and nothing was spent. " + out["summary"]
     out["status"] = "partial"
     return out
 

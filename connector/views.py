@@ -5,7 +5,7 @@ import json
 
 from connector import store
 
-_LIMITS = {"present": 12, "news": 5, "competence": 6, "notes": 6, "underworld": 2}
+_LIMITS = {"present": 5, "news": 5, "competence": 6, "notes": 6, "underworld": 2}
 
 
 def _clip(text, n: int) -> str:
@@ -73,13 +73,18 @@ def _town_sample(conn, people: list, me: int, limit: int) -> list:
     """A settlement-wide scene is the town. Underworld figures are few among a town's people, so beyond a couple
     (unless they know the protagonist or are his own people) they stay out of the list."""
     crim = {r[0] for r in conn.execute("SELECT actor_id FROM underworld_personnel WHERE status='active'")}
-    if not crim.intersection(a["id"] for a in people):
-        return people[:limit]
     mine = {r[0] for r in conn.execute(
         """SELECT p.actor_id FROM underworld_personnel p WHERE p.status='active' AND p.organization_id IN
            (SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active')""", (me,))}
     known = {r[0] for r in conn.execute(
         "SELECT actor_b_id FROM relationships WHERE actor_a_id=? UNION SELECT actor_a_id FROM relationships WHERE actor_b_id=?", (me, me))}
+    house = {r[0] for r in conn.execute(
+        """SELECT m.actor_id FROM household_members m WHERE m.status='active' AND m.household_id IN
+           (SELECT household_id FROM household_members WHERE actor_id=? AND status='active')""", (me,))}
+    close = mine | known | house
+    people = sorted(people, key=lambda a: a["id"] not in close)  # his own people, kin and acquaintances come first (stable otherwise)
+    if not crim.intersection(a["id"] for a in people):
+        return people[:limit]
     out, strangers = [], 0
     for a in people:
         if a["id"] in crim and a["id"] not in mine and a["id"] not in known:
