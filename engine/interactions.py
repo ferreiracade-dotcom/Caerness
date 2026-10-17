@@ -350,6 +350,43 @@ def _depth(conn: sqlite3.Connection, interaction: sqlite3.Row) -> int:
     return depth
 
 
+_STANDING_CAP = 0.6
+
+
+def _standing_term(conn: sqlite3.Connection, proposer: int, recipient: int, kind: str, day: int, interaction_id: int) -> float:
+    """What the recipient's view of the proposer adds to the score: respect, felt fear, kin, household
+    authority, and how the proposer has treated them.  Obligations run both ways (kin or servants are never
+    simply obedient), and the total is clamped so standing never decides alone."""
+    from .standing import _children, _parents, _siblings, _spouses
+
+    r = relationship_view(conn, recipient, proposer)  # the recipient's feeling toward the proposer
+    t = 0.0
+    if kind in {"request", "offer"}:
+        t += 0.20 * r["respect"] / 100.0
+    if kind in {"demand", "threat"}:
+        t += 0.25 * max(0.0, r["fear"]) / 100.0
+    is_kin = (proposer in _parents(conn, recipient) or proposer in _children(conn, recipient)
+              or proposer in _siblings(conn, recipient) or proposer in _spouses(conn, recipient))
+    if is_kin and kind in {"request", "offer"}:
+        t += -0.15 if r["resentment"] >= 50 else 0.30
+    if not is_kin and kind in {"request", "demand"}:
+        authority = conn.execute(
+            """SELECT 1 FROM households h WHERE h.head_actor_id=? AND h.status='active' AND (
+                   EXISTS (SELECT 1 FROM household_service_terms s WHERE s.household_id=h.id AND s.actor_id=? AND s.status='active')
+                OR EXISTS (SELECT 1 FROM household_members m WHERE m.household_id=h.id AND m.actor_id=? AND m.status='active' AND m.role='member'))
+               LIMIT 1""", (proposer, recipient, recipient)).fetchone()
+        if authority:
+            t += 0.25 * max(0.0, 1.0 - max(0.0, r["resentment"]) / 100.0)
+    harmed = conn.execute(
+        """SELECT (SELECT COUNT(*) FROM interactions WHERE proposer_actor_id=? AND recipient_actor_id=? AND id<>?
+                      AND interaction_type IN ('threat','demand') AND status<>'pending' AND created_day>=?)
+                + (SELECT COUNT(*) FROM harm_incidents h JOIN events e ON h.source_kind='player_operation' AND e.id=h.source_ref_id
+                      WHERE e.source_actor_id=? AND h.actor_id=? AND h.day>=?)""",
+        (proposer, recipient, interaction_id, day - 365, proposer, recipient, day - 365)).fetchone()[0]
+    t -= min(0.4, 0.10 * int(harmed or 0))
+    return max(-_STANDING_CAP, min(_STANDING_CAP, t))
+
+
 def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: int) -> InteractionResult:
     proposer = int(interaction["proposer_actor_id"])
     recipient = int(interaction["recipient_actor_id"])
@@ -384,6 +421,7 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
         + 0.30 * incentive
         - 0.30 * burden
         + rng.uniform(-0.25, 0.25)
+        + _standing_term(conn, proposer, recipient, kind, day, int(interaction["id"]))
     )
 
     if kind in {"demand", "threat"}:
