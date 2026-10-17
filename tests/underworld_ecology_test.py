@@ -73,7 +73,35 @@ def run():
         assert {"River Quays", "Sea Quays"} <= set(zones(toll)), zones(toll)
         assert len(orgs(toll, "gang")) >= 2, len(orgs(toll, "gang"))
         spec_n = len([o for o in orgs(toll) if o["organization_type"] in ("criminal_enterprise", "network")]) - 1  # minus Greyhook
-        assert spec_n >= 4, spec_n
+        assert spec_n >= 8, spec_n  # canon: "dozens of specialist networks" in Toll's Reach
+
+        # Review 6 (owner ruling): women are clearly less likely in positions of power, the violent underworld least of all.
+        def male_share(rows):
+            sexes = [r[0] for r in rows if r[0] in ("female", "male")]
+            return sum(1 for x in sexes if x == "male") / max(1, len(sexes)), len(sexes)
+        live = "('active','strained','fragmented')"
+        gang_sex = c.execute(f"""SELECT lp.demographic_sex FROM underworld_organizations o JOIN actor_life_profiles lp ON lp.actor_id=o.current_leader_actor_id
+                                 WHERE o.status IN {live} AND o.organization_type='gang' AND o.metadata_json LIKE '%street_gang%'""").fetchall()
+        spec_sex = c.execute(f"""SELECT lp.demographic_sex FROM underworld_organizations o JOIN actor_life_profiles lp ON lp.actor_id=o.current_leader_actor_id
+                                 WHERE o.status IN {live} AND o.metadata_json LIKE '%"role": "specialist"%'""").fetchall()
+        gm, gn = male_share(gang_sex); sm, sn = male_share(spec_sex)
+        assert gn >= 20 and gm >= .85, ("gang bosses male share", gm, gn)
+        assert sn >= 100 and sm >= .78, ("specialist bosses male share", sm, sn)
+
+        # Review 8: no digits in outfit or crew names; no two outfits in a settlement share an outfit or crew name; specialists carry local surnames.
+        digits = c.execute("SELECT name FROM underworld_organizations WHERE name GLOB '*[0-9]*' UNION SELECT name FROM underworld_crews WHERE name GLOB '*[0-9]*'").fetchall()
+        assert not digits, [r[0] for r in digits][:8]
+        dup = c.execute(f"""SELECT o.primary_location_id,x.name,COUNT(*) FROM (SELECT organization_id,name FROM underworld_crews) x JOIN underworld_organizations o ON o.id=x.organization_id
+                            WHERE o.status IN {live} GROUP BY 1,2 HAVING COUNT(*)>1""").fetchall()
+        assert not dup, [tuple(r) for r in dup][:5]
+        dup = c.execute(f"SELECT primary_location_id,name,COUNT(*) FROM underworld_organizations WHERE status IN {live} GROUP BY 1,2 HAVING COUNT(*)>1").fetchall()
+        assert not dup, [tuple(r) for r in dup][:5]
+        stranger = 0
+        for r in c.execute(f"""SELECT o.name,a.name boss FROM underworld_organizations o JOIN actors a ON a.id=o.current_leader_actor_id
+                               WHERE o.status IN {live} AND o.metadata_json LIKE '%"role": "specialist"%'"""):
+            if r["boss"].split()[-1] not in r["name"]:
+                stranger += 1
+        assert stranger == 0, stranger
 
         # Aldergate: money and paperwork, Tallow holds fronts not ground.
         tl = canon_org("Tallow Family")

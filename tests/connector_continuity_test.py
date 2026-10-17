@@ -58,6 +58,25 @@ def run():
             assert len(store.record(conn, "sheet", "z" * 900, "s3", field="voice") and store.continuity(conn)["character_sheet"]["voice"]) <= 300
             store.record(conn, "error", "Engine placed Vera in Rivermoor.", "e1")
             assert conn.execute("SELECT status FROM error_reports").fetchone()[0] == "open"
+            # Review 3: open error reports reach the GM as `corrections` (newest first, at most 5, text only), and note closes them.
+            assert store.continuity(conn)["corrections"] == ["Engine placed Vera in Rivermoor."], store.continuity(conn)
+            for i in range(6):
+                store.record(conn, "error", f"Flagged {i}", f"e{i + 2}")
+            assert store.continuity(conn)["corrections"] == [f"Flagged {i}" for i in (5, 4, 3, 2, 1)], store.continuity(conn)["corrections"]
+            done = store.record(conn, "error", "Flagged 5", "e20", field="fixed")
+            assert done["fixed"] is True and "Flagged 5" not in store.continuity(conn)["corrections"], done
+            assert store.continuity(conn)["corrections"][0] == "Flagged 4"
+            rid = conn.execute("SELECT id FROM error_reports WHERE text='Flagged 4'").fetchone()[0]
+            store.record(conn, "error", str(rid), "e21", field="fixed")  # by id as well as by text
+            assert conn.execute("SELECT status FROM error_reports WHERE id=?", (rid,)).fetchone()[0] == "fixed"
+            try:
+                store.record(conn, "error", "no such report", "e22", field="fixed"); raise AssertionError("accepted")
+            except ValueError as e:
+                assert "no open error report" in str(e), e
+            for t in ("Flagged 3", "Flagged 2", "Flagged 1", "Flagged 0", "Engine placed Vera in Rivermoor."):
+                store.record(conn, "error", t, "e-" + t, field="fixed")
+            assert "corrections" not in store.continuity(conn)
+            store.record(conn, "error", "Engine placed Vera in Rivermoor.", "e1b")
             assert store.record(conn, "detail", "limps", "d1", subject_kind="actor", subject_id=me)["subject_kind"] == "actor"
             for bad in (lambda: store.record(conn, "diary", "x", "b1"),
                         lambda: store.record(conn, "sheet", "x", "b2", field="shoe size")):

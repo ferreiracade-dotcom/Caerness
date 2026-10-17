@@ -64,6 +64,14 @@ def run():
             assert r["story"]["live_thread"]["open_threads"] == ["Rooks probing"], r["story"]
             assert r["story"]["standing_rules"] == ["Never ask me to name subordinates."]
             assert "sheet_missing" not in r
+            assert "corrections" not in r["story"]
+            store.record(conn, "error", "The ferry note names a gang that no longer exists.", "rr4")
+            conn.commit()
+            assert resume(conn)["story"]["corrections"] == ["The ferry note names a gang that no longer exists."]
+            assert "If `corrections` lists something" in r["rulebook"]
+            store.record(conn, "error", "The ferry note names a gang that no longer exists.", "rr5", field="fixed")
+            conn.commit()
+            assert "corrections" not in resume(conn)["story"]
             assert len(json.dumps(r, ensure_ascii=False)) <= 15500
             # Fully loaded continuity stays inside the resume budget.
             for i in range(3):

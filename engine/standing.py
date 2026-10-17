@@ -24,8 +24,29 @@ STAGE_READINGS = (
     "a continental anomaly",
 )
 
+# The first three steps for a cultivator with no martial life (canon [474]-[476], [5886]-[5887]: Veinborn, cultivator,
+# martial artist and Churned are separate labels; a physician or clerk is not a combatant and has no healer ladder of her own).
+NONMARTIAL_READINGS = (
+    "lightly cultivated",
+    "a practised cultivator",
+    "a well-cultivated vessel",
+)
+# Beyond Third a non-martial cultivator is unheard of; recorded so, the person reads as a martial artist.
+_NONMARTIAL_MAX_STAGE = 2
+_MARTIAL_INST = re.compile(r"sect|clan|house|martial|military|school|order|service family", re.I)
+_MARTIAL_WORK = re.compile(r"soldier|guard|warden|knight|fighter|champion|martial|mercenary|captain|marshal|sergeant|veteran|duellist|duelist", re.I)
+_CHURN_INST = ("Concord", "Undertow", "Unsworn", "Long Road")
+
 _AGE_BANDS = ((12, "child"), (17, "youth"), (29, "young adult"), (44, "adult"), (59, "middle-aged"), (74, "elderly"))
-_VISIBLE_RANK = re.compile(r"\b(head|master|elder|champion|captain|teacher|general|commander|lord|magistrate|abbot|chief|steward)\b", re.I)
+# A rank is read off the person only when the title is a real one. "Master" and "head" are martial and house
+# titles (sect, clan, house, coven, order ...); in a trade title ("harbour master", "head cook") they are not ranks.
+_MARTIAL_KIND = re.compile(r"sect|clan|house|coven|order|league|union|martial|military|school|federation|service family|royal|dynasty|council", re.I)
+_MARTIAL_TITLE = re.compile(r"\b(head|master|elder|champion|captain|teacher|leader|patriarch|matriarch)\b", re.I)
+_OFFICE_TITLE = re.compile(r"\b(general|admiral|commander|lord|lady|magistrate|abbot|abbess|bishop|archbishop|chancellor|prince|princess|king|queen)\b", re.I)
+_TRADE_BEFORE = {"harbour", "harbor", "dock", "port", "quay", "ship", "stable", "kitchen", "yard", "wharf", "quarter", "post", "toll",
+                 "bath", "band", "ring", "fight", "game", "dance", "brew", "work", "bridge", "gate", "town", "tax", "ware"}
+_TRADE_AFTER = {"cook", "chef", "baker", "brewer", "groom", "gardener", "clerk", "servant", "maid", "porter", "nurse", "gatekeeper",
+                "relative", "butcher", "carter", "mason", "smith", "boy", "girl", "man", "woman"}
 _HOUSE_ROLES = {"steward", "clerk", "retainer", "guard", "tutor", "apprentice"}
 _FAME = 60.0
 
@@ -79,17 +100,71 @@ def _clean(text: str) -> str:
     return " ".join(str(text or "").replace("_", " ").split()).rstrip(". ")
 
 
-def _station(conn: sqlite3.Connection, aid: int) -> str | None:
+def _is_rank(role: str, institution_kind: str | None) -> bool:
+    """A real rank: a martial or house title in a martial or house institution, or a great office; never a trade title."""
+    words = re.findall(r"[a-z'-]+", role.lower())
+    pattern = _MARTIAL_TITLE if institution_kind is None or _MARTIAL_KIND.search(institution_kind) else None
+    for rx in (pattern, _OFFICE_TITLE):
+        if rx is None:
+            continue
+        for m in rx.finditer(role):
+            before = re.findall(r"[a-z'-]+", role[:m.start()].lower())[-1:]
+            after = re.findall(r"[a-z'-]+", role[m.end():].lower())[:1]
+            if not (before and before[0] in _TRADE_BEFORE) and not (after and after[0] in _TRADE_AFTER):
+                return True
+    return False
+
+
+def _martial_context(conn: sqlite3.Connection, aid: int) -> tuple[bool, bool]:
+    """(martial artist, Churned): martial by membership of a martial institution, a fighting trade or an underworld outfit;
+    Churned only through a Churn institution or a martial house of the Hearth."""
+    martial = churned = False
+    for name, kind, loc in conn.execute(
+            """SELECT i.name,i.subtype,COALESCE(i.current_location_id,i.home_location_id) FROM institution_memberships m
+               JOIN actors i ON i.id=m.institution_actor_id WHERE m.member_actor_id=? AND m.status='active'""", (aid,)):
+        if any(n in str(name) for n in _CHURN_INST):
+            martial = churned = True
+        elif _MARTIAL_INST.search(str(kind or "")):
+            martial = True
+            churned = churned or bool(loc is not None and location_in_hearth(conn, loc))
+    if not martial:
+        r = conn.execute("SELECT subtype FROM actors WHERE id=?", (aid,)).fetchone()
+        martial = bool(r and _MARTIAL_WORK.search(str(r[0] or ""))) or bool(conn.execute(
+            "SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active'", (aid,)).fetchone())
+    return martial, churned
+
+
+def _reading(conn: sqlite3.Connection, aid: int, idx: int, stage_idx: int) -> str:
+    martial, churned = _martial_context(conn, aid)
+    idx = min(idx, len(STAGE_READINGS) - 1)
+    if not martial and stage_idx <= _NONMARTIAL_MAX_STAGE:
+        return NONMARTIAL_READINGS[min(idx, len(NONMARTIAL_READINGS) - 1)]
+    word = STAGE_READINGS[idx]
+    if not churned:
+        return word
+    return "a Churned " + word[2:] if word.startswith("a ") else "Churned, " + word
+
+
+def _station(conn: sqlite3.Connection, aid: int) -> tuple[str | None, bool]:
+    """How the room reads someone (public roles only) and whether that is a visible rank. Secret roles, such as
+    an underworld command, are never read off a person."""
     r = conn.execute("SELECT i.name FROM political_polities p JOIN actors i ON i.id=p.institution_actor_id "
                      "WHERE p.ruler_actor_id=? AND p.status='active' LIMIT 1", (aid,)).fetchone()
     if r:
-        return f"ruler of {r[0]}"
-    r = conn.execute("SELECT role_text,membership_kind FROM institution_memberships WHERE member_actor_id=? AND status='active' "
-                     "AND COALESCE(role_text,'')<>'' ORDER BY id LIMIT 1", (aid,)).fetchone()
+        return f"ruler of {r[0]}", True
+    r = conn.execute("SELECT m.role_text,i.subtype FROM institution_memberships m JOIN actors i ON i.id=m.institution_actor_id "
+                     "WHERE m.member_actor_id=? AND m.status='active' AND COALESCE(m.role_text,'')<>'' ORDER BY m.id LIMIT 1", (aid,)).fetchone()
     if r:
-        return _clean(r[0])[:60]
-    r = conn.execute("SELECT role_kind FROM underworld_personnel WHERE actor_id=? AND status='active' ORDER BY authority DESC LIMIT 1", (aid,)).fetchone()
-    return _clean(r[0]) if r else None
+        role = _clean(r[0])[:60]
+        return role, _is_rank(role, r[1])
+    r = conn.execute("SELECT h.name,h.id FROM household_members m JOIN households h ON h.id=m.household_id "
+                     "WHERE m.actor_id=? AND m.role='head' AND m.status='active' ORDER BY h.id LIMIT 1", (aid,)).fetchone()
+    if r:
+        return f"head of the {_household_family(conn, int(r[1]), aid)} household", False
+    r = conn.execute("SELECT name FROM civilian_enterprises WHERE owner_actor_id=? AND status IN ('active','strained') ORDER BY capital DESC LIMIT 1", (aid,)).fetchone()
+    if r:
+        return f"owner of {_clean(r[0])}"[:60], False
+    return None, False
 
 
 def _is_famous(conn: sqlite3.Connection, aid: int) -> bool:
@@ -121,8 +196,23 @@ def _spouses(conn, aid):
     return _links(conn, aid, ("spouse",))
 
 
+def _sibling_map(conn, aid) -> dict[int, bool]:
+    """Sibling -> True if full. Linked siblings count, and so does anyone sharing a parent link (half if only one shared)."""
+    out = {b: True for b in _links(conn, aid, ("sibling",))}
+    mine = _parents(conn, aid)
+    shared: dict[int, int] = {}
+    for par in mine:
+        for kid in _children(conn, par):
+            if kid != aid:
+                shared[kid] = shared.get(kid, 0) + 1
+    for kid, n in shared.items():
+        if kid not in out:
+            out[kid] = n >= 2 or len(mine) == 1 and len(_parents(conn, kid)) == 1
+    return out
+
+
 def _siblings(conn, aid):
-    return _links(conn, aid, ("sibling",))
+    return list(_sibling_map(conn, aid))
 
 
 def _noun(sex: str | None, female: str, male: str, neutral: str) -> str:
@@ -138,10 +228,12 @@ def _kin(conn: sqlite3.Connection, observer: int, subject: int) -> str | None:
         return "your " + _noun(ssex, "mother", "father", "parent")
     if subject in _children(conn, observer):
         return "your " + _noun(ssex, "daughter", "son", "child")
-    if subject in _siblings(conn, observer):
+    sibs = _sibling_map(conn, observer)
+    if subject in sibs:
         ob, sb = _birth(conn, observer), _birth(conn, subject)
         rel = "" if ob is None or sb is None or ob == sb else ("elder " if sb < ob else "younger ")
-        return f"your {rel}" + _noun(ssex, "sister", "brother", "sibling")
+        half = "" if sibs[subject] else "half-"
+        return f"your {rel}{half}" + _noun(ssex, "sister", "brother", "sibling")
     for sp in _spouses(conn, observer):
         spw = _noun(_sex(conn, sp), "wife", "husband", "spouse")
         if subject in _parents(conn, sp):
@@ -160,9 +252,19 @@ def _kin(conn: sqlite3.Connection, observer: int, subject: int) -> str | None:
 
 # ---- household -----------------------------------------------------------------------------------------
 
-def _household_word(name: str, actor_name: str) -> str:
-    last = str(actor_name or "").split()[-1:] or ["local"]
-    return f"the {last[0]} household"
+def _household_family(conn: sqlite3.Connection, household_id: int, fallback: int | None = None) -> str:
+    """The family a household goes by: its head's family name."""
+    r = conn.execute("SELECT a.name FROM household_members m JOIN actors a ON a.id=m.actor_id WHERE m.household_id=? AND m.role='head' "
+                     "AND m.status='active' LIMIT 1", (household_id,)).fetchone()
+    if not r:
+        r = conn.execute("SELECT a.name FROM households h JOIN actors a ON a.id=h.head_actor_id WHERE h.id=?", (household_id,)).fetchone()
+    if not r and fallback is not None:
+        r = conn.execute("SELECT name FROM actors WHERE id=?", (fallback,)).fetchone()
+    return (str(r[0]).split()[-1:] or ["local"])[0] if r else "local"
+
+
+def _household_word(conn: sqlite3.Connection, household_id: int) -> str:
+    return f"the {_household_family(conn, household_id)} household"
 
 
 def _house(conn: sqlite3.Connection, observer: int | None, subject: int) -> str | None:
@@ -176,8 +278,7 @@ def _house(conn: sqlite3.Connection, observer: int | None, subject: int) -> str 
             (term["household_id"], observer)).fetchone())
         if mine:
             return f"your {role}" if role in _HOUSE_ROLES else "a servant of your house"
-        name = conn.execute("SELECT name FROM actors WHERE id=?", (subject,)).fetchone()[0]
-        return f"{'servant' if role == 'other' else role} of {_household_word('', name)}"
+        return f"{'servant' if role == 'other' else role} of {_household_word(conn, int(term['household_id']))}"
     return None
 
 
@@ -219,7 +320,7 @@ def standing(conn: sqlite3.Connection, observer_id: int | None, subject_id: int,
     if age:
         out["age"] = age
 
-    station = _station(conn, subj)
+    station, ranked = _station(conn, subj)
     kin = _kin(conn, obs, subj) if obs is not None and obs != subj else None
     house = _house(conn, obs, subj)
     toward, fam = (None, 0.0)
@@ -227,12 +328,12 @@ def standing(conn: sqlite3.Connection, observer_id: int | None, subject_id: int,
         toward, fam = _toward(conn, subj, obs)
 
     # Bearing: only where the Stage is visible or known, since Presence is not a scanner [352].
-    visible = bool(station and (_VISIBLE_RANK.search(station) or station.startswith("ruler of")))
+    visible = bool(station and ranked)
     known = bool(kin or house or fam >= 30 or _is_famous(conn, subj))
     stage = conn.execute("SELECT current_stage FROM cultivation_profiles WHERE actor_id=?", (subj,)).fetchone()
     if stage and stage[0] in STAGES and (visible or known):
         idx = STAGES.index(stage[0]) + (0 if place_id is None or location_in_hearth(conn, place_id) else 1)
-        out["bearing"] = STAGE_READINGS[min(idx, len(STAGE_READINGS) - 1)]
+        out["bearing"] = _reading(conn, subj, idx, STAGES.index(stage[0]))
     if station:
         out["station"] = station
     if kin:

@@ -62,7 +62,10 @@ def run():
             assert r["found"] is True and r["kind"] == "actor" and r["name"] == who["name"]
             assert _j(r) <= 2000, _j(r)
             assert "truth_event_id" not in json.dumps(r)
-            assert lookup(conn, str(who["id"]))["id"] == who["id"]
+            # A bare number is an id in every table, so use a person whose id no place or business shares.
+            top = max(conn.execute("SELECT MAX(id) FROM locations").fetchone()[0], conn.execute("SELECT MAX(id) FROM civilian_enterprises").fetchone()[0])
+            far_id = next(i for i in range(top + 1, top + 5000) if conn.execute("SELECT 1 FROM actors WHERE id=?", (i,)).fetchone())
+            assert lookup(conn, str(far_id))["id"] == far_id
             assert lookup(conn, "zzzz-nobody") == {"found": False, "candidates": []}
             part = lookup(conn, who["name"].split()[0][:4])
             assert part["found"] in (True, False)
@@ -165,6 +168,55 @@ def run():
             assert not any(c.isdigit() for c in json.dumps(lk.get("standing", {}))), lk["standing"]
             assert not any(c.isdigit() for c in json.dumps(s3.get("you_here", {})))
             print("scene bytes", _j(s3), "per-person max", max(len(json.dumps(p, ensure_ascii=False)) for p in s3["present"]))
+
+            # Review 11: how the room reads him shows public roles only; an underworld command is secret.
+            from engine.underworld import create_underworld_organization
+            from engine.underworld_rebuild import create_personnel
+            org = create_underworld_organization(conn, "review11:mine", "gang", name="Review Eleven Hands", founder_actor_id=me,
+                                                 primary_location_id=s["location"]["id"], member_count_estimate=6)
+            create_personnel(conn, org, role_kind="boss", actor_id=me)
+            conn.execute("DELETE FROM institution_memberships WHERE member_actor_id=?", (me,))
+            conn.execute("UPDATE actors SET subtype='merchant' WHERE id=?", (me,))
+            conn.commit()
+            yh = compact_scene(conn)["you_here"]
+            assert "boss" not in json.dumps(yh).lower(), yh
+
+            # Review 1: a settlement-wide scene is the town, not its gangsters (Toll's Reach 7 of 7 were bosses and crew leaders).
+            toll = int(conn.execute("SELECT id FROM locations WHERE name='Toll’s Reach'").fetchone()[0])
+            conn.execute("DELETE FROM underworld_personnel WHERE actor_id=?", (me,))
+            local = int(conn.execute("""SELECT a.id FROM actors a WHERE a.actor_type='character' AND a.status='active' AND a.home_location_id=? AND a.id<>?
+                                        AND NOT EXISTS (SELECT 1 FROM underworld_personnel p WHERE p.actor_id=a.id) ORDER BY a.id LIMIT 1""", (toll, me)).fetchone()[0])
+            set_player(conn, local)
+            conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (toll, local))
+            conn.commit()
+            crim = {r[0] for r in conn.execute("SELECT actor_id FROM underworld_personnel WHERE status='active'")}
+            sc = compact_scene(conn)
+            n_crim = sum(1 for p in sc["present"] if p["id"] in crim)
+            assert sc["location"]["id"] == toll and n_crim <= 2, (n_crim, len(sc["present"]))
+            # ...while his own outfit still shows up.
+            from engine.presence import add_presence_habit
+            mine = create_underworld_organization(conn, "review1:mine", "gang", name="Review One Hands", founder_actor_id=local,
+                                                  primary_location_id=toll, member_count_estimate=8)
+            create_personnel(conn, mine, role_kind="boss", actor_id=local)
+            crew = [int(r[0]) for r in conn.execute("""SELECT id FROM actors WHERE actor_type='character' AND status='active' AND id NOT IN (?,?)
+                       AND id NOT IN (SELECT actor_id FROM underworld_personnel) ORDER BY id DESC LIMIT 4""", (me, local))]
+            assert len(crew) == 4, crew
+            for a_ in crew:
+                conn.execute("UPDATE actors SET home_location_id=?,current_location_id=? WHERE id=?", (toll, toll, a_))
+                create_personnel(conn, mine, role_kind="member", actor_id=a_)
+                add_presence_habit(conn, a_, toll, habit_kind="work", weight=1.0, confidence=1.0)
+            conn.commit()
+            sc = compact_scene(conn)
+            assert {p["id"] for p in sc["present"]} >= set(crew), ([p["id"] for p in sc["present"]], crew)
+
+            # Review 7: networks have presence, not a seat; the scene and the lookup both show where they are.
+            inst = {i["name"]: i for i in compact_scene(conn)["institutions_here"]}
+            assert "Red Board" in inst and "present" in inst["Red Board"]["what"], inst
+            assert "Cormorants" in inst, list(inst)
+            nl = lookup(conn, "Red Board")
+            assert nl["found"] and any(x.startswith("Toll") and "present" in x for x in nl["basics"]["present_in"]), nl
+            assert any(x.startswith("Cairnholt") for x in nl["basics"]["present_in"]), nl
+            assert _j(compact_scene(conn)) <= 4000, _j(compact_scene(conn))
     print("connector_views_test passed")
 
 

@@ -165,6 +165,8 @@ def run_orgs():
 
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         conn, me, place = _open(tmp, "o.db", pop=400)
+        # The town was shrunk to 400 people: whatever the seeded world put there no longer exists, so the cap starts from none.
+        conn.execute("UPDATE underworld_organizations SET status='destroyed' WHERE primary_location_id=? AND status='active'", (place,))
         owner = author(conn, me, "person", {"sex": "female", "age": 45}, "o0")
         b = author(conn, me, "business", {"name": "Tarn & Daughters", "trade": "rope and tackle", "enterprise_kind": "workshop", "owner_actor_id": owner["actor_id"]}, "b1")
         assert b["status"] == "created" and b["kind"] == "business" and isinstance(b["means"], str), b
@@ -268,9 +270,13 @@ def run_presence():
         work, sex, stage, row = _outsider_combo(conn, place)
         r = author(conn, me, "person", {"sex": sex, "work": work, "stage": stage, "from_elsewhere": True}, "f1")
         d0 = _day_of(conn)
-        here = sum(actor_is_present_candidate(conn, r["actor_id"], place, day=d0 + i) for i in range(10))
-        there = sum(actor_is_present_candidate(conn, r["actor_id"], int(row["current_location_id"]), day=d0 + i) for i in range(10))
-        assert here >= 7 and there == 0, ("outsider presence", here, there)
+        from engine.presence import assess_presence
+        origin = int(row["current_location_id"])
+        at_place = assess_presence(conn, r["actor_id"], place, day=d0 + 3)
+        assert at_place.probability >= 0.95, ("outsider presence at the requested place", at_place)
+        assert assess_presence(conn, r["actor_id"], origin, day=d0 + 3).probability == 0.0, "outsider still at the origin"
+        there = sum(actor_is_present_candidate(conn, r["actor_id"], origin, day=d0 + i) for i in range(10))
+        assert there == 0, ("outsider is never present at the origin", there)
         assert conn.execute("SELECT home_location_id FROM actors WHERE id=?", (r["actor_id"],)).fetchone()[0] == place
         conn.close()
 

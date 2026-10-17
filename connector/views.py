@@ -5,7 +5,7 @@ import json
 
 from connector import store
 
-_LIMITS = {"present": 12, "news": 5, "competence": 6, "notes": 6}
+_LIMITS = {"present": 12, "news": 5, "competence": 6, "notes": 6, "underworld": 2}
 
 
 def _clip(text, n: int) -> str:
@@ -54,6 +54,37 @@ def _member_of(conn, actor_id: int) -> list[str]:
                WHERE m.member_actor_id=? AND m.status='active' ORDER BY m.id LIMIT 3""", (actor_id,)):
         out.append(_clip(f"{role or str(kind).replace('_', ' ')}, {inst}", 80))
     return out[:4]
+
+
+def _town_sample(conn, people: list, me: int, limit: int) -> list:
+    """A settlement-wide scene is the town. Underworld figures are few among a town's people, so beyond a couple
+    (unless they know the protagonist or are his own people) they stay out of the list."""
+    crim = {r[0] for r in conn.execute("SELECT actor_id FROM underworld_personnel WHERE status='active'")}
+    if not crim.intersection(a["id"] for a in people):
+        return people[:limit]
+    mine = {r[0] for r in conn.execute(
+        """SELECT p.actor_id FROM underworld_personnel p WHERE p.status='active' AND p.organization_id IN
+           (SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active')""", (me,))}
+    known = {r[0] for r in conn.execute(
+        "SELECT actor_b_id FROM relationships WHERE actor_a_id=? UNION SELECT actor_a_id FROM relationships WHERE actor_b_id=?", (me, me))}
+    out, strangers = [], 0
+    for a in people:
+        if a["id"] in crim and a["id"] not in mine and a["id"] not in known:
+            strangers += 1
+            if strangers > _LIMITS["underworld"]:
+                continue
+        out.append(a)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _network_places(conn, actor_id: int) -> list[str] | None:
+    """Where a network (no seat, no territory) is present, strongest first."""
+    rows = [f"{n} ({st})" for n, st in conn.execute(
+        """SELECT l.name,p.strength FROM underworld_network_presence p JOIN locations l ON l.id=p.location_id WHERE p.institution_actor_id=?
+           ORDER BY CASE p.strength WHEN 'strong' THEN 0 WHEN 'present' THEN 1 ELSE 2 END,l.name LIMIT 8""", (actor_id,))]
+    return rows or None
 
 
 def _words(conn, observer: int | None, subject: int, place, shown: str = "") -> dict:
@@ -191,7 +222,7 @@ def compact_scene(conn) -> dict:
     people = [a for a in p["present_actors"] if a.get("actor_type") == "character"]
     here = loc["id"]
     present = []
-    for a in people[: _LIMITS["present"]]:
+    for a in _town_sample(conn, people, int(me["actor_id"]), _LIMITS["present"]):
         who, member = _who(conn, a), "; ".join(_member_of(conn, a["id"])) or None
         present.append(_drop_none({"id": a["id"], "name": a["name"], "sex": _sex(conn, a["id"], day), "who": who,
                                    "member_of": member, **_words(conn, int(me["actor_id"]), a["id"], here, f"{who} {member or ''}")}))
@@ -201,7 +232,14 @@ def compact_scene(conn) -> dict:
     if you_here.get("station") and you_here["station"].lower() in str(me.get("subtype") or "").lower():
         you_here.pop("station")  # already in protagonist.role
     institutions = [{"id": a["id"], "name": a["name"], "what": _who(conn, a)}
-                    for a in p["present_actors"] if a.get("actor_type") != "character"][:8]
+                    for a in p["present_actors"] if a.get("actor_type") != "character"]
+    seen = {i["id"] for i in institutions}
+    for nid, nname, strength in conn.execute(
+            """SELECT a.id,a.name,n.strength FROM underworld_network_presence n JOIN actors a ON a.id=n.institution_actor_id
+               WHERE n.location_id=? AND a.status NOT IN ('dead','destroyed','dissolved','defunct','historical') ORDER BY CASE n.strength WHEN 'strong' THEN 0 WHEN 'present' THEN 1 ELSE 2 END,a.name""", (here,)):
+        if nid not in seen:
+            institutions.append({"id": nid, "name": nname, "what": f"network, {strength} here"})
+    institutions = institutions[:8]
     events = [f"day {e['day']}: {_clip(e['title'], 100)}" for e in p["known_events"][-_LIMITS["news"]:]]
     rumours = ["rumour: " + _clip(r["text"], 110) for r in p["known_rumours"][-_LIMITS["news"]:]]
     notes = []
@@ -265,7 +303,8 @@ def lookup(conn, query: str) -> dict:
         day = conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]
         out["basics"] = _drop_none({"type": r["actor_type"], "sex": _sex(conn, int(r["id"]), day), "role": _who(conn, r),
                                     "member_of": _member_of(conn, int(r["id"])) or None, "status": r["status"],
-                                    "last_known_place": where[0] if where else None})
+                                    "last_known_place": where[0] if where else None,
+                                    "present_in": _network_places(conn, int(r["id"]))})
     elif kind == "business":
         owner = conn.execute("SELECT name FROM actors WHERE id=COALESCE(?,?)", (r["owner_actor_id"], r["institution_actor_id"])).fetchone()
         where = conn.execute("SELECT name FROM locations WHERE id=?", (r["location_id"],)).fetchone()

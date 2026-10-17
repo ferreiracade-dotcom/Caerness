@@ -95,6 +95,21 @@ def run():
         ids = ",".join(str(r["id"]) for r in procedural)
         people = {r[0]: r[1] for r in c.execute(f"SELECT DISTINCT p.actor_id,a.current_location_id FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.organization_id IN ({ids})")}
         assert people
+        # Review 2: rows that tie other tables to the invented outfits (interests, permissions, incidents, relations).
+        a_ids = [r["id"] for r in procedural]
+        top, other = a_ids[0], a_ids[1]
+        racket = c.execute("SELECT id FROM underworld_racket_sites WHERE organization_id=? LIMIT 1", (top,)).fetchone()
+        zone = c.execute("SELECT id FROM underworld_zones WHERE city_location_id=? LIMIT 1", (ald,)).fetchone()[0]
+        c.execute("INSERT INTO economic_interests(holder_organization_id,target_racket_id,interest_kind,share_fraction,started_day) VALUES (?,?, 'operator',1.0,0)", (top, racket[0]))
+        c.execute("INSERT INTO economic_interests(holder_organization_id,target_racket_id,interest_kind,share_fraction,started_day) VALUES (?,?, 'revenue_share',.2,0)",
+                  (mine, racket[0]))  # a survivor's share in a racket that disappears
+        c.execute("INSERT INTO underworld_operating_permissions(zone_id,controller_organization_id,guest_organization_id,activity_kind,tribute_rate,started_day) VALUES (?,?,?,'gaming',.1,0)", (zone, top, mine))
+        c.execute("INSERT INTO underworld_operating_permissions(zone_id,controller_organization_id,guest_organization_id,activity_kind,tribute_rate,started_day) VALUES (?,?,?,'gaming',.1,0)", (zone, mine, other))
+        c.execute("INSERT INTO underworld_incidents(day,zone_id,source_organization_id,target_organization_id,incident_kind) VALUES (0,?,?,?,'poach')", (zone, top, mine))
+        for a_, b_, kind_, host in ((mine, top, "war", 95), (mine, authored, "rival", 70)):
+            x_, y_ = sorted((a_, b_))
+            c.execute("INSERT OR REPLACE INTO underworld_relations(organization_a_id,organization_b_id,relation_kind,hostility) VALUES (?,?,?,?)", (x_, y_, kind_, host))
+        c.commit()
         keep = {oid: tuple(c.execute("SELECT status,member_count_estimate,treasury,current_leader_actor_id,metadata_json FROM underworld_organizations WHERE id=?", (oid,)).fetchone()) for oid in (mine, authored)}
         keep_claims = c.execute("SELECT zone_id,status FROM underworld_zone_claims WHERE organization_id=? ORDER BY id", (authored,)).fetchall()
         keep_claims = [tuple(r) for r in keep_claims]
@@ -121,6 +136,25 @@ def run():
             assert not c.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active' AND organization_id IN (%s)" % ids, (aid,)).fetchone()
         assert not c.execute("SELECT 1 FROM underworld_zones WHERE city_location_id=? AND status='active' AND metadata_json LIKE '%not_world_bible_canon%' "
                              "AND id NOT IN (SELECT zone_id FROM underworld_zone_claims WHERE status='active')", (ald,)).fetchone()
+
+        # Review 2: nothing active still points at a destroyed outfit.
+        q = ",".join(str(i) for i in a_ids)
+        assert not c.execute(f"SELECT 1 FROM economic_interests WHERE status='active' AND (holder_organization_id IN ({q}) OR target_racket_id IN "
+                             f"(SELECT id FROM underworld_racket_sites WHERE organization_id IN ({q})))").fetchone(), "active economic interests"
+        assert not c.execute(f"SELECT 1 FROM underworld_operating_permissions WHERE status='active' AND (controller_organization_id IN ({q}) OR guest_organization_id IN ({q}))").fetchone(), "active permissions"
+        assert not c.execute(f"SELECT 1 FROM underworld_incidents WHERE status='open' AND (source_organization_id IN ({q}) OR target_organization_id IN ({q}))").fetchone(), "open incidents"
+        assert not c.execute(f"SELECT 1 FROM underworld_relations WHERE organization_a_id IN ({q}) OR organization_b_id IN ({q})").fetchone(), "relations"
+        # The survivor's top rival was dissolved; its next hit goes to the live one.
+        import random
+        from engine.underworld_rebuild import _targeted_hit
+        assert _targeted_hit(c, mine, random.Random(3)) is True
+        tgt = c.execute("SELECT target_organization_id FROM underworld_operations WHERE organization_id=? AND operation_kind='targeted_hit' ORDER BY id DESC LIMIT 1", (mine,)).fetchone()
+        assert tgt and tgt[0] == authored, tgt
+        c.rollback()
+
+        # Review 5: no seeded ward is left abandoned by a key collision with a dissolved one, and no claim sits on an abandoned ward.
+        assert c.execute("SELECT COUNT(*) FROM underworld_zones WHERE status='abandoned' AND metadata_json LIKE '%procedural_calibration_from_canon_character%'").fetchone()[0] == 0
+        assert not c.execute("SELECT 1 FROM underworld_zone_claims k JOIN underworld_zones z ON z.id=k.zone_id WHERE z.status='abandoned' AND k.status='active'").fetchone()
 
         # The protagonist's outfit and the authored gang are untouched.
         for oid, before in keep.items():

@@ -34,12 +34,19 @@ SPECIALIST_RACKETS = {
     "fraud": ("invoice fraud", "seal manipulation", "cargo fraud"),
 }
 SPECIALIST_NOUNS = {
-    "fencing": ("Pawn House", "Trading Company"), "smuggling": ("Carrying Company", "Boatmen"),
-    "lending": ("Lending Circle", "Tallymen"), "gaming": ("Dice Rooms", "Card House"),
-    "prizefighting": ("Promotions", "Fight Company"), "vice": ("Lamp House", "Rooms"),
-    "brokerage": ("Introductions", "Agency"), "labour_debt": ("Bond Company", "Ledger Men"),
-    "horse_theft": ("Bridle Men", "Stud Company"), "fraud": ("Counting Room", "Seal and Weight"),
+    "fencing": ("Pawn House", "Trading Company", "Resale Rooms", "Salvage Stores"), "smuggling": ("Carrying Company", "Boatmen", "Night Freight", "Lighter Company"),
+    "lending": ("Lending Circle", "Tallymen", "Loan Rooms", "Advance Company"), "gaming": ("Dice Rooms", "Card House", "Table Company", "Betting Rooms"),
+    "prizefighting": ("Promotions", "Fight Company", "Ring Company", "Purse Men"), "vice": ("Lamp House", "Rooms", "Silk House", "Evening Company"),
+    "brokerage": ("Introductions", "Agency", "Brokers", "Go-Betweens"), "labour_debt": ("Bond Company", "Ledger Men", "Contract Hirers", "Work Bonds"),
+    "horse_theft": ("Bridle Men", "Stud Company", "Horse Dealers", "Paddock Men"), "fraud": ("Counting Room", "Seal and Weight", "Weighhouse", "Measure Company"),
 }
+# Men lead the violent trades more than the books and rooms ([624]-[626] a martial society, yet [1701] women lead gangs, fence and run books).
+# Owner ruling 2026-10-17: women are clearly less likely in positions of power, the violent underworld least of all.
+P_MALE_VIOLENT = .92
+P_MALE_TRADE = .85
+P_MALE_VICE = .70
+VIOLENT_KINDS = ("prizefighting", "horse_theft")
+CREW_WORDS = ("Hands", "Runners", "Lads", "Men", "Watch", "Tallymen", "Boys", "Crew")
 # Canon activity text -> the racket kinds the engine models (nearest honest fit).
 ACTIVITY_RACKETS = {
     "cargo substitution": "cargo fraud", "stolen goods": "stolen goods", "protection": "protection collections",
@@ -56,8 +63,6 @@ _GENERIC_ZONES = (
 )
 _FIRST = ("Alden", "Bren", "Caro", "Darian", "Elias", "Garran", "Hale", "Iven", "Joren", "Kellan", "Lucan", "Marek", "Nolan", "Orin",
           "Perrin", "Rafe", "Soren", "Tomas", "Varen", "Willem")
-_SUR = ("Vale", "Kerr", "Marr", "Rooke", "Brann", "Voss", "Dane", "Kestrel", "Torve", "Renn", "Holt", "Serrin", "Marrow", "Verran",
-        "Dorn", "Pell", "Reese", "Ashe", "Lowe", "March")
 _GANG_PREFIX = ("Black", "Red", "Iron", "Grey", "Low", "East", "Ash", "White", "Old", "River", "South", "North", "Salt", "Tin", "Stone")
 _GANG_WORDS = ("Hounds", "Crows", "Hooks", "Knives", "Boars", "Lanterns", "Rooks", "Hawks", "Bells", "Foxes", "Hammers", "Jacks", "Gulls", "Wasps")
 
@@ -100,8 +105,8 @@ def _character(conn: sqlite3.Connection, lid: int) -> tuple[dict, str]:
     return REGION_DEFAULTS["Underheaven Empire"], "Underheaven Empire"
 
 
-def _unique_name(conn: sqlite3.Connection, make) -> str:
-    for i in range(80):
+def _unique_name(conn: sqlite3.Connection, make, tries: int = 80) -> str:
+    for i in range(tries):
         name = make(i)
         if not conn.execute("SELECT 1 FROM underworld_organizations WHERE name=?", (name,)).fetchone() and \
            not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
@@ -109,13 +114,12 @@ def _unique_name(conn: sqlite3.Connection, make) -> str:
     raise RuntimeError("could not generate a unique outfit name")
 
 
-def _person(conn: sqlite3.Connection, lid: int, role: str, *, strict: bool, oid: int, rng: random.Random) -> int:
-    """A pre-existing person of this very place (never invented, never from elsewhere); command leans Open-Core as culture says."""
+def _find_person(conn: sqlite3.Connection, lid: int, role: str, *, strict: bool, oid: int, rng: random.Random, sex: str | None) -> int | None:
     from .person_ecology import resolve_background_person
     command = role in ("boss", "crew_leader")
     kw = dict(reason=f"Underworld {role} became consequential", demand_kind="underworld_personnel", location_id=lid,
               min_age=32 if role == "boss" else 24, max_age=68 if role == "boss" else 58, subtype=f"underworld_{role}",
-              command_weight=1.0 if command else .55, criminal_weight=1.15, allow_elsewhere=False)
+              command_weight=1.0 if command else .55, criminal_weight=1.15, allow_elsewhere=False, demographic_sex=sex)
     aid = None
     if command and _leader_open_core(rng, float(ensure_organization_culture(conn, oid)["open_core_command_bias"]), role):
         aid = (resolve_background_person(conn, occupation_domains=("criminal",), require_open_core=True, **kw)
@@ -124,9 +128,53 @@ def _person(conn: sqlite3.Connection, lid: int, role: str, *, strict: bool, oid:
         aid = resolve_background_person(conn, occupation_domains=("criminal",), **kw)
     if aid is None and not strict:
         aid = resolve_background_person(conn, occupation_domains=None, **kw)
-    if aid is None:
-        raise _NoPerson(role)
     return aid
+
+
+def _person(conn: sqlite3.Connection, lid: int, role: str, *, strict: bool, oid: int, rng: random.Random, sex: str | None = None) -> int:
+    """A pre-existing person of this very place (never invented, never from elsewhere); command leans Open-Core as culture says.
+    A wanted sex is tried first and given up on when the place has nobody of it."""
+    for want in ((sex, None) if sex else (None,)):
+        aid = _find_person(conn, lid, role, strict=strict, oid=oid, rng=rng, sex=want)
+        if aid is not None:
+            # Gangsters keep to their own corners: only a low-weight habit at the settlement as a whole (the default 0.62
+            # home habit would make every scene in town a roomful of them).
+            from .presence import add_presence_habit
+            add_presence_habit(conn, aid, lid, habit_kind="home", weight=0.15, cadence_days=1, basis_kind="actor_home", basis_id=aid,
+                               source_kind="derived", confidence=0.9)
+            return aid
+    raise _NoPerson(role)
+
+
+def _wanted_sex(conn: sqlite3.Connection, cls: str, p_male: float, rng: random.Random) -> str:
+    """Error-diffusion draw: the world's bosses of this class stay within one person of the target share, in a seeded order."""
+    row = conn.execute("SELECT value FROM engine_meta WHERE key=?", (f"uw_boss_sex:{cls}",)).fetchone()
+    d = json.loads(row[0]) if row else {"n": 0, "male": 0}
+    n, male = int(d["n"]), int(d["male"])
+    expected = p_male * (n + 1)
+    if male <= expected - 1:
+        return "male"
+    if male >= expected:
+        return "female"
+    return "male" if rng.random() < expected - male else "female"
+
+
+def _note_sex(conn: sqlite3.Connection, cls: str, actor_id: int) -> None:
+    row = conn.execute("SELECT value FROM engine_meta WHERE key=?", (f"uw_boss_sex:{cls}",)).fetchone()
+    d = json.loads(row[0]) if row else {"n": 0, "male": 0}
+    sx = conn.execute("SELECT demographic_sex FROM actor_life_profiles WHERE actor_id=?", (actor_id,)).fetchone()
+    d["n"] = int(d["n"]) + 1
+    d["male"] = int(d["male"]) + (1 if sx and sx[0] == "male" else 0)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES (?,?)", (f"uw_boss_sex:{cls}", _j(d)))
+
+
+def _family(conn: sqlite3.Connection, actor_id: int, lid: int, rng: random.Random) -> str:
+    """The boss's family name, which is a local one; a one-word name falls back to a surname from the place's own people."""
+    last = (conn.execute("SELECT name FROM actors WHERE id=?", (actor_id,)).fetchone()[0].split() or [""])[-1]
+    if last.isalpha() and len(conn.execute("SELECT name FROM actors WHERE id=?", (actor_id,)).fetchone()[0].split()) > 1:
+        return last
+    rows = conn.execute("SELECT DISTINCT family_name FROM background_person_profiles WHERE current_location_id=? AND family_name<>'' ORDER BY family_name LIMIT 200", (lid,)).fetchall()
+    return rng.choice([r[0] for r in rows if str(r[0]).isalpha()] or ["Local"])
 
 
 def _new_org(conn, key, typ, name, lid, members, meta, *, institution=None, violence=(20, 50), rng) -> int:
@@ -203,7 +251,7 @@ def seed_settlement_underworld(conn: sqlite3.Connection, location_id: int) -> di
     n_zones = 0 if pop < MIN_ZONE_POPULATION else max(2, min(12, round(pop / 20000)))
     zones = _seed_zones(conn, lid, n_zones, character, ctx, rng, pop) if n_zones else []
     n_gangs = min(round(density * character["street"] * pop / 60000), len(zones) // 2, 8)  # some ground always stays open
-    n_spec = min(round(density * pop / 50000), 25)  # 30000 made a 30-day advance 2.1x its old time; 50000 keeps it under 2x
+    n_spec = min(round(density * pop / 30000), 25)  # canon: Toll's Reach has dozens of specialist networks; their cost is kept down by a slow decision cadence
     meta = {"source": "procedural", "calibration": CALIBRATION_SOURCE, "inputs": inputs}
     unstaffed = gangs = specs = 0
     gang_ids: list[int] = []
@@ -212,19 +260,24 @@ def seed_settlement_underworld(conn: sqlite3.Connection, location_id: int) -> di
     for i in range(n_gangs):
         conn.execute("SAVEPOINT uw_org")
         try:
-            name = _unique_name(conn, lambda k: f"{rng.choice(_GANG_PREFIX)} {rng.choice(_GANG_WORDS)}" + ("" if k < 40 else f" {k}"))
+            place = conn.execute("SELECT name FROM locations WHERE id=?", (lid,)).fetchone()[0]
+            name = _unique_name(conn, lambda k: f"{rng.choice(_GANG_PREFIX)} {rng.choice(_GANG_WORDS)}" + ("" if k < 40 else f" of {place}"))
             members = rng.randint(8, 30)
             oid = _new_org(conn, f"uw:{lid}:gang:{i}", "gang", name, lid, members, {**meta, "role": "street_gang"}, violence=(25, 62), rng=rng)
-            boss = create_personnel(conn, oid, role_kind="boss", actor_id=_person(conn, lid, "boss", strict=True, oid=oid, rng=rng), rng=rng)
+            boss = create_personnel(conn, oid, role_kind="boss", rng=rng, actor_id=_person(
+                conn, lid, "boss", strict=True, oid=oid, rng=rng, sex=_wanted_sex(conn, "violent", P_MALE_VIOLENT, rng)))
+            _note_sex(conn, "violent", boss)
             conn.execute("UPDATE underworld_organizations SET founder_actor_id=?,current_leader_actor_id=? WHERE id=?", (boss, boss, oid))
             zid = free.pop(0)
             set_zone_controller(conn, zid, oid, strength=rng.uniform(48, 72), local_support=rng.uniform(32, 66), fear=rng.uniform(42, 76),
                                 metadata={"opening_control": True})
             crews = 1 if members < 18 else 2
             for c in range(crews):
+                lsex = _wanted_sex(conn, "violent", P_MALE_VIOLENT, rng)
                 lead = create_personnel(conn, oid, role_kind="crew_leader", membership_status="member", rng=rng,
-                                        actor_id=_person(conn, lid, "crew_leader", strict=False, oid=oid, rng=rng))
-                create_crew(conn, oid, f"{name.split()[0]} Crew {c + 1}", leader_actor_id=lead, home_zone_id=zid, size_estimate=members / crews, rng=rng)
+                                        actor_id=_person(conn, lid, "crew_leader", strict=False, oid=oid, rng=rng, sex=lsex))
+                _note_sex(conn, "violent", lead)
+                create_crew(conn, oid, f"{name} {('First', 'Second')[c]} Crew", leader_actor_id=lead, home_zone_id=zid, size_estimate=members / crews, rng=rng)
             _rackets(conn, oid, racket_kind_options(conn, zid, rng, count=rng.randint(1, 3)), rng, zid)
             ents = conn.execute("SELECT id FROM civilian_enterprises WHERE location_id=? AND status IN ('active','strained') AND id NOT IN "
                                 "(SELECT enterprise_id FROM underworld_protection_accounts WHERE status='active') ORDER BY id", (lid,)).fetchall()
@@ -240,15 +293,30 @@ def seed_settlement_underworld(conn: sqlite3.Connection, location_id: int) -> di
         conn.execute("SAVEPOINT uw_org")
         try:
             kind = rng.choices(KINDS, weights=[character["kinds"].get(k, 0) + .01 for k in KINDS])[0]
-            sur = rng.choice(_SUR)
-            name = _unique_name(conn, lambda k: f"{sur} {SPECIALIST_NOUNS[kind][k % 2]}" + ("" if k < 2 else f" {k}"))
             members = rng.randint(3, 15)
-            oid = _new_org(conn, f"uw:{lid}:spec:{i}", "network" if kind == "brokerage" else "criminal_enterprise", name, lid, members,
+            cls, p_male = (("violent", P_MALE_VIOLENT) if kind in VIOLENT_KINDS else ("vice", P_MALE_VICE) if kind == "vice"
+                           else ("trade", P_MALE_TRADE))
+            oid = _new_org(conn, f"uw:{lid}:spec:{i}", "network" if kind == "brokerage" else "criminal_enterprise", f"pending specialist {lid}.{i}", lid, members,
                            {**meta, "role": "specialist", "specialty": kind}, violence=(8, 32), rng=rng)
-            boss = create_personnel(conn, oid, role_kind="boss", actor_id=_person(conn, lid, "boss", strict=True, oid=oid, rng=rng), rng=rng)
+            boss = create_personnel(conn, oid, role_kind="boss", rng=rng, actor_id=_person(
+                conn, lid, "boss", strict=True, oid=oid, rng=rng, sex=_wanted_sex(conn, cls, p_male, rng)))
+            _note_sex(conn, cls, boss)
             conn.execute("UPDATE underworld_organizations SET founder_actor_id=?,current_leader_actor_id=? WHERE id=?", (boss, boss, oid))
-            create_crew(conn, oid, f"{sur} Hands", leader_actor_id=boss, purpose_kind=kind, size_estimate=members, rng=rng)
+            fam = _family(conn, boss, lid, rng)
+            place = conn.execute("SELECT name FROM locations WHERE id=?", (lid,)).fetchone()[0]
+            nouns = SPECIALIST_NOUNS[kind]
+            try:
+                name = _unique_name(conn, lambda k: f"{fam} {nouns[k % len(nouns)]}" + ("" if k < len(nouns) else f" of {place}"), tries=len(nouns) * 2)
+            except RuntimeError:
+                raise _NoPerson("name")
+            conn.execute("UPDATE underworld_organizations SET name=? WHERE id=?", (name, oid))
+            crew_word = next((w for w in CREW_WORDS if not conn.execute(
+                """SELECT 1 FROM underworld_crews c JOIN underworld_organizations o ON o.id=c.organization_id
+                   WHERE o.primary_location_id=? AND o.status IN ('active','strained','fragmented') AND c.name=?""", (lid, f"{fam} {w}")).fetchone()), None)
+            create_crew(conn, oid, f"{fam} {crew_word or name}", leader_actor_id=boss, purpose_kind=kind, size_estimate=members, rng=rng)
             _rackets(conn, oid, rng.sample(SPECIALIST_RACKETS[kind], k=min(len(SPECIALIST_RACKETS[kind]), rng.randint(1, 2))), rng)
+            # A non-territorial trade is not minded every month: its head reviews strategy every quarter, staggered.
+            conn.execute("UPDATE simulation_profiles SET cadence_days=90,next_review_day=? WHERE actor_id=?", (_day(conn) + rng.randint(5, 90), boss))
             if rng.random() < .25:
                 create_front(conn, oid, f"{name} {rng.choice(('Yard', 'Stores', 'Lodging'))}", "service", zone_id=None,
                              capital=rng.uniform(8, 24), cash=rng.uniform(3, 10), metadata={"opening_front": True})
@@ -419,6 +487,13 @@ def dissolve_procedural_underworld(conn: sqlite3.Connection) -> list[str]:
         conn.execute("UPDATE underworld_racket_sites SET status='abandoned' WHERE organization_id=? AND status IN ('active','suppressed')", (oid,))
         conn.execute("UPDATE underworld_protection_accounts SET status='ended' WHERE protector_organization_id=? AND status='active'", (oid,))
         conn.execute("UPDATE OR REPLACE underworld_business_links SET status='ended' WHERE organization_id=? AND status='active'", (oid,))
+        # Everything that still pointed at it: interests (set_racket_status convention), permissions, incidents, relations.
+        conn.execute("""UPDATE economic_interests SET status='ended',ended_day=? WHERE status IN ('active','disputed') AND (holder_organization_id=?
+                        OR holder_crew_id IN (SELECT id FROM underworld_crews WHERE organization_id=?)
+                        OR target_racket_id IN (SELECT id FROM underworld_racket_sites WHERE organization_id=?))""", (_day(conn), oid, oid, oid))
+        conn.execute("UPDATE OR REPLACE underworld_operating_permissions SET status='revoked' WHERE status='active' AND (controller_organization_id=? OR guest_organization_id=?)", (oid, oid))
+        conn.execute("UPDATE underworld_incidents SET status='expired' WHERE status IN ('open','answered') AND (source_organization_id=? OR target_organization_id=?)", (oid, oid))
+        conn.execute("DELETE FROM underworld_relations WHERE organization_a_id=? OR organization_b_id=?", (oid, oid))
         people = [int(r[0]) for r in conn.execute("SELECT actor_id FROM underworld_personnel WHERE organization_id=? AND status='active'", (oid,))]
         conn.execute("UPDATE underworld_personnel SET status='retired' WHERE organization_id=? AND status='active'", (oid,))
         for a in people:  # still in a live outfit elsewhere? then the subtype stays

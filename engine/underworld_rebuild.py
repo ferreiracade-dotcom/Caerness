@@ -283,7 +283,7 @@ def create_zone(
            VALUES (?,?,?,?,?,?,?,?,'active',?)
            ON CONFLICT(zone_key) DO UPDATE SET name=excluded.name,zone_kind=excluded.zone_kind,
              population_scale=excluded.population_scale,commercial_intensity=excluded.commercial_intensity,
-             street_visibility=excluded.street_visibility,policing_pressure=excluded.policing_pressure,metadata_json=excluded.metadata_json""",
+             street_visibility=excluded.street_visibility,policing_pressure=excluded.policing_pressure,metadata_json=excluded.metadata_json,status='active'""",
         (city_location_id, key, name, zone_kind, _clamp(population_scale), _clamp(commercial_intensity),
          _clamp(street_visibility), _clamp(policing_pressure), _j(metadata or {})),
     )
@@ -2001,13 +2001,17 @@ def _targeted_hit(conn: sqlite3.Connection, organization_id: int, rng: random.Ra
 
 
 def _ensure_leader_decision_cadence(conn: sqlite3.Connection, actor_id: int) -> None:
-    """Underworld command is strategically causal, so its actor review cannot remain a 180-day dormant cadence."""
+    """Underworld command is strategically causal, so its actor review cannot remain a 180-day dormant cadence.
+    A specialist outfit holds no ground and its head is reviewed quarterly rather than monthly (schema 110 seeds
+    dozens of them per great port; a monthly review each made a 30-day advance twice as slow)."""
     day=_day(conn)
+    slow=conn.execute("SELECT 1 FROM underworld_organizations WHERE current_leader_actor_id=? AND metadata_json LIKE '%\"role\": \"specialist\"%' LIMIT 1",(actor_id,)).fetchone()
+    cadence=90 if slow else 30
     row=conn.execute("SELECT 1 FROM simulation_profiles WHERE actor_id=?",(actor_id,)).fetchone()
     if row:
-        conn.execute("UPDATE simulation_profiles SET tier='STRATEGIC',cadence_days=MIN(cadence_days,30),next_review_day=MIN(next_review_day,?) WHERE actor_id=?",(day+30,actor_id))
+        conn.execute("UPDATE simulation_profiles SET tier='STRATEGIC',cadence_days=MIN(cadence_days,?),next_review_day=MIN(next_review_day,?) WHERE actor_id=?",(cadence,day+cadence,actor_id))
     else:
-        conn.execute("INSERT INTO simulation_profiles(actor_id,tier,cadence_days,volatility,agency,last_review_day,next_review_day,wake_threshold) VALUES (?,'STRATEGIC',30,.35,.75,?,?,3)",(actor_id,day,day+30))
+        conn.execute("INSERT INTO simulation_profiles(actor_id,tier,cadence_days,volatility,agency,last_review_day,next_review_day,wake_threshold) VALUES (?,'STRATEGIC',?,.35,.75,?,?,3)",(actor_id,cadence,day,day+cadence))
 
 def _is_background_person_unavailable(exc: BaseException) -> bool:
     return isinstance(exc, RuntimeError) and str(exc).startswith("No pre-existing background person is available for underworld role")

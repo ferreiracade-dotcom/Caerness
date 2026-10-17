@@ -94,6 +94,7 @@ NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error")
 SHEET_FIELDS = ("appearance", "voice", "temperament", "ambitions", "habits", "history", "standing")
 _CLIP = {"recap": 600, "thread": 160, "sheet": 300, "rule": 300, "error": 500}
 MAX_RULES = 8  # newest active rules returned by resume
+MAX_CORRECTIONS = 5  # newest open error reports returned by resume
 
 
 def _clip(text, n: int) -> str:
@@ -130,6 +131,13 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
             raise ValueError("no active rule matches that text exactly")
         conn.execute("UPDATE standing_rules SET status='retired' WHERE id=?", (int(row[0]),))
         return {"saved": "rule", "retired": True, "summary": f"Rule retired: {body[:80]}"}
+    if kind == "error" and field == "fixed":
+        rows = conn.execute("SELECT id,text FROM error_reports WHERE status='open' ORDER BY id DESC").fetchall()
+        row = next((r for r in rows if (body.isdigit() and r["id"] == int(body)) or r["text"] == body), None)
+        if not row:
+            raise ValueError("no open error report matches that text or id")
+        conn.execute("UPDATE error_reports SET status='fixed' WHERE id=?", (int(row["id"]),))
+        return {"saved": "error", "fixed": True, "summary": f"Correction done: {row['text'][:80]}"}
     table = "standing_rules" if kind == "rule" else "error_reports"
     conn.execute(f"INSERT INTO {table}(world_day,text,call_id) VALUES (?,?,?)", (day, body, call_id))
     return {"saved": kind, "summary": f"{kind.capitalize()} saved: {body[:80]}"}
@@ -151,6 +159,9 @@ def continuity(conn) -> dict:
     rules = [r["text"] for r in conn.execute("SELECT text FROM standing_rules WHERE status='active' ORDER BY id DESC LIMIT ?", (MAX_RULES,))][::-1]
     if rules:
         out["standing_rules"] = rules
+    open_errors = [r["text"] for r in conn.execute("SELECT text FROM error_reports WHERE status='open' ORDER BY id DESC LIMIT ?", (MAX_CORRECTIONS,))]
+    if open_errors:
+        out["corrections"] = open_errors
     return out
 
 
