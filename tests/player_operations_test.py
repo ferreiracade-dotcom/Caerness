@@ -46,7 +46,7 @@ def run():
             assert r["status"] == "refused" and ledger.balance(conn, ("business", other_id)) == ob, r
             r = po.execute(conn, me, "pay", target_actor_id=None,
                            details={"from": "me", "to": f"person:{w['bystander']}", "amount": "fortune"}, intent="Too much.")
-            assert r["status"] == "refused", r
+            assert r["status"] == "partial" and r["short_of"] == "fortune", r  # an oversized sum pays what the purse holds
 
             # hire: crew leader into the business (tier 1, already the protagonist's personnel)
             r = po.execute(conn, me, "hire", target_actor_id=w["crew_leader"],
@@ -92,16 +92,15 @@ def run():
             # lend: refused for another's purse, applied or refused (never half) for his own
             assert po.execute(conn, me, "lend", target_actor_id=by,
                               details={"amount": "modest", "from": f"business:{other_id}"}, intent="x")["status"] == "refused"
-            assert po.execute(conn, me, "lend", target_actor_id=by, details={"amount": "fortune"}, intent="x")["status"] == "refused"
             ledger.transfer(conn, ("business", biz), ("person", me), 2.0, flow_kind="other", purpose="t")
             mine0, theirs0 = ledger.balance(conn, ("person", me)), ledger.balance(conn, ("person", by))
             n_cred = conn.execute("SELECT COUNT(*) FROM credit_agreements").fetchone()[0]
             r = po.execute(conn, me, "lend", target_actor_id=by, details={"amount": "modest", "rate": "usual"}, intent="A loan between friends.")
-            if r["status"] == "applied":
+            if r["status"] in ("applied", "partial"):
                 row = conn.execute("SELECT * FROM credit_agreements WHERE borrower_actor_id=? AND lender_actor_id=? ORDER BY id DESC", (by, me)).fetchone()
-                assert row and abs(row["principal"] - 3.0) < 1e-9 and abs(row["interest_rate_per_30"] - 0.05) < 1e-9, r
-                assert abs(mine0 - ledger.balance(conn, ("person", me)) - 3.0) < 1e-9
-                assert abs(ledger.balance(conn, ("person", by)) - theirs0 - 3.0) < 1e-9
+                assert row and abs(row["principal"] - (mine0 - ledger.balance(conn, ("person", me)))) < 1e-9 and abs(row["interest_rate_per_30"] - 0.05) < 1e-9, r
+                assert (r["status"] == "applied") == (abs(row["principal"] - 3.0) < 1e-9), r  # less than asked only when the purse was short
+                assert abs(ledger.balance(conn, ("person", by)) - theirs0 - row["principal"]) < 1e-9
                 assert not re.search(r"\d", r["summary"]), r
             else:
                 assert r["status"] == "refused" and conn.execute("SELECT COUNT(*) FROM credit_agreements").fetchone()[0] == n_cred, r
@@ -385,12 +384,14 @@ def run_review_fixes():
             assert count("interactions") == i0
             po._HANDLERS["hire"] = saved
 
-            # 3: loans come from his purse or a house of business only
+            # 3: an outfit or a household he heads may lend (loansharking); a purse he cannot draw on may not
             cr0 = count("credit_agreements")
-            for src in (f"outfit:{outfit}", f"household:{hh}"):
-                r = po.execute(conn, me, "lend", target_actor_id=by, details={"from": src, "amount": "small"}, intent="x")
-                assert r["status"] == "refused" and "own purse or one of his houses" in r["summary"], r
-            assert count("interactions") == i0 and count("credit_agreements") == cr0
+            r = po.execute(conn, me, "lend", target_actor_id=by, details={"from": f"outfit:{outfit}", "amount": "small"}, intent="x")
+            assert r["status"] in ("applied", "refused") and (r["status"] == "applied") == (count("credit_agreements") == cr0 + 1), r
+            r = po.execute(conn, me, "lend", target_actor_id=by, details={"from": "person:%d" % by, "amount": "small"}, intent="x")
+            assert r["status"] == "refused"
+            cr0 = count("credit_agreements")
+            i0 = count("interactions")
 
             # 5: the other party accepts the protagonist's own offer later, during the simulation
             conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (w["location"], by))

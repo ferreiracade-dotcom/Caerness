@@ -60,8 +60,11 @@ def _holder_label(conn, h: ledger.Holder, me: int) -> str:
     kind, i = h
     if kind == "person":
         return "his own purse" if i == me else _name(conn, i)
+    if kind == "polity":
+        row = conn.execute("SELECT a.name FROM political_polities p JOIN actors a ON a.id=p.institution_actor_id WHERE p.id=?", (i,)).fetchone()
+        return str(row[0]) if row else kind
     table, col = {"business": ("civilian_enterprises", "name"), "outfit": ("underworld_organizations", "name"),
-                  "household": ("households", "name")}[kind]
+                  "household": ("households", "name"), "institution": ("actors", "name")}[kind]
     row = conn.execute(f"SELECT {col} FROM {table} WHERE id=?", (i,)).fetchone()
     return str(row[0]) if row else kind
 
@@ -101,6 +104,21 @@ def _pay_wages(conn, me: int, boss: int, d: dict) -> dict:
     return {"status": "applied", "summary": summary, "amount": ledger.scale_word(paid)}
 
 
+def _fit(conn, src: ledger.Holder, amount: float) -> tuple[float, bool]:
+    """What can actually be taken from a purse for an asked-for sum, and whether it falls short of it."""
+    have = ledger.balance(conn, src)
+    return (amount, False) if have + 1e-9 >= amount else (have, True)
+
+
+def _amount(conn, d: dict, key: str, src: ledger.Holder | None, default=None) -> float:
+    raw = d.get(key, default)
+    base = ledger.balance(conn, src) if src is not None else None
+    return ledger.amount_of(raw if raw is not None else "", base)
+
+
+_SPEND_TO = ("spend", "nobody", "upkeep", "expenses", "bribes", "none")
+
+
 def _pay(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     boss = _authority(me, d)
     if str(d.get("to") or "").lower() == "wages":
@@ -108,30 +126,36 @@ def _pay(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     try:
         src = ledger.parse_holder(d.get("from") or "me", boss, conn)
         to_ref = d.get("to") or (f"person:{target}" if target is not None else None)
-        if to_ref is None:
-            return _refuse("Say who is to be paid.")
-        dst = ledger.parse_holder(to_ref, boss, conn)
-        amount = ledger.amount_of(d.get("amount", ""))
+        sink = to_ref is None or str(to_ref).lower() in _SPEND_TO
+        dst = None if sink else ledger.parse_holder(to_ref, boss, conn)
+        amount = _amount(conn, d, "amount", src)
     except ValueError as e:
         return _refuse(str(e))
-    if src == dst:
+    if dst is not None and src == dst:
         return _refuse("That would be paying money to the same pocket.")
     if not ledger.can_draw(conn, boss, src):
         return _refuse("He has no right to draw on that purse.")
-    if dst[0] == "person" and not _living(conn, dst[1]):
+    if dst is not None and dst[0] == "person" and not _living(conn, dst[1]):
         return _refuse("There is no living person there to be paid.")
     purpose = str(d.get("purpose") or intent)
     flow = "wage" if "wage" in purpose.lower() else "other"
+    paid, short = _fit(conn, src, amount)
+    if paid <= 0.005:
+        return _refuse(f"There is nothing in {_holder_label(conn, src, boss)} to pay with.")
     try:
-        ledger.transfer(conn, src, dst, amount, flow_kind=flow, purpose=purpose)
+        if dst is None:
+            ledger.spend(conn, src, paid, purpose=purpose)
+        else:
+            ledger.transfer(conn, src, dst, paid, flow_kind=flow, purpose=purpose)
     except ValueError as e:
-        if "not enough" in str(e):
-            return _refuse(f"There is not enough in {_holder_label(conn, src, boss)} for a {ledger.scale_word(amount)} sum.")
         return _refuse(str(e))
-    word = ledger.scale_word(amount)
-    summary = f"A {word} sum passes from {_holder_label(conn, src, boss)} to {_holder_label(conn, dst, boss)}."
-    _record(conn, me, "Payment made", summary, targets=(dst[1],) if dst[0] == "person" and dst[1] != me else ())
-    return {"status": "applied", "summary": summary, "amount": word}
+    word = ledger.scale_word(paid)
+    to_label = _holder_label(conn, dst, boss) if dst is not None else "where it was wanted"
+    summary = f"A {word} sum passes from {_holder_label(conn, src, boss)} to {to_label}."
+    if short:
+        summary += f" It was less than he meant: {_holder_label(conn, src, boss)} held no more than that."
+    _record(conn, me, "Payment made", summary, targets=(dst[1],) if dst is not None and dst[0] == "person" and dst[1] != me else ())
+    return {"status": "partial" if short else "applied", "summary": summary, "amount": word, **({"short_of": ledger.scale_word(amount)} if short else {})}
 
 
 # ---------------------------------------------------------------- hire
@@ -314,6 +338,20 @@ def _dismiss(conn, me, target, into, name, where) -> dict:
 RATES = {"low": 0.02, "usual": 0.05, "steep": 0.12}
 
 
+def _rate(raw) -> tuple[str, float]:
+    """A rate per 30 days: a word, or a number (0.03, "3%"); anything else takes the usual rate."""
+    key = str(raw or "usual").strip().lower()
+    if key in RATES:
+        return key, RATES[key]
+    try:
+        v = float(key.rstrip("%")) / (100.0 if key.endswith("%") or float(key.rstrip("%")) >= 1 else 1.0)
+        if 0 < v <= 1:
+            return min(RATES, key=lambda k: abs(RATES[k] - v)), v
+    except ValueError:
+        pass
+    return "usual", RATES["usual"]
+
+
 def _offer(conn, me: int, target: int, kind: str, day: int, intent: str, terms: dict, stakes: int = 2, *,
            op: str, d: dict):
     """Create an interaction and resolve it at once. Returns (interaction_id, result) or (None, refusal dict).
@@ -376,22 +414,20 @@ def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     boss = _authority(me, d)
     try:
         src = ledger.parse_holder(d.get("from") or "me", boss, conn)
-        amount = ledger.amount_of(d.get("amount", ""))
+        amount = _amount(conn, d, "amount", src)
     except ValueError as e:
         return _refuse(str(e))
-    rate_word = str(d.get("rate") or "usual").lower()
-    if rate_word not in RATES:
-        return _refuse(f"Rate must be one of {', '.join(RATES)}.")
+    rate_word, rate = _rate(d.get("rate"))
     try:
         due_days = max(1, int(d.get("due_days") or 90))
     except (TypeError, ValueError):
         return _refuse("due_days must be a number of days.")
-    if src[0] in ("outfit", "household"):
-        return _refuse("Loans are made from his own purse or one of his houses.")
     if (src[0] == "person" and src[1] != boss) or not ledger.can_draw(conn, boss, src):
         return _refuse("He has no right to draw on that purse.")
-    if ledger.balance(conn, src) + 1e-9 < amount:
-        return _refuse(f"There is not enough in {_holder_label(conn, src, boss)} for a {ledger.scale_word(amount)} loan.")
+    asked = amount
+    amount, short = _fit(conn, src, amount)
+    if amount <= 0.005:
+        return _refuse(f"There is nothing in {_holder_label(conn, src, boss)} to lend.")
     if not _same_place(conn, me, target):
         return _refuse(f"{name} is not here to be asked.")
     day = _day(conn)
@@ -413,13 +449,16 @@ def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         kw["lender_enterprise_id"] = src[1]
     else:
         kw["lender_actor_id"] = boss
-    cid = civilian_life.create_credit_agreement(conn, principal=amount, interest_rate_per_30=RATES[rate_word],
+    cid = civilian_life.create_credit_agreement(conn, principal=amount, interest_rate_per_30=rate,
                                                 due_day=day + due_days, metadata={"source": f"{src[0]}:{src[1]}"}, **kw)
     if src[0] == "business":  # create_credit_agreement debits the lender enterprise itself; the ledger already did
         conn.execute("UPDATE civilian_enterprises SET cash=cash+? WHERE id=?", (amount, src[1]))
     summary = f"{name} took a {ledger.scale_word(amount)} loan at {rate_word} interest from {_holder_label(conn, src, boss)}."
+    if short:
+        summary += " It was less than he meant to lend: that was all the purse held."
     _record(conn, me, "Loan made", summary, targets=(target,))
-    return {"status": "applied", "summary": summary, "interaction_id": iid, "credit_agreement_id": cid}
+    return {"status": "partial" if short else "applied", "summary": summary, "interaction_id": iid, "credit_agreement_id": cid,
+            **({"short_of": ledger.scale_word(asked)} if short else {})}
 
 
 # ---------------------------------------------------------------- demand
@@ -517,7 +556,7 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     amount = None
     if what == "payment":
         try:
-            amount = ledger.amount_of(d.get("amount", ""))
+            amount = ledger.amount_of(d.get("amount", ""), ledger.balance(conn, ("person", target)))
         except ValueError as e:
             return _refuse(str(e))
     boss = _authority(me, d)
@@ -537,7 +576,7 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
             return _refuse(f"{name} owes him nothing.")
         if d.get("amount"):
             try:
-                ledger.amount_of(d["amount"])
+                ledger.amount_of(d["amount"], ledger.balance(conn, ("person", target)))
             except ValueError as e:
                 return _refuse(str(e))
     backers = _backers(conn, me, target, d)
@@ -590,7 +629,7 @@ def _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_ou
         summary = f"{name} hands over a {ledger.scale_word(paid)} sum" + ("." if status == "applied" else ", all that can be had.")
     elif what == "debt":
         from . import civilian_life
-        limit = ledger.amount_of(d["amount"]) if d.get("amount") else float("inf")
+        limit = ledger.amount_of(d["amount"], ledger.balance(conn, theirs)) if d.get("amount") else float("inf")
         remaining = min(sum(float(r["outstanding"]) for r in debts), limit, ledger.balance(conn, theirs))
         paid = 0.0
         for r in debts:
