@@ -154,6 +154,41 @@ def _sex(conn, aid: int) -> str | None:
 
 # ---------------------------------------------------------------- person
 
+def _pick_args(*, loc, sex, age, work_domain, stage, elsewhere, retired=False) -> dict:
+    return dict(location_id=loc, occupation_domains=(work_domain,) if work_domain else None,
+                min_age=max(age - 3, 45 if retired else 0) if age else (45 if retired else 18),
+                max_age=(age + 3) if age else 85, require_open_core=True if stage else None, required_stage=stage,
+                demographic_sex=sex, allow_elsewhere=elsewhere, strict_stage=True, prefer_open_core=bool(stage))
+
+
+def materialise_person(conn, *, loc, sex, age, work_domain, stage, elsewhere, name, pick_seed, call_id, retired=False,
+                       out: dict | None = None, reason: str = "Authored in play", notes: str = "Authored in play from a pre-existing identity.",
+                       pick: dict | None = None) -> int:
+    """Pick one pre-existing identity of the place, reveal it, relocate an outsider, make it TRACKED and present there."""
+    day = _day(conn)
+    pick = pick or _pick_args(loc=loc, sex=sex, age=age, work_domain=work_domain, stage=stage, elsewhere=elsewhere, retired=retired)
+    aid = resolve_background_person(conn, reason=reason, demand_kind="authoring", subtype=f"authored_{work_domain or 'person'}",
+                                    name=name, pick_seed=pick_seed, **pick)
+    if aid is None:
+        _no(f"the settlement's population cannot supply that person{'' if elsewhere else ' (try from_elsewhere)'}; adapt the story")
+    if int(conn.execute("SELECT current_location_id FROM actors WHERE id=?", (aid,)).fetchone()[0]) != loc:
+        prof = conn.execute("SELECT current_location_id FROM background_person_profiles WHERE actor_id=?", (aid,)).fetchone()
+        if out is not None:
+            out["origin"] = conn.execute("SELECT name FROM locations WHERE id=?", (prof["current_location_id"],)).fetchone()[0]
+        conn.execute("UPDATE actors SET current_location_id=?,home_location_id=? WHERE id=?", (loc, loc, aid))  # an outsider has moved here
+    from .resolution_controller import _sync_sim_tier
+    _sync_sim_tier(conn, aid, "TRACKED", day)  # resolution already made them TRACKED; give them a life of their own
+    conn.execute("UPDATE actors SET notes=? WHERE id=?", (notes, aid))
+    # Whoever the GM just placed is there now, and keeps coming back: a home habit here, plus today for certain.
+    from .presence import add_presence_habit, ensure_presence_profile
+    ensure_presence_profile(conn, aid, base_location_id=loc, source_kind="authored", confidence=0.9, effective_from_day=day)
+    add_presence_habit(conn, aid, loc, habit_kind="home", weight=0.97, cadence_days=1, basis_kind="actor_home", basis_id=aid,
+                       source_kind="authored", confidence=1.0, effective_from_day=day)
+    add_presence_habit(conn, aid, loc, habit_kind="frequented", weight=1.0, cadence_days=1, basis_kind="authored", basis_id=aid,
+                       source_kind="authored", confidence=1.0, effective_from_day=day, effective_to_day=day)
+    return aid
+
+
 def _person(conn, me: int, d: dict, call_id: str) -> dict:
     sex = d.get("sex")
     if sex not in ("male", "female"):
@@ -207,9 +242,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
                 _no(f"note {n} is not a general note that can be attached")
 
     day = _day(conn)
-    pick = dict(location_id=loc, occupation_domains=(work,) if work else None, min_age=max(age - 3, 45 if retired else 0) if age else (45 if retired else 18),
-                max_age=(age + 3) if age else 85, require_open_core=True if stage else None, required_stage=stage,
-                demographic_sex=sex, allow_elsewhere=elsewhere, strict_stage=True, prefer_open_core=bool(stage))
+    pick = _pick_args(loc=loc, sex=sex, age=age, work_domain=work, stage=stage, elsewhere=elsewhere, retired=retired)
     # A wife or a man's sibling/child carries his family name; the given name still comes from the identity.
     if full is None:
         for t in ties:
@@ -220,26 +253,12 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
                 if prof is not None:
                     full = _free_name(conn, str(prof["given_name"]), fam, sex, int(prof["partition_id"]) * 10000 + int(prof["local_uid"]))
                 break
-    aid = resolve_background_person(conn, reason="Authored in play", demand_kind="authoring", subtype=f"authored_{work or 'person'}",
-                                    name=full, **pick)
-    if aid is None:
-        _no(f"the settlement's population cannot supply that person{'' if elsewhere else ' (try from_elsewhere)'}; adapt the story")
+    got: dict = {}
+    aid = materialise_person(conn, loc=loc, sex=sex, age=age, work_domain=work, stage=stage, elsewhere=elsewhere, name=full,
+                             pick_seed=None, call_id=call_id, retired=retired, out=got)
     prof = conn.execute("SELECT * FROM background_person_profiles WHERE actor_id=?", (aid,)).fetchone()
-    origin = None
-    if int(conn.execute("SELECT current_location_id FROM actors WHERE id=?", (aid,)).fetchone()[0]) != loc:
-        origin = conn.execute("SELECT name FROM locations WHERE id=?", (prof["current_location_id"],)).fetchone()[0]
-        conn.execute("UPDATE actors SET current_location_id=?,home_location_id=? WHERE id=?", (loc, loc, aid))  # an outsider has moved here
-    from .resolution_controller import _sync_sim_tier
-    _sync_sim_tier(conn, aid, "TRACKED", day)  # resolution already made them TRACKED; give them a life of their own
-    conn.execute("UPDATE actors SET notes=? WHERE id=?", ("Authored in play from a pre-existing identity.", aid))
+    origin = got.get("origin")
     me_age = _age(conn, aid, day)
-    # Whoever the GM just placed is there now, and keeps coming back: a home habit here, plus today for certain.
-    from .presence import add_presence_habit, ensure_presence_profile
-    ensure_presence_profile(conn, aid, base_location_id=loc, source_kind="authored", confidence=0.9, effective_from_day=day)
-    add_presence_habit(conn, aid, loc, habit_kind="home", weight=0.97, cadence_days=1, basis_kind="actor_home", basis_id=aid,
-                       source_kind="authored", confidence=1.0, effective_from_day=day)
-    add_presence_habit(conn, aid, loc, habit_kind="frequented", weight=1.0, cadence_days=1, basis_kind="authored", basis_id=aid,
-                       source_kind="authored", confidence=1.0, effective_from_day=day, effective_to_day=day)
 
     for t in ties:
         tid, kind = int(t["actor_id"]), t["as"]

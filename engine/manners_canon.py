@@ -56,26 +56,31 @@ _BY_POLITY = {"Dunmoor": "dunmoor", "Greywood": "greywood", "Windmere": "windmer
               "Thornward": "thornward", "Stormhollow": "stormhollow"}
 
 
-def manners_for(conn: sqlite3.Connection, place_id: int | None, *, churn: bool = False) -> str:
-    """The one line of room manners for a place. `churn` picks the Churn line inside the Hearth."""
+def culture_key(conn: sqlite3.Connection, place_id: int | None, *, churn: bool = False) -> str:
+    """The culture of a place (a key of MANNERS). `churn` picks the Churn culture inside the Hearth."""
     from .cultivation import location_in_hearth
     from .standing import _chain, polity_of
 
     if place_id is None:
-        return MANNERS["default"]
+        return "default"
     chain = _chain(conn, place_id)
     if not chain:
-        return MANNERS["default"]
+        return "default"
     names = {str(r["name"]) for r in chain}
     if any("Waystone" in n for n in names):
-        return MANNERS["road"]
+        return "road"
     if "Crownhold" in names:
-        return MANNERS["court"]
+        return "court"
     if "Fellmarch" in names:
-        return MANNERS["undertow"]
+        return "undertow"
     if location_in_hearth(conn, place_id):
-        return MANNERS["churn" if churn else "hearth"]
+        return "churn" if churn else "hearth"
     polity = polity_of(conn, place_id)
     if polity == "Underheaven Empire":
-        return MANNERS["empire"]
-    return MANNERS[_BY_POLITY.get(str(polity), "default")]
+        return "empire"
+    return _BY_POLITY.get(str(polity), "default")
+
+
+def manners_for(conn: sqlite3.Connection, place_id: int | None, *, churn: bool = False) -> str:
+    """The one line of room manners for a place. `churn` picks the Churn line inside the Hearth."""
+    return MANNERS[culture_key(conn, place_id, churn=churn)]

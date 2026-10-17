@@ -368,79 +368,123 @@ def _mark(conn: sqlite3.Connection, actor_id: int, patch: dict[str, Any]) -> Non
                  (_j({**patch, "marital_status_authority": AUTHORITY}), actor_id))
 
 
+_PERSON_SQL = """SELECT a.id,a.name,COALESCE(a.home_location_id,a.current_location_id) loc,lp.birth_day,lp.demographic_sex,
+                  lp.metadata_json,COALESCE(h.longevity_class,'ordinary') lc,m.source_key
+           FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id
+           LEFT JOIN actor_health_profiles h ON h.actor_id=a.id
+           LEFT JOIN source_identity_map m ON m.entity_kind='actor' AND m.entity_id=a.id"""
+
+
+def _kids_of(conn: sqlite3.Connection, aid: int) -> int:
+    return int(conn.execute("SELECT COALESCE(SUM(count_estimate),0) FROM latent_entities WHERE latent_kind='kin_group' AND archetype='children' "
+                            "AND json_extract(constraints_json,'$.parent_actor_id')=?", (aid,)).fetchone()[0])
+
+
+def resolve_family_for(conn: sqlite3.Connection, aid: int, *, key: str | None = None, day: int | None = None,
+                       constraints: dict[str, Any] | None = None, force: bool = False, canon_family: set[int] | None = None) -> str | None:
+    """Resolve one person's marital status, spouse and latent children (the loop body of `resolve_opening_family`).
+
+    Returns the counter name it fell under, or None when the person is not eligible. `constraints` (`marital`:
+    married|widowed|never_married, `children_min`, `children_max`) narrows the pure draw by rejection sampling (at most 40
+    tries); an improbable request raises Contradiction naming the clash.
+    """
+    day = _day(conn) if day is None else int(day)
+    p = conn.execute(_PERSON_SQL + " WHERE a.id=?", (int(aid),)).fetchone()
+    if p is None or p["birth_day"] is None or p["demographic_sex"] not in ("female", "male"):
+        return None
+    meta = json.loads(p["metadata_json"] or "{}")
+    if not force and (meta.get("marital_status_basis") or meta.get("marital_status_authority")):
+        return "already_resolved"
+    canon_family = _canon_family_ids(conn) if canon_family is None else canon_family
+    if conn.execute("SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?)", (aid, aid)).fetchone():
+        _mark(conn, aid, {"marital_status": "married", "marital_status_basis": "canon_record" if aid in canon_family else "recorded_union"})
+        return "canon_record"
+    if aid in canon_family:
+        # Canon records this person's children but no living spouse: leave the rest to canon.
+        _mark(conn, aid, {"marital_status": "unresolved", "marital_status_basis": "canon_partial"})
+        return "canon_partial"
+    seed = _world_seed(conn)
+    age = (day - int(p["birth_day"])) / 365.0
+    sex = str(p["demographic_sex"]); lc = str(p["lc"])
+    key = key or str(p["source_key"] or f"actor:{seed}:{aid}")
+    curve, tags = marriage_curve_for(conn, aid, sex, lc)
+    from .health import childhood_circumstance
+    child_mult, child_tags = childhood_circumstance(conn, parent_ids=[aid], location_id=int(p["loc"]) if p["loc"] is not None else None)
+    from .cultivation import location_in_hearth
+    hearth = location_in_hearth(conn, int(p["loc"]) if p["loc"] is not None else None)
+    cons = constraints or {}
+
+    def fits(h: dict[str, Any]) -> bool:
+        alive = sum(1 for c in h["children"] if c["alive"])
+        return ((not cons.get("marital") or h["status"] == cons["marital"])
+                and int(cons.get("children_min", 0)) <= alive <= int(cons.get("children_max", 99)))
+
+    hist = draw_family_history(key, age=age, sex=sex, longevity_class=lc, curve=curve, childhood_multiplier=child_mult, hearth=hearth)
+    if cons and not fits(hist):
+        for i in range(40):
+            hist = draw_family_history(f"{key}:try{i}", age=age, sex=sex, longevity_class=lc, curve=curve,
+                                       childhood_multiplier=child_mult, hearth=hearth)
+            if fits(hist):
+                break
+        else:
+            from .veto import Contradiction
+            raise Contradiction("the world's marriage and mortality rates make that family improbable at this age")
+    status = hist["status"]
+    former = [{"sex": m["sex"], "union_kind": m["union_kind"], "married_at_age": round(m["married_at"], 1), "died_at_age": round(m["died_at"], 1)}
+              for m in hist["marriages"] if "died_at" in m]
+    alive_children = [c for c in hist["children"] if c["alive"]]
+    patch: dict[str, Any] = {
+        "marital_status": status, "marital_status_basis": "opening_draw", "marriage_rate_factors": tags,
+        "former_spouses_deceased": former, "children_born": len(hist["children"]),
+        "latent_children_alive": len(alive_children), "childhood_circumstance": {"multiplier": child_mult, "factors": child_tags},
+    }
+    if status == "widowed":
+        patch["widowed_day"] = day - int(round((age - hist["marriages"][-1]["died_at"]) * 365.0))
+    spouse_id = None
+    if status == "married":
+        spouse = hist["marriages"][-1]
+        married_day = day - int(round((age - spouse["married_at"]) * 365.0))
+        loc = int(p["loc"]) if p["loc"] is not None else None
+        spouse_id = _reveal_spouse(conn, aid, spouse, key=key, day=day, location_id=loc, reason="opening_draw")
+        from .household_life import resolved_biological_birth_parent
+        plan = _family_plan(hist, sex=sex, person_age=age, spouse_age=spouse["age_now"], day=day, key=key,
+                            birth_parent_id=resolved_biological_birth_parent(conn, aid, spouse_id),
+                            mode="OPENING_RESOLUTION_FAMILY_CONTINUITY", married_day=married_day)
+        _form_revealed_union(conn, aid, spouse_id, married_day=married_day, day=day, family_plan=plan, basis="opening_draw",
+                             union_kind=spouse["union_kind"])
+        patch["spouse_actor_id"] = spouse_id
+    if alive_children:
+        conn.execute(
+            """INSERT INTO latent_entities(latent_kind,archetype,location_id,count_estimate,constraints_json,historical_context_json,
+                                           status,created_day,updated_day,notes)
+               VALUES ('kin_group','children',?,?,?,?,'latent',?,?,?)""",
+            (p["loc"], len(alive_children),
+             _j({"parent_actor_id": aid, "other_parent_actor_id": spouse_id, "childhood_multiplier": child_mult,
+                 "birth_days": [day - int(round(c["age"] * 365.0)) for c in alive_children]}),
+             _j({"authority": AUTHORITY, "basis": "opening_draw"}), day, day,
+             "Children born before the opening; existing, previously undescribed."),
+        )
+    _mark(conn, aid, patch)
+    return status
+
+
 def resolve_opening_family(conn: sqlite3.Connection) -> dict[str, int]:
     """Resolve marital status, spouses and latent children for named adults canon leaves unknown."""
     day = _day(conn)
-    seed = _world_seed(conn)
     canon_family = _canon_family_ids(conn)
     counts = {"married": 0, "widowed": 0, "never_married": 0, "canon_record": 0, "canon_partial": 0,
               "spouses_revealed": 0, "latent_children": 0, "already_resolved": 0}
     for p in _person_rows(conn, day):
         aid = int(p["id"])
-        meta = json.loads(p["metadata_json"] or "{}")
-        if meta.get("marital_status_basis") or meta.get("marital_status_authority"):
-            counts["already_resolved"] += 1
+        kids = _kids_of(conn, aid)
+        outcome = resolve_family_for(conn, aid, day=day, canon_family=canon_family)
+        if outcome is None:
             continue
-        in_union = conn.execute(
-            "SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?)", (aid, aid)).fetchone()
-        if in_union:
-            _mark(conn, aid, {"marital_status": "married", "marital_status_basis": "canon_record" if aid in canon_family else "recorded_union"})
-            counts["canon_record"] += 1
-            continue
-        if aid in canon_family:
-            # Canon records this person's children but no living spouse: leave the rest to canon.
-            _mark(conn, aid, {"marital_status": "unresolved", "marital_status_basis": "canon_partial"})
-            counts["canon_partial"] += 1
-            continue
-        age = (day - int(p["birth_day"])) / 365.0
-        sex = str(p["demographic_sex"]); lc = str(p["lc"])
-        key = str(p["source_key"] or f"actor:{seed}:{aid}")
-        curve, tags = marriage_curve_for(conn, aid, sex, lc)
-        from .health import childhood_circumstance
-        child_mult, child_tags = childhood_circumstance(conn, parent_ids=[aid], location_id=int(p["loc"]) if p["loc"] is not None else None)
-        from .cultivation import location_in_hearth
-        hearth = location_in_hearth(conn, int(p["loc"]) if p["loc"] is not None else None)
-        hist = draw_family_history(key, age=age, sex=sex, longevity_class=lc, curve=curve, childhood_multiplier=child_mult,
-                                   hearth=hearth)
-        status = hist["status"]
-        former = [{"sex": m["sex"], "union_kind": m["union_kind"], "married_at_age": round(m["married_at"], 1), "died_at_age": round(m["died_at"], 1)}
-                  for m in hist["marriages"] if "died_at" in m]
-        alive_children = [c for c in hist["children"] if c["alive"]]
-        patch: dict[str, Any] = {
-            "marital_status": status, "marital_status_basis": "opening_draw", "marriage_rate_factors": tags,
-            "former_spouses_deceased": former, "children_born": len(hist["children"]),
-            "latent_children_alive": len(alive_children), "childhood_circumstance": {"multiplier": child_mult, "factors": child_tags},
-        }
-        if status == "widowed":
-            patch["widowed_day"] = day - int(round((age - hist["marriages"][-1]["died_at"]) * 365.0))
-        spouse_id = None
-        if status == "married":
-            spouse = hist["marriages"][-1]
-            married_day = day - int(round((age - spouse["married_at"]) * 365.0))
-            loc = int(p["loc"]) if p["loc"] is not None else None
-            spouse_id = _reveal_spouse(conn, aid, spouse, key=key, day=day, location_id=loc, reason="opening_draw")
-            from .household_life import resolved_biological_birth_parent
-            plan = _family_plan(hist, sex=sex, person_age=age, spouse_age=spouse["age_now"], day=day, key=key,
-                                birth_parent_id=resolved_biological_birth_parent(conn, aid, spouse_id),
-                                mode="OPENING_RESOLUTION_FAMILY_CONTINUITY", married_day=married_day)
-            _form_revealed_union(conn, aid, spouse_id, married_day=married_day, day=day, family_plan=plan, basis="opening_draw",
-                                 union_kind=spouse["union_kind"])
-            patch["spouse_actor_id"] = spouse_id
+        counts[outcome] += 1
+        if outcome == "married":
             counts["spouses_revealed"] += 1
-        if alive_children:
-            conn.execute(
-                """INSERT INTO latent_entities(latent_kind,archetype,location_id,count_estimate,constraints_json,historical_context_json,
-                                               status,created_day,updated_day,notes)
-                   VALUES ('kin_group','children',?,?,?,?,'latent',?,?,?)""",
-                (p["loc"], len(alive_children),
-                 _j({"parent_actor_id": aid, "other_parent_actor_id": spouse_id, "childhood_multiplier": child_mult,
-                     "birth_days": [day - int(round(c["age"] * 365.0)) for c in alive_children]}),
-                 _j({"authority": AUTHORITY, "basis": "opening_draw"}), day, day,
-                 "Children born before the opening; existing, previously undescribed."),
-            )
-            counts["latent_children"] += len(alive_children)
-        _mark(conn, aid, patch)
-        counts[status] += 1
+        if outcome in ("married", "widowed", "never_married"):
+            counts["latent_children"] += _kids_of(conn, aid) - kids
     return counts
 
 

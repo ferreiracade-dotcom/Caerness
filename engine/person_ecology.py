@@ -382,7 +382,7 @@ def find_background_candidate(
     required_stage: str | None = None, command_weight: float = 0, economic_weight: float = 0,
     medical_weight: float = 0, teaching_weight: float = 0, criminal_weight: float = 0,
     demographic_sex: str | None = None, allow_elsewhere: bool = True, strict_stage: bool = False,
-    prefer_open_core: bool = True,
+    prefer_open_core: bool = True, pick_seed: int | str | None = None,
 ) -> sqlite3.Row | None:
     rows = _candidate_rows(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
@@ -435,7 +435,11 @@ def find_background_candidate(
             float(r["criminal_familiarity"])*criminal_weight +
             (8.0 if prefer_open_core and r["open_core"] else 0.0)
         )
-    return max(rows, key=score)
+    if pick_seed is None:
+        return max(rows, key=score)
+    # A seeded pick among the best dozen: the same seed gives the same person, another seed (a redraw) another.
+    top = sorted(rows, key=lambda r: (-score(r), int(r["partition_id"]), int(r["local_uid"])))[:12]
+    return random.Random(f"pick:{pick_seed}").choices(top, weights=[len(top) - i for i in range(len(top))])[0]
 
 
 def resolve_background_person(
@@ -446,7 +450,7 @@ def resolve_background_person(
     command_weight: float = 0, economic_weight: float = 0, medical_weight: float = 0,
     teaching_weight: float = 0, criminal_weight: float = 0, demographic_sex: str | None = None,
     allow_elsewhere: bool = True, strict_stage: bool = False, name: str | None = None,
-    prefer_open_core: bool = True,
+    prefer_open_core: bool = True, pick_seed: int | str | None = None,
 ) -> int | None:
     """Reveal one pre-existing POPBACK identity as a tracked actor.
 
@@ -458,7 +462,7 @@ def resolve_background_person(
         require_open_core=require_open_core, required_stage=required_stage, command_weight=command_weight,
         economic_weight=economic_weight, medical_weight=medical_weight, teaching_weight=teaching_weight,
         criminal_weight=criminal_weight, demographic_sex=demographic_sex, allow_elsewhere=allow_elsewhere, strict_stage=strict_stage,
-        prefer_open_core=prefer_open_core,
+        prefer_open_core=prefer_open_core, pick_seed=pick_seed,
     )
     if profile is None:
         return None
@@ -474,7 +478,7 @@ def resolve_background_person(
          "Resolved from a pre-existing POPBACK identity; not created by demand."),
     ).lastrowid)
     age = max(0, (day-int(profile["birth_day"]))//365)
-    life_stage = "elder" if age >= 60 else ("child" if age < 13 else ("adolescent" if age < 18 else "adult"))
+    life_stage = "elder" if age >= 60 else ("infant" if age < 2 else "child" if age < 13 else "youth" if age < 18 else "adult")
     conn.execute(
         """INSERT INTO actor_life_profiles(actor_id,birth_day,demographic_sex,life_stage,family_formation_eligible,life_status,last_review_day,metadata_json)
            VALUES (?,?,?,?,?,'living',?,?)""",
