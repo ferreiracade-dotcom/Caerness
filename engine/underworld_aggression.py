@@ -16,7 +16,7 @@ from typing import Any
 from . import temperament as tp
 from .decision_runtime import DecisionCandidate
 
-HOSTILE_KINDS = {"occupy_vacant_turf", "challenge_zone", "poach_protection", "targeted_hit"}
+HOSTILE_KINDS = {"occupy_vacant_turf", "challenge_zone", "poach_protection", "targeted_hit", "squeeze_specialist"}
 
 
 def _day(conn: sqlite3.Connection) -> int:
@@ -151,11 +151,25 @@ def aggression_candidates(conn: sqlite3.Connection, actor_id: int, oid: int, dri
             if len(seen_t) >= 3:
                 break
 
+    # Gangs and families prey on the specialists of their city (fences, lenders, brokers): they hold stock and cash and no ground to defend it.
+    if cls != "specialist" and loc is not None:
+        prey = conn.execute(
+            """SELECT o.id,o.treasury FROM underworld_organizations o WHERE o.primary_location_id=? AND o.id<>? AND o.status='active'
+               AND json_extract(o.metadata_json,'$.role')='specialist' ORDER BY o.treasury DESC,o.id LIMIT 2""", (loc, oid)).fetchall()
+        own_tr = max(0.0, treasury)
+        for pr in prey:
+            t = int(pr["id"])
+            pt = tp.propensity(conn, oid, toward=t)
+            richness = math.log1p(float(pr["treasury"])) - math.log1p(own_tr)
+            u = .3 + 5.5 * pt + 1.1 * ambition + .5 * richness + 1.2 * _log_ratio(conn, oid, t) - (1.6 - pt) * hp - 1.2 * tol + {"street": .4, "durable": -1.0}.get(cls, 0.0)
+            cand(f"squeeze:{t}", "squeeze_specialist", u, f"Squeeze {_name(conn, t)}: it holds stock and cash and no ground to defend them.",
+                 {"target_organization_id": t}, ("hostile", "predation"), .5)
+
     # A hit on a hated rival, and the settlements durable outfits prefer.
     for other, h, kind in pool:
         pt = tp.propensity(conn, oid, toward=other)
         g = tp.grudge_level(conn, oid, other, day)
-        if h >= 58 and kind in ("rival", "war"):
+        if (h >= 58 and kind in ("rival", "war")) or (kind == "hostile_peace" and h >= 58 and g >= 35):
             u = .4 + 6.5 * pt + (h - 58) / 12.0 + g / 22.0 + 1.0 * _log_ratio(conn, oid, other) - (2.0 - 1.2 * pt) * hp - tol
             cand(f"hit:{other}", "targeted_hit", u, f"Strike {_name(conn, other)} where it hurts.", {"target_organization_id": other}, ("hostile", "violence"), .8)
         if h >= 35 and kind in ("rival", "war", "hostile_peace"):
@@ -171,7 +185,6 @@ def _members_of(conn: sqlite3.Connection, oid: int, *, least: bool = False) -> l
     return conn.execute(
         """SELECT p.actor_id,p.role_kind FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id
            WHERE p.organization_id=? AND p.status='active' AND a.status='active'
-           AND p.actor_id<>COALESCE((SELECT player_actor_id FROM player_state WHERE id=1),-1)
            ORDER BY p.authority {} ,p.actor_id""".format("ASC" if least else "DESC"), (oid,)).fetchall()
 
 
@@ -182,10 +195,133 @@ def _client(conn: sqlite3.Connection, t: int, zid: int | None) -> sqlite3.Row | 
            ORDER BY (p.zone_id=?) DESC,e.cash DESC,e.id LIMIT 1""", (t, zid if zid is not None else -1)).fetchone()
 
 
-def _harm(conn: sqlite3.Connection, victim: int, source_org: int, rng: random.Random, *, severity: float, intent: str, kind: str, fatal: bool = False) -> str:
+def hit_band(p: float, rng: random.Random, lethal: bool) -> str:
+    """Outcome of a blow whose odds of landing are p: failed / wounded / maimed / killed. It leans toward survival: death needs
+    a killing intent and odds that are close to overwhelming; most blows that land wound or maim."""
+    if rng.random() >= max(0.0, min(1.0, p)):
+        return "failed"
+    pk = (max(0.0, p - 0.3) / 0.7) ** 1.3 * (1.0 if lethal else 0.15)
+    if rng.random() < pk:
+        return "killed"
+    return "maimed" if rng.random() < 0.35 + 0.3 * p else "wounded"
+
+
+_BAND_OUTCOME = {"wounded": "transient", "maimed": "persistent", "killed": "fatal"}
+
+
+def _phrase_for(style: str, org: str) -> str:
+    if style == "beating":
+        return f"men of {org} mean to beat you"
+    if style == "abduction":
+        return f"men of {org} mean to take you"
+    if style == "duel":
+        return f"{org} has sent its best fighter to settle it with you"
+    return f"{org} has made an attempt on your life"
+
+
+def pending_attempt(conn: sqlite3.Connection, player: int, src_org: int, p: float, *, style: str, lethal: bool, day: int) -> int | None:
+    """An attempt on the protagonist is never resolved off-screen: it becomes a pending incident for the GM to play (and it
+    interrupts a time skip). The odds are kept for the scene's resolution."""
+    from .interactions import create_interaction
+    from .simulation import SimEvent, log_event
+    head = conn.execute("SELECT current_leader_actor_id FROM underworld_organizations WHERE id=?", (src_org,)).fetchone()
+    proposer = int(head[0]) if head and head[0] is not None and int(head[0]) != player else None
+    if proposer is None:
+        r = conn.execute("""SELECT p.actor_id FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.organization_id=? AND p.status='active'
+                            AND a.status='active' AND p.actor_id<>? ORDER BY p.authority DESC,p.actor_id LIMIT 1""", (src_org, player)).fetchone()
+        proposer = int(r[0]) if r else None
+    if proposer is None:
+        return None
+    org = _name(conn, src_org)
+    phrase = _phrase_for(style, org)
+    iid = create_interaction(conn, proposer, player, "attack", day, urgency=5, stakes=4,
+                             terms={"purpose": phrase, "underworld_attempt": True, "source_organization_id": src_org, "style": style,
+                                    "odds": round(float(p), 4), "lethal": bool(lethal)},
+                             rationale=f"{org} moves against the protagonist.")
+    loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (player,)).fetchone()
+    log_event(conn, SimEvent(day=day, event_type="underworld_attempt", title=f"{org} moves against you", summary=phrase[0].upper() + phrase[1:] + ".",
+                             severity=4, source_actor_id=proposer, target_actor_ids=(player,), location_id=int(loc[0]) if loc and loc[0] is not None else None))
+    return iid
+
+
+def _apply_band(conn: sqlite3.Connection, victim: int, src_org: int, band: str, rng: random.Random, *, style: str, severity: float, lethal: bool,
+                ref: int | None = None) -> dict[str, Any] | None:
     from .harm import record_harm
+    outcome = _BAND_OUTCOME.get(band)
+    if outcome is None:
+        return None
+    return record_harm(conn, victim, source_kind=f"underworld_{style}", source_ref_id=ref if ref is not None else rng.randrange(1, 10**9), severity=severity,
+                       intent_class="lethal" if lethal else "hostile", metadata={"source_organization_id": src_org, "style": style, "band": band},
+                       outcome_override=outcome)
+
+
+def attempt_on(conn: sqlite3.Connection, victim: int, src_org: int, p: float, rng: random.Random, *, style: str, lethal: bool, severity: float) -> dict[str, Any]:
+    """A blow aimed at one person, whoever he is. The protagonist's becomes a pending incident; anyone else's resolves in bands."""
+    if victim == _player_actor(conn):
+        return {"band": "pending", "interaction_id": pending_attempt(conn, victim, src_org, p, style=style, lethal=lethal, day=_day(conn))}
+    band = hit_band(p, rng, lethal)
+    _apply_band(conn, victim, src_org, band, rng, style=style, severity=severity, lethal=lethal)
+    return {"band": band}
+
+
+def resolve_attempt(conn: sqlite3.Connection, interaction: sqlite3.Row, choice: str, day: int):
+    """The GM has played the attempt on the protagonist: he stands (reject), yields (accept) or runs (counter). Same bands, same odds."""
+    from . import ledger
+    from .interactions import InteractionResult
+    from .simulation import SimEvent, log_event
+    terms = json.loads(interaction["terms_json"] or "{}")
+    me, src = int(interaction["recipient_actor_id"]), int(terms["source_organization_id"])
+    p, lethal, style = float(terms.get("odds", .5)), bool(terms.get("lethal")), str(terms.get("style", "assault"))
+    rng = random.Random(int(interaction["id"]) * 7919 + day)
+    org = _name(conn, src)
+    if choice == "accept":
+        bal = ledger.balance(conn, ("person", me))
+        if bal > 0.01:
+            ledger.transfer(conn, ("person", me), ("outfit", src), round(bal * (0.1 + 0.4 * p), 4), flow_kind="other", purpose="paid off", allow_partial=True)
+        summary = f"He yields to {org}, pays them off and walks away whole."
+    else:
+        pe = p if choice == "reject" else p * 0.45  # running cuts the odds of being caught
+        band = hit_band(pe, rng, lethal)
+        _apply_band(conn, me, src, band, rng, style=style, severity=70 if lethal else 40, lethal=lethal, ref=int(interaction["id"]))
+        verb = "stands" if choice == "reject" else "runs"
+        tail = {"failed": f"and {org}'s attempt comes to nothing.", "wounded": f"and {org}'s men leave him hurt.",
+                "maimed": f"and {org}'s men leave him badly hurt, for good.", "killed": f"and {org}'s men kill him."}[band]
+        summary = f"He {verb} {tail}"
+        if band == "failed":
+            _anonymous_loss(conn, src, 1.0, "lost a man in a failed attempt on", 30, (0.0, 0.0, 0.0))
+    conn.execute("UPDATE interactions SET status='resolved',resolved_day=?,resolution_summary=? WHERE id=?", (day, summary, int(interaction["id"])))
+    log_event(conn, SimEvent(day=day, event_type="underworld_attempt_resolved", title=f"{org}'s attempt on him", summary=summary, severity=4,
+                             source_actor_id=int(interaction["proposer_actor_id"]), target_actor_ids=(me,)))
+    return InteractionResult(int(interaction["id"]), "resolved", choice, summary)
+
+
+def expire_attempts(conn: sqlite3.Connection, day: int, ttl: int = 60) -> int:
+    """An attempt nobody plays out lapses (the moment passes); it never turns into harm unseen."""
+    n = 0
+    for r in conn.execute("SELECT id FROM interactions WHERE status='pending' AND interaction_type='attack' AND json_extract(terms_json,'$.underworld_attempt')=1 AND created_day<=?", (day - ttl,)).fetchall():
+        conn.execute("UPDATE interactions SET status='expired',resolved_day=?,resolution_summary='The moment passed.' WHERE id=?", (day, int(r[0])))
+        n += 1
+    return n
+
+
+def _edge(conn: sqlite3.Connection, a: int, t: int) -> float:
+    """Chance that outfit a gets the better of outfit t in a blow: from the Stage-weighted strength of the two."""
+    return max(0.06, min(0.94, 1.0 / (1.0 + math.exp(-1.6 * _log_ratio(conn, a, t)))))
+
+
+def _harm(conn: sqlite3.Connection, victim: int, source_org: int, rng: random.Random, *, severity: float, intent: str, kind: str,
+          lethal: bool = False, odds: float = 0.6) -> str:
+    """Harm to one person. The protagonist's is a pending incident. A killing resolves in bands; a beating by the ordinary model."""
+    from .harm import record_harm
+    if victim == _player_actor(conn):
+        pending_attempt(conn, victim, source_org, odds, style=kind, lethal=lethal, day=_day(conn))
+        return "pending"
+    if lethal:
+        band = hit_band(max(odds, 0.05), rng, True)
+        _apply_band(conn, victim, source_org, band, rng, style=kind, severity=severity, lethal=True)
+        return {"failed": "transient", "wounded": "transient", "maimed": "persistent", "killed": "fatal"}[band]
     r = record_harm(conn, victim, source_kind=f"underworld_{kind}", source_ref_id=rng.randrange(1, 10**9), severity=severity, intent_class=intent,
-                    metadata={"source_organization_id": source_org, "style": kind}, outcome_override="fatal" if fatal else None)
+                    metadata={"source_organization_id": source_org, "style": kind})
     return str(r["outcome"])
 
 
@@ -216,14 +352,50 @@ def _s_intimidation(conn, a, t, zid, rng):
     return {"win": win, "incident": "extortion_attempt", "severity": 30, "heat": (1.0, 0.5, 1.0), "text": "leaned on"}
 
 
+def _failed(conn, a, t, text, severity=22):
+    """The blow did not land. The target still knows it was tried, and the attacker pays for it in men."""
+    _anonymous_loss(conn, a, .5 + .9 * (1.0 - _edge(conn, a, t)), "lost men", severity, (0.0, 0.0, 0.0))
+    return {"win": False, "incident": "extortion_attempt", "severity": severity, "heat": (1.0, .5, 1.0), "text": text}
+
+
+def _fee(conn, a):
+    """What a hired hand costs: a share of the buyer's treasury, so a rich outfit pays more and a poor one can still buy something small."""
+    tr = float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (a,)).fetchone()[0])
+    return round(max(.2, .12 * tr), 3), tr
+
+
 @_styled("beating")
 def _s_beating(conn, a, t, zid, rng):
     ms = [m for m in _members_of(conn, t, least=True) if m["role_kind"] in ("member", "associate", "collector", "enforcer", "crew_leader")]
+    p = _edge(conn, a, t)
+    if rng.random() >= p:
+        return _failed(conn, a, t, "failed in a beating of men of")
     if not ms:
         return _anonymous_loss(conn, t, .6, "beat men of", 42, (1.5, 1.0, 2.5))
     v = ms[rng.randrange(min(3, len(ms)))]
-    out = _harm(conn, int(v["actor_id"]), a, rng, severity=38, intent="hostile", kind="beating")
+    out = _harm(conn, int(v["actor_id"]), a, rng, severity=38, intent="hostile", kind="beating", odds=p)
     return {"win": True, "incident": "attack_on_member", "severity": 42, "heat": (1.5, 1.0, 2.5), "text": "beat a man of", "victim": int(v["actor_id"]), "harm": out}
+
+
+@_styled("hired_beating")
+def _s_hired_beating(conn, a, t, zid, rng):
+    """A specialist or a careful family buys a beating from freelances instead of sending its own."""
+    from .underworld_rebuild import _finance
+    fee, tr = _fee(conn, a)
+    if tr < fee * .5:
+        return _s_intimidation(conn, a, t, zid, rng)
+    pay = round(fee * .5, 3)
+    conn.execute("UPDATE underworld_organizations SET treasury=treasury-? WHERE id=?", (pay, a))
+    _finance(conn, a, "hired_hands_fee", -pay, counterparty_organization_id=None)
+    ms = [m for m in _members_of(conn, t, least=True) if m["role_kind"] in ("member", "associate", "collector", "enforcer", "crew_leader")]
+    p = max(.3, min(.8, .55 + .1 * math.tanh(-_log_ratio(conn, t, a))))  # the hired hands' skill does not depend on the buyer's own fighters
+    if rng.random() >= p:
+        return {"win": False, "incident": "extortion_attempt", "severity": 22, "heat": (.5, .5, .5), "text": "sent hired hands against"}
+    if not ms:
+        return _anonymous_loss(conn, t, .5, "had men of", 38, (1.0, 1.0, 1.5))
+    v = ms[rng.randrange(min(3, len(ms)))]
+    out = _harm(conn, int(v["actor_id"]), a, rng, severity=38, intent="hostile", kind="hired_beating", odds=p)
+    return {"win": True, "incident": "attack_on_member", "severity": 40, "heat": (1.0, 1.5, 1.5), "text": "had a man of", "victim": int(v["actor_id"]), "harm": out}
 
 
 @_styled("smashed_premises")
@@ -231,6 +403,8 @@ def _s_smashed_premises(conn, a, t, zid, rng):
     c = _client(conn, t, zid)
     if c is None:
         return _s_beating(conn, a, t, zid, rng)
+    if rng.random() >= _edge(conn, a, t):
+        return _failed(conn, a, t, "failed to wreck a business under the protection of")
     conn.execute("UPDATE civilian_enterprises SET cash=cash*.6,status=CASE WHEN status='active' AND ?<.4 THEN 'strained' ELSE status END WHERE id=?", (rng.random(), int(c["id"])))
     return {"win": True, "incident": "attack_on_client", "severity": 48, "heat": (2.5, 1.5, 3.0), "text": "wrecked a business under the protection of", "enterprise_id": int(c["id"])}
 
@@ -239,12 +413,23 @@ def _s_smashed_premises(conn, a, t, zid, rng):
 def _s_seized_goods(conn, a, t, zid, rng):
     from . import ledger
     c = _client(conn, t, zid)
-    if c is None or float(c["cash"]) < 1.0:
+    p = _edge(conn, a, t)
+    if c is not None and float(c["cash"]) >= 1.0:
+        if rng.random() >= p:
+            return _failed(conn, a, t, "failed to seize goods from a client of")
+        amt = round(float(c["cash"]) * .35, 3)
+        if amt >= .05:
+            ledger.transfer(conn, ("business", int(c["id"])), ("outfit", a), amt, flow_kind="other", purpose="goods seized")
+        return {"win": True, "incident": "attack_on_client", "severity": 40, "heat": (1.5, 1.5, 1.0), "text": "seized goods from a client of", "enterprise_id": int(c["id"])}
+    # an outfit with no clients (a fence, a broker, a lender) is robbed of its own stock
+    tr = float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (t,)).fetchone()[0])
+    if tr < .5:
         return _s_intimidation(conn, a, t, zid, rng)
-    amt = round(min(float(c["cash"]) * .35, 4.0), 3)
-    if amt >= .05:
-        ledger.transfer(conn, ("business", int(c["id"])), ("outfit", a), amt, flow_kind="other", purpose="goods seized")
-    return {"win": True, "incident": "attack_on_client", "severity": 40, "heat": (1.5, 1.5, 1.0), "text": "seized goods from a client of", "enterprise_id": int(c["id"])}
+    if rng.random() >= p:
+        return _failed(conn, a, t, "failed to rob")
+    amt = round(tr * .2, 3)
+    ledger.transfer(conn, ("outfit", t), ("outfit", a), amt, flow_kind="other", purpose="goods seized")
+    return {"win": True, "incident": "attack_on_member", "severity": 38, "heat": (1.5, 1.5, 1.0), "text": "robbed the stock of"}
 
 
 @_styled("abduction")
@@ -253,9 +438,12 @@ def _s_abduction(conn, a, t, zid, rng):
     ms = [m for m in _members_of(conn, t, least=False) if m["role_kind"] in ("crew_leader", "collector", "enforcer", "lieutenant", "member")]
     if not ms:
         return _s_beating(conn, a, t, zid, rng)
+    p = _edge(conn, a, t)
+    if rng.random() >= p:
+        return _failed(conn, a, t, "failed to snatch a man of", 26)
     v = ms[-1]
-    out = _harm(conn, int(v["actor_id"]), a, rng, severity=22, intent="hostile", kind="abduction")
-    ransom = round(min(float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (t,)).fetchone()[0]) * .25, 3.0), 3)
+    out = _harm(conn, int(v["actor_id"]), a, rng, severity=22, intent="hostile", kind="abduction", odds=p)
+    ransom = round(float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (t,)).fetchone()[0]) * .25, 3)
     if ransom >= .05:
         ledger.transfer(conn, ("outfit", t), ("outfit", a), ransom, flow_kind="other", purpose="ransom")
     return {"win": True, "incident": "attack_on_member", "severity": 55, "heat": (2.5, 3.0, 3.0), "text": "snatched a man of", "victim": int(v["actor_id"]), "harm": out}
@@ -274,7 +462,7 @@ def _s_duel(conn, a, t, zid, rng):
     win = rng.random() < p
     loser, winner = (ct, ca) if win else (ca, ct)
     src = a if win else t
-    out = _harm(conn, int(loser["actor_id"]), src, rng, severity=78, intent="hostile", kind="duel")
+    out = _harm(conn, int(loser["actor_id"]), src, rng, severity=78, intent="hostile", kind="duel", odds=p if win else 1.0 - p)
     return {"win": win, "incident": "attack_on_member", "severity": 60, "heat": (3.0, 2.0, 4.0), "text": "sent its best fighter against the best of",
             "victim": int(loser["actor_id"]), "harm": out}
 
@@ -282,21 +470,24 @@ def _s_duel(conn, a, t, zid, rng):
 @_styled("public_example")
 def _s_public_example(conn, a, t, zid, rng):
     ms = [m for m in _members_of(conn, t, least=True) if m["role_kind"] in ("member", "associate", "collector", "enforcer")]
+    p = min(.95, _edge(conn, a, t) + .15)  # the example is made of someone who cannot fight back well
+    if rng.random() >= p:
+        return _failed(conn, a, t, "failed to make an example of a man of", 30)
     if not ms:
         return _anonymous_loss(conn, t, 1.0, "made a public example of a man of", 72, (6.0, 3.0, 9.0))
     v = ms[0]
-    out = _harm(conn, int(v["actor_id"]), a, rng, severity=100, intent="lethal", kind="public_example", fatal=True)
+    out = _harm(conn, int(v["actor_id"]), a, rng, severity=100, intent="lethal", kind="public_example", lethal=True, odds=p)
     return {"win": True, "incident": "attack_on_member", "severity": 72, "heat": (6.0, 3.0, 9.0), "text": "made a public example of a man of", "victim": int(v["actor_id"]), "harm": out}
 
 
 @_styled("hired_killing")
 def _s_hired_killing(conn, a, t, zid, rng):
     from .underworld_rebuild import _finance, _targeted_hit
-    tr = float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (a,)).fetchone()[0])
-    if tr < 3.0:
+    fee, tr = _fee(conn, a)
+    if tr < fee:
         return _s_beating(conn, a, t, zid, rng)
-    conn.execute("UPDATE underworld_organizations SET treasury=treasury-3 WHERE id=?", (a,))
-    _finance(conn, a, "hired_killer_fee", -3.0, counterparty_organization_id=None)
+    conn.execute("UPDATE underworld_organizations SET treasury=treasury-? WHERE id=?", (fee, a))
+    _finance(conn, a, "hired_killer_fee", -fee, counterparty_organization_id=None)
     ok = _targeted_hit(conn, a, rng, target=t, hired=True)
     return {"win": bool(ok), "incident": "attack_on_member", "severity": 80, "heat": (1.0, 4.0, 3.0), "text": "paid for a killing in", "hit": True}
 
@@ -312,23 +503,26 @@ def _s_assault(conn, a, t, zid, rng):
     return {"win": won, "incident": None, "severity": 70, "heat": (0.0, 0.0, 0.0), "text": "stormed the ground of", "assault": True}
 
 
-STYLE_FUNCS = {"intimidation": _s_intimidation, "beating": _s_beating, "smashed_premises": _s_smashed_premises, "seized_goods": _s_seized_goods,
-               "abduction": _s_abduction, "duel": _s_duel, "public_example": _s_public_example, "hired_killing": _s_hired_killing, "assault": _s_assault}
+STYLE_FUNCS = {"intimidation": _s_intimidation, "beating": _s_beating, "hired_beating": _s_hired_beating, "smashed_premises": _s_smashed_premises,
+               "seized_goods": _s_seized_goods, "abduction": _s_abduction, "duel": _s_duel, "public_example": _s_public_example,
+               "hired_killing": _s_hired_killing, "assault": _s_assault}
 
 
 def pick_style(conn: sqlite3.Connection, a: int, t: int, rng: random.Random) -> str:
     w = tp.style_weights(conn, a)
     h, _ = _hostility(conn, a, t)
     p = tp.propensity(conn, a, toward=t)
-    tr = float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (a,)).fetchone()[0])
+    fee, tr = _fee(conn, a)
     keys, weights = [], []
     for k, v in sorted(w.items()):
-        if k == "hired_killing" and tr < 3.0:
+        if k in ("hired_killing", "hired_beating") and tr < fee:
             continue
         if k == "public_example":
             v *= p * p * 2.0 if h >= 40 else 0.0
         if k in ("hired_killing", "duel", "abduction"):
             v *= .3 + p
+        if k == "hired_beating":
+            v *= 1.4 - p  # the less hot-blooded the buyer, the more it prefers to pay for it
         if v > 0:
             keys.append(k); weights.append(v)
     return rng.choices(keys, weights=weights, k=1)[0] if keys else "intimidation"
@@ -381,7 +575,7 @@ def _rng(conn: sqlite3.Connection, oid: int, salt: int) -> random.Random:
 
 def execute_aggression(conn: sqlite3.Connection, actor_id: int, oid: int, action_kind: str, payload: dict[str, Any], day: int) -> dict[str, Any]:
     from . import underworld_rebuild as uw
-    if leader_is_player(conn, oid):
+    if leader_is_player(conn, oid) and (action_kind in HOSTILE_KINDS or action_kind == "negotiate_settlement"):
         return {"summary": "Hostile initiative withheld: it needs the boss's own order.", "blocked": True}
     t = int(payload["target_organization_id"]) if payload.get("target_organization_id") is not None else None
     rng = _rng(conn, oid, (t or 0) * 31 + int(payload.get("zone_id") or 0))
@@ -409,7 +603,8 @@ def execute_aggression(conn: sqlite3.Connection, actor_id: int, oid: int, action
                            success=.5, metadata={"style": "intimidation", **res})
         return {"summary": f"Tried to take protected client #{eid} from {_name(conn, t)}.", "operation_id": op}
     if action_kind == "targeted_hit":
-        style = "hired_killing" if tp.outfit_class(conn, oid) != "street" and float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (oid,)).fetchone()[0]) >= 3.0 else "assault"
+        fee, trs = _fee(conn, oid)
+        style = "hired_killing" if tp.outfit_class(conn, oid) != "street" and trs >= fee else "assault"
         if style == "assault":
             ok = uw._targeted_hit(conn, oid, rng, target=t)
             op = None
@@ -418,6 +613,11 @@ def execute_aggression(conn: sqlite3.Connection, actor_id: int, oid: int, action
             return {"summary": f"Paid for a killing in {_name(conn, t)}.", "operation_id": r["operation_id"]}
         uw.add_heat(conn, oid, violence=2)
         return {"summary": f"Struck at {_name(conn, t)}: {'done' if ok else 'nothing came of it'}."}
+    if action_kind == "squeeze_specialist":
+        w = {k: v for k, v in tp.style_weights(conn, oid).items() if k in ("seized_goods", "intimidation", "beating")}
+        style = rng.choices(sorted(w), weights=[w[k] for k in sorted(w)], k=1)[0] if w else "intimidation"
+        r = hostile_move(conn, oid, t, None, rng, style=style, file_contest=False)
+        return {"summary": f"Squeezed {_name(conn, t)} by {r['style']}.", "operation_id": r["operation_id"]}
     if action_kind == "negotiate_settlement":
         return negotiate(conn, oid, t, rng, day)
     raise ValueError(f"unsupported aggression action {action_kind}")
@@ -432,7 +632,7 @@ def negotiate(conn: sqlite3.Connection, a: int, t: int, rng: random.Random, day:
     mid = conn.execute(
         """SELECT o.id FROM underworld_organizations o WHERE o.primary_location_id=(SELECT primary_location_id FROM underworld_organizations WHERE id=?)
            AND o.status='active' AND o.id NOT IN (?,?) ORDER BY o.cohesion DESC,o.id LIMIT 1""", (a, a, t)).fetchone()
-    pay = round(min(float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (a,)).fetchone()[0]) * .15, 2.5), 3)
+    pay = round(float(conn.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (a,)).fetchone()[0]) * .15, 3)
     ok = rng.random() < accept
     if ok:
         if pay >= .05:
@@ -447,23 +647,90 @@ def negotiate(conn: sqlite3.Connection, a: int, t: int, rng: random.Random, day:
     return {"summary": f"{'Settled' if ok else 'Failed to settle'} with {_name(conn, t)}.", "operation_id": op}
 
 
+_IN_KIND = {"beating": "beating", "hired_beating": "hired_beating", "smashed_premises": "smashed_premises", "seized_goods": "seized_goods",
+            "intimidation": "intimidation", "abduction": "abduction", "duel": "duel",
+            # a killing is answered in proportion: the same only when the dead man's side can afford a hired hand, else by a beating
+            "public_example": "beating", "hired_killing": "hired_beating", "assault": "beating"}
+
+
 def retaliate(conn: sqlite3.Connection, oid: int, source: int, incident_id: int, rng: random.Random) -> dict[str, Any]:
-    """A real answer to a specific incident: suppress one of the source's rackets for 30-60 days, else hurt one of its people,
-    else contest its ground."""
+    """A real answer to a specific incident, proportionate and in kind: the same sort of blow the source dealt (a killing is answered
+    by a beating unless a man was in fact killed), else a racket of the source's suppressed for a while, else its ground contested."""
     from . import underworld_rebuild as uw
     day = _day(conn)
+    inc = conn.execute("SELECT metadata_json,incident_kind FROM underworld_incidents WHERE id=?", (incident_id,)).fetchone()
+    try:
+        meta = json.loads(inc["metadata_json"] or "{}") if inc else {}
+    except Exception:
+        meta = {}
+    style = _IN_KIND.get(str(meta.get("style")))
+    dead = meta.get("harm") == "fatal"
+    if style is not None and meta.get("style") in ("public_example", "hired_killing") and dead:
+        style = "hired_killing" if _fee(conn, oid)[1] >= _fee(conn, oid)[0] else "beating"
+    if style in ("beating", "abduction", "duel", "assault") and tp.outfit_class(conn, oid) == "specialist":
+        style = "hired_beating"  # a fence or a lender does not send its own men; it pays freelances
+    zones = _own_zones(conn, source)
+    if style is not None and (style != "smashed_premises" or _client(conn, source, zones[0] if zones else None) is not None):
+        r = hostile_move(conn, oid, source, zones[0] if zones else None, rng, style=style, file_contest=False)
+        return {"effect": "in_kind", "style": r["style"], "operation_id": r["operation_id"]}
     rk = conn.execute("""SELECT id,racket_kind,zone_id FROM underworld_racket_sites WHERE organization_id=? AND status='active'
                          AND racket_kind<>'protection collections' ORDER BY gross_income_per_30 DESC,id LIMIT 1""", (source,)).fetchone()
     if rk is not None and rng.random() < .55:
         uw.set_racket_status(conn, int(rk["id"]), "suppressed")
         conn.execute("UPDATE underworld_racket_sites SET metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.restore_day',?) WHERE id=?", (day + rng.randint(30, 60), int(rk["id"])))
         return {"effect": "racket_suppressed", "racket_id": int(rk["id"])}
-    zones = _own_zones(conn, source)
     if rng.random() < .5 or not zones:
-        r = hostile_move(conn, oid, source, zones[0] if zones else None, rng, style="beating", file_contest=False)
-        return {"effect": "member_beaten", "operation_id": r["operation_id"]}
+        r = hostile_move(conn, oid, source, zones[0] if zones else None, rng, style="hired_beating" if tp.outfit_class(conn, oid) == "specialist" else "beating", file_contest=False)
+        return {"effect": "member_beaten", "style": r["style"], "operation_id": r["operation_id"]}
     uw.add_zone_challenger(conn, zones[0], oid, strength=26, severity=30, metadata={"retaliation_for": incident_id})
     return {"effect": "zone_contested", "zone_id": zones[0]}
+
+
+# -- coercion of clients and debtors ---------------------------------------------------------------------------
+
+_COERCION = {"high-risk debt": ("a debtor", ("labor", "merchant", "artisan", "transport"), "was beaten over what he owed"),
+             "brothel protection": ("a house worker", ("hospitality", "artisan"), "was roughed up for the house's protection money"),
+             "protection collections": ("a shopkeeper", ("merchant", "artisan", "hospitality"), "was leaned on for his protection money")}
+
+
+def coercion_turn(conn: sqlite3.Connection, oid: int, rng: random.Random, day: int) -> int:
+    """Outfits that live on coercive rackets (debt, brothel and shop protection) hurt the people they squeeze, at a rate set by their
+    temperament and the heat they carry. The victim is a person of the city who already existed; the blow is a real harm."""
+    if leader_is_player(conn, oid):
+        return 0  # nothing hostile happens in his name without his order
+    org = conn.execute("SELECT primary_location_id FROM underworld_organizations WHERE id=?", (oid,)).fetchone()
+    loc = int(org[0]) if org and org[0] is not None else None
+    rackets = [r for r in conn.execute("SELECT racket_kind FROM underworld_racket_sites WHERE organization_id=? AND status='active'", (oid,)) if r[0] in _COERCION]
+    if not rackets:
+        return 0
+    heat = conn.execute("SELECT investigative_heat,violence_heat FROM underworld_heat WHERE organization_id=?", (oid,)).fetchone()
+    hp = (float(heat[1]) / 60.0 + float(heat[0]) / 90.0) if heat else 0.0
+    p = tp.propensity(conn, oid)
+    tol = city_violence(conn, loc) / 100.0
+    h = 0.10 * p * math.exp(-hp) * (1.0 - 0.5 * min(1.0, tol))
+    n = 0
+    for r in rackets:
+        if rng.random() >= h:
+            continue
+        who, domains, what = _COERCION[r[0]]
+        victim = None
+        if loc is not None:
+            from .person_ecology import resolve_background_person
+            victim = resolve_background_person(conn, reason="An outfit squeezed its clients", demand_kind="underworld_coercion", location_id=loc,
+                                               occupation_domains=domains, min_age=20, max_age=60, allow_elsewhere=False)
+        if victim is not None:
+            _harm(conn, int(victim), oid, rng, severity=34, intent="hostile", kind="coercion")
+            name = str(conn.execute("SELECT name FROM actors WHERE id=?", (int(victim),)).fetchone()[0])
+            who_text = f"{name}, {who},"
+        else:
+            who_text = who
+        from .underworld_rebuild import add_heat
+        from .simulation import SimEvent, log_event
+        add_heat(conn, oid, public=1.0, investigative=.5, violence=1.5)
+        log_event(conn, SimEvent(day=day, event_type="underworld_coercion", title=f"Trouble from {_name(conn, oid)}",
+                                 summary=f"{who_text[0].upper() + who_text[1:]} {what}.", severity=2, location_id=loc, rumorability=.25))
+        n += 1
+    return n
 
 
 # -- the city's own response, and the churn of street gangs ---------------------------------------------------
@@ -477,26 +744,33 @@ def restore_suppressed_rackets(conn: sqlite3.Connection, day: int) -> int:
 
 
 def city_crackdowns(conn: sqlite3.Connection, day: int) -> int:
-    """Rising violence in a city brings the watch, cultivated officers and a magistrate's crackdown; every outfit that fed it turns cautious."""
+    """Rising violence in a city brings the watch, cultivated officers and a magistrate's crackdown; the outfits that fed it turn cautious.
+    How much violence a city tolerates grows with the number of outfits it holds; the chance of a crackdown rises smoothly with the
+    tension above that, and falls just after the last one (the watch has been through). Outfits are hit in proportion to the
+    violence heat they carry."""
     from . import underworld_rebuild as uw
-    from .simulation import _world_event_logger
     done = 0
     for r in conn.execute("""SELECT DISTINCT o.primary_location_id loc FROM underworld_incidents i JOIN underworld_organizations o ON o.id=i.target_organization_id
                              WHERE o.primary_location_id IS NOT NULL AND i.day>? AND i.incident_kind IN ('attack_on_member','attack_on_client')""", (day - 90,)).fetchall():
         loc = int(r["loc"])
         tension = city_tension(conn, loc, day)
-        if tension < 2.4:
-            continue
+        n_out = int(conn.execute("SELECT COUNT(*) FROM underworld_organizations WHERE primary_location_id=? AND status IN ('active','strained','fragmented')", (loc,)).fetchone()[0])
+        tolerance = 0.45 * math.sqrt(max(1, n_out))
         key = f"uw_crackdown:{loc}"
         last = conn.execute("SELECT value FROM engine_meta WHERE key=?", (key,)).fetchone()
-        if last and day - int(last[0]) < 90:
+        rest = 1.0 - math.exp(-(day - int(last[0])) / 60.0) if last else 1.0
+        rng = _rng(conn, loc, day)
+        p = rest / (1.0 + math.exp(-(tension - tolerance) / max(0.2, 0.25 * tolerance)))
+        if rng.random() >= p:
             continue
         conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES (?,?)", (key, str(day)))
-        rng = _rng(conn, loc, day)
-        top = conn.execute("""SELECT o.id FROM underworld_heat h JOIN underworld_organizations o ON o.id=h.organization_id
-                              WHERE o.primary_location_id=? AND o.status IN ('active','strained','fragmented') ORDER BY h.violence_heat DESC,o.id LIMIT 3""", (loc,)).fetchall()
-        for t in top:
-            oid = int(t[0])
+        heats = conn.execute("""SELECT o.id,h.violence_heat vh FROM underworld_heat h JOIN underworld_organizations o ON o.id=h.organization_id
+                                WHERE o.primary_location_id=? AND o.status IN ('active','strained','fragmented') ORDER BY h.violence_heat DESC,o.id""", (loc,)).fetchall()
+        top_heat = float(heats[0]["vh"]) if heats else 0.0
+        for t in heats:
+            oid = int(t["id"])
+            if t is not heats[0] and float(t["vh"]) < 0.5 * top_heat:
+                continue
             conn.execute("INSERT INTO underworld_enforcement_actions(organization_id,day,action_kind,severity,result,metadata_json) VALUES (?,?,?,?,?,?)",
                          (oid, day, "city_crackdown", 60, "applied", json.dumps({"city_tension": round(tension, 2)})))
             rk = conn.execute("SELECT id FROM underworld_racket_sites WHERE organization_id=? AND status='active' ORDER BY gross_income_per_30 DESC,id LIMIT 1", (oid,)).fetchone()
@@ -546,9 +820,11 @@ def dissolve_street_gang(conn: sqlite3.Connection, oid: int, day: int, reason: s
     conn.execute("UPDATE underworld_business_links SET status='ended' WHERE organization_id=? AND status='active'", (oid,))
     for rk in conn.execute("SELECT id FROM underworld_racket_sites WHERE organization_id=? AND status IN ('active','suppressed')", (oid,)).fetchall():
         uw.set_racket_status(conn, int(rk[0]), "abandoned")
+    me = _player_actor(conn)
     for p in conn.execute("SELECT actor_id FROM underworld_personnel WHERE organization_id=? AND status='active'", (oid,)).fetchall():
         conn.execute("UPDATE underworld_personnel SET status='retired' WHERE actor_id=?", (int(p[0]),))
-        make_former_member_ordinary(conn, int(p[0]))
+        if me is None or int(p[0]) != me:  # the protagonist is not rewritten by his gang's fall
+            make_former_member_ordinary(conn, int(p[0]))
     log_event(conn, SimEvent(day=day, event_type="underworld_outfit_collapsed", title=f"{name} has broken up",
                              summary=f"{name} came apart ({reason}); its men drifted back to ordinary life or to other crews.", severity=2, location_id=loc))
 
@@ -578,7 +854,8 @@ def found_street_gang(conn: sqlite3.Connection, lid: int, zid: int, rng: random.
     except ue._NoPerson:
         conn.execute("ROLLBACK TO SAVEPOINT uw_new_gang"); conn.execute("RELEASE SAVEPOINT uw_new_gang")
         return None
-    from .world_pressure import seed_baseline_relations
+    from .world_pressure import seed_baseline_relations, seed_named_personnel
+    seed_named_personnel(conn, oid, rng)
     seed_baseline_relations(conn, only_org=oid)
     log_event(conn, SimEvent(day=day, event_type="underworld_new_gang", title=f"A new gang in {place}: {name}",
                              summary=f"A crew calling itself {name} has begun to hold a corner of {place}.", severity=2, location_id=lid))
@@ -596,6 +873,7 @@ def monthly_world_pressure(conn: sqlite3.Connection, day: int) -> dict[str, int]
     if day < next_pressure_day(conn):
         return {"collapsed": 0, "founded": 0, "crackdowns": 0}
     restore_suppressed_rackets(conn, day)
+    expire_attempts(conn, day)
     crackdowns = city_crackdowns(conn, day)
     churn = street_gang_churn(conn, day)
     return {**churn, "crackdowns": crackdowns}
@@ -609,8 +887,6 @@ def street_gang_churn(conn: sqlite3.Connection, day: int) -> dict[str, int]:
     for r in conn.execute("""SELECT id FROM underworld_organizations WHERE status IN ('active','strained','fragmented')
                              AND json_extract(metadata_json,'$.role')='street_gang' ORDER BY id""").fetchall():
         oid = int(r[0])
-        if leader_is_player(conn, oid):
-            continue
         w = _weakness(conn, oid)
         if (w >= .3 and rng.random() < .30) or rng.random() < .006:  # the weak go quickly; any street gang can fold on a bad month
             dissolve_street_gang(conn, oid, day, "beaten and spent" if w >= .8 else "worn thin")

@@ -1149,9 +1149,29 @@ def attach_front_use(
     return int(cur.lastrowid)
 
 
+_RACKET_FRONT = {"illegal gaming": "gambling_house", "unlicensed bookmaking": "gambling_house", "high-risk debt": "loan_house",
+                 "brothel protection": "pleasure_house", "courtesan house leverage": "pleasure_house", "stolen goods": "pawnbroker",
+                 "cargo fraud": "warehouse", "warehouse theft": "warehouse", "invoice fraud": "wholesaler", "seal manipulation": "appraiser",
+                 "protection collections": "tavern"}
+_KIND_FRONT = {"service": "tavern", "shop": "food_shop", "workshop": "smithy", "shipping": "caravan_firm", "estate": "horse_breeder"}
+
+
+def front_archetype(conn: sqlite3.Connection, organization_id: int, enterprise_kind: str, name: str = "") -> str:
+    """A real business archetype for a front: lodging and yards by name, else what the outfit's rackets need a front for, else the kind."""
+    low = (name or "").lower()
+    if "lodging" in low:
+        return "inn"
+    if "yard" in low or "stores" in low or "aggregate" in low:
+        return "warehouse"
+    r = conn.execute("SELECT racket_kind,COUNT(*) n FROM underworld_racket_sites WHERE organization_id=? GROUP BY 1 ORDER BY n DESC,racket_kind LIMIT 1", (organization_id,)).fetchone()
+    if r and r[0] in _RACKET_FRONT:
+        return _RACKET_FRONT[r[0]]
+    return _KIND_FRONT.get(enterprise_kind, "warehouse")
+
+
 def create_front(
     conn: sqlite3.Connection, organization_id: int, name: str, enterprise_kind: str, *, zone_id: int | None,
-    archetype: str = "general_store", capital: float = 20, cash: float = 8, ownership_share: float = 1.0,
+    archetype: str | None = None, capital: float = 20, cash: float = 8, ownership_share: float = 1.0,
     legal_owner_actor_id: int | None = None, organization_legal_owner: bool = True,
     operator_actor_id: int | None = None, operator_crew_id: int | None = None,
     metadata: dict[str, Any] | None = None,
@@ -1175,11 +1195,9 @@ def create_front(
                             location_id=loc, capital=capital, cash=cash,
                             reputation=45, admin_quality=50, labor_capacity=45, risk_tolerance=65,
                             metadata={"underworld_front": True, "generated_underworld": True, **(metadata or {})})
-    try:
-        configure_enterprise_business(conn, eid, archetype, quality=48, capacity=48, clientele_fit=48, service_reliability=48, regulatory_pressure=25,
-                                      metadata={"underworld_front": True, "generated_underworld": True})
-    except Exception:
-        pass
+    configure_enterprise_business(conn, eid, archetype or front_archetype(conn, organization_id, enterprise_kind, name), quality=48, capacity=48,
+                                  clientele_fit=48, service_reliability=48, regulatory_pressure=25,
+                                  metadata={"underworld_front": True, "generated_underworld": True})
     attach_front_use(conn,organization_id,eid,zone_id=zone_id,ownership_share=ownership_share,
                      organization_legal_owner=organization_legal_owner,legal_owner_actor_id=legal_owner_actor_id,
                      operator_actor_id=operator_actor_id,operator_crew_id=operator_crew_id,metadata=metadata)
@@ -1702,14 +1720,37 @@ def organization_manpower_balance(conn: sqlite3.Connection, organization_id: int
     return {"crew_manpower": size, "assigned_patrol": patrol, "territorial_requirement": required, "slack": size - required}
 
 
+def kick_rate(conn: sqlite3.Connection, organization_id: int, org: sqlite3.Row | None = None, culture: sqlite3.Row | None = None) -> float:
+    """The share of a racket's gross that its earners kick up to the outfit. Per outfit: the boss's order if he set one, else the
+    culture's formality moved by how greedy the boss is (ambition against patience). Earners keep the rest."""
+    org = org or conn.execute("SELECT * FROM underworld_organizations WHERE id=?", (organization_id,)).fetchone()
+    try:
+        set_rate = json.loads(org["metadata_json"] or "{}").get("kick_rate")
+    except Exception:
+        set_rate = None
+    if set_rate is not None:
+        return float(set_rate)
+    culture = culture or ensure_organization_culture(conn, organization_id)
+    d = _boss_drives(conn, organization_id)
+    greed = .5 * (d.get("ambition", .5) - .5) + .3 * (.5 - d.get("patience", .5)) + .2 * (.5 - d.get("loyalty", .5))
+    return max(.15, min(.8, .34 + float(culture["formality"]) / 100 * .23 + .25 * greed))
+
+
+def set_kick_rate(conn: sqlite3.Connection, organization_id: int, rate: float) -> float:
+    """A boss's decision (the engine's greedy ones take it too): earners feel it as a smaller share."""
+    rate = max(.05, min(.9, float(rate)))
+    conn.execute("UPDATE underworld_organizations SET metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.kick_rate',?) WHERE id=?", (rate, organization_id))
+    return rate
+
+
 def _monthly_figures(conn: sqlite3.Connection, organization_id: int, org: sqlite3.Row, culture: sqlite3.Row) -> dict[str, Any]:
     """Pure arithmetic of one month's cashflow (no writes)."""
     rackets = conn.execute("SELECT * FROM underworld_racket_sites WHERE organization_id=? AND status='active'", (organization_id,)).fetchall()
     protections = conn.execute("SELECT * FROM underworld_protection_accounts WHERE protector_organization_id=? AND status='active'", (organization_id,)).fetchall()
-    kick_rate = .34 + float(culture["formality"]) / 100 * .23
+    kick_rate_ = kick_rate(conn, organization_id, org, culture)
     racket_gross = sum(float(r["gross_income_per_30"]) for r in rackets)
     protection_gross = sum(float(p["payment_per_30"]) for p in protections if not int(p["disputed"]))
-    treasury_gross = racket_gross * kick_rate + protection_gross * .78
+    treasury_gross = racket_gross * kick_rate_ + protection_gross * .78
     crew_count = int(conn.execute("SELECT COUNT(*) FROM underworld_crews WHERE organization_id=? AND status='active'", (organization_id,)).fetchone()[0])
     front_count = int(conn.execute("SELECT COUNT(*) FROM underworld_business_links WHERE organization_id=? AND link_kind IN ('owned_front','controlled_front') AND status='active'", (organization_id,)).fetchone()[0])
     overhead = 0.10 * treasury_gross + crew_count * .10 + front_count * .08
@@ -1718,7 +1759,7 @@ def _monthly_figures(conn: sqlite3.Connection, organization_id: int, org: sqlite
                   if rel["patron_organization_id"] is not None and int(rel["patron_organization_id"]) != organization_id)
     net = max(0.0, treasury_gross - overhead - tribute)
     draw_rate = float(org["monthly_leader_draw_rate"] or .08)
-    return {"rackets": rackets, "protections": protections, "kick_rate": kick_rate, "racket_gross": racket_gross,
+    return {"rackets": rackets, "protections": protections, "kick_rate": kick_rate_, "racket_gross": racket_gross,
             "protection_gross": protection_gross, "treasury_gross": treasury_gross, "overhead": overhead, "tribute": tribute,
             "net": net, "draw_rate": draw_rate}
 
@@ -2011,33 +2052,42 @@ def _resolve_territorial_attack(conn: sqlite3.Connection, organization_id: int, 
 
 def _targeted_hit(conn: sqlite3.Connection, organization_id: int, rng: random.Random, *, event_logger: Callable[...,int] | None=None,
                   target: int | None=None, hired: bool=False) -> bool:
+    """A killing attempt on one of a rival's leaders. Anyone in command can be chosen, the protagonist included (his attempt is a
+    pending incident to play, never resolved unseen). The odds weigh the two sides' fighters, the Stage of the man aimed at, and
+    his guard; the outcome is a band (failed, wounded, maimed, killed) that leans toward survival. Returns True when it landed."""
+    from . import temperament as _tp
+    from .underworld_aggression import attempt_on
     if target is None:
-        rels=conn.execute("SELECT * FROM underworld_relations WHERE (organization_a_id=? OR organization_b_id=?) AND relation_kind IN ('war','rival') AND hostility>=58 ORDER BY hostility DESC",(organization_id,organization_id)).fetchall()
+        rels=conn.execute("SELECT * FROM underworld_relations WHERE (organization_a_id=? OR organization_b_id=?) AND relation_kind IN ('war','rival','hostile_peace') AND hostility>=58 ORDER BY hostility DESC",(organization_id,organization_id)).fetchall()
         if not rels: return False
         rel=rels[0]; target=int(rel["organization_b_id"] if int(rel["organization_a_id"])==organization_id else rel["organization_a_id"])
-    # The engine never kills the player's character on its own; an attack on him is another kind of trouble (harm, pressure).
-    candidates=conn.execute("SELECT p.*,a.name FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.organization_id=? AND p.status='active' AND p.role_kind IN ('boss','underboss','lieutenant','crew_leader') AND a.status='active' AND p.actor_id<>COALESCE((SELECT player_actor_id FROM player_state WHERE id=1),-1) ORDER BY p.authority DESC",(target,)).fetchall()
+    candidates=conn.execute("SELECT p.*,a.name FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.organization_id=? AND p.status='active' AND p.role_kind IN ('boss','underboss','lieutenant','crew_leader') AND a.status='active' ORDER BY p.authority DESC,p.actor_id",(target,)).fetchall()
     if not candidates: return False
-    victim=candidates[0]
+    # the man aimed at is picked by standing, but not always the head: lesser leaders are easier to reach
+    weights=[float(c["authority"])**1.5 for c in candidates]
+    victim=rng.choices(candidates,weights=weights,k=1)[0]
     att=conn.execute("SELECT violence_capacity,cohesion FROM underworld_organizations WHERE id=?",(organization_id,)).fetchone()
     targ=conn.execute("SELECT violence_capacity,cohesion FROM underworld_organizations WHERE id=?",(target,)).fetchone()
     edge=(_stage_edge(conn,organization_id)-_stage_edge(conn,target))*.5
+    # the victim's own Stage against the best the other side can field
+    vs=_tp.stage_weight(conn,int(victim["actor_id"])); ts=max([_tp.stage_weight(conn,int(r["actor_id"])) for r in _tp._fighters(conn,organization_id)[:4]] or [1.0])
+    stage_term=-6.0*math.log(max(vs,.5)/max(ts,.5))
     # A hired killer is a specialist's weapon: its skill does not depend on the buyer's own fighters.
-    chance=_clamp(22+(38 if hired else float(att[0])*.42)+float(att[1])*.12-float(targ[0])*.22-float(targ[1])*.08+(0 if hired else edge)+rng.uniform(-12,12),5,88)/100
-    success=rng.random()<chance
-    if success:
-        from .household_life import mark_actor_deceased
-        mark_actor_deceased(conn,int(victim["actor_id"]),reason="killed in an underworld hit",event_logger=event_logger)
+    chance=_clamp(22+(38 if hired else float(att[0])*.42)+float(att[1])*.12-float(targ[0])*.22-float(targ[1])*.08+(0 if hired else edge)+stage_term+rng.uniform(-12,12),5,88)/100
+    r=attempt_on(conn,int(victim["actor_id"]),organization_id,chance,rng,style="hired_killing" if hired else "assault",lethal=True,severity=100)
+    band=r["band"]
+    if band=="killed":
         conn.execute("UPDATE underworld_personnel SET status='dead' WHERE actor_id=?",(int(victim["actor_id"]),))
-    op_id=_operation(conn,organization_id,"targeted_hit",target_organization_id=target,target_actor_id=int(victim["actor_id"]),result="killed" if success else "failed",success=chance,
-                     metadata={"style":"hired_killing" if hired else "assault","hired":hired})
-    from . import temperament as _tp
-    if success:
-        _tp.note_personal_blow(conn,int(victim["actor_id"]),organization_id,"fatal")
+    op_id=_operation(conn,organization_id,"targeted_hit",target_organization_id=target,target_actor_id=int(victim["actor_id"]),
+                     result={"killed":"killed","maimed":"maimed","wounded":"wounded","failed":"failed","pending":"pending"}[band],success=chance,
+                     metadata={"style":"hired_killing" if hired else "assault","hired":hired,"band":band})
+    if band=="killed":
         _tp.adjust(conn,organization_id,.04); _tp.adjust(conn,target,.03)
-    else:
+    elif band in ("maimed","wounded"):
+        _tp.adjust(conn,organization_id,.02); _tp.adjust(conn,target,.02)
+    elif band=="failed":
         _tp.adjust(conn,organization_id,-.08)
-    if success:
+    if band=="killed":
         from .population_reconciliation import record_excess_mortality, population_source_for_location
         target_org=conn.execute("SELECT primary_location_id FROM underworld_organizations WHERE id=?",(target,)).fetchone()
         loc=int(target_org[0]) if target_org and target_org[0] is not None else None
@@ -2045,9 +2095,10 @@ def _targeted_hit(conn: sqlite3.Connection, organization_id: int, rng: random.Ra
         record_excess_mortality(conn,source_kind='underworld_targeted_hit',source_id=op_id,aggregate_deaths=1,tracked_deaths=1,
                                 population_source_id=pop_source,metadata={'organization_id':organization_id,'target_organization_id':target,
                                                                          'victim_actor_id':int(victim['actor_id']),'location_id':loc},adult_only=True)
-    change_relation(conn,organization_id,target,kind="war",hostility_delta=12 if success else 7,respect_delta=2 if success else 0)
-    add_heat(conn,organization_id,public=2 if success else 1,investigative=5,violence=8)
-    return True
+    landed=band in ("killed","maimed","wounded")
+    change_relation(conn,organization_id,target,kind="war",hostility_delta=(12 if band=="killed" else 9 if landed else 7),respect_delta=2 if landed else 0)
+    add_heat(conn,organization_id,public=2 if landed else 1,investigative=5,violence=8)
+    return landed
 
 
 
@@ -2287,6 +2338,8 @@ def autonomous_organization_turn(conn: sqlite3.Connection, organization_id: int,
     payroll=run_outfit_payroll(conn,organization_id)
     from .loyalty import outfit_morale
     morale=outfit_morale(conn,organization_id,int(payroll.get('months',0)))
+    from .underworld_aggression import coercion_turn
+    coercion_turn(conn,organization_id,random.Random(_seed(conn,organization_id*4177+_day(conn))),_day(conn))
     # Anonymous membership still turns over in the background. Concrete crews are reconciled
     # immediately afterward so aggregate growth/loss cannot detach from operational manpower.
     from .underworld import simulate_underworld_membership_turnover

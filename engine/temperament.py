@@ -13,7 +13,7 @@ import math
 import sqlite3
 from typing import Any
 
-STYLES = ("intimidation", "beating", "smashed_premises", "seized_goods", "abduction", "duel", "hired_killing", "public_example", "assault")
+STYLES = ("intimidation", "beating", "hired_beating", "smashed_premises", "seized_goods", "abduction", "duel", "hired_killing", "public_example", "assault")
 STAGE_RANK = {"First": 0, "Temper": 1, "Third": 2, "Breach": 3, "Fifth": 4, "Sixth": 5}
 STAGE_WEIGHT = {"First": 1.0, "Temper": 2.2, "Third": 5.0, "Breach": 12.0, "Fifth": 30.0, "Sixth": 60.0}
 FIGHTER_ROLES = ("boss", "underboss", "lieutenant", "crew_leader", "enforcer", "collector")
@@ -23,8 +23,8 @@ COERCIVE_RACKETS = ("high-risk debt", "brothel protection", "protection collecti
 
 _STYLE_WEIGHTS = {
     "street": {"beating": 3.0, "smashed_premises": 2.2, "intimidation": 2.0, "assault": 1.6, "seized_goods": 1.2, "abduction": 0.8, "duel": 0.5, "public_example": 0.6},
-    "durable": {"intimidation": 3.0, "public_example": 1.4, "seized_goods": 1.4, "hired_killing": 1.2, "duel": 0.7, "smashed_premises": 0.8},
-    "specialist": {"intimidation": 3.0, "hired_killing": 1.8, "seized_goods": 1.2},
+    "durable": {"intimidation": 3.0, "public_example": 1.4, "seized_goods": 1.4, "hired_killing": 1.2, "hired_beating": 1.0, "duel": 0.7, "smashed_premises": 0.8},
+    "specialist": {"intimidation": 3.0, "hired_beating": 2.2, "hired_killing": 1.8, "seized_goods": 1.2},
 }
 
 
@@ -197,6 +197,7 @@ def rederive(conn: sqlite3.Connection, oid: int) -> None:
 def on_succession(conn: sqlite3.Connection, oid: int) -> None:
     """A new boss brings his own drives; the outfit's mood carries over half-way."""
     row = conn.execute("SELECT * FROM underworld_temperament WHERE organization_id=?", (oid,)).fetchone()
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES (?,?)", (f"uw_succ:{oid}", str(_day(conn))))  # people remember a change of head
     cur_eff = _eff(row, _day(conn))
     tradition, base, style, leader = _derive(conn, oid)
     conn.execute("UPDATE underworld_temperament SET tradition=?,base=?,current=?,style=?,leader_actor_id=?,last_day=? WHERE organization_id=?",
@@ -296,6 +297,21 @@ def note_personal_blow(conn: sqlite3.Connection, victim_actor_id: int, source_or
         amount = (60.0 if fatal else 38.0) if o["role_kind"] != "lieutenant" else (55.0 if fatal else 35.0)
         if amount > hit.get(int(o["id"]), (0, ""))[0]:
             hit[int(o["id"])] = (amount, "leader_killed" if fatal else "leader_maimed")
+    # Crew leaders are remembered too, a little less than the boss's own; any killing of a member leaves a small grudge.
+    if victim_actor_id is not None:
+        for o in conn.execute(
+                """SELECT o.id,p.role_kind FROM underworld_personnel p JOIN underworld_organizations o ON o.id=p.organization_id
+                   WHERE p.actor_id=? AND p.status IN ('active','dead') AND o.status IN ('active','strained','fragmented')""", (victim_actor_id,)):
+            if o["role_kind"] in ("boss", "underboss", "lieutenant"):
+                continue
+            if o["role_kind"] == "crew_leader":
+                amount, kind = (30.0, "crew_leader_killed") if fatal else (16.0, "crew_leader_maimed")
+            elif fatal:
+                amount, kind = 8.0, "member_killed"
+            else:
+                continue
+            if amount > hit.get(int(o["id"]), (0, ""))[0]:
+                hit[int(o["id"])] = (amount, kind)
     done = []
     for oid, (amount, kind) in sorted(hit.items()):
         if oid == int(source_org_id):

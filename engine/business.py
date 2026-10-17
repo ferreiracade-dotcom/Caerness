@@ -438,19 +438,30 @@ def _owner_draw(conn: sqlite3.Connection, enterprise_id: int, operating_cost: fl
     """Monthly draw: an active, debt-free business pays its natural-person owner up to half of its cash
     above a working floor (two months of operating cost), into the owner's household, else purse."""
     row = conn.execute("SELECT owner_actor_id,household_id,cash FROM civilian_enterprises WHERE id=?", (enterprise_id,)).fetchone()
-    if not row or row["owner_actor_id"] is None:
+    if not row:
         return 0.0
     floor = 2.0 * max(0.0, float(operating_cost))
     amount = round(0.5 * (float(row["cash"]) - floor), 4)
     if amount < 0.01:
         return 0.0
+    from . import ledger
+    if row["owner_actor_id"] is None:
+        # No natural-person owner: a front's profit goes to the outfit that holds it.
+        link = conn.execute("""SELECT l.organization_id FROM underworld_business_links l JOIN underworld_organizations o ON o.id=l.organization_id
+                               WHERE l.enterprise_id=? AND l.status='active' AND l.link_kind IN ('owned_front','controlled_front')
+                               AND o.status IN ('active','strained','fragmented') ORDER BY l.id LIMIT 1""", (enterprise_id,)).fetchone()
+        if link is None:
+            return 0.0
+        try:
+            return ledger.transfer(conn, ("business", enterprise_id), ("outfit", int(link[0])), amount, flow_kind="distribution", purpose="front's take")
+        except ValueError:
+            return 0.0
     owner = int(row["owner_actor_id"])
     hid = row["household_id"]
     if hid is None:
         r = conn.execute("""SELECT h.id FROM households h WHERE h.head_actor_id=? AND h.status NOT IN ('dissolved','historical')
                             ORDER BY h.id LIMIT 1""", (owner,)).fetchone()
         hid = r[0] if r else None
-    from . import ledger
     dst = ("household", int(hid)) if hid is not None else ("person", owner)
     try:
         return ledger.transfer(conn, ("business", enterprise_id), dst, amount, flow_kind="distribution", purpose="owner's draw")

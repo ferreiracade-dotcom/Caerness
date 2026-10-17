@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 113
+SCHEMA_VERSION = 114
 
 
 def _running_tests() -> bool:
@@ -4551,7 +4551,23 @@ def _migration_113(conn: sqlite3.Connection) -> None:
             report["own_front_protection_ended"] = end_own_front_protection(conn)
             report["outfits_given_ground"] = claim_ground_for_outfits(conn)
             report["baseline_relations_seeded"] = seed_baseline_relations(conn)
-    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema113_report',?)", (json.dumps(report, sort_keys=True),))
+    # A re-run finds nothing left to do; it must not overwrite the report of the run that did the work.
+    conn.execute("INSERT OR IGNORE INTO engine_meta(key,value) VALUES ('schema113_report',?)", (json.dumps(report, sort_keys=True),))
+
+
+def _migration_114(conn: sqlite3.Connection) -> None:
+    """Gap 4b fix pass: fronts run as businesses (a missing archetype had left them without), opening city businesses have owners,
+    every outfit has named people drawn from its place's reservoir, and loyalty starts dispersed by bonds instead of flat."""
+    import json
+    report: dict = {}
+    if _has_table(conn, "underworld_organizations") and _has_table(conn, "enterprise_business_profiles"):
+        from .world_pressure import backfill_front_profiles, disperse_loyalty, give_city_businesses_owners, seed_all_named_personnel
+        report["front_profiles_backfilled"] = backfill_front_profiles(conn)
+        report["city_business_owners_given"] = give_city_businesses_owners(conn)
+        if _has_table(conn, "underworld_personnel") and _has_table(conn, "background_person_profiles"):
+            report["named_people_seeded"] = seed_all_named_personnel(conn)
+            report["loyalty_dispersed"] = disperse_loyalty(conn)
+    conn.execute("INSERT OR IGNORE INTO engine_meta(key,value) VALUES ('schema114_report',?)", (json.dumps(report, sort_keys=True),))
 
 
 _MIGRATIONS: dict[int, Migration] = {
@@ -4666,6 +4682,7 @@ _MIGRATIONS: dict[int, Migration] = {
     109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed; unrevealed stages follow canon headcounts", _migration_109),
     110: ("underworld_everywhere", "Gap 4a: procedural Aldergate underworld dissolved; canon-shaped underworld in every settlement; notes naming dissolved outfits reported", _migration_110),
     111: ("occupation_follows_stage", "Background occupation follows Stage: Breach/Fifth martial, Third rarely otherwise; resolved mismatches reported", _migration_111),
+    114: ("world_pushes_back_people", "Gap 4b fix pass: fronts run as businesses, city businesses have owners, outfits have named people, loyalty starts dispersed by bonds", _migration_114),
     113: ("world_pushes_back", "Gap 4b: every outfit ticks and has a treasury; own fronts are not protected by rivals; ground and relations seeded", _migration_113),
     112: ("former_members_retired_masters_reckoning", "Former outfit members read as ordinary; retired masters keep a trade at high Stage; the Reckoning at Waymeet with Seth Carrick", _migration_112),
 }

@@ -297,15 +297,27 @@ def _free_name(conn: sqlite3.Connection, given: str, family: str, sex: str | Non
     for g in ((given,) if given not in names else ()) + names[start:] + names[:start]:
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (f"{g} {family}",)).fetchone():
             return f"{g} {family}"
+    # Every first name of this family is taken: an epithet keeps the person distinct, never a number in the name.
+    for k in range(len(_EPITHETS)):
+        ep = _EPITHETS[(suffix + k) % len(_EPITHETS)]
+        cand = f"{given} {family} {ep}"
+        if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
+            return cand
     return f"{given} {family} {suffix}"
+
+
+_EPITHETS = ("the Younger", "the Elder", "the Lame", "Redhand", "Longstride", "the Quiet", "the Broad", "Greycloak", "the Tall", "Shortfinger",
+             "of the Quay", "of the Mill", "of the Row", "of the Gate", "the Fair", "the Dark", "Oneeye", "the Stout", "Swiftfoot", "the Careful",
+             "Blackhand", "the Ginger", "the Thin", "Hardhead", "the Singer", "the Warden's", "of the Lane", "the Pale", "Ironknee", "the Lucky")
 
 
 def _unique_actor_name(conn: sqlite3.Connection, profile: sqlite3.Row) -> str:
     name = _free_name(conn, str(profile["given_name"]), str(profile["family_name"]), profile["demographic_sex"],
                       int(profile["partition_id"]) * 10000 + int(profile["local_uid"]))
-    if name.split(" ", 1)[0] != profile["given_name"]:
-        conn.execute("UPDATE background_person_profiles SET given_name=?,metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.stable_name',?) "
-                     "WHERE partition_id=? AND local_uid=?", (name.split(" ", 1)[0], name, int(profile["partition_id"]), int(profile["local_uid"])))
+    given_new, _, family_new = name.partition(" ")
+    if given_new != profile["given_name"] or family_new != profile["family_name"]:
+        conn.execute("UPDATE background_person_profiles SET given_name=?,family_name=?,metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.stable_name',?) "
+                     "WHERE partition_id=? AND local_uid=?", (given_new, family_new, name, int(profile["partition_id"]), int(profile["local_uid"])))
     return name
 
 

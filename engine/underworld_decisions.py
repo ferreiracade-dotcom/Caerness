@@ -8,6 +8,11 @@ from .decision_runtime import DecisionCandidate
 from .underworld_aggression import aggression_candidates, execute_aggression, leader_is_player, retaliate as _retaliate_effect
 
 
+_INCIDENT_WORDS = {"attack_on_member": "the attack on its people", "attack_on_client": "the attack on its client",
+                   "extortion_attempt": "the leaning on it", "territorial_challenge": "the challenge to its ground",
+                   "defection": "the men it lost to them"}
+
+
 def _jload(raw: str | None) -> dict[str, Any]:
     try:
         v = json.loads(raw or "{}")
@@ -45,10 +50,11 @@ def underworld_decision_candidates(conn: sqlite3.Connection, actor_id: int, tier
     violence_heat = float(heat["violence_heat"] or 0) if heat else 0.0
     out: list[DecisionCandidate] = []
 
-    # Directly suffered poaching is actor-accessible operational information, not omniscient rival knowledge.
+    # Directly suffered trouble is actor-accessible operational information, not omniscient rival knowledge.
+    player_led = leader_is_player(conn, oid)  # his outfit defends itself and answers in kind; it opens no talks without his order
     incidents = conn.execute(
         """SELECT * FROM underworld_incidents WHERE target_organization_id=? AND status='open'
-           AND incident_kind IN ('protection_poach','protection_dispute','attack_on_client','attack_on_member','extortion_attempt','territorial_challenge')
+           AND incident_kind IN ('protection_poach','protection_dispute','attack_on_client','attack_on_member','extortion_attempt','territorial_challenge','defection')
            ORDER BY severity DESC,day,id LIMIT 3""", (oid,),
     ).fetchall()
     for inc in incidents:
@@ -56,36 +62,44 @@ def underworld_decision_candidates(conn: sqlite3.Connection, actor_id: int, tier
         enterprise_id = int(meta["enterprise_id"]) if meta.get("enterprise_id") is not None else None
         if source is None:
             continue
+        poach = str(inc["incident_kind"]) in ("protection_poach", "protection_dispute")
+        what = _INCIDENT_WORDS.get(str(inc["incident_kind"]), "the trouble")
+        kinds = ("warn_protection_poacher", "retaliate_protection_poach", "negotiate_protection_poach") if poach else ("warn_aggressor", "retaliate_aggression", "negotiate_aggression")
+        keyp = "poach" if poach else "answer"
         base = 7.0 + float(inc["severity"]) / 50.0
         common = dict(incident_id=int(inc["id"]), source_organization_id=source, zone_id=int(inc["zone_id"]) if inc["zone_id"] is not None else None, enterprise_id=enterprise_id)
         out.append(DecisionCandidate(
-            key=f"underworld:poach:warn:{inc['id']}", provider_key="underworld", action_kind="warn_protection_poacher",
-            utility=base + pragmatism * 1.2 + loyalty * .5, rationale=f"Answer {_org_name(conn, source)}'s specific protection poaching attempt with a warning backed by the existing account.",
+            key=f"underworld:{keyp}:warn:{inc['id']}", provider_key="underworld", action_kind=kinds[0],
+            utility=base + pragmatism * 1.2 + loyalty * .5,
+            rationale=(f"Answer {_org_name(conn, source)}'s specific protection poaching attempt with a warning backed by the existing account." if poach
+                       else f"Warn {_org_name(conn, source)} off over {what}."),
             execution_kind="underworld_action", payload={**common, "response": "warn"},
             information_basis={"underworld_incident_id": int(inc["id"]), "access": "target_organization"}, tags=("protection", "grievance", "specific_incident"), risk=.25,
         ))
-        if not leader_is_player(conn, oid):
-          out.append(DecisionCandidate(
-            key=f"underworld:poach:retaliate:{inc['id']}", provider_key="underworld", action_kind="retaliate_protection_poach",
+        out.append(DecisionCandidate(
+            key=f"underworld:{keyp}:retaliate:{inc['id']}", provider_key="underworld", action_kind=kinds[1],
             utility=base - .4 + aggression * 2.2 - investigative_heat / 80.0 - violence_heat / 90.0,
-            rationale=f"Retaliate against {_org_name(conn, source)} for the concrete poaching attempt rather than escalating against an abstract rival.",
+            rationale=(f"Retaliate against {_org_name(conn, source)} for the concrete poaching attempt rather than escalating against an abstract rival." if poach
+                       else f"Pay {_org_name(conn, source)} back in kind for {what}."),
             execution_kind="underworld_action", payload={**common, "response": "retaliate"},
             information_basis={"underworld_incident_id": int(inc["id"]), "access": "target_organization"}, tags=("protection", "retaliation", "specific_incident"), risk=.70,
         ))
-        out.append(DecisionCandidate(
-            key=f"underworld:poach:negotiate:{inc['id']}", provider_key="underworld", action_kind="negotiate_protection_poach",
-            utility=base - .2 + patience * 1.4 + pragmatism * 1.2 + investigative_heat / 70.0,
-            rationale=f"Open a concrete settlement over {_org_name(conn, source)}'s poaching attempt and the named disputed account.",
-            execution_kind="underworld_action", payload={**common, "response": "negotiate"},
-            information_basis={"underworld_incident_id": int(inc["id"]), "access": "target_organization"}, tags=("protection", "truce_path", "specific_incident"), risk=.15,
-        ))
+        if not player_led:
+            out.append(DecisionCandidate(
+                key=f"underworld:{keyp}:negotiate:{inc['id']}", provider_key="underworld", action_kind=kinds[2],
+                utility=base - .2 + patience * 1.4 + pragmatism * 1.2 + investigative_heat / 70.0,
+                rationale=(f"Open a concrete settlement over {_org_name(conn, source)}'s poaching attempt and the named disputed account." if poach
+                           else f"Open a settlement with {_org_name(conn, source)} over {what}."),
+                execution_kind="underworld_action", payload={**common, "response": "negotiate"},
+                information_basis={"underworld_incident_id": int(inc["id"]), "access": "target_organization"}, tags=("protection", "truce_path", "specific_incident"), risk=.15,
+            ))
 
     # Truce targets are existing recorded organization relations; this is not recursive theory-of-mind.
     rels = conn.execute(
         """SELECT * FROM underworld_relations WHERE (organization_a_id=? OR organization_b_id=?)
            AND relation_kind IN ('rival','war','hostile_peace') AND hostility>=45 ORDER BY hostility DESC,organization_a_id,organization_b_id LIMIT 4""", (oid, oid),
     ).fetchall()
-    for rel in rels:
+    for rel in ([] if player_led else rels):
         other = int(rel["organization_b_id"]) if int(rel["organization_a_id"]) == oid else int(rel["organization_a_id"])
         util = 4.4 + patience * 1.2 + pragmatism * 1.1 + investigative_heat / 45.0 - aggression * .8
         out.append(DecisionCandidate(
@@ -196,25 +210,25 @@ def execute_underworld_action(conn: sqlite3.Connection, actor_id: int, action_ki
     oid = int(membership["organization_id"])
     from . import underworld_rebuild as uw
     try:
-        if action_kind in {"warn_protection_poacher","retaliate_protection_poach","negotiate_protection_poach"}:
+        if action_kind in {"warn_protection_poacher","retaliate_protection_poach","negotiate_protection_poach","warn_aggressor","retaliate_aggression","negotiate_aggression"}:
             inc_id=int(payload["incident_id"]); inc=conn.execute("SELECT * FROM underworld_incidents WHERE id=? AND target_organization_id=? AND status='open'",(inc_id,oid)).fetchone()
             if not inc: raise ValueError("poaching incident no longer open")
             source=int(inc["source_organization_id"]); enterprise=int(payload["enterprise_id"]) if payload.get("enterprise_id") is not None else None
-            if action_kind=="retaliate_protection_poach":
+            if action_kind in ("retaliate_protection_poach","retaliate_aggression"):
                 uw.change_relation(conn,oid,source,kind="rival",hostility_delta=12,respect_delta=2,metadata={"response_to_incident":inc_id})
                 uw.add_heat(conn,oid,public=2,investigative=2,violence=5)
                 import random as _r
                 effect=_retaliate_effect(conn,oid,source,inc_id,_r.Random(inc_id*104729+day))
-                op=uw._operation(conn,oid,"retaliate_protection_poach",zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.65,metadata={"incident_id":inc_id,"effect":effect})
-            elif action_kind=="negotiate_protection_poach":
+                op=uw._operation(conn,oid,action_kind,zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.65,metadata={"incident_id":inc_id,"effect":effect})
+            elif action_kind in ("negotiate_protection_poach","negotiate_aggression"):
                 uw.change_relation(conn,oid,source,kind="hostile_peace",hostility_delta=-8,respect_delta=1,metadata={"response_to_incident":inc_id})
-                op=uw._operation(conn,oid,"negotiate_protection_poach",zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.7,metadata={"incident_id":inc_id})
+                op=uw._operation(conn,oid,action_kind,zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.7,metadata={"incident_id":inc_id})
             else:
                 uw.change_relation(conn,oid,source,hostility_delta=4,respect_delta=1,metadata={"response_to_incident":inc_id})
-                op=uw._operation(conn,oid,"warn_protection_poacher",zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.8,metadata={"incident_id":inc_id})
+                op=uw._operation(conn,oid,action_kind,zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.8,metadata={"incident_id":inc_id})
             conn.execute("UPDATE underworld_incidents SET status='answered' WHERE id=?",(inc_id,))
-            return {"summary":f"Answered protection-poaching incident #{inc_id} through {action_kind}.","operation_id":op}
-        if action_kind in {"occupy_vacant_turf","challenge_zone","poach_protection","targeted_hit","negotiate_settlement"}:
+            return {"summary":f"Answered incident #{inc_id} through {action_kind}.","operation_id":op}
+        if action_kind in {"occupy_vacant_turf","challenge_zone","poach_protection","targeted_hit","negotiate_settlement","squeeze_specialist"}:
             return execute_aggression(conn,actor_id,oid,action_kind,payload,day)
         if action_kind=="seek_truce":
             other=int(payload["target_organization_id"]); uw.make_truce(conn,oid,other,metadata={"dec01_actor_id":actor_id}); return {"summary":f"Made a truce with {_org_name(conn,other)}."}

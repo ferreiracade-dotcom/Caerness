@@ -13,35 +13,40 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 
+REAL_112 = "39b35da"  # the last commit that carried the real schema-112 packaged world
+
+
 def run():
+    import subprocess
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         db = Path(tmp) / "m.db"
-        shutil.copy2(ROOT / "data" / "caerness.db", db)
+        blob = subprocess.run(["git", "show", f"{REAL_112}:data/caerness.db"], cwd=ROOT, capture_output=True, check=True).stdout
+        db.write_bytes(blob)
         os.environ["CAERNESS_DB_PATH"] = str(db)
         raw = sqlite3.connect(db)
         raw.row_factory = sqlite3.Row
-        # Make it a schema-112 save: some outfits without heat rows, one that already earned money, a rival protecting a front of another outfit.
-        raw.execute("DELETE FROM schema_migrations WHERE version>=113")
-        raw.execute("DELETE FROM engine_meta WHERE key='schema113_report'")
-        raw.execute("UPDATE engine_meta SET value='112' WHERE key='schema_version'")
+        assert raw.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()[0] == "112", "not a real schema-112 save"
+        assert raw.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 112
         ids = [int(r[0]) for r in raw.execute("SELECT id FROM underworld_organizations WHERE status='active' ORDER BY id LIMIT 3")]
-        for i in ids[:2]:
+        for i in ids[:2]:  # the real save has heat rows for its outfits; two that never ticked, as in the older saves
             raw.execute("DELETE FROM underworld_heat WHERE organization_id=?", (i,))
+        missing_heat = raw.execute("""SELECT COUNT(*) FROM underworld_organizations o WHERE o.status IN ('active','strained','fragmented')
+                                      AND NOT EXISTS (SELECT 1 FROM underworld_heat h WHERE h.organization_id=o.id)""").fetchone()[0]
+        assert missing_heat >= 2, missing_heat
         earned = ids[2]
         raw.execute("UPDATE underworld_organizations SET treasury=7.5 WHERE id=?", (earned,))
         raw.execute("INSERT INTO underworld_finance_transactions(organization_id,day,transaction_kind,amount,metadata_json) VALUES (?,0,'criminal_income_kickup',3,'{}')", (earned,))
-        raw.execute("UPDATE underworld_organizations SET treasury=0 WHERE id<>?", (earned,))
         raw.commit()
         raw.close()
 
         from engine.db import connect, init_db, SCHEMA_VERSION
         init_db()
         c = connect()
-        assert SCHEMA_VERSION >= 113 and c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] >= 113
+        assert SCHEMA_VERSION >= 113 and c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION
         rep = json.loads(c.execute("SELECT value FROM engine_meta WHERE key='schema113_report'").fetchone()[0])
         for key in ("heat_rows_added", "treasuries_seeded", "own_front_protection_ended", "outfits_given_ground", "baseline_relations_seeded"):
             assert key in rep, (key, rep)
-        assert rep["heat_rows_added"] == 2, rep
+        assert rep["heat_rows_added"] == missing_heat, (rep, missing_heat)
         assert c.execute("""SELECT COUNT(*) FROM underworld_organizations o WHERE o.status IN ('active','strained','fragmented')
                             AND NOT EXISTS (SELECT 1 FROM underworld_heat h WHERE h.organization_id=o.id)""").fetchone()[0] == 0
         assert abs(c.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (earned,)).fetchone()[0] - 7.5) < 1e-9, "an outfit that had earned money was touched"
@@ -78,7 +83,9 @@ def run():
         snap = (c.execute("SELECT SUM(treasury) FROM underworld_organizations").fetchone()[0], c.execute("SELECT COUNT(*) FROM underworld_relations").fetchone()[0],
                 c.execute("SELECT COUNT(*) FROM underworld_zone_claims").fetchone()[0], c.execute("SELECT COUNT(*) FROM underworld_incidents").fetchone()[0])
         from engine.db import _migration_113
+        rep0 = c.execute("SELECT value FROM engine_meta WHERE key='schema113_report'").fetchone()[0]
         _migration_113(c)
+        assert c.execute("SELECT value FROM engine_meta WHERE key='schema113_report'").fetchone()[0] == rep0, "a re-run overwrote the report of the run that did the work"
         again = (c.execute("SELECT SUM(treasury) FROM underworld_organizations").fetchone()[0], c.execute("SELECT COUNT(*) FROM underworld_relations").fetchone()[0],
                  c.execute("SELECT COUNT(*) FROM underworld_zone_claims").fetchone()[0], c.execute("SELECT COUNT(*) FROM underworld_incidents").fetchone()[0])
         assert snap == again, (snap, again)

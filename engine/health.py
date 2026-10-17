@@ -261,7 +261,7 @@ def ensure_health_profile(conn: sqlite3.Connection, actor_id: int, *, longevity_
     conn.execute(
         """INSERT OR IGNORE INTO actor_health_profiles(actor_id,longevity_class,aging_phase,baseline_health,last_review_day,next_review_day,metadata_json)
            VALUES (?,?,?,?,?,?,?)""",
-        (actor_id, longevity_class, phase, max(0,min(100,baseline_health)), day, day+30,
+        (actor_id, longevity_class, phase, max(0,min(100,baseline_health)), day, day+30+(int(actor_id)*37)%150,  # first reviews are spread out, not all on one day
          json.dumps(metadata or {}, sort_keys=True)),
     )
 

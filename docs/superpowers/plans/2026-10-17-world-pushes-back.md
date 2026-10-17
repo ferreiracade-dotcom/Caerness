@@ -95,3 +95,13 @@
 **Final test list:** world_pushes_back_test, schema113_test, schema112_test, player_operations_test, interactions_standing_test, standing_test, underworld_ecology_test, schema110_underworld_test, v60_underworld_rebuild_test, v60_phase2a_test, connector_views_test, connector_resume_test, connector_act_test, connector_server_test, connector_author_test, authoring_test, tenyear02_underworld_person_reservoir_defer_test, any `*household*`/`*service*`/`*business*` tests.
 
 **Not in this plan:** new-character flow and servants seeded into wealthy opening households (gap 5); currency/wage canon (gap 6).
+
+
+---
+
+## Fix pass (2026-10-17, after the Opus review `notes/2026-10-17-gap4b-review.md`) and owner rulings
+
+- **Pay follows the racket (mafia ruling).** Rank and file and crews earn from the rackets they work and kick a share up (`underworld_rebuild.kick_rate`, per outfit: the boss's order, else the culture's formality moved by his greed; `set_kick_rate`). They keep the rest and are never in arrears. Only the stipended (accountant, fixer, specialist, house enforcers) are paid from the treasury (`payroll.STIPEND_WEIGHT`, a weight of one set against what an ordinary earner of the same outfit keeps in a month). Business staff are paid by the business (I4: unpaid labour is not charged twice), servants by the household (I5: arrears are never forgiven between closings).
+- **Loyalty is bonds first (culture ruling, canon `notes/2026-10-17-culture-canon.md` 2.3, 2.7).** `loyalty.bond_strength`: kin to the head or a crew leader, sworn/disciple/retainer family, years of service, shared fights, regional culture (Hearth and Dunmoor high, Windmere and Sunreach low), per-person spread. Bonds damp arrears and a falling share; grievances (cruelty from one's own head, defeat and humiliation, dead comrades nobody avenged, succession, a stronger branch pulling) move the bonded. The loss hazard is smooth (`leave_hazard`), no thresholds. Betrayal costs standing in the relationships. Migration 114 disperses loyalty by these bonds.
+- **The protagonist is a valid target (C1).** Attempts resolve in bands (failed / wounded / maimed / killed) that lean toward survival; an attempt on him becomes a pending `attack` interaction (`underworld_attempt`) for the GM, answered with `respond` (accept = yield, reject = stand, counter = run), never resolved in `advance`, lapsing after sixty days. His outfit defends itself and answers in kind but opens nothing hostile or diplomatic without his order.
+- **Note for the `act` rework:** raising or lowering the kick-up rate (`set_kick_rate`) is an outfit-policy decision the boss can make; `act order` only addresses one subordinate, so there is no verb for it yet. The engine exposes `set_kick_rate` for it.

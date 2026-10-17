@@ -841,6 +841,10 @@ def apply_player_response(
     if int(interaction["recipient_actor_id"]) != int(player_actor_id):
         raise ValueError("the configured player is not the recipient of this interaction")
     kind = str(interaction["interaction_type"])
+    if kind == "attack" and json.loads(interaction["terms_json"] or "{}").get("underworld_attempt"):
+        # An attempt on the protagonist is played in a scene: he yields (accept), stands (reject) or runs (counter).
+        from .underworld_aggression import resolve_attempt
+        return resolve_attempt(conn, interaction, choice, day)
     if kind in {"attack", "investigation"}:
         raise ValueError(f"{kind} requires a scene-specific resolver, not accept/reject/counter")
 
