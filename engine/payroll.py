@@ -176,6 +176,15 @@ def run_business_payroll(conn: sqlite3.Connection, eid: int, operating_cost: flo
 
 # -- households --------------------------------------------------------------------------------------------------
 
+def household_wage(t) -> float:
+    """What one servant is paid a month: the wage agreed when he was taken on, else the usual wage for the post."""
+    try:
+        agreed = json.loads(t["metadata_json"] or "{}").get("wage")
+    except Exception:
+        agreed = None
+    return float(agreed) if agreed else HOUSEHOLD_WAGE.get(str(t["service_role"]), .08)
+
+
 def service_terms(conn: sqlite3.Connection, hid: int) -> list[sqlite3.Row]:
     return conn.execute(
         """SELECT t.* FROM household_service_terms t JOIN actors a ON a.id=t.actor_id WHERE t.household_id=? AND t.status='active' AND a.status='active' ORDER BY t.id""", (hid,)).fetchall()
@@ -193,7 +202,7 @@ def run_household_payroll(conn: sqlite3.Connection, h: sqlite3.Row, elapsed_days
         if prior["owed"] > 0:
             set_arrears(conn, "household", hid, 0, 0.0)
         return 0.0
-    month_due = sum(HOUSEHOLD_WAGE.get(str(t["service_role"]), .08) for t in terms)
+    month_due = sum(household_wage(t) for t in terms)
     prior = get_arrears(conn, "household", hid)
     due = month_due * elapsed_days / 30.0
     owed_share = prior["owed"] / max(month_due, 0.001)  # what is still owed is added to this closing's wages, never forgiven
@@ -201,7 +210,7 @@ def run_household_payroll(conn: sqlite3.Connection, h: sqlite3.Row, elapsed_days
     head = h["head_actor_id"]
     paid_total = from_house = 0.0
     for t in terms:
-        want = HOUSEHOLD_WAGE.get(str(t["service_role"]), .08) * (elapsed_days / 30.0 + owed_share)
+        want = household_wage(t) * (elapsed_days / 30.0 + owed_share)
         got = min(max(0.0, liquidity - from_house), want)
         if got > 0.0001:
             ledger._credit(conn, ("person", int(t["actor_id"])), got)
@@ -244,8 +253,8 @@ def pay_arrears(conn: sqlite3.Connection, kind: str, hid: int, source: tuple[str
         month_due = prior["owed"]
     else:
         terms = service_terms(conn, hid)
-        tw = sum(HOUSEHOLD_WAGE.get(str(t["service_role"]), .08) for t in terms) or 1.0
-        recipients = [(int(t["actor_id"]), pay * HOUSEHOLD_WAGE.get(str(t["service_role"]), .08) / tw) for t in terms]
+        tw = sum(household_wage(t) for t in terms) or 1.0
+        recipients = [(int(t["actor_id"]), pay * household_wage(t) / tw) for t in terms]
         month_due = tw
     ledger._debit(conn, source, pay)
     if kind == "business":

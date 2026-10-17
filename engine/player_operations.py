@@ -6,6 +6,7 @@ Amounts leave this module only as scale words.
 from __future__ import annotations
 
 import math
+import re
 import sqlite3
 from typing import Any, Callable
 
@@ -221,8 +222,56 @@ def _sour(conn, me: int, target: int, weight: float) -> None:
     adjust_relationship_pair(conn, target, me, _day(conn), a_to_b={"trust_delta": -6.0 * weight, "resentment_delta": 6.0 * weight})
 
 
+def _usual_wage(into: ledger.Holder, role: str) -> float:
+    from .payroll import HOUSEHOLD_WAGE
+    return HOUSEHOLD_WAGE.get(role, 0.10)
+
+
+def _wage_of(raw, usual: float) -> float:
+    """Monthly pay per head: a number, or a word relative to the usual wage."""
+    if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+        return ledger.amount_of(raw)
+    key = str(raw).strip().lower()
+    words = {"low": 0.7, "poor": 0.7, "usual": 1.0, "fair": 1.0, "ordinary": 1.0, "good": 1.5, "high": 1.5, "generous": 1.5, "double": 2.0}
+    for w, f in words.items():
+        if key.startswith(w):
+            return usual * f
+    return ledger.amount_of(raw)
+
+
+_POST_TABLE = {"business": ("enterprise_staff", "enterprise_id=? AND actor_id=? AND status='active'"),
+               "outfit": ("underworld_personnel", "organization_id=? AND actor_id=? AND status='active'"),
+               "household": ("household_service_terms", "household_id=? AND actor_id=? AND status='active'")}
+
+
+def _stamp(conn, into: ledger.Holder, target: int, **terms) -> None:
+    """Keep the terms a person was taken on at (wage, duty, day) on his post, so nothing stated is lost."""
+    import json
+    kind, i = into
+    table, where = _POST_TABLE[kind]
+    row = conn.execute(f"SELECT metadata_json FROM {table} WHERE {where}", (i, target)).fetchone()
+    if row is None:
+        return
+    meta = json.loads(row[0] or "{}")
+    meta.update({k: v for k, v in terms.items() if v is not None})
+    conn.execute(f"UPDATE {table} SET metadata_json=? WHERE {where}", (json.dumps(meta, sort_keys=True), i, target))
+
+
+def _hire_terms(d: dict, into: ledger.Holder, role: str) -> tuple[float | None, float]:
+    """(monthly wage if one was stated, the usual wage for that post)."""
+    usual = _usual_wage(into, role or "other")
+    raw = d.get("wage") if d.get("wage") is not None else d.get("salary")
+    return (_wage_of(raw, usual) if raw is not None else None), usual
+
+
 def _hire(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
-    if target is None or not _living(conn, target):
+    try:
+        count = max(1, int(d.get("count") or 1))
+    except (TypeError, ValueError):
+        return _refuse("count must be a number of people.")
+    if target is None and d.get("count") is None:
+        return _refuse("There is no living person named to take on.")
+    if target is not None and not _living(conn, target):
         return _refuse("There is no living person named to take on.")
     if target == me:
         return _refuse("He cannot hire himself.")
@@ -231,10 +280,94 @@ def _hire(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         into = ledger.parse_holder(d.get("into", ""), boss, conn)
     except ValueError:
         return _refuse("Say where: business:<id>, outfit:<id> or household:<id>.")
-    if into[0] == "person":
+    if into[0] not in ("business", "outfit", "household"):
         return _refuse("Say where: business:<id>, outfit:<id> or household:<id>.")
     if not ledger.can_draw(conn, boss, into):
         return _refuse("He has no authority to take people on there.")
+    if target is None or count > 1:
+        return _hire_many(conn, me, boss, target, d, intent, into, count)
+    return _hire_one(conn, me, boss, target, d, intent, into)
+
+
+def _hire_many(conn, me: int, boss: int, target: int | None, d: dict, intent: str, into: ledger.Holder, count: int) -> dict:
+    """Take on a number of people from those the place can supply. Asks for more than there are: takes those there are and says so."""
+    import random
+    from .person_ecology import resolve_background_person
+    role = str(d.get("role") or "").strip().lower()
+    where = _holder_label(conn, into, me)
+    first = None
+    if target is not None:
+        first = _hire_one(conn, me, boss, target, d, intent, into)
+        count -= 1
+        if count < 1 or first["status"] == "countered":
+            return first
+    try:
+        wage, usual = _hire_terms(d, into, role)
+        signon = ledger.amount_of(d["amount"]) if d.get("amount") else 0.0
+        src = ledger.parse_holder(d["from"], boss, conn) if d.get("from") else into
+    except ValueError as e:
+        return _refuse(str(e))
+    if not ledger.can_draw(conn, boss, src):
+        return _refuse("He has no right to draw on that purse.")
+    per_head = (wage or 0.0) + signon
+    afford = count if per_head <= 0 else int(max(0.0, ledger.balance(conn, src)) // per_head)
+    here = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()[0]
+    low = intent.lower()
+    sex = str(d.get("sex") or "").lower() or ("male" if re.search(r"\bmen\b|\bman\b", low) else ("female" if re.search(r"\bwomen\b|\bwoman\b", low) else None))
+    seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
+    rng = random.Random(f"hiremany:{seed}:{d.get('_call_id') or ''}:{_day(conn)}:{into}")
+    ratio = 0.0 if wage is None else max(-1.0, min(1.0, wage / usual - 1.0))
+    p_take = max(0.05, min(0.97, 0.6 + 0.3 * ratio + (0.1 if signon > 0 else 0.0)))
+    crew_id = None
+    if d.get("crew") and into[0] == "outfit":
+        raw = str(d["crew"]).partition(":")[2]
+        row = conn.execute("SELECT id FROM underworld_crews WHERE id=? AND organization_id=?", (int(raw) if raw.isdigit() else -1, into[1])).fetchone()
+        crew_id = int(row[0]) if row else None
+    got: list[int] = []
+    seen = refused = 0
+    exhausted = False
+    while len(got) < min(count, afford) and seen < count * 4 + 8:
+        aid = resolve_background_person(conn, reason=f"player hire: {intent[:60]}", location_id=here, allow_elsewhere=False,
+                                        demographic_sex=sex, min_age=18, max_age=60,
+                                        criminal_weight=1.0 if into[0] == "outfit" else 0.0)
+        if aid is None:
+            exhausted = True
+            break
+        seen += 1
+        if rng.random() > p_take:
+            refused += 1
+            continue
+        _install(conn, me, aid, into, role, crew_id=crew_id)
+        _stamp(conn, into, aid, wage=wage, sign_on=signon or None, duty=str(d.get("duty") or intent)[:120], hired_day=_day(conn))
+        if per_head > 0:
+            ledger.transfer(conn, src, ("person", aid), per_head, flow_kind="wage", purpose=f"first pay: {intent[:60]}", allow_partial=True)
+        got.append(aid)
+    n = len(got)
+    if n and into[0] == "outfit":
+        conn.execute("UPDATE underworld_organizations SET member_count_estimate=member_count_estimate+? WHERE id=?", (n, into[1]))
+        if crew_id is not None:
+            conn.execute("UPDATE underworld_crews SET size_estimate=size_estimate+? WHERE id=?", (n, crew_id))
+    asked = count + (1 if first is not None else 0)
+    why = []
+    if exhausted:
+        why.append("there aren't that many people to be had here")
+    elif afford < count:
+        why.append("his purse would not stand the pay for more")
+    elif refused and n < count:
+        why.append(f"{refused} of those asked turned it down")
+    total = n + (1 if first is not None and first["status"] == "applied" else 0)
+    summary = f"{total} of the {asked} sought took a place with {where}" + (": " + "; ".join(why) if why else "") + "."
+    if first is not None:
+        summary = f"{first['summary']} " + summary
+    _record(conn, me, "People taken on", summary, targets=tuple(got[:20]))
+    status = "applied" if total >= asked else ("partial" if total else "refused")
+    out = {"status": status, "summary": summary, "hired": total, "wanted": asked, "turned_down": refused}
+    if total < asked:
+        out["shortfall"] = "there are not that many people here" if exhausted else ("pay" if afford < count else "willingness")
+    return out
+
+
+def _hire_one(conn, me: int, boss: int, target: int, d: dict, intent: str, into: ledger.Holder) -> dict:
     role = str(d.get("role") or "").strip().lower()
     name = _name(conn, target)
     where = _holder_label(conn, into, me)
@@ -249,14 +382,14 @@ def _hire(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         return _refuse(f"{name} is not here to be asked.")
     if into[0] == "outfit" and conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active'", (target,)).fetchone():
         return _refuse(f"{name} already answers to another outfit.")
-    amount = 1.0
-    if d.get("amount"):
-        try:
-            amount = ledger.amount_of(d["amount"])
-        except ValueError as e:
-            return _refuse(str(e))
+    try:
+        wage, usual = _hire_terms(d, into, role)
+        amount = ledger.amount_of(d["amount"]) if d.get("amount") else 0.0
+    except ValueError as e:
+        return _refuse(str(e))
+    incentive = (min(2.0, amount / 1.5) if amount else 1.0) + (0.0 if wage is None else max(-1.0, min(1.0, wage / usual - 1.0)))
     day = _day(conn)
-    iid, res = _offer(conn, me, target, "offer", day, intent, {"incentive": min(2.0, amount / 1.5)}, op="hire", d=d)
+    iid, res = _offer(conn, me, target, "offer", day, intent, {"incentive": max(-2.0, min(2.0, incentive))}, op="hire", d=d)
     if iid is None:
         return res
     countered = _countered(conn, me, target, iid, res)
@@ -267,12 +400,17 @@ def _hire(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         _record(conn, me, "Offer refused", summary, targets=(target,))
         return {"status": "refused", "summary": summary, "interaction_id": iid}
     _install(conn, me, target, into, role)
+    _stamp(conn, into, target, wage=wage, sign_on=amount or None, duty=str(d.get("duty") or intent)[:120], hired_day=day)
+    if amount:
+        src = ledger.parse_holder(d["from"], boss, conn) if d.get("from") else ("person", boss)
+        if ledger.can_draw(conn, boss, src):
+            ledger.transfer(conn, src, ("person", target), amount, flow_kind="wage", purpose=f"sign-on: {intent[:60]}", allow_partial=True)
     summary = f"{name} accepted a place with {where}."
     _record(conn, me, "Person taken on", summary, targets=(target,))
-    return {"status": "applied", "summary": summary, "interaction_id": iid}
+    return {"status": "applied", "summary": summary, "interaction_id": iid, **({"wage_agreed": True} if wage is not None else {})}
 
 
-def _install(conn, me: int, target: int, into: ledger.Holder, role: str) -> None:
+def _install(conn, me: int, target: int, into: ledger.Holder, role: str, crew_id: int | None = None) -> None:
     kind, i = into
     if kind == "business":
         from .merchant import add_enterprise_staff
@@ -280,7 +418,7 @@ def _install(conn, me: int, target: int, into: ledger.Holder, role: str) -> None
     elif kind == "outfit":
         from .underworld_rebuild import create_personnel
         kind_role = role if role in OUTFIT_ROLES and role not in ("boss", "underboss") else "member"
-        create_personnel(conn, i, role_kind=kind_role, actor_id=target)
+        create_personnel(conn, i, role_kind=kind_role, actor_id=target, crew_id=crew_id)
     else:
         from .household_life import add_service_term
         add_service_term(conn, i, target, role if role in SERVICE_ROLES else "retainer")
@@ -507,7 +645,20 @@ def _backer_list(conn, me: int, target: int | None, d: dict) -> list[tuple[int |
             if not _living(conn, int(leader)) or not _same_place(conn, me, int(leader)):
                 return "The crew is not here."
             out.append((int(leader), _capacity(conn, int(leader))))
-        out.extend([(None, 1.0)] * int(min(float(crew["size_estimate"]), 8)))
+        out.extend([(None, 1.0)] * int(float(crew["size_estimate"])))
+    men = d.get("men")
+    if men:
+        try:
+            want = max(0, int(men))
+        except (TypeError, ValueError):
+            return "men must be a number of men."
+        org = _my_outfit(conn, _authority(me, d))
+        have = int(conn.execute("SELECT member_count_estimate FROM underworld_organizations WHERE id=?", (org,)).fetchone()[0]) if org else 0
+        have = max(0, have - 1 - sum(1 for i, _ in out if i is None) - sum(1 for i, _ in out if i is not None))
+        take = min(want, have)
+        if take < want:
+            d["_men_short"] = f"he has only {take} more men to bring" if take else "he has no more men to bring"
+        out.extend([(None, 1.0)] * take)
     return out
 
 
@@ -794,18 +945,29 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     weakest = min(lesser, key=lambda t: (t[1], t[0]))[0]
     front = defenders[0] if defenders else None
     plan: list[tuple[int, float]] = []
+    anon = sum(1 for i, _ in backers if i is None)  # unnamed men standing with him
+    force_n = len(attackers) + anon
+    k_def = max(1, min(len(defenders), round(force_n / 4)))  # the more men he brings, the more of theirs are hurt
+    k_att = max(1, min(len(lesser), round(len(defenders) / 2)))
+    by_weak = [a for a, _ in sorted(lesser, key=lambda t: (t[1], t[0]))]
     if roll > 1.35:
         outcome = "won"
-        if front is not None:
-            plan.append((front, HARM_SEVERITY[kind]))
+        frac = 0.05
+        for n, aid in enumerate(defenders[:k_def]):
+            plan.append((aid, HARM_SEVERITY[kind] * (1.0 if n == 0 else 0.6)))
     elif roll < 0.75:
         outcome = "lost"
-        plan.append((weakest, 35))
+        frac = 0.3
+        for aid in by_weak[:k_att]:
+            plan.append((aid, 35))
     else:
         outcome = "stalemate"
-        plan.append((weakest, 20))
-        if front is not None:
-            plan.append((front, 20))
+        frac = 0.12
+        for aid in by_weak[:max(1, k_att // 2)]:
+            plan.append((aid, 20))
+        for aid in defenders[:max(1, k_def // 2)]:
+            plan.append((aid, 20))
+    men_lost = min(anon, max(1 if (anon >= 5 and outcome != "won") else 0, round(anon * frac)))
 
     heavy = kind == "kill"
     if business is None:
@@ -835,6 +997,13 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
                                metadata={"source_organization_id": my_org} if (my_org is not None and aid != me and aid not in {i for i, _ in attackers}) else None)
         hurt.append({"name": _name(conn, aid), "how": inc["outcome"]})
 
+    if men_lost:
+        crew_ref = str(d.get("crew") or "")
+        crew_id = int(crew_ref.partition(":")[2]) if crew_ref.startswith("crew:") and crew_ref.partition(":")[2].isdigit() else None
+        if crew_id is not None:
+            conn.execute("UPDATE underworld_crews SET size_estimate=MAX(0,size_estimate-?) WHERE id=?", (min(men_lost, anon), crew_id))
+        if my_org is not None:
+            conn.execute("UPDATE underworld_organizations SET member_count_estimate=MAX(1,member_count_estimate-?) WHERE id=?", (men_lost, my_org))
     foe = victim if business is None else business["owner_actor_id"]
     if foe is not None and int(foe) != me:
         adjust_relationship_pair(
@@ -852,7 +1021,13 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
             add_heat(conn, outfit, public=3, violence=10 if heavy else 4, investigative=6 if heavy else 0)
         else:
             add_heat(conn, outfit, public=4, violence=8 if heavy else 4, investigative=5 if heavy else 0)
-    return {"status": "applied", "outcome": outcome, "hurt": hurt, "summary": summary, "event_id": event_id}
+    if men_lost:
+        summary += f" {men_lost} of the men with him were lost."
+    short = d.get("_men_short")
+    if short:
+        summary += f" {short[0].upper() + short[1:]}."
+    return {"status": "applied", "outcome": outcome, "hurt": hurt, "summary": summary, "event_id": event_id,
+            **({"men_lost": men_lost} if men_lost else {}), **({"men_short": short} if short else {})}
 
 
 # ---------------------------------------------------------------- trade

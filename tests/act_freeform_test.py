@@ -58,6 +58,45 @@ def t_amounts(conn, w):
     assert ledger.balance(conn, ("person", me)) < 1e-6
 
 
+def t_hire_many(conn, w):
+    import json
+    from engine import ledger, player_operations as po
+    me, outfit, hh = w["me"], w["outfit"], w["household"]
+    conn.execute("UPDATE underworld_organizations SET treasury=5000 WHERE id=?", (outfit,))
+    a0 = count(conn, "actors")
+    r = po.execute(conn, me, "hire", target_actor_id=None, details={"count": 30, "into": f"outfit:{outfit}", "role": "member", "wage": 0.1, "_call_id": "h1"},
+                   intent="I take on thirty men.")
+    assert r["status"] == "applied" and r["hired"] == 30, r
+    staffed = conn.execute("SELECT actor_id,metadata_json FROM underworld_personnel WHERE organization_id=? AND status='active' AND json_extract(metadata_json,'$.wage') IS NOT NULL", (outfit,)).fetchall()
+    assert len(staffed) == 30 and json.loads(staffed[0][1])["wage"] == 0.1, len(staffed)  # the wage is stored, not dropped
+    assert count(conn, "actors") >= a0  # revealed, never invented out of nothing: pool-bound
+    # more asked than the place has: those there are, with the reason in words
+    r = po.execute(conn, me, "hire", target_actor_id=None, details={"count": 5000, "into": f"outfit:{outfit}", "role": "member", "_call_id": "h2"},
+                   intent="I take on five thousand men.")
+    assert r["status"] == "partial" and 0 < r["hired"] < 5000 and "aren't that many" in r["summary"] and r["shortfall"], r
+    # pay bounds the number: a poor household takes only what it can pay
+    conn.execute("UPDATE households SET liquidity=0.25 WHERE id=?", (hh,))
+    r = po.execute(conn, me, "hire", target_actor_id=None, details={"count": 20, "into": f"household:{hh}", "role": "servant", "wage": 0.1, "_call_id": "h3"},
+                   intent="Servants.")
+    assert r["hired"] <= 2 and "purse would not stand" in r["summary"], r
+    # the wage binds the household's payroll
+    from engine import payroll
+    t = payroll.service_terms(conn, hh)
+    assert t and abs(payroll.household_wage(t[-1]) - 0.1) < 1e-9
+
+
+def t_crew_scale(conn, w):
+    from engine import player_operations as po
+    me, outfit, crew, by = w["me"], w["outfit"], w["crew"], w["bystander"]
+    conn.execute("UPDATE underworld_crews SET size_estimate=60 WHERE id=?", (crew,))
+    conn.execute("UPDATE underworld_organizations SET member_count_estimate=90 WHERE id=?", (outfit,))
+    r = po.execute(conn, me, "attack", target_actor_id=by, details={"crew": f"crew:{crew}", "intent_kind": "beat", "men": 500, "_call_id": "c1"},
+                   intent="I go for him with the whole crew.")
+    assert r["status"] == "applied" and r["outcome"] == "won", r
+    assert r.get("men_short") and r["men_lost"] >= 1, r  # a big force takes losses scaled to its size; and he has no more men to bring
+    assert conn.execute("SELECT size_estimate FROM underworld_crews WHERE id=?", (crew,)).fetchone()[0] == 60 - r["men_lost"]
+
+
 def run():
     with tempfile.TemporaryDirectory() as tmp:
         db = Path(tmp) / "act.db"
@@ -70,7 +109,7 @@ def run():
         with connect() as conn:
             conn.execute("PRAGMA busy_timeout=30000")
             w = make_boss(conn)
-            for fn in (t_amounts,):
+            for fn in (t_amounts, t_hire_many, t_crew_scale):
                 fn(conn, w)
                 print(fn.__name__, "ok")
     print("act_freeform_test passed")
