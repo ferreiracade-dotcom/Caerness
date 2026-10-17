@@ -409,6 +409,8 @@ def resolve_business_cycle(conn: sqlite3.Connection, enterprise_id: int, day: in
             conn.execute("UPDATE enterprise_ecology_state SET profitable_streak_days=?,insolvent_since_day=NULL,last_review_day=? WHERE enterprise_id=?",
                          (profitable,day,enterprise_id))
     conn.execute("UPDATE civilian_enterprises SET cash=?,debt=?,status=?,updated_day=? WHERE id=?", (cash, debt, status, day, enterprise_id))
+    if status == "active" and debt <= 0 and net > 0:
+        _owner_draw(conn, enterprise_id, operating_cost)
     conn.execute(
         """UPDATE enterprise_business_profiles SET utilization=?,last_resolved_day=?,next_review_day=?,updated_day=? WHERE enterprise_id=?""",
         (utilization, day, day + 30, day, enterprise_id),
@@ -428,6 +430,30 @@ def resolve_business_cycle(conn: sqlite3.Connection, enterprise_id: int, day: in
         "utilization": round(utilization, 3), "gross_revenue": round(gross, 4),
         "operating_cost": round(operating_cost, 4), "net_income": round(net, 4), "status": status,
     }
+
+
+def _owner_draw(conn: sqlite3.Connection, enterprise_id: int, operating_cost: float) -> float:
+    """Monthly draw: an active, debt-free business pays its natural-person owner up to half of its cash
+    above a working floor (two months of operating cost), into the owner's household, else purse."""
+    row = conn.execute("SELECT owner_actor_id,household_id,cash FROM civilian_enterprises WHERE id=?", (enterprise_id,)).fetchone()
+    if not row or row["owner_actor_id"] is None:
+        return 0.0
+    floor = 2.0 * max(0.0, float(operating_cost))
+    amount = round(0.5 * (float(row["cash"]) - floor), 4)
+    if amount < 0.01:
+        return 0.0
+    owner = int(row["owner_actor_id"])
+    hid = row["household_id"]
+    if hid is None:
+        r = conn.execute("""SELECT h.id FROM households h WHERE h.head_actor_id=? AND h.status NOT IN ('dissolved','historical')
+                            ORDER BY h.id LIMIT 1""", (owner,)).fetchone()
+        hid = r[0] if r else None
+    from . import ledger
+    dst = ("household", int(hid)) if hid is not None else ("person", owner)
+    try:
+        return ledger.transfer(conn, ("business", enterprise_id), dst, amount, flow_kind="distribution", purpose="owner's draw")
+    except ValueError:
+        return 0.0
 
 
 def next_business_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int | None:

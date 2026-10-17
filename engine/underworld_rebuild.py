@@ -1702,6 +1702,36 @@ def organization_manpower_balance(conn: sqlite3.Connection, organization_id: int
     return {"crew_manpower": size, "assigned_patrol": patrol, "territorial_requirement": required, "slack": size - required}
 
 
+def _monthly_figures(conn: sqlite3.Connection, organization_id: int, org: sqlite3.Row, culture: sqlite3.Row) -> dict[str, Any]:
+    """Pure arithmetic of one month's cashflow (no writes)."""
+    rackets = conn.execute("SELECT * FROM underworld_racket_sites WHERE organization_id=? AND status='active'", (organization_id,)).fetchall()
+    protections = conn.execute("SELECT * FROM underworld_protection_accounts WHERE protector_organization_id=? AND status='active'", (organization_id,)).fetchall()
+    kick_rate = .34 + float(culture["formality"]) / 100 * .23
+    racket_gross = sum(float(r["gross_income_per_30"]) for r in rackets)
+    protection_gross = sum(float(p["payment_per_30"]) for p in protections if not int(p["disputed"]))
+    treasury_gross = racket_gross * kick_rate + protection_gross * .78
+    crew_count = int(conn.execute("SELECT COUNT(*) FROM underworld_crews WHERE organization_id=? AND status='active'", (organization_id,)).fetchone()[0])
+    front_count = int(conn.execute("SELECT COUNT(*) FROM underworld_business_links WHERE organization_id=? AND link_kind IN ('owned_front','controlled_front') AND status='active'", (organization_id,)).fetchone()[0])
+    overhead = 0.10 * treasury_gross + crew_count * .10 + front_count * .08
+    rels = conn.execute("SELECT * FROM underworld_relations WHERE (organization_a_id=? OR organization_b_id=?) AND relation_kind='tributary'", (organization_id,organization_id)).fetchall()
+    tribute = sum(max(0.0, treasury_gross * float(rel["tribute_rate"])) for rel in rels
+                  if rel["patron_organization_id"] is not None and int(rel["patron_organization_id"]) != organization_id)
+    net = max(0.0, treasury_gross - overhead - tribute)
+    draw_rate = float(org["monthly_leader_draw_rate"] or .08)
+    return {"rackets": rackets, "protections": protections, "kick_rate": kick_rate, "racket_gross": racket_gross,
+            "protection_gross": protection_gross, "treasury_gross": treasury_gross, "overhead": overhead, "tribute": tribute,
+            "net": net, "draw_rate": draw_rate}
+
+
+def monthly_net_estimate(conn: sqlite3.Connection, organization_id: int) -> float:
+    """What one month would add to the treasury (after overhead, tribute and the leader's draw)."""
+    org = conn.execute("SELECT * FROM underworld_organizations WHERE id=?", (organization_id,)).fetchone()
+    if not org:
+        return 0.0
+    f = _monthly_figures(conn, organization_id, org, ensure_organization_culture(conn, organization_id))
+    return max(0.0, f["net"] - f["net"] * f["draw_rate"])
+
+
 def collect_monthly_income(conn: sqlite3.Connection, organization_id: int) -> dict[str, float]:
     """Resolve the organization's monthly criminal cashflow.
 
@@ -1712,14 +1742,9 @@ def collect_monthly_income(conn: sqlite3.Connection, organization_id: int) -> di
     if not org or str(org["status"]) not in {"active","strained","fragmented"}:
         return {"gross":0,"treasury_net":0,"leader_draw":0}
     culture = ensure_organization_culture(conn, organization_id)
-    rackets = conn.execute("SELECT * FROM underworld_racket_sites WHERE organization_id=? AND status='active'", (organization_id,)).fetchall()
-    protections = conn.execute("SELECT * FROM underworld_protection_accounts WHERE protector_organization_id=? AND status='active'", (organization_id,)).fetchall()
-    # More formal/corporate organizations generally centralize a larger share; this remains
-    # institutional accounting, not an assertion of moral sophistication.
-    kick_rate = .34 + float(culture["formality"]) / 100 * .23
-    racket_gross = sum(float(r["gross_income_per_30"]) for r in rackets)
-    protection_gross = sum(float(p["payment_per_30"]) for p in protections if not int(p["disputed"]))
-    treasury_gross = racket_gross * kick_rate + protection_gross * .78
+    f = _monthly_figures(conn, organization_id, org, culture)
+    rackets, protections, kick_rate = f["rackets"], f["protections"], f["kick_rate"]
+    racket_gross, protection_gross, treasury_gross = f["racket_gross"], f["protection_gross"], f["treasury_gross"]
     # ECON-01 records the money path explicitly. Racket gross is still a gross earning estimate
     # here; the later personal-estate/merchant integration will model every client-side balance.
     for r in rackets:
@@ -1741,9 +1766,7 @@ def collect_monthly_income(conn: sqlite3.Connection, organization_id: int) -> di
                                   racket_id=rid,protection_account_id=int(p["id"]),cadence_kind="monthly",rate=.78)
     # Overhead is bribes, specialists, safehouses, funerals, legal help, messengers and emergency
     # support. It is intentionally not payroll proportional to every member.
-    crew_count = int(conn.execute("SELECT COUNT(*) FROM underworld_crews WHERE organization_id=? AND status='active'", (organization_id,)).fetchone()[0])
-    front_count = int(conn.execute("SELECT COUNT(*) FROM underworld_business_links WHERE organization_id=? AND link_kind IN ('owned_front','controlled_front') AND status='active'", (organization_id,)).fetchone()[0])
-    overhead = 0.10 * treasury_gross + crew_count * .10 + front_count * .08
+    overhead = f["overhead"]
     # Tribute is paid from the subordinate's take upward.
     tribute_paid = 0.0
     rels = conn.execute("SELECT * FROM underworld_relations WHERE (organization_a_id=? OR organization_b_id=?) AND relation_kind='tributary'", (organization_id,organization_id)).fetchall()
@@ -1757,7 +1780,7 @@ def collect_monthly_income(conn: sqlite3.Connection, organization_id: int) -> di
             _finance(conn, int(patron), "tribute_received", amount, counterparty_organization_id=organization_id)
             _record_economic_flow(conn,"tribute",amount,source_organization_id=organization_id,target_organization_id=int(patron),cadence_kind="monthly",rate=float(rel["tribute_rate"]))
     net = max(0.0, treasury_gross - overhead - tribute_paid)
-    draw_rate = float(org["monthly_leader_draw_rate"] or .08)
+    draw_rate = f["draw_rate"]
     leader_draw = net * draw_rate
     treasury_add = max(0.0, net - leader_draw)
     conn.execute("UPDATE underworld_organizations SET treasury=treasury+?,updated_day=? WHERE id=?", (treasury_add, _day(conn), organization_id))

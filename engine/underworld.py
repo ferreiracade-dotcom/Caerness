@@ -252,7 +252,11 @@ def create_underworld_organization(
             max(0,min(100,float(succession_depth))),day,day,_j(meta),
         ),
     )
-    return int(conn.execute("SELECT id FROM underworld_organizations WHERE organization_key=?",(organization_key,)).fetchone()[0])
+    oid = int(conn.execute("SELECT id FROM underworld_organizations WHERE organization_key=?",(organization_key,)).fetchone()[0])
+    # An outfit without a heat row never reaches the monthly tick (process_due_rebuild_underworld joins on it).
+    from .underworld_rebuild import ensure_heat_profile
+    ensure_heat_profile(conn, oid)
+    return oid
 
 
 def underworld_organization_for_actor(conn: sqlite3.Connection, actor_id: int) -> sqlite3.Row | None:

@@ -48,3 +48,35 @@ def make_boss(conn) -> dict:
     conn.commit()
     return {"me": me, "outfit": outfit, "business": business, "household": household, "crew": crew,
             "crew_leader": leader, "bystander": bystander, "location": loc}
+
+
+def make_fane(conn, *, legacy: bool = True) -> dict:
+    """A Fane-like outfit: three rackets, three controlled fronts each paying a rival 'opening' protection,
+    no zone, treasury 0. legacy=True also removes the heat row, as in the saves built before schema 113."""
+    from engine.underworld_rebuild import _ensure_protection_racket, create_front, create_racket_site
+
+    w = make_boss(conn)
+    outfit, me, loc = w["outfit"], w["me"], w["location"]
+    conn.execute("UPDATE underworld_organizations SET treasury=0 WHERE id=?", (outfit,))
+    for kind in ("illegal gaming", "unlicensed bookmaking", "high-risk debt"):
+        create_racket_site(conn, outfit, kind, zone_id=None, gross_income_per_30=7)
+    held = conn.execute(
+        """SELECT c.organization_id o,c.zone_id z FROM underworld_zone_claims c JOIN underworld_zones z ON z.id=c.zone_id
+           WHERE z.city_location_id=? AND c.claim_kind='controller' AND c.status='active' AND c.organization_id<>? ORDER BY c.zone_id LIMIT 3""",
+        (loc, outfit)).fetchall()
+    rivals = [int(r["o"]) for r in held]
+    zone = int(held[0]["z"])
+    fronts = []
+    for i, h in enumerate(held):
+        rival, rzone = int(h['o']), int(h['z'])
+        eid = create_front(conn, outfit, f"Fane Front {i}", "shop", zone_id=None, archetype="food_shop", organization_legal_owner=False,
+                           legal_owner_actor_id=me, cash=30)
+        conn.execute(
+            """INSERT INTO underworld_protection_accounts(protector_organization_id,enterprise_id,zone_id,payment_per_30,service_strength,
+                   fear_component,disputed,started_day,status,metadata_json,racket_id) VALUES (?,?,?,?,50,50,0,0,'active','{"opening_account":true}',?)""",
+            (rival, eid, rzone, 1.0, _ensure_protection_racket(conn, rival, rzone)))
+        fronts.append(eid)
+    if legacy:
+        conn.execute("DELETE FROM underworld_heat WHERE organization_id=?", (outfit,))
+    conn.commit()
+    return {**w, "fronts": fronts, "rivals": rivals, "zone": zone}

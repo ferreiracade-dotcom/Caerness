@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 112
+SCHEMA_VERSION = 113
 
 
 def _running_tests() -> bool:
@@ -4523,6 +4523,32 @@ def _migration_112(conn: sqlite3.Connection) -> None:
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema112_report',?)", (json.dumps(report, sort_keys=True),))
 
 
+def _migration_113(conn: sqlite3.Connection) -> None:
+    """Gap 4b: every active outfit ticks (heat row) and has an opening treasury; protection conflicts on an outfit's own fronts end;
+    outfits hold or contest ground where their fronts sit; neighbouring outfits know each other."""
+    import json
+    report: dict = {}
+    if _has_table(conn, "underworld_organizations") and _has_table(conn, "underworld_heat"):
+        from .underworld_rebuild import ensure_heat_profile, monthly_net_estimate
+        day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+        ids = [int(r[0]) for r in conn.execute(
+            """SELECT o.id FROM underworld_organizations o WHERE o.status IN ('active','strained','fragmented')
+               AND NOT EXISTS (SELECT 1 FROM underworld_heat h WHERE h.organization_id=o.id)""")]
+        for oid in ids:
+            ensure_heat_profile(conn, oid)
+        report["heat_rows_added"] = len(ids)
+        seeded = 0
+        for r in conn.execute(
+                """SELECT o.id FROM underworld_organizations o WHERE o.status IN ('active','strained','fragmented') AND o.treasury=0
+                   AND NOT EXISTS (SELECT 1 FROM underworld_finance_transactions f WHERE f.organization_id=o.id)""").fetchall():
+            t = round(3 * monthly_net_estimate(conn, int(r[0])), 2)
+            if t > 0:
+                conn.execute("UPDATE underworld_organizations SET treasury=? WHERE id=?", (t, int(r[0])))
+                seeded += 1
+        report["treasuries_seeded"] = seeded
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema113_report',?)", (json.dumps(report, sort_keys=True),))
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4635,6 +4661,7 @@ _MIGRATIONS: dict[int, Migration] = {
     109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed; unrevealed stages follow canon headcounts", _migration_109),
     110: ("underworld_everywhere", "Gap 4a: procedural Aldergate underworld dissolved; canon-shaped underworld in every settlement; notes naming dissolved outfits reported", _migration_110),
     111: ("occupation_follows_stage", "Background occupation follows Stage: Breach/Fifth martial, Third rarely otherwise; resolved mismatches reported", _migration_111),
+    113: ("world_pushes_back", "Gap 4b: every outfit ticks and has a treasury; own fronts are not protected by rivals; ground and relations seeded", _migration_113),
     112: ("former_members_retired_masters_reckoning", "Former outfit members read as ordinary; retired masters keep a trade at high Stage; the Reckoning at Waymeet with Seth Carrick", _migration_112),
 }
 
