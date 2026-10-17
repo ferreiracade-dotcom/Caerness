@@ -357,7 +357,7 @@ def loyalty():
         term = add_service_term(conn, hh, servant, "servant")
         conn.execute("UPDATE underworld_racket_sites SET status='abandoned' WHERE organization_id=?", (outfit,))
         conn.execute("UPDATE underworld_organizations SET treasury=0,monthly_leader_draw_rate=0 WHERE id=?", (outfit,))
-        conn.execute("UPDATE households SET liquidity=0,wealth=3 WHERE id=?", (hh,))
+        conn.execute("UPDATE households SET liquidity=0,wealth=40 WHERE id=?", (hh,))
         conn.execute("UPDATE underworld_leader_wealth SET liquid_wealth=0 WHERE actor_id=?", (w["me"],))
         conn.execute("UPDATE resources SET amount=0 WHERE actor_id=? AND resource_type='cash'", (w["me"],))
         for e in w["fronts"]:

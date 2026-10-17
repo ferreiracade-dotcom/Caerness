@@ -137,14 +137,15 @@ def aggression_candidates(conn: sqlite3.Connection, actor_id: int, oid: int, dri
             seen_t.add(t)
             h, _kind = _hostility(conn, oid, t)
             pt = tp.propensity(conn, oid, toward=t)
-            u = 1.0 + 5.0 * pt + h / 40.0 + 1.4 * _log_ratio(conn, oid, t) - 1.3 * hp - 1.5 * tol
+            # Durable families hold property and fronts and settle things by other means [1734, 1774]; street gangs fight over corners.
+            u = 0.6 + 9.0 * pt + h / 40.0 + 1.4 * _log_ratio(conn, oid, t) - (1.6 - 1.0 * pt) * hp - 1.5 * tol + {"street": .5, "durable": -1.4}.get(cls, 0.0)
             cand(f"challenge:{zid}:{t}", "challenge_zone", u, f"Press {_name(conn, t)} for its ground.", {"zone_id": zid, "target_organization_id": t},
                  ("territory", "hostile"), .6)
             acct = conn.execute(
                 """SELECT p.enterprise_id,p.protector_organization_id FROM underworld_protection_accounts p
                    WHERE p.zone_id=? AND p.status='active' AND p.protector_organization_id=? ORDER BY p.id LIMIT 1""", (zid, t)).fetchone()
             if acct and _log_ratio(conn, oid, t) > -.1 and zid in own + [z for z in reach if z in own]:
-                up = 1.8 + 3.0 * pt + 1.3 * ambition + h / 60.0 - 1.0 * hp
+                up = 1.8 + 4.0 * pt + 1.3 * ambition + h / 60.0 - 1.0 * hp + {"street": .3, "durable": -.8}.get(cls, 0.0)
                 cand(f"poach:{acct['enterprise_id']}:{zid}", "poach_protection", up, f"Take a protected client from {_name(conn, t)}.",
                      {"zone_id": zid, "enterprise_id": int(acct["enterprise_id"]), "target_organization_id": t}, ("protection", "hostile"), .4)
             if len(seen_t) >= 3:
@@ -155,7 +156,7 @@ def aggression_candidates(conn: sqlite3.Connection, actor_id: int, oid: int, dri
         pt = tp.propensity(conn, oid, toward=other)
         g = tp.grudge_level(conn, oid, other, day)
         if h >= 58 and kind in ("rival", "war"):
-            u = .4 + 6.5 * pt + (h - 58) / 12.0 + g / 22.0 + 1.0 * _log_ratio(conn, oid, other) - 1.6 * hp - tol
+            u = .4 + 6.5 * pt + (h - 58) / 12.0 + g / 22.0 + 1.0 * _log_ratio(conn, oid, other) - (2.0 - 1.2 * pt) * hp - tol
             cand(f"hit:{other}", "targeted_hit", u, f"Strike {_name(conn, other)} where it hurts.", {"target_organization_id": other}, ("hostile", "violence"), .8)
         if h >= 35 and kind in ("rival", "war", "hostile_peace"):
             u = 2.4 + 2.6 * (1 - pt) + 1.3 * patience + (.9 if cls == "durable" else 0.0) + h / 55.0 + .8 * hp + tol - g / 35.0
@@ -484,7 +485,7 @@ def city_crackdowns(conn: sqlite3.Connection, day: int) -> int:
                              WHERE o.primary_location_id IS NOT NULL AND i.day>? AND i.incident_kind IN ('attack_on_member','attack_on_client')""", (day - 90,)).fetchall():
         loc = int(r["loc"])
         tension = city_tension(conn, loc, day)
-        if tension < 3.5:
+        if tension < 2.4:
             continue
         key = f"uw_crackdown:{loc}"
         last = conn.execute("SELECT value FROM engine_meta WHERE key=?", (key,)).fetchone()
@@ -598,7 +599,7 @@ def street_gang_churn(conn: sqlite3.Connection, day: int) -> dict[str, int]:
         if leader_is_player(conn, oid):
             continue
         w = _weakness(conn, oid)
-        if w >= .35 and rng.random() < .30:
+        if (w >= .3 and rng.random() < .30) or rng.random() < .006:  # the weak go quickly; any street gang can fold on a bad month
             dissolve_street_gang(conn, oid, day, "beaten and spent" if w >= .8 else "worn thin")
             collapsed += 1
     cities = conn.execute("""SELECT DISTINCT z.city_location_id FROM underworld_zones z WHERE z.status='active' ORDER BY 1""").fetchall()
@@ -612,7 +613,7 @@ def street_gang_churn(conn: sqlite3.Connection, day: int) -> dict[str, int]:
             street = float(_character(conn, lid)[0]["street"])
         except Exception:
             street = .3
-        p = .03 * min(1.5, street * 1.6) * min(1.0, len(free) / 2.0)
+        p = .014 * min(1.5, street * 1.6) * min(1.0, len(free) / 2.0)
         if rng.random() < p:
             if found_street_gang(conn, lid, free[rng.randrange(len(free))], rng, day, founded) is not None:
                 founded += 1

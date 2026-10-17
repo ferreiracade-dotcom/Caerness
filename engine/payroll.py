@@ -9,8 +9,8 @@ import math
 import sqlite3
 from typing import Any
 
-UNIT = 0.30  # one weight of wage, per month. Calibrated so payroll is roughly 35-45% of a median outfit's gross.
-ANON_WEIGHT = 0.5  # rank and file who are not named people: their pay is real but has no individual payee
+UNIT = 0.15  # one weight of wage, per month. A typical named roster (about ten weights) costs 35-45% of a median outfit's gross.
+ANON_WEIGHT = 0.1  # rank and file who are not named people already live off the rackets; this is only the treasury's upkeep of them
 ROLE_WEIGHT = {"underboss": 3.0, "lieutenant": 2.0, "crew_leader": 2.0, "accountant": 1.5, "fixer": 1.5, "specialist": 1.5,
                "enforcer": 1.0, "collector": 1.0, "member": 1.0, "associate": 0.5}
 HOUSEHOLD_WAGE = {"steward": 0.15, "retainer": 0.12, "guard": 0.12, "tutor": 0.12, "clerk": 0.12, "servant": 0.08, "apprentice": 0.05, "other": 0.08}
@@ -35,12 +35,11 @@ def set_arrears(conn: sqlite3.Connection, kind: str, hid: int, months: int, owed
         (kind, hid, max(0, int(months)), round(max(0.0, owed), 4), paid_day, day))
 
 
-def _next_months(months: int, shortfall: float, paid: float, current_due: float) -> int:
-    if shortfall <= 0.01:
+def _months_behind(owed: float, month_due: float) -> int:
+    """Months unpaid, from what is owed against one month's wages (so it does not depend on how often the books are closed)."""
+    if owed <= 0.01 or month_due <= 0.0:
         return 0
-    if paid >= current_due - 0.01:
-        return max(1, months - 1)  # this month's pay was met; the old debt is still being worked off
-    return months + 1
+    return max(1, math.ceil(owed / month_due - 1e-9))
 
 
 # -- outfits ---------------------------------------------------------------------------------------------------
@@ -86,7 +85,7 @@ def run_outfit_payroll(conn: sqlite3.Connection, oid: int, day: int | None = Non
         paid += anon_pay
     total_due = month_due * scale
     shortfall = max(0.0, total_due - paid)
-    months = _next_months(prior["months"], shortfall, paid, month_due)
+    months = _months_behind(shortfall, month_due)
     set_arrears(conn, "outfit", oid, months, shortfall, paid_day=day if shortfall <= 0.01 else None)
     if paid > 0:
         _finance(conn, oid, "payroll", -paid, metadata={"due": round(total_due, 3), "arrears_months": months})
@@ -133,7 +132,7 @@ def run_business_payroll(conn: sqlite3.Connection, eid: int, operating_cost: flo
                     _record_economic_flow(conn, "wage", catch / len(named), source_enterprise_id=eid, target_actor_id=aid, cadence_kind="one_off")
             ledger._debit(conn, ("business", eid), catch)
             shortfall = max(0.0, shortfall - catch)
-    months = _next_months(prior["months"], shortfall, paid, labour)
+    months = _months_behind(shortfall, labour)
     set_arrears(conn, "business", eid, months, shortfall, paid_day=day if shortfall <= 0.01 else None)
     from .loyalty import business_morale
     business_morale(conn, eid, months)
@@ -182,10 +181,10 @@ def run_household_payroll(conn: sqlite3.Connection, h: sqlite3.Row, elapsed_days
         paid_total += got
     total_due = due * scale
     shortfall = max(0.0, total_due - paid_total)
-    months = _next_months(prior["months"], shortfall, paid_total, due)
+    months = _months_behind(shortfall, month_due)
     set_arrears(conn, "household", hid, months, shortfall, paid_day=day if shortfall <= 0.01 else None)
     from .loyalty import household_morale
-    household_morale(conn, hid, months, day)
+    household_morale(conn, hid, months, day, elapsed_days)
     return from_house
 
 

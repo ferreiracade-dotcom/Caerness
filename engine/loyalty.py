@@ -205,7 +205,7 @@ def skim(conn: sqlite3.Connection, aid: int, oid: int, day: int, loc: int | None
 
 # -- households ---------------------------------------------------------------------------------------------------
 
-def household_morale(conn: sqlite3.Connection, hid: int, months_behind: int, day: int | None = None, rng: random.Random | None = None) -> int:
+def household_morale(conn: sqlite3.Connection, hid: int, months_behind: int, day: int | None = None, elapsed_days: int = 30, rng: random.Random | None = None) -> int:
     """Servants and stewards: satisfaction and loyalty follow pay and treatment; a badly paid or unhappy one may leave mid-term."""
     from .household_life import _record_life_event
     day = _day(conn) if day is None else day
@@ -213,14 +213,15 @@ def household_morale(conn: sqlite3.Connection, hid: int, months_behind: int, day
     left = 0
     for t in conn.execute("SELECT * FROM household_service_terms WHERE household_id=? AND status='active' ORDER BY id", (hid,)).fetchall():
         harmed = int(conn.execute("SELECT COUNT(*) FROM harm_incidents WHERE actor_id=? AND day>? AND source_kind='player_operation'", (int(t["actor_id"]), day - 60)).fetchone()[0])
-        ds = drift(months_behind, harmed, float(t["satisfaction"]))
+        k = max(0.0, min(1.5, elapsed_days / 30.0))  # the books close every few days, not every month
+        ds = drift(months_behind, harmed, float(t["satisfaction"])) * k
         dl = ds * .6 if ds < 0 else ds * .5
         sat, loy = _clamp(float(t["satisfaction"]) + ds), _clamp(float(t["loyalty"]) + dl)
         conn.execute("UPDATE household_service_terms SET satisfaction=?,loyalty=? WHERE id=?", (sat, loy, int(t["id"])))
         if sat < 25 or months_behind >= 2:
             # a steward whose loyalty holds stays longer than a servant whose does not
             p = .45 if loy < 40 else .15
-            if (sat < 25 or months_behind >= 3) and rng.random() < p:
+            if (sat < 25 or months_behind >= 3) and rng.random() < p * k:
                 conn.execute("UPDATE household_service_terms SET status='former',end_day=? WHERE id=?", (day, int(t["id"])))
                 conn.execute("UPDATE household_members SET status='former',left_day=? WHERE household_id=? AND actor_id=? AND role=? AND status='active'",
                              (day, hid, int(t["actor_id"]), t["service_role"]))
