@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
 
 # sha of the opening family resolution on the packaged world, recorded on HEAD before the shared-parts refactor
-PARITY_SHA = "093f440f97c81af83f38f8b46982752b96b7ea92966e0ecdc8791503f77ea0ce"
+PARITY_SHA = "a2980851321be4e5c3e1e7cf2fdb02c87309f6f8674909603551ead4afb8522a"
 
 
 def open_copy(tmp, name="w.db"):
@@ -31,6 +31,7 @@ def open_copy(tmp, name="w.db"):
 def parity():
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         c = open_copy(tmp)
+        c.execute("UPDATE households SET wealth=0,liquidity=0")  # the recorded draw predates schema 115's household means
         ids = [r[0] for r in c.execute(
             """SELECT actor_id FROM actor_life_profiles WHERE json_extract(metadata_json,'$.marital_status_basis')='opening_draw'
                AND json_extract(metadata_json,'$.marital_status') IN ('widowed','never_married') ORDER BY actor_id LIMIT 80""")]
@@ -40,11 +41,22 @@ def parity():
         from engine import opening_family as of
         of.resolve_opening_family(c)
         h = hashlib.sha256()
+        drop = ("spouse_actor_id", "other_parent_actor_id")  # ids shift when schema 115 adds household staff
         for a in ids:
-            h.update(json.dumps(json.loads(c.execute("SELECT metadata_json FROM actor_life_profiles WHERE actor_id=?", (a,)).fetchone()[0]), sort_keys=True).encode())
+            m = json.loads(c.execute("SELECT metadata_json FROM actor_life_profiles WHERE actor_id=?", (a,)).fetchone()[0])
+            for k in drop:
+                m.pop(k, None)
+            h.update(json.dumps(m, sort_keys=True).encode())
+        idset = set(ids)
         for r in c.execute("SELECT constraints_json,count_estimate FROM latent_entities WHERE latent_kind='kin_group' ORDER BY id"):
-            h.update(str(tuple(r)).encode())
-        h.update(str(c.execute("select count(*) from household_unions").fetchone()[0]).encode())
+            cj = json.loads(r[0])
+            if cj.get("parent_actor_id") not in idset:
+                continue
+            for k in drop:
+                cj.pop(k, None)
+            h.update(str((json.dumps(cj, sort_keys=True), r[1])).encode())
+        q = ",".join(map(str, ids))
+        h.update(str(c.execute(f"select count(*) from household_unions where actor_a_id in ({q}) or actor_b_id in ({q})").fetchone()[0]).encode())
         assert h.hexdigest() == PARITY_SHA, h.hexdigest()
         # people of any age can be revealed (13-17 used to fail on an invalid life_stage)
         from engine.person_ecology import resolve_background_person
@@ -150,8 +162,95 @@ def lived_past():
     print("new_character_test::lived_past ok")
 
 
+FANE = {"age": 45, "sex": "male", "place": "Toll's Reach", "work": "gang boss", "stage": "Third", "draw": 0, "from_elsewhere": True,
+        "affiliation": {"name": "The Fane Combine", "role": "boss", "new": True, "type": "gang"},
+        "holdings": [{"kind": "brothel", "amount": "modest"}, {"kind": "gambling den"}, {"kind": "lending"}]}
+
+
+def _counts(c):
+    return tuple(c.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in (
+        "actors", "latent_entities", "engine_meta", "knowledge", "kinship_links", "relationships", "households", "household_members",
+        "background_population_identity_links", "player_state", "underworld_organizations", "civilian_enterprises", "resources"))
+
+
+def proposal():
+    from engine import new_character as nc
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        c = open_copy(tmp)
+        c.commit()
+        n0 = _counts(c)
+        prev = nc.create_protagonist(c, {**FANE}, "p1")
+        assert prev["status"] == "draft" and "actor_id" not in prev and prev["summary"]["who"], prev
+        assert _counts(c) == n0, "a preview left rows behind"
+        prev2 = nc.create_protagonist(c, {**FANE}, "p2")
+        assert prev2["summary"] == prev["summary"]
+        done = nc.create_protagonist(c, {**FANE, "accept": True}, "p4")
+        assert done["status"] == "created", done
+        assert done["summary"] == prev["summary"], "accept made a different person from the preview"
+        me = done["actor_id"]
+        assert c.execute("SELECT player_actor_id FROM player_state").fetchone()[0] == me
+        row = c.execute("SELECT * FROM underworld_organizations WHERE current_leader_actor_id=?", (me,)).fetchone()
+        assert row and row["name"] == "The Fane Combine" and json.loads(row["metadata_json"])["authored"], dict(row) if row else None
+        assert c.execute("SELECT COUNT(*) FROM underworld_racket_sites WHERE organization_id=?", (row["id"],)).fetchone()[0] == 3
+        assert c.execute("SELECT 1 FROM underworld_heat WHERE organization_id=?", (row["id"],)).fetchone()
+        assert c.execute("SELECT COUNT(*) FROM households WHERE head_actor_id=?", (me,)).fetchone()[0] == 1
+        meta = json.loads(c.execute("SELECT metadata_json FROM actor_life_profiles WHERE actor_id=?", (me,)).fetchone()[0])
+        assert meta["source"] == "new_character" and meta["not_canon"] and meta["lived_past_key"]
+        # a second protagonist is refused; the world runs and the outfit earns
+        again = nc.create_protagonist(c, {**FANE, "accept": True}, "p5")
+        assert again["status"] == "refused" and "already" in again["reason"]
+        from engine.simulation import advance_connection
+        advance_connection(c, 30)
+        earned = c.execute("SELECT treasury FROM underworld_organizations WHERE id=?", (row["id"],)).fetchone()[0]
+        flows = c.execute("SELECT COUNT(*) FROM economic_flows WHERE source_racket_id IS NOT NULL OR target_organization_id=?", (row["id"],)).fetchone()[0]
+        assert earned > 0 or flows > 0, (earned, flows)
+        c.close()
+
+    # refusals each cite their clash; a corrected resubmit passes
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        c = open_copy(tmp)
+        c.commit()
+        base = {"age": 34, "sex": "male", "place": "Toll's Reach", "work": "lamp-lighter", "draw": 0}
+        canon = c.execute("SELECT a.name FROM actors a JOIN source_identity_map m ON m.entity_id=a.id AND m.entity_kind='actor' WHERE a.actor_type='character' LIMIT 1").fetchone()[0]
+        dead = c.execute("SELECT a.name FROM actors a JOIN actor_life_profiles p ON p.actor_id=a.id WHERE p.life_status<>'living' LIMIT 1").fetchone()[0]
+        cases = [({"name": canon}, "canon figure", {"name": "Tam Underhill"}),
+                 ({"age": 25, "work": "merchant", "stage": "Third"}, "unheard", {"age": 25, "work": "merchant"}),
+                 ({"affiliation": {"name": "Stone Boars", "role": "boss"}}, "already has its leader", {"affiliation": {"name": "Stone Boars", "role": "member"}}),
+                 ({"family": {"parents": [{"name": dead}]}}, "dead", {"family": {"parents": "gone"}}),
+                 ({"family": {"spouse": "a husband"}}, "same-sex", {"family": {"spouse": "a wife"}})]
+        whos = {nc.create_protagonist(c, {**base, "draw": d}, f"d{d}")["summary"]["who"] for d in range(4)}
+        assert len(whos) >= 2, "another draw gives another person"
+        for bad, needle, fix in cases:
+            r = nc.create_protagonist(c, {**base, **bad}, "r1")
+            assert r["status"] == "refused" and needle in r["reason"].lower(), (bad, r)
+            ok = nc.create_protagonist(c, {**base, **fix}, "r2")
+            assert ok["status"] == "draft", (fix, ok)
+        # an absurd fortune is scaled down in words, not refused; weird free text passes; a child has no spouse
+        big = nc.create_protagonist(c, {**base, "holdings": [{"kind": "cash", "amount": "fortune"}, {"kind": "tea house", "name": "Lamp Tea House", "amount": "fortune"}]}, "r3")
+        assert big["status"] == "draft" and big["scaled_down"] and "town" in big["scaled_down"][0]["why"], big
+        weird = nc.create_protagonist(c, {**base, "work": "keeper of the dawn bells", "family": {"spouse": "none"}, "concept": "x"}, "r4")
+        assert weird["status"] == "draft", weird
+        kid = nc.create_protagonist(c, {"age": 12, "place": "Toll's Reach", "draw": 0}, "r5")
+        assert kid["status"] == "draft" and "parents' house" in kid["summary"]["household"], kid
+        assert _counts(c) == _counts(c)
+        # a drawn sex follows the power role: violent outfit ~0.92, trade ~0.85, vice ~0.70; a stated sex is respected
+        for cls, text, lo, hi in (("violent", {"name": "The Rooks", "role": "boss", "new": True, "type": "gang"}, .88, .96),
+                                  ("trade", {"name": "Weavers Guild", "role": "head", "new": True, "type": "guild"}, .80, .90),
+                                  ("vice", {"name": "Velvet House", "role": "owner", "new": True, "type": "brothel"}, .64, .76)):
+            assert nc.power_class({"affiliation": text}) == cls, cls
+            share = sum(nc.resolve_sex(c, {"affiliation": text}, f"k{i}")[0] == "male" for i in range(300)) / 300
+            assert lo <= share <= hi, (cls, share)
+        assert nc.power_class({}) is None
+        pop = sum(nc.resolve_sex(c, {}, f"k{i}")[0] == "male" for i in range(300)) / 300
+        assert 0.4 < pop < 0.6, pop
+        fem = nc.create_protagonist(c, {**base, "sex": "female", "work": "criminal"}, "r6")
+        assert fem["status"] == "draft" and " woman " in fem["summary"]["who"], fem
+        c.close()
+    print("new_character_test::proposal ok")
+
+
 def run(only=None):
-    for fn in (parity, lived_past):
+    for fn in (parity, lived_past, proposal):
         if only is None or fn.__name__ in only:
             fn()
 

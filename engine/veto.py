@@ -27,7 +27,7 @@ _KEYWORDS = (
     ("physician", ("physician", "healer", "doctor", "surgeon", "apothecar", "herbal", "midwife", "nurse", "medic", "bonesetter")),
     ("soldier", ("soldier", "guard", "warden", "knight", "captain", "mercenar", "sergeant", "militia", "officer", "marshal", "warrior",
                  "swordsman", "duelist", "lancer", "archer", "general", "garrison", "cadet")),
-    ("criminal", ("thief", "smuggl", "gangster", "racket", "fence", "pimp", "bandit", "outlaw", "criminal", "brothel", "gambl", "enforcer",
+    ("criminal", ("thief", "smuggl", "gang", "mobster", "crime", "thug", "gangster", "racket", "fence", "pimp", "bandit", "outlaw", "criminal", "brothel", "gambl", "enforcer",
                   "cutpurse", "underworld", "crime boss", "extortion")),
     ("clerk", ("clerk", "scribe", "notary", "accountant", "bookkeep", "secretary", "steward", "registrar", "archivist", "official",
                "magistrate", "bailiff", "tax", "reeve")),
@@ -220,15 +220,19 @@ def kin_alive(conn: sqlite3.Connection, who: str, as_: str, age: int, *, alive: 
 
 
 def pool_can_supply(conn: sqlite3.Connection, *, loc: int, sex: str | None, age: int, category: str | None, stage: str | None,
-                    elsewhere: bool = False, pick_seed: Any = None) -> None:
+                    elsewhere: bool = False, pick_seed: Any = None, exact: bool = False) -> int:
     """The population of the place must contain such a person (the reservoir is grown first, as a real reveal would)."""
     from .authoring import _pick_args
     retired = bool(category and category not in _MARTIAL and stage in ("Breach", "Fifth", "Sixth"))
     s = settlement_of(conn, loc)
-    args = _pick_args(loc=s if s is not None else loc, sex=sex, age=age, work_domain=category, stage=stage, elsewhere=elsewhere, retired=retired)
-    if find_background_candidate(conn, pick_seed=pick_seed, **args) is None:
-        raise Contradiction("the people of that place cannot supply such a person"
-                            + ("" if elsewhere else " (he could have come from elsewhere)"))
+    # The protagonist's age is asked exactly; where the place has nobody of exactly that age and standing, the nearest is taken.
+    for window in ((1, 3, 6, 10, 15) if exact else (3,)):
+        args = _pick_args(loc=s if s is not None else loc, sex=sex, age=age, work_domain=category, stage=stage, elsewhere=elsewhere,
+                          retired=retired, exact_stage=exact, window=window)
+        if find_background_candidate(conn, pick_seed=pick_seed, growth_batches=64 if exact else None, **args) is not None:
+            return window
+    raise Contradiction("the people of that place cannot supply such a person"
+                        + ("" if elsewhere else " (he could have come from elsewhere)"))
 
 
 def holdings_in_proportion(conn: sqlite3.Connection, loc: int, holdings: list[dict], *, prior_wealth: float = 0.0,
@@ -314,7 +318,7 @@ def check_proposal(conn: sqlite3.Connection, proposal: dict) -> dict:
     aff = p.get("affiliation") or {}
     if aff and (aff.get("name") or aff.get("text")):
         held_by_other(conn, str(aff.get("name") or aff.get("text")), aff.get("role"), new=bool(aff.get("new")))
-    pool_can_supply(conn, loc=loc, sex=sex, age=age, category=cat if p.get("work") else None, stage=p.get("stage") if p.get("stage") in
+    window = pool_can_supply(conn, loc=loc, sex=sex, age=age, category=cat if p.get("work") else None, stage=p.get("stage") if p.get("stage") in
                     ("First", "Temper", "Third", "Breach", "Fifth") else None, elsewhere=bool(p.get("from_elsewhere")),
-                    pick_seed=f"{p.get('draw', 0)}")
-    return {"location": loc, "category": cat, "sex": sex}
+                    pick_seed=f"{p.get('draw', 0)}", exact=bool(p.get("_exact")))
+    return {"location": loc, "category": cat, "sex": sex, "window": window}

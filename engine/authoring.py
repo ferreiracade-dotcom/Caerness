@@ -193,23 +193,24 @@ def _afford(conn, me: int, amount: float) -> float:
 
 # ---------------------------------------------------------------- person
 
-def _pick_args(*, loc, sex, age, work_domain, stage, elsewhere, retired=False, exact_stage=False) -> dict:
+def _pick_args(*, loc, sex, age, work_domain, stage, elsewhere, retired=False, exact_stage=False, window=3) -> dict:
     return dict(location_id=loc, occupation_domains=(work_domain,) if work_domain else None,
-                min_age=max(age - 3, 45 if retired else 0) if age else (45 if retired else 18),
-                max_age=(age + 3) if age else 85, require_open_core=True if stage else None, required_stage=stage,
+                min_age=max(age - window, 45 if retired else 0) if age else (45 if retired else 18),
+                max_age=(age + window) if age else 85, require_open_core=True if stage else None, required_stage=stage,
                 demographic_sex=sex, allow_elsewhere=elsewhere, strict_stage=True, prefer_open_core=bool(stage), exact_stage=exact_stage)
 
 
 def materialise_person(conn, *, loc, sex, age, work_domain, stage, elsewhere, name, pick_seed, call_id, retired=False,
                        out: dict | None = None, reason: str = "Authored in play", notes: str = "Authored in play from a pre-existing identity.",
-                       pick: dict | None = None, exact_stage: bool = False, pool_loc: int | None = None) -> int:
+                       pick: dict | None = None, exact_stage: bool = False, pool_loc: int | None = None, window: int = 3,
+                       growth_batches: int | None = None) -> int:
     """Pick one pre-existing identity of the place, reveal it, relocate an outsider, make it TRACKED and present there."""
     day = _day(conn)
     pool = pool_loc if pool_loc is not None else veto.settlement_of(conn, loc)
     pick = pick or _pick_args(loc=pool if pool is not None else loc, sex=sex, age=age, work_domain=work_domain, stage=stage,
-                              elsewhere=elsewhere, retired=retired, exact_stage=exact_stage)
+                              elsewhere=elsewhere, retired=retired, exact_stage=exact_stage, window=window)
     aid = resolve_background_person(conn, reason=reason, demand_kind="authoring", subtype=f"authored_{work_domain or 'person'}",
-                                    name=name, pick_seed=pick_seed, **pick)
+                                    name=name, pick_seed=pick_seed, growth_batches=growth_batches, **pick)
     if aid is None:
         _no(f"the settlement's population cannot supply that person{'' if elsewhere else ' (try from_elsewhere)'}; adapt the story")
     cur = int(conn.execute("SELECT current_location_id FROM actors WHERE id=?", (aid,)).fetchone()[0])

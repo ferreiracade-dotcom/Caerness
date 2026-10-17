@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 import sqlite3
 from typing import Any
 
@@ -370,3 +371,318 @@ def fill_lived_past(conn: sqlite3.Connection, aid: int, *, key: str, proposal: d
               "mentor": bool(ties["mentor"]), "knowledge": nk, "memories": nm}
     _mark_actor(conn, aid, {"lived_past_key": key, "lived_past_digest": digest})
     return {"already": False, "digest": digest, "competence": score}
+
+
+# ================================================================ proposal -> protagonist
+
+_VIOLENT = ("gang", "crew", "outfit", "mob", "syndicate", "thieves", "racket", "enforcer", "smuggl", "cutthroat", "bandit")
+_UNIT = ("squad", "regiment", "garrison", "warband", "patrol", "captain", "platoon", "militia", "unit of")
+_VICE = ("brothel", "gambl", "dice", "lend", "bookmak", "vice", "pleasure", "courtesan", "loan", "usur")
+_TRADE = ("guild", "company", "firm", "house", "trading", "merchant", "clinic", "school", "workshop", "physician", "smith", "bank", "counting")
+_CASH = ("cash", "savings", "coin", "purse", "money", "inheritance", "fortune", "wealth", "means", "nest egg")
+_BIZ = ("shop", "inn", "tavern", "stall", "bakery", "smithy", "business", "store", "mill", "workshop", "chandl", "brewery", "farm", "stable", "market")
+_RACKET = (("brothel", "brothel protection"), ("courtesan", "courtesan house leverage"), ("gambl", "illegal gaming"), ("dice", "illegal gaming"),
+           ("bookmak", "unlicensed bookmaking"), ("bet", "unlicensed bookmaking"), ("lend", "high-risk debt"), ("loan", "high-risk debt"),
+           ("usur", "high-risk debt"), ("stolen", "stolen goods"), ("fence", "stolen goods"), ("smuggl", "stolen goods"), ("protect", "protection collections"))
+POWER_P_MALE = {"violent": 0.92, "unit": 0.85, "trade": 0.85, "vice": 0.70}
+_OUTFIT_RE = re.compile(r"\b(outfit|gang|crew|band|brotherhood|syndicate|mob|ring)\b")
+
+
+def _blob(v: Any) -> str:
+    if isinstance(v, dict):
+        return " ".join(_blob(x) for x in v.values())
+    if isinstance(v, (list, tuple)):
+        return " ".join(_blob(x) for x in v)
+    return str(v or "")
+
+
+def power_class(proposal: dict) -> str | None:
+    """The sort of power role the proposal gives him (and so the male share a drawn sex follows): violent outfit, unit leader,
+    trade or specialist, vice; None when he holds no power role. The shares are the owner's (92/85/85/70)."""
+    aff = proposal.get("affiliation") or {}
+    holdings = proposal.get("holdings") or []
+    led = bool(aff and (veto._LEAD.search(str(aff.get("role") or "").lower()) or aff.get("new")))
+    text = " ".join([_blob(aff), _blob(holdings), str(proposal.get("work") or "")]).lower()
+    outfit = any(w in text for w in _VIOLENT)
+    if not (led or outfit or any(isinstance(h, dict) and veto._LEAD.search(str(h.get("role") or "").lower()) for h in holdings)):
+        return None
+    for cls, words in (("violent", _VIOLENT), ("unit", _UNIT), ("vice", _VICE), ("trade", _TRADE)):
+        if any(w in text for w in words):
+            return cls
+    return "trade" if led else None
+
+
+def resolve_sex(conn, proposal: dict, key: str) -> tuple[str, bool]:
+    """(sex, drawn). Stated, else implied by the name, else drawn: a power role skews male (92/85/85/70), elsewhere the population (even)."""
+    if proposal.get("sex") in ("male", "female"):
+        return proposal["sex"], False
+    implied = veto.name_sex(proposal.get("name"), None)
+    if implied:
+        return implied, False
+    p = POWER_P_MALE.get(power_class(proposal), 0.5)
+    return ("male" if _rng(f"{key}:sex").random() < p else "female"), True
+
+
+def _key(conn, proposal: dict) -> str:
+    import hashlib
+    seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
+    core = {k: proposal.get(k) for k in ("name", "sex", "age", "place", "work", "category", "stage", "family", "affiliation", "holdings", "ties", "from_elsewhere")}
+    blob = json.dumps([seed, int(proposal.get("draw", 0) or 0), core], sort_keys=True, default=str)
+    return "newchar:" + hashlib.sha1(blob.encode()).hexdigest()[:16]
+
+
+def _holdings_plan(proposal: dict) -> dict:
+    """Sort holdings into cash, businesses, rackets (vice under an outfit) and outfits; free text decides, the fallback is a business."""
+    plan: dict[str, Any] = {"cash": 0.0, "businesses": [], "rackets": [], "outfits": []}
+    aff = proposal.get("affiliation") or {}
+    atext = (str(aff.get("name") or aff.get("text") or "") + " " + str(aff.get("type") or "")).lower()
+    for h in proposal.get("holdings") or []:
+        h = dict(h) if isinstance(h, dict) else {"kind": str(h)}
+        kind = str(h.get("kind") or h.get("name") or "").lower()
+        if any(w in kind for w in _CASH):
+            try:
+                plan["cash"] += ledger.amount_of(h.get("amount", "modest"), None)
+            except ValueError:
+                plan["cash"] += ledger.SCALES["modest"]
+        elif _OUTFIT_RE.search(kind):
+            plan["outfits"].append(h)
+        elif any(w in kind for w in _VICE) or any(w in kind for w, _ in _RACKET):
+            plan["rackets"].append(h)
+        else:
+            plan["businesses"].append(h)
+    founding = bool(aff and (aff.get("new") or veto._LEAD.search(str(aff.get("role") or "").lower())))
+    if founding and not plan["outfits"] and any(w in atext for w in _VIOLENT):
+        plan["outfits"].append({"kind": "outfit", "name": aff.get("name") or aff.get("text"), "members": aff.get("members")})
+    return plan
+
+
+def create_protagonist(conn: sqlite3.Connection, proposal: dict, call_id: str, *, campaign_name: str | None = None) -> dict:
+    """Preview (accept false) or create (accept true) the whole protagonist from the proposal. Deterministic from (world seed, draw,
+    proposal): the preview shows exactly the person accept makes. A preview leaves no row. Contradictions come back as
+    {status: refused, reason}; the GM adjusts and resubmits."""
+    from .player import get_player
+    p = dict(proposal or {})
+    draw = int(p.get("draw", 0) or 0)
+    if get_player(conn):
+        return {"status": "refused", "reason": "a protagonist already exists", "reason_kind": "contradiction", "draw": draw}
+    accept = bool(p.get("accept", False))
+    conn.execute("SAVEPOINT newchar")
+    try:
+        out = _build(conn, p, call_id, campaign_name)
+    except ValueError as e:  # Contradiction and the engine's own domain refusals (an AuthoringRefused) alike
+        conn.execute("ROLLBACK TO SAVEPOINT newchar")
+        conn.execute("RELEASE SAVEPOINT newchar")
+        return {"status": "refused", "reason": str(e), "reason_kind": getattr(e, "reason_kind", "contradiction"), "draw": draw}
+    except BaseException:
+        conn.execute("ROLLBACK TO SAVEPOINT newchar")
+        conn.execute("RELEASE SAVEPOINT newchar")
+        raise
+    if not accept:
+        conn.execute("ROLLBACK TO SAVEPOINT newchar")
+        conn.execute("RELEASE SAVEPOINT newchar")
+        out.pop("actor_id", None)
+        out.pop("sheet", None)
+        out["status"] = "draft"
+        return out
+    conn.execute("RELEASE SAVEPOINT newchar")
+    out["status"] = "created"
+    return out
+
+
+def _campaign_name() -> str:
+    import os
+    from pathlib import Path
+    name = os.environ.get("CAERNESS_CAMPAIGN")
+    if name:
+        return name
+    path = os.environ.get("CAERNESS_DB_PATH")
+    return Path(path).stem if path else "Campaign 01"
+
+
+def _join(conn, aid: int, found: dict, role: Any, day: int) -> dict:
+    """He joins an existing body in an ordinary place; never a seat that is held."""
+    role_text = str(role or "member")[:60]
+    if found["kind"] == "institution":
+        conn.execute("INSERT OR IGNORE INTO institution_memberships(institution_actor_id,member_actor_id,membership_kind,role_text,status,joined_day,"
+                     "provenance_json,metadata_json) VALUES (?,?,'ordinary_member',?, 'active',?,?,?)",
+                     (found["id"], aid, role_text, day - 365, json.dumps(["new protagonist"]), json.dumps(SOURCE)))
+    elif found["kind"] == "outfit":
+        from .underworld_rebuild import create_personnel
+        create_personnel(conn, found["id"], role_kind="member", actor_id=aid)
+    else:
+        from .merchant import add_enterprise_staff
+        add_enterprise_staff(conn, found["id"], aid, role=role_text, authority=25)
+    return found
+
+
+def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
+    from . import authoring
+    from .health import _family_means
+    from .player import set_player
+    key = _key(conn, p)
+    draw = int(p.get("draw", 0) or 0)
+    day = _day(conn)
+    sex, drawn = resolve_sex(conn, p, key)
+    prop = {**p, "sex": sex, "_exact": True}
+    try:
+        facts = veto.check_proposal(conn, prop)
+    except Contradiction as e:
+        if drawn and "cannot supply" in str(e):  # a drawn sex the place cannot supply is flipped; a stated one is a clash
+            sex = "female" if sex == "male" else "male"
+            prop = {**p, "sex": sex, "_exact": True}
+            facts = veto.check_proposal(conn, prop)
+        else:
+            raise
+    loc, cat = facts["location"], facts["category"]
+    age = int(p["age"])
+    stage = authoring._stage_name(p.get("stage"))
+    plan = _holdings_plan(p)
+    scaled_in = [dict(h, amount=h.get("amount", "modest")) for h in plan["businesses"]] + ([{"kind": "cash", "amount": plan["cash"]}] if plan["cash"] else [])
+    adj, down = veto.holdings_in_proportion(conn, loc, scaled_in)
+    cash = next((float(h["amount"]) for h in adj if h.get("kind") == "cash"), 0.0)
+    businesses = [h for h in adj if h.get("kind") != "cash"]
+    work_text = p.get("work")
+    got: dict = {}
+    aid = authoring.materialise_person(
+        conn, loc=loc, sex=sex, age=age, work_domain=cat if work_text else None, stage=stage, elsewhere=bool(p.get("from_elsewhere")),
+        name=(str(p["name"]).strip() if p.get("name") else None), pick_seed=key, call_id=call_id,
+        retired=bool(work_text and cat not in ("soldier", "criminal") and stage in ("Breach", "Fifth", "Sixth")), out=got,
+        reason="New protagonist", notes="Protagonist designed with the owner; not canon.", exact_stage=bool(stage), window=facts["window"], growth_batches=64)
+    got_age = _age(conn, aid, day)
+    if got_age != age:
+        down.append({"asked": f"{age} years", "got": f"{got_age} years", "why": "he is the nearest to that age and standing the place has"})
+        age = got_age
+    _mark_actor(conn, aid, {"concept": str(p.get("concept") or "")[:600], "draw": draw})
+    means, _tags = _family_means(conn, [aid])
+    start = round(0.5 * 4.0 * (means / 50.0) ** 3 * max(0.4, min(1.2, age / 45.0)), 2) if age >= 16 else 0.0
+    set_player(conn, aid, campaign_name or _campaign_name())
+    funds = start + cash + sum(float(h["amount"]) for h in businesses)
+    if funds > 0:
+        ledger._credit(conn, ("person", aid), funds)
+    hid = None
+    if age >= 16:
+        from .civilian import create_household
+        hid = create_household(conn, f"Household of {_name(conn, aid)}", head_actor_id=aid, location_id=loc,
+                               wealth=round(start * 3, 2), liquidity=round(start * 1.2, 2),
+                               metadata={**SOURCE, "economic_basis": "protagonist", "economic_resolution": "QUANTIFIED"})
+        conn.execute("UPDATE actor_life_profiles SET current_household_id=? WHERE actor_id=?", (hid, aid))
+    # what he founds: outfits and businesses through the same vetted paths as `author`, paid from his own purse
+    made: list[str] = []
+    outfit_ids: list[int] = []
+    holds = 0
+    aff_resolved = None
+    aff = p.get("affiliation") or {}
+    oname = aff.get("name") or aff.get("text")
+    atype = " ".join(str(aff.get(k) or "") for k in ("type", "kind")).strip()
+    lastname = _name(conn, aid).split()[-1]
+    if oname:
+        found = veto.held_by_other(conn, str(oname), aff.get("role"), new=bool(aff.get("new")))
+        if found is not None:
+            aff_resolved = _join(conn, aid, found, aff.get("role"), day)
+        else:
+            text = f"{oname} {atype}".lower()
+            if any(w in text for w in _VIOLENT) or plan["outfits"]:
+                o = authoring._organisation(conn, aid, {"name": oname, "type": atype or "gang", "location_id": loc,
+                                                        **({"members": aff["members"]} if aff.get("members") else {})}, call_id + ":o")
+                outfit_ids.append(o["outfit_id"])
+                aff_resolved = {"kind": "outfit", "id": o["outfit_id"]}
+                down += o.get("scaled_down", [])
+                made.append(f"leads {oname}, an outfit")
+                holds += 2
+            elif any(w in text for w in _BIZ):
+                b = authoring._business(conn, aid, {"name": oname, "trade": atype or str(oname), "location_id": loc}, call_id + ":b")
+                down += b.get("scaled_down", [])
+                made.append(f"keeps {oname}")
+                holds += 1
+            else:
+                o = authoring._organisation(conn, aid, {"name": oname, "type": atype or "company", "location_id": loc}, call_id + ":i")
+                aff_resolved = {"kind": "institution", "id": o["institution_actor_id"]}
+                made.append(f"heads {oname}")
+                holds += 1
+    for h in plan["outfits"]:
+        if outfit_ids or not h.get("name"):
+            continue
+        o = authoring._organisation(conn, aid, {"name": h["name"], "type": h.get("kind") or "gang", "location_id": loc,
+                                                **({"members": h["members"]} if h.get("members") else {})}, call_id + ":o")
+        outfit_ids.append(o["outfit_id"])
+        aff_resolved = aff_resolved or {"kind": "outfit", "id": o["outfit_id"]}
+        down += o.get("scaled_down", [])
+        made.append(f"leads {h['name']}")
+        holds += 2
+    for h in businesses:
+        b = authoring._business(conn, aid, {"name": h.get("name") or f"{lastname}'s {h.get('kind', 'shop')}", "trade": h.get("kind") or "shop",
+                                            "amount": h.get("amount"), "location_id": loc}, f"{call_id}:b:{h.get('name') or h.get('kind')}")
+        down += b.get("scaled_down", [])
+        made.append(f"owns {b['name']}")
+        holds += 1
+    for h in plan["rackets"]:
+        kind_text = str(h.get("kind") or h.get("name") or "").lower()
+        try:
+            amt = ledger.amount_of(h.get("amount", "modest"), None)
+        except ValueError:
+            amt = ledger.SCALES["modest"]
+        if outfit_ids:
+            from .underworld_rebuild import create_racket_site
+            rk = next((v for w, v in _RACKET if w in kind_text), "protection collections")
+            adj2, d2 = veto.holdings_in_proportion(conn, loc, [{"kind": kind_text, "amount": amt}])
+            down += d2
+            if adj2:
+                create_racket_site(conn, outfit_ids[0], rk, zone_id=None, gross_income_per_30=round(max(1.0, float(adj2[0]["amount"]) * 2.0), 2))
+                made.append(f"runs {rk}")
+        else:  # no outfit: vice under his own name is a plain business
+            b = authoring._business(conn, aid, {"name": h.get("name") or f"{lastname}'s {h.get('kind', 'house')}", "trade": kind_text,
+                                                "amount": amt, "location_id": loc}, f"{call_id}:r:{kind_text}")
+            made.append(f"owns {b['name']}")
+            holds += 1
+    from .opening_family import _seed_pair
+    for t in p.get("ties") or []:
+        who = t.get("who") if isinstance(t, dict) else None
+        other = conn.execute("SELECT id FROM actors WHERE name=? AND actor_type='character' AND status='active'", (who,)).fetchone() if who else None
+        if other:
+            _seed_pair(conn, aid, int(other[0]), "acquaintance", key=f"{key}:tie:{who}", started_day=day - 700)
+    past = fill_lived_past(conn, aid, key=key, proposal={**p, "_affiliation": aff_resolved, "_holds": holds})
+    staff: dict = {}
+    if hid is not None:
+        from .household_staff import ensure_household_staff
+        staff = ensure_household_staff(conn, hid, key=key)
+    return _summary(conn, aid, past, made, down, staff, draw, got, loc)
+
+
+def _summary(conn, aid: int, past: dict, made: list[str], down: list[dict], staff: dict, draw: int, got: dict, loc: int) -> dict:
+    day = _day(conn)
+    row = conn.execute("""SELECT a.name,lp.demographic_sex sex FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.id=?""", (aid,)).fetchone()
+    place = _loc(conn, loc)
+    age = _age(conn, aid, day)
+    d = past.get("digest", {})
+    prof = conn.execute("SELECT occupation_domain FROM background_person_profiles WHERE actor_id=?", (aid,)).fetchone()
+    work = prof["occupation_domain"] if prof else "ordinary work"
+
+    def word(n: int) -> str:
+        return {0: "no", 1: "one", 2: "two", 3: "three"}.get(n, "several")
+
+    fam = ["married" if d.get("spouse") else "not married"]
+    if d.get("children"):
+        fam.append(f"{word(d['children'])} child{'ren' if d['children'] > 1 else ''} known")
+    fam.append("both parents living" if d.get("parents_living") == 2 else "one parent living" if d.get("parents_living") == 1 else "no parent in the house")
+    if d.get("siblings_known"):
+        fam.append(f"{word(d['siblings_known'])} sibling{'s' if d['siblings_known'] > 1 else ''} nearby")
+    served = int(staff.get("hired", 0)) + int(staff.get("counted", 0))
+    out = {
+        "status": "draft", "draw": draw, "actor_id": aid,
+        "summary": {
+            "who": f"{row['name']}, a {age}-year-old {'man' if row['sex'] == 'male' else 'woman'} of {place}"
+                   + (f", come from {got['origin']}" if got.get("origin") else ""),
+            "work": work,
+            "family": "; ".join(fam),
+            "holdings": made or ["nothing of his own beyond his household"],
+            "household": (f"a household with {word(served)} in service" if served else "a household with no servants") if age >= 16 else "lives in his parents' house",
+            "standing": f"known in {place} as a {work}, as far as his years and holdings earn",
+            "people": ("a handful of neighbours" if d.get("neighbours", 0) >= 3 else "few neighbours") + (", colleagues" if d.get("colleagues") else "")
+                      + (", an old teacher" if d.get("mentor") else ""),
+            "past": "a plausible past is filled in: kin, neighbours, what he has learned of the town, a few memories",
+        },
+        "sheet": {"history": f"{row['name']}: {', '.join(fam)}. " + ("; ".join(made) if made else "Lives by his work."), "standing": f"Known in {place}."},
+    }
+    if down:
+        out["scaled_down"] = down
+    return out

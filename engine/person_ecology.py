@@ -383,15 +383,18 @@ def find_background_candidate(
     medical_weight: float = 0, teaching_weight: float = 0, criminal_weight: float = 0,
     demographic_sex: str | None = None, allow_elsewhere: bool = True, strict_stage: bool = False,
     prefer_open_core: bool = True, pick_seed: int | str | None = None, exact_stage: bool = False,
+    growth_batches: int | None = None,
 ) -> sqlite3.Row | None:
     rows = _candidate_rows(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
         require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex, exact_stage=exact_stage,
     )
-    for _ in range(_GROWTH_BATCHES):
+    for _ in range(growth_batches or _GROWTH_BATCHES):
         # A settlement's first sample is small; when nobody in it fits, draw more of its real population
         # (blind to this demand) before looking anywhere else.
-        if rows or location_id is None or not grow_identity_reservoir(conn, int(location_id)):
+        # a seeded pick with a growth budget (a new protagonist) wants a dozen to choose among, so another draw can differ
+        enough = len(rows) >= (12 if pick_seed is not None and growth_batches else 1)
+        if enough or location_id is None or not grow_identity_reservoir(conn, int(location_id)):
             break
         rows = _candidate_rows(
             conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
@@ -451,6 +454,7 @@ def resolve_background_person(
     teaching_weight: float = 0, criminal_weight: float = 0, demographic_sex: str | None = None,
     allow_elsewhere: bool = True, strict_stage: bool = False, name: str | None = None,
     prefer_open_core: bool = True, pick_seed: int | str | None = None, exact_stage: bool = False,
+    growth_batches: int | None = None,
 ) -> int | None:
     """Reveal one pre-existing POPBACK identity as a tracked actor.
 
@@ -462,7 +466,7 @@ def resolve_background_person(
         require_open_core=require_open_core, required_stage=required_stage, command_weight=command_weight,
         economic_weight=economic_weight, medical_weight=medical_weight, teaching_weight=teaching_weight,
         criminal_weight=criminal_weight, demographic_sex=demographic_sex, allow_elsewhere=allow_elsewhere, strict_stage=strict_stage,
-        prefer_open_core=prefer_open_core, pick_seed=pick_seed, exact_stage=exact_stage,
+        prefer_open_core=prefer_open_core, pick_seed=pick_seed, exact_stage=exact_stage, growth_batches=growth_batches,
     )
     if profile is None:
         return None
