@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS connector_calls (
 
 CREATE TABLE IF NOT EXISTS gm_notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    subject_kind TEXT NOT NULL CHECK (subject_kind IN ('actor','location','general')),
+    subject_kind TEXT NOT NULL CHECK (subject_kind IN ('actor','location','general','business','outfit','household','crew','institution')),
     subject_id INTEGER,
     text TEXT NOT NULL,
     provenance TEXT NOT NULL DEFAULT 'gm_improvised',

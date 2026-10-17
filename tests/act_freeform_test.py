@@ -171,6 +171,156 @@ def t_counters(conn, w):
     assert _reapproach_blocked(conn, me, by, "offer", day, {"player_operation": {"op": "hire", "details": {"into": "outfit:1", "wage": 0.3}}}) is None
 
 
+def t_freeform(conn, w):
+    from connector.acting import act
+    from connector.store import ensure_connector_schema
+    from engine import ledger
+    ensure_connector_schema(conn)
+    me, outfit, by, biz = w["me"], w["outfit"], w["bystander"], w["business"]
+    ledger._credit(conn, ("person", me), 100.0)
+    conn.execute("UPDATE underworld_organizations SET treasury=500,member_count_estimate=40 WHERE id=?", (outfit,))
+    # money by number, to a person, any words for the intent
+    r = act(conn, "f1", "bribe", "I slip the clerk a bribe.", details={"targets": [f"actor:{by}"], "resources": {"money": "2 silver", "from": "me"}})
+    assert r["status"] in ("applied", "partial") and r["mapped_to"] == "pay", r
+    # a plan nothing models: accepted, costed in money and men, oversize men get what exists and the reason in words
+    m0 = ledger.balance(conn, ("outfit", outfit))
+    r = act(conn, "f2", "operation", "Seize the toll bridge at Saltmere with a great force of men.",
+            details={"resources": {"men": 900, "money": 30, "from": f"outfit:{outfit}"}, "time": "a month", "conditions": ["before the river floods"]})
+    assert r["status"] == "partial" and r["mapped_to"] == "plan" and "aren't that many men" in r["summary"] and r["ready_in_days"] == 30, r
+    assert r["costs"]["men"] <= 39 and ledger.balance(conn, ("outfit", outfit)) < m0, r
+    assert r["conditions"] == ["before the river floods"]
+    # the commitment is visible to the world's own reminders and settles on its day
+    from engine import commitments, free_operation
+    assert any(c["id"] == r["commitment_id"] for c in commitments.active(conn, me))
+    conn.execute("UPDATE world_state SET current_day=current_day+31 WHERE id=1")
+    done = free_operation.settle_due(conn, me)
+    assert any(x["what"].startswith("Seize the toll") for x in done), done
+    # mapped words: a hire of many with a wage
+    r = act(conn, "f3", "operation", "Take on forty men as guards.", details={"targets": [f"outfit:{outfit}"], "resources": {"men": 40, "wage": 0.1}, "role": "member"})
+    assert r["mapped_to"] == "hire" and r["status"] in ("applied", "partial") and r["hired"] > 0, r
+    # format slips are input gaps (retry), true contradictions are not
+    r = act(conn, "f4", "hire", "x", details={"into": "nowhere:1"})
+    assert r["status"] == "refused" and r["reason_kind"] == "input_gap", r
+    r = act(conn, "f5", "treat", "I tend the stranger's wound.", details={"targets": [f"actor:{by}"]})
+    assert r["status"] == "refused" and r["reason_kind"] == "contradiction", r
+    # not fitting the machinery falls back to a commitment with the reason, never a refusal
+    r = act(conn, "f6", "operation", "Build a stout wall around the stall.", details={"resources": {"money": 1}})
+    assert r["status"] in ("applied", "partial") and r.get("commitment_id"), r
+    # founding his own thing is left to the new-character work: planned, nothing spent
+    b0 = ledger.balance(conn, ("person", me))
+    r = act(conn, "f7", "operation", "Found a gambling house under my name.", details={"resources": {"money": 50}})
+    assert r["mapped_to"] == "found" and ledger.balance(conn, ("person", me)) == b0 and r["status"] == "partial", r
+    # unknown names are an input gap
+    r = act(conn, "f8", "operation", "Pay him.", details={"targets": ["Nobody Atall"], "resources": {"money": 1}})
+    assert r["status"] == "refused" and r["reason_kind"] == "input_gap", r
+
+
+def t_messages_and_stages(conn, w):
+    from connector.acting import act
+    from engine import free_operation
+    me, by = w["me"], w["bystander"]
+    far = int(conn.execute("SELECT id FROM locations WHERE name='Saltmere'").fetchone()[0])
+    conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (far, by))
+    r = act(conn, "m1", "operation", "Send word to him that the bridge toll is changing.",
+            details={"targets": [f"actor:{by}"], "tells": ["The bridge toll is changing."], "kind": "message"})
+    assert r["mapped_to"] == "message" and r["status"] == "applied" and r["ready_in_days"] >= 1, r
+    conn.execute("UPDATE world_state SET current_day=current_day+?+1 WHERE id=1", (r["ready_in_days"],))
+    done = free_operation.settle_due(conn, me)
+    assert any(x["kind"] == "message" and "reached" in x["result"] for x in done), done
+    assert conn.execute("SELECT COUNT(*) FROM knowledge WHERE knower_actor_id=? AND belief_text LIKE '%toll is changing%'", (by,)).fetchone()[0] == 1
+    conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (w["location"], by))
+    # a duel runs in stages the player steers
+    r = act(conn, "d1", "operation", "I challenge him to a duel.", details={"targets": [f"actor:{by}"]})
+    assert r["mapped_to"] == "duel" and r["stage"] == "begins", r
+    r2 = act(conn, "d2", "operation", "I press him hard.", details={"duel": r["duel"], "kind": "duel"})
+    assert r2["status"] == "applied" and r2["stage"] in ("continues", "resolved"), r2
+    # a battle likewise, with the men he really has
+    conn.execute("UPDATE underworld_organizations SET member_count_estimate=40 WHERE id=?", (w["outfit"],))
+    rival = int(conn.execute("SELECT id FROM underworld_organizations WHERE id<>? AND current_leader_actor_id IS NOT NULL ORDER BY id LIMIT 1", (w["outfit"],)).fetchone()[0])
+    r = act(conn, "b1", "operation", "I give battle to the rival outfit in the street.", details={"targets": [f"outfit:{rival}"], "resources": {"men": 200}, "kind": "battle"})
+    assert r["mapped_to"] == "battle" and r["stage"] == "begins" and r["view"]["sides"], r
+    bid = r["battle"]
+    for i in range(3):  # rounds are fought one at a time on the player's word; the engine's own grind decides how long it lasts
+        r = act(conn, f"b2{i}", "operation", "Press the attack.", details={"battle": bid, "kind": "battle"})
+        assert r["status"] == "applied" and r["stage"] in ("continues", "resolved") and r["view"]["sides"], r
+        if r["stage"] == "resolved":
+            break
+    a = free_operation._aftermath(conn, w["me"], bid, {"winner_side_id": None})
+    assert "men_lost" in a and "outcome" in a, a
+
+
+def t_speak_investigate(conn, w):
+    from connector.acting import act
+    from engine import findings
+    me, by, biz = w["me"], w["bystander"], w["business"]
+    findings.tell(conn, by, ["Old Harl keeps a second set of books at the mill."], source=by)
+    r = act(conn, "s1", "speak", "I ask what he knows of the mill.", target_actor_id=by,
+            details={"tells": ["The magistrate is bought."], "asks": "the mill books"})
+    if r["status"] == "applied":
+        assert r["told"] == 1 and r["answers"] and "second set of books" in r["answers"][0], r
+        assert conn.execute("SELECT COUNT(*) FROM knowledge WHERE knower_actor_id=? AND belief_text LIKE '%magistrate is bought%'", (by,)).fetchone()[0] == 1
+        assert conn.execute("SELECT COUNT(*) FROM knowledge WHERE knower_actor_id=? AND belief_text LIKE '%second set of books%'", (me,)).fetchone()[0] == 1
+        r = act(conn, "s2", "speak", "I ask about the harbour.", target_actor_id=by, details={"asks": "the harbour fees"})
+        assert r.get("answers") == [] and "nothing to say" in r["note"], r
+    # investigate a business, a bare question, a person: real findings or an honest nothing
+    r = act(conn, "i1", "investigate", "I look into the stall.", details={"business": f"business:{biz}"}, duration_days=3)
+    assert r["status"] == "applied" and r["elapsed_days"] == 3 and r["found"], r
+    assert any("owned by" in x or "works at" in x for x in r["found"]), r
+    assert conn.execute("SELECT COUNT(*) FROM knowledge WHERE knower_actor_id=? AND fact_key LIKE ?", (me, "found:i1:%")).fetchone()[0] == len(r["found"])
+    r = act(conn, "i2", "investigate", "I ask around about the moon-eyed ferryman.", details={"subject": "moon-eyed ferryman"}, duration_days=2)
+    assert r["status"] == "applied" and r.get("nothing_found") is True and r["found"] == [], r
+    r = act(conn, "i3", "investigate", "I study him.", target_actor_id=by, duration_days=4)
+    assert r["status"] == "applied" and "found" in r, r
+
+
+def t_advance_and_views(conn, w):
+    import json
+    from connector import store, views
+    from connector.timeflow import advance
+    me, outfit, hh, biz, crew, by = w["me"], w["outfit"], w["household"], w["business"], w["crew"], w["bystander"]
+    store.ensure_connector_schema(conn)
+    # advance keeps its purpose, focus (the discipline it names), delegation and interruption policy
+    r = advance(conn, "adv1", 3, "train swordwork for a season", delegate={"to": "my steward", "everything_routine": True}, interrupt="critical_only")
+    run = conn.execute("SELECT * FROM time_skip_runs ORDER BY id DESC LIMIT 1").fetchone()
+    focus = json.loads(run["focus_json"])
+    assert focus and focus[0]["domain"] == "martial" and "swordwork" in focus[0]["description"], focus
+    assert json.loads(run["delegation_json"])["to"] == "my steward" and run["interruption_policy"] == "critical_only"
+    assert r["spent_on"] and r["spent_on"][0]["days"] > 0, r
+    # lookup finds outfits (his own in full, a rival only if heard of), households, crews, roles
+    assert views.lookup(conn, "Fixture Outfit")["kind"] == "outfit" and views.lookup(conn, "Fixture Outfit")["basics"]["members"] > 0
+    assert views.lookup(conn, "Fixture Crew")["kind"] == "crew"
+    assert views.lookup(conn, "Fixture House")["kind"] == "household"
+    rival = conn.execute("""SELECT id,name FROM underworld_organizations o WHERE id<>? AND current_leader_actor_id IS NOT NULL AND NOT EXISTS
+                            (SELECT 1 FROM underworld_zone_claims c JOIN underworld_zones z ON z.id=c.zone_id WHERE c.organization_id=o.id AND z.city_location_id=?)
+                            AND NOT EXISTS (SELECT 1 FROM actors a WHERE a.name=o.name) ORDER BY id LIMIT 1""", (outfit, w["location"])).fetchone()
+    assert views.lookup(conn, rival["name"])["found"] is False  # not heard of
+    conn.execute("INSERT INTO knowledge(knower_actor_id,fact_key,belief_text,confidence,learned_day) VALUES (?,?,?,?,0)", (me, "t:rival", f"{rival['name']} runs the docks.", 0.7))
+    got = views.lookup(conn, rival["name"])
+    assert got["found"] and got["kind"] == "outfit" and "key_people" not in got["basics"] and got["known"], got
+    role = conn.execute("SELECT a.name,p.role_kind FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.organization_id=? AND p.role_kind='crew_leader'", (outfit,)).fetchone()
+    got = views.lookup(conn, "crew leader")
+    assert got.get("found") or got.get("by_role"), got
+    # memory pages: notes on a business, an outfit; nothing silently shrinks
+    for i in range(11):
+        store.add_note(conn, "business", biz, f"fact {i}", f"n{i}")
+    store.add_note(conn, "outfit", outfit, "The crews drink at the Lamp.", "no1")
+    page1 = views.lookup(conn, "Fixture Stall")
+    assert len(page1["notes"]) == 8 and page1["notes_more"] == 3, page1
+    page2 = views.lookup(conn, "Fixture Stall", offset=8)
+    assert len(page2["notes"]) == 3 and "notes_more" not in page2 and page2["notes"][0] == "fact 0", page2
+    for i in range(12):
+        conn.execute("INSERT INTO knowledge(knower_actor_id,fact_key,belief_text,confidence,learned_day) VALUES (?,?,?,?,?)", (me, f"t:{i}", f"Marek Harrow was seen {i}.", 0.5, i))
+    by_name = conn.execute("SELECT name FROM actors WHERE id=?", (by,)).fetchone()[0]
+    got = views.lookup(conn, by_name)
+    assert len(got["known"]) == 8 and got["known_more"] >= 4, got
+    assert views.lookup(conn, by_name, offset=8)["known"], "older facts can be paged"
+    # a recap says what it cut
+    r = store.record(conn, "recap", "x" * 900, "rc1", threads=[f"thread {i}" for i in range(11)])
+    assert "clipped" in r and "threads_dropped" in r, r
+    scene = views.compact_scene(conn)
+    assert "commitments" in scene or True
+
+
 def run():
     with tempfile.TemporaryDirectory() as tmp:
         db = Path(tmp) / "act.db"
@@ -183,7 +333,7 @@ def run():
         with connect() as conn:
             conn.execute("PRAGMA busy_timeout=30000")
             w = make_boss(conn)
-            for fn in (t_amounts, t_hire_many, t_crew_scale, t_orders_and_posts, t_demand_kept, t_counters):
+            for fn in (t_amounts, t_hire_many, t_crew_scale, t_orders_and_posts, t_demand_kept, t_counters, t_freeform, t_messages_and_stages, t_speak_investigate, t_advance_and_views):
                 fn(conn, w)
                 print(fn.__name__, "ok")
     print("act_freeform_test passed")

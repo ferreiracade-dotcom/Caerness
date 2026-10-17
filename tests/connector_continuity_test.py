@@ -79,7 +79,7 @@ def run():
             store.record(conn, "error", "Engine placed Vera in Rivermoor.", "e1b")
             assert store.record(conn, "detail", "limps", "d1", subject_kind="actor", subject_id=me)["subject_kind"] == "actor"
             for bad in (lambda: store.record(conn, "diary", "x", "b1"),
-                        lambda: store.record(conn, "sheet", "x", "b2", field="shoe size")):
+                        lambda: store.record(conn, "sheet", "x", "b2", field="Shoe Size 9")):
                 try:
                     bad()
                     raise AssertionError("accepted")

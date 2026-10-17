@@ -191,10 +191,12 @@ def _outfit_mood(conn, oid: int) -> str:
 
 def _holdings(conn, me: int) -> dict:
     """What the protagonist owns and runs: businesses, organisations led, household, personal means."""
-    businesses = [_business(conn, e, me) for e in conn.execute(
+    biz_rows = conn.execute(
         """SELECT * FROM civilian_enterprises WHERE status='active' AND (owner_actor_id=? OR id IN
-             (SELECT enterprise_id FROM enterprise_partners WHERE actor_id=? AND status='active')) ORDER BY capital DESC LIMIT 6""",
-        (me, me))]
+             (SELECT enterprise_id FROM enterprise_partners WHERE actor_id=? AND status='active')) ORDER BY capital DESC""",
+        (me, me)).fetchall()
+    businesses = [_business(conn, e, me) for e in biz_rows[:6]]
+    biz_more = len(biz_rows) - len(businesses)
     orgs = []
     for o in conn.execute("SELECT * FROM underworld_organizations WHERE current_leader_actor_id=? AND status='active'", (me,)):
         people = [f"{r[0]} ({r[1]})" for r in conn.execute(
@@ -242,8 +244,10 @@ def _holdings(conn, me: int) -> dict:
         spend["outfit_treasury"] = scale_word(balance(conn, ("outfit", int(boss[0]))))
     if businesses:
         spend["business_cash"] = {b["name"]: scale_word(float(b.get("cash") or 0)) for b in businesses}
-    return _drop_none({"money_scale": scale, "means": spend, "businesses": businesses or None, "organisations": orgs or None,
-                       "household": household, "personal_means": means})
+    hh_more = int(conn.execute("SELECT COUNT(*) FROM households WHERE head_actor_id=? AND status='active'", (me,)).fetchone()[0]) - (1 if household else 0)
+    return _drop_none({"money_scale": scale, "means": spend, "businesses": businesses or None,
+                       "businesses_more": biz_more or None, "organisations": orgs or None,
+                       "household": household, "households_more": hh_more if hh_more > 0 else None, "personal_means": means})
 
 
 def compact_scene(conn) -> dict:
@@ -260,7 +264,8 @@ def compact_scene(conn) -> dict:
     people = [a for a in p["present_actors"] if a.get("actor_type") == "character"]
     here = loc["id"]
     present = []
-    for a in _town_sample(conn, people, int(me["actor_id"]), _LIMITS["present"]):
+    sampled = _town_sample(conn, people, int(me["actor_id"]), _LIMITS["present"])
+    for a in sampled:
         who, member = _who(conn, a), "; ".join(_member_of(conn, a["id"])) or None
         present.append(_drop_none({"id": a["id"], "name": a["name"], "sex": _sex(conn, a["id"], day), "who": who,
                                    "member_of": member, **_words(conn, int(me["actor_id"]), a["id"], here, f"{who} {member or ''}")}))
@@ -280,16 +285,24 @@ def compact_scene(conn) -> dict:
             institutions.append({"id": nid, "name": nname, "what": f"network, {strength} here"})
     local, nets = institutions[:local_n], institutions[local_n:]
     local = local[:8 - min(3, len(nets))]  # networks are not crowded out by a town's many seats
+    inst_total = len(institutions)
     institutions = local + nets[:8 - len(local)]
     events = [f"day {e['day']}: {_clip(e['title'], 100)}" for e in p["known_events"][-_LIMITS["news"]:]]
     rumours = ["rumour: " + _clip(r["text"], 110) for r in p["known_rumours"][-_LIMITS["news"]:]]
-    notes = []
+    more_news = max(0, len(p["known_events"]) - len(events)) + max(0, len(p["known_rumours"]) - len(rumours))
+    notes, notes_more = [], 0
     for kind, sid, name in [("location", loc["id"], loc["name"])] + [("actor", a["id"], a["name"]) for a in present]:
         if sid is None:
             continue
         notes += [{"about": name, "text": _clip(t, 160)} for t in store.notes_for(conn, kind, int(sid), 2)]
+        notes_more += max(0, store.notes_count(conn, kind, int(sid)) - 2)
+    notes_more += max(0, len(notes) - _LIMITS["notes"])
     desc = "; ".join(x for x in (loc.get("kind"), loc.get("notes"), loc.get("political_owner")) if x)
+    from engine import commitments
+    pending_work = commitments.active(conn, int(me["actor_id"]), 5)
     return _drop_none({
+        "commitments": [{"what": _clip(c["what"], 100), "kind": c["kind"], "due_in_days": max(0, int(c["due_day"]) - day) if c["due_day"] is not None else None}
+                        for c in pending_work] or None,
         "day": day,
         "date": format_sv_date(day),
         "season": season_for_day(day),
@@ -301,11 +314,14 @@ def compact_scene(conn) -> dict:
         "you_here": you_here or None,
         "institutions_here": institutions,
         "pending": [_pending(i) for i in p["pending_player_interactions"][:5]],
-        "news": {"events": events, "rumours": rumours},
+        "news": _drop_none({"events": events, "rumours": rumours, "more": more_news or None}),
+        "present_more": (len(people) - len(sampled)) or None,
+        "institutions_more": (inst_total - len(institutions)) or None,
         "competence": _competence(p["professional_context"]),
         "condition": _condition(p["health_context"]),
         "holdings": _holdings(conn, int(me["actor_id"])),
         "notes": notes[: _LIMITS["notes"]],
+        "notes_more": notes_more or None,
         "recent_operations": store.recent_operations(conn),
     })
 
@@ -323,22 +339,114 @@ def _find(conn, table: str, q: str):
                                 (_like(q),)).fetchall()
 
 
-def lookup(conn, query: str) -> dict:
+_PAGE = 8
+
+
+def _role_hits(conn, q: str) -> list[tuple]:
+    """People known by a role word ("magistrate", "steward", "boss"): (actor row, role text)."""
+    like = _like(q)
+    seen, out = set(), []
+    queries = (
+        "SELECT a.*,a.subtype role FROM actors a WHERE a.actor_type='character' AND a.status='active' AND a.subtype LIKE ? ESCAPE '!' AND a.subtype NOT LIKE 'resolved_%' ORDER BY a.id LIMIT 6",
+        "SELECT a.*,m.role_text role FROM institution_memberships m JOIN actors a ON a.id=m.member_actor_id WHERE m.status='active' AND m.role_text LIKE ? ESCAPE '!' ORDER BY a.id LIMIT 6",
+        "SELECT a.*,s.role role FROM enterprise_staff s JOIN actors a ON a.id=s.actor_id WHERE s.status='active' AND s.role LIKE ? ESCAPE '!' ORDER BY a.id LIMIT 6",
+        "SELECT a.*,REPLACE(p.role_kind,'_',' ') role FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.status='active' AND REPLACE(p.role_kind,'_',' ') LIKE ? ESCAPE '!' ORDER BY a.id LIMIT 6",
+    )
+    for sql in queries:
+        for r in conn.execute(sql, (like,)):
+            if r["id"] not in seen:
+                seen.add(r["id"])
+                out.append((r, str(r["role"])))
+    return out[:8]
+
+
+def _knows_of(conn, me: int | None, kind: str, row) -> bool:
+    """Lookup finds what he could know exists: his own outfit, house or crew, what he has heard named, what stands in the place he is."""
+    if me is None:
+        return False
+    here = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()
+    here = here[0] if here else None
+    if kind == "outfit":
+        if conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND organization_id=? AND status='active'", (me, row["id"])).fetchone():
+            return True
+        if conn.execute("""SELECT 1 FROM underworld_zone_claims c JOIN underworld_zones z ON z.id=c.zone_id
+                           WHERE c.organization_id=? AND c.claim_kind='controller' AND c.status='active' AND z.city_location_id=? LIMIT 1""", (row["id"], here)).fetchone():
+            return True
+    elif kind == "crew":
+        if conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND organization_id=? AND status='active'", (me, row["organization_id"])).fetchone():
+            return True
+    elif kind == "household":
+        if conn.execute("SELECT 1 FROM household_members WHERE household_id=? AND actor_id=? AND status='active'", (row["id"], me)).fetchone():
+            return True
+        if here is not None and "location_id" in row.keys() and row["location_id"] == here:
+            return True
+    return conn.execute("SELECT 1 FROM knowledge WHERE knower_actor_id=? AND belief_text LIKE ? ESCAPE '!' LIMIT 1", (me, _like(row["name"]))).fetchone() is not None
+
+
+def _outfit_view(conn, o, me: int | None) -> dict:
+    mine = me is not None and conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND organization_id=? AND status='active'", (me, o["id"])).fetchone()
+    out = {"type": o["organization_type"], "status": o["status"]}
+    if mine:
+        people = [f"{r[0]} ({str(r[1]).replace('_', ' ')})" for r in conn.execute(
+            "SELECT a.name,p.role_kind FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.organization_id=? AND p.status='active' ORDER BY p.authority DESC LIMIT ?", (o["id"], _PAGE))]
+        crews = [{"id": c["id"], "name": c["name"]} for c in conn.execute("SELECT id,name FROM underworld_crews WHERE organization_id=? AND status='active' ORDER BY id LIMIT ?", (o["id"], _PAGE))]
+        out.update({"members": int(o["member_count_estimate"] or 0), "key_people": people or None, "crews": crews or None,
+                    "mood": _outfit_mood(conn, int(o["id"])) or None})
+    else:
+        out["seen"] = "what he knows of it is below"  # a rival's inner workings are not his to read off
+    return _drop_none(out)
+
+
+def _household_view(conn, h, me: int | None) -> dict:
+    head = conn.execute("SELECT name FROM actors WHERE id=?", (h["head_actor_id"],)).fetchone()
+    members = [f"{r[0]} ({r[1]})" for r in conn.execute(
+        "SELECT a.name,m.role FROM household_members m JOIN actors a ON a.id=m.actor_id WHERE m.household_id=? AND m.status='active' ORDER BY m.authority DESC LIMIT ?", (h["id"], _PAGE))]
+    where = conn.execute("SELECT name FROM locations WHERE id=?", (h["location_id"],)).fetchone() if "location_id" in h.keys() else None
+    return _drop_none({"head": head[0] if head else None, "members": members or None, "place": where[0] if where else None, "status": h["status"]})
+
+
+def _crew_view(conn, c, me: int | None) -> dict:
+    org = conn.execute("SELECT name FROM underworld_organizations WHERE id=?", (c["organization_id"],)).fetchone()
+    leader = conn.execute("SELECT name FROM actors WHERE id=?", (c["leader_actor_id"],)).fetchone() if c["leader_actor_id"] is not None else None
+    mine = me is not None and conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND organization_id=? AND status='active'", (me, c["organization_id"])).fetchone()
+    return _drop_none({"outfit": org[0] if org else None, "leader": leader[0] if leader else None, "status": c["status"],
+                       "men": int(c["size_estimate"]) if mine else None, "works": c["purpose_kind"] if mine else None})
+
+
+def lookup(conn, query: str, offset: int = 0) -> dict:
+    """Find what the protagonist knows of a person, place, business, outfit, household, crew, institution or role.
+    `offset` pages the older known facts and notes (the newest come first); the reply says how many more there are."""
     from engine.player import get_player
 
     q = str(query or "").strip()
+    offset = max(0, int(offset or 0))
     if not q:
         return {"found": False, "candidates": []}
-    actors, locs, biz = _find(conn, "actors", q), _find(conn, "locations", q), _find(conn, "civilian_enterprises", q)
-    hits = [("actor", r) for r in actors] + [("location", r) for r in locs] + [("business", r) for r in biz]
+    pl0 = get_player(conn)
+    me0 = int(pl0["player_actor_id"]) if pl0 else None
+    kinds = [("actor", _find(conn, "actors", q)), ("location", _find(conn, "locations", q)), ("business", _find(conn, "civilian_enterprises", q)),
+             ("outfit", [o for o in _find(conn, "underworld_organizations", q) if _knows_of(conn, me0, "outfit", o)]),
+             ("household", [h for h in _find(conn, "households", q) if _knows_of(conn, me0, "household", h)]),
+             ("crew", [c for c in _find(conn, "underworld_crews", q) if _knows_of(conn, me0, "crew", c)])]
+    hits = [(k, r) for k, rows in kinds for r in rows]
+    roles = []
     if len(hits) != 1:
-        exact = [h for h in hits if h[1]["name"].lower() == q.lower()]
+        exact = [h for h in hits if str(h[1]["name"]).lower() == q.lower()]
         if len(exact) == 1:
             hits = exact
+    if not hits:
+        roles = _role_hits(conn, q)
+        if len(roles) == 1:
+            hits = [("actor", roles[0][0])]
     if len(hits) != 1:
-        return {"found": False, "candidates": [h[1]["name"] for h in hits[:5]]}
+        if roles:
+            return {"found": False, "candidates": [f"{r['name']} ({role})" for r, role in roles[:5]], "by_role": True,
+                    **({"more_candidates": len(roles) - 5} if len(roles) > 5 else {})}
+        return {"found": False, "candidates": [h[1]["name"] for h in hits[:5]], **({"more_candidates": len(hits) - 5} if len(hits) > 5 else {})}
     kind, r = hits[0]
     out = {"found": True, "kind": kind, "id": int(r["id"]), "name": r["name"]}
+    pl = get_player(conn)
+    me = int(pl["player_actor_id"]) if pl else None
     if kind == "actor":
         where = conn.execute("SELECT name FROM locations WHERE id=?", (r["current_location_id"],)).fetchone()
         day = conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]
@@ -352,22 +460,28 @@ def lookup(conn, query: str) -> dict:
         b = _business(conn, r)
         b.pop("id"); b.pop("name")
         out["basics"] = _drop_none({**b, "owner": owner[0] if owner else None, "place": where[0] if where else None})
+    elif kind == "outfit":
+        out["basics"] = _outfit_view(conn, r, me)
+    elif kind == "household":
+        out["basics"] = _household_view(conn, r, me)
+    elif kind == "crew":
+        out["basics"] = _crew_view(conn, r, me)
     else:
         out["basics"] = _drop_none({"kind": r["kind"], "owner": r["political_owner"], "notes": _clip(r["notes"], 160)})
-    if kind in ("actor", "business") and conn.execute(
-            "SELECT 1 FROM authored_entities WHERE entity_table=? AND entity_id=? LIMIT 1",
-            ("actors" if kind == "actor" else "civilian_enterprises", out["id"])).fetchone():
+    table = {"actor": "actors", "business": "civilian_enterprises", "outfit": "underworld_organizations", "household": "households", "crew": "underworld_crews"}.get(kind)
+    if table and conn.execute("SELECT 1 FROM authored_entities WHERE entity_table=? AND entity_id=? LIMIT 1", (table, out["id"])).fetchone():
         out["authored"] = True
-    pl = get_player(conn)
     if pl:
-        me = int(pl["player_actor_id"])
         like = _like(r["name"])
+        total = conn.execute("SELECT COUNT(*) FROM knowledge WHERE knower_actor_id=? AND belief_text LIKE ? ESCAPE '!'", (me, like)).fetchone()[0]
         known = conn.execute(
             """SELECT belief_text,confidence,learned_day FROM knowledge
-               WHERE knower_actor_id=? AND belief_text LIKE ? ESCAPE '!' ORDER BY learned_day DESC,id DESC LIMIT 8""",
-            (me, like)).fetchall()
+               WHERE knower_actor_id=? AND belief_text LIKE ? ESCAPE '!' ORDER BY learned_day DESC,id DESC LIMIT ? OFFSET ?""",
+            (me, like, _PAGE, offset)).fetchall()
         if known:
             out["known"] = [{"text": _clip(k[0], 160), "confidence": round(float(k[1]), 2), "learned_day": k[2]} for k in known]
+        if total > offset + len(known):
+            out["known_more"] = total - offset - len(known)  # ask again with a larger offset for the older ones
         if kind == "actor" and me != out["id"]:
             # Bands in words replace the rounded meters (the rulebook forbade showing those anyway).
             from engine.standing import standing
@@ -375,7 +489,15 @@ def lookup(conn, query: str) -> dict:
             words = standing(conn, me, out["id"], here[0] if here else None)
             if words:
                 out["standing"] = words
-    notes = store.notes_for(conn, kind, out["id"])
+        if kind == "actor" and me == out["id"]:
+            from engine import commitments
+            cm = commitments.active(conn, me, _PAGE, offset)
+            if cm:
+                out["commitments"] = [{"what": _clip(c["what"], 140), "kind": c["kind"], "due_day": c["due_day"]} for c in cm]
+    notes = store.notes_for(conn, kind, out["id"], _PAGE, offset)
     if notes:
         out["notes"] = [_clip(n, 160) for n in notes]
+    ncount = store.notes_count(conn, kind, out["id"])
+    if ncount > offset + len(notes):
+        out["notes_more"] = ncount - offset - len(notes)
     return out

@@ -84,10 +84,10 @@ def scene() -> dict:
     return _call(compact_scene, "scene")
 
 
-def lookup(query: str) -> dict:
-    """Caerness game: what the protagonist knows about a person or place, by name or id."""
+def lookup(query: str, offset: int = 0) -> dict:
+    """Caerness game: what the protagonist knows of a person, place, business, outfit, household, crew, institution or role, by name or id. known_more/notes_more say older entries exist; raise offset to read them."""
     from connector.views import lookup as _lookup
-    return _call(lambda c: _lookup(c, query), "lookup")
+    return _call(lambda c: _lookup(c, query, offset), "lookup")
 
 
 def lore(query: str) -> dict:
@@ -99,26 +99,27 @@ def lore(query: str) -> dict:
 def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None = None,
         target_location_id: int | None = None, interaction_id: int | None = None,
         response_choice: str | None = None, details: dict | None = None) -> dict:
-    """Attempt a consequential action; narrate only what returns. Types: observe, speak, investigate, respond, travel, pay, hire, lend, demand, attack, trade, order. details: from/to ('me','business:<id>','outfit:<id>','household:<id>','person:<id>'), amount (token|small|modest|substantial|large|fortune), role, what, with (ids), crew, intent_kind, deal, business, do."""
+    """Do anything with consequences; narrate only what returns (partial results and counter-terms included). action_type "operation" takes any intent in intent, with details: actors, resources {money (number, word or share), men, wage, from}, targets (ids like actor:3, outfit:2, or names), conditions, time (days or "a month"), kind (optional hint). Shortcuts: observe, speak (tells, asks), investigate (subject, business, outfit; duration_days), respond (changes), travel, pay, hire (count, wage), lend, demand, attack, trade, order. Holders: me, business:/outfit:/household:/institution:/polity:<id>. A refusal has reason_kind: input_gap means rephrase and retry."""
     from connector.acting import act as _act
     return _call(lambda c: _act(c, call_id, action_type, intent, target_actor_id=target_actor_id,
                                 target_location_id=target_location_id, interaction_id=interaction_id,
                                 response_choice=response_choice, details=details), "act")
 
 
-def advance(call_id: str, days: int, purpose: str) -> dict:
-    """Let days pass (max 30 per call); stops early at real interruptions."""
+def advance(call_id: str, days: int, purpose: str, domain: str | None = None, delegate: dict | None = None,
+            interrupt: str | None = None) -> dict:
+    """Let days pass (max 30 per call); stops early at real interruptions. purpose is kept and practised (domain optional); delegate {to, obligations, interaction_types, everything_routine} names who minds matters meanwhile; interrupt: all|meaningful|critical_only."""
     from connector.timeflow import advance as _advance
 
     def go(conn):
         _snapshot_before_advance()
-        return _advance(conn, call_id, days, purpose)
+        return _advance(conn, call_id, days, purpose, domain=domain, delegate=delegate, interrupt=interrupt)
     return _call(go, "advance")
 
 
 def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "general", subject_id: int | None = None,
          threads: list[str] | None = None, field: str | None = None) -> dict:
-    """Caerness game: record what should last. kind=detail (a fact about an actor/location/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake; field=fixed with a `corrections` entry's text or id marks it done)."""
+    """Caerness game: record what should last. kind=detail (a fact about an actor/location/business/outfit/household/crew/institution/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake; field=fixed with a `corrections` entry's text or id marks it done)."""
     from connector import store
 
     request = {"kind": kind, "text": text, "subject_kind": subject_kind, "subject_id": subject_id,
