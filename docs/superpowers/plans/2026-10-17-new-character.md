@@ -4,7 +4,7 @@
 
 **Goal:** (a) The GM and player design the whole protagonist; the engine only vetoes contradictions, then materialises the proposal and fills what was left open with a plausible lived past. (b) Every household has quantified means and pays staff through 4b's payroll; wealthy ones have stewards, servants and retainers. (c) `author` moves to the same veto model.
 
-**Architecture:** The engine is a veto, not a menu. New `engine/veto.py` holds the checks, each returning a named `Contradiction` (what clashes, with what) so the GM can adjust and resubmit. `engine/new_character.py` materialises a proposal through the existing paths (`authoring.materialise_person`, `opening_family`, `_tie_values`, `health._family_means`, `reputation.adjust`, `education._set_competence_floor`, `underworld_ecology` helpers). `engine/household_staff.py` quantifies households and staffs them. Creation is `author(kind="protagonist")` (no ninth tool): `accept=false` previews in a rolled-back SAVEPOINT, `accept=true` re-runs the same deterministic fill and commits. No Ansel rebuild: the next playtest starts a new campaign.
+**Architecture:** The engine is a veto, not a menu. New `engine/veto.py` holds the checks, each returning a named `Contradiction` (what clashes, with what) so the GM can adjust and resubmit. `engine/new_character.py` materialises a proposal through the existing paths (`authoring.materialise_person`, `opening_family`, `_tie_values`, `health._family_means`, `reputation.adjust`, `education._set_competence_floor`, `underworld_ecology` helpers). `engine/household_staff.py` quantifies households and staffs them. Creation is `author(kind="protagonist")` (no ninth tool): `accept=false` previews in a rolled-back SAVEPOINT, `accept=true` re-runs the same deterministic fill and commits. Ansel Fane keeps his outfit, businesses and household and gets a fresh lived past (Task 5b); nothing from earlier playtests is carried over.
 
 **Tech Stack:** Python 3.13, SQLite, plain-script tests (`PYTHONPATH=<repo>;<repo>/tests`).
 
@@ -78,6 +78,13 @@
 - `_migration_114` (after 113): `seed_all`, report `schema114_report`, deterministic from the world seed, skips nothing but location-less households (reported). Regenerate `data/caerness.db` through the normal open path from the committed 113 file; `integrity_check`; no `-wal/-shm`.
 - [ ] Tests `tests/household_staff_test.py`, `tests/schema114_test.py`: all 263 households quantified, wealth rises with means band, median net positive; 365-day run: no household dissolves without a real cause, no staff leaves for wage reasons, payroll rows exist; tier spread (great houses larger than house families, ordinary households none); named staff have terms, members rows, two-way ties, name-sex match; second run adds nothing; `population_delta` 0; 30-day advance <= +5%. Commit.
 
+### Task 5b: Ansel gets a fresh lived past (repair)
+
+**Files:** `tools/give_lived_past.py`, `tests/new_character_test.py::ansel`.
+- Owner ruling: keep playing Ansel Fane with his outfit, businesses, household and staff; nothing established in earlier playtests (wife, children, parents, notes, recaps) has to carry over. Run Task 3's `give_lived_past` on the existing protagonist: it fills family, origin kin, ties (neighbours, colleagues, his outfit's people, his businesses' managers), knowledge, competence, memories and standing plausibly for a 45-year-old Third-stage underworld boss in Toll's Reach. Existing rows stay (insert-only); no constraints file, no owner review of playtest facts.
+- Usage: `python tools/give_lived_past.py --campaign ansel [--apply]`; dry run on a copy prints a short digest; `--apply` takes a sqlite backup `<backups>/ansel.pre-livedpast-<ts>.db` + `integrity_check` first and refuses without it. On the server, run after deploying migration 114.
+- [ ] Test `::ansel` (temp Fane-like fixture): after apply he has kin (parents dead or alive by age), >= 12 knowledge rows, ties to his underboss/accountant/steward with both directions, standing in Toll's Reach; his outfit, businesses, household and pre-existing rows unchanged (hash); second run adds nothing. Commit.
+
 ### Task 6: `author` becomes a veto (`engine/authoring.py`, `connector/authoring.py`)
 
 Closed lists and caps removed, with their replacement:
@@ -116,7 +123,7 @@ Kept unchanged: never grant money, troops, ownership or authority over existing 
 3. Its owner draw from businesses credits household liquidity (or purse); loyalty drift reads `relationships.loyalty` toward the head and service-term loyalty/satisfaction as seeded here (non-hostile values).
 4. Migration 113 is final; 114 runs after it and touches none of its columns.
 
-**Not in this plan:** Ansel (new campaign instead); per-person faith; household succession customs; currency/wage canon (gap 6); staffing households that become rich mid-run (only migration and creation paths; add a 30-day hook if play shows the need).
+**Not in this plan:** per-person faith; household succession customs; currency/wage canon (gap 6); staffing households that become rich mid-run (only migration and creation paths; add a 30-day hook if play shows the need).
 
 ## Owner decisions
 
