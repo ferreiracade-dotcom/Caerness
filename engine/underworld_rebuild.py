@@ -2305,7 +2305,11 @@ def autonomous_organization_turn(conn: sqlite3.Connection, organization_id: int,
 
 def next_rebuild_underworld_due_day(conn:sqlite3.Connection,after_day:int,end_day:int)->int|None:
     r=conn.execute("SELECT MIN(next_review_day) FROM underworld_heat h JOIN underworld_organizations o ON o.id=h.organization_id WHERE o.status IN ('active','strained','fragmented') AND h.next_review_day>? AND h.next_review_day<=?",(after_day,end_day)).fetchone()
-    return int(r[0]) if r and r[0] is not None else None
+    due=int(r[0]) if r and r[0] is not None else None
+    from .underworld_aggression import next_pressure_day
+    pressure=max(next_pressure_day(conn),after_day+1)  # the world-level monthly work is a due day of its own
+    if pressure<=end_day and (due is None or pressure<due): due=pressure
+    return due
 
 
 def process_due_rebuild_underworld(conn:sqlite3.Connection,day:int,*,event_logger:Callable[...,int]|None=None)->dict[str,int]:
@@ -2318,11 +2322,9 @@ def process_due_rebuild_underworld(conn:sqlite3.Connection,day:int,*,event_logge
         actions+=int(bool(out.get('acted'))); hits+=int(bool(out.get('hit'))); enforcement+=int(out.get('enforcement_actions',0))
         after=conn.execute("SELECT current_leader_actor_id FROM underworld_organizations WHERE id=?",(oid,)).fetchone()[0]
         succession+=int(before!=after)
-    from .underworld_aggression import city_crackdowns, restore_suppressed_rackets, street_gang_churn
-    restore_suppressed_rackets(conn,day)
-    crackdowns=city_crackdowns(conn,day)
-    churn=street_gang_churn(conn,day)
-    enforcement+=crackdowns
+    from .underworld_aggression import monthly_world_pressure
+    world=monthly_world_pressure(conn,day)
+    churn=world; enforcement+=world['crackdowns']
     return {'rebuild_underworld_orgs_due':len(orgs),'rebuild_underworld_actions':actions,'rebuild_underworld_hits':hits,'rebuild_underworld_enforcement':enforcement,'rebuild_underworld_successions':succession,'rebuild_underworld_gangs_collapsed':churn['collapsed'],'rebuild_underworld_gangs_founded':churn['founded']}
 
 

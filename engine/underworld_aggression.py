@@ -585,11 +585,24 @@ def found_street_gang(conn: sqlite3.Connection, lid: int, zid: int, rng: random.
     return oid
 
 
+def next_pressure_day(conn: sqlite3.Connection) -> int:
+    """The next day the world-level monthly work (restoring suppressed rackets, city crackdowns, gang churn) falls due."""
+    last = conn.execute("SELECT value FROM engine_meta WHERE key='uw_churn_day'").fetchone()
+    return (int(last[0]) if last else 0) + 30
+
+
+def monthly_world_pressure(conn: sqlite3.Connection, day: int) -> dict[str, int]:
+    """Runs on its own schedule (never on whichever day another outfit happens to be due), so every clock driver agrees."""
+    if day < next_pressure_day(conn):
+        return {"collapsed": 0, "founded": 0, "crackdowns": 0}
+    restore_suppressed_rackets(conn, day)
+    crackdowns = city_crackdowns(conn, day)
+    churn = street_gang_churn(conn, day)
+    return {**churn, "crackdowns": crackdowns}
+
+
 def street_gang_churn(conn: sqlite3.Connection, day: int) -> dict[str, int]:
     """Weak or beaten street gangs collapse and new ones rise where there is room (canon [1734]: they rise and disappear quickly)."""
-    last = conn.execute("SELECT value FROM engine_meta WHERE key='uw_churn_day'").fetchone()
-    if last and day - int(last[0]) < 30:
-        return {"collapsed": 0, "founded": 0}
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('uw_churn_day',?)", (str(day),))
     rng = random.Random(int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0]) * 7 + day * 131)
     collapsed = founded = 0

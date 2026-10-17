@@ -68,12 +68,16 @@ def run():
     assert 'investigate_underworld_claim' in keys
     assert all(x.action_kind not in {'advance_goal','address_pressure','work_relationship','force_goal'} for x in candidates)
     poach_candidates=[x for x in candidates if x.action_kind in {'warn_protection_poacher','retaliate_protection_poach','negotiate_protection_poach'}]
-    assert all(int(x.information_basis['underworld_incident_id'])==int(incident['id']) for x in poach_candidates)
+    # Gap 4b: the grievance query also reads other incidents against the outfit (challenges, attacks on clients); every candidate must still
+    # point at a concrete open incident aimed at this outfit, and the named poach incident must have its own candidates.
+    open_ids={int(r[0]) for r in c.execute("SELECT id FROM underworld_incidents WHERE target_organization_id=? AND status='open'",(home_org,))}
+    assert all(int(x.information_basis['underworld_incident_id']) in open_ids for x in poach_candidates)
+    assert any(int(x.information_basis['underworld_incident_id'])==int(incident['id']) for x in poach_candidates)
     investigation=next(x for x in candidates if x.action_kind=='investigate_underworld_claim')
     assert claim in investigation.claim_ids and hidden_ev not in investigation.evidence_ids
 
     # Domain owner executes the concrete grievance response and closes the exact incident.
-    warning=next(x for x in poach_candidates if x.action_kind=='warn_protection_poacher')
+    warning=next(x for x in poach_candidates if x.action_kind=='warn_protection_poacher' and int(x.information_basis['underworld_incident_id'])==int(incident['id']))
     result=execute_underworld_action(c,leader,warning.action_kind,warning.payload,0)
     assert not result.get('blocked'), result
     assert c.execute("SELECT status FROM underworld_incidents WHERE id=?",(int(incident['id']),)).fetchone()[0]=='answered'
