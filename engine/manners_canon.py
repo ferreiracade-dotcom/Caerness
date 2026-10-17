@@ -8,34 +8,32 @@ from __future__ import annotations
 import sqlite3
 
 MANNERS: dict[str, str] = {
-    "hearth": ("Formal by default. A bow is grammar, not a Stage calculator: depth, timing and who begins it say the relationship. "
-               "Hospitality comes before business. Titles keep distance and over-familiar address insults. Fear tightens formality; "
-               "who stays informal reveals old ties."),
-    "churn": ("Among the Churned, master and disciple, seniority and lineage protocol rule, and a master's word outlasts a pupil's Stage. "
-              "Martial affairs are the Churn's own, but tax and magistrates still apply. Challenges want notice and witnesses; "
-              "refusing one is not cowardice."),
-    "empire": ("Beyond the Hearth the Empire is the most formal society: office and examination outrank blood, and rank sets distance "
-               "and address. Satire at sovereignty is a legal risk. Hearth Rites are kept in private."),
-    "court": ("Court is a graded approach: distance is rank, audience is bodily (prostration, eyes lowered until addressed, set forms "
-              "of speech). No one stands north of the throne; screen and veil mark access. Office outweighs blood."),
-    "dunmoor": ("Landed, confident, martial. Feasts, oaths and land frame talk, and birth matters. A man who breaks an oath or "
-                "abandons his dead loses standing without losing a Stage. Witnesses are pressed to attend the rites."),
-    "greywood": ("Institutional and precedent-minded: church and guild courtesy, charity, public moral language. 'By what lawful "
-                 "authority' is the question asked. Marriage and fidelity carry heavy pressure; vice hides behind respectable fronts."),
-    "windmere": ("Fluid, cosmopolitan, bargaining. Foreigners are welcome, credit and access count for more than birth, and the noble "
-                 "and merchant lines blur. A bargain is sacred; oaths are sworn under the Turn. Little shocks anyone."),
-    "sunreach": ("Civic pride and rivalry, and every city differs. Visible self-made wealth, guild standing and public works count. "
-                 "Oaths are taken before the Common Flame, which sits badly with Witnesses."),
-    "thornward": ("Practical and frontier: self-sufficient, muster and Warden duty, news by the military roads. Nobles are officeholders "
-                  "in a defence system, and the officer who holds a line is prized. The old gods are honoured."),
-    "stormhollow": ("Highland, with strong local lordship and worker towns. The hill-fighter and the lord who holds a pass are prized. "
-                    "The Keeping of Names honours ancestors, and Keepers settle lineage disputes. Debt can bind industrial workers."),
-    "undertow": ("Rougher and less uniform. Personal hierarchy and sworn loyalty, no common code: surety, truce, a neutral host and a "
-                 "mediator are the old tools. Violence costs because of relationships."),
-    "road": ("Looser: reputation circuits, no membership, personal synthesis. A Waystone's peace is local and rests on reputation, "
-             "not rule. A fighter answers only the fights meant to be answered."),
-    "default": ("Formality follows power: conduct, distance, address and precedence are keyed to office, birth or martial standing, "
-                "and a breach reads loudly. Elders and hosts are deferred to; strangers are read by how they carry themselves."),
+    'hearth': (
+        'Formal by default; a bow is grammar, not a Stage calculator. Hospitality before business. Titles keep distance. Fear tightens formality.'),
+    'churn': (
+        "Master and disciple, seniority and lineage rule; a master's word outlasts a pupil's Stage. Tax and magistrates still apply. Refusing a challenge is no cowardice."),
+    'empire': (
+        'The most formal society beyond the Hearth: office and examination outrank blood, rank sets distance and address. Satire at sovereignty is a legal risk.'),
+    'court': (
+        'Court is a graded approach: distance is rank, audience is bodily (prostration, eyes lowered until addressed). Nobody stands north of the throne. Office outweighs blood.'),
+    'dunmoor': (
+        'Landed, confident, martial. Feasts, oaths and land frame talk. An oath-breaker or one who abandons his dead loses standing without losing a Stage.'),
+    'greywood': (
+        'Institutional and precedent-minded: church and guild courtesy, charity, public moral language. Marriage and fidelity carry heavy pressure.'),
+    'windmere': (
+        'Fluid, cosmopolitan, bargaining. Foreigners welcome; credit and access outweigh birth. A bargain is sacred; little shocks anyone.'),
+    'sunreach': (
+        'Civic pride and rivalry; every city differs. Visible self-made wealth, guild standing and public works count. Oaths before the Common Flame.'),
+    'thornward': (
+        'Practical and frontier: self-sufficient, muster and Warden duty. Nobles are officeholders in a defence system; the officer who holds a line is prized.'),
+    'stormhollow': (
+        'Highland, strong local lordship, worker towns. The hill-fighter and the lord who holds a pass are prized. Keepers of Names settle lineage disputes.'),
+    'undertow': (
+        'Rougher, less uniform. Personal hierarchy and sworn loyalty, no common code: surety, truce, a neutral host, a mediator. Violence costs because of relationships.'),
+    'road': (
+        "Looser: reputation circuits, no membership. A Waystone's peace is local and rests on reputation. A fighter answers only the fights meant to be answered."),
+    'default': (
+        'Formality follows power: distance and address are keyed to office, birth or martial standing, and a breach reads loudly. Elders and hosts are deferred to.'),
 }
 
 LOCATORS: dict[str, tuple[str, ...]] = {

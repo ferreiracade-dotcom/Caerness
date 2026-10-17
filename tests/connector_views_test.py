@@ -138,6 +138,33 @@ def run():
             assert mn["business_cash"]["Test Lantern House"] in set(SCALES) | {"nothing"}, mn
             assert not any(c.isdigit() for c in json.dumps(mn)), mn
             assert _j(compact_scene(conn)) <= 4000
+
+            # Standing and manners (culture plan, Task 3): kin shows as kin, a stranger still gets words, the room has manners.
+            base = compact_scene(conn)
+            assert base["manners"] and len(base["manners"]) <= 300, base.get("manners")
+            others = [p for p in base["present"] if p["id"] != me]
+            kin_p = others[0]
+            stranger = next(p for p in others[1:] if "knows" not in p)
+            for q in (me, kin_p["id"]):
+                conn.execute("DELETE FROM kinship_links WHERE ? IN (actor_a_id,actor_b_id) AND kin_kind IN ('parent','child')", (q,))
+            conn.execute("UPDATE actor_life_profiles SET demographic_sex='male' WHERE actor_id=?", (kin_p["id"],))
+            conn.execute("INSERT INTO kinship_links(actor_a_id,actor_b_id,kin_kind,legal_status,started_day) VALUES (?,?, 'parent','recognized',0)",
+                         (kin_p["id"], me))
+            conn.execute("INSERT INTO kinship_links(actor_a_id,actor_b_id,kin_kind,legal_status,started_day) VALUES (?,?, 'child','recognized',0)",
+                         (me, kin_p["id"]))
+            conn.commit()
+            s3 = compact_scene(conn)
+            byid = {p["id"]: p for p in s3["present"]}
+            assert byid[kin_p["id"]]["kin"] == "your father", byid[kin_p["id"]]
+            assert "knows" not in byid[kin_p["id"]]
+            assert stranger["id"] != kin_p["id"] and "knows" not in byid[stranger["id"]], byid[stranger["id"]]
+            assert "kin" not in byid[stranger["id"]] and "None" not in json.dumps(byid[stranger["id"]]), byid[stranger["id"]]
+            assert all(len(json.dumps(p, ensure_ascii=False)) <= 330 for p in s3["present"]), max(len(json.dumps(p)) for p in s3["present"])
+            lk = lookup(conn, kin_p["name"])
+            assert lk["standing"]["kin"] == "your father" and "relationship" not in lk, lk
+            assert not any(c.isdigit() for c in json.dumps(lk.get("standing", {}))), lk["standing"]
+            assert not any(c.isdigit() for c in json.dumps(s3.get("you_here", {})))
+            print("scene bytes", _j(s3), "per-person max", max(len(json.dumps(p, ensure_ascii=False)) for p in s3["present"]))
     print("connector_views_test passed")
 
 

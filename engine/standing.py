@@ -15,9 +15,9 @@ from .relationships import relationship_view
 # What a Stage looks like to a Hearth observer ([212]-[232]). Outside the Hearth the same Stage impresses
 # one step more ([297]-[318]); an outer Sixth is "a continental anomaly".
 STAGE_READINGS = (
-    "a developing martial artist",
-    "a working professional fighter",
-    "a strong, seasoned master",
+    "a developing fighter",
+    "a working fighter",
+    "a seasoned master",
     "an unmistakable master",
     "a great master",
     "among the strongest alive",
