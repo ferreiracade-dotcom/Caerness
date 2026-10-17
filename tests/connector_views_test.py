@@ -210,7 +210,9 @@ def run():
             assert {p["id"] for p in sc["present"]} >= set(crew), ([p["id"] for p in sc["present"]], crew)
 
             # Review 7: networks have presence, not a seat; the scene and the lookup both show where they are.
-            inst = {i["name"]: i for i in compact_scene(conn)["institutions_here"]}
+            listed = compact_scene(conn)["institutions_here"]
+            assert len({i["id"] for i in listed}) == len(listed) <= 8, [i["name"] for i in listed]  # no network twice
+            inst = {i["name"]: i for i in listed}
             assert "Red Board" in inst and "present" in inst["Red Board"]["what"], inst
             assert "Cormorants" in inst, list(inst)
             nl = lookup(conn, "Red Board")

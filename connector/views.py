@@ -253,8 +253,9 @@ def compact_scene(conn) -> dict:
                WHERE n.location_id=? AND a.status NOT IN ('dead','destroyed','dissolved','defunct','historical') ORDER BY CASE n.strength WHEN 'strong' THEN 0 WHEN 'present' THEN 1 ELSE 2 END,a.name""", (here,)):
         if nid not in seen:
             institutions.append({"id": nid, "name": nname, "what": f"network, {strength} here"})
-    nets = institutions[local_n:]
-    institutions = institutions[:max(5, 8 - len(nets[:3]))] + nets[:3]  # networks are not crowded out by a town's many seats
+    local, nets = institutions[:local_n], institutions[local_n:]
+    local = local[:8 - min(3, len(nets))]  # networks are not crowded out by a town's many seats
+    institutions = local + nets[:8 - len(local)]
     events = [f"day {e['day']}: {_clip(e['title'], 100)}" for e in p["known_events"][-_LIMITS["news"]:]]
     rumours = ["rumour: " + _clip(r["text"], 110) for r in p["known_rumours"][-_LIMITS["news"]:]]
     notes = []
