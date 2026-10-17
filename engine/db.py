@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 109
+SCHEMA_VERSION = 110
 
 
 def _running_tests() -> bool:
@@ -4479,6 +4479,13 @@ def _migration_109(conn: sqlite3.Connection) -> None:
         redraw_unresolved_profile_cores(conn)
 
 
+def _migration_110(conn: sqlite3.Connection) -> None:
+    """Underworld everywhere: the Aldergate-only procedural city is dissolved and the canon-shaped underworld is seeded in every settlement."""
+    if _has_table(conn, "underworld_organizations") and _has_table(conn, "underworld_network_presence"):
+        from .underworld_ecology import rebuild_campaign_underworld
+        rebuild_campaign_underworld(conn)
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4589,6 +4596,7 @@ _MIGRATIONS: dict[int, Migration] = {
     107: ("family02_sex_resolution", "FAMILY-02 demographic-sex resolution for named characters (canon text, canon rule, given name, seeded roll)", _migration_107),
     108: ("opening01_family_relationships", "OPENING-01 relationship start dates, opening family life (marriage, widowhood, spouses, latent children) and opening relationships", _migration_108),
     109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed; unrevealed stages follow canon headcounts", _migration_109),
+    110: ("underworld_everywhere", "Gap 4a: procedural Aldergate underworld dissolved; canon-shaped underworld in every settlement; notes naming dissolved outfits reported", _migration_110),
 }
 
 

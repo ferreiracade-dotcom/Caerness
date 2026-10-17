@@ -106,7 +106,7 @@ def run():
                 """SELECT a.name,o.name,p.role_kind,lp.demographic_sex FROM underworld_personnel p
                    JOIN underworld_organizations o ON o.id=p.organization_id JOIN actors a ON a.id=p.actor_id
                    JOIN actor_life_profiles lp ON lp.actor_id=a.id
-                   WHERE p.status='active' AND p.role_kind='crew_leader' ORDER BY a.id LIMIT 1""").fetchone()
+                   WHERE p.status='active' AND p.role_kind='crew_leader' AND (SELECT COUNT(*) FROM actors x WHERE x.name=a.name)=1 ORDER BY a.id LIMIT 1""").fetchone()
             lb = lookup(conn, boss[0])["basics"]
             assert any(m.startswith(f"crew leader, {boss[1]}") for m in lb["member_of"]), lb
             assert lb["sex"] == ("woman" if boss[3] == "female" else "man"), lb

@@ -120,6 +120,10 @@ def run():
                               JOIN underworld_organizations o ON o.id=p.organization_id JOIN actors a ON a.id=p.actor_id WHERE p.role_kind='boss'"""):
             assert r["status"] == "active" and int(r["current_location_id"]) == int(r["primary_location_id"])
 
+        # Every crew leader is on the books (a leader missing from personnel gets replaced on the first monthly turn).
+        assert not c.execute("""SELECT 1 FROM underworld_crews cr WHERE cr.status='active' AND cr.leader_actor_id IS NOT NULL AND NOT EXISTS
+                                (SELECT 1 FROM underworld_personnel p WHERE p.actor_id=cr.leader_actor_id AND p.organization_id=cr.organization_id AND p.status='active')""").fetchone()
+
         # Idempotent; population sources unchanged.
         def snap():
             return [c.execute(q).fetchone()[0] for q in (

@@ -222,8 +222,9 @@ def seed_settlement_underworld(conn: sqlite3.Connection, location_id: int) -> di
                                 metadata={"opening_control": True})
             crews = 1 if members < 18 else 2
             for c in range(crews):
-                create_crew(conn, oid, f"{name.split()[0]} Crew {c + 1}", leader_actor_id=_person(conn, lid, "crew_leader", strict=False, oid=oid, rng=rng),
-                            home_zone_id=zid, size_estimate=members / crews, rng=rng)
+                lead = create_personnel(conn, oid, role_kind="crew_leader", membership_status="member", rng=rng,
+                                        actor_id=_person(conn, lid, "crew_leader", strict=False, oid=oid, rng=rng))
+                create_crew(conn, oid, f"{name.split()[0]} Crew {c + 1}", leader_actor_id=lead, home_zone_id=zid, size_estimate=members / crews, rng=rng)
             _rackets(conn, oid, racket_kind_options(conn, zid, rng, count=rng.randint(1, 3)), rng, zid)
             ents = conn.execute("SELECT id FROM civilian_enterprises WHERE location_id=? AND status IN ('active','strained') AND id NOT IN "
                                 "(SELECT enterprise_id FROM underworld_protection_accounts WHERE status='active') ORDER BY id", (lid,)).fetchall()
@@ -369,3 +370,77 @@ def seed_all_settlements(conn: sqlite3.Connection) -> dict[str, Any]:
         "v060_underworld_rackets": q("SELECT COUNT(*) FROM underworld_racket_sites WHERE status='active'"),
         "v060_underworld_protection_accounts": q("SELECT COUNT(*) FROM underworld_protection_accounts WHERE status='active'"),
     }
+
+
+# ---------------------------------------------------------------- schema 110: rebuild an existing campaign
+
+def _notes_to_report(conn: sqlite3.Connection, names: list[str]) -> int:
+    """One error_report per GM note / recap / standing rule that names a dissolved outfit (connector tables may be absent)."""
+    have = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if "error_reports" not in have or not names:
+        return 0
+    day = _day(conn)
+    n = 0
+    for table in ("gm_notes", "campaign_recaps", "standing_rules"):
+        if table not in have:
+            continue
+        for row in conn.execute(f"SELECT id,text FROM {table}").fetchall():
+            hit = [x for x in names if x in row["text"]]
+            if not hit:
+                continue
+            cid = f"schema110:{table}:{row['id']}"
+            if conn.execute("SELECT 1 FROM error_reports WHERE call_id=?", (cid,)).fetchone():
+                continue
+            conn.execute("INSERT INTO error_reports(world_day,text,call_id) VALUES (?,?,?)",
+                         (day, f"World rebuilt (schema 110): {', '.join(hit)} no longer exists; revise this note ({table} #{row['id']}).", cid))
+            n += 1
+    return n
+
+
+def dissolve_procedural_underworld(conn: sqlite3.Connection) -> list[str]:
+    """End the Aldergate-only procedural outfits. People stay alive and in place, unaffiliated; the protagonist's and authored outfits stay."""
+    me = conn.execute("SELECT player_actor_id FROM player_state WHERE player_actor_id IS NOT NULL LIMIT 1").fetchone() if \
+        conn.execute("SELECT 1 FROM sqlite_master WHERE name='player_state'").fetchone() else None
+    me = int(me[0]) if me else None
+    dissolved: list[tuple[int, str]] = []
+    for o in conn.execute("SELECT * FROM underworld_organizations WHERE status IN ('active','strained','fragmented','dormant') ORDER BY id").fetchall():
+        meta = json.loads(o["metadata_json"] or "{}")
+        if not (meta.get("not_world_bible_canon") and meta.get("v060_clean_rebuild")) or meta.get("authored"):
+            continue
+        oid = int(o["id"])
+        if me is not None and (me in (o["current_leader_actor_id"], o["founder_actor_id"]) or conn.execute(
+                "SELECT 1 FROM underworld_personnel WHERE organization_id=? AND actor_id=? AND status='active'", (oid, me)).fetchone()):
+            continue
+        dissolved.append((oid, o["name"]))
+        meta["superseded_by"] = "schema110_canon_underworld"
+        conn.execute("UPDATE underworld_organizations SET status='destroyed',metadata_json=? WHERE id=?", (_j(meta), oid))
+        conn.execute("UPDATE underworld_crews SET status='destroyed' WHERE organization_id=? AND status IN ('active','depleted')", (oid,))
+        conn.execute("UPDATE underworld_zone_claims SET status='withdrawn' WHERE organization_id=? AND status='active'", (oid,))
+        conn.execute("UPDATE underworld_racket_sites SET status='abandoned' WHERE organization_id=? AND status IN ('active','suppressed')", (oid,))
+        conn.execute("UPDATE underworld_protection_accounts SET status='ended' WHERE protector_organization_id=? AND status='active'", (oid,))
+        conn.execute("UPDATE OR REPLACE underworld_business_links SET status='ended' WHERE organization_id=? AND status='active'", (oid,))
+        people = [int(r[0]) for r in conn.execute("SELECT actor_id FROM underworld_personnel WHERE organization_id=? AND status='active'", (oid,))]
+        conn.execute("UPDATE underworld_personnel SET status='retired' WHERE organization_id=? AND status='active'", (oid,))
+        for a in people:  # still in a live outfit elsewhere? then the subtype stays
+            if not conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active'", (a,)).fetchone():
+                conn.execute("UPDATE actors SET subtype='resolved_criminal' WHERE id=? AND substr(subtype,1,11)='underworld_'", (a,))
+    # Their invented wards go too, unless somebody who survived still holds or contests one.
+    conn.execute("""UPDATE underworld_zones SET status='abandoned' WHERE status='active' AND metadata_json LIKE '%not_world_bible_canon%'
+                    AND id NOT IN (SELECT zone_id FROM underworld_zone_claims WHERE status='active')""")
+    return [n for _, n in dissolved]
+
+
+def rebuild_campaign_underworld(conn: sqlite3.Connection) -> dict[str, Any]:
+    """Migration 110: dissolve the procedural city, then seed the canon version everywhere; report the dissolved names."""
+    dissolved = dissolve_procedural_underworld(conn)
+    has_world = conn.execute("SELECT 1 FROM background_population_sources WHERE source_kind='settlement' LIMIT 1").fetchone()
+    seeded: dict[str, Any] = {}
+    if has_world:  # an empty database has nothing to seed (tests bootstrap through activation instead)
+        from .spectacle import activate_spectacle_substrate
+        activate_spectacle_substrate(conn)
+        seeded = seed_all_settlements(conn)
+    reported = _notes_to_report(conn, dissolved)
+    if dissolved or not conn.execute("SELECT 1 FROM engine_meta WHERE key='schema110_report'").fetchone():
+        conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema110_report',?)",
+                     (_j({"dissolved": dissolved, "reported_notes": reported, "seeded": {k: v for k, v in seeded.items() if not k.startswith("v060")}}),))
+    return {"dissolved": dissolved, "reported_notes": reported, "seeded": seeded}

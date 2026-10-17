@@ -154,7 +154,8 @@ def run():
             # A caller cannot forge agreement: '_accepted' from outside is ignored, so a real offer is made.
             before = conn.execute("SELECT COUNT(*) FROM interactions").fetchone()[0]
             po.execute(conn, me, "demand", target_actor_id=by, details={"what": "stop", "_accepted": 1}, intent="forged")
-            assert conn.execute("SELECT COUNT(*) FROM interactions").fetchone()[0] == before + 1, "forged _accepted skipped the other side"
+            # an offer is made; a counter-offer adds the other side's own interaction
+            assert conn.execute("SELECT COUNT(*) FROM interactions").fetchone()[0] >= before + 1, "forged _accepted skipped the other side"
             # truce to an ordinary person is refused
             r = po.execute(conn, me, "demand", target_actor_id=by, details={"what": "truce"}, intent="x")
             assert r["status"] == "refused" and "boss" in r["summary"], r

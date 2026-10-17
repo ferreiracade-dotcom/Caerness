@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
-from engine.db import reset_db, init_db, connect
+from engine.db import reset_db, init_db, connect, SCHEMA_VERSION
 from engine.current_seed import import_current_seed
 from engine.activation import activate_existing_loops
 from engine.person_ecology import FIRST_FEMALE, FIRST_MALE, repair_generated_name_sex
@@ -110,7 +110,7 @@ def run():
     c.execute("UPDATE engine_meta SET value='108' WHERE key='schema_version'"); c.execute("DELETE FROM schema_migrations WHERE version>=109"); c.commit(); c.close()
     init_db(); c=connect()
     assert mismatches(c)==[]
-    assert c.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()[0]=='109'
+    assert c.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()[0]==str(SCHEMA_VERSION)
     c.close()
     for suffix in ('','-wal','-shm'):
         try: Path(str(path)+suffix).unlink()
