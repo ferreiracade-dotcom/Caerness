@@ -4546,6 +4546,11 @@ def _migration_113(conn: sqlite3.Connection) -> None:
                 conn.execute("UPDATE underworld_organizations SET treasury=? WHERE id=?", (t, int(r[0])))
                 seeded += 1
         report["treasuries_seeded"] = seeded
+        if _has_table(conn, "underworld_protection_accounts") and _has_table(conn, "underworld_zone_claims") and _has_table(conn, "underworld_relations"):
+            from .world_pressure import claim_ground_for_outfits, end_own_front_protection, seed_baseline_relations
+            report["own_front_protection_ended"] = end_own_front_protection(conn)
+            report["outfits_given_ground"] = claim_ground_for_outfits(conn)
+            report["baseline_relations_seeded"] = seed_baseline_relations(conn)
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema113_report',?)", (json.dumps(report, sort_keys=True),))
 
 

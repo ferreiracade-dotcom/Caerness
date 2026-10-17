@@ -69,7 +69,44 @@ def money():
     print("money ok")
 
 
-TESTS = {"money": money}
+def ground():
+    from fixtures_protagonist import make_fane
+    from engine.db import _migration_113
+    with world() as conn:
+        w = make_fane(conn, legacy=True)
+        outfit = w["outfit"]
+        assert conn.execute("SELECT COUNT(*) FROM underworld_zone_claims WHERE organization_id=? AND status='active'", (outfit,)).fetchone()[0] == 0
+        _migration_113(conn)
+        claims = conn.execute("SELECT zone_id,claim_kind FROM underworld_zone_claims WHERE organization_id=? AND status='active'", (outfit,)).fetchall()
+        assert claims, "outfit with fronts neither holds nor contests ground"
+        assert claims[0]["zone_id"] in [r[0] for r in conn.execute("SELECT id FROM underworld_zones WHERE city_location_id=?", (w["location"],))]
+        for eid in w["fronts"]:
+            n = conn.execute("SELECT COUNT(*) FROM underworld_protection_accounts WHERE enterprise_id=? AND status='active' AND protector_organization_id<>?", (eid, outfit)).fetchone()[0]
+            assert n == 0, f"rival still protects front {eid}"
+        for rv in w["rivals"]:
+            a, b = sorted((rv, outfit))
+            rel = conn.execute("SELECT * FROM underworld_relations WHERE organization_a_id=? AND organization_b_id=?", (a, b)).fetchone()
+            assert rel and rel["relation_kind"] == "rival" and rel["hostility"] >= 45, dict(rel) if rel else None
+            assert conn.execute("SELECT COUNT(*) FROM underworld_incidents WHERE incident_kind='protection_dispute' AND target_organization_id=? AND source_organization_id=?", (rv, outfit)).fetchone()[0] >= 1
+        # baseline relations among outfits sharing a city
+        loc = w["location"]
+        orgs = [int(r[0]) for r in conn.execute("SELECT id FROM underworld_organizations WHERE primary_location_id=? AND status='active'", (loc,))]
+        missing = 0
+        for i, x in enumerate(orgs):
+            for y in orgs[i + 1:]:
+                a, b = sorted((x, y))
+                if not conn.execute("SELECT 1 FROM underworld_relations WHERE organization_a_id=? AND organization_b_id=?", (a, b)).fetchone():
+                    missing += 1
+        assert missing == 0, f"{missing} same-city pairs without a relation"
+        n_claims = conn.execute("SELECT COUNT(*) FROM underworld_zone_claims").fetchone()[0]
+        n_inc = conn.execute("SELECT COUNT(*) FROM underworld_incidents").fetchone()[0]
+        _migration_113(conn)
+        assert conn.execute("SELECT COUNT(*) FROM underworld_zone_claims").fetchone()[0] == n_claims
+        assert conn.execute("SELECT COUNT(*) FROM underworld_incidents").fetchone()[0] == n_inc
+    print("ground ok")
+
+
+TESTS = {"money": money, "ground": ground}
 
 if __name__ == "__main__":
     names = sys.argv[1:] or list(TESTS)
