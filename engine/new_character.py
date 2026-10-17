@@ -223,7 +223,7 @@ def _origin(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex
     return {**counts, "revealed_parents": len(revealed["parents"]), "revealed_siblings": len(revealed["siblings"]), "people": people}
 
 
-def _ties(conn, aid: int, *, key: str, day: int, loc: int, age: int, cat: str, affiliation: dict | None) -> dict:
+def _ties(conn, aid: int, *, key: str, day: int, loc: int, age: int, cat: str, affiliation: dict | None, also: list[int] | None = None) -> dict:
     from .opening_family import _seed_pair
     from .person_ecology import resolve_background_person
     s = _settlement(conn, loc)
@@ -247,7 +247,12 @@ def _ties(conn, aid: int, *, key: str, day: int, loc: int, age: int, cat: str, a
                 (affiliation["id"], aid))]
         elif affiliation["kind"] == "outfit":
             colleagues = [int(r[0]) for r in conn.execute(
-                "SELECT actor_id FROM underworld_personnel WHERE organization_id=? AND status='active' AND actor_id<>? ORDER BY actor_id LIMIT 3", (affiliation["id"], aid))]
+                """SELECT actor_id FROM underworld_personnel WHERE organization_id=? AND status='active' AND actor_id<>?
+                   ORDER BY CASE role_kind WHEN 'underboss' THEN 0 WHEN 'accountant' THEN 1 WHEN 'lieutenant' THEN 2 WHEN 'fixer' THEN 3 ELSE 4 END,
+                   actor_id LIMIT 4""", (affiliation["id"], aid))]
+    for x in also or []:
+        if x not in colleagues and x != aid:
+            colleagues.append(int(x))
     for j, c in enumerate(colleagues):
         if _seed_pair(conn, aid, c, "colleague", key=f"{key}:col{j}", started_day=day - rng.randint(100, 1500)):
             made["colleagues"] += 1
@@ -358,9 +363,14 @@ def fill_lived_past(conn: sqlite3.Connection, aid: int, *, key: str, proposal: d
     hearth = location_in_hearth(conn, _settlement(conn, loc))
     family_name = _family_surname(str(row["name"]))
     aff = proposal.get("_affiliation")  # resolved by create_protagonist: {"kind","id"} of a body he belongs to
+    # a household he already heads or belongs to is his home: a spouse joins it rather than a new house being formed around him
+    home = conn.execute("SELECT household_id FROM household_members WHERE actor_id=? AND status='active' ORDER BY (role='head') DESC, household_id LIMIT 1",
+                        (aid,)).fetchone()
+    if home is not None:
+        conn.execute("UPDATE actor_life_profiles SET current_household_id=? WHERE actor_id=? AND current_household_id IS NULL", (int(home[0]), aid))
     fam = _family(conn, aid, key=key, proposal=proposal, day=day, loc=loc, sex=sex, age=age)
     origin = _origin(conn, aid, key=key, proposal=proposal, day=day, loc=loc, sex=sex, age=age, family_name=family_name, hearth=hearth)
-    ties = _ties(conn, aid, key=key, day=day, loc=loc, age=age, cat=cat, affiliation=aff)
+    ties = _ties(conn, aid, key=key, day=day, loc=loc, age=age, cat=cat, affiliation=aff, also=proposal.get("_ties_with"))
     score = _competence(conn, aid, cat, age) if age >= 14 else 0.0
     kin = [x for x in ([fam["spouse"]] if fam["spouse"] else []) + fam["children"] + list(origin["people"].values()) if x]
     nk = _knowledge(conn, aid, key=key, day=day, loc=loc, cat=cat, kin=kin)

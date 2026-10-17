@@ -249,8 +249,64 @@ def proposal():
     print("new_character_test::proposal ok")
 
 
+def ansel():
+    """A protagonist made before the new-character work keeps his outfit, businesses, household and every row; a fresh lived past is added."""
+    import fixtures_protagonist as fx
+    sys.path.insert(0, str(ROOT / "tools"))
+    import give_lived_past as glp
+    from engine.household_life import add_service_term
+    from engine.person_ecology import resolve_background_person
+    from engine.underworld_rebuild import create_personnel
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        c = open_copy(tmp)
+        w = fx.make_fane(c)
+        me, loc, oid, hid = w["me"], w["location"], w["outfit"], w["household"]
+        under = create_personnel(c, oid, role_kind="underboss")
+        acct = create_personnel(c, oid, role_kind="accountant")
+        stew = resolve_background_person(c, reason="fixture steward", location_id=loc, min_age=35, max_age=60)
+        add_service_term(c, hid, stew, "steward")
+        c.commit()
+        tables = ("underworld_organizations", "civilian_enterprises", "households", "underworld_personnel", "enterprise_staff",
+                  "household_service_terms", "relationships", "knowledge", "kinship_links", "actor_memories")
+
+        def snap():
+            return {t: [tuple(r) for r in c.execute(f"SELECT * FROM {t} ORDER BY 1,2")] for t in tables}
+
+        before = snap()
+        n_actors = c.execute("SELECT COUNT(*) FROM actors").fetchone()[0]
+        pop = c.execute("SELECT SUM(population_estimate) FROM background_population_sources").fetchone()[0]
+        r = glp.give_lived_past(c)
+        c.commit()
+        assert not r["already"] and r["digest"]["knowledge"] >= 12, r
+        after = snap()
+        for t in tables:
+            assert all(row in after[t] for row in before[t]) or t == "households", f"{t}: a pre-existing row changed"
+        # his outfit, businesses and household are exactly as they were (the household may gain a spouse and children as members)
+        for t in ("underworld_organizations", "civilian_enterprises", "underworld_personnel", "enterprise_staff", "household_service_terms"):
+            assert all(row in after[t] for row in before[t]), t
+        hh0 = [tuple(x) for x in before["households"] if x[0] == hid][0]
+        hh1 = [tuple(x) for x in after["households"] if x[0] == hid][0]
+        assert hh0 == hh1, ("his household row changed", hh0, hh1)
+        # kin by age (living or dead), neighbours, colleagues in both directions: underboss, accountant, steward
+        meta = json.loads(c.execute("SELECT metadata_json FROM actor_life_profiles WHERE actor_id=?", (me,)).fetchone()[0])
+        assert "origin_family" in meta and meta["lived_past_key"]
+        for x in (under, acct, stew):
+            for a, b in ((me, x), (x, me)):
+                assert c.execute("SELECT 1 FROM relationships WHERE actor_a_id=? AND actor_b_id=?", (a, b)).fetchone(), (a, b)
+        assert c.execute("SELECT COUNT(*) FROM knowledge WHERE knower_actor_id=? AND fact_key LIKE 'lived:%'", (me,)).fetchone()[0] >= 12
+        assert c.execute("SELECT value FROM social_reputation WHERE subject_kind='actor' AND subject_id=? AND domain='public'", (me,)).fetchone()[0] > 50
+        assert c.execute("SELECT SUM(population_estimate) FROM background_population_sources").fetchone()[0] == pop
+        # a second run adds nothing
+        s1 = snap()
+        a1 = c.execute("SELECT COUNT(*) FROM actors").fetchone()[0]
+        assert a1 > n_actors and glp.give_lived_past(c)["already"]
+        assert snap() == s1 and c.execute("SELECT COUNT(*) FROM actors").fetchone()[0] == a1
+        c.close()
+    print("new_character_test::ansel ok")
+
+
 def run(only=None):
-    for fn in (parity, lived_past, proposal):
+    for fn in (parity, lived_past, proposal, ansel):
         if only is None or fn.__name__ in only:
             fn()
 
