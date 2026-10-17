@@ -377,7 +377,7 @@ def _hire_one(conn, me: int, boss: int, target: int, d: dict, intent: str, into:
         return _dismiss(conn, me, target, into, name, where)
     mine = _is_my_person(conn, boss, target, into)
     if mine:
-        return _reassign(conn, me, target, into, role, name, where)
+        return _reassign(conn, me, target, into, role, name, where, move=bool(d.get("move")))
     if not _same_place(conn, me, target):
         return _refuse(f"{name} is not here to be asked.")
     if into[0] == "outfit" and conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active'", (target,)).fetchone():
@@ -424,9 +424,11 @@ def _install(conn, me: int, target: int, into: ledger.Holder, role: str, crew_id
         add_service_term(conn, i, target, role if role in SERVICE_ROLES else "retainer")
 
 
-def _reassign(conn, me, target, into, role, name, where) -> dict:
+def _reassign(conn, me, target, into, role, name, where, move: bool = False) -> dict:
     kind, i = into
     weight = 0.0
+    if not _serves_in(conn, target, into) and (move or kind == "outfit"):
+        _leave_holdings(conn, me, target, except_=into, only_outfits=not move)
     if kind == "business":
         row = conn.execute("SELECT authority FROM enterprise_staff WHERE enterprise_id=? AND actor_id=? AND status='active'", (i, target)).fetchone()
         new_auth = BUSINESS_AUTHORITY.get(role or "hand", 30)
@@ -436,14 +438,15 @@ def _reassign(conn, me, target, into, role, name, where) -> dict:
         add_enterprise_staff(conn, i, target, role=role or "hand", authority=new_auth)
     elif kind == "outfit":
         row = conn.execute("SELECT role_kind FROM underworld_personnel WHERE actor_id=? AND organization_id=? AND status='active'", (target, i)).fetchone()
-        if row is None:
-            return _refuse(f"{name} belongs to a different outfit.")
         new = role if role in OUTFIT_ROLES else "member"
-        if new in ("boss",):
-            return _refuse("There is only one boss.")
-        if OUTFIT_RANK.index(new) < OUTFIT_RANK.index(str(row[0])):
-            weight = 0.5
-        conn.execute("UPDATE underworld_personnel SET role_kind=? WHERE actor_id=?", (new, target))
+        if new in ("boss", "underboss"):
+            return _refuse("There is only one boss." if new == "boss" else "An underboss is named by the outfit, not by posting a man.")
+        if row is None:  # his own man from another holding (a servant, a clerk): he left that post and takes this one
+            _install(conn, me, target, into, new)
+        else:
+            if OUTFIT_RANK.index(new) < OUTFIT_RANK.index(str(row[0])):
+                weight = 0.5
+            conn.execute("UPDATE underworld_personnel SET role_kind=? WHERE actor_id=?", (new, target))
     else:
         from .household_life import add_service_term
         add_service_term(conn, i, target, role if role in SERVICE_ROLES else "retainer")
@@ -452,6 +455,22 @@ def _reassign(conn, me, target, into, role, name, where) -> dict:
     summary = f"{name} is moved to a {'lesser' if weight else 'new'} post with {where}."
     _record(conn, me, "Post changed", summary, targets=(target,))
     return {"status": "applied", "summary": summary}
+
+
+def _leave_holdings(conn, me: int, target: int, *, except_: ledger.Holder, only_outfits: bool = False) -> None:
+    """End the man's other posts in holdings the protagonist runs, when he is moved into a new one."""
+    day = _day(conn)
+    for r in conn.execute("SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active'", (target,)).fetchall():
+        if ("outfit", int(r[0])) != except_ and ledger.can_draw(conn, me, ("outfit", int(r[0]))):
+            conn.execute("UPDATE underworld_personnel SET status='retired' WHERE actor_id=? AND organization_id=?", (target, r[0]))
+    for kind, table, col in (() if only_outfits else (("business", "enterprise_staff", "enterprise_id"), ("household", "household_service_terms", "household_id"))):
+        for r in conn.execute(f"SELECT {col} FROM {table} WHERE actor_id=? AND status='active'", (target,)).fetchall():
+            if (kind, int(r[0])) == except_ or not ledger.can_draw(conn, me, (kind, int(r[0]))):
+                continue
+            if kind == "business":
+                conn.execute("DELETE FROM enterprise_staff WHERE enterprise_id=? AND actor_id=?", (r[0], target))
+            else:
+                conn.execute("UPDATE household_service_terms SET status='former',end_day=? WHERE household_id=? AND actor_id=? AND status='active'", (day, r[0], target))
 
 
 def _dismiss(conn, me, target, into, name, where) -> dict:
@@ -505,7 +524,7 @@ def _offer(conn, me: int, target: int, kind: str, day: int, intent: str, terms: 
     iid = create_interaction(conn, me, target, kind, day, stakes=stakes, rationale=intent, terms=terms)
     pending = conn.execute("SELECT status FROM interactions WHERE id=?", (iid,)).fetchone()
     if not pending or str(pending[0]) != "pending":
-        return None, _refuse(f"{_name(conn, target)} will not hear it again so soon.")
+        return None, _refuse(f"{_name(conn, target)} will not hear the same proposal again so soon; different terms (a better wage, a smaller ask, another sum) would be heard.")
     global _OFFERING
     _OFFERING += 1  # the caller settles an immediate acceptance itself
     try:
@@ -535,14 +554,74 @@ def settle_npc_accepted(conn: sqlite3.Connection, interaction) -> dict | None:
                    intent=str(interaction["rationale"] or "accepted offer"), _trusted=True)
 
 
+def counter_terms_for(conn, po: dict, interaction) -> tuple[dict | None, dict]:
+    """What a man who will not take an offer as it stands asks instead: (the operation with the new terms, those terms in words).
+
+    Accepting the counter carries out the operation on these terms, so what was said across the table is what is done."""
+    import copy
+    op, details = str(po.get("op")), copy.deepcopy(po.get("details") or {})
+    words: dict[str, str] = {}
+    if op == "hire":
+        role = str(details.get("role") or "other").lower()
+        usual = _usual_wage(("person", 0), role)
+        cur = _wage_of(details["wage"] if details.get("wage") is not None else details.get("salary", "usual"), usual)
+        details["wage"] = round(cur * 1.35, 4)
+        details.pop("salary", None)
+        words["wage"] = "a third more than was offered"
+    elif op == "lend":
+        order = list(RATES)
+        cur_word, _ = _rate(details.get("rate"))
+        nxt = order[min(len(order) - 1, order.index(cur_word) + 1)]
+        details["rate"] = nxt
+        words["rate"] = "a steeper rate than was offered" if nxt != cur_word else "the rate as offered, and the loan secured"
+        if nxt == cur_word:
+            details["due_days"] = max(15, int(int(details.get("due_days") or 90) * 0.5))
+            words["repay"] = "sooner than was offered"
+    elif op == "trade":
+        buying = str(details.get("deal")) == "buy"
+        try:
+            price = ledger.amount_of(details.get("amount", ""))
+        except ValueError:
+            return None, {}
+        details["amount"] = round(price * (1.2 if buying else 0.85), 4)
+        words["price"] = "a fifth more than was offered" if buying else "a little less than was asked"
+    elif op == "demand":
+        what = str(details.get("what") or "other").lower()
+        if what in ("payment", "tribute"):
+            if what == "payment":
+                try:
+                    amt = ledger.amount_of(details.get("amount", ""), None)
+                except ValueError:
+                    return None, {}
+                details["amount"] = round(amt * 0.6, 4)
+                words["amount"] = "less than was demanded"
+            else:
+                words["tribute"] = "a lighter share than was demanded"
+                details["amount"] = "small"
+        else:
+            details["deadline"] = (int(details.get("deadline") or 0) or 0) + 21
+            words["time"] = "more time to do as demanded"
+    else:
+        return None, {}
+    return {"op": op, "details": details}, words
+
+
 def _countered(conn, me: int, target: int, iid: int, res) -> dict | None:
     """A counter is an open negotiation: a pending offer back to the protagonist, answered with respond."""
+    import json
     if res.response != "counter":
         return None
     summary = f"{_name(conn, target)} answers with terms of their own."
     _record(conn, me, "Counter-offer", summary, targets=(target,))
-    return {"status": "countered", "summary": summary, "interaction_id": iid,
-            "counter_interaction_id": res.child_interaction_id, "answer": res.summary}
+    out = {"status": "countered", "summary": summary, "interaction_id": iid,
+           "counter_interaction_id": res.child_interaction_id, "answer": res.summary}
+    if res.child_interaction_id is not None:
+        row = conn.execute("SELECT terms_json FROM interactions WHERE id=?", (res.child_interaction_id,)).fetchone()
+        said = (json.loads(row[0] or "{}") if row else {}).get("counter_terms")
+        if said:
+            out["counter_terms"] = said
+            out["summary"] = summary + " He wants " + "; ".join(said.values()) + "."
+    return out
 
 
 def _lend(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
@@ -772,6 +851,7 @@ def _open_debts(conn, me: int, target: int) -> list:
 def _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_outfit, iid, openly) -> dict:
     mine: ledger.Holder = ("person", _authority(me, d))
     theirs: ledger.Holder = ("person", target)
+    extra: dict[str, Any] = {}
     if what == "payment":
         paid = ledger.transfer(conn, theirs, mine, amount, flow_kind="other", purpose="payment demanded", allow_partial=True)
         if paid <= 0:
@@ -812,10 +892,39 @@ def _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_ou
         rate = TRIBUTE_RATES.get(str(d.get("amount") or ""), 0.10)
         change_relation(conn, my_outfit, their_outfit, kind="tributary", tribute_rate=rate, patron_organization_id=my_outfit)
         status, summary = "applied", f"{name} agrees to pay tribute."
+    elif what == "information":
+        from . import findings
+        learned = findings.answers(conn, target, d.get("about") or d.get("subject") or d.get("terms") or intent)
+        if learned:
+            findings.learn(conn, _authority(me, d), learned, key=f"demanded:{iid}", confidence=0.6)
+            status, summary = "applied", f"{name} gives way and tells what he knows of it."
+            extra["learned"] = learned
+        else:
+            status, summary = "partial", f"{name} gives way, but he knows nothing of it to tell."
     else:
+        text = str(d.get("terms") or d.get("subject") or d.get("unless") or intent)[:200]
         status, summary = "applied", f"{name} gives way on the {what}."
+        extra["agreement_id"] = _bind_concession(conn, _authority(me, d), target, iid, what, text, d)
     _record(conn, me, "Demand met", summary, severity=2 if openly else 1, targets=(target,))
-    return {"status": status, "summary": summary, "interaction_id": iid}
+    return {"status": status, "summary": summary, "interaction_id": iid, **extra}
+
+
+def _bind_concession(conn, boss: int, target: int, iid: int, what: str, text: str, d: dict) -> int:
+    """A thing someone has given way on is kept: an agreement between the two, and an obligation on him that the world can see."""
+    import json
+    from . import commitments
+    day = _day(conn)
+    terms = json.dumps({"what": what, "terms": text, "deadline": d.get("deadline")}, sort_keys=True, default=str)
+    row = conn.execute("SELECT id FROM agreements WHERE source_interaction_id=? ORDER BY id LIMIT 1", (iid,)).fetchone()
+    if row:
+        aid = int(row[0])
+        conn.execute("UPDATE agreements SET terms_json=json_patch(terms_json,?) WHERE id=?", (terms, aid))
+    else:
+        aid = int(conn.execute("INSERT INTO agreements(agreement_type,actor_a_id,actor_b_id,created_day,terms_json,source_interaction_id) VALUES ('concession',?,?,?,?,?)",
+                               (boss, target, day, terms, iid)).lastrowid)
+    commitments.record(conn, target, f"Has agreed to {what}: {text}", kind="concession", counterparty_actor_id=boss, importance=2,
+                       details={"what": what, "terms": text, "agreement_id": aid})
+    return aid
 
 
 def settle_accepted(conn: sqlite3.Connection, interaction, player_actor_id: int) -> dict | None:
@@ -1115,14 +1224,83 @@ def _trade(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
 # ---------------------------------------------------------------- order
 
 ORDERABLE = ("pay", "demand", "attack", "lend", "hire")
+_ORDER_ALIAS = (("attack", ("attack", "beat", "kill", "hurt", "assault", "drive off", "ambush", "rob", "raid", "burn")),
+                ("demand", ("demand", "collect", "extort", "squeeze", "threaten", "shake down", "press")),
+                ("pay", ("pay", "bribe", "give", "hand over", "settle")),
+                ("lend", ("lend", "loan", "advance money")),
+                ("hire", ("hire", "recruit", "take on", "dismiss", "fire", "promote", "demote", "reassign")))
+
+
+def _alias_of(do: str) -> str | None:
+    for op, words in _ORDER_ALIAS:
+        if any(do.startswith(w) or f" {w}" in f" {do}" for w in words):
+            return op
+    return None
+
+
+def _kick_rate_order(conn, me: int, d: dict, intent: str) -> dict:
+    """An outfit-wide change to the share earners kick up: the boss's order, felt by every earner."""
+    from .underworld_rebuild import kick_rate, set_kick_rate
+    boss = _authority(me, d)
+    org = None
+    if d.get("outfit"):
+        try:
+            org = ledger.parse_holder(d["outfit"], boss, conn)
+        except ValueError as e:
+            return _refuse(str(e))
+        if org[0] != "outfit":
+            return _refuse("Name the outfit as outfit:<id>.")
+        org = org[1]
+    else:
+        org = _my_outfit(conn, boss)
+    if org is None:
+        return _refuse("He has no outfit to set a rate for.")
+    if not ledger.can_draw(conn, boss, ("outfit", org)):
+        return _refuse("He has no say over that outfit's rates.")
+    now = kick_rate(conn, org)
+    raw = d.get("rate")
+    try:
+        if raw is None:
+            word = str(d.get("change") or intent).lower()
+            new = now + (0.08 if re.search(r"rais|more|up|higher|squeez", word) else -0.08 if re.search(r"low|less|cut|down|ease", word) else 0.0)
+        else:
+            key = str(raw).strip().lower().rstrip("%")
+            v = float(key)
+            new = v / 100.0 if str(raw).strip().endswith("%") or v > 1 else v
+    except (TypeError, ValueError):
+        return _refuse("Give the rate as a share (0.3 or 30%) or say raise or lower.")
+    set_rate = set_kick_rate(conn, org, new)
+    verb = "raised" if set_rate > now + 0.005 else "lowered" if set_rate < now - 0.005 else "kept"
+    from .loyalty import outfit_mood
+    summary = f"He {verb} the share every earner kicks up to {_holder_label(conn, ('outfit', org), me)}; the crews will feel it."
+    _record(conn, me, "Kick-up changed", summary, severity=2)
+    return {"status": "applied", "summary": summary, "report": summary, "mood": outfit_mood(conn, org) or None}
+
+
+def _instruct(conn, me: int, sub: int, d: dict, intent: str, mood: str) -> dict:
+    """An order no engine system models: the man takes it on as a commitment of his own, due when the order says."""
+    from . import commitments
+    name = _name(conn, sub)
+    try:
+        days = max(1, int(d.get("time") or d.get("days") or 7))
+    except (TypeError, ValueError):
+        days = 7
+    cid = commitments.record(conn, sub, intent, kind="order", counterparty_actor_id=me, due_day=_day(conn) + days, importance=2,
+                             details={"terms": d.get("terms"), "given_by": me, "reluctant": mood == "reluctantly"})
+    summary = f"{name} takes it on{', unwillingly' if mood == 'reluctantly' else ''}: {intent[:120]}"
+    _record(conn, me, "Order given", summary, targets=(sub,))
+    return {"status": "applied", "summary": summary, "report": summary, "by": name, "obeyed": mood, "commitment_id": cid}
 ATTACK_DANGER = {"drive_off": 1, "beat": 2, "kill": 3}
 
 
 def _is_subordinate(conn, boss: int, sub: int) -> bool:
+    """Anyone who answers to a holding he can draw on: outfit men, business staff, household servants, members of an institution he leads."""
     if sub == boss:
         return False
-    for r in conn.execute("SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active'", (sub,)):
-        if ledger.can_draw(conn, boss, ("outfit", int(r[0]))) and _outranks(conn, boss, sub, ("outfit", int(r[0]))):
+    if _is_my_person(conn, boss, sub, ("person", boss)):
+        return True
+    for r in conn.execute("SELECT institution_actor_id FROM institution_memberships WHERE member_actor_id=? AND status='active'", (sub,)):
+        if ledger.can_draw(conn, boss, ("institution", int(r[0]))):
             return True
     return conn.execute("SELECT 1 FROM enterprise_staff s JOIN civilian_enterprises e ON e.id=s.enterprise_id "
                         "WHERE s.actor_id=? AND s.status='active' AND e.owner_actor_id=?", (sub, boss)).fetchone() is not None
@@ -1164,11 +1342,18 @@ def _obedience(conn, boss: int, sub: int, do: str, toward: int | None, d: dict) 
 
 
 def _order(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
-    do = str(d.get("do") or "").lower()
-    if do not in ORDERABLE:
-        return _refuse(f"do must be one of {', '.join(ORDERABLE)}.")
-    if target is None or not _living(conn, target) or not _is_subordinate(conn, me, target):
+    do = str(d.get("do") or "").lower().strip()
+    if do in ("set_kick_rate", "kick_rate", "kickup"):
+        return _kick_rate_order(conn, me, d, intent)
+    if target is None or not _living(conn, target) or not _is_subordinate(conn, _authority(me, d), target):
         return _refuse("He has no subordinate like that to give orders to.")
+    free = do not in ORDERABLE
+    if free:
+        mapped = _alias_of(do) if do else None
+        if mapped is not None:
+            do, free = mapped, False
+    if not do:
+        free = True
     sub = int(target)
     name = _name(conn, sub)
     toward = d.get("toward")
@@ -1187,6 +1372,8 @@ def _order(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         summary = f"{name} would not do it."
         _record(conn, me, "Order refused", summary, targets=(sub,))
         return {"status": "refused", "summary": summary, "report": summary, "by": name, "obeyed": "refused"}
+    if free:
+        return _instruct(conn, me, sub, d, intent, mood)
     inner = {k: v for k, v in d.items() if k not in ("do", "toward")}
     inner["_principal"] = me
     if mood == "reluctantly":

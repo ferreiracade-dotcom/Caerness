@@ -135,6 +135,11 @@ def _wake_recipient(conn: sqlite3.Connection, actor_id: int, stakes: int, day: i
 
 def _interaction_subject_key(interaction_type: str, terms: dict | None) -> str:
     payload = terms or {}
+    po = payload.get("player_operation")
+    if isinstance(po, dict):  # the protagonist's own offers are told apart by what is offered and on what terms
+        import hashlib
+        sig = json.dumps({"op": po.get("op"), "d": po.get("details")}, sort_keys=True, default=str)
+        return f"{interaction_type}:op:{po.get('op')}:{hashlib.sha1(sig.encode()).hexdigest()[:10]}"
     subject = payload.get("opportunity_proposal_id") or payload.get("purpose") or payload.get("domain_action_kind") or payload.get("goal_id") or ""
     return f"{interaction_type}:{subject}"
 
@@ -555,6 +560,12 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
         counter_terms["counter_depth"] = depth + 1
         counter_terms["burden"] = max(0.0, burden - 0.25)
         counter_terms["incentive"] = incentive + 0.20
+        if isinstance(terms.get("player_operation"), dict):  # concrete terms: what he asks instead, and what accepting it will do
+            from .player_operations import counter_terms_for
+            new_po, said = counter_terms_for(conn, terms["player_operation"], interaction)
+            if new_po is not None:
+                counter_terms["player_operation"] = new_po
+                counter_terms["counter_terms"] = said
         child_id = create_interaction(
             conn,
             recipient,
@@ -949,7 +960,12 @@ def apply_player_response(
         conn.execute("UPDATE interactions SET status='countered',resolved_day=?,resolution_summary=? WHERE id=?", (day, summary, interaction_id))
         adjust_relationship(conn, proposer, player_actor_id, day, trust_delta=0.25)
         return InteractionResult(interaction_id, "countered", "counter", summary, child_interaction_id=child_id)
-    terms.update(counter_terms or {})
+    changes = (counter_terms or {}).get("changes")
+    if isinstance(changes, dict) and isinstance(terms.get("player_operation"), dict):  # the protagonist's own new terms
+        po = dict(terms["player_operation"])
+        po["details"] = {**(po.get("details") or {}), **changes}
+        terms["player_operation"] = po
+    terms.update({k: v for k, v in (counter_terms or {}).items() if k != "changes"})
     child_id = create_interaction(
         conn,
         player_actor_id,
