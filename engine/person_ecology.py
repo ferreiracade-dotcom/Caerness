@@ -103,6 +103,49 @@ def _profile_stage(seed: int, uid: int, hearth: bool, sex: str | None) -> tuple[
     return 1, "Fifth"
 
 
+_MARTIAL = ("soldier", "criminal")
+_THIRD_EXCEPTION = 0.12
+
+
+def occupation_for_stage(seed: int, uid: int, stage: str | None, drawn: str) -> str:
+    """High Stages mean a martial life (owner ruling): Breach/Fifth are always soldier or enforcer; Third is martial
+    except for a rare exception; First/Temper/unstaged keep the drawn occupation."""
+    if stage not in ("Third", "Breach", "Fifth") or drawn in _MARTIAL:
+        return drawn
+    if stage == "Third" and _score(seed, uid, "third_exception") < _THIRD_EXCEPTION:
+        return drawn
+    return "soldier" if _score(seed, uid, "martial_occupation") < 0.75 else "criminal"
+
+
+def redraw_unresolved_occupations(conn: sqlite3.Connection) -> dict:
+    """Make still-background identities' occupation follow their Stage; report (never change) resolved mismatches."""
+    changed = {"total": 0, "by_stage": {}}
+    for r in conn.execute("""SELECT p.partition_id,p.local_uid,p.current_stage,p.occupation_domain,p.social_archetype,pt.seed
+                             FROM background_person_profiles p JOIN background_population_partitions pt ON pt.id=p.partition_id
+                             WHERE p.status='background'""").fetchall():
+        seed, uid = int(r["seed"]), int(r["local_uid"])
+        occ = occupation_for_stage(seed, uid, r["current_stage"], _pick(_OCCUPATIONS, seed, uid, "occupation"))
+        arch = f"ordinary_{occ}"
+        if occ != r["occupation_domain"] or arch != r["social_archetype"]:
+            conn.execute("UPDATE background_person_profiles SET occupation_domain=?,social_archetype=? WHERE partition_id=? AND local_uid=?",
+                         (occ, arch, int(r["partition_id"]), uid))
+            if occ != r["occupation_domain"]:
+                changed["total"] += 1
+                k = r["current_stage"] or "None"
+                changed["by_stage"][k] = changed["by_stage"].get(k, 0) + 1
+    report = []
+    for r in conn.execute("""SELECT p.partition_id,p.local_uid,p.actor_id,p.status,p.current_stage,p.occupation_domain,p.given_name,p.family_name,a.name,a.status AS astatus
+                             FROM background_person_profiles p LEFT JOIN actors a ON a.id=p.actor_id
+                             WHERE p.status<>'background' AND p.current_stage IN ('Third','Breach','Fifth')
+                               AND p.occupation_domain NOT IN ('soldier','criminal')
+                             ORDER BY p.partition_id,p.local_uid""").fetchall():
+        if r["astatus"] == "dead":
+            continue
+        report.append({"actor_id": r["actor_id"], "name": r["name"] or f"{r['given_name']} {r['family_name']}", "status": r["status"],
+                       "stage": r["current_stage"], "occupation": r["occupation_domain"]})
+    return {"changed": changed["total"], "changed_by_stage": changed["by_stage"], "resolved_mismatches": report}
+
+
 def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int, seed: int, state: Any, day: int) -> int:
     """Give every reservoir identity without one its demand-independent profile; returns how many were made."""
     sid = int(source["id"])
@@ -112,10 +155,10 @@ def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int,
         if conn.execute("SELECT 1 FROM background_person_profiles WHERE partition_id=? AND local_uid=?", (pid, uid)).fetchone():
             continue
         snap = state.snapshot(uid)
-        occupation = _pick(_OCCUPATIONS, seed, uid, "occupation")
         loc = _source_location(conn, source, seed, uid)
         from .cultivation import location_in_hearth
         open_core, stage = _profile_stage(seed, uid, location_in_hearth(conn, loc), snap["demographic_sex"])
+        occupation = occupation_for_stage(seed, uid, stage, _pick(_OCCUPATIONS, seed, uid, "occupation"))
         given = given_name_for(seed, uid, snap["demographic_sex"])
         family = _pick(_LAST, seed, uid, "family")
         # The local uid is not visible in ordinary naming unless a collision must be resolved.

@@ -117,8 +117,8 @@ def run():
 
         init_db()
         c = connect()
-        assert c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 110
-        assert int(c.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()[0]) == 110
+        assert c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] >= 110
+        assert int(c.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()[0]) >= 110
 
         # The invented city is gone; its people are not.
         for r in procedural:
@@ -181,7 +181,7 @@ def run():
         init_db()
         c = connect()
         assert snap(c) == before, (before, snap(c))
-        assert c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 110
+        assert c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] >= 110
         c.close()
     print("schema110_underworld_test passed")
 

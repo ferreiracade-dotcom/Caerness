@@ -167,6 +167,8 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     stage = d.get("stage")
     if stage is not None and stage not in STAGES:
         _no("stage must be one of " + ", ".join(STAGES))
+    if work and work not in ("soldier", "criminal") and stage in ("Breach", "Fifth", "Sixth"):
+        _no(f"a {work} at that Stage is unheard of; High Stages mean a martial life (soldier or criminal)")
     loc = _place(conn, me, d)
     elsewhere = bool(d.get("from_elsewhere", False))
     wants = _text(d["wants"], "wants", 200) if d.get("wants") is not None else None

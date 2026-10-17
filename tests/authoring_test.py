@@ -497,9 +497,30 @@ def run_ground():
         conn.close()
 
 
+def run_occupation():
+    """Owner ruling: a non-martial person at Breach or above is unheard of; Third is a rare exception; martial work is unaffected."""
+    from engine.authoring import author, AuthoringRefused
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "o.db")
+        n = _count(conn, "SELECT COUNT(*) FROM actors")
+        for work in ("physician", "labor", "merchant"):
+            for stage in ("Breach", "Fifth"):
+                _refused(lambda: author(conn, me, "person", {"sex": "male", "work": work, "stage": stage, "from_elsewhere": True}, f"o-{work}-{stage}"), "unheard of")
+        assert _count(conn, "SELECT COUNT(*) FROM actors") == n
+        try:
+            author(conn, me, "person", {"sex": "male", "work": "physician", "stage": "Third", "from_elsewhere": True}, "o-third")
+        except AuthoringRefused as e:
+            assert "unheard of" not in str(e), e
+        try:
+            author(conn, me, "person", {"sex": "male", "work": "soldier", "stage": "Breach", "from_elsewhere": True}, "o-sold")
+        except AuthoringRefused as e:
+            assert "unheard of" not in str(e), e
+        conn.close()
+
+
 if __name__ == "__main__":
     only = sys.argv[1] if len(sys.argv) > 1 else None
-    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor), ("spouse", run_spouse), ("ground", run_ground)):
+    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor), ("spouse", run_spouse), ("ground", run_ground), ("occupation", run_occupation)):
         if only in (None, name):
             fn()
     print("authoring_test: ok")

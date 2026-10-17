@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 110
+SCHEMA_VERSION = 111
 
 
 def _running_tests() -> bool:
@@ -4486,6 +4486,17 @@ def _migration_110(conn: sqlite3.Connection) -> None:
         rebuild_campaign_underworld(conn)
 
 
+def _migration_111(conn: sqlite3.Connection) -> None:
+    """Occupation follows Stage: unrevealed Breach/Fifth people are soldiers or enforcers, Third mostly so; resolved mismatches are reported."""
+    if _has_table(conn, "background_person_profiles") and _has_table(conn, "background_population_partitions"):
+        import json
+        from .person_ecology import redraw_unresolved_occupations
+        res = redraw_unresolved_occupations(conn)
+        report = {"changed": res["changed"], "changed_by_stage": res["changed_by_stage"],
+                  "resolved_mismatch_count": len(res["resolved_mismatches"]), "resolved_mismatches": res["resolved_mismatches"][:50]}
+        conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema111_report',?)", (json.dumps(report, sort_keys=True),))
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4597,6 +4608,7 @@ _MIGRATIONS: dict[int, Migration] = {
     108: ("opening01_family_relationships", "OPENING-01 relationship start dates, opening family life (marriage, widowhood, spouses, latent children) and opening relationships", _migration_108),
     109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed; unrevealed stages follow canon headcounts", _migration_109),
     110: ("underworld_everywhere", "Gap 4a: procedural Aldergate underworld dissolved; canon-shaped underworld in every settlement; notes naming dissolved outfits reported", _migration_110),
+    111: ("occupation_follows_stage", "Background occupation follows Stage: Breach/Fifth martial, Third rarely otherwise; resolved mismatches reported", _migration_111),
 }
 
 
