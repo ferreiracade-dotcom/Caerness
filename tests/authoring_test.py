@@ -445,9 +445,51 @@ def run_spouse():
         conn.close()
 
 
+def run_ground():
+    """An authored gang anywhere holds a vacant zone, or challenges the weakest-held one."""
+    from engine.authoring import author
+    from engine.spectacle import activate_spectacle_substrate
+    from engine.underworld_ecology import seed_all_settlements
+
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, _ = _open(tmp, "g.db")
+        activate_spectacle_substrate(conn)
+        seed_all_settlements(conn)  # the world as schema 110 leaves it (idempotent if already migrated)
+        toll = int(conn.execute("SELECT id FROM locations WHERE name='Toll’s Reach'").fetchone()[0])
+        zones = [r[0] for r in conn.execute("SELECT id FROM underworld_zones WHERE city_location_id=? AND status='active' ORDER BY id", (toll,))]
+        assert len(zones) >= 4, zones
+
+        def claims(zid, kind):
+            return [r[0] for r in conn.execute("SELECT organization_id FROM underworld_zone_claims WHERE zone_id=? AND claim_kind=? AND status='active'", (zid, kind))]
+
+        def leader(i):
+            row = conn.execute("""SELECT a.id FROM actors a WHERE a.actor_type='character' AND a.status='active' AND a.current_location_id=? AND a.home_location_id=?
+                                  AND a.id<>? AND NOT EXISTS (SELECT 1 FROM underworld_personnel p WHERE p.actor_id=a.id AND p.status='active')
+                                  ORDER BY a.id LIMIT 1 OFFSET ?""", (toll, toll, me, i)).fetchone()
+            assert row, "no free local in Toll's Reach"
+            return int(row[0])
+
+        vacant = [z for z in zones if not claims(z, "controller")]
+        assert vacant, "seeding should leave open ground"
+        g = author(conn, me, "organisation", {"name": "The Quay Lads", "type": "gang", "location_id": toll, "leader_actor_id": leader(0)}, "gr1")
+        held = [z for z in zones if g["outfit_id"] in claims(z, "controller")]
+        assert len(held) == 1 and held[0] in vacant, (held, vacant)
+        # no vacant ground left: it challenges the weakest-held zone
+        for z in [z for z in zones if not claims(z, "controller")]:
+            from engine.underworld_rebuild import set_zone_controller
+            other = int(conn.execute("SELECT id FROM underworld_organizations WHERE organization_type='gang' AND primary_location_id=? AND id<>? AND status='active' LIMIT 1", (toll, g["outfit_id"])).fetchone()[0])
+            set_zone_controller(conn, z, other, strength=60)
+        weakest = conn.execute("""SELECT c.zone_id FROM underworld_zone_claims c JOIN underworld_zones z ON z.id=c.zone_id
+                                  WHERE z.city_location_id=? AND c.claim_kind='controller' AND c.status='active' ORDER BY c.strength,c.id LIMIT 1""", (toll,)).fetchone()[0]
+        g2 = author(conn, me, "organisation", {"name": "The Sea Wall Boys", "type": "crew", "location_id": toll, "leader_actor_id": leader(1)}, "gr2")
+        assert g2["outfit_id"] in claims(weakest, "challenger"), (weakest, claims(weakest, "challenger"))
+        assert g2["outfit_id"] not in [o for z in zones for o in claims(z, "controller")]
+        conn.close()
+
+
 if __name__ == "__main__":
     only = sys.argv[1] if len(sys.argv) > 1 else None
-    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor), ("spouse", run_spouse)):
+    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor), ("spouse", run_spouse), ("ground", run_ground)):
         if only in (None, name):
             fn()
     print("authoring_test: ok")

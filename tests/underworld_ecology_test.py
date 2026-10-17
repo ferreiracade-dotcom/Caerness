@@ -138,6 +138,9 @@ def run():
         far = c.execute("""SELECT COUNT(DISTINCT o.primary_location_id) FROM underworld_finance_transactions f JOIN underworld_organizations o ON o.id=f.organization_id
                            WHERE o.primary_location_id<>?""", (loc("Aldergate"),)).fetchone()[0]
         assert far >= 1, far
+        # The monthly process is not city-bound: finance rows exist for outfits in at least three different settlements.
+        spread = c.execute("SELECT COUNT(DISTINCT o.primary_location_id) FROM underworld_finance_transactions f JOIN underworld_organizations o ON o.id=f.organization_id").fetchone()[0]
+        assert spread >= 3, spread
         c.close()
     print("underworld_ecology_test passed")
 

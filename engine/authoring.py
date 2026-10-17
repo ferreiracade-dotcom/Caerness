@@ -320,6 +320,24 @@ def _business(conn, me: int, d: dict, call_id: str) -> dict:
 
 # ---------------------------------------------------------------- organisation
 
+def _claim_ground(conn, oid: int, loc: int) -> dict:
+    """A new outfit takes a vacant zone of its town, else challenges the weakest-held one (towns without zones: none)."""
+    from .underworld_rebuild import add_zone_challenger, set_zone_controller
+    zones = [int(r[0]) for r in conn.execute("SELECT id FROM underworld_zones WHERE city_location_id=? AND status='active' ORDER BY id", (loc,))]
+    held = {int(r[0]): float(r[1]) for r in conn.execute(
+        "SELECT zone_id,strength FROM underworld_zone_claims WHERE claim_kind='controller' AND status='active' AND zone_id IN (%s)" % ",".join("?" * len(zones)), zones)} if zones else {}
+    vacant = [z for z in zones if z not in held]
+    meta = {"authored": True}
+    if vacant:
+        set_zone_controller(conn, vacant[0], oid, strength=30, local_support=25, fear=35, metadata=meta)
+        return {"zone_id": vacant[0], "ground": "holds"}
+    if held:
+        z = min(held, key=lambda k: (held[k], k))
+        add_zone_challenger(conn, z, oid, strength=25, severity=25, metadata=meta)
+        return {"zone_id": z, "ground": "challenges"}
+    return {}
+
+
 def _organisation(conn, me: int, d: dict, call_id: str) -> dict:
     name = _text(d.get("name"), "name", 80)
     typ = d.get("type")
@@ -348,7 +366,8 @@ def _organisation(conn, me: int, d: dict, call_id: str) -> dict:
         from .underworld_rebuild import ensure_heat_profile
         ensure_underworld_membership_profile(conn, oid, core_members=1, active_members=0, peripheral_associates=0)
         ensure_heat_profile(conn, oid)
-        return {"status": "created", "kind": "organisation", "type": typ, "outfit_id": oid, "name": name}
+        ground = _claim_ground(conn, oid, loc)
+        return {"status": "created", "kind": "organisation", "type": typ, "outfit_id": oid, "name": name, **ground}
     if conn.execute("SELECT COUNT(*) FROM actors WHERE actor_type='institution' AND subtype=? AND current_location_id=? AND status='active'", (typ, loc)).fetchone()[0] >= max(1, pop // 1000):
         _no(f"the town has no room for another {typ}")
     day = _day(conn)
