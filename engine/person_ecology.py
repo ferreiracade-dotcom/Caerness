@@ -275,7 +275,7 @@ def find_background_candidate(
     min_age: int = 18, max_age: int = 85, require_open_core: bool | None = None,
     required_stage: str | None = None, command_weight: float = 0, economic_weight: float = 0,
     medical_weight: float = 0, teaching_weight: float = 0, criminal_weight: float = 0,
-    demographic_sex: str | None = None,
+    demographic_sex: str | None = None, allow_elsewhere: bool = True, strict_stage: bool = False,
 ) -> sqlite3.Row | None:
     rows = _candidate_rows(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
@@ -290,7 +290,7 @@ def find_background_candidate(
             conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
             require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex,
         )
-    if not rows and location_id is not None:
+    if not rows and location_id is not None and allow_elsewhere:
         # The world may reveal someone from the same broader population bucket rather than conjure
         # a local person.  Prefer exact location, but broaden only to already-profiled identities.
         bucket = conn.execute(
@@ -309,6 +309,10 @@ def find_background_candidate(
                 where.append("p.open_core=?"); args.append(1 if require_open_core else 0)
             if demographic_sex:
                 where.append("p.demographic_sex=?"); args.append(str(demographic_sex))
+            if strict_stage and required_stage:  # the broadened search normally ignores Stage; authoring asks for it to count
+                order = {"First":1,"Temper":2,"Third":3,"Breach":4,"Fifth":5,"Sixth":6}
+                allowed = [k for k,v in order.items() if v >= order.get(required_stage,1)]
+                where.append("p.current_stage IN (%s)" % ",".join("?" for _ in allowed)); args.extend(allowed)
             rows = conn.execute(
                 f"""SELECT p.* FROM background_person_profiles p
                     JOIN background_population_sources s ON s.id=p.source_id
@@ -334,6 +338,7 @@ def resolve_background_person(
     required_stage: str | None = None, subtype: str | None = None,
     command_weight: float = 0, economic_weight: float = 0, medical_weight: float = 0,
     teaching_weight: float = 0, criminal_weight: float = 0, demographic_sex: str | None = None,
+    allow_elsewhere: bool = True, strict_stage: bool = False, name: str | None = None,
 ) -> int | None:
     """Reveal one pre-existing POPBACK identity as a tracked actor.
 
@@ -344,15 +349,19 @@ def resolve_background_person(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
         require_open_core=require_open_core, required_stage=required_stage, command_weight=command_weight,
         economic_weight=economic_weight, medical_weight=medical_weight, teaching_weight=teaching_weight,
-        criminal_weight=criminal_weight, demographic_sex=demographic_sex,
+        criminal_weight=criminal_weight, demographic_sex=demographic_sex, allow_elsewhere=allow_elsewhere, strict_stage=strict_stage,
     )
     if profile is None:
         return None
     day = _day(conn)
+    if name is not None:  # a chosen name replaces the identity's own; the profile keeps it as its stable name
+        given, _, family = name.partition(" ")
+        conn.execute("UPDATE background_person_profiles SET given_name=?,family_name=?,metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.stable_name',?) "
+                     "WHERE partition_id=? AND local_uid=?", (given, family or str(profile["family_name"]), name, int(profile["partition_id"]), int(profile["local_uid"])))
     aid = int(conn.execute(
         """INSERT INTO actors(name,actor_type,subtype,home_location_id,current_location_id,status,notes,is_demo)
            VALUES (?,'character',?,?,?,'active',?,0)""",
-        (_unique_actor_name(conn, profile), subtype or f"resolved_{profile['occupation_domain']}", profile["current_location_id"], profile["current_location_id"],
+        (name if name is not None else _unique_actor_name(conn, profile), subtype or f"resolved_{profile['occupation_domain']}", profile["current_location_id"], profile["current_location_id"],
          "Resolved from a pre-existing POPBACK identity; not created by demand."),
     ).lastrowid)
     age = max(0, (day-int(profile["birth_day"]))//365)
