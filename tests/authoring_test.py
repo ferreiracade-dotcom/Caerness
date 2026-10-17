@@ -80,13 +80,18 @@ def run():
         _refused(lambda: author(conn, me, "person", {"sex": "male" if taken.split()[0] not in FIRST_FEMALE else "female", "name": taken}, "n2"), "already")
         ok = author(conn, me, "person", {"sex": "female", "name": "Fennick Vael"}, "n3")
         assert ok["name"] == "Fennick Vael" and ok["sex"] == "female", ok
-        _refused(lambda: author(conn, me, "person", {"sex": "male", "work": "wizard"}, "w1"), "artisan")
+        # free text is accepted and mapped to the nearest category (labor when nothing fits); sex is optional; any age the pool supplies
+        wz = author(conn, me, "person", {"sex": "male", "work": "wizard"}, "w1")
+        assert wz["status"] == "created" and wz["work"] == "labor", wz
+        nosex = author(conn, me, "person", {"age": 30, "work": "lamp-lighter"}, "w1b")
+        assert nosex["sex"] in ("male", "female") and nosex["name"].split()[0] in (FIRST_MALE if nosex["sex"] == "male" else FIRST_FEMALE), nosex
         _refused(lambda: author(conn, me, "person", {"sex": "other"}, "w2"), "sex")
-        _refused(lambda: author(conn, me, "person", {"sex": "male", "age": 5}, "w3"), "age")
+        kid = author(conn, me, "person", {"sex": "male", "age": 5}, "w3")
+        assert kid["status"] == "created" and kid["age"] <= 8, kid
 
         # rarity: not conjured, no rows left behind
         n = _count(conn, "SELECT COUNT(*) FROM actors")
-        _refused(lambda: author(conn, me, "person", {"sex": "male", "stage": "Sixth"}, "r1"), "population")
+        _refused(lambda: author(conn, me, "person", {"sex": "male", "stage": "Sixth"}, "r1"), "Sixth")
         assert _count(conn, "SELECT COUNT(*) FROM actors") == n
 
         # kin ties
@@ -168,15 +173,16 @@ def run_orgs():
         # The town was shrunk to 400 people: whatever the seeded world put there no longer exists, so the cap starts from none.
         conn.execute("UPDATE underworld_organizations SET status='destroyed' WHERE primary_location_id=? AND status='active'", (place,))
         owner = author(conn, me, "person", {"sex": "female", "age": 45}, "o0")
+        _refused(lambda: author(conn, me, "business", {"name": "Forged", "trade": "x", "owner_actor_id": me}, "b2"), "money")  # he may found, but only from his own purse
         b = author(conn, me, "business", {"name": "Tarn & Daughters", "trade": "rope and tackle", "enterprise_kind": "workshop", "owner_actor_id": owner["actor_id"]}, "b1")
         assert b["status"] == "created" and b["kind"] == "business" and isinstance(b["means"], str), b
         e = conn.execute("SELECT * FROM civilian_enterprises WHERE id=?", (b["enterprise_id"],)).fetchone()
         assert e["location_id"] == place and e["owner_actor_id"] == owner["actor_id"] and e["capital"] == e["cash"] > 0, dict(e)
         assert conn.execute("SELECT role,authority FROM enterprise_staff WHERE enterprise_id=? AND actor_id=?", (e["id"], owner["actor_id"])).fetchone()[:] == ("owner", 100)
-        _refused(lambda: author(conn, me, "business", {"name": "Forged", "trade": "x", "enterprise_kind": "shop", "owner_actor_id": me}, "b2"), "protagonist")
         _refused(lambda: author(conn, me, "business", {"name": "Tarn & Daughters", "trade": "x", "enterprise_kind": "shop", "owner_actor_id": owner["actor_id"]}, "b3"), "already")
         n = _count(conn, "SELECT COUNT(*) FROM civilian_enterprises")
-        _refused(lambda: author(conn, me, "business", {"name": "Odd", "trade": "x", "enterprise_kind": "casino", "owner_actor_id": owner["actor_id"]}, "b4"), "kind")
+        from engine.authoring import _archetype
+        assert _archetype("casino dice house")[0] == "gambling_house" and _archetype("zzzz")[0] == "wholesaler"  # free kinds map; unknown ones fall back
         # his people cannot own authored businesses: staff of a business he owns
         from engine.civilian import create_enterprise
         from engine.merchant import add_enterprise_staff
@@ -188,17 +194,17 @@ def run_orgs():
         _refused(lambda: author(conn, me, "business", {"name": "Hers", "trade": "x", "enterprise_kind": "shop", "owner_actor_id": hand["actor_id"]}, "b5"), "his people")
         _refused(lambda: author(conn, me, "organisation", {"name": "Hands", "type": "gang", "leader_actor_id": hand["actor_id"]}, "b6"), "his people")
         assert _count(conn, "SELECT COUNT(*) FROM civilian_enterprises") == n
-        # the town only has room for so many
+        # the town only has room for so many: a tenth of what a place of this size holds (data, not a table), and the refusal says so
         i = 0
         while True:
             try:
-                author(conn, me, "business", {"name": f"Stall {i}", "trade": "odds", "enterprise_kind": "shop", "owner_actor_id": owner["actor_id"]}, f"cap{i}")
+                author(conn, me, "business", {"name": f"Stall {i}", "trade": "odds", "owner_actor_id": owner["actor_id"]}, f"cap{i}")
             except Exception as ex:
                 assert "no room" in str(ex), ex
                 break
             i += 1
             assert i < 10
-        assert _count(conn, "SELECT COUNT(*) FROM civilian_enterprises WHERE location_id=? AND status='active'", place) == 3
+        assert _count(conn, "SELECT COUNT(*) FROM civilian_enterprises WHERE location_id=? AND json_extract(metadata_json,'$.authored')=1", place) >= 1
 
         # outfits
         boss = author(conn, me, "person", {"sex": "male", "age": 40}, "o1")
@@ -211,7 +217,6 @@ def run_orgs():
         _refused(lambda: author(conn, me, "organisation", {"name": "Mafia Lite", "type": "mafia_family", "leader_actor_id": boss["actor_id"]}, "g3"), "canon-scale")
         b2 = author(conn, me, "person", {"sex": "male", "age": 38}, "o2")
         _refused(lambda: author(conn, me, "organisation", {"name": "Second Crew", "type": "crew", "leader_actor_id": b2["actor_id"]}, "g4"), "no room")
-        _refused(lambda: author(conn, me, "organisation", {"name": "Mine", "type": "gang", "leader_actor_id": me}, "g5"), "protagonist")
         _refused(lambda: author(conn, me, "organisation", {"name": "Again", "type": "club", "leader_actor_id": boss["actor_id"]}, "g6"), "already")
         # his outfit's people cannot front an authored body either
         # local bodies
@@ -306,7 +311,7 @@ def run_bodies():
         assert _count(conn, "SELECT COUNT(*) FROM enterprise_ecology_state WHERE enterprise_id=?", e) == 1
         assert _count(conn, "SELECT COUNT(*) FROM underworld_membership_profiles WHERE organization_id=?", o) == 1
         assert _count(conn, "SELECT COUNT(*) FROM underworld_heat WHERE organization_id=?", o) == 1
-        assert conn.execute("SELECT member_count_estimate FROM underworld_organizations WHERE id=?", (o,)).fetchone()[0] == 1
+        assert conn.execute("SELECT member_count_estimate FROM underworld_organizations WHERE id=?", (o,)).fetchone()[0] >= 1
         assert _count(conn, "SELECT COUNT(*) FROM organization_agency_profiles WHERE institution_actor_id=?", i) == 1
         assert _count(conn, "SELECT COUNT(*) FROM organization_lifecycle_profiles WHERE institution_actor_id=?", i) == 1
         conn.commit()
@@ -389,7 +394,8 @@ def run_minor():
     # minor: one-word names, sibling ages, rumour hearers by presence
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         conn, me, place = _open(tmp, "f7.db")
-        _refused(lambda: author(conn, me, "person", {"sex": "female", "name": "Fennick"}, "w1"), "family name")
+        one = author(conn, me, "person", {"sex": "female", "name": "Fennick"}, "w1")  # a single name is a name
+        assert one["name"] == "Fennick", one
         bro = conn.execute("""SELECT a.id,p.birth_day FROM actors a JOIN actor_life_profiles p ON p.actor_id=a.id WHERE a.actor_type='character' AND a.status='active'
                               AND p.demographic_sex='male' AND p.life_status='living' AND p.birth_day IS NOT NULL AND a.id<>? ORDER BY a.id LIMIT 1""", (me,)).fetchone()
         bage = (_day_of(conn) - bro["birth_day"]) // 365
@@ -534,9 +540,59 @@ def run_occupation():
         conn.close()
 
 
+def run_free():
+    """The veto model: districts count by their city, the protagonist founds new things from his own purse, sizes follow the place,
+    kinds and trades are free text, refusals say whether the request or the world is at fault."""
+    from engine import ledger, veto
+    from engine.authoring import AuthoringRefused, author
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "free.db")
+        toll = veto.find_location(conn, "Toll's Reach")
+        conn.execute("UPDATE actors SET current_location_id=?,home_location_id=? WHERE id=?", (toll, toll, me))
+        conn.execute("UPDATE player_state SET current_location_id=? WHERE id=1", (toll,))
+        # a district counts by its parent city: nobody-lives-there no longer refuses a commercial or port district
+        dist = conn.execute("SELECT l.id FROM locations l WHERE l.kind LIKE '%district%' AND l.parent_location_id=?", (toll,)).fetchone()
+        if dist is None:
+            dist = conn.execute("SELECT id FROM locations WHERE kind LIKE '%district%' AND parent_location_id IS NOT NULL LIMIT 1").fetchone()
+            toll = veto.settlement_of(conn, int(dist[0]))
+        owner = author(conn, me, "person", {"age": 40, "work": "shopkeeper", "location_id": int(dist[0])}, "f0")
+        assert conn.execute("SELECT home_location_id FROM actors WHERE id=?", (owner["actor_id"],)).fetchone()[0] == int(dist[0])
+        biz = author(conn, me, "business", {"name": "Canal Chandlery", "trade": "ship chandlery", "owner_actor_id": owner["actor_id"], "location_id": int(dist[0])}, "f1")
+        assert biz["status"] == "created", biz
+        # the protagonist founds his own, paid from his purse and never more than he has
+        before = ledger.balance(conn, ("person", me))
+        _refused(lambda: author(conn, me, "business", {"name": "Poor Start", "trade": "ink", "location_id": toll}, "f2"), "money")
+        ledger._credit(conn, ("person", me), 6.0)
+        mine = author(conn, me, "business", {"name": "Fane Counting House", "trade": "moneylending", "location_id": toll, "amount": "modest"}, "f3")
+        assert mine["status"] == "created", mine
+        e = conn.execute("SELECT * FROM civilian_enterprises WHERE id=?", (mine["enterprise_id"],)).fetchone()
+        assert e["owner_actor_id"] == me and abs(ledger.balance(conn, ("person", me)) - (before + 6.0 - e["capital"])) < 1e-6, (dict(e), ledger.balance(conn, ("person", me)))
+        assert conn.execute("SELECT a.archetype_key FROM enterprise_business_profiles p JOIN business_archetypes a ON a.id=p.archetype_id WHERE p.enterprise_id=?", (e["id"],)).fetchone()[0] == "moneylender"
+        # an outfit of his own: sized by the place, not a constant; too big is scaled down in words, not refused
+        o1 = author(conn, me, "organisation", {"name": "The Lamp Lads", "type": "gang", "members": 500, "location_id": toll}, "f4")
+        assert o1["status"] == "created" and o1["scaled_down"] and "men" in o1["scaled_down"][0]["why"], o1
+        org = conn.execute("SELECT * FROM underworld_organizations WHERE id=?", (o1["outfit_id"],)).fetchone()
+        assert 1 < org["member_count_estimate"] < 100 and org["current_leader_actor_id"] == me and org["violence_capacity"] > 10, dict(org)
+        # kinds are free text; a trade nobody follows is relaxed and said so
+        r = author(conn, me, "gossip", {"text": "Ink prices will rise.", "spread": "wide", "location_id": toll}, "f5")
+        w = conn.execute("SELECT reach FROM rumours WHERE id=?", (r["rumour_id"],)).fetchone()[0]
+        r2 = author(conn, me, "story", {"text": "A quiet one.", "spread": "whisper", "location_id": toll}, "f6")
+        assert w > conn.execute("SELECT reach FROM rumours WHERE id=?", (r2["rumour_id"],)).fetchone()[0] and r["kind"] == "rumour"
+        r3 = author(conn, me, "rumour", {"text": "Default spread follows the place.", "location_id": toll}, "f7")
+        assert 0.05 < conn.execute("SELECT reach FROM rumours WHERE id=?", (r3["rumour_id"],)).fetchone()[0] < 0.5
+        # refusals say whose fault: the request (input_gap) or the world (contradiction)
+        for det, kind in (({"sex": "other"}, "input_gap"), ({"stage": "Sixth"}, "contradiction")):
+            try:
+                author(conn, me, "person", det, "f8" + kind)
+                raise AssertionError("accepted")
+            except AuthoringRefused as ex:
+                assert ex.reason_kind == kind, (det, ex.reason_kind)
+        conn.close()
+
+
 if __name__ == "__main__":
     only = sys.argv[1] if len(sys.argv) > 1 else None
-    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor), ("spouse", run_spouse), ("ground", run_ground), ("occupation", run_occupation)):
+    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor), ("spouse", run_spouse), ("ground", run_ground), ("occupation", run_occupation), ("free", run_free)):
         if only in (None, name):
             fn()
     print("authoring_test: ok")

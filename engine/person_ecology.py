@@ -324,7 +324,7 @@ def _unique_actor_name(conn: sqlite3.Connection, profile: sqlite3.Row) -> str:
 def _candidate_rows(
     conn: sqlite3.Connection, *, location_id: int | None = None, occupation_domains: Iterable[str] | None = None,
     min_age: int = 18, max_age: int = 85, require_open_core: bool | None = None,
-    required_stage: str | None = None, demographic_sex: str | None = None,
+    required_stage: str | None = None, demographic_sex: str | None = None, exact_stage: bool = False,
 ) -> list[sqlite3.Row]:
     day = _day(conn)
     where = ["p.status='background'", "l.actor_id IS NULL", "(l.status IS NULL OR l.status<>'dead')", "p.birth_day<=?", "p.birth_day>=?"]
@@ -344,7 +344,7 @@ def _candidate_rows(
         args.append(str(demographic_sex))
     if required_stage:
         order = {"First":1,"Temper":2,"Third":3,"Breach":4,"Fifth":5,"Sixth":6}
-        allowed = [s for s,v in order.items() if v >= order.get(required_stage,1)]
+        allowed = [required_stage] if exact_stage else [s for s,v in order.items() if v >= order.get(required_stage,1)]
         where.append("p.current_stage IN (%s)" % ",".join("?" for _ in allowed))
         args.extend(allowed)
     sql = f"""SELECT p.* FROM background_person_profiles p
@@ -382,11 +382,11 @@ def find_background_candidate(
     required_stage: str | None = None, command_weight: float = 0, economic_weight: float = 0,
     medical_weight: float = 0, teaching_weight: float = 0, criminal_weight: float = 0,
     demographic_sex: str | None = None, allow_elsewhere: bool = True, strict_stage: bool = False,
-    prefer_open_core: bool = True, pick_seed: int | str | None = None,
+    prefer_open_core: bool = True, pick_seed: int | str | None = None, exact_stage: bool = False,
 ) -> sqlite3.Row | None:
     rows = _candidate_rows(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
-        require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex,
+        require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex, exact_stage=exact_stage,
     )
     for _ in range(_GROWTH_BATCHES):
         # A settlement's first sample is small; when nobody in it fits, draw more of its real population
@@ -395,7 +395,7 @@ def find_background_candidate(
             break
         rows = _candidate_rows(
             conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
-            require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex,
+            require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex, exact_stage=exact_stage,
         )
     if not rows and location_id is not None and allow_elsewhere:
         # The world may reveal someone from the same broader population bucket rather than conjure
@@ -418,7 +418,7 @@ def find_background_candidate(
                 where.append("p.demographic_sex=?"); args.append(str(demographic_sex))
             if strict_stage and required_stage:  # the broadened search normally ignores Stage; authoring asks for it to count
                 order = {"First":1,"Temper":2,"Third":3,"Breach":4,"Fifth":5,"Sixth":6}
-                allowed = [k for k,v in order.items() if v >= order.get(required_stage,1)]
+                allowed = [required_stage] if exact_stage else [k for k,v in order.items() if v >= order.get(required_stage,1)]
                 where.append("p.current_stage IN (%s)" % ",".join("?" for _ in allowed)); args.extend(allowed)
             rows = conn.execute(
                 f"""SELECT p.* FROM background_person_profiles p
@@ -450,7 +450,7 @@ def resolve_background_person(
     command_weight: float = 0, economic_weight: float = 0, medical_weight: float = 0,
     teaching_weight: float = 0, criminal_weight: float = 0, demographic_sex: str | None = None,
     allow_elsewhere: bool = True, strict_stage: bool = False, name: str | None = None,
-    prefer_open_core: bool = True, pick_seed: int | str | None = None,
+    prefer_open_core: bool = True, pick_seed: int | str | None = None, exact_stage: bool = False,
 ) -> int | None:
     """Reveal one pre-existing POPBACK identity as a tracked actor.
 
@@ -462,7 +462,7 @@ def resolve_background_person(
         require_open_core=require_open_core, required_stage=required_stage, command_weight=command_weight,
         economic_weight=economic_weight, medical_weight=medical_weight, teaching_weight=teaching_weight,
         criminal_weight=criminal_weight, demographic_sex=demographic_sex, allow_elsewhere=allow_elsewhere, strict_stage=strict_stage,
-        prefer_open_core=prefer_open_core, pick_seed=pick_seed,
+        prefer_open_core=prefer_open_core, pick_seed=pick_seed, exact_stage=exact_stage,
     )
     if profile is None:
         return None

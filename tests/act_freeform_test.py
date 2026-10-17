@@ -308,9 +308,9 @@ def t_advance_and_views(conn, w):
     assert len(page1["notes"]) == 8 and page1["notes_more"] == 3, page1
     page2 = views.lookup(conn, "Fixture Stall", offset=8)
     assert len(page2["notes"]) == 3 and "notes_more" not in page2 and page2["notes"][0] == "fact 0", page2
-    for i in range(12):
-        conn.execute("INSERT INTO knowledge(knower_actor_id,fact_key,belief_text,confidence,learned_day) VALUES (?,?,?,?,?)", (me, f"t:{i}", f"Marek Harrow was seen {i}.", 0.5, i))
     by_name = conn.execute("SELECT name FROM actors WHERE id=?", (by,)).fetchone()[0]
+    for i in range(12):
+        conn.execute("INSERT INTO knowledge(knower_actor_id,fact_key,belief_text,confidence,learned_day) VALUES (?,?,?,?,?)", (me, f"t:{i}", f"{by_name} was seen {i}.", 0.5, i))
     got = views.lookup(conn, by_name)
     assert len(got["known"]) == 8 and got["known_more"] >= 4, got
     assert views.lookup(conn, by_name, offset=8)["known"], "older facts can be paged"

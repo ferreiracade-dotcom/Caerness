@@ -43,7 +43,7 @@ _KEYWORDS = (
     ("labor", ("labor", "dock", "farm", "miner", "sweep", "hand", "digger", "woodcutter", "shepherd", "herder", "fisher", "navvy")),
 )
 
-_LEAD = re.compile(r"head|lead|lord|lady|boss|chief|captain|commander|founder|owner|proprietor|patriarch|matriarch|abbot|abbess|prior|chair|"
+_LEAD = re.compile(r"head|lead|lord|lady|boss|chief|captain|commander|founder|owner|proprietor|patriarch|matriarch|abbot|abbess|priorb|chair|"
                    r"ruler|king|queen|duke|baron|earl|regent|emperor|sovereign|warlord|master of|principal|director|heir")
 
 # Female/male-coded words in a family description (a "husband" is a man): used only to catch a same-sex union.
@@ -57,6 +57,8 @@ def categorise(text: Any, hint: str | None = None) -> str:
     if hint and str(hint).strip().lower() in set(_OCCUPATIONS):
         return str(hint).strip().lower()
     t = " ".join(str(text or "").lower().replace("-", " ").split())
+    if t in set(_OCCUPATIONS):
+        return t
     best, score = "labor", 0
     for dom, words in _KEYWORDS:
         s = sum(len(w) for w in words if w in t)
@@ -118,7 +120,7 @@ def canon_figure(conn: sqlite3.Connection, name: str | None) -> None:
     for r in conn.execute("SELECT a.name FROM actors a JOIN source_identity_map m ON m.entity_kind IN ('actor','institution') AND m.entity_id=a.id "
                           "WHERE a.actor_type='character'"):
         if norm(r["name"]) == want or (len(want.split()) >= 2 and norm(r["name"]).split()[:2] == want.split()[:2]):
-            raise Contradiction(f"the name {name} is a canon figure ({r['name']}); the protagonist is a new person")
+            raise Contradiction(f"the name {name} is already taken by a canon figure ({r['name']}); a new person needs a new name")
 
 
 def name_taken(conn: sqlite3.Connection, name: str | None) -> None:
@@ -244,7 +246,7 @@ def holdings_in_proportion(conn: sqlite3.Connection, loc: int, holdings: list[di
     for h in holdings:
         h = dict(h)
         kind = str(h.get("kind") or "").lower()
-        is_outfit = bool(re.search(r"outfit|gang|crew|band|company of|brotherhood|syndicate|mob|ring", kind))
+        is_outfit = bool(re.search(r"\b(outfit|gang|crew|band|brotherhood|syndicate|mob|ring)\b|company of", kind))
         if is_outfit:
             asked = float(h.get("members") or h.get("size") or 0) or None
             if asked is not None:
