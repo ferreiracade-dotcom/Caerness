@@ -182,6 +182,14 @@ def update_embodiment_profile(
     return get_embodiment_profile(conn, actor_id)
 
 
+def stance_band(stance: float) -> str:
+    return "warm" if stance >= 35 else "hostile" if stance <= -35 else "mixed_or_neutral"
+
+
+def trust_band(trust: float) -> str:
+    return "high" if trust >= 35 else "low" if trust <= -35 else "uncertain_or_moderate"
+
+
 def _relationship_context(conn: sqlite3.Connection, actor_id: int, other_ids: list[int] | tuple[int, ...] | set[int]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for other_id in other_ids:
@@ -200,8 +208,8 @@ def _relationship_context(conn: sqlite3.Connection, actor_id: int, other_ids: li
             item = {
                 "other_actor_id": int(other_id),
                 "other_name": item["actor_b"],
-                "stance_band": "warm" if stance >= 35 else "hostile" if stance <= -35 else "mixed_or_neutral",
-                "trust_band": "high" if trust >= 35 else "low" if trust <= -35 else "uncertain_or_moderate",
+                "stance_band": stance_band(stance),
+                "trust_band": trust_band(trust),
                 "has_obligation": abs(float(row["obligation"])) > 0.01,
                 "updated_day": int(row["updated_day"]),
             }
