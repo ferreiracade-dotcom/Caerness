@@ -488,6 +488,50 @@ def resolve_opening_family(conn: sqlite3.Connection) -> dict[str, int]:
     return counts
 
 
+def draw_origin_family(key: str, *, age: float, sex: str, hearth: bool = True, childhood_multiplier: float = 1.0) -> dict[str, Any]:
+    """Deterministic family a person grew up in: two parents (ages, survival to now) and brothers and sisters (ages, sexes,
+    survival), from the engine's own mortality, desired-children and birth-interval models. Pure."""
+    rng = _rng(f"origin:{key}")
+    m_at = int(min(40, max(17, round(rng.gauss(26, 4.5)))))
+    mother_age = age + m_at
+    father_age = mother_age + int(min(12, max(-2, round(rng.gauss(3, 3.5)))))
+
+    def lives(a_now: float, a_then: float, cls: str = "ordinary", mult: float = 1.0) -> bool:
+        t = a_then
+        while t < a_now:
+            if rng.random() < natural_annual_hazard(t, cls, childhood_multiplier=mult):
+                return False
+            t += 1.0
+        return True
+
+    mother = {"age_now": mother_age, "alive": lives(mother_age, m_at)}
+    father = {"age_now": father_age, "alive": lives(father_age, father_age - age)}
+    n_sib = max(0, _weighted(rng, _DESIRED_CHILDREN) - 1 + rng.choice((-1, 0, 0, 1)))
+    older = rng.randint(0, n_sib)
+    sibs: list[dict[str, Any]] = []
+    gap_age = float(m_at)
+    for i in range(n_sib):
+        if i < older:
+            gap = (_birth_interval_days(rng)) / 365.0
+            gap_age -= gap
+            if gap_age < 16.0:
+                break
+            sib_age = age + (m_at - gap_age)
+        else:
+            if i == older:
+                gap_age = float(m_at)
+            gap_age += _birth_interval_days(rng) / 365.0
+            if gap_age > 43.0:
+                break
+            sib_age = age - (gap_age - m_at)
+            if sib_age < 0:
+                break
+        sibs.append({"age_now": max(0.0, sib_age), "sex": "female" if rng.random() < 0.5 else "male"})
+    for s in sibs:
+        s["alive"] = lives(s["age_now"], 0.0, "ordinary", childhood_multiplier)
+    return {"mother": mother, "father": father, "siblings": sibs}
+
+
 # ---------------------------------------------------------------------------------------------
 # Opening relationships
 # ---------------------------------------------------------------------------------------------
@@ -509,6 +553,9 @@ def _tie_values(kind: str, rng: random.Random, *, role: str = "") -> dict[str, f
     if kind == "kin_extended":
         return {"familiarity": _u(rng, 50, 75), "affection": _u(rng, 15, 45), "trust": _u(rng, 20, 45),
                 "loyalty": _u(rng, 10, 35), "stance": _u(rng, 15, 35), "obligation": 15.0}
+    if kind == "acquaintance":
+        return {"familiarity": _u(rng, 30, 65), "stance": max(-20.0, min(40.0, rng.gauss(10, 12))),
+                "trust": max(-20.0, min(40.0, rng.gauss(8, 12))), "respect": _u(rng, 5, 30)}
     if kind == "teaching":
         if role == "student":
             return {"familiarity": _u(rng, 75, 90), "respect": _u(rng, 55, 80), "trust": _u(rng, 45, 70),
@@ -724,6 +771,10 @@ def reveal_latent_adult_child(conn: sqlite3.Connection, parent_id: int, *, reaso
             order = ["first", "temper", "third", "breach", "fifth"]
             if order.index(stage) > order.index(cap):
                 stage = cap
+            if age < 14:
+                stage = None  # a small child has no Stage yet
+            elif age < 18 and stage != "first":
+                stage = "first"
         loc = conn.execute("SELECT COALESCE(home_location_id,current_location_id) FROM actors WHERE id=?", (int(cons["parent_actor_id"]),)).fetchone()
         loc_id = int(loc[0]) if loc and loc[0] is not None else None
         cur = conn.execute(
