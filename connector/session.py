@@ -11,8 +11,8 @@ RULEBOOK_PATH = Path(__file__).with_name("rulebook.md")
 HOW_TO_PLAY = """1. Check established facts with scene or lookup, and the setting with lore; where the engine is silent, invent plausibly and never contradict it.
 2. Consequential intentions go through act first (pay, hire, lend, demand, attack, trade, order, or the scene actions); then write the scene, dialogue and detail around what it returns.
 3. Passing time goes through advance; the player directs significant skips.
-4. Record what should last with note: details (kind=detail), a recap with open threads after meaningful moments (kind=recap), the protagonist's sheet (kind=sheet), approved standing rules (kind=rule), mistakes (kind=error).
-5. Every act, advance and note needs a fresh call_id; reuse it only to retry the same call."""
+4. Record what should last with note (kind=detail|recap|sheet|rule|error); make someone or something new real with author.
+5. Every act, advance, note and author needs a fresh call_id; reuse it only to retry the same call."""
 
 SHEET_MISSING = "Draft the protagonist's sheet from scene, lookup and play so far; save each field with note kind=sheet."
 

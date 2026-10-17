@@ -28,7 +28,7 @@ def run():
             conn.commit()
 
         tools = asyncio.run(server.mcp.list_tools())
-        assert sorted(t.name for t in tools) == ["act", "advance", "lookup", "lore", "note", "resume", "scene"]
+        assert sorted(t.name for t in tools) == ["act", "advance", "author", "lookup", "lore", "note", "resume", "scene"]
         size = len(json.dumps([t.model_dump(by_alias=True, exclude_none=True) for t in tools], ensure_ascii=False))
         print(f"tool definitions: {size} chars")
         assert size <= 6000, size
@@ -62,6 +62,11 @@ def run():
         assert "error" not in week and week["elapsed_days"] >= 7 and "fresh_chat_hint" in week, week
         n = server.note("s-note-1", "keeps a limp", subject_kind="actor", subject_id=who["id"])
         assert "error" not in n, n
+
+        au = server.author("s-au-1", "person", {"sex": "male", "age": 40})
+        assert au.get("status") == "created" and "error" not in au, au
+        assert server.author("s-au-1", "person", {"sex": "male", "age": 40}).get("replayed")
+        assert server.author("s-au-2", "person", {"sex": "male", "stage": "Sixth"})["status"] == "refused"
 
         # Errors become dicts, not exceptions.
         assert "error" in server.note("s-note-2", "ghost", subject_kind="actor", subject_id=99999999)

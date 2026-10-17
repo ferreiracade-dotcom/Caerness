@@ -54,3 +54,15 @@ CREATE TABLE IF NOT EXISTS error_reports (
     status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','fixed','declined')),
     call_id TEXT NOT NULL
 );
+
+-- What the GM made real through `author` (provenance only; the engine rows are the truth).
+CREATE TABLE IF NOT EXISTS authored_entities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    call_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    entity_table TEXT NOT NULL,
+    entity_id INTEGER NOT NULL,
+    world_day INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_authored_entity ON authored_entities(entity_table, entity_id);

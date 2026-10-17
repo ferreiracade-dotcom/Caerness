@@ -18,7 +18,7 @@ def make_mcp(**kwargs) -> MCPServer:
 
 
 def register_tools(server: MCPServer) -> MCPServer:
-    for fn in (resume, scene, lookup, lore, act, advance, note):
+    for fn in (resume, scene, lookup, lore, act, advance, note, author):
         server.tool(structured_output=False)(fn)
     return server
 
@@ -129,6 +129,12 @@ def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "gen
                               lambda: store.record(conn, kind, text, call_id, subject_kind=subject_kind,
                                                    subject_id=subject_id, threads=threads, field=field))
     return _call(go, "note")
+
+
+def author(call_id: str, kind: str, details: dict | None = None) -> dict:
+    """Caerness game: make something new real. kind: person (sex; age, work, stage, name, ties, wants, from_elsewhere), business, organisation, rumour. The engine decides whether it fits; refusals say why."""
+    from connector.authoring import author as _author
+    return _call(lambda c: _author(c, call_id, kind, details), "author")
 
 
 mcp = register_tools(make_mcp())  # the stdio server

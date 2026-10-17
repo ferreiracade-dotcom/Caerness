@@ -246,6 +246,10 @@ def lookup(conn, query: str) -> dict:
         out["basics"] = _drop_none({**b, "owner": owner[0] if owner else None, "place": where[0] if where else None})
     else:
         out["basics"] = _drop_none({"kind": r["kind"], "owner": r["political_owner"], "notes": _clip(r["notes"], 160)})
+    if kind in ("actor", "business") and conn.execute(
+            "SELECT 1 FROM authored_entities WHERE entity_table=? AND entity_id=? LIMIT 1",
+            ("actors" if kind == "actor" else "civilian_enterprises", out["id"])).fetchone():
+        out["authored"] = True
     pl = get_player(conn)
     if pl:
         me = int(pl["player_actor_id"])
