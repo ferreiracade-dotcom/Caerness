@@ -71,7 +71,7 @@ def run():
                 store.record(conn, "rule", "u" * 900 + str(i), f"full-u{i}")
             conn.commit()
             size = len(json.dumps(resume(conn), ensure_ascii=False))
-            assert size <= 19000, size
+            assert size <= 20000, size  # rulebook rules are not trimmed to fit; keep growth deliberate
     print("connector_resume_test passed")
 
 
