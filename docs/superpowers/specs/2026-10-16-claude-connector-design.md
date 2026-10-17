@@ -295,7 +295,7 @@ Drawn from the agreed areas. Short, imperative, written to Claude. The owner can
 - Keep the order and conditions of mixed instructions. An order given is not an order carried out.
 - Parentheses are the player speaking out of character. Answer briefly in parentheses, in terms of the world as the characters know it (never "the records say"), then carry on if nothing needs deciding.
 - If the player asks something their character would know, tell them in parentheses. The character never pretends to have forgotten. If the player tells the character to ask aloud, do that.
-- Fix obvious typos silently. Ask only when guessing wrong would matter.
+- Fix obvious typos and misspelt names silently. Ask only when guessing wrong would matter.
 - Gestures get proportionate weight.
 
 **The protagonist**
