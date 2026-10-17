@@ -49,3 +49,12 @@ These are already in the rulebook unless marked **open**:
 - Commit after each task; pushing to `feat/claude-connector` is needed for deploys and is approved for this work.
 
 Start with findings 1-3 (they corrupt every scene), then gap 1, then gap 2.
+
+## Status 2026-10-17 (deployed)
+
+- Findings 1-3 fixed: names follow sex (schema 109 renamed mismatched people; sex kept), scene/lookup show sex and "role, organisation", rulebook "decide, don't ask" and "ignore remembered older Caerness". Settlement identity reservoirs now grow from their own population (cap 2048); background stages follow canon headcounts; newborns and new businesses get real names.
+- `ansel` repaired (backup `/var/lib/caerness/backups/ansel.pre-schema109.db`): Dara/Elin/Vera/Elias are now Marek Harrow, Nolan Pell, Willem Keen (underboss, back in Toll's Reach), Celia Keen (Iron Rooks; husband Winston Ives, unaffiliated); crews Silkwater door crew (Varen Marr), Green Table floor crew (Hale Brann), Counting Room collectors (Varen Dane); contradictory notes replaced.
+- Gap 1 done (plan `2026-10-16-connector-continuity.md`): `note` kinds detail/recap/rule/sheet/error; `resume` returns the story; fresh-chat hint.
+- Gap 2 done (plan `2026-10-16-connector-actions.md`): `act` pay/hire/lend/demand/attack/trade/order via `engine/ledger.py` and `engine/player_operations.py`; tiered outcomes (own will: just happens; others' will/strength: engine decides). Deferred minors are in that plan's ledger notes (`.superpowers/sdd/2026-10-16-connector-actions/progress.md`, git-ignored) and summarised in the session's final message.
+- Not yet run: the full regression suite on the final code (owner stopped it; last full run 139/139 on an earlier state). Next: owner phone playtest, then gap 3 (`author`) and gap 4 (Toll's Reach zones, rivals reacting, unpaid wages vs loyalty).
+- Model split (owner): Sonnet subagents implement, Opus reviews.
