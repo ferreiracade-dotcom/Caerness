@@ -31,6 +31,31 @@ def _no(msg: str):
     raise AuthoringRefused(msg)
 
 
+def _domain(fn, *a, **k):
+    """Calls whose ValueError is the engine's own domain refusal (a kinship or union it will not record)."""
+    try:
+        return fn(*a, **k)
+    except AuthoringRefused:
+        raise
+    except ValueError as e:
+        raise AuthoringRefused(str(e)) from e
+
+
+def _lives_at(conn, aid: int, loc: int) -> bool:
+    r = conn.execute("SELECT home_location_id,current_location_id FROM actors WHERE id=?", (aid,)).fetchone()
+    return loc in (r[0], r[1])
+
+
+def _settled(conn, loc: int, who: int, what: str) -> int:
+    """Somebody lives at the place, and the owner/leader is one of them."""
+    pop = _population(conn, loc)
+    if pop <= 0:
+        _no("nobody lives there")
+    if not _lives_at(conn, who, loc):
+        _no(f"{what} must live there")
+    return pop
+
+
 def _day(conn) -> int:
     return int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
 
@@ -121,6 +146,8 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     full = None
     if d.get("name") is not None:
         full = _text(d["name"], "name", 60)
+        if " " not in full:
+            _no("give a given and family name")
         given = full.split(" ", 1)[0]
         if given in (FIRST_FEMALE if sex == "male" else FIRST_MALE):
             _no(f"the name {given} belongs to the other sex; names follow sex")
@@ -151,7 +178,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     day = _day(conn)
     pick = dict(location_id=loc, occupation_domains=(work,) if work else None, min_age=(age - 3) if age else 18,
                 max_age=(age + 3) if age else 85, require_open_core=True if stage else None, required_stage=stage,
-                demographic_sex=sex, allow_elsewhere=elsewhere, strict_stage=True)
+                demographic_sex=sex, allow_elsewhere=elsewhere, strict_stage=True, prefer_open_core=bool(stage))
     # A wife or a man's sibling/child carries his family name; the given name still comes from the identity.
     if full is None:
         for t in ties:
@@ -170,11 +197,18 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     origin = None
     if int(conn.execute("SELECT current_location_id FROM actors WHERE id=?", (aid,)).fetchone()[0]) != loc:
         origin = conn.execute("SELECT name FROM locations WHERE id=?", (prof["current_location_id"],)).fetchone()[0]
-        conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (loc, aid))
+        conn.execute("UPDATE actors SET current_location_id=?,home_location_id=? WHERE id=?", (loc, loc, aid))  # an outsider has moved here
     from .resolution_controller import _sync_sim_tier
     _sync_sim_tier(conn, aid, "TRACKED", day)  # resolution already made them TRACKED; give them a life of their own
     conn.execute("UPDATE actors SET notes=? WHERE id=?", ("Authored in play from a pre-existing identity.", aid))
     me_age = _age(conn, aid, day)
+    # Whoever the GM just placed is there now, and keeps coming back: a home habit here, plus today for certain.
+    from .presence import add_presence_habit, ensure_presence_profile
+    ensure_presence_profile(conn, aid, base_location_id=loc, source_kind="authored", confidence=0.9, effective_from_day=day)
+    add_presence_habit(conn, aid, loc, habit_kind="home", weight=0.97, cadence_days=1, basis_kind="actor_home", basis_id=aid,
+                       source_kind="authored", confidence=1.0, effective_from_day=day)
+    add_presence_habit(conn, aid, loc, habit_kind="frequented", weight=1.0, cadence_days=1, basis_kind="authored", basis_id=aid,
+                       source_kind="authored", confidence=1.0, effective_from_day=day, effective_to_day=day)
 
     for t in ties:
         tid, kind = int(t["actor_id"]), t["as"]
@@ -182,12 +216,14 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
             for a, b in ((aid, tid), (tid, aid)):
                 ensure_relationship(conn, a, b, day, familiarity=10)
         elif kind == "sibling":
-            add_kinship(conn, aid, tid, "sibling", reciprocal_kind="sibling")
+            if abs(me_age - _age(conn, tid, day)) > 25:
+                _no("siblings must be within 25 years of each other")
+            _domain(add_kinship, conn, aid, tid, "sibling", reciprocal_kind="sibling")
         elif kind in ("parent", "child"):
             gap = (me_age - _age(conn, tid, day)) if kind == "parent" else (_age(conn, tid, day) - me_age)
             if not 15 <= gap <= 55:
                 _no("a parent must be 15 to 55 years older than the child")
-            add_kinship(conn, *((aid, tid) if kind == "parent" else (tid, aid)), "parent", reciprocal_kind="child")
+            _domain(add_kinship, conn, *((aid, tid) if kind == "parent" else (tid, aid)), "parent", reciprocal_kind="child")
         else:
             if min(me_age, _age(conn, tid, day)) < 18 or _sex(conn, tid) == sex:
                 _no("no union: both must be adults of opposite sex")
@@ -196,7 +232,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
             why = prohibited_union_kinship_reason(conn, aid, tid)
             if why:
                 _no(f"no union between close kin ({why})")
-            create_union(conn, *((aid, tid) if sex == "male" else (tid, aid)))
+            _domain(create_union, conn, *((aid, tid) if sex == "male" else (tid, aid)))
     if wants:
         conn.execute("INSERT INTO goals(actor_id,description,priority,progress,status,created_day) VALUES (?,?,50,0,'active',?)", (aid, wants, day))
     for n in notes:
@@ -209,6 +245,21 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
 
 # ---------------------------------------------------------------- business
 
+_BY_KIND = {"shop": "food_shop", "workshop": "smithy", "service": "courier", "other": "wholesaler"}
+_BY_WORD = (("inn", "inn"), ("tavern", "inn"), ("cloth", "cloth_shop"), ("tailor", "cloth_shop"), ("weav", "cloth_shop"), ("book", "bookshop"),
+            ("scribe", "bookshop"), ("ink", "bookshop"), ("medicine", "medicine_shop"), ("herb", "medicine_shop"), ("physician", "physician_practice"),
+            ("healer", "physician_practice"), ("smith", "smithy"), ("forge", "smithy"), ("courier", "courier"), ("warehouse", "warehouse"))
+
+
+def _archetype(kind: str, trade: str) -> str:
+    """A trade word picks a fitting archetype of the same broad kind; otherwise the broad kind's plain one."""
+    from .business import _ARCHETYPES
+    t = trade.lower()
+    for word, key in _BY_WORD:
+        if word in t and _ARCHETYPES[key]["enterprise_kind"] == kind:
+            return key
+    return _BY_KIND[kind]
+
 def _business(conn, me: int, d: dict, call_id: str) -> dict:
     name = _text(d.get("name"), "name", 80)
     trade = _text(d.get("trade"), "trade", 80)
@@ -220,7 +271,7 @@ def _business(conn, me: int, d: dict, call_id: str) -> dict:
     _not_his(conn, me, owner, "the owner")
     if conn.execute("SELECT 1 FROM civilian_enterprises WHERE name=? AND location_id=?", (name, loc)).fetchone():
         _no(f"a business called {name} already stands here")
-    pop = _population(conn, loc)
+    pop = _settled(conn, loc, owner, "the owner")
     if conn.execute("SELECT COUNT(*) FROM civilian_enterprises WHERE location_id=? AND status IN ('active','strained','insolvent')", (loc,)).fetchone()[0] >= max(3, pop // 150):
         _no("the town has no room for another business of that kind")
     means = BUSINESS_KINDS[kind] * (1.5 if pop >= 5000 else 1.0)
@@ -229,6 +280,14 @@ def _business(conn, me: int, d: dict, call_id: str) -> dict:
     eid = create_enterprise(conn, name, kind, owner_actor_id=owner, location_id=loc, capital=means, cash=means,
                             metadata={"authored": True, "trade": trade})
     add_enterprise_staff(conn, eid, owner, role="owner", authority=100)
+    # Like an emergent business: a real archetype, so the economy resolves it, and an ecology row.
+    from .business import configure_enterprise_business
+    day = _day(conn)
+    configure_enterprise_business(conn, eid, _archetype(kind, trade), quality=50, price_position=50, capacity=40, clientele_fit=50,
+                                  service_reliability=50, regulatory_pressure=10, cadence_days=30, metadata={"authored": True})
+    conn.execute("""INSERT INTO enterprise_ecology_state(enterprise_id,founded_day,crystallized_day,structural_origin,last_review_day,metadata_json)
+                    VALUES (?,?,?,'formed_during_simulation',?,?) ON CONFLICT(enterprise_id) DO NOTHING""",
+                 (eid, day, day, day, json.dumps({"authored": True, "population_delta": 0}, sort_keys=True)))
     return {"status": "created", "kind": "business", "enterprise_id": eid, "name": name, "means": ledger.scale_word(means)}
 
 
@@ -248,15 +307,20 @@ def _organisation(conn, me: int, d: dict, call_id: str) -> dict:
         _no("that person already heads another body")
     if conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone() or conn.execute("SELECT 1 FROM underworld_organizations WHERE name=?", (name,)).fetchone():
         _no(f"the name {name} is already in use")
-    pop = _population(conn, loc)
+    pop = _settled(conn, loc, leader, "the leader")
     if typ in OUTFIT_TYPES:
         if conn.execute("SELECT COUNT(*) FROM underworld_organizations WHERE primary_location_id=? AND status IN ('active','strained','fragmented')", (loc,)).fetchone()[0] >= max(1, pop // 2000):
             _no("the town has no room for another outfit")
         from .underworld import create_underworld_organization
         from .underworld_rebuild import create_personnel
         oid = create_underworld_organization(conn, f"authored:{call_id}", typ, name=name, founder_actor_id=leader, primary_location_id=loc,
-                                             member_count_estimate=4, violence_capacity=10, cohesion=50, metadata={"authored": True})
+                                             member_count_estimate=1, violence_capacity=10, cohesion=50, metadata={"authored": True})
         create_personnel(conn, oid, role_kind="boss", actor_id=leader)
+        # What every existing outfit has: a membership stock (honestly one: the boss) and a heat profile.
+        from .underworld import ensure_underworld_membership_profile
+        from .underworld_rebuild import ensure_heat_profile
+        ensure_underworld_membership_profile(conn, oid, core_members=1, active_members=0, peripheral_associates=0)
+        ensure_heat_profile(conn, oid)
         return {"status": "created", "kind": "organisation", "type": typ, "outfit_id": oid, "name": name}
     if conn.execute("SELECT COUNT(*) FROM actors WHERE actor_type='institution' AND subtype=? AND current_location_id=? AND status='active'", (typ, loc)).fetchone()[0] >= max(1, pop // 1000):
         _no(f"the town has no room for another {typ}")
@@ -269,6 +333,10 @@ def _organisation(conn, me: int, d: dict, call_id: str) -> dict:
                  "VALUES (?,'DORMANT',180,.30,.55,?,?,3)", (iid, day, day + 180))
     conn.execute("INSERT INTO institution_memberships(institution_actor_id,member_actor_id,membership_kind,role_text,status,joined_day,provenance_json,metadata_json) "
                  "VALUES (?,?,'member','head','active',?,?,?)", (iid, leader, day, json.dumps(["authored in play"]), json.dumps({"authored": True})))
+    from .organization_agency import ensure_agency_profile
+    from .organization_lifecycle import ensure_lifecycle_profile
+    ensure_agency_profile(conn, iid, governance_mode="institutional", metadata={"authored": True})
+    ensure_lifecycle_profile(conn, iid, lifecycle_kind=typ, metadata={"authored": True})
     return {"status": "created", "kind": "organisation", "type": typ, "institution_actor_id": iid, "name": name}
 
 
@@ -277,13 +345,14 @@ def _organisation(conn, me: int, d: dict, call_id: str) -> dict:
 def _rumour(conn, me: int, d: dict, call_id: str) -> dict:
     text = _text(d.get("text"), "text", 300)
     loc = _place(conn, me, d)
+    from .presence import actor_is_present_candidate
     hearers = d.get("heard_by") or []
     if not isinstance(hearers, list) or len(hearers) > 12:
         _no("heard_by must be a list of at most 12 actor ids")
     ids = []
     for h in hearers:
         h = _character(conn, h, "heard_by")
-        if int(conn.execute("SELECT COALESCE(current_location_id,-1) FROM actors WHERE id=?", (h,)).fetchone()[0]) != loc:
+        if not actor_is_present_candidate(conn, h, loc):
             _no("everyone who hears it first must be present at the place")
         ids.append(h)
     from .information import _schedule_from_location, expose_actor_to_rumour
@@ -312,8 +381,6 @@ def author(conn: sqlite3.Connection, me: int, kind: str, details: dict, call_id:
     except BaseException as e:
         conn.execute("ROLLBACK TO SAVEPOINT authoring")
         conn.execute("RELEASE SAVEPOINT authoring")
-        if isinstance(e, ValueError) and not isinstance(e, AuthoringRefused):
-            raise AuthoringRefused(str(e)) from e
-        raise
+        raise  # only AuthoringRefused is a refusal; anything else is a bug and must not be stored as one
     conn.execute("RELEASE SAVEPOINT authoring")
     return out

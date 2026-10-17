@@ -91,8 +91,9 @@ def run():
 
         # kin ties
         bro = conn.execute("""SELECT a.id,a.name FROM actors a JOIN actor_life_profiles p ON p.actor_id=a.id WHERE a.actor_type='character'
-                              AND a.status='active' AND p.demographic_sex='male' AND p.life_status='living' AND a.id<>? ORDER BY a.id LIMIT 1""", (me,)).fetchone()
-        s = author(conn, me, "person", {"sex": "male", "age": 35, "ties": [{"actor_id": bro["id"], "as": "sibling"}]}, "k1")
+                              AND a.status='active' AND p.demographic_sex='male' AND p.life_status='living' AND a.id<>? AND p.birth_day BETWEEN (SELECT current_day FROM world_state)-55*365 AND (SELECT current_day FROM world_state)-25*365 ORDER BY a.id LIMIT 1""", (me,)).fetchone()
+        bro_age = (_count(conn, "SELECT current_day FROM world_state WHERE id=1") - conn.execute("SELECT birth_day FROM actor_life_profiles WHERE actor_id=?", (bro["id"],)).fetchone()[0]) // 365
+        s = author(conn, me, "person", {"sex": "male", "age": max(18, min(85, bro_age)), "ties": [{"actor_id": bro["id"], "as": "sibling"}]}, "k1")
         assert s["name"].split(" ", 1)[1] == bro["name"].split(" ", 1)[1], (s, dict(bro))
         assert _count(conn, "SELECT COUNT(*) FROM kinship_links WHERE kin_kind='sibling' AND ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))",
                       s["actor_id"], bro["id"], bro["id"], s["actor_id"]) == 2
@@ -155,7 +156,7 @@ def run():
         r = author(conn, me, "person", {"sex": sex, "work": work, "stage": stage, "from_elsewhere": True}, "x2")
         a = conn.execute("SELECT current_location_id,home_location_id FROM actors WHERE id=?", (r["actor_id"],)).fetchone()
         origin = conn.execute("SELECT name FROM locations WHERE id=?", (row["current_location_id"],)).fetchone()[0]
-        assert a["current_location_id"] == place and a["home_location_id"] != place and r["from"] == origin, (dict(a), r, origin)
+        assert a["current_location_id"] == place and a["home_location_id"] == place and r["from"] == origin, (dict(a), r, origin)
         conn.close()
 
 
@@ -240,7 +241,168 @@ def run_orgs():
         conn.close()
 
 
+def _outsider_combo(conn, place):
+    from engine.person_ecology import find_background_candidate
+    for work in WORK:
+        for sex in ("male", "female"):
+            for stage in ("Third", "Breach"):
+                kw = dict(location_id=place, occupation_domains=(work,), demographic_sex=sex, required_stage=stage, require_open_core=True, strict_stage=True)
+                if find_background_candidate(conn, allow_elsewhere=False, **kw) is None:
+                    row = find_background_candidate(conn, **kw)
+                    if row is not None and int(row["current_location_id"]) != place and row["current_stage"] == stage:
+                        return work, sex, stage, row
+    raise AssertionError("no outsider-only combination")
+
+
+def _day_of(conn):
+    return _count(conn, "SELECT current_day FROM world_state WHERE id=1")
+
+
+def run_presence():
+    from engine.authoring import author
+    from engine.presence import actor_is_present_candidate
+
+    # an outsider has moved: present at the new place, not at the origin
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "f1.db")
+        work, sex, stage, row = _outsider_combo(conn, place)
+        r = author(conn, me, "person", {"sex": sex, "work": work, "stage": stage, "from_elsewhere": True}, "f1")
+        d0 = _day_of(conn)
+        here = sum(actor_is_present_candidate(conn, r["actor_id"], place, day=d0 + i) for i in range(10))
+        there = sum(actor_is_present_candidate(conn, r["actor_id"], int(row["current_location_id"]), day=d0 + i) for i in range(10))
+        assert here >= 9 and there == 0, ("outsider presence", here, there)
+        assert conn.execute("SELECT home_location_id FROM actors WHERE id=?", (r["actor_id"],)).fetchone()[0] == place
+        conn.close()
+
+    # locals are reliably there on the authoring day
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "f2.db")
+        ids = [author(conn, me, "person", {"sex": "male" if i % 2 else "female", "age": 25 + i}, f"l{i}")["actor_id"] for i in range(10)]
+        d0 = _day_of(conn)
+        assert all(actor_is_present_candidate(conn, a, place, day=d0) for a in ids), "authored people not present on the authoring day"
+        assert sum(actor_is_present_candidate(conn, a, place, day=d0 + i) for a in ids for i in range(1, 6)) >= 47
+        conn.close()
+
+
+def run_bodies():
+    from engine.authoring import author
+
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "f3.db", pop=6000)
+        own = author(conn, me, "person", {"sex": "female", "age": 45}, "o")["actor_id"]
+        boss = author(conn, me, "person", {"sex": "male", "age": 40}, "b")["actor_id"]
+        head = author(conn, me, "person", {"sex": "female", "age": 52}, "h")["actor_id"]
+        biz = author(conn, me, "business", {"name": "Tarn Rope", "trade": "rope and tackle", "enterprise_kind": "workshop", "owner_actor_id": own}, "bz")
+        gang = author(conn, me, "organisation", {"name": "The Ferry Lads", "type": "gang", "leader_actor_id": boss}, "gg")
+        guild = author(conn, me, "organisation", {"name": "Weavers Guild", "type": "guild", "leader_actor_id": head}, "gd")
+        e, o, i = biz["enterprise_id"], gang["outfit_id"], guild["institution_actor_id"]
+        assert _count(conn, "SELECT COUNT(*) FROM enterprise_business_profiles WHERE enterprise_id=?", e) == 1
+        assert _count(conn, "SELECT COUNT(*) FROM enterprise_ecology_state WHERE enterprise_id=?", e) == 1
+        assert _count(conn, "SELECT COUNT(*) FROM underworld_membership_profiles WHERE organization_id=?", o) == 1
+        assert _count(conn, "SELECT COUNT(*) FROM underworld_heat WHERE organization_id=?", o) == 1
+        assert conn.execute("SELECT member_count_estimate FROM underworld_organizations WHERE id=?", (o,)).fetchone()[0] == 1
+        assert _count(conn, "SELECT COUNT(*) FROM organization_agency_profiles WHERE institution_actor_id=?", i) == 1
+        assert _count(conn, "SELECT COUNT(*) FROM organization_lifecycle_profiles WHERE institution_actor_id=?", i) == 1
+        conn.commit()
+        from connector.timeflow import advance
+        d0 = _day_of(conn)
+        for k in range(2):
+            advance(conn, f"adv{k}", 30, "test")
+        assert _day_of(conn) > d0
+        assert conn.execute("SELECT last_resolved_day FROM enterprise_business_profiles WHERE enterprise_id=?", (e,)).fetchone()[0] > d0, "economy never touched the authored business"
+        conn.close()
+
+
+def run_caps():
+    from engine.authoring import AuthoringRefused, author
+    from engine.presence import actor_is_present_candidate, add_presence_habit
+
+    # somebody must live there, and so must the owner
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "f4.db", pop=6000)
+        own = author(conn, me, "person", {"sex": "female", "age": 45}, "o")["actor_id"]
+        away = int(conn.execute("SELECT id FROM actors WHERE actor_type='character' AND status='active' AND home_location_id<>? AND current_location_id<>? AND id<>? ORDER BY id LIMIT 1",
+                                (place, place, me)).fetchone()[0])
+        for kind, det in (("business", {"name": "Away Shop", "trade": "x", "enterprise_kind": "shop", "owner_actor_id": away}),
+                          ("organisation", {"name": "Away Crew", "type": "gang", "leader_actor_id": away}),
+                          ("organisation", {"name": "Away Guild", "type": "guild", "leader_actor_id": away})):
+            _refused(lambda: author(conn, me, kind, det, "away" + det["name"]), "live")
+        conn.execute("UPDATE background_population_sources SET population_estimate=0 WHERE location_id=?", (place,))
+        for kind, det in (("business", {"name": "Ghost Shop", "trade": "x", "enterprise_kind": "shop", "owner_actor_id": own}),
+                          ("organisation", {"name": "Ghost Crew", "type": "gang", "leader_actor_id": own}),
+                          ("organisation", {"name": "Ghost Guild", "type": "guild", "leader_actor_id": own})):
+            _refused(lambda: author(conn, me, kind, det, "gh" + det["name"]), "nobody lives")
+        conn.close()
+
+
+def run_rarity():
+    from engine.authoring import AuthoringRefused, author
+    from engine.presence import actor_is_present_candidate, add_presence_habit
+
+    # rarity: authored people reflect the settlement
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "f5.db")
+        base = conn.execute("SELECT AVG(open_core) FROM background_person_profiles WHERE current_location_id=?", (place,)).fetchone()[0]
+        got = [author(conn, me, "person", {"sex": "male" if i % 2 else "female"}, f"p{i}")["actor_id"] for i in range(20)]
+        share = sum(conn.execute("SELECT core_state FROM cultivation_profiles WHERE actor_id=?", (a,)).fetchone()[0] == "Open-Core" for a in got) / 20
+        assert share <= float(base) + 0.25, ("open-core share", share, base)
+        early = sum(conn.execute("SELECT core_state FROM cultivation_profiles WHERE actor_id=?", (a,)).fetchone()[0] == "Open-Core" for a in got[:10]) / 10
+        assert early <= float(base) + 0.25, ("early open-core share", early, base)
+        conn.close()
+
+
+def run_errors():
+    from engine.authoring import AuthoringRefused, author
+    from engine.presence import actor_is_present_candidate, add_presence_habit
+
+    # a bug is a bug, not a refusal; nothing persists
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        import engine.civilian as civ
+        conn, me, place = _open(tmp, "f6.db", pop=6000)
+        own = author(conn, me, "person", {"sex": "female", "age": 45}, "o")["actor_id"]
+        n = _count(conn, "SELECT COUNT(*) FROM civilian_enterprises")
+        real = civ.create_enterprise
+        civ.create_enterprise = lambda *a, **k: (_ for _ in ()).throw(ValueError("boom"))
+        try:
+            author(conn, me, "business", {"name": "Bug", "trade": "x", "enterprise_kind": "shop", "owner_actor_id": own}, "bug")
+            raise AssertionError("bug swallowed")
+        except AuthoringRefused:
+            raise AssertionError("a bug became a refusal")
+        except ValueError as e:
+            assert "boom" in str(e)
+        finally:
+            civ.create_enterprise = real
+        assert _count(conn, "SELECT COUNT(*) FROM civilian_enterprises") == n
+        conn.close()
+
+
+def run_minor():
+    from engine.authoring import AuthoringRefused, author
+    from engine.presence import actor_is_present_candidate, add_presence_habit
+
+    # minor: one-word names, sibling ages, rumour hearers by presence
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "f7.db")
+        _refused(lambda: author(conn, me, "person", {"sex": "female", "name": "Fennick"}, "w1"), "family name")
+        bro = conn.execute("""SELECT a.id,p.birth_day FROM actors a JOIN actor_life_profiles p ON p.actor_id=a.id WHERE a.actor_type='character' AND a.status='active'
+                              AND p.demographic_sex='male' AND p.life_status='living' AND p.birth_day IS NOT NULL AND a.id<>? ORDER BY a.id LIMIT 1""", (me,)).fetchone()
+        bage = (_day_of(conn) - bro["birth_day"]) // 365
+        n = _count(conn, "SELECT COUNT(*) FROM actors")
+        want = bage + 30 if bage + 30 <= 90 else bage - 30
+        assert want >= 13, (bage, want)
+        _refused(lambda: author(conn, me, "person", {"sex": "male", "age": want, "ties": [{"actor_id": bro["id"], "as": "sibling"}]}, "w2"), "25 years")
+        assert _count(conn, "SELECT COUNT(*) FROM actors") == n
+        far = conn.execute("SELECT id FROM actors WHERE actor_type='character' AND status='active' AND current_location_id IS NOT NULL AND current_location_id<>? AND id<>? LIMIT 1", (place, me)).fetchone()[0]
+        add_presence_habit(conn, far, place, habit_kind="work", weight=1.0, confidence=1.0)
+        assert actor_is_present_candidate(conn, far, place)
+        rum = author(conn, me, "rumour", {"text": "A visitor talks.", "heard_by": [far]}, "w3")
+        assert rum["status"] == "created", rum
+        conn.close()
+
+
 if __name__ == "__main__":
-    run()
-    run_orgs()
+    only = sys.argv[1] if len(sys.argv) > 1 else None
+    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor)):
+        if only in (None, name):
+            fn()
     print("authoring_test: ok")

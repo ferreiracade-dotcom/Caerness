@@ -276,6 +276,7 @@ def find_background_candidate(
     required_stage: str | None = None, command_weight: float = 0, economic_weight: float = 0,
     medical_weight: float = 0, teaching_weight: float = 0, criminal_weight: float = 0,
     demographic_sex: str | None = None, allow_elsewhere: bool = True, strict_stage: bool = False,
+    prefer_open_core: bool = True,
 ) -> sqlite3.Row | None:
     rows = _candidate_rows(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
@@ -326,7 +327,7 @@ def find_background_candidate(
             float(r["command_aptitude"])*command_weight + float(r["economic_aptitude"])*economic_weight +
             float(r["medical_aptitude"])*medical_weight + float(r["teaching_aptitude"])*teaching_weight +
             float(r["criminal_familiarity"])*criminal_weight +
-            (8.0 if r["open_core"] else 0.0)
+            (8.0 if prefer_open_core and r["open_core"] else 0.0)
         )
     return max(rows, key=score)
 
@@ -339,6 +340,7 @@ def resolve_background_person(
     command_weight: float = 0, economic_weight: float = 0, medical_weight: float = 0,
     teaching_weight: float = 0, criminal_weight: float = 0, demographic_sex: str | None = None,
     allow_elsewhere: bool = True, strict_stage: bool = False, name: str | None = None,
+    prefer_open_core: bool = True,
 ) -> int | None:
     """Reveal one pre-existing POPBACK identity as a tracked actor.
 
@@ -350,6 +352,7 @@ def resolve_background_person(
         require_open_core=require_open_core, required_stage=required_stage, command_weight=command_weight,
         economic_weight=economic_weight, medical_weight=medical_weight, teaching_weight=teaching_weight,
         criminal_weight=criminal_weight, demographic_sex=demographic_sex, allow_elsewhere=allow_elsewhere, strict_stage=strict_stage,
+        prefer_open_core=prefer_open_core,
     )
     if profile is None:
         return None

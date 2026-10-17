@@ -71,6 +71,23 @@ def run():
         from connector.views import compact_scene
         scene = compact_scene(conn)
         assert "error" not in scene
+        assert any(a["id"] == r["actor_id"] for a in scene["present"]), scene["present"]
+
+        # An engine bug is an error, not a stored refusal: nothing persists and a retry with the same call_id can succeed.
+        import engine.civilian as civ
+        real = civ.create_enterprise
+        civ.create_enterprise = lambda *a, **k: (_ for _ in ()).throw(ValueError("boom"))
+        det = {"name": "Bugged & Sons", "trade": "ink", "enterprise_kind": "shop", "owner_actor_id": r["actor_id"]}
+        try:
+            author(conn, "au-6", "business", det)
+            raise AssertionError("bug swallowed")
+        except ValueError as e:
+            assert "boom" in str(e), e
+        finally:
+            civ.create_enterprise = real
+        assert conn.execute("SELECT COUNT(*) FROM connector_calls WHERE call_id='au-6'").fetchone()[0] == 0
+        ok = author(conn, "au-6", "business", det)
+        assert ok["status"] == "created", ok
         conn.close()
 
 
