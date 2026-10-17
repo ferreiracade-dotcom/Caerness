@@ -46,3 +46,8 @@ def day_from_sv_date(year_sv: int, month: int, day: int) -> int:
 def format_sv_date(day_offset: int) -> str:
     year, month, day = sv_date_from_day(day_offset)
     return f"{day} {MONTH_NAMES[month - 1]}, {year} SV"
+
+
+def season_for_day(day_offset: int) -> str:
+    """Spring months 1-3, Summer 4-6, Autumn 7-9, Winter 10-12 (World Bible, calendar and dating convention)."""
+    return ("Spring", "Summer", "Autumn", "Winter")[(sv_date_from_day(day_offset)[1] - 1) // 3]

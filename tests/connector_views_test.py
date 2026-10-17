@@ -42,6 +42,11 @@ def run():
             for k in ("narrator_rules", "embodiment", "canon", "player", "scene_packet_id"):
                 assert k not in s, k
             assert _j(s) <= 4000, _j(s)
+            # The civil date and season are in the scene (gap 4a, canon "The calendar and dating convention").
+            assert s["date"] == "1 First Month, 624 SV" and s["season"] == "Spring", (s["date"], s["season"])
+            from engine.civil_calendar import season_for_day, format_sv_date
+            assert (format_sv_date(100), season_for_day(100)) == ("10 Fourth Month, 624 SV", "Summer")
+            assert [season_for_day(d) for d in (90, 91, 181, 182, 273, 364, 365)] == ["Spring", "Summer", "Summer", "Autumn", "Winter", "Winter", "Spring"]
             assert not any(v is None for v in s.values())
             assert s["protagonist"]["id"] == int(row["id"]) and s["location"]["name"]
             assert len(s["present"]) >= 1, "opening location should have people present"

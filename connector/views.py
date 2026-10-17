@@ -163,6 +163,7 @@ def _holdings(conn, me: int) -> dict:
 
 def compact_scene(conn) -> dict:
     """Commits (it drops its own audit packet), so never call it inside a run_once callback."""
+    from engine.civil_calendar import format_sv_date, season_for_day
     from engine.player import build_scene_packet
 
     p = build_scene_packet(conn)
@@ -187,6 +188,8 @@ def compact_scene(conn) -> dict:
     desc = "; ".join(x for x in (loc.get("kind"), loc.get("notes"), loc.get("political_owner")) if x)
     return _drop_none({
         "day": day,
+        "date": format_sv_date(day),
+        "season": season_for_day(day),
         "location": {"id": loc["id"], "name": loc["name"], "description": _clip(desc, 140)},
         "protagonist": _drop_none({"id": me["actor_id"], "name": me["name"], "age": _age(conn, me["actor_id"], day),
                                    "role": _clip(me.get("subtype") or me.get("actor_type"), 100)}),
