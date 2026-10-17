@@ -30,6 +30,7 @@ class PlayerActionProposal:
     route_location_names: tuple[str, ...] = ()
     needs_interpretation: bool = False
     note: str = ""
+    changes: dict | None = None  # new terms the protagonist puts to a counter-offer
 
 
 @dataclass(frozen=True)
@@ -162,6 +163,74 @@ def shortest_route(conn: sqlite3.Connection, start_location_id: int, end_locatio
         names.append(str(row[0]) if row else f"Location {lid}")
     days = math.ceil(dist[end_location_id] - 1e-9)  # whole days; local movement stays 0
     return int(days), path, names
+
+
+_SETTLED = re.compile(r"settlement|pass|port|quay|city|inn|waystone|district|fortress|monastery|node", re.I)
+_UNSETTLED = re.compile(r"region|area|sea|river|lake$|range|isles|island|country|approach|frontier|basin|sphere", re.I)
+
+
+def nearest_on(conn: sqlite3.Connection, start_location_id: int | None, target_location_id: int) -> tuple[int, str] | None:
+    """A region, sea, river, lake or range cannot be walked to: the nearest settlement, pass or port on it can.
+
+    Returns (location id, how it was chosen) or None when the target is a place one can simply go to, or nothing on it is reachable."""
+    row = conn.execute("SELECT name,kind FROM locations WHERE id=?", (target_location_id,)).fetchone()
+    if row is None or start_location_id is None:
+        return None
+    name, kind = str(row[0]), str(row[1] or "")
+    chain, cur = set(), target_location_id  # going into or out of the place he stands in is local movement
+    for _ in range(8):
+        r = conn.execute("SELECT parent_location_id FROM locations WHERE id=?", (cur,)).fetchone()
+        cur = r[0] if r else None
+        if cur is None:
+            break
+        chain.add(int(cur))
+    up, cur = set(), int(start_location_id)
+    for _ in range(8):
+        r = conn.execute("SELECT parent_location_id FROM locations WHERE id=?", (cur,)).fetchone()
+        cur = r[0] if r else None
+        if cur is None:
+            break
+        up.add(int(cur))
+    if int(start_location_id) in chain or target_location_id in up:
+        return None
+    if _SETTLED.search(kind) and not _UNSETTLED.search(kind.replace("mountain pass", "pass")):
+        return None
+    kids: set[int] = set()
+    frontier = [target_location_id]
+    while frontier:
+        nxt = [int(r[0]) for r in conn.execute(f"SELECT id FROM locations WHERE parent_location_id IN ({','.join('?' * len(frontier))})", frontier)]
+        frontier = [i for i in nxt if i not in kids]
+        kids.update(frontier)
+    pool = set(kids)
+    ends = {int(r[0]) for r in conn.execute(
+        f"SELECT to_location_id FROM travel_routes WHERE status IN ('open','restricted') AND from_location_id IN ({','.join('?' * (len(kids) + 1))})",
+        [target_location_id, *kids])}
+    ends |= {int(r[0]) for r in conn.execute(
+        f"SELECT from_location_id FROM travel_routes WHERE status IN ('open','restricted') AND to_location_id IN ({','.join('?' * (len(kids) + 1))})",
+        [target_location_id, *kids])}
+    pool |= ends
+    low = kind.lower()
+    if low in ("sea", "lake", "river"):
+        if low == "river":
+            pool |= {int(r[0]) for r in conn.execute("SELECT from_location_id FROM travel_routes WHERE route_kind='river' AND status IN ('open','restricted')")}
+            pool |= {int(r[0]) for r in conn.execute("SELECT to_location_id FROM travel_routes WHERE route_kind='river' AND status IN ('open','restricted')")}
+        else:
+            ports = [(int(r[0]), str(r[1])) for r in conn.execute("SELECT id,name FROM locations WHERE kind LIKE ?", ("%lake port%" if low == "lake" else "%port%",))]
+            coastal = [i for i, n in ports if re.search(r"sea|coast|shore|bay|harbo", n, re.I)]
+            pool |= set(coastal or [i for i, _ in ports])
+    best = None
+    for cand in sorted(pool):
+        cr = conn.execute("SELECT name,kind FROM locations WHERE id=?", (cand,)).fetchone()
+        if cr is None or cand == target_location_id or _UNSETTLED.search(str(cr[1] or "")) and not _SETTLED.search(str(cr[1] or "")):
+            continue
+        got = shortest_route(conn, int(start_location_id), cand)
+        if got is None:
+            continue
+        if best is None or got[0] < best[0]:
+            best = (got[0], cand, str(cr[0]), str(cr[1] or "place"))
+    if best is None:
+        return None
+    return best[1], f"{name} is not a place one can go to; the nearest {best[3]} on it is {best[2]}, and the journey goes there."
 
 
 def explain_no_route(conn: sqlite3.Connection, start_location_id: int | None, end_location_id: int) -> str:
@@ -365,7 +434,7 @@ def begin_player_action(
             return proposal, result
         ir = apply_player_response(
             conn, proposal.interaction_id, player_id, proposal.response_choice, day,
-            counter_terms={"purpose": proposal.purpose} if proposal.response_choice == "counter" else None,
+            counter_terms={"purpose": proposal.purpose, **({"changes": proposal.changes} if proposal.changes else {})} if proposal.response_choice == "counter" else None,
         )
         result = PlayerActionResult(
             action_id, "applied", "respond", ir.summary,

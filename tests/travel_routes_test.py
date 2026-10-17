@@ -86,10 +86,21 @@ def run():
 
         # an unreachable place is explained, not a flat refusal
         isl = conn.execute("""SELECT id,name FROM locations l WHERE NOT EXISTS (SELECT 1 FROM travel_routes WHERE from_location_id=l.id OR to_location_id=l.id)
-                              AND parent_location_id IS NULL AND kind NOT LIKE '%district%' LIMIT 1""").fetchone()
+                              AND NOT EXISTS (SELECT 1 FROM locations c WHERE c.parent_location_id=l.id)
+                              AND parent_location_id IS NULL AND kind NOT LIKE '%district%' AND kind NOT IN ('sea','lake','river') ORDER BY id LIMIT 1""").fetchone()
         r = act(conn, "u1", "travel", "I go there.", target_location_id=int(isl["id"]))
         assert r["status"] != "applied" and len(r["summary"]) > 40 and "route" in r["summary"].lower(), r
         print("unreachable sample:", isl["name"], "->", r["summary"])
+
+        # a sea, a river or a region cannot be walked to: the journey goes to the nearest port, settlement or pass on it
+        conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (toll, w["me"]))
+        conn.execute("UPDATE player_state SET current_location_id=? WHERE id=1", (toll,))
+        conn.commit()
+        sea = loc["Glassen Sea"]
+        r = act(conn, "sea1", "travel", "I take ship on the Glassen Sea.", target_location_id=sea)
+        assert r["status"] == "applied" and r.get("destination_note") and here() != sea, r
+        assert "port" in conn.execute("SELECT kind FROM locations WHERE id=?", (here(),)).fetchone()[0], here()
+        print("sea ->", r["destination_note"])
 
         # reachability sweep from Toll's Reach over settlements
         sett = [int(r["id"]) for r in conn.execute("SELECT id FROM locations WHERE kind='settlement'")]

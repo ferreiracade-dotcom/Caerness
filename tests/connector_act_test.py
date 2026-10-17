@@ -66,9 +66,9 @@ def run():
 
         r = act(conn, "a4", "seize_castle", "I take the castle.")
         results.append(r)
-        assert r["status"] == "refused" and "observe" in r["summary"]
+        assert r["status"] in ("applied", "partial") and r["mapped_to"] == "plan" and r["commitment_id"], r  # any intent is accepted
         assert _day(conn) == d1 and _n(conn) == n1
-        assert act(conn, "a4", "seize_castle", "I take the castle.")["replayed"] is True  # refusals are stored
+        assert act(conn, "a4", "seize_castle", "I take the castle.")["replayed"] is True  # results are stored
 
         r = act(conn, "a5", "speak", "Hello?", target_actor_id=99999999)
         results.append(r)

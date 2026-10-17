@@ -206,7 +206,7 @@ def run():
             conn.execute("UPDATE actors SET current_location_id=? WHERE id IN (?,?)", (loc, by, w["crew_leader"]))
             crew_ref = f"crew:{w['crew']}"
             r = po.execute(conn, me, "attack", target_actor_id=None, details={"business": f"business:{biz}", "intent_kind": "beat"}, intent="x")
-            assert r["status"] == "refused" and "own" in r["summary"], r
+            assert r["status"] == "applied" and "his own" in r["summary"] and r["hurt"] == [], r  # an owner may wreck his own premises
             rival_shop = civilian.create_enterprise(conn, "Fixture Rival Shop", "shop", owner_actor_id=by, location_id=loc, capital=10, cash=3)
             cap0 = conn.execute("SELECT capital FROM civilian_enterprises WHERE id=?", (rival_shop,)).fetchone()[0]
             ev_n = conn.execute("SELECT COUNT(*) FROM events WHERE event_type='player_operation'").fetchone()[0]

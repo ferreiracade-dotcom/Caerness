@@ -1016,12 +1016,12 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         business = conn.execute("SELECT * FROM civilian_enterprises WHERE id=?", (int(raw),)).fetchone()
         if business is None:
             return _refuse(f"unknown business {raw}")
-        if business["owner_actor_id"] == _authority(me, d) or ledger.can_draw(conn, _authority(me, d), ("business", int(business["id"]))):
-            return _refuse("He will not wreck what is his own.")
+        own = business["owner_actor_id"] == _authority(me, d) or ledger.can_draw(conn, _authority(me, d), ("business", int(business["id"])))
         here = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()[0]
         if business["location_id"] is None or here != business["location_id"]:
             return _refuse(f"{business['name']} is not here.")
     else:
+        own = False
         if target is None or target == me or not _living(conn, target):
             return _refuse("There is no living person named to attack.")
         if not _same_place(conn, me, target):
@@ -1041,11 +1041,11 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         defenders = [victim] + [a for a in prot_ids if a not in backing]
         label = _name(conn, victim)
     else:
-        defenders = [int(r[0]) for r in conn.execute(
+        defenders = [] if own else [int(r[0]) for r in conn.execute(
             "SELECT s.actor_id FROM enterprise_staff s JOIN actors a ON a.id=s.actor_id "
             "WHERE s.enterprise_id=? AND s.status='active' AND a.current_location_id=? ORDER BY s.actor_id",
             (business["id"], business["location_id"])) if int(r[0]) != me and _living(conn, int(r[0]))]
-        extra = _protectors(conn, int(business["owner_actor_id"]))[1] if business["owner_actor_id"] is not None else 0.0
+        extra = _protectors(conn, int(business["owner_actor_id"]))[1] if business["owner_actor_id"] is not None and not own else 0.0
         label = str(business["name"])
     def_cap = sum(_capacity(conn, a) for a in defenders) + extra
     roll = att_cap / max(0.01, def_cap) * rng.uniform(0.75, 1.25)
@@ -1090,9 +1090,22 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     event_id = _record(conn, me, "Attack" if business is None else "Attack on a place", summary,
                        severity=4 if heavy else 3, targets=(victim,) if victim is not None else ())
 
+    took = 0.0
     if business is not None and outcome == "won":
+        lost_capital = float(business["capital"]) * CAPITAL_LOSS[kind]
         conn.execute("UPDATE civilian_enterprises SET capital=capital-capital*?, reputation=MAX(0,reputation-8), "
                      "labor_capacity=MAX(0,labor_capacity-10), updated_day=? WHERE id=?", (CAPITAL_LOSS[kind], day, business["id"]))
+        if d.get("loot") and not own:
+            took = ledger.transfer(conn, ("business", int(business["id"])), ("person", _authority(me, d)), max(0.0, lost_capital * 0.5),
+                                   flow_kind="other", purpose="loot", allow_partial=True) if lost_capital * 0.5 > 0.01 else 0.0
+    elif victim is not None and outcome == "won" and d.get("loot"):
+        took = ledger.transfer(conn, ("person", victim), ("person", _authority(me, d)), ledger.balance(conn, ("person", victim)) * 0.25,
+                               flow_kind="other", purpose="loot", allow_partial=True) if ledger.balance(conn, ("person", victim)) > 0.05 else 0.0
+    held = None
+    if victim is not None and outcome == "won" and d.get("capture"):
+        from . import commitments
+        held = commitments.record(conn, _authority(me, d), f"Holds {_name(conn, victim)} captive", kind="captive", target_actor_id=victim,
+                                  importance=3, details={"held_since": day})
     from . import harm
     hurt = []
     my_org = _my_outfit(conn, _authority(me, d))
@@ -1130,13 +1143,20 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
             add_heat(conn, outfit, public=3, violence=10 if heavy else 4, investigative=6 if heavy else 0)
         else:
             add_heat(conn, outfit, public=4, violence=8 if heavy else 4, investigative=5 if heavy else 0)
+    if own and business is not None:
+        summary = f"He wrecked what was his own: {label}."
+    if took > 0.005:
+        summary += f" He came away with a {ledger.scale_word(took)} sum."
+    if held is not None:
+        summary += " He has him in his hands."
     if men_lost:
         summary += f" {men_lost} of the men with him were lost."
     short = d.get("_men_short")
     if short:
         summary += f" {short[0].upper() + short[1:]}."
     return {"status": "applied", "outcome": outcome, "hurt": hurt, "summary": summary, "event_id": event_id,
-            **({"men_lost": men_lost} if men_lost else {}), **({"men_short": short} if short else {})}
+            **({"men_lost": men_lost} if men_lost else {}), **({"men_short": short} if short else {}),
+            **({"held": held} if held is not None else {})}
 
 
 # ---------------------------------------------------------------- trade

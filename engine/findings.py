@@ -77,11 +77,16 @@ def _talk(conn: sqlite3.Connection, name: str, place: int | None, limit: int = 3
     return ["People say: " + str(r[0]) for r in rows]
 
 
+def _ago(conn: sqlite3.Connection, day: int) -> str:
+    n = _day(conn) - int(day)
+    return "Recently" if n <= 10 else "Some weeks ago" if n <= 60 else "Some months ago" if n <= 400 else "Years ago"
+
+
 def _events_about(conn: sqlite3.Connection, actor: int, limit: int = 4) -> list[str]:
     rows = conn.execute(
         """SELECT DISTINCT e.day,e.title FROM events e LEFT JOIN event_targets t ON t.event_id=e.id
            WHERE (e.source_actor_id=? OR t.actor_id=?) AND e.severity<=4 ORDER BY e.day DESC,e.id DESC LIMIT ?""", (actor, actor, limit)).fetchall()
-    return [f"On day {r[0]}: {r[1]}" for r in rows]
+    return [f"{_ago(conn, r[0])}: {r[1]}" for r in rows]
 
 
 def _actor_pool(conn: sqlite3.Connection, a: sqlite3.Row) -> tuple[list[str], list[str]]:
@@ -151,7 +156,7 @@ def investigate(conn: sqlite3.Connection, me: int, *, actor: int | None = None, 
         l = conn.execute("SELECT * FROM locations WHERE id=?", (location,)).fetchone()
         subject = str(l["name"])
         for r in conn.execute("SELECT day,title FROM events WHERE location_id=? AND severity<=4 ORDER BY day DESC,id DESC LIMIT 4", (location,)):
-            plain.append(f"On day {r[0]}: {r[1]}")
+            plain.append(f"{_ago(conn, r[0])}: {r[1]}")
         for r in conn.execute("SELECT name FROM civilian_enterprises WHERE location_id=? AND status IN ('active','strained') ORDER BY capital DESC LIMIT 4", (location,)):
             plain.append(f"{r[0]} trades here.")
         for r in conn.execute("""SELECT o.name FROM underworld_zone_claims c JOIN underworld_zones z ON z.id=c.zone_id JOIN underworld_organizations o ON o.id=c.organization_id
@@ -162,7 +167,7 @@ def investigate(conn: sqlite3.Connection, me: int, *, actor: int | None = None, 
         words = _terms(text)
         for w in words[:3]:
             for r in conn.execute("SELECT day,title FROM events WHERE title LIKE ? ESCAPE '!' AND severity<=4 ORDER BY day DESC LIMIT 2", (_like(w),)):
-                plain.append(f"On day {r[0]}: {r[1]}")
+                plain.append(f"{_ago(conn, r[0])}: {r[1]}")
         for w in words[:3]:
             plain += [f"People say: {t}" for t in _topic_talk(conn, w, here)]
     # time and luck reach what is kept quiet: each quiet fact surfaces with a chance that grows with the days spent
