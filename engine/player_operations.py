@@ -72,8 +72,39 @@ def _record(conn, actor_id: int, title: str, summary: str, *, severity: int = 1,
 
 # ---------------------------------------------------------------- pay
 
+def _pay_wages(conn, me: int, boss: int, d: dict) -> dict:
+    """Pay what an outfit, a business or a household owes its people, from the named purse."""
+    from . import payroll
+    try:
+        src = ledger.parse_holder(d.get("from") or "me", boss, conn)
+        owing = ledger.parse_holder(d.get("for") or (f"{src[0]}:{src[1]}" if src[0] != "person" else ""), boss, conn)
+    except ValueError as e:
+        return _refuse(str(e) if d.get("for") or (d.get("from") or "me") != "me" else "Say whose wages: for is outfit:<id>, business:<id> or household:<id>.")
+    if owing[0] == "person":
+        return _refuse("Wages are owed by an outfit, a business or a household.")
+    if not ledger.can_draw(conn, boss, src) or not ledger.can_draw(conn, boss, owing):
+        return _refuse("He has no right to settle those wages.")
+    due = payroll.get_arrears(conn, owing[0], owing[1])
+    if due["owed"] <= 0.005:
+        return _refuse("Nobody there is owed anything.")
+    try:
+        amount = ledger.amount_of(d["amount"]) if d.get("amount") else due["owed"]
+    except ValueError as e:
+        return _refuse(str(e))
+    paid = payroll.pay_arrears(conn, owing[0], owing[1], src, amount)
+    if paid <= 0:
+        return _refuse(f"There is not enough in {_holder_label(conn, src, boss)} to pay what is owed.")
+    left = payroll.get_arrears(conn, owing[0], owing[1])["owed"]
+    who = _holder_label(conn, owing, boss)
+    summary = f"He pays the wages owed at {who}" + (", all of it." if left <= 0.005 else ", though not all of it.")
+    _record(conn, me, "Wages paid", summary)
+    return {"status": "applied", "summary": summary, "amount": ledger.scale_word(paid)}
+
+
 def _pay(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     boss = _authority(me, d)
+    if str(d.get("to") or "").lower() == "wages":
+        return _pay_wages(conn, me, boss, d)
     try:
         src = ledger.parse_holder(d.get("from") or "me", boss, conn)
         to_ref = d.get("to") or (f"person:{target}" if target is not None else None)
@@ -530,8 +561,14 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
             from .underworld_rebuild import add_heat
             add_heat(conn, my_outfit, public=2, violence=0)
         summary = f"{name} would not give way."
+        if what not in OUTFIT_TERMS and what != "tribute":
+            vo, vz = _org_behind(conn, target, None)
+            _leave_trace(conn, my_outfit, vo, vz, "extortion_attempt", 35, 10 if openly else 5, {"victim_actor_id": target, "what": what, "outcome": "refused"})
         _record(conn, me, "Demand refused", summary, severity=2 if openly else 1, targets=(target,))
         return {"status": "refused", "summary": summary, "interaction_id": iid, "answer": res.summary}
+    if what not in OUTFIT_TERMS and what != "tribute":
+        vo, vz = _org_behind(conn, target, None)
+        _leave_trace(conn, my_outfit, vo, vz, "extortion_attempt", 22, 4, {"victim_actor_id": target, "what": what, "outcome": "conceded"})
     return _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_outfit, iid, openly)
 
 
@@ -601,6 +638,55 @@ def settle_accepted(conn: sqlite3.Connection, interaction, player_actor_id: int)
     details = {**(po.get("details") or {}), "_accepted": int(interaction["id"])}
     return execute(conn, int(player_actor_id), str(po["op"]), target_actor_id=int(interaction["proposer_actor_id"]),
                    details=details, intent=str(interaction["rationale"] or "accepted counter-offer"), _trusted=True)
+
+
+def _org_behind(conn, actor_id: int | None, business) -> tuple[int | None, int | None]:
+    """The outfit that stands behind a victim, and the zone: the victim's own outfit, else the protector of the business
+    (or of a business the victim owns), else the outfit linked to it, else whoever holds the ground where it stands."""
+    def protector(enterprise_id: int):
+        r = conn.execute("SELECT protector_organization_id,zone_id FROM underworld_protection_accounts WHERE enterprise_id=? AND status='active' ORDER BY id LIMIT 1", (enterprise_id,)).fetchone()
+        if r:
+            return int(r[0]), (int(r[1]) if r[1] is not None else None)
+        r = conn.execute("SELECT organization_id,zone_id FROM underworld_business_links WHERE enterprise_id=? AND status='active' ORDER BY id LIMIT 1", (enterprise_id,)).fetchone()
+        if r:
+            return int(r[0]), (int(r[1]) if r[1] is not None else None)
+        return None
+    if business is None and actor_id is not None:
+        r = conn.execute("SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active' ORDER BY authority DESC LIMIT 1", (actor_id,)).fetchone()
+        if r:
+            z = conn.execute("SELECT zone_id FROM underworld_zone_claims WHERE organization_id=? AND claim_kind='controller' AND status='active' LIMIT 1", (int(r[0]),)).fetchone()
+            return int(r[0]), (int(z[0]) if z else None)
+        for e in conn.execute("SELECT id FROM civilian_enterprises WHERE owner_actor_id=? AND status IN ('active','strained') ORDER BY id", (actor_id,)):
+            got = protector(int(e[0]))
+            if got:
+                return got
+        return None, None
+    if business is not None:
+        got = protector(int(business["id"]))
+        if got:
+            return got
+        r = conn.execute("""SELECT c.organization_id,c.zone_id FROM underworld_zone_claims c JOIN underworld_zones z ON z.id=c.zone_id
+                            WHERE c.claim_kind='controller' AND c.status='active' AND z.city_location_id=? ORDER BY c.strength DESC LIMIT 1""", (business["location_id"],)).fetchone()
+        if r:
+            return int(r[0]), int(r[1])
+    return None, None
+
+
+def _leave_trace(conn, my_outfit: int | None, victim_org: int | None, zone_id: int | None, kind: str, severity: float, hostility: float, meta: dict) -> int | None:
+    """What a rival can see: an incident against its outfit, a harder relation, and heat on both."""
+    import json
+    if victim_org is None or (my_outfit is not None and victim_org == my_outfit):
+        return None
+    from .underworld_rebuild import add_heat, change_relation
+    iid = int(conn.execute(
+        """INSERT INTO underworld_incidents(day,zone_id,source_organization_id,target_organization_id,incident_kind,severity,status,metadata_json)
+           VALUES (?,?,?,?,?,?,'open',?)""", (_day(conn), zone_id, my_outfit, victim_org, kind, severity, json.dumps(meta, sort_keys=True))).lastrowid)
+    if my_outfit is not None:
+        change_relation(conn, my_outfit, victim_org, kind="rival", hostility_delta=hostility, respect_delta=-1, metadata={"player_operation": kind})
+        add_heat(conn, my_outfit, public=1.5, violence=2 if kind != "extortion_attempt" else 0)
+    add_heat(conn, victim_org, public=1.0, violence=2 if kind != "extortion_attempt" else 0)
+    return iid
+
 
 
 # ---------------------------------------------------------------- attack
@@ -699,12 +785,15 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
                      "labor_capacity=MAX(0,labor_capacity-10), updated_day=? WHERE id=?", (CAPITAL_LOSS[kind], day, business["id"]))
     from . import harm
     hurt = []
+    my_org = _my_outfit(conn, _authority(me, d))
     for aid, sev in plan:
         if not _living(conn, aid):
             continue
         spot = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (aid,)).fetchone()[0]
+        # The blow carries the outfit it came from, so a boss whose kin or lieutenant it fell on remembers who did it.
         inc = harm.record_harm(conn, aid, source_kind="player_operation", source_ref_id=event_id, severity=sev,
-                               intent_class="hostile", location_id=spot)
+                               intent_class="hostile", location_id=spot,
+                               metadata={"source_organization_id": my_org} if (my_org is not None and aid != me and aid not in {i for i, _ in attackers}) else None)
         hurt.append({"name": _name(conn, aid), "how": inc["outcome"]})
 
     foe = victim if business is None else business["owner_actor_id"]
@@ -714,6 +803,10 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
             a_to_b={"trust_delta": -12.0, "stance_delta": -15.0, "resentment_delta": 8.0},
             b_to_a={"trust_delta": -15.0, "stance_delta": -18.0, "fear_delta": 5.0, "resentment_delta": 12.0})
     outfit = _my_outfit(conn, _authority(me, d))
+    victim_org, trace_zone = _org_behind(conn, victim if business is None else None, business)
+    _leave_trace(conn, outfit, victim_org, trace_zone, "attack_on_member" if business is None else "attack_on_client",
+                 55 if heavy else 40, 30 if heavy else 15, {"enterprise_id": int(business["id"]) if business is not None else None,
+                                                             "victim_actor_id": victim, "outcome": outcome, "player_operation": "attack"})
     if outfit is not None:
         from .underworld_rebuild import add_heat
         if business is None:

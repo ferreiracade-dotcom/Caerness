@@ -409,6 +409,8 @@ def resolve_business_cycle(conn: sqlite3.Connection, enterprise_id: int, day: in
             conn.execute("UPDATE enterprise_ecology_state SET profitable_streak_days=?,insolvent_since_day=NULL,last_review_day=? WHERE enterprise_id=?",
                          (profitable,day,enterprise_id))
     conn.execute("UPDATE civilian_enterprises SET cash=?,debt=?,status=?,updated_day=? WHERE id=?", (cash, debt, status, day, enterprise_id))
+    from .payroll import run_business_payroll
+    run_business_payroll(conn, enterprise_id, operating_cost, unfunded_deficit, day)
     if status == "active" and debt <= 0 and net > 0:
         _owner_draw(conn, enterprise_id, operating_cost)
     conn.execute(

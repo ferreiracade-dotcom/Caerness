@@ -176,6 +176,11 @@ def record_harm(
         )
         conn.execute("UPDATE harm_incidents SET condition_id=? WHERE id=?", (condition_id, incident_id))
 
+    src_org = (metadata or {}).get("source_organization_id")
+    if src_org is not None and outcome in ("fatal", "persistent"):
+        # A rival's blow on a boss's kin or a lieutenant is remembered by the outfit that lost them.
+        from .temperament import note_personal_blow
+        note_personal_blow(conn, actor_id, int(src_org), outcome)
     row = conn.execute("SELECT * FROM harm_incidents WHERE id=?", (incident_id,)).fetchone()
     return dict(row)
 

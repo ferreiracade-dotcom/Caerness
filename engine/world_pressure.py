@@ -46,11 +46,14 @@ def end_own_front_protection(conn: sqlite3.Connection) -> int:
 
 
 def claim_ground_for_outfits(conn: sqlite3.Connection) -> int:
-    """An outfit with fronts or rackets in a city and no claim holds the vacant zone where they sit, else challenges it."""
+    """An outfit with fronts or rackets in a city and no claim holds the vacant zone where they sit, else challenges it.
+    Specialists, networks and canon durable families hold fronts, not ground (canon), so they are left alone."""
     done = 0
     orgs = conn.execute(
         f"""SELECT o.id,o.primary_location_id FROM underworld_organizations o WHERE o.status IN {ACTIVE_ORG}
             AND o.primary_location_id IS NOT NULL
+            AND COALESCE(json_extract(o.metadata_json,'$.role'),'') <> 'specialist' AND COALESCE(json_extract(o.metadata_json,'$.source'),'') <> 'world_bible'
+            AND o.organization_type <> 'network'
             AND NOT EXISTS (SELECT 1 FROM underworld_zone_claims c WHERE c.organization_id=o.id AND c.status='active')
             AND (EXISTS (SELECT 1 FROM underworld_business_links l WHERE l.organization_id=o.id AND l.status='active'
                          AND l.link_kind IN ('owned_front','controlled_front'))
@@ -87,7 +90,7 @@ def claim_ground_for_outfits(conn: sqlite3.Connection) -> int:
     return done
 
 
-def seed_baseline_relations(conn: sqlite3.Connection) -> int:
+def seed_baseline_relations(conn: sqlite3.Connection, only_org: int | None = None) -> int:
     """Outfits sharing a city know each other: neutral or rival by overlap of activities and ground, hostility 10-40."""
     made = 0
     rows = conn.execute(f"SELECT id,primary_location_id FROM underworld_organizations WHERE status IN {ACTIVE_ORG} AND primary_location_id IS NOT NULL ORDER BY id").fetchall()
@@ -102,6 +105,8 @@ def seed_baseline_relations(conn: sqlite3.Connection) -> int:
         for i, x in enumerate(orgs):
             for y in orgs[i + 1:]:
                 a, b = (x, y) if x < y else (y, x)
+                if only_org is not None and only_org not in (x, y):
+                    continue
                 if conn.execute("SELECT 1 FROM underworld_relations WHERE organization_a_id=? AND organization_b_id=?", (a, b)).fetchone():
                     continue
                 shared = len(kinds.get(x, set()) & kinds.get(y, set()))

@@ -5,6 +5,7 @@ import sqlite3
 from typing import Any
 
 from .decision_runtime import DecisionCandidate
+from .underworld_aggression import aggression_candidates, execute_aggression, leader_is_player, retaliate as _retaliate_effect
 
 
 def _jload(raw: str | None) -> dict[str, Any]:
@@ -47,7 +48,8 @@ def underworld_decision_candidates(conn: sqlite3.Connection, actor_id: int, tier
     # Directly suffered poaching is actor-accessible operational information, not omniscient rival knowledge.
     incidents = conn.execute(
         """SELECT * FROM underworld_incidents WHERE target_organization_id=? AND status='open'
-           AND incident_kind='protection_poach' ORDER BY severity DESC,day,id LIMIT 3""", (oid,),
+           AND incident_kind IN ('protection_poach','protection_dispute','attack_on_client','attack_on_member','extortion_attempt','territorial_challenge')
+           ORDER BY severity DESC,day,id LIMIT 3""", (oid,),
     ).fetchall()
     for inc in incidents:
         meta = _jload(inc["metadata_json"]); source = int(inc["source_organization_id"]) if inc["source_organization_id"] is not None else None
@@ -62,7 +64,8 @@ def underworld_decision_candidates(conn: sqlite3.Connection, actor_id: int, tier
             execution_kind="underworld_action", payload={**common, "response": "warn"},
             information_basis={"underworld_incident_id": int(inc["id"]), "access": "target_organization"}, tags=("protection", "grievance", "specific_incident"), risk=.25,
         ))
-        out.append(DecisionCandidate(
+        if not leader_is_player(conn, oid):
+          out.append(DecisionCandidate(
             key=f"underworld:poach:retaliate:{inc['id']}", provider_key="underworld", action_kind="retaliate_protection_poach",
             utility=base - .4 + aggression * 2.2 - investigative_heat / 80.0 - violence_heat / 90.0,
             rationale=f"Retaliate against {_org_name(conn, source)} for the concrete poaching attempt rather than escalating against an abstract rival.",
@@ -164,6 +167,9 @@ def underworld_decision_candidates(conn: sqlite3.Connection, actor_id: int, tier
             information_basis={"racket_id":int(invest["id"]),"treasury_known":True,"access":"own_organization"}, tags=("investment","racket"), estimated_cost=min(5.0,max(2.0,treasury*.12)), risk=.12,
         ))
 
+    out.extend(aggression_candidates(conn, actor_id, oid, {"aggression": aggression, "patience": patience, "ambition": ambition, "pragmatism": pragmatism},
+                                     day, investigative_heat, violence_heat, treasury))
+
     # Low-confidence underworld claims can trigger a domain-owned investigation record.
     for belief in envelope.get("beliefs") or []:
         if float(belief.get("confidence") or 0) >= .48 or str(belief.get("stance")) not in {"uncertain","accepts","rejects"}:
@@ -197,7 +203,9 @@ def execute_underworld_action(conn: sqlite3.Connection, actor_id: int, action_ki
             if action_kind=="retaliate_protection_poach":
                 uw.change_relation(conn,oid,source,kind="rival",hostility_delta=12,respect_delta=2,metadata={"response_to_incident":inc_id})
                 uw.add_heat(conn,oid,public=2,investigative=2,violence=5)
-                op=uw._operation(conn,oid,"retaliate_protection_poach",zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.65,metadata={"incident_id":inc_id})
+                import random as _r
+                effect=_retaliate_effect(conn,oid,source,inc_id,_r.Random(inc_id*104729+day))
+                op=uw._operation(conn,oid,"retaliate_protection_poach",zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.65,metadata={"incident_id":inc_id,"effect":effect})
             elif action_kind=="negotiate_protection_poach":
                 uw.change_relation(conn,oid,source,kind="hostile_peace",hostility_delta=-8,respect_delta=1,metadata={"response_to_incident":inc_id})
                 op=uw._operation(conn,oid,"negotiate_protection_poach",zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.7,metadata={"incident_id":inc_id})
@@ -206,6 +214,8 @@ def execute_underworld_action(conn: sqlite3.Connection, actor_id: int, action_ki
                 op=uw._operation(conn,oid,"warn_protection_poacher",zone_id=inc["zone_id"],target_organization_id=source,enterprise_id=enterprise,result="completed",success=.8,metadata={"incident_id":inc_id})
             conn.execute("UPDATE underworld_incidents SET status='answered' WHERE id=?",(inc_id,))
             return {"summary":f"Answered protection-poaching incident #{inc_id} through {action_kind}.","operation_id":op}
+        if action_kind in {"occupy_vacant_turf","challenge_zone","poach_protection","targeted_hit","negotiate_settlement"}:
+            return execute_aggression(conn,actor_id,oid,action_kind,payload,day)
         if action_kind=="seek_truce":
             other=int(payload["target_organization_id"]); uw.make_truce(conn,oid,other,metadata={"dec01_actor_id":actor_id}); return {"summary":f"Made a truce with {_org_name(conn,other)}."}
         if action_kind=="discipline_crew":

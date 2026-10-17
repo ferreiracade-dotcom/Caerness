@@ -1926,6 +1926,18 @@ def _territorial_attack(conn: sqlite3.Connection, organization_id: int, rng: ran
         scored.append((float(rel["hostility"])+rng.uniform(-12,12),zid,target))
     score,zid,target=max(scored)
     if score < 42: return False
+    return _resolve_territorial_attack(conn,organization_id,zid,target,rng,event_logger=event_logger)
+
+
+def _stage_edge(conn: sqlite3.Connection, organization_id: int) -> float:
+    """What the Stage of an outfit's named fighters adds to a fight (cultivated fighters outclass ordinary guards)."""
+    from .temperament import stage_power
+    return min(30.0, 7.0 * math.log1p(max(0.0, stage_power(conn, organization_id) - 6.0) / 4.0))
+
+
+def _resolve_territorial_attack(conn: sqlite3.Connection, organization_id: int, zid: int, target: int, rng: random.Random, *,
+                                event_logger: Callable[..., int] | None = None, own_bal: dict[str, float] | None = None) -> bool:
+    own_bal=own_bal or organization_manpower_balance(conn,organization_id)
     zone_name = conn.execute("SELECT name FROM underworld_zones WHERE id=?", (zid,)).fetchone()
     zname = str(zone_name[0]) if zone_name else f"zone {zid}"
     _record_territorial_occurrence(
@@ -1938,8 +1950,8 @@ def _territorial_attack(conn: sqlite3.Connection, organization_id: int, rng: ran
     defense=float(ctrl["strength"]) if ctrl else 35
     atk_org=conn.execute("SELECT violence_capacity,reputation_deterrence FROM underworld_organizations WHERE id=?",(organization_id,)).fetchone()
     def_org=conn.execute("SELECT violence_capacity,reputation_deterrence FROM underworld_organizations WHERE id=?",(target,)).fetchone()
-    attack=float(atk_org[0])*.40 + min(40,own_bal["slack"]*1.25)+rng.uniform(0,28)
-    defend=defense*.45+float(def_org[0])*.35+rng.uniform(0,25)
+    attack=float(atk_org[0])*.40 + min(40,own_bal["slack"]*1.25)+rng.uniform(0,28)+_stage_edge(conn,organization_id)
+    defend=defense*.45+float(def_org[0])*.35+rng.uniform(0,25)+_stage_edge(conn,target)
     success=1/(1+math.exp(-(attack-defend)/12))
     won=rng.random()<success
     # Membership losses are concrete flows, mostly active full members in organized street fights.
@@ -1981,6 +1993,10 @@ def _territorial_attack(conn: sqlite3.Connection, organization_id: int, rng: ran
                metadata={"attack_score":attack,"defense_score":defend,"attacker_losses":att_loss,"defender_losses":def_loss})
     add_heat(conn,organization_id,public=2.5,investigative=2.0,violence=5.0)
     add_heat(conn,target,public=1.2,investigative=1.0,violence=3.0)
+    from . import temperament as _tp
+    costly=att_loss>=1.0
+    _tp.adjust(conn,organization_id,(.05 if not costly else -.03) if won else -.12)
+    _tp.adjust(conn,target,-.10 if won else .05)
     _record_territorial_occurrence(
         conn, event_logger=event_logger, event_type="underworld_territorial_attack_resolved",
         title=f"Territorial attack resolved: {zname}", summary=f"The attack on {zname} was {'won' if won else 'repulsed'}.",
@@ -1993,22 +2009,34 @@ def _territorial_attack(conn: sqlite3.Connection, organization_id: int, rng: ran
     return True
 
 
-def _targeted_hit(conn: sqlite3.Connection, organization_id: int, rng: random.Random, *, event_logger: Callable[...,int] | None=None) -> bool:
-    rels=conn.execute("SELECT * FROM underworld_relations WHERE (organization_a_id=? OR organization_b_id=?) AND relation_kind IN ('war','rival') AND hostility>=58 ORDER BY hostility DESC",(organization_id,organization_id)).fetchall()
-    if not rels: return False
-    rel=rels[0]; target=int(rel["organization_b_id"] if int(rel["organization_a_id"])==organization_id else rel["organization_a_id"])
-    candidates=conn.execute("SELECT p.*,a.name FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.organization_id=? AND p.status='active' AND p.role_kind IN ('boss','underboss','lieutenant','crew_leader') AND a.status='active' ORDER BY p.authority DESC",(target,)).fetchall()
+def _targeted_hit(conn: sqlite3.Connection, organization_id: int, rng: random.Random, *, event_logger: Callable[...,int] | None=None,
+                  target: int | None=None, hired: bool=False) -> bool:
+    if target is None:
+        rels=conn.execute("SELECT * FROM underworld_relations WHERE (organization_a_id=? OR organization_b_id=?) AND relation_kind IN ('war','rival') AND hostility>=58 ORDER BY hostility DESC",(organization_id,organization_id)).fetchall()
+        if not rels: return False
+        rel=rels[0]; target=int(rel["organization_b_id"] if int(rel["organization_a_id"])==organization_id else rel["organization_a_id"])
+    # The engine never kills the player's character on its own; an attack on him is another kind of trouble (harm, pressure).
+    candidates=conn.execute("SELECT p.*,a.name FROM underworld_personnel p JOIN actors a ON a.id=p.actor_id WHERE p.organization_id=? AND p.status='active' AND p.role_kind IN ('boss','underboss','lieutenant','crew_leader') AND a.status='active' AND p.actor_id<>COALESCE((SELECT player_actor_id FROM player_state WHERE id=1),-1) ORDER BY p.authority DESC",(target,)).fetchall()
     if not candidates: return False
     victim=candidates[0]
     att=conn.execute("SELECT violence_capacity,cohesion FROM underworld_organizations WHERE id=?",(organization_id,)).fetchone()
     targ=conn.execute("SELECT violence_capacity,cohesion FROM underworld_organizations WHERE id=?",(target,)).fetchone()
-    chance=_clamp(22+float(att[0])*.42+float(att[1])*.12-float(targ[0])*.22-float(targ[1])*.08+rng.uniform(-12,12),5,88)/100
+    edge=(_stage_edge(conn,organization_id)-_stage_edge(conn,target))*.5
+    # A hired killer is a specialist's weapon: its skill does not depend on the buyer's own fighters.
+    chance=_clamp(22+(38 if hired else float(att[0])*.42)+float(att[1])*.12-float(targ[0])*.22-float(targ[1])*.08+(0 if hired else edge)+rng.uniform(-12,12),5,88)/100
     success=rng.random()<chance
     if success:
         from .household_life import mark_actor_deceased
         mark_actor_deceased(conn,int(victim["actor_id"]),reason="killed in an underworld hit",event_logger=event_logger)
         conn.execute("UPDATE underworld_personnel SET status='dead' WHERE actor_id=?",(int(victim["actor_id"]),))
-    op_id=_operation(conn,organization_id,"targeted_hit",target_organization_id=target,target_actor_id=int(victim["actor_id"]),result="killed" if success else "failed",success=chance)
+    op_id=_operation(conn,organization_id,"targeted_hit",target_organization_id=target,target_actor_id=int(victim["actor_id"]),result="killed" if success else "failed",success=chance,
+                     metadata={"style":"hired_killing" if hired else "assault","hired":hired})
+    from . import temperament as _tp
+    if success:
+        _tp.note_personal_blow(conn,int(victim["actor_id"]),organization_id,"fatal")
+        _tp.adjust(conn,organization_id,.04); _tp.adjust(conn,target,.03)
+    else:
+        _tp.adjust(conn,organization_id,-.08)
     if success:
         from .population_reconciliation import record_excess_mortality, population_source_for_location
         target_org=conn.execute("SELECT primary_location_id FROM underworld_organizations WHERE id=?",(target,)).fetchone()
@@ -2166,6 +2194,9 @@ def _review_heat(conn: sqlite3.Connection, organization_id: int, rng: random.Ran
             investigative=max(0,investigative-6); public=max(0,public-2)
     conn.execute("UPDATE underworld_heat SET public_heat=?,investigative_heat=?,violence_heat=?,last_review_day=?,next_review_day=? WHERE organization_id=?",
                  (_clamp(public),_clamp(investigative),_clamp(violent),_day(conn),_day(conn)+30,organization_id))
+    if actions:
+        from . import temperament as _tp
+        _tp.adjust(conn,organization_id,-.08)  # the law's attention makes an outfit cautious for a while
     return actions
 
 
@@ -2252,6 +2283,10 @@ def autonomous_organization_turn(conn: sqlite3.Connection, organization_id: int,
     ensure_crew_leadership(conn,organization_id,rng=rng)
     ensure_zone_staffing(conn,organization_id,rng=rng)
     cash=collect_monthly_income(conn,organization_id)
+    from .payroll import run_outfit_payroll
+    payroll=run_outfit_payroll(conn,organization_id)
+    from .loyalty import outfit_morale
+    morale=outfit_morale(conn,organization_id,int(payroll.get('months',0)))
     # Anonymous membership still turns over in the background. Concrete crews are reconciled
     # immediately afterward so aggregate growth/loss cannot detach from operational manpower.
     from .underworld import simulate_underworld_membership_turnover
@@ -2265,7 +2300,7 @@ def autonomous_organization_turn(conn: sqlite3.Connection, organization_id: int,
     action='decision_runtime_owned'; acted=False; hit=False
     lifestyle=review_leader_lifestyle(conn,organization_id,rng)
     enforcement=_review_heat(conn,organization_id,rng,event_logger=event_logger)
-    return {'acted':acted,'action':action,'hit':hit,'leader_actor_id':leader,'income':cash,'lifestyle_purchase':lifestyle,'enforcement_actions':enforcement}
+    return {'acted':acted,'action':action,'hit':hit,'leader_actor_id':leader,'income':cash,'payroll':payroll,'morale':morale,'lifestyle_purchase':lifestyle,'enforcement_actions':enforcement}
 
 
 def next_rebuild_underworld_due_day(conn:sqlite3.Connection,after_day:int,end_day:int)->int|None:
@@ -2283,7 +2318,12 @@ def process_due_rebuild_underworld(conn:sqlite3.Connection,day:int,*,event_logge
         actions+=int(bool(out.get('acted'))); hits+=int(bool(out.get('hit'))); enforcement+=int(out.get('enforcement_actions',0))
         after=conn.execute("SELECT current_leader_actor_id FROM underworld_organizations WHERE id=?",(oid,)).fetchone()[0]
         succession+=int(before!=after)
-    return {'rebuild_underworld_orgs_due':len(orgs),'rebuild_underworld_actions':actions,'rebuild_underworld_hits':hits,'rebuild_underworld_enforcement':enforcement,'rebuild_underworld_successions':succession}
+    from .underworld_aggression import city_crackdowns, restore_suppressed_rackets, street_gang_churn
+    restore_suppressed_rackets(conn,day)
+    crackdowns=city_crackdowns(conn,day)
+    churn=street_gang_churn(conn,day)
+    enforcement+=crackdowns
+    return {'rebuild_underworld_orgs_due':len(orgs),'rebuild_underworld_actions':actions,'rebuild_underworld_hits':hits,'rebuild_underworld_enforcement':enforcement,'rebuild_underworld_successions':succession,'rebuild_underworld_gangs_collapsed':churn['collapsed'],'rebuild_underworld_gangs_founded':churn['founded']}
 
 
 def _membership_status_for_absorbed(culture: sqlite3.Row) -> str:

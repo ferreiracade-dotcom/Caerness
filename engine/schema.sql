@@ -4895,3 +4895,24 @@ CREATE TABLE IF NOT EXISTS underworld_network_presence (
     source TEXT NOT NULL DEFAULT 'world_bible',
     PRIMARY KEY (institution_actor_id, location_id)
 );
+
+-- Gap 4b: violence temperament per outfit (base from type/canon/leader, current moved by events) and grudges toward particular rivals.
+CREATE TABLE IF NOT EXISTS underworld_temperament (
+    organization_id INTEGER PRIMARY KEY REFERENCES underworld_organizations(id) ON DELETE CASCADE,
+    tradition REAL NOT NULL, base REAL NOT NULL, current REAL NOT NULL, style TEXT NOT NULL,
+    leader_actor_id INTEGER, last_day INTEGER NOT NULL DEFAULT 0, metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS underworld_grudges (
+    organization_id INTEGER NOT NULL REFERENCES underworld_organizations(id) ON DELETE CASCADE,
+    rival_organization_id INTEGER NOT NULL REFERENCES underworld_organizations(id) ON DELETE CASCADE,
+    intensity REAL NOT NULL CHECK (intensity BETWEEN 0 AND 100), last_day INTEGER NOT NULL,
+    cause_kind TEXT, cause_actor_id INTEGER, started_day INTEGER NOT NULL, metadata_json TEXT NOT NULL DEFAULT '{}',
+    PRIMARY KEY (organization_id, rival_organization_id)
+);
+
+-- Gap 4b: wages owed. One row per paying holder (outfit, business, household); months unpaid and the sum owed. Never a negative balance.
+CREATE TABLE IF NOT EXISTS payroll_arrears (
+    holder_kind TEXT NOT NULL CHECK (holder_kind IN ('outfit','business','household')),
+    holder_id INTEGER NOT NULL, months_behind INTEGER NOT NULL DEFAULT 0, owed REAL NOT NULL DEFAULT 0 CHECK (owed>=0),
+    last_paid_day INTEGER, updated_day INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (holder_kind, holder_id)
+);

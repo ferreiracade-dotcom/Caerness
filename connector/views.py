@@ -148,6 +148,11 @@ def _ordinal(n: int) -> str:
     return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
+def _arrears_word(conn, kind: str, hid: int):
+    from engine.payroll import arrears_words, get_arrears
+    return arrears_words(get_arrears(conn, kind, hid)["months"]) or None
+
+
 def _business(conn, e, me: int | None = None) -> dict:
     """One business as the engine records it: kind, money, staff, rackets run through it."""
     kind = conn.execute(
@@ -165,7 +170,23 @@ def _business(conn, e, me: int | None = None) -> dict:
     standing = f"capital {_ordinal(rank)} of {total} businesses in the world"
     return _drop_none({"id": e["id"], "name": e["name"], "kind": kind[0] if kind else e["enterprise_kind"], "standing": standing,
                        "capital": _num(e["capital"]), "cash": _num(e["cash"]), "debt": _num(e["debt"]) or None,
-                       "staff": staff or None, "rackets": rackets or None})
+                       "staff": staff or None, "rackets": rackets or None,
+                       "wages": _arrears_word(conn, "business", int(e["id"]))})
+
+
+def _unpaid_people(conn, hid: int) -> list[str]:
+    from engine.payroll import get_arrears
+    months = get_arrears(conn, "household", hid)["months"]
+    if months < 1:
+        return []
+    how = "has not been paid this month" if months == 1 else f"has not been paid in {({2: 'two', 3: 'three', 4: 'four', 5: 'five'}).get(months, 'many')} months"
+    return [f"{r[0]} {how}" for r in conn.execute(
+        """SELECT a.name FROM household_service_terms t JOIN actors a ON a.id=t.actor_id WHERE t.household_id=? AND t.status='active' ORDER BY t.id LIMIT 4""", (hid,))]
+
+
+def _outfit_mood(conn, oid: int) -> str:
+    from engine.loyalty import outfit_mood
+    return outfit_mood(conn, oid)
 
 
 def _holdings(conn, me: int) -> dict:
@@ -190,6 +211,7 @@ def _holdings(conn, me: int) -> dict:
         orgs.append(_drop_none({"name": o["name"], "type": o["organization_type"], "standing": standing,
                                 "members": int(o["member_count_estimate"] or 0),
                                 "treasury": _num(o["treasury"]), "violence_capacity": _num(o["violence_capacity"]),
+                                "mood": _outfit_mood(conn, int(o["id"])) or None,
                                 "key_people": people or None}))
     hh = conn.execute(
         """SELECT h.* FROM household_members m JOIN households h ON h.id=m.household_id
@@ -199,7 +221,10 @@ def _holdings(conn, me: int) -> dict:
         members = [f"{r[0]} ({r[1]})" for r in conn.execute(
             """SELECT a.name,m.role FROM household_members m JOIN actors a ON a.id=m.actor_id
                WHERE m.household_id=? AND m.actor_id<>? AND m.status='active' LIMIT 6""", (hh["id"], me))]
+        from engine.payroll import arrears_words, get_arrears
         household = _drop_none({"name": hh["name"], "wealth": _num(hh["wealth"]), "liquidity": _num(hh["liquidity"]),
+                                "wages": arrears_words(get_arrears(conn, "household", int(hh["id"]))["months"]) or None,
+                                "unpaid": _unpaid_people(conn, int(hh["id"])) or None,
                                 "members": members or None})
     w = conn.execute("SELECT liquid_wealth,property_value,lifestyle_level FROM underworld_leader_wealth WHERE actor_id=?", (me,)).fetchone()
     means = _drop_none({"liquid": _num(w[0]), "property": _num(w[1]), "lifestyle": _num(w[2])}) if w else None
