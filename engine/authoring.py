@@ -41,6 +41,33 @@ def _domain(fn, *a, **k):
         raise AuthoringRefused(str(e)) from e
 
 
+def _marry(conn, aid: int, tid: int, sex: str, me_age: int, day: int, call_id: str) -> None:
+    """Authored spouses have been married a while: they share one household and the union is dated in the past."""
+    import random
+    husband, wife = (aid, tid) if sex == "male" else (tid, aid)
+    hh = conn.execute("""SELECT household_id FROM household_members WHERE actor_id=? AND status='active'
+                         ORDER BY (role='head') DESC, household_id LIMIT 1""", (tid,)).fetchone()
+    if hh is None:
+        hh = conn.execute("SELECT current_household_id FROM actor_life_profiles WHERE actor_id=? AND current_household_id IS NOT NULL", (tid,)).fetchone()
+    if hh is not None:
+        uid = _domain(create_union, conn, husband, wife, household_id=int(hh[0]))
+    else:
+        hname = conn.execute("SELECT name FROM actors WHERE id=?", (husband,)).fetchone()[0]
+        wname = conn.execute("SELECT name FROM actors WHERE id=?", (wife,)).fetchone()[0]
+        uid = _domain(create_union, conn, husband, wife, create_new_household_name=f"Household of {hname} and {wname}")
+    younger = min(me_age, _age(conn, tid, day))
+    years = random.Random(f"{call_id}:{husband}:{wife}").randint(1, max(1, min(30, younger - 18)))
+    start = day - years * 365
+    conn.execute("UPDATE household_unions SET started_day=? WHERE id=?", (start, uid))
+    conn.execute("""UPDATE kinship_links SET started_day=? WHERE kin_kind='spouse' AND actor_a_id IN (?,?) AND actor_b_id IN (?,?)""",
+                 (start, husband, wife, husband, wife))
+    conn.execute("UPDATE life_events SET day=? WHERE event_kind='union' AND day=? AND actor_id=? AND related_actor_id=?", (start, day, husband, wife))
+    if hh is None:
+        hid = conn.execute("SELECT household_id FROM household_unions WHERE id=?", (uid,)).fetchone()[0]
+        conn.execute("UPDATE households SET created_day=? WHERE id=?", (start, hid))
+        conn.execute("UPDATE life_events SET day=? WHERE event_kind='household_formation' AND day=? AND household_id=?", (start, day, hid))
+
+
 def _lives_at(conn, aid: int, loc: int) -> bool:
     r = conn.execute("SELECT home_location_id,current_location_id FROM actors WHERE id=?", (aid,)).fetchone()
     return loc in (r[0], r[1])
@@ -232,7 +259,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
             why = prohibited_union_kinship_reason(conn, aid, tid)
             if why:
                 _no(f"no union between close kin ({why})")
-            _domain(create_union, conn, *((aid, tid) if sex == "male" else (tid, aid)))
+            _marry(conn, aid, tid, sex, me_age, day, call_id)
     if wants:
         conn.execute("INSERT INTO goals(actor_id,description,priority,progress,status,created_day) VALUES (?,?,50,0,'active',?)", (aid, wants, day))
     for n in notes:

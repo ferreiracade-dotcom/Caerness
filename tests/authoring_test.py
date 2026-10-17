@@ -400,9 +400,54 @@ def run_minor():
         conn.close()
 
 
+def run_spouse():
+    from engine.authoring import author
+
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        conn, me, place = _open(tmp, "sp.db")
+        day = _day_of(conn)
+        base = """SELECT a.id FROM actors a JOIN actor_life_profiles p ON p.actor_id=a.id WHERE a.actor_type='character' AND a.status='active'
+                  AND p.demographic_sex='male' AND p.life_status='living' AND p.birth_day BETWEEN ?-60*365 AND ?-25*365 AND a.id<>?
+                  AND NOT EXISTS (SELECT 1 FROM household_unions u WHERE u.status='active' AND a.id IN (u.actor_a_id,u.actor_b_id)) %s ORDER BY a.id LIMIT 1"""
+        from engine.civilian import create_household
+        free = "AND NOT EXISTS (SELECT 1 FROM household_members m WHERE m.actor_id=a.id AND m.status='active')"
+        head = conn.execute(base % free, (day, day, me)).fetchone()
+        loner = conn.execute(base % (free + " AND a.id<>%d" % head["id"]), (day, day, me)).fetchone()
+        create_household(conn, "Test household", head_actor_id=head["id"], location_id=place)  # a bachelor who heads a household
+        assert head and loner, (head, loner)
+
+        def check(husband, wife_id, key):
+            u = conn.execute("SELECT * FROM household_unions WHERE status='active' AND ? IN (actor_a_id,actor_b_id) AND ? IN (actor_a_id,actor_b_id)", (husband, wife_id)).fetchone()
+            births = [conn.execute("SELECT birth_day FROM actor_life_profiles WHERE actor_id=?", (x,)).fetchone()[0] for x in (husband, wife_id)]
+            assert day - 30 * 365 <= u["started_day"] < day, u["started_day"]
+            assert u["started_day"] >= max(births) + 18 * 365, (u["started_day"], births)
+            ks = conn.execute("SELECT started_day FROM kinship_links WHERE kin_kind='spouse' AND actor_a_id IN (?,?) AND actor_b_id IN (?,?)", (husband, wife_id, husband, wife_id)).fetchall()
+            assert ks and all(r[0] == u["started_day"] for r in ks), (ks, u["started_day"])
+            assert _count(conn, "SELECT COUNT(*) FROM life_events WHERE event_kind='union' AND day=? AND actor_id IN (?,?)", day, husband, wife_id) == 0
+            ev = conn.execute("SELECT day FROM life_events WHERE event_kind='union' AND actor_id IN (?,?) AND related_actor_id IN (?,?)", (husband, wife_id, husband, wife_id)).fetchall()
+            assert ev and all(r[0] == u["started_day"] for r in ev), (ev, u["started_day"])
+            return u
+
+        # a wife joins the household her husband heads
+        hh = conn.execute("SELECT household_id FROM household_members WHERE actor_id=? AND status='active' AND role='head'", (head["id"],)).fetchone()[0]
+        w = author(conn, me, "person", {"sex": "female", "age": 30, "ties": [{"actor_id": head["id"], "as": "spouse"}]}, "sp1")
+        assert conn.execute("SELECT status FROM household_members WHERE household_id=? AND actor_id=?", (hh, w["actor_id"])).fetchone()[0] == "active"
+        assert conn.execute("SELECT current_household_id FROM actor_life_profiles WHERE actor_id=?", (w["actor_id"],)).fetchone()[0] == hh
+        check(head["id"], w["actor_id"], "sp1")
+
+        # a husband with no household: both in one new household, he heads it, dated with the marriage
+        w2 = author(conn, me, "person", {"sex": "female", "age": 30, "ties": [{"actor_id": loner["id"], "as": "spouse"}]}, "sp2")
+        u = check(loner["id"], w2["actor_id"], "sp2")
+        rows = conn.execute("SELECT actor_id,role,household_id FROM household_members WHERE status='active' AND actor_id IN (?,?)", (loner["id"], w2["actor_id"])).fetchall()
+        assert len(rows) == 2 and len({r[2] for r in rows}) == 1, [tuple(r) for r in rows]
+        assert [r[1] for r in rows if r[0] == loner["id"]] == ["head"]
+        assert conn.execute("SELECT created_day FROM households WHERE id=?", (rows[0][2],)).fetchone()[0] == u["started_day"]
+        conn.close()
+
+
 if __name__ == "__main__":
     only = sys.argv[1] if len(sys.argv) > 1 else None
-    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor)):
+    for name, fn in (("run", run), ("run_orgs", run_orgs), ("presence", run_presence), ("bodies", run_bodies), ("caps", run_caps), ("rarity", run_rarity), ("errors", run_errors), ("minor", run_minor), ("spouse", run_spouse)):
         if only in (None, name):
             fn()
     print("authoring_test: ok")
