@@ -79,7 +79,7 @@ def run():
            FROM background_person_profiles p JOIN background_population_identity_links l
              ON l.partition_id=p.partition_id AND l.local_uid=p.local_uid JOIN actors a ON a.id=l.actor_id
            ORDER BY a.id LIMIT 1""").fetchone()
-    wrong=(FIRST_MALE if sex=='female' else FIRST_FEMALE)[0]
+    wrong=next(w for w in (FIRST_MALE if sex=='female' else FIRST_FEMALE) if not c.execute('SELECT 1 FROM actors WHERE name=?',(f'{w} {family}',)).fetchone())  # a name nobody has
     old=f"{wrong} {family}"
     c.execute("UPDATE background_person_profiles SET given_name=? WHERE partition_id=? AND local_uid=?",(wrong,pid,uid))
     c.execute("UPDATE actors SET name=? WHERE id=?",(old,aid))

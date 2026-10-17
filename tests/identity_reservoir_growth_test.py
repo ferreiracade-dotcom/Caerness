@@ -24,8 +24,12 @@ def run():
     before=load_partition(c,pid)[1].sample_size
 
     # Forty working-age men are wanted in one city of ~110,000: every one is a local.
-    got=[resolve_background_person(c,reason='test demand',location_id=loc,min_age=24,max_age=58,demographic_sex='male') for _ in range(40)]
-    assert all(got) and len(set(got))==40
+    # The underworld already drew on this city's sample (gap 4a): keep asking until the sample has to grow.
+    got=[]
+    while load_partition(c,pid)[1].sample_size==before and len(got)<1000:
+        got.append(resolve_background_person(c,reason='test demand',location_id=loc,min_age=24,max_age=58,demographic_sex='male'))
+    got+=[resolve_background_person(c,reason='test demand',location_id=loc,min_age=24,max_age=58,demographic_sex='male') for _ in range(40)]
+    assert all(got) and len(set(got))==len(got)>=40
     rows=c.execute(f"""SELECT a.current_location_id,lp.demographic_sex,a.name FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id
                        WHERE a.id IN ({','.join('?'*len(got))})""",got).fetchall()
     assert all(r[0]==loc and r[1]=='male' and r[2].split()[0] in FIRST_MALE for r in rows), rows[:5]

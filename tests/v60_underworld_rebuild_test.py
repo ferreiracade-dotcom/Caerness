@@ -29,12 +29,12 @@ def bootstrap():
 def run():
     assert ENGINE_VERSION=='0.60.0' and SCHEMA_VERSION>=59
     c=bootstrap()
-    # Clean rebuild firewall: old named underworld answers are quarry, not active runtime facts.
+    # Gap 4a: the World Bible outfits are re-adopted at their canon places, no longer quarry.
     for name in ('Tallow Family','Greyhook Wharf Company','Saltwake Combine'):
         r=c.execute("select id,status from actors where name=?",(name,)).fetchone()
         if r:
-            assert r['status']=='retired', (name,r['status'])
-            assert c.execute('select 1 from underworld_rebuild_quarry where actor_id=?',(int(r['id']),)).fetchone()
+            assert r['status']=='active', (name,r['status'])
+            assert not c.execute('select 1 from underworld_rebuild_quarry where actor_id=?',(int(r['id']),)).fetchone()
     # Current World Bible independently retains these institutions/ecologies; anti-grandfathering
     # targets the old city-assigned criminal organizations, not all older underworld-adjacent facts.
     for name in ('Painted Veil','The Hush','The Reckoning','Cormorants','Red Board'):
@@ -45,9 +45,9 @@ def run():
 
     alder=int(c.execute("select id from locations where name='Aldergate'").fetchone()[0])
     snap=city_underworld_snapshot(c,alder)
-    assert snap['zones']==12, snap
-    assert snap['organizations']>=8 and snap['forms'].get('gang',0)>=6, snap
-    assert snap['crews']>=snap['organizations'], snap
+    assert snap['zones']==10, snap  # canon-shaped Aldergate: money and paperwork, few street gangs
+    assert snap['organizations']>=8 and 1<=snap['forms'].get('gang',0)<=3, snap
+    assert snap['crews']>=snap['organizations']-1, snap  # Tallow holds fronts, not crews, until it needs them
     assert snap['rackets']>=snap['organizations'], snap
     assert snap['crew_manpower_estimate']>0 and snap['open_core_manpower_estimate']>0
     overall=snap['open_core_manpower_estimate']/snap['crew_manpower_estimate']

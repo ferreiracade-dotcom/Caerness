@@ -229,6 +229,28 @@ def activate_spectacle_substrate(conn: sqlite3.Connection) -> dict[str, int]:
         )
         if not existed:
             prize_markets_created += 1
+    # World Bible fighting by place (Red Yard, dockside and warehouse rings, pits, clubs, prestige halls).
+    from .underworld_canon import FIGHTING
+    for place, specs in FIGHTING.items():
+        for sp in specs:
+            lid = _location(conn, sp.get("venue") or sp.get("location") or place)
+            if lid is None:
+                continue
+            existed = conn.execute("SELECT 1 FROM prizefight_markets WHERE market_key=?", (sp["key"],)).fetchone()
+            pool = _ensure_latent_pool(conn, sp["key"], lid, sp["pool"], day)
+            if not existed:
+                latent_pools_created += 1
+                prize_markets_created += 1
+            conn.execute(
+                """INSERT INTO prizefight_markets(
+                       market_key,name,location_id,market_kind,legality,coercion_profile,cadence_days,next_card_day,latent_pool_id,pool_size,public_form,injury_load,status,metadata_json
+                   ) VALUES (?,?,?,?,?,?,?,?,?,?,50,?, 'active',?)
+                   ON CONFLICT(market_key) DO UPDATE SET location_id=excluded.location_id,latent_pool_id=excluded.latent_pool_id,pool_size=excluded.pool_size,status='active'""",
+                (sp["key"], sp["name"], lid, sp.get("kind", "prize_hall"), sp["legality"], sp["coercion"], sp["cadence"], day + 7 + sp["pool"] % 17,
+                 pool, sp["pool"], 9 if sp["coercion"] == "coercive" else 5,
+                 json.dumps({"source": "world_bible", "locator": sp["locator"], "settlement": place, "network": sp.get("network"),
+                             "coercive_pit_logic": sp["coercion"] == "coercive"}, sort_keys=True)),
+            )
     return {
         "spectacle_books": int(conn.execute("SELECT COUNT(*) FROM spectacle_books WHERE status='active'").fetchone()[0]),
         "spectacle_books_created": books_created,

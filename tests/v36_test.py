@@ -27,12 +27,16 @@ def run():
         c.execute("INSERT INTO institution_profiles(actor_id,institution_kind) VALUES (?,'gambling/fight syndicate')",(red,))
         before_actors=int(c.execute("SELECT COUNT(*) FROM actors").fetchone()[0])
         r1=activate_spectacle_substrate(c); r2=activate_spectacle_substrate(c)
-        assert r1['spectacle_books']==5 and r1['prizefight_markets']==3,r1
+        # 3 structural prize halls plus the World Bible fighting whose place exists here (gap 4a: warehouse ring, Waymeet, Aldergate clubs)
+        assert r1['spectacle_books']==5 and r1['prizefight_markets']==6,r1
         assert r1['spectacle_books_created']==5 and r2['spectacle_books_created']==0,(r1,r2)
-        assert r1['prizefight_markets_created']==3 and r2['prizefight_markets_created']==0,(r1,r2)
-        assert int(c.execute("SELECT COUNT(*) FROM latent_entities WHERE latent_kind='prizefighter_pool'").fetchone()[0])==3
+        assert r1['prizefight_markets_created']==6 and r2['prizefight_markets_created']==0,(r1,r2)
+        assert int(c.execute("SELECT COUNT(*) FROM latent_entities WHERE latent_kind='prizefighter_pool'").fetchone()[0])==6
         assert int(c.execute("SELECT COUNT(*) FROM actors").fetchone()[0])==before_actors
-        assert int(c.execute("SELECT COUNT(*) FROM prizefight_markets WHERE coercion_profile<>'voluntary' OR legality='criminal'").fetchone()[0])==0
+        assert int(c.execute("SELECT COUNT(*) FROM prizefight_markets WHERE (coercion_profile<>'voluntary' OR legality='criminal') AND json_extract(metadata_json,'$.source') IS NOT 'world_bible'").fetchone()[0])==0
+
+        # The card/champion mechanics below are exercised on the three structural halls alone; the World Bible rings are paused here.
+        c.execute("UPDATE prizefight_markets SET status='paused' WHERE json_extract(metadata_json,'$.source')='world_bible'")
 
         # Published odds are public-belief state, not a leak of hidden/current cultivation capability.
         a=_actor(c,'Public Equal A',locs['Cairnholt'],'First'); b=_actor(c,'Public Equal B',locs['Cairnholt'],'Fifth')

@@ -1126,17 +1126,9 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     # v0.60 keeps the old module only for generic law/evidence compatibility. Legacy named
     # underworld institutions are retired by the schema firewall and therefore do not reactivate.
     out.update(activate_underworld_substrate(conn))
-    from .underworld_rebuild import seed_city_underworld
-    aldergate = conn.execute("SELECT id FROM locations WHERE name='Aldergate'").fetchone()
-    if aldergate:
-        snap = seed_city_underworld(conn, city_location_id=int(aldergate[0]))
-        out.update({
-            'v060_underworld_organizations': int(snap.get('organizations',0)),
-            'v060_underworld_zones': int(snap.get('zones',0)),
-            'v060_underworld_crews': int(snap.get('crews',0)),
-            'v060_underworld_rackets': int(snap.get('rackets',0)),
-            'v060_underworld_protection_accounts': int(snap.get('protection_accounts',0)),
-        })
+    from .underworld_ecology import seed_all_settlements
+    # Canon-shaped underworld in every settlement (gap 4a); replaces the Aldergate-only procedural city.
+    out.update(seed_all_settlements(conn))
     out.update(activate_post76_agency_conflict(conn))
     out.update(activate_post80_organization_lifecycle(conn))
     from .hollow import activate_hollow_substrate

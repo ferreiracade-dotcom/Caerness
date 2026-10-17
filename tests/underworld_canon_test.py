@@ -38,7 +38,8 @@ def run():
         for place, specs in FIGHTING.items():
             assert place in places, place
             for s in specs:
-                assert s["locator"].startswith("[") and s["legality"] in ("licensed", "tolerated", "illegal")
+                assert s["locator"].startswith("[") and s["legality"] in ("licensed", "tolerated", "unlicensed", "criminal")
+                assert s.get("kind", "prize_hall") in ("prize_hall", "back_room", "pit", "private_club")
                 assert s["coercion"] in ("voluntary", "coercive") and s.get("location", place) in places
                 assert s.get("venue") is None or s["venue"] in places, s
         assert {"Tallow Family", "Greyhook Wharf Company", "Saltwake Combine"} == set(CANON_OUTFITS)

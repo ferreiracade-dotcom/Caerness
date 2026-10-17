@@ -120,15 +120,15 @@ REGION_DEFAULTS = {
                            "kinds": _w(fencing=2, fraud=2, gaming=2, lending=1, smuggling=1, vice=1)},
 }
 
-# Fighting by place (notes section 1 [1662]-[1693], section 3). legality: licensed, tolerated or illegal.
+# Fighting by place (notes section 1 [1662]-[1693], section 3). legality (prizefight_markets values): licensed, tolerated, unlicensed or criminal; kind: prize_hall, back_room, pit or private_club.
 # `venue` is an existing location the market sits at; without one the market sits at the settlement.
 FIGHTING = {
     "Toll’s Reach": [
         {"key": "toll-red-yard", "name": "The Red Yard challenge ground", "venue": "The Red Yard", "legality": "licensed",
          "coercion": "voluntary", "pool": 18, "cadence": 21, "locator": "[415]-[417] [1787]"},
-        {"key": "toll-dockside-rings", "name": "Toll’s Reach dockside rings", "venue": "River Quays", "legality": "tolerated",
+        {"key": "toll-dockside-rings", "name": "Toll’s Reach dockside rings", "kind": "back_room", "venue": "River Quays", "legality": "tolerated",
          "coercion": "voluntary", "pool": 16, "cadence": 14, "locator": "[1787]"},
-        {"key": "toll-red-board-warehouse-ring", "name": "Red Board warehouse ring", "legality": "illegal",
+        {"key": "toll-red-board-warehouse-ring", "name": "Red Board warehouse ring", "kind": "pit", "legality": "criminal",
          "coercion": "coercive", "pool": 12, "cadence": 18, "locator": "[1656]-[1660] [1685] [4365]",
          "network": "Red Board"},
     ],
@@ -138,9 +138,9 @@ FIGHTING = {
                   "coercion": "voluntary", "pool": 30, "cadence": 25, "locator": "[1808]"}],
     "Waymeet": [{"key": "waymeet-open-prizefighting", "name": "Waymeet open prizefighting", "legality": "tolerated",
                  "coercion": "voluntary", "pool": 18, "cadence": 12, "locator": "[1792]-[1794]"}],
-    "Aldergate": [{"key": "aldergate-private-clubs", "name": "Aldergate private fighting clubs", "legality": "illegal",
+    "Aldergate": [{"key": "aldergate-private-clubs", "name": "Aldergate private fighting clubs", "kind": "private_club", "legality": "criminal",
                    "coercion": "voluntary", "pool": 10, "cadence": 30, "locator": "[1789]-[1791]"}],
-    "Stormhollow": [{"key": "stormhollow-debt-pits", "name": "Stormhollow debt pits", "legality": "illegal",
+    "Stormhollow": [{"key": "stormhollow-debt-pits", "name": "Stormhollow debt pits", "kind": "pit", "legality": "criminal",
                      "coercion": "coercive", "pool": 14, "cadence": 20, "locator": "[1823]-[1825]"}],
     "Brackenfell": [{"key": "thornward-seasonal-promoters", "name": "Thornward seasonal fight promoters",
                      "legality": "tolerated", "coercion": "voluntary", "pool": 12, "cadence": 40,

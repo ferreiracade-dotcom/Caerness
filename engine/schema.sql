@@ -4886,3 +4886,12 @@ CREATE TABLE IF NOT EXISTS leadership_transition_cases (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_leadership_transition_open ON leadership_transition_cases(institution_actor_id,authority_key) WHERE status IN ('open','deferred');
 CREATE INDEX IF NOT EXISTS idx_leadership_transition_status ON leadership_transition_cases(status,opened_day,institution_actor_id,id);
+
+-- Underworld networks have presence by place, not a seat or territory (World Bible Part Twenty-Two; gap 4a).
+CREATE TABLE IF NOT EXISTS underworld_network_presence (
+    institution_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    location_id INTEGER NOT NULL REFERENCES locations(id) ON DELETE CASCADE,
+    strength TEXT NOT NULL DEFAULT 'present' CHECK (strength IN ('strong','present','thin')),
+    source TEXT NOT NULL DEFAULT 'world_bible',
+    PRIMARY KEY (institution_actor_id, location_id)
+);

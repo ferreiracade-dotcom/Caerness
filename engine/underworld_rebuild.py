@@ -47,11 +47,9 @@ def _clamp(v: float, lo: float = 0.0, hi: float = 100.0) -> float:
 # generated organization; history can move every continuous dimension without changing form.
 
 
-LEGACY_UNDERWORLD_QUARRY_NAMES = (
-    # Anti-grandfathering targets the old city-assigned durable criminal organizations, not
-    # every pre-existing underworld-adjacent institution/ecology in the current World Bible.
-    "Tallow Family", "Greyhook Wharf Company", "Saltwake Combine",
-)
+LEGACY_UNDERWORLD_QUARRY_NAMES: tuple[str, ...] = ()
+# Empty since gap 4a: the World Bible outfits (Tallow Family, Greyhook Wharf Company, Saltwake Combine) are re-adopted
+# at their canon places by engine/underworld_ecology.py. The firewall stays for any future quarry names.
 
 def enforce_rebuild_firewall(conn: sqlite3.Connection) -> int:
     """Retire inherited underworld answers after seed import as well as during migration.

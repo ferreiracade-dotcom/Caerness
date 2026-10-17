@@ -55,9 +55,12 @@ def run():
     # --- 6.2 shared geography: zone -> anchor location -> city, resolvable without
     # parsing zone_key strings. Backfilling is opt-in and additive; existing zones start
     # unanchored (verified) and become resolvable once anchored.
-    zones_before = c.execute("select id,anchor_location_id from underworld_zones where city_location_id=?", (alder,)).fetchall()
+    # Gap 4a: zones named for a canon district that is already a location row (Exchange Quarter) start anchored to it;
+    # the procedural quarters start unanchored.
+    canon_zone = c.execute("select z.anchor_location_id a,l.name n from underworld_zones z join locations l on l.id=z.anchor_location_id where z.city_location_id=?", (alder,)).fetchall()
+    assert {r['n'] for r in canon_zone} == {'Exchange Quarter'}, [tuple(r) for r in canon_zone]
+    zones_before = c.execute("select id,anchor_location_id from underworld_zones where city_location_id=? and anchor_location_id is null", (alder,)).fetchall()
     assert zones_before, "expected seeded Aldergate zones"
-    assert all(z['anchor_location_id'] is None for z in zones_before), "zones should start unanchored"
     linked = ensure_zone_anchor_locations(c, alder)
     assert len(linked) == len(zones_before)
     for zkey, loc_id in linked.items():
@@ -186,31 +189,15 @@ def run():
         'decision_runtime_owned',
     }
 
-    # --- 6.8 no perfect-map invention: the five zones whose theme (not name, count, or
-    # boundary) is confirmed in the World Bible get an honest citation; the other seven
-    # stay purely procedural, and nothing about zone identity/count/adjacency changes.
-    from engine.underworld_rebuild import apply_world_bible_zone_theme_citations, ALDERGATE_WORLD_BIBLE_ZONE_THEMES
+    # --- 6.8 no perfect-map invention. Gap 4a: Aldergate's zones now carry their own provenance (canon districts
+    # say world_bible, the rest procedural), so the old theme-citation pass finds nothing to annotate and changes nothing.
+    from engine.underworld_rebuild import apply_world_bible_zone_theme_citations
     zone_count_before = int(c.execute("select count(*) from underworld_zones where city_location_id=?", (alder,)).fetchone()[0])
-    touched = apply_world_bible_zone_theme_citations(c, alder)
-    zone_count_after = int(c.execute("select count(*) from underworld_zones where city_location_id=?", (alder,)).fetchone()[0])
-    assert zone_count_after == zone_count_before, "citation pass must not seed, remove, or rename zones"
-    assert set(touched) == set(ALDERGATE_WORLD_BIBLE_ZONE_THEMES.keys())
-    themed_rows = c.execute(
-        "select metadata_json from underworld_zones where city_location_id=? and json_extract(metadata_json,'$.world_bible_theme_grounded')=1",
-        (alder,),
-    ).fetchall()
-    assert len(themed_rows) == 5
-    untouched_rows = c.execute(
-        "select count(*) from underworld_zones where city_location_id=? and (json_extract(metadata_json,'$.world_bible_theme_grounded') is null)",
-        (alder,),
-    ).fetchone()[0]
-    assert int(untouched_rows) == zone_count_before - 5, "the other seven zones must remain unannotated/procedural"
-    # idempotent, and never claims full canon for a procedurally-bounded zone.
-    touched_again = apply_world_bible_zone_theme_citations(c, alder)
-    assert touched_again == []
-    for row in themed_rows:
-        meta = __import__('json').loads(row['metadata_json'])
-        assert meta.get('not_world_bible_canon') is True, "theme citation must not silently upgrade the zone itself to canon"
+    assert apply_world_bible_zone_theme_citations(c, alder) == []
+    assert int(c.execute("select count(*) from underworld_zones where city_location_id=?", (alder,)).fetchone()[0]) == zone_count_before
+    src = {r['name']: __import__('json').loads(r['metadata_json']).get('source') for r in c.execute("select name,metadata_json from underworld_zones where city_location_id=?", (alder,))}
+    assert {n for n, v in src.items() if v == 'world_bible'} == {'Caravan Quarter', 'Exchange Quarter', 'Warehouse Row'}, src
+    assert {'world_bible', 'procedural'} <= set(src.values())
 
     c.commit(); c.close(); print('v0.60 Phase 2A tests: PASS')
 
