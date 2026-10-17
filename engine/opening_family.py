@@ -553,6 +553,9 @@ def _tie_values(kind: str, rng: random.Random, *, role: str = "") -> dict[str, f
     if kind == "kin_extended":
         return {"familiarity": _u(rng, 50, 75), "affection": _u(rng, 15, 45), "trust": _u(rng, 20, 45),
                 "loyalty": _u(rng, 10, 35), "stance": _u(rng, 15, 35), "obligation": 15.0}
+    if kind == "service":  # master and servant: bound by wages and habit, not blood
+        return {"familiarity": _u(rng, 40, 75), "stance": _u(rng, 10, 40), "trust": _u(rng, 25, 55), "respect": _u(rng, 25, 55),
+                "loyalty": _u(rng, 40, 65), "obligation": _u(rng, 20, 40)}
     if kind == "acquaintance":
         return {"familiarity": _u(rng, 30, 65), "stance": max(-20.0, min(40.0, rng.gauss(10, 12))),
                 "trust": max(-20.0, min(40.0, rng.gauss(8, 12))), "respect": _u(rng, 5, 30)}

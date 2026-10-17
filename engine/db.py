@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 114
+SCHEMA_VERSION = 115
 
 
 def _running_tests() -> bool:
@@ -4570,6 +4570,17 @@ def _migration_114(conn: sqlite3.Connection) -> None:
     conn.execute("INSERT OR IGNORE INTO engine_meta(key,value) VALUES ('schema114_report',?)", (json.dumps(report, sort_keys=True),))
 
 
+def _migration_115(conn: sqlite3.Connection) -> None:
+    """Gap 5: every household has means (wealth, liquidity, an income that keeps it solvent) and the means that bear it keep staff
+    paid through the household payroll; poor households do their own labour. Deterministic from the world seed."""
+    import json
+    report: dict = {}
+    if _has_table(conn, "households") and _has_table(conn, "household_service_terms") and _has_table(conn, "background_person_profiles"):
+        from .household_staff import seed_all
+        report = seed_all(conn)
+    conn.execute("INSERT OR IGNORE INTO engine_meta(key,value) VALUES ('schema115_report',?)", (json.dumps(report, sort_keys=True),))
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4682,6 +4693,7 @@ _MIGRATIONS: dict[int, Migration] = {
     109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed; unrevealed stages follow canon headcounts", _migration_109),
     110: ("underworld_everywhere", "Gap 4a: procedural Aldergate underworld dissolved; canon-shaped underworld in every settlement; notes naming dissolved outfits reported", _migration_110),
     111: ("occupation_follows_stage", "Background occupation follows Stage: Breach/Fifth martial, Third rarely otherwise; resolved mismatches reported", _migration_111),
+    115: ("household_means_and_staff", "Gap 5: households quantified from their means, with income, and staffed through the household payroll", _migration_115),
     114: ("world_pushes_back_people", "Gap 4b fix pass: fronts run as businesses, city businesses have owners, outfits have named people, loyalty starts dispersed by bonds", _migration_114),
     113: ("world_pushes_back", "Gap 4b: every outfit ticks and has a treasury; own fronts are not protected by rivals; ground and relations seeded", _migration_113),
     112: ("former_members_retired_masters_reckoning", "Former outfit members read as ordinary; retired masters keep a trade at high Stage; the Reckoning at Waymeet with Seth Carrick", _migration_112),

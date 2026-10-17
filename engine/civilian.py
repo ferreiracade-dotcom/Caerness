@@ -374,12 +374,11 @@ def _resolve_households(conn: sqlite3.Connection, day: int) -> None:
         # Servants and stewards on service terms are paid as wages (to their purses) instead of an implicit per-head charge.
         from .payroll import run_household_payroll
         wages = run_household_payroll(conn, h, elapsed, day)
-        members = int(conn.execute(
-            """SELECT COUNT(*) FROM household_members m WHERE m.household_id=? AND m.status='active'
-               AND NOT EXISTS (SELECT 1 FROM household_service_terms t WHERE t.household_id=m.household_id AND t.actor_id=m.actor_id AND t.status='active')""", (h["id"],)).fetchone()[0])
-        monthly_upkeep = members * 0.08 + float(h["staff_capacity"]) * 0.004 + float(h["hospitality"]) * 0.003
-        upkeep = monthly_upkeep * elapsed / 30.0
-        liquidity = float(h["liquidity"]) - wages - upkeep
+        # Households quantified from their means earn: working members a margin over their keep, wealth a yield (household_staff).
+        from .household_staff import _upkeep, household_income
+        income = household_income(conn, int(h["id"])) * elapsed / 30.0 if metadata.get("economic_basis") == "family_means" else 0.0
+        upkeep = _upkeep(conn, h) * elapsed / 30.0
+        liquidity = float(h["liquidity"]) + income - wages - upkeep
         wealth = float(h["wealth"])
         status = str(h["status"])
         if liquidity < 0:

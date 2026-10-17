@@ -28,7 +28,8 @@ def run():
         from engine.db import SCHEMA_VERSION, _migration_114, connect, init_db
         init_db()
         c = connect()
-        assert SCHEMA_VERSION == 114 and c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 114
+        assert SCHEMA_VERSION >= 114 and c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION
+        assert c.execute("SELECT 1 FROM schema_migrations WHERE version=114").fetchone()
         rep = json.loads(c.execute("SELECT value FROM engine_meta WHERE key='schema114_report'").fetchone()[0])
         assert rep["named_people_seeded"] > 150 and rep["front_profiles_backfilled"] > 50, rep
         assert c.execute("SELECT COUNT(*) FROM underworld_personnel WHERE status='active'").fetchone()[0] == before + rep["named_people_seeded"]
