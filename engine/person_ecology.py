@@ -107,43 +107,94 @@ _MARTIAL = ("soldier", "criminal")
 _THIRD_EXCEPTION = 0.12
 
 
-def occupation_for_stage(seed: int, uid: int, stage: str | None, drawn: str) -> str:
-    """High Stages mean a martial life (owner ruling): Breach/Fifth are always soldier or enforcer; Third is martial
-    except for a rare exception; First/Temper/unstaged keep the drawn occupation."""
+_RETIRED_MASTER_AGE = 45
+_RETIRED_MASTER_SHARE = 0.25
+
+
+def occupation_with_past(seed: int, uid: int, stage: str | None, drawn: str, age: int | None = None) -> tuple[str, bool]:
+    """(occupation, martial_past). What is unheard of is a cultivator who never took up martial arts reaching a high Stage;
+    a retired master (aged 45+) may keep an ordinary trade on top of a martial life. Breach/Fifth are otherwise soldier or
+    enforcer; Third is martial bar a rare genuine non-martial exception or a retired master; First/Temper/unstaged are drawn."""
     if stage not in ("Third", "Breach", "Fifth") or drawn in _MARTIAL:
-        return drawn
+        return drawn, False
     if stage == "Third" and _score(seed, uid, "third_exception") < _THIRD_EXCEPTION:
-        return drawn
-    return "soldier" if _score(seed, uid, "martial_occupation") < 0.75 else "criminal"
+        return drawn, False
+    if age is not None and age >= _RETIRED_MASTER_AGE and _score(seed, uid, "retired_master") < _RETIRED_MASTER_SHARE:
+        return drawn, True
+    return ("soldier" if _score(seed, uid, "martial_occupation") < 0.75 else "criminal"), False
+
+
+def occupation_for_stage(seed: int, uid: int, stage: str | None, drawn: str, age: int | None = None) -> str:
+    return occupation_with_past(seed, uid, stage, drawn, age)[0]
+
+
+def _set_profile_past(conn: sqlite3.Connection, pid: int, uid: int, past: bool) -> None:
+    if past:
+        conn.execute("UPDATE background_person_profiles SET metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.martial_past',json('true')) WHERE partition_id=? AND local_uid=?", (pid, uid))
+    else:
+        conn.execute("UPDATE background_person_profiles SET metadata_json=json_remove(COALESCE(metadata_json,'{}'),'$.martial_past') WHERE partition_id=? AND local_uid=? "
+                     "AND json_extract(COALESCE(metadata_json,'{}'),'$.martial_past') IS NOT NULL", (pid, uid))
+
+
+def mark_actor_martial_past(conn: sqlite3.Connection, actor_id: int) -> None:
+    conn.execute("UPDATE actor_life_profiles SET metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.martial_past',json('true')) WHERE actor_id=?", (int(actor_id),))
+
+
+def has_martial_past(conn: sqlite3.Connection, actor_id: int) -> bool:
+    r = conn.execute("SELECT json_extract(COALESCE(metadata_json,'{}'),'$.martial_past') FROM actor_life_profiles WHERE actor_id=?", (int(actor_id),)).fetchone()
+    return bool(r and r[0])
 
 
 def redraw_unresolved_occupations(conn: sqlite3.Connection) -> dict:
-    """Make still-background identities' occupation follow their Stage; report (never change) resolved mismatches."""
+    """Make still-background identities' occupation follow their Stage and martial past; report (never change) resolved
+    Breach-and-above non-martial people (retired masters, aged 45+, excluded: they are marked by the caller, see mark_resolved_retired_masters)."""
+    day = _day(conn)
     changed = {"total": 0, "by_stage": {}}
-    for r in conn.execute("""SELECT p.partition_id,p.local_uid,p.current_stage,p.occupation_domain,p.social_archetype,pt.seed
+    for r in conn.execute("""SELECT p.partition_id,p.local_uid,p.current_stage,p.occupation_domain,p.social_archetype,p.birth_day,p.metadata_json,pt.seed
                              FROM background_person_profiles p JOIN background_population_partitions pt ON pt.id=p.partition_id
                              WHERE p.status='background'""").fetchall():
-        seed, uid = int(r["seed"]), int(r["local_uid"])
-        occ = occupation_for_stage(seed, uid, r["current_stage"], _pick(_OCCUPATIONS, seed, uid, "occupation"))
+        seed, uid, pid = int(r["seed"]), int(r["local_uid"]), int(r["partition_id"])
+        age = (day - int(r["birth_day"])) // 365
+        occ, past = occupation_with_past(seed, uid, r["current_stage"], _pick(_OCCUPATIONS, seed, uid, "occupation"), age)
         arch = f"ordinary_{occ}"
+        had = bool(json.loads(r["metadata_json"] or "{}").get("martial_past"))
+        if had != past:
+            _set_profile_past(conn, pid, uid, past)
         if occ != r["occupation_domain"] or arch != r["social_archetype"]:
-            conn.execute("UPDATE background_person_profiles SET occupation_domain=?,social_archetype=? WHERE partition_id=? AND local_uid=?",
-                         (occ, arch, int(r["partition_id"]), uid))
+            conn.execute("UPDATE background_person_profiles SET occupation_domain=?,social_archetype=? WHERE partition_id=? AND local_uid=?", (occ, arch, pid, uid))
             if occ != r["occupation_domain"]:
                 changed["total"] += 1
                 k = r["current_stage"] or "None"
                 changed["by_stage"][k] = changed["by_stage"].get(k, 0) + 1
+    return {"changed": changed["total"], "changed_by_stage": changed["by_stage"], "resolved_mismatches": resolved_mismatches(conn)}
+
+
+def resolved_mismatches(conn: sqlite3.Connection) -> list[dict]:
+    """Resolved Breach-and-above people with a non-martial trade and no martial past (Third non-martial is an allowed exception)."""
+    day = _day(conn)
     report = []
-    for r in conn.execute("""SELECT p.partition_id,p.local_uid,p.actor_id,p.status,p.current_stage,p.occupation_domain,p.given_name,p.family_name,a.name,a.status AS astatus
+    for r in conn.execute("""SELECT p.actor_id,p.status,p.current_stage,p.occupation_domain,p.birth_day,p.metadata_json,p.given_name,p.family_name,a.name,a.status AS astatus
                              FROM background_person_profiles p LEFT JOIN actors a ON a.id=p.actor_id
-                             WHERE p.status<>'background' AND p.current_stage IN ('Third','Breach','Fifth')
+                             WHERE p.status<>'background' AND p.current_stage IN ('Breach','Fifth')
                                AND p.occupation_domain NOT IN ('soldier','criminal')
                              ORDER BY p.partition_id,p.local_uid""").fetchall():
-        if r["astatus"] == "dead":
+        if r["astatus"] == "dead" or json.loads(r["metadata_json"] or "{}").get("martial_past"):
             continue
         report.append({"actor_id": r["actor_id"], "name": r["name"] or f"{r['given_name']} {r['family_name']}", "status": r["status"],
-                       "stage": r["current_stage"], "occupation": r["occupation_domain"]})
-    return {"changed": changed["total"], "changed_by_stage": changed["by_stage"], "resolved_mismatches": report}
+                       "stage": r["current_stage"], "occupation": r["occupation_domain"], "age": (day - int(r["birth_day"])) // 365})
+    return report
+
+
+def mark_resolved_retired_masters(conn: sqlite3.Connection) -> list[dict]:
+    """A resolved Breach-and-above non-martial person aged 45+ is a retired master: mark the past, change no job. Returns who."""
+    day = _day(conn)
+    marked = []
+    for m in resolved_mismatches(conn):
+        if m["age"] >= _RETIRED_MASTER_AGE and m["actor_id"] is not None:
+            conn.execute("UPDATE background_person_profiles SET metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.martial_past',json('true')) WHERE actor_id=?", (m["actor_id"],))
+            mark_actor_martial_past(conn, m["actor_id"])
+            marked.append(m)
+    return marked
 
 
 def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int, seed: int, state: Any, day: int) -> int:
@@ -158,7 +209,7 @@ def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int,
         loc = _source_location(conn, source, seed, uid)
         from .cultivation import location_in_hearth
         open_core, stage = _profile_stage(seed, uid, location_in_hearth(conn, loc), snap["demographic_sex"])
-        occupation = occupation_for_stage(seed, uid, stage, _pick(_OCCUPATIONS, seed, uid, "occupation"))
+        occupation, past = occupation_with_past(seed, uid, stage, _pick(_OCCUPATIONS, seed, uid, "occupation"), int(snap["age_days"]) // 365)
         given = given_name_for(seed, uid, snap["demographic_sex"])
         family = _pick(_LAST, seed, uid, "family")
         # The local uid is not visible in ordinary naming unless a collision must be resolved.
@@ -180,7 +231,7 @@ def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int,
                 round(_score(seed,uid,"medical")*100,6),
                 round(_score(seed,uid,"teaching")*100,6),
                 round(_score(seed,uid,"criminal")*100,6),
-                day,_j({"profiled_before_demand":True,"stable_name":base,"population_delta":0}),
+                day,_j({"profiled_before_demand":True,"stable_name":base,"population_delta":0, **({"martial_past": True} if past else {})}),
             ),
         )
         created_profiles += 1
@@ -416,7 +467,8 @@ def resolve_background_person(
         """INSERT INTO actor_life_profiles(actor_id,birth_day,demographic_sex,life_stage,family_formation_eligible,life_status,last_review_day,metadata_json)
            VALUES (?,?,?,?,?,'living',?,?)""",
         (aid,int(profile["birth_day"]),str(profile["demographic_sex"]),life_stage,1 if age>=18 else 0,day,
-         _j({"source":"PERSONECO01","partition_id":int(profile["partition_id"]),"local_uid":int(profile["local_uid"]),"population_delta":0})),
+         _j({"source":"PERSONECO01","partition_id":int(profile["partition_id"]),"local_uid":int(profile["local_uid"]),"population_delta":0,
+             **({"martial_past": True} if json.loads(profile["metadata_json"] or "{}").get("martial_past") else {})})),
     )
     open_core = bool(profile["open_core"]); stage = str(profile["current_stage"]) if profile["current_stage"] else None
     conn.execute(
@@ -531,3 +583,28 @@ def repair_generated_name_sex(conn: sqlite3.Connection) -> dict[str, int]:
         _rename_actor(conn, int(aid), name, new)
         counts["actors_renamed"] += 1
     return counts
+
+
+_CIVILIAN_OCCUPATIONS = tuple(o for o in _OCCUPATIONS if o not in _MARTIAL)
+
+
+def ordinary_domain_for_former_member(conn: sqlite3.Connection, actor_id: int) -> str:
+    """The plain trade of someone who used to be in an outfit that no longer exists: their own background trade
+    unless it is 'criminal'; otherwise a deterministic non-criminal draw that respects the Stage rule."""
+    p = conn.execute("""SELECT p.occupation_domain,p.current_stage,p.partition_id,p.local_uid,pt.seed FROM background_person_profiles p
+                        LEFT JOIN background_population_partitions pt ON pt.id=p.partition_id WHERE p.actor_id=?""", (int(actor_id),)).fetchone()
+    if p is not None and p["occupation_domain"] and p["occupation_domain"] != "criminal":
+        return str(p["occupation_domain"])
+    seed, uid, stage = (int(p["seed"] or 0), int(p["local_uid"]), p["current_stage"]) if p is not None else (0, int(actor_id), None)
+    if stage in ("Breach", "Fifth", "Sixth"):
+        return "soldier"
+    return _pick(_CIVILIAN_OCCUPATIONS, seed, uid, "former_member_occupation")
+
+
+def make_former_member_ordinary(conn: sqlite3.Connection, actor_id: int) -> str:
+    """Give a former outfit member the ordinary subtype resolved_<domain> (and the matching profile fields)."""
+    dom = ordinary_domain_for_former_member(conn, actor_id)
+    conn.execute("UPDATE actors SET subtype=? WHERE id=?", (f"resolved_{dom}", int(actor_id)))
+    conn.execute("UPDATE background_person_profiles SET occupation_domain=?,social_archetype=? WHERE actor_id=? AND occupation_domain<>?",
+                 (dom, f"ordinary_{dom}", int(actor_id), dom))
+    return dom

@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 111
+SCHEMA_VERSION = 112
 
 
 def _running_tests() -> bool:
@@ -4497,6 +4497,32 @@ def _migration_111(conn: sqlite3.Connection) -> None:
         conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema111_report',?)", (json.dumps(report, sort_keys=True),))
 
 
+def _migration_112(conn: sqlite3.Connection) -> None:
+    """Former outfit members read as ordinary people; retired masters (martial past) may keep a trade at a high Stage;
+    the Reckoning sits at Waymeet with Seth Carrick as its elder."""
+    import json
+    report: dict = {}
+    if _has_table(conn, "actors") and _has_table(conn, "underworld_personnel"):
+        from .person_ecology import make_former_member_ordinary
+        ids = [int(r[0]) for r in conn.execute(
+            """SELECT a.id FROM actors a WHERE a.subtype='resolved_criminal'
+               AND NOT EXISTS (SELECT 1 FROM underworld_personnel p WHERE p.actor_id=a.id AND p.status='active')""")]
+        for aid in ids:
+            make_former_member_ordinary(conn, aid)
+        report["former_members_made_ordinary"] = len(ids)
+    if _has_table(conn, "background_person_profiles") and _has_table(conn, "background_population_partitions"):
+        from .person_ecology import redraw_unresolved_occupations, mark_resolved_retired_masters, resolved_mismatches
+        res = redraw_unresolved_occupations(conn)
+        marked = mark_resolved_retired_masters(conn)
+        left = resolved_mismatches(conn)
+        report.update({"changed": res["changed"], "changed_by_stage": res["changed_by_stage"],
+                       "resolved_marked_retired_master": marked[:50], "resolved_mismatch_count": len(left), "resolved_mismatches": left[:50]})
+    if _has_table(conn, "underworld_network_presence"):
+        from .underworld_ecology import place_reckoning
+        report["reckoning"] = place_reckoning(conn)
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('schema112_report',?)", (json.dumps(report, sort_keys=True),))
+
+
 _MIGRATIONS: dict[int, Migration] = {
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
@@ -4609,6 +4635,7 @@ _MIGRATIONS: dict[int, Migration] = {
     109: ("names01_given_name_follows_sex", "NAMES-01 background identities get a given name of their recorded sex; revealed people renamed; unrevealed stages follow canon headcounts", _migration_109),
     110: ("underworld_everywhere", "Gap 4a: procedural Aldergate underworld dissolved; canon-shaped underworld in every settlement; notes naming dissolved outfits reported", _migration_110),
     111: ("occupation_follows_stage", "Background occupation follows Stage: Breach/Fifth martial, Third rarely otherwise; resolved mismatches reported", _migration_111),
+    112: ("former_members_retired_masters_reckoning", "Former outfit members read as ordinary; retired masters keep a trade at high Stage; the Reckoning at Waymeet with Seth Carrick", _migration_112),
 }
 
 

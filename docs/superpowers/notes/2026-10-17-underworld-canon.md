@@ -193,3 +193,7 @@ Explicitly open in canon
 - City licensing rules, vice taxes, regional ages of contractual majority, and selected senior figures are open ([1840]).
 - Mallow's exact origin and relation to the Grand Coven are banked ([5921]); Reckoning's relationships "intentionally obscured" ([4107]); a "Great Evils" cluster is deliberately unfixed ([5900]).
 - Canon sets no pay scales, oath or membership forms, rank titles, or gang-war rules for criminal organisations.
+
+## Placement ruling (owner, 2026-10-17, schema 112)
+
+The Reckoning is placed: Waymeet (strong), Cairnholt (present), Crownhold (thin). Seth Carrick is among the Hearth's Sixths [2242]-[2245], and Waymeet is the Hearth's Long Road crossroads where people repeatedly meet [606] [841] [863]: a secret killing institution whose members pass as travellers and whose clients come from everywhere fits there [1730]. Seth lives at Waymeet and is an elder (member) of the Reckoning, not an underworld boss. Mallow stays unplaced [1751]. Canon itself still gives the Reckoning no base [1734] [4107]; this is a working placement, to be superseded by any later text.

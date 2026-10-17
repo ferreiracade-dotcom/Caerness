@@ -498,23 +498,39 @@ def run_ground():
 
 
 def run_occupation():
-    """Owner ruling: a non-martial person at Breach or above is unheard of; Third is a rare exception; martial work is unaffected."""
+    """What is unheard of is a high Stage with no martial life: a retired master (45+) may keep a trade; martial work is unaffected."""
     from engine.authoring import author, AuthoringRefused
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         conn, me, place = _open(tmp, "o.db")
         n = _count(conn, "SELECT COUNT(*) FROM actors")
-        for work in ("physician", "labor", "merchant"):
+        for work in ("physician", "labor", "hospitality"):
             for stage in ("Breach", "Fifth"):
-                _refused(lambda: author(conn, me, "person", {"sex": "male", "work": work, "stage": stage, "from_elsewhere": True}, f"o-{work}-{stage}"), "unheard of")
+                _refused(lambda: author(conn, me, "person", {"sex": "male", "age": 30, "work": work, "stage": stage, "from_elsewhere": True}, f"o-{work}-{stage}"),
+                         "unless a retired master")
         assert _count(conn, "SELECT COUNT(*) FROM actors") == n
-        try:
-            author(conn, me, "person", {"sex": "male", "work": "physician", "stage": "Third", "from_elsewhere": True}, "o-third")
-        except AuthoringRefused as e:
-            assert "unheard of" not in str(e), e
-        try:
-            author(conn, me, "person", {"sex": "male", "work": "soldier", "stage": "Breach", "from_elsewhere": True}, "o-sold")
-        except AuthoringRefused as e:
-            assert "unheard of" not in str(e), e
+        # Make a retired-master innkeeper available in this town: a Breach open-core male, aged 50, trade hospitality, marked.
+        row = conn.execute("""SELECT partition_id,local_uid FROM background_person_profiles WHERE status='background' AND current_location_id=? AND current_stage='Breach'
+                              AND open_core=1 AND demographic_sex='male' LIMIT 1""", (place,)).fetchone()
+        if row is None:
+            row = conn.execute("""SELECT partition_id,local_uid FROM background_person_profiles WHERE status='background' AND current_location_id=? AND open_core=1
+                                  AND demographic_sex='male' LIMIT 1""", (place,)).fetchone()
+        assert row is not None
+        day = _count(conn, "SELECT current_day FROM world_state WHERE id=1")
+        conn.execute("""UPDATE background_person_profiles SET current_stage='Breach',occupation_domain='hospitality',social_archetype='ordinary_hospitality',
+                        birth_day=?,metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.martial_past',json('true')) WHERE partition_id=? AND local_uid=?""",
+                     (day - 50 * 365, row[0], row[1]))
+        conn.commit()
+        r = author(conn, me, "person", {"sex": "male", "age": 50, "work": "hospitality", "stage": "Breach"}, "o-inn")
+        assert r["status"] == "created" and r["work"] == "hospitality", r
+        meta = conn.execute("SELECT metadata_json FROM actor_life_profiles WHERE actor_id=?", (r["actor_id"],)).fetchone()[0]
+        import json as _json
+        assert _json.loads(meta).get("martial_past") is True, meta
+        # Third non-martial is not refused as unheard of; martial work at Breach never is
+        for work, stage in (("physician", "Third"), ("soldier", "Breach")):
+            try:
+                author(conn, me, "person", {"sex": "male", "work": work, "stage": stage, "from_elsewhere": True}, f"o-{work}")
+            except AuthoringRefused as e:
+                assert "unheard of" not in str(e), e
         conn.close()
 
 

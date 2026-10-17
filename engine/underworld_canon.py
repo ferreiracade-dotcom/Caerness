@@ -44,8 +44,12 @@ CANON_NETWORKS = {
     "Cormorants": {"locator": "[1735] [1788]",
                    "presence": [("Toll’s Reach", "present"), ("Saltmere", "present"), ("Southbay", "thin"),
                                 ("Tidefall", "thin")]},
-    # Reckoning: relationships intentionally obscured [4107]; Mallow: secret cells [1751]. Both stay unplaced.
-    "The Reckoning": {"locator": "[1734] [4107]", "presence": [], "presence_rule": "unplaced"},
+    # Reckoning (owner ruling 2026-10-17): canon gives no base and its relationships are obscured [4107], but Seth Carrick is
+    # one of the Hearth's Sixths [2242]-[2245] and Waymeet is the Hearth's Long Road crossroads where people repeatedly meet
+    # [606] [841]: a secret killing institution whose members pass as travellers and whose clients come from everywhere fits
+    # there, with thinner reach in Cairnholt and Crownhold [1730]. Mallow: secret cells [1751]; it stays unplaced.
+    "The Reckoning": {"locator": "[1734] [4107] [1730] [2242]-[2245] [606] [841]",
+                      "presence": [("Waymeet", "strong"), ("Cairnholt", "present"), ("Crownhold", "thin")]},
     "Mallow Coven": {"locator": "[1751]-[1765] [3527]", "presence": [], "presence_rule": "unplaced"},
 }
 

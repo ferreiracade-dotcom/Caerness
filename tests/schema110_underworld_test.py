@@ -134,6 +134,15 @@ def run():
             a = c.execute("SELECT status,current_location_id,subtype FROM actors WHERE id=?", (aid,)).fetchone()
             assert a["status"] == "active" and a["current_location_id"] == where and not str(a["subtype"]).startswith("underworld_"), (aid, tuple(a))
             assert not c.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active' AND organization_id IN (%s)" % ids, (aid,)).fetchone()
+        # Former members read as ordinary people: a plain trade, no outfit, no 'criminal'.
+        from connector.views import lookup, _who
+        dissolved_names = [r["name"] for r in procedural]
+        for aid in people:
+            row = c.execute("SELECT * FROM actors WHERE id=?", (aid,)).fetchone()
+            assert row["subtype"].startswith("resolved_") and row["subtype"] != "resolved_criminal", row["subtype"]
+            blob = json.dumps(lookup(c, row["name"])) + _who(c, row)
+            assert "criminal" not in blob and "resolved" not in blob, blob
+            assert not any(n in blob for n in dissolved_names), blob
         assert not c.execute("SELECT 1 FROM underworld_zones WHERE city_location_id=? AND status='active' AND metadata_json LIKE '%not_world_bible_canon%' "
                              "AND id NOT IN (SELECT zone_id FROM underworld_zone_claims WHERE status='active')", (ald,)).fetchone()
 

@@ -128,6 +128,9 @@ def _martial_context(conn: sqlite3.Connection, aid: int) -> tuple[bool, bool]:
             martial = True
             churned = churned or bool(loc is not None and location_in_hearth(conn, loc))
     if not martial:
+        from .person_ecology import has_martial_past
+        martial = has_martial_past(conn, aid)  # a retired master reads as a martial artist whatever his trade now
+    if not martial:
         r = conn.execute("SELECT subtype FROM actors WHERE id=?", (aid,)).fetchone()
         martial = bool(r and _MARTIAL_WORK.search(str(r[0] or ""))) or bool(conn.execute(
             "SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active'", (aid,)).fetchone())

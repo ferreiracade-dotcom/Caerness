@@ -22,15 +22,28 @@ def _age(conn, actor_id: int, day: int):
     return int((day - r[0]) // 365) if r and r[0] is not None else None
 
 
+_TRADE_WORDS = {"labor": "labourer", "transport": "carter", "hospitality": "innkeeper", "criminal": "local"}
+
+
+def _plain_role(subtype) -> str:
+    """A subtype as a plain trade word: no 'resolved_'/'authored_' prefixes, and 'criminal' only for an active underworld role."""
+    sub = str(subtype or "")
+    for pre in ("resolved_", "authored_"):
+        if sub.startswith(pre):
+            dom = sub[len(pre):]
+            return _TRADE_WORDS.get(dom, dom.replace("_", " "))
+    return sub.replace("_", " ")
+
+
 def _who(conn, a) -> str:
     """One line on who someone is; kin and partners say whose, so nobody is mistaken for the protagonist's."""
-    role = str(a["subtype"] or a["actor_type"] or "").replace("_", " ")
+    role = _plain_role(a["subtype"] or a["actor_type"])
     partner = conn.execute(
         """SELECT b.name,b.subtype FROM household_unions u JOIN actors b ON b.id=CASE WHEN u.actor_a_id=? THEN u.actor_b_id ELSE u.actor_a_id END
            WHERE ? IN (u.actor_a_id,u.actor_b_id) AND u.status='active' ORDER BY u.started_day DESC LIMIT 1""",
         (a["id"], a["id"])).fetchone()
     if partner and role in ("spouse", "partner", "widow", "widower", ""):
-        return _clip(f"{role or 'spouse'} of {partner[0]} ({str(partner[1] or 'local').replace('_', ' ')})", 100)
+        return _clip(f"{role or 'spouse'} of {partner[0]} ({_plain_role(partner[1]) or 'local'})", 100)
     return _clip(role, 80)
 
 
@@ -234,12 +247,14 @@ def compact_scene(conn) -> dict:
     institutions = [{"id": a["id"], "name": a["name"], "what": _who(conn, a)}
                     for a in p["present_actors"] if a.get("actor_type") != "character"]
     seen = {i["id"] for i in institutions}
+    local_n = len(institutions)
     for nid, nname, strength in conn.execute(
             """SELECT a.id,a.name,n.strength FROM underworld_network_presence n JOIN actors a ON a.id=n.institution_actor_id
                WHERE n.location_id=? AND a.status NOT IN ('dead','destroyed','dissolved','defunct','historical') ORDER BY CASE n.strength WHEN 'strong' THEN 0 WHEN 'present' THEN 1 ELSE 2 END,a.name""", (here,)):
         if nid not in seen:
             institutions.append({"id": nid, "name": nname, "what": f"network, {strength} here"})
-    institutions = institutions[:8]
+    nets = institutions[local_n:]
+    institutions = institutions[:max(5, 8 - len(nets[:3]))] + nets[:3]  # networks are not crowded out by a town's many seats
     events = [f"day {e['day']}: {_clip(e['title'], 100)}" for e in p["known_events"][-_LIMITS["news"]:]]
     rumours = ["rumour: " + _clip(r["text"], 110) for r in p["known_rumours"][-_LIMITS["news"]:]]
     notes = []

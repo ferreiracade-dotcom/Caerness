@@ -127,10 +127,10 @@ def run():
         seed_settlement_underworld(c, tid)
         assert not c.execute("SELECT 1 FROM underworld_zones WHERE city_location_id=?", (tid,)).fetchone()
 
-        # Networks are not parked at Waymeet; the Reckoning and Mallow stay unplaced.
+        # Networks are not parked at Waymeet; Mallow stays unplaced and the Reckoning is placed by owner ruling (schema 112).
         for n in ("Painted Veil", "The Hush", "The Reckoning", "Cormorants", "Red Board"):
             assert actor(n)["current_location_id"] is None, n
-        assert not c.execute("SELECT 1 FROM underworld_network_presence p JOIN actors a ON a.id=p.institution_actor_id WHERE a.name IN ('The Reckoning','Mallow Coven')").fetchone()
+        assert not c.execute("SELECT 1 FROM underworld_network_presence p JOIN actors a ON a.id=p.institution_actor_id WHERE a.name = 'Mallow Coven'").fetchone()
         assert presence("The Hush", "Crownhold") and presence("The Hush", "Waymeet")
 
         # Provenance, unique names, canon is never labelled procedural and vice versa.

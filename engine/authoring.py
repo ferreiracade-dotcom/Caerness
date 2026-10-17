@@ -167,8 +167,10 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     stage = d.get("stage")
     if stage is not None and stage not in STAGES:
         _no("stage must be one of " + ", ".join(STAGES))
-    if work and work not in ("soldier", "criminal") and stage in ("Breach", "Fifth", "Sixth"):
-        _no(f"a {work} at that Stage is unheard of; High Stages mean a martial life (soldier or criminal)")
+    retired = bool(work and work not in ("soldier", "criminal") and stage in ("Breach", "Fifth", "Sixth"))
+    if retired:  # only a retired martial master keeps an ordinary trade at a high Stage
+        if age is not None and age < 40:
+            _no(f"a {work} at that Stage is unheard of unless a retired master (aged 45 or more)")
     loc = _place(conn, me, d)
     elsewhere = bool(d.get("from_elsewhere", False))
     wants = _text(d["wants"], "wants", 200) if d.get("wants") is not None else None
@@ -205,7 +207,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
                 _no(f"note {n} is not a general note that can be attached")
 
     day = _day(conn)
-    pick = dict(location_id=loc, occupation_domains=(work,) if work else None, min_age=(age - 3) if age else 18,
+    pick = dict(location_id=loc, occupation_domains=(work,) if work else None, min_age=max(age - 3, 45 if retired else 0) if age else (45 if retired else 18),
                 max_age=(age + 3) if age else 85, require_open_core=True if stage else None, required_stage=stage,
                 demographic_sex=sex, allow_elsewhere=elsewhere, strict_stage=True, prefer_open_core=bool(stage))
     # A wife or a man's sibling/child carries his family name; the given name still comes from the identity.

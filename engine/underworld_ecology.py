@@ -374,7 +374,7 @@ def _seed_canon_outfit(conn: sqlite3.Connection, name: str, spec: dict) -> int |
 
 
 def _seed_networks(conn: sqlite3.Connection, pops: dict[int, int]) -> int:
-    """Networks have presence by place and no seat; the Reckoning and Mallow stay unplaced (canon: obscured / secret cells)."""
+    """Networks have presence by place and no seat; Mallow stays unplaced (secret cells); the Reckoning is placed by owner ruling (schema 112)."""
     rows = 0
     names = {r[1]: int(r[0]) for r in conn.execute("SELECT id,name FROM locations")}
     for name, net in CANON_NETWORKS.items():
@@ -399,6 +399,32 @@ def _seed_networks(conn: sqlite3.Connection, pops: dict[int, int]) -> int:
                          (aid, lid, strength, "world_bible"))
             rows += 1
     return rows
+
+
+def place_reckoning(conn: sqlite3.Connection) -> dict[str, Any]:
+    """Owner ruling (schema 112): the Reckoning is present at Waymeet (strong), Cairnholt, Crownhold; Seth Carrick lives at Waymeet
+    and is its elder (a member, not an underworld boss). Idempotent."""
+    out: dict[str, Any] = {"presence": 0, "seth": None}
+    names = {r[1]: int(r[0]) for r in conn.execute("SELECT id,name FROM locations")}
+    inst = conn.execute("SELECT id FROM actors WHERE actor_type='institution' AND name='The Reckoning'").fetchone()
+    if not inst:
+        return out
+    iid = int(inst[0])
+    for place, strength in CANON_NETWORKS["The Reckoning"]["presence"]:
+        if place in names:
+            conn.execute("INSERT OR REPLACE INTO underworld_network_presence(institution_actor_id,location_id,strength,source) VALUES (?,?,?,?)",
+                         (iid, names[place], strength, "world_bible"))
+            out["presence"] += 1
+    seth = conn.execute("SELECT id FROM actors WHERE actor_type='character' AND name='Seth Carrick'").fetchone()
+    if seth and "Waymeet" in names:
+        sid = int(seth[0])
+        conn.execute("UPDATE actors SET home_location_id=?,current_location_id=? WHERE id=?", (names["Waymeet"], names["Waymeet"], sid))
+        if not conn.execute("SELECT 1 FROM institution_memberships WHERE institution_actor_id=? AND member_actor_id=? AND status='active'", (iid, sid)).fetchone():
+            conn.execute("""INSERT INTO institution_memberships(institution_actor_id,member_actor_id,membership_kind,role_text,status)
+                            VALUES (?,?,'member','elder','active')
+                            ON CONFLICT(institution_actor_id,member_actor_id,membership_kind) DO UPDATE SET status='active',role_text='elder'""", (iid, sid))
+        out["seth"] = sid
+    return out
 
 
 def _seed_fighting_rackets(conn: sqlite3.Connection) -> int:
@@ -498,7 +524,9 @@ def dissolve_procedural_underworld(conn: sqlite3.Connection) -> list[str]:
         conn.execute("UPDATE underworld_personnel SET status='retired' WHERE organization_id=? AND status='active'", (oid,))
         for a in people:  # still in a live outfit elsewhere? then the subtype stays
             if not conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active'", (a,)).fetchone():
-                conn.execute("UPDATE actors SET subtype='resolved_criminal' WHERE id=? AND substr(subtype,1,11)='underworld_'", (a,))
+                if str(conn.execute("SELECT subtype FROM actors WHERE id=?", (a,)).fetchone()[0] or "").startswith("underworld_"):
+                    from .person_ecology import make_former_member_ordinary
+                    make_former_member_ordinary(conn, a)
     # Their invented wards go too, unless somebody who survived still holds or contests one.
     conn.execute("""UPDATE underworld_zones SET status='abandoned' WHERE status='active' AND metadata_json LIKE '%not_world_bible_canon%'
                     AND id NOT IN (SELECT zone_id FROM underworld_zone_claims WHERE status='active')""")

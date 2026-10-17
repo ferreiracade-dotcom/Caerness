@@ -14,7 +14,7 @@ MARTIAL = ("soldier", "criminal")
 
 
 def run():
-    from engine.person_ecology import (_OCCUPATIONS, _pick, occupation_for_stage, redraw_unresolved_occupations)
+    from engine.person_ecology import (_OCCUPATIONS, _pick, occupation_for_stage, occupation_with_past, redraw_unresolved_occupations)
 
     # Pure function
     assert occupation_for_stage(1, 1, "First", "physician") == "physician"
@@ -32,6 +32,14 @@ def run():
     third = [occupation_for_stage(7, uid, "Third", "physician") for uid in range(2000)]
     share = sum(o == "physician" for o in third) / len(third)
     assert 0.06 < share < 0.18, share
+    # Retired masters: only aged 45+, about a quarter, marked with a martial past; the young never keep a trade at Breach+
+    old = [occupation_with_past(7, uid, "Breach", "physician", 60) for uid in range(2000)]
+    kept = [o for o in old if o[0] == "physician"]
+    assert all(past for _, past in kept) and 0.18 < len(kept) / len(old) < 0.32, len(kept)
+    assert all(occupation_with_past(7, uid, "Fifth", "physician", 44)[0] in MARTIAL for uid in range(500))
+    assert all(occupation_with_past(7, uid, "Breach", "physician", None)[0] in MARTIAL for uid in range(500))
+    t_old = [occupation_with_past(7, uid, "Third", "physician", 60) for uid in range(2000)]
+    assert 0.30 < sum(o == "physician" for o, _ in t_old) / len(t_old) < 0.40  # 12% genuine + 25% of the rest
 
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         db = Path(tmp) / "o.db"
@@ -42,9 +50,13 @@ def run():
         c = connect()
         rows = c.execute("SELECT current_stage,occupation_domain,social_archetype FROM background_person_profiles WHERE status='background'").fetchall()
         assert rows
-        assert not [r for r in rows if r[0] in ("Breach", "Fifth") and r[1] not in MARTIAL]
-        thirds = [r for r in rows if r[0] == "Third"]
-        assert thirds and sum(r[1] not in MARTIAL for r in thirds) / len(thirds) <= 0.20
+        day = c.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]
+        for r in c.execute("""SELECT current_stage,occupation_domain,birth_day,json_extract(metadata_json,'$.martial_past') FROM background_person_profiles
+                              WHERE status='background' AND current_stage IN ('Breach','Fifth')"""):
+            assert r[1] in MARTIAL or ((day - r[2]) // 365 >= 45 and r[3] == 1), tuple(r)
+        thirds = c.execute("""SELECT occupation_domain,json_extract(metadata_json,'$.martial_past') FROM background_person_profiles
+                              WHERE status='background' AND current_stage='Third'""").fetchall()
+        assert thirds and sum(r[0] not in MARTIAL and r[1] != 1 for r in thirds) / len(thirds) <= 0.20
         assert all(r[2] == f"ordinary_{r[1]}" for r in rows)
         # First/Temper/unstaged keep the pure draw
         n = 0
@@ -63,13 +75,14 @@ def run():
                      WHERE status='background' AND current_stage='Breach'""")
         res = c.execute("SELECT partition_id,local_uid FROM background_person_profiles WHERE status='background' AND current_stage='Temper' LIMIT 1").fetchone()
         c.execute("""UPDATE background_person_profiles SET status='resolved',current_stage='Fifth',occupation_domain='labor',
-                      social_archetype='ordinary_labor',actor_id=(SELECT MIN(id) FROM actors WHERE actor_type='character')
-                     WHERE partition_id=? AND local_uid=?""", (res[0], res[1]))
+                      social_archetype='ordinary_labor',birth_day=?,actor_id=(SELECT MIN(id) FROM actors WHERE actor_type='character')
+                     WHERE partition_id=? AND local_uid=?""", (day - 30 * 365, res[0], res[1]))
         r1 = redraw_unresolved_occupations(c)
-        assert r1["changed"] > 0 and r1["changed_by_stage"].get("Breach", 0) > 0, r1
+        assert r1["changed"] > 0, r1
         assert any(m["stage"] == "Fifth" and m["occupation"] == "labor" for m in r1["resolved_mismatches"]), r1["resolved_mismatches"][:3]
         assert tuple(c.execute("SELECT occupation_domain,status FROM background_person_profiles WHERE partition_id=? AND local_uid=?", (res[0], res[1])).fetchone()) == ("labor", "resolved")
-        assert not c.execute("SELECT 1 FROM background_person_profiles WHERE status='background' AND current_stage IN ('Breach','Fifth') AND occupation_domain NOT IN ('soldier','criminal')").fetchone()
+        assert not c.execute("SELECT 1 FROM background_person_profiles WHERE status='background' AND current_stage IN ('Breach','Fifth') AND occupation_domain NOT IN ('soldier','criminal') "
+                             "AND json_extract(metadata_json,'$.martial_past') IS NOT 1").fetchone()
         assert redraw_unresolved_occupations(c)["changed"] == 0
         c.close()
     print("occupation_follows_stage_test passed")

@@ -196,6 +196,13 @@ def run():
             assert "bearing" not in standing(conn, y, veinborn, toll)
             setup(doc, "female", 40, "Breach")  # a non-martial Breach is unheard of: read as a martial artist
             assert standing(conn, y, doc, toll)["bearing"] in STAGE_READINGS, standing(conn, y, doc, toll)
+            # A retired master keeps his trade but reads as a martial artist; Churned still needs a Churn or Hearth martial institution.
+            setup(doc, "male", 55, "Third")
+            conn.execute("UPDATE actors SET subtype='resolved_hospitality' WHERE id=?", (doc,))
+            assert standing(conn, y, doc, toll)["bearing"] == "a well-cultivated vessel", standing(conn, y, doc, toll)
+            conn.execute("UPDATE actor_life_profiles SET metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.martial_past',json('true')) WHERE actor_id=?", (doc,))
+            rb = standing(conn, y, doc, toll)["bearing"]
+            assert rb == "a seasoned master", rb  # martial words, no Churned
     print("standing_test passed")
 
 
