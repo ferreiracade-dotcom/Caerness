@@ -1,9 +1,11 @@
 """Authoring: the GM's invented people, businesses, bodies and rumours become real only through existing engine paths.
 
-People are pre-existing background identities of the settlement (population-preserving); authoring never hands the protagonist money, people, ownership, office or anything beyond acquaintance.
+People are pre-existing background identities of the settlement (population-preserving); the engine fixes
+means and never hands the protagonist money, people, ownership, office or anything beyond acquaintance.
 """
 from __future__ import annotations
 
+import json
 import sqlite3
 from typing import Any
 
@@ -20,6 +22,9 @@ class AuthoringRefused(ValueError):
 WORK = ("artisan", "artist", "clerk", "criminal", "hospitality", "labor", "merchant", "physician", "soldier", "teacher", "transport")
 STAGES = ("First", "Temper", "Third", "Breach", "Fifth", "Sixth")
 TIES = ("knows", "sibling", "parent", "child", "spouse")
+BUSINESS_KINDS = {"shop": 2.0, "workshop": 3.0, "service": 2.0, "other": 1.5}
+OUTFIT_TYPES = ("gang", "crew")
+BODY_TYPES = ("guild", "school", "temple", "club", "company")
 
 
 def _no(msg: str):
@@ -44,6 +49,10 @@ def _place(conn, me: int, d: dict) -> int:
     if loc is None or not conn.execute("SELECT 1 FROM locations WHERE id=?", (int(loc),)).fetchone():
         _no("unknown location")
     return int(loc)
+
+
+def _population(conn, loc: int) -> int:
+    return int(conn.execute("SELECT COALESCE(SUM(population_estimate),0) FROM background_population_sources WHERE location_id=?", (loc,)).fetchone()[0])
 
 
 def _character(conn, aid: Any, what: str) -> int:
@@ -198,7 +207,98 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
             "from": origin}
 
 
-_KINDS = {"person": _person}
+# ---------------------------------------------------------------- business
+
+def _business(conn, me: int, d: dict, call_id: str) -> dict:
+    name = _text(d.get("name"), "name", 80)
+    trade = _text(d.get("trade"), "trade", 80)
+    kind = d.get("enterprise_kind")
+    if kind not in BUSINESS_KINDS:
+        _no("enterprise_kind must be one of " + ", ".join(BUSINESS_KINDS))
+    loc = _place(conn, me, d)
+    owner = _character(conn, d.get("owner_actor_id"), "owner_actor_id")
+    _not_his(conn, me, owner, "the owner")
+    if conn.execute("SELECT 1 FROM civilian_enterprises WHERE name=? AND location_id=?", (name, loc)).fetchone():
+        _no(f"a business called {name} already stands here")
+    pop = _population(conn, loc)
+    if conn.execute("SELECT COUNT(*) FROM civilian_enterprises WHERE location_id=? AND status IN ('active','strained','insolvent')", (loc,)).fetchone()[0] >= max(3, pop // 150):
+        _no("the town has no room for another business of that kind")
+    means = BUSINESS_KINDS[kind] * (1.5 if pop >= 5000 else 1.0)
+    from .civilian import create_enterprise
+    from .merchant import add_enterprise_staff
+    eid = create_enterprise(conn, name, kind, owner_actor_id=owner, location_id=loc, capital=means, cash=means,
+                            metadata={"authored": True, "trade": trade})
+    add_enterprise_staff(conn, eid, owner, role="owner", authority=100)
+    return {"status": "created", "kind": "business", "enterprise_id": eid, "name": name, "means": ledger.scale_word(means)}
+
+
+# ---------------------------------------------------------------- organisation
+
+def _organisation(conn, me: int, d: dict, call_id: str) -> dict:
+    name = _text(d.get("name"), "name", 80)
+    typ = d.get("type")
+    if typ not in OUTFIT_TYPES + BODY_TYPES:
+        _no("canon-scale bodies cannot be authored; type must be one of " + ", ".join(OUTFIT_TYPES + BODY_TYPES))
+    loc = _place(conn, me, d)
+    leader = _character(conn, d.get("leader_actor_id"), "leader_actor_id")
+    _not_his(conn, me, leader, "the leader")
+    if conn.execute("SELECT 1 FROM underworld_personnel WHERE actor_id=? AND status='active'", (leader,)).fetchone():
+        _no("that person already belongs to an outfit")
+    if conn.execute("SELECT 1 FROM institution_memberships WHERE member_actor_id=? AND role_text='head' AND status='active'", (leader,)).fetchone():
+        _no("that person already heads another body")
+    if conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone() or conn.execute("SELECT 1 FROM underworld_organizations WHERE name=?", (name,)).fetchone():
+        _no(f"the name {name} is already in use")
+    pop = _population(conn, loc)
+    if typ in OUTFIT_TYPES:
+        if conn.execute("SELECT COUNT(*) FROM underworld_organizations WHERE primary_location_id=? AND status IN ('active','strained','fragmented')", (loc,)).fetchone()[0] >= max(1, pop // 2000):
+            _no("the town has no room for another outfit")
+        from .underworld import create_underworld_organization
+        from .underworld_rebuild import create_personnel
+        oid = create_underworld_organization(conn, f"authored:{call_id}", typ, name=name, founder_actor_id=leader, primary_location_id=loc,
+                                             member_count_estimate=4, violence_capacity=10, cohesion=50, metadata={"authored": True})
+        create_personnel(conn, oid, role_kind="boss", actor_id=leader)
+        return {"status": "created", "kind": "organisation", "type": typ, "outfit_id": oid, "name": name}
+    if conn.execute("SELECT COUNT(*) FROM actors WHERE actor_type='institution' AND subtype=? AND current_location_id=? AND status='active'", (typ, loc)).fetchone()[0] >= max(1, pop // 1000):
+        _no(f"the town has no room for another {typ}")
+    day = _day(conn)
+    iid = int(conn.execute(
+        "INSERT INTO actors(name,actor_type,subtype,home_location_id,current_location_id,status,notes,is_demo) VALUES (?,'institution',?,?,?,'active',?,0)",
+        (name, typ, loc, loc, "Authored in play.")).lastrowid)
+    conn.execute("INSERT INTO institution_profiles(actor_id,institution_kind,founded_day,primary_location_id) VALUES (?,?,?,?)", (iid, typ, day, loc))
+    conn.execute("INSERT INTO simulation_profiles(actor_id,tier,cadence_days,volatility,agency,last_review_day,next_review_day,wake_threshold) "
+                 "VALUES (?,'DORMANT',180,.30,.55,?,?,3)", (iid, day, day + 180))
+    conn.execute("INSERT INTO institution_memberships(institution_actor_id,member_actor_id,membership_kind,role_text,status,joined_day,provenance_json,metadata_json) "
+                 "VALUES (?,?,'member','head','active',?,?,?)", (iid, leader, day, json.dumps(["authored in play"]), json.dumps({"authored": True})))
+    return {"status": "created", "kind": "organisation", "type": typ, "institution_actor_id": iid, "name": name}
+
+
+# ---------------------------------------------------------------- rumour
+
+def _rumour(conn, me: int, d: dict, call_id: str) -> dict:
+    text = _text(d.get("text"), "text", 300)
+    loc = _place(conn, me, d)
+    hearers = d.get("heard_by") or []
+    if not isinstance(hearers, list) or len(hearers) > 12:
+        _no("heard_by must be a list of at most 12 actor ids")
+    ids = []
+    for h in hearers:
+        h = _character(conn, h, "heard_by")
+        if int(conn.execute("SELECT COALESCE(current_location_id,-1) FROM actors WHERE id=?", (h,)).fetchone()[0]) != loc:
+            _no("everyone who hears it first must be present at the place")
+        ids.append(h)
+    from .information import _schedule_from_location, expose_actor_to_rumour
+    day = _day(conn)
+    rid = int(conn.execute("INSERT INTO rumours(created_day,origin_location_id,text,truth_event_id,distortion,reach,status) VALUES (?,?,?,NULL,.3,.15,'circulating')",
+                           (day, loc, text)).lastrowid)
+    conn.execute("INSERT INTO rumour_locations(rumour_id,location_id,first_arrived_day,last_updated_day,prevalence,fidelity,hop_count) VALUES (?,?,?,?,.3,.7,0)",
+                 (rid, loc, day, day))
+    _schedule_from_location(conn, rid, loc, day, .3, .7, 0)
+    for h in ids:
+        expose_actor_to_rumour(conn, rid, h, day, loc, force=True)
+    return {"status": "created", "kind": "rumour", "rumour_id": rid}
+
+
+_KINDS = {"person": _person, "business": _business, "organisation": _organisation, "rumour": _rumour}
 
 
 def author(conn: sqlite3.Connection, me: int, kind: str, details: dict, call_id: str) -> dict:
