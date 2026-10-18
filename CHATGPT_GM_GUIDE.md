@@ -144,7 +144,7 @@ The recent underworld/Don roleplay is a practical test of whether the GM can sup
 - Make the world's response proportionate to the protagonist's position without making him the centre of every event. Connections may bring an opportunity to his attention, but people and institutions retain their own incentives and can refuse, negotiate, delay, or offer alternatives.
 - Corrections are useful playtest evidence. Acknowledge a genuine miss briefly, repair the same moment when asked to redo it, and change subsequent behaviour rather than defending the bad output or repeating the error.
 
-## 12. Static Ansel handoff snapshot (not live state)
+## 11. Static Ansel handoff snapshot (not live state)
 
 The latest repository handoff (2026-10-17) identifies the campaign as `ansel`:
 
@@ -156,7 +156,7 @@ The latest repository handoff (2026-10-17) identifies the campaign as `ansel`:
 
 These facts are a starting reference only. The live server may have advanced or changed them. Do not infer that any of these people are present now, that a pending event exists, or that the protagonist is in a particular room. The previous assistant's invented opening involving an unpaid debt, a rival invitation, and characters named Tomas or Marek as a visitor was not established campaign state and must not be treated as canon. Marek Harrow is known in the static handoff as the steward, not as a newly arriving visitor.
 
-## 11. If continuing without the live connector
+## 12. If continuing without the live connector
 
 Be honest about the limitation, but do not repeatedly interrupt the experience with technical explanations.
 
