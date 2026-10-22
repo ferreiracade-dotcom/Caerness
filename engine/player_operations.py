@@ -5,6 +5,7 @@ Amounts leave this module only as scale words.
 """
 from __future__ import annotations
 
+import json
 import math
 import re
 import sqlite3
@@ -844,8 +845,22 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
 def _open_debts(conn, me: int, target: int) -> list:
     rows = conn.execute("SELECT * FROM credit_agreements WHERE borrower_actor_id=? AND outstanding>0 "
                         "AND status IN ('current','late','defaulted') ORDER BY id", (target,)).fetchall()
-    return [r for r in rows if r["lender_actor_id"] == me or (
-        r["lender_enterprise_id"] is not None and ledger.can_draw(conn, me, ("business", int(r["lender_enterprise_id"]))))]
+    def mine_to_collect(r) -> bool:
+        t = _treasury_of(r)
+        if t is not None:
+            return ledger.can_draw(conn, me, t)
+        return r["lender_actor_id"] == me or (
+            r["lender_enterprise_id"] is not None and ledger.can_draw(conn, me, ("business", int(r["lender_enterprise_id"]))))
+    return [r for r in rows if mine_to_collect(r)]
+
+
+def _treasury_of(r):
+    """The outfit or household treasury a loan was lent from (it is repaid there, not to the boss's own purse); None otherwise."""
+    try:
+        kind, _, i = str(json.loads(r["metadata_json"] or "{}").get("source", "")).partition(":")
+    except Exception:
+        return None
+    return (kind, int(i)) if kind in ("outfit", "household", "institution") and i.isdigit() else None
 
 
 def _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_outfit, iid, openly) -> dict:
@@ -867,7 +882,7 @@ def _concede(conn, me, target, name, what, d, amount, debts, my_outfit, their_ou
             if remaining <= 1e-9:
                 break
             part = min(float(r["outstanding"]), remaining)
-            dst: ledger.Holder = ("business", int(r["lender_enterprise_id"])) if r["lender_enterprise_id"] is not None else mine
+            dst: ledger.Holder = ("business", int(r["lender_enterprise_id"])) if r["lender_enterprise_id"] is not None else (_treasury_of(r) or mine)
             got = ledger.transfer(conn, theirs, dst, part, flow_kind="other", purpose="debt collected", allow_partial=True)
             if got <= 0:
                 break

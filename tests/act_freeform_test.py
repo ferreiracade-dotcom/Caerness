@@ -188,6 +188,11 @@ def t_freeform(conn, w):
             details={"resources": {"men": 900, "money": 30, "from": f"outfit:{outfit}"}, "time": "a month", "conditions": ["before the river floods"]})
     assert r["status"] == "partial" and r["mapped_to"] == "plan" and "aren't that many men" in r["summary"] and r["ready_in_days"] == 30, r
     assert r["costs"]["men"] <= 39 and ledger.balance(conn, ("outfit", outfit)) < m0, r
+    # his outfit's men live on the kick-up: only the money named is spent, no wages into a sink; a long plan is not capped at 60 days
+    assert abs((m0 - ledger.balance(conn, ("outfit", outfit))) - 30.0) < 1e-6, (m0, ledger.balance(conn, ("outfit", outfit)))
+    r2 = act(conn, "f2b", "operation", "Hold the whole river road with a great force of men for a year.",
+             details={"resources": {"men": 30, "from": f"outfit:{outfit}"}, "time": "a year"})
+    assert r2["ready_in_days"] == 365, r2
     assert r["conditions"] == ["before the river floods"]
     # the commitment is visible to the world's own reminders and settles on its day
     from engine import commitments, free_operation

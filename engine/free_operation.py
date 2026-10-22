@@ -303,6 +303,14 @@ def _operation(conn, me, kind, intent, f, res, targets, committed, days, call_id
 
 # ---------------------------------------------------------------- commitments (nothing models it, or it does not fit)
 
+def _pay_levy(conn, me: int, amount: float) -> None:
+    here = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()[0]
+    hh = [int(r[0]) for r in conn.execute("SELECT id FROM households WHERE location_id=? AND status IN ('active','declining') ORDER BY id", (here,))]
+    if hh and amount > 0:
+        for h in hh:
+            ledger._credit(conn, ("household", h), amount / len(hh))
+
+
 def _commit(conn, me, intent, f, res, targets, committed, days, kind) -> dict:
     """Accept it anyway: take its costs (money, people, time) plausibly and keep it as a commitment the world can see."""
     day = _day(conn)
@@ -317,15 +325,18 @@ def _commit(conn, me, intent, f, res, targets, committed, days, kind) -> dict:
     if not ledger.can_draw(conn, me, src):
         return _refuse("He has no right to draw on that purse.")
     men = int(res.get("men") or 0) + sum(c["count"] for c in committed if c["kind"] == "actor" and c["count"] > 1)
-    span = days or max(3, min(60, 3 + men // 5))
+    span = days or max(3, 3 + men // 5)  # more men take longer to gather and move, with no fixed ceiling
     est_wages = 0.0
+    hirelings = 0
     if men:
         have, where = _men_available(conn, me)
         if men > have:
             pay_note.append(f"there aren't that many men to be had from {where}")
             status = "partial"
             men = have
-        est_wages = men * 0.10 * span / 30.0
+        if where != "his outfit":  # his outfit's men live on the kick-up, not on wages; only hirelings from the place are paid
+            hirelings = men
+            est_wages = men * 0.10 * span / 30.0
         cost_words["men"] = men
     money = _money(f, res)
     total = 0.0
@@ -342,6 +353,8 @@ def _commit(conn, me, intent, f, res, targets, committed, days, kind) -> dict:
             pay_note.append("the money on hand would not cover all of it, so it is scaled back")
             status = "partial"
         cost_words["money"] = ledger.scale_word(spent) if spent > 0 else "nothing"
+        if hirelings and est_wages > 0 and total > 0:  # the hirelings' pay reaches the households of the place, not a sink
+            _pay_levy(conn, me, spent * est_wages / total)
     funded = 1.0 if total <= 0 else min(1.0, spent / total)
     names = [c["name"] for c in committed]
     cid = commitments.record(

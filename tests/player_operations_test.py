@@ -390,6 +390,20 @@ def run_review_fixes():
             assert r["status"] in ("applied", "refused") and (r["status"] == "applied") == (count("credit_agreements") == cr0 + 1), r
             r = po.execute(conn, me, "lend", target_actor_id=by, details={"from": "person:%d" % by, "amount": "small"}, intent="x")
             assert r["status"] == "refused"
+            # a loan the outfit made is repaid to the outfit's treasury, not to the boss's own purse
+            from engine import civilian_life
+            ledger._credit(conn, ("person", by), 5.0)
+            loan = civilian_life.create_credit_agreement(conn, principal=3.0, lender_actor_id=me, borrower_actor_id=by, due_day=999999,
+                                                         metadata={"source": f"outfit:{outfit}"})
+            t0, boss0 = ledger.balance(conn, ("outfit", outfit)), ledger.balance(conn, ("person", me))
+            assert any(int(d["id"]) == loan for d in po._open_debts(conn, me, by))
+            for _ in range(4):
+                rr = po.execute(conn, me, "demand", target_actor_id=by, details={"what": "debt", "open": False}, intent="The outfit's money is due.")
+                if rr["status"] != "refused":
+                    break
+            if rr["status"] != "refused":
+                assert ledger.balance(conn, ("outfit", outfit)) > t0 + 1e-9 and abs(ledger.balance(conn, ("person", me)) - boss0) < 1e-9, \
+                    (t0, ledger.balance(conn, ("outfit", outfit)), boss0, ledger.balance(conn, ("person", me)))
             cr0 = count("credit_agreements")
             i0 = count("interactions")
 
