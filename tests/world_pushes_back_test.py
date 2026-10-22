@@ -357,8 +357,9 @@ def loyalty():
         w = make_fane(conn, legacy=False)
         outfit, hh, loc = w["outfit"], w["household"], w["location"]
         members = [create_personnel(conn, outfit, role_kind="enforcer") for _ in range(5)]
-        servant = _reveal(conn, loc, "fixture servant", min_age=20, max_age=50)
-        term = add_service_term(conn, hh, servant, "servant")
+        terms = []
+        for i in range(8):  # one draw proves nothing: a household of servants shows the rate
+            terms.append(add_service_term(conn, hh, _reveal(conn, loc, f"fixture servant {i}", min_age=20, max_age=50), "servant"))
         conn.commit()
         advance_connection(conn, 31)  # one good month: the crews learn what their rackets give them
         crews0 = conn.execute("SELECT AVG(loyalty) FROM underworld_crews WHERE organization_id=?", (outfit,)).fetchone()[0]
@@ -386,7 +387,9 @@ def loyalty():
             st = conn.execute("SELECT status,organization_id FROM underworld_personnel WHERE actor_id=?", (aid,)).fetchone()
             if st["status"] == "retired":
                 assert "criminal" not in str(sub), sub
-        assert conn.execute("SELECT status FROM household_service_terms WHERE id=?", (term,)).fetchone()[0] == "former", "the unpaid servant stayed"
+        gone_n = conn.execute("SELECT COUNT(*) FROM household_service_terms WHERE id IN (%s) AND status='former'" % ",".join(map(str, terms))).fetchone()[0]
+        print("unpaid servants who left:", gone_n, "of", len(terms))
+        assert 3 <= gone_n, ("unpaid servants mostly stayed", gone_n)
         assert conn.execute("SELECT COUNT(*) FROM events WHERE event_type='household_service_quit'").fetchone()[0] >= 1
     # paid outfits over a year lose no one to these paths
     with world() as conn:
