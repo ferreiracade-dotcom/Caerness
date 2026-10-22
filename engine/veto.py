@@ -46,6 +46,8 @@ _KEYWORDS = (
 _LEAD = re.compile(r"head|lead|lord|lady|boss|chief|captain|commander|founder|owner|proprietor|patriarch|matriarch|abbot|abbess|priorb|chair|"
                    r"ruler|king|queen|duke|baron|earl|regent|emperor|sovereign|warlord|master of|principal|director|heir")
 
+_SPOUSE_NOUN = re.compile(r"\b(husband|groom|bridegroom|wife|bride)\b")
+
 # Female/male-coded words in a family description (a "husband" is a man): used only to catch a same-sex union.
 _MALE_KIN = ("husband", "father", "brother", "son ", "uncle", "man ")
 _FEMALE_KIN = ("wife", "mother", "sister", "daughter", "aunt", "woman")
@@ -154,10 +156,6 @@ def stage_plausible(age: int, category: str, stage: str | None) -> None:
     i = order.index(stage)
     if stage == "Sixth":
         raise Contradiction("the forty Sixths of the world are all known; a new person cannot be one")
-    if age < 25 and i > 2:
-        raise Contradiction(f"at {age} a {stage} is unheard of; under 25 at most Third")
-    if age < 35 and i > 3:
-        raise Contradiction(f"at {age} a {stage} is unheard of; under 35 at most Breach")
     if category not in _MARTIAL and i >= 2 and age < 45:
         raise Contradiction(f"a {category} at {stage} is all but unheard of; only a retired martial master (45 or more) keeps an ordinary trade")
 
@@ -266,10 +264,12 @@ def holdings_in_proportion(conn: sqlite3.Connection, loc: int, holdings: list[di
             if amt is not None:
                 got = min(amt, wealth_left)
                 if got < amt - 0.01:
-                    down.append({"asked": f"{ledger.scale_word(amt)} {kind or 'holding'}", "got": f"{ledger.scale_word(max(got, 0.2))}",
+                    down.append({"asked": f"{ledger.scale_word(amt)} {kind or 'holding'}", "got": ledger.scale_word(got),
                                  "why": "the town doesn't hold that much; he starts with what it can bear"})
                 wealth_left = max(0.0, wealth_left - got)
-                h["amount"] = round(max(got, 0.2), 2)
+                if got <= 0.0:
+                    continue  # nothing can be given: the holding is dropped and said so
+                h["amount"] = round(got, 2)
             businesses += 1
             if businesses > biz_cap:
                 down.append({"asked": f"{kind or 'business'} {h.get('name', '')}".strip(), "got": "none",
@@ -301,10 +301,9 @@ def check_proposal(conn: sqlite3.Connection, proposal: dict) -> dict:
         for it in items:
             blob = " ".join(str(v) for v in (it.values() if isinstance(it, dict) else [it])).lower()
             if key == "spouse":
-                if any(w in blob for w in _MALE_KIN) and not any(w in blob for w in _FEMALE_KIN):
-                    same_sex_union(sex, "male")
-                elif any(w in blob for w in _FEMALE_KIN):
-                    same_sex_union(sex, "female")
+                m = _SPOUSE_NOUN.search(blob)  # "a husband, a widower with a daughter": only the spouse word counts
+                if m:
+                    same_sex_union(sex, "male" if m.group(1) in ("husband", "groom", "bridegroom") else "female")
             if age < 16 and key == "spouse" and blob.strip() not in ("", "none"):
                 raise Contradiction("a child of that age has no spouse")
             who = it.get("name") if isinstance(it, dict) else (it if isinstance(it, str) else None)

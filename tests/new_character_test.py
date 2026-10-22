@@ -231,7 +231,7 @@ def proposal():
         weird = nc.create_protagonist(c, {**base, "work": "keeper of the dawn bells", "family": {"spouse": "none"}, "concept": "x"}, "r4")
         assert weird["status"] == "draft", weird
         kid = nc.create_protagonist(c, {"age": 12, "place": "Toll's Reach", "draw": 0}, "r5")
-        assert kid["status"] == "draft" and "parents' house" in kid["summary"]["household"], kid
+        assert kid["status"] == "draft" and "parents" in kid["summary"]["household"], kid
         assert _counts(c) == _counts(c)
         # a drawn sex follows the power role: violent outfit ~0.92, trade ~0.85, vice ~0.70; a stated sex is respected
         for cls, text, lo, hi in (("violent", {"name": "The Rooks", "role": "boss", "new": True, "type": "gang"}, .88, .96),
@@ -305,8 +305,55 @@ def ansel():
     print("new_character_test::ansel ok")
 
 
+def unearned():
+    """Review fixes: nothing unearned at creation, the words carry no ages and use his sex, a from-elsewhere past is where he came from."""
+    from engine import ledger, new_character as nc
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        c = open_copy(tmp)
+        c.commit()
+        tally = []
+        real_c = ledger._credit
+        ledger._credit = lambda conn, h, a: (tally.append((h, a)), real_c(conn, h, a))[1]
+        try:
+            rich = nc.create_protagonist(c, {"age": 40, "sex": "female", "place": "Toll's Reach", "work": "merchant", "draw": 0, "accept": True,
+                                             "from_elsewhere": True, "family": {"spouse": "a husband"},
+                                             "holdings": [{"kind": "tea house", "name": "Lamp Tea House", "amount": "large"},
+                                                          {"kind": "ink works", "name": "Blue Ink Works", "amount": "large"}]}, "u1")
+        finally:
+            ledger._credit = real_c
+        assert rich["status"] == "created", rich
+        me = rich["actor_id"]
+        first = next(a for h, a in tally if h == ("person", me))
+        caps = c.execute("SELECT COALESCE(SUM(capital),0) FROM civilian_enterprises WHERE owner_actor_id=?", (me,)).fetchone()[0]
+        assert caps > 0 and abs(ledger.balance(c, ("person", me)) - first) < 1e-6, (ledger.balance(c, ("person", me)), first, caps)
+        # words: no ages, no raw category names, her and she for a woman; knowledge skips aggregate stand-ins
+        texts = [r[0] for r in c.execute("SELECT belief_text FROM knowledge WHERE knower_actor_id=? AND fact_key LIKE 'lived:%'", (me,))]
+        texts += [r[0] for r in c.execute("SELECT summary FROM actor_memories WHERE actor_id=?", (me,))]
+        assert texts and not any("years old" in x or "at about" in x or " a merchant " in x for x in texts), texts
+        assert not any(x.startswith("[") or "[STRUCTURAL" in x for x in texts)
+        s = json.dumps(rich["summary"])
+        assert " his " not in s and " him " not in s, s
+        # he came from elsewhere: home memory and family are where he grew up
+        pr = c.execute("SELECT current_location_id FROM background_person_profiles WHERE actor_id=?", (me,)).fetchone()[0]
+        here = c.execute("SELECT home_location_id FROM actors WHERE id=?", (me,)).fetchone()[0]
+        if pr != here:
+            home = c.execute("SELECT name FROM locations WHERE id=?", (pr,)).fetchone()[0]
+            assert any(home in x for x in texts if x.startswith("Grew up")), texts
+            for (loc,) in c.execute("SELECT a.home_location_id FROM kinship_links k JOIN actors a ON a.id=k.actor_b_id WHERE k.actor_a_id=? AND k.kin_kind='parent'", (me,)):
+                assert loc == pr, "his parents live where he grew up"
+        # a married woman's children take her husband's surname
+        sp = c.execute("SELECT actor_a_id a,actor_b_id b FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?)", (me, me)).fetchone()
+        if sp:
+            husband = sp["b"] if sp["a"] == me else sp["a"]
+            fam = c.execute("SELECT name FROM actors WHERE id=?", (husband,)).fetchone()[0].split()[-1]
+            for (nm,) in c.execute("SELECT a.name FROM kinship_links k JOIN actors a ON a.id=k.actor_b_id WHERE k.actor_a_id=? AND k.kin_kind='parent'", (husband,)):
+                assert nm.split()[-1] == fam, (nm, fam)
+        c.close()
+    print("new_character_test::unearned ok")
+
+
 def run(only=None):
-    for fn in (parity, lived_past, proposal, ansel):
+    for fn in (parity, lived_past, proposal, ansel, unearned):
         if only is None or fn.__name__ in only:
             fn()
 

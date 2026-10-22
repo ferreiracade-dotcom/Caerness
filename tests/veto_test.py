@@ -47,8 +47,8 @@ def run():
         refuses(v.stage_plausible, "unheard", 25, "merchant", "Third")
         v.stage_plausible(55, "merchant", "Third")          # a retired master
         v.stage_plausible(45, "criminal", "Third")
-        refuses(v.stage_plausible, "under 25", 22, "soldier", "Breach")
-        refuses(v.stage_plausible, "under 35", 30, "soldier", "Fifth")
+        v.stage_plausible(22, "soldier", "Breach")  # no fixed age caps on a Stage: canon's Blake Merrin was a Sixth at 34
+        v.stage_plausible(30, "soldier", "Fifth")
         refuses(v.stage_plausible, "forty Sixths", 80, "soldier", "Sixth")
         v.stage_plausible(30, "merchant", "Temper")
         v.stage_plausible(30, "merchant", "a quiet sort of talent")  # free text claims no Stage
@@ -90,6 +90,13 @@ def run():
         refuses(v.check_proposal, "unheard", c, {**base, "age": 25, "work": "merchant", "stage": "Third"})
         refuses(v.check_proposal, "dead", c, {**base, "family": {"parents": [{"name": dead}]}})
         refuses(v.check_proposal, "no spouse", c, {**base, "age": 12, "family": {"spouse": "a wife"}})
+        # only the spouse word decides: a widower and a daughter in the same breath are not a second spouse
+        v.check_proposal(c, {**base, "sex": "female", "family": {"spouse": "a husband, a widower with a daughter"}})
+        v.check_proposal(c, {**base, "sex": "male", "family": {"spouse": "a wife who is a widow's daughter"}})
+        refuses(v.check_proposal, "same-sex", c, {**base, "sex": "female", "family": {"spouse": "a wife"}})
+        # zero is a valid answer: where the town can bear nothing more, the holding is dropped and said so
+        adj, down = v.holdings_in_proportion(c, toll, [{"kind": "tavern", "name": "B", "amount": "modest"}], prior_wealth=1e6)
+        assert adj == [] and down and down[0]["got"] == "nothing", (adj, down)
         v.check_proposal(c, {**base, "affiliation": {"name": "House Halloway", "role": "cadet"}})
         c.close()
     print("veto_test: ok")

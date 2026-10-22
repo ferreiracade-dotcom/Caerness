@@ -438,9 +438,11 @@ def _business(conn, me: int, d: dict, call_id: str) -> dict:
         asked = round(2.0 * max(0.5, _owner_means(conn, owner) / 50.0), 2)  # a modest start for the owner's means
     adj, down = veto.holdings_in_proportion(conn, loc, [{"kind": trade, "name": name, "amount": asked}],
                                             prior_wealth=_founded_capital(conn, me) if founding else 0.0)
-    if not adj:
+    if not adj:  # nothing can be given: zero is a valid answer
         _no("the town has no room for another business of that kind")
     means = float(adj[0]["amount"])
+    if means <= 0:
+        _no("the town has no room for another business of that kind")
     if founding:  # he pays for what he founds, from his own purse; never more than he has
         got = round(_afford(conn, me, means), 2)
         if got < 0.2:

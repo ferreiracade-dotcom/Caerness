@@ -744,7 +744,12 @@ def reveal_latent_adult_child(conn: sqlite3.Connection, parent_id: int, *, reaso
             continue
         bd = adults[0]  # eldest
         parents = [x for x in (cons.get("parent_actor_id"), cons.get("other_parent_actor_id")) if x is not None]
-        pname = str(conn.execute("SELECT name FROM actors WHERE id=?", (int(cons["parent_actor_id"]),)).fetchone()[0])
+        fid = int(cons["parent_actor_id"])
+        if cons.get("other_parent_actor_id") is not None:  # children take the father's surname, whichever parent the group hangs on
+            sx = lambda i: (conn.execute("SELECT demographic_sex FROM actor_life_profiles WHERE actor_id=?", (int(i),)).fetchone() or [None])[0]
+            if sx(fid) == "female" and sx(cons["other_parent_actor_id"]) == "male":
+                fid = int(cons["other_parent_actor_id"])
+        pname = str(conn.execute("SELECT name FROM actors WHERE id=?", (fid,)).fetchone()[0])
         key = f"latent-child:{int(g['id'])}:{bd}"
         sex = seeded_sex(key)
         rng = _rng(key)

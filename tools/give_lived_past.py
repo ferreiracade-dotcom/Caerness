@@ -87,9 +87,10 @@ def main() -> None:
         copy_consistent(src, dest)  # online backup API, then integrity_check of the copy; raises on any failure
         print(f"backup: {dest}", file=sys.stderr)
     else:
+        from connector.backup import copy_consistent
         tmp = Path(tempfile.mkdtemp())
         target = tmp / src.name
-        shutil.copy2(src, target)
+        copy_consistent(src, target)  # an online backup copy: the campaign may be in WAL
         print("dry run on a copy; nothing is written to the campaign", file=sys.stderr)
     os.environ["CAERNESS_DB_PATH"] = str(target)
     from engine.db import connect, init_db

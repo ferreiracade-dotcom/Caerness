@@ -264,7 +264,7 @@ def _ties(conn, aid: int, *, key: str, day: int, loc: int, age: int, cat: str, a
             _low_attention(conn, m, day, "mentor of a new protagonist")
             start = day - int(rng.randint(8, max(9, age - 14)) * 365)
             conn.execute("""INSERT OR IGNORE INTO teaching_relationships(teacher_actor_id,student_actor_id,relation_kind,domain_key,responsibility,start_day,end_day,status,notes)
-                            VALUES (?,?, 'mentor',?,50,?,?,'ended','Taught him the trade; lived before the opening of his story.')""",
+                            VALUES (?,?, 'mentor',?,50,?,?,'ended','Taught the trade; this was before the story opens.')""",
                          (m, aid, cat, start, start + 365 * 3))
             _seed_pair(conn, aid, m, "teaching", key=f"{key}:mentor", started_day=start, a_role="student", b_role="teacher")
             made["mentor"] = 1
@@ -273,6 +273,9 @@ def _ties(conn, aid: int, *, key: str, day: int, loc: int, age: int, cat: str, a
 
 _APT = {"merchant": "economic_aptitude", "clerk": "economic_aptitude", "physician": "medical_aptitude", "teacher": "teaching_aptitude",
         "criminal": "criminal_familiarity", "soldier": "command_aptitude"}
+_WORK_PHRASE = {"labor": "hard labour", "artisan": "a craft", "artist": "the arts", "clerk": "clerking", "criminal": "the life outside the law",
+                "hospitality": "hospitality work", "merchant": "trade", "physician": "healing", "soldier": "soldiering",
+                "teacher": "teaching", "transport": "the carrying trades"}
 _START = {"labor": 14, "hospitality": 14, "clerk": 16, "merchant": 16, "soldier": 18, "criminal": 18}
 
 
@@ -286,8 +289,13 @@ def _competence(conn, aid: int, cat: str, age: int) -> float:
     return float(score)
 
 
+def _sexword(conn, aid: int) -> str:
+    return str(conn.execute("SELECT demographic_sex FROM actor_life_profiles WHERE actor_id=?", (aid,)).fetchone()[0])
+
+
 def _knowledge(conn, aid: int, *, key: str, day: int, loc: int, cat: str, kin: list[int]) -> int:
     from .manners_canon import MANNERS, culture_key
+    they = "he" if _sexword(conn, aid) == "male" else "she"
     rng = _rng(f"{key}:knowledge")
     s = _settlement(conn, loc)
     facts: list[tuple[str, str]] = []
@@ -299,7 +307,8 @@ def _knowledge(conn, aid: int, *, key: str, day: int, loc: int, cat: str, kin: l
                JOIN underworld_organizations o ON o.id=c.organization_id LEFT JOIN actors a ON a.id=o.current_leader_actor_id
                WHERE z.city_location_id=?""", (s,)):
         facts.append((f"zone:{r['id']}", f"{r['oname']} holds {r['zname']}" + (f"; {r['boss']} answers for it." if r["boss"] else ".")))
-    for r in conn.execute("SELECT id,name,owner_actor_id FROM civilian_enterprises WHERE location_id=? AND status IN ('active','strained')", (s,)):
+    for r in conn.execute("SELECT id,name,owner_actor_id FROM civilian_enterprises WHERE location_id=? AND status IN ('active','strained') AND name NOT LIKE '[%' "
+            "AND metadata_json NOT LIKE '%STRUCTURAL%' AND metadata_json NOT LIKE '%aggregate%'", (s,)):
         owner = f", kept by {_name(conn, r['owner_actor_id'])}" if r["owner_actor_id"] else ""
         facts.append((f"business:{r['id']}", f"{r['name']} trades here{owner}."))
     for r in conn.execute("SELECT id,name FROM actors WHERE actor_type='institution' AND status='active' AND current_location_id=?", (s,)):
@@ -307,7 +316,7 @@ def _knowledge(conn, aid: int, *, key: str, day: int, loc: int, cat: str, kin: l
     rng.shuffle(facts)
     facts = facts[:rng.randint(12, 25)]
     for k in kin:
-        facts.append((f"person:{k}", f"{_name(conn, k)} is known to him, {_age(conn, k, day)} years old."))
+        facts.append((f"person:{k}", f"{_name(conn, k)} is someone {they} know{'s' if they != 'they' else ''} well."))
     facts.append(("manners:place", MANNERS[culture_key(conn, loc)]))
     n = 0
     for fk, text in facts:
@@ -324,7 +333,7 @@ def _memories(conn, aid: int, *, key: str, day: int, loc: int, cat: str, age: in
     rng = _rng(f"{key}:memories")
     items = [("lived:home", f"Grew up in {_loc(conn, _settlement(conn, loc))}; the streets and their people are familiar.", .5)]
     if age >= 16:
-        items.append(("lived:trade", f"Took up the work of a {cat} at about {_START.get(cat, 16)} and has kept at it.", .6))
+        items.append(("lived:trade", f"Took up {_WORK_PHRASE.get(cat, 'a trade')} young and has kept at it.", .6))
     if origin.get("parents_dead") == 2:
         items.append(("lived:orphaned", "Both parents are dead; their loss shaped the years after.", .8))
     elif origin.get("parents_dead"):
@@ -360,7 +369,11 @@ def fill_lived_past(conn: sqlite3.Connection, aid: int, *, key: str, proposal: d
     loc, sex, age = int(row["loc"]), str(row["sex"]), _age(conn, aid, day)
     cat = veto.categorise(proposal.get("work"), proposal.get("category"))
     from .cultivation import location_in_hearth
-    hearth = location_in_hearth(conn, _settlement(conn, loc))
+    pr = conn.execute("SELECT current_location_id FROM background_person_profiles WHERE actor_id=?", (aid,)).fetchone()
+    home_loc = int(pr[0]) if pr and pr[0] is not None else loc
+    if _settlement(conn, home_loc) == _settlement(conn, loc):
+        home_loc = loc  # not from elsewhere: he grew up where he lives
+    hearth = location_in_hearth(conn, _settlement(conn, home_loc))
     family_name = _family_surname(str(row["name"]))
     aff = proposal.get("_affiliation")  # resolved by create_protagonist: {"kind","id"} of a body he belongs to
     # a household he already heads or belongs to is his home: a spouse joins it rather than a new house being formed around him
@@ -369,12 +382,12 @@ def fill_lived_past(conn: sqlite3.Connection, aid: int, *, key: str, proposal: d
     if home is not None:
         conn.execute("UPDATE actor_life_profiles SET current_household_id=? WHERE actor_id=? AND current_household_id IS NULL", (int(home[0]), aid))
     fam = _family(conn, aid, key=key, proposal=proposal, day=day, loc=loc, sex=sex, age=age)
-    origin = _origin(conn, aid, key=key, proposal=proposal, day=day, loc=loc, sex=sex, age=age, family_name=family_name, hearth=hearth)
+    origin = _origin(conn, aid, key=key, proposal=proposal, day=day, loc=home_loc, sex=sex, age=age, family_name=family_name, hearth=hearth)
     ties = _ties(conn, aid, key=key, day=day, loc=loc, age=age, cat=cat, affiliation=aff, also=proposal.get("_ties_with"))
     score = _competence(conn, aid, cat, age) if age >= 14 else 0.0
     kin = [x for x in ([fam["spouse"]] if fam["spouse"] else []) + fam["children"] + list(origin["people"].values()) if x]
     nk = _knowledge(conn, aid, key=key, day=day, loc=loc, cat=cat, kin=kin)
-    nm = _memories(conn, aid, key=key, day=day, loc=loc, cat=cat, age=age, origin=origin, kin=kin)
+    nm = _memories(conn, aid, key=key, day=day, loc=home_loc, cat=cat, age=age, origin=origin, kin=kin)
     _standing(conn, aid, cat=cat, age=age, holds=float(proposal.get("_holds", 0)))
     digest = {"spouse": bool(fam["spouse"]), "children": len(fam["children"]), "parents_living": origin["revealed_parents"],
               "siblings_known": origin["revealed_siblings"], "neighbours": ties["neighbours"], "colleagues": ties["colleagues"],
@@ -566,7 +579,7 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
     means, _tags = _family_means(conn, [aid])
     start = round(0.5 * 4.0 * (means / 50.0) ** 3 * max(0.4, min(1.2, age / 45.0)), 2) if age >= 16 else 0.0
     set_player(conn, aid, campaign_name or _campaign_name())
-    funds = start + cash + sum(float(h["amount"]) for h in businesses)
+    funds = start + cash  # what he founds is paid in just before it is founded (below), never more than becomes capital
     if funds > 0:
         ledger._credit(conn, ("person", aid), funds)
     hid = None
@@ -620,8 +633,18 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
         made.append(f"leads {h['name']}")
         holds += 2
     for h in businesses:
-        b = authoring._business(conn, aid, {"name": h.get("name") or f"{lastname}'s {h.get('kind', 'shop')}", "trade": h.get("kind") or "shop",
-                                            "amount": h.get("amount"), "location_id": loc}, f"{call_id}:b:{h.get('name') or h.get('kind')}")
+        paid_in = float(h["amount"])
+        ledger._credit(conn, ("person", aid), paid_in)
+        try:
+            b = authoring._business(conn, aid, {"name": h.get("name") or f"{lastname}'s {h.get('kind', 'shop')}", "trade": h.get("kind") or "shop",
+                                                "amount": paid_in, "location_id": loc}, f"{call_id}:b:{h.get('name') or h.get('kind')}")
+        except authoring.AuthoringRefused as e:
+            ledger._debit(conn, ("person", aid), paid_in)
+            down.append({"asked": str(h.get("kind") or "business"), "got": "none", "why": str(e)})
+            continue
+        capital = float(conn.execute("SELECT capital FROM civilian_enterprises WHERE id=?", (b["enterprise_id"],)).fetchone()[0])
+        if paid_in - capital > 1e-9:  # the town bore less than was paid in: the rest goes back, he keeps nothing unearned
+            ledger._debit(conn, ("person", aid), paid_in - capital)
         down += b.get("scaled_down", [])
         made.append(f"owns {b['name']}")
         holds += 1
@@ -677,6 +700,7 @@ def _summary(conn, aid: int, past: dict, made: list[str], down: list[dict], staf
     if d.get("siblings_known"):
         fam.append(f"{word(d['siblings_known'])} sibling{'s' if d['siblings_known'] > 1 else ''} nearby")
     served = int(staff.get("hired", 0)) + int(staff.get("counted", 0))
+    his = "his" if row["sex"] == "male" else "her"
     out = {
         "status": "draft", "draw": draw, "actor_id": aid,
         "summary": {
@@ -684,9 +708,9 @@ def _summary(conn, aid: int, past: dict, made: list[str], down: list[dict], staf
                    + (f", come from {got['origin']}" if got.get("origin") else ""),
             "work": work,
             "family": "; ".join(fam),
-            "holdings": made or ["nothing of his own beyond his household"],
-            "household": (f"a household with {word(served)} in service" if served else "a household with no servants") if age >= 16 else "lives in his parents' house",
-            "standing": f"known in {place} as a {work}, as far as his years and holdings earn",
+            "holdings": made or [f"nothing of {his} own beyond {his} household"],
+            "household": (f"a household with {word(served)} in service" if served else "a household with no servants") if age >= 16 else f"lives in the house of {his} parents",
+            "standing": f"known in {place} as a {work}, as far as {his} years and holdings earn",
             "people": ("a handful of neighbours" if d.get("neighbours", 0) >= 3 else "few neighbours") + (", colleagues" if d.get("colleagues") else "")
                       + (", an old teacher" if d.get("mentor") else ""),
             "past": "a plausible past is filled in: kin, neighbours, what he has learned of the town, a few memories",
