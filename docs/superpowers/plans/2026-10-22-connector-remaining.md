@@ -8,7 +8,6 @@ Owner principles that govern every item below: the engine is a veto, not a menu 
 - [ ] Phone playtest as Ansel: businesses, outfit, his new family and past, an operation, an `advance` of a month, an attack on him (pending → `act respond`).
 - [ ] Playtest new-character creation once (a fresh campaign starts with the creation conversation).
 - [ ] Pick the GM model (Sonnet medium for value, Opus low for quality).
-- [ ] Delete `D:\Git\tmp_other.txt`.
 
 ## 2. Verification debt (do before or alongside the playtest)
 - [ ] Full regression suite never run on the final code (last full run 139/139 was before gap 3). Run it once in a clean worktree; fix only real failures.
