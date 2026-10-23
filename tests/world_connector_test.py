@@ -136,6 +136,60 @@ def run_no_cultivation():
     print("world_connector_test (no cultivation) passed")
 
 
+def run_package_surface():
+    """Tasks 14-15: rulebook = shared core + the campaign's world section; lore, rulebook and date follow the package."""
+    os.environ.pop("CAERNESS_WORLD_PACKAGE", None)
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        tmp = Path(tmp)
+        os.environ["CAERNESS_CAMPAIGN_DIR"] = str(tmp / "camps")
+        worlds = tmp / "worlds"
+        worlds.mkdir()
+        _write_pkg(worlds, "caerness", display_name="Caerness", calendar={"kind": "sv"})
+        sj = _write_pkg(worlds, "saintjude", display_name="Saint Jude", calendar={"kind": "gregorian", "start": "1985-03-04"},
+                        bible_path="bible.md", rulebook_section="rb.md", creation_section="cr.md")
+        (sj / "bible.md").write_text("# Harbour\n\nThe zorblat quay smells of diesel and salt.\n", encoding="utf-8")
+        (sj / "rb.md").write_text("{{intro}}\nYou are the game master for Saint Jude. Binding.\n", encoding="utf-8")
+        (sj / "cr.md").write_text("Design a Saint Jude resident.\n", encoding="utf-8")
+        bare = _write_pkg(worlds, "bare", display_name="Bare", bible_path="b.md")
+        (bare / "b.md").write_text("# Bare\n\nPlain.\n", encoding="utf-8")
+        os.environ["CAERNESS_WORLDS_DIR"] = str(worlds)
+        import connector.campaign as cc
+        import engine.canon as canon
+        from connector.session import load_creation, load_rulebook, resume
+        from engine.player import set_player
+
+        fake_root = tmp / "root"
+        (fake_root / "data").mkdir(parents=True)
+        for n in ("saintjude", "bare"):
+            shutil.copy2(cc.PACKAGED_DB, fake_root / "data" / f"{n}.db")
+        real_root = cc.ROOT
+        cc.ROOT = fake_root
+        try:
+            cc.open_campaign("sj1", package="saintjude")
+            with cc.connect_campaign() as conn:
+                rb = load_rulebook(conn)
+                assert rb.startswith("You are the game master for Saint Jude."), rb[:80]
+                assert "Caerness" not in rb and load_creation(conn) .startswith("Design a Saint Jude resident.")
+                assert resume(conn)["creation"] == load_creation(conn)
+                me = int(conn.execute("SELECT id FROM actors WHERE actor_type='character' AND current_location_id IS NOT NULL ORDER BY id LIMIT 1").fetchone()[0])
+                set_player(conn, me)
+                conn.commit()
+                out = resume(conn)
+                assert out["rulebook"] == rb
+            cc.open_campaign("bare1", package="bare")
+            with cc.connect_campaign() as conn:
+                rb = load_rulebook(conn)
+                for word in ("Caerness", "Stage", "cultivat", "House", "SV", "Hollow"):
+                    assert word not in rb, word
+                assert "Close third person" in rb and rb.count("\n\n\n") == 0
+                assert "Stage" not in load_creation(conn) and "Caerness" not in load_creation(conn)
+        finally:
+            cc.ROOT = real_root
+            os.environ.pop("CAERNESS_WORLDS_DIR", None)
+    print("world_connector_test (package surface) passed")
+
+
 if __name__ == "__main__":
     run()
     run_no_cultivation()
+    run_package_surface()

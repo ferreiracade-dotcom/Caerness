@@ -8,17 +8,31 @@ import threading
 
 from mcp.server.mcpserver import MCPServer
 
-INSTRUCTIONS = ("Caerness is the user's text role-playing game. When the user says \"resume\", \"play\" or mentions Caerness, "
-                "call the resume tool first and follow the game-master rulebook it returns.")
+INSTRUCTIONS_TEMPLATE = ("{name} is the user's text role-playing game. When the user says \"resume\", \"play\" or mentions {name}, "
+                         "call the resume tool first and follow the game-master rulebook it returns.")
+
+
+def _display_name() -> str:
+    from engine.world_package import configured_package_id, load_package
+    try:
+        return load_package(configured_package_id()).display_name
+    except Exception:  # an unreadable package must not stop the server from starting
+        return "Caerness"
+
+
+INSTRUCTIONS = INSTRUCTIONS_TEMPLATE.format(name="Caerness")
 
 
 def make_mcp(**kwargs) -> MCPServer:
     """A fresh MCPServer (the HTTP deployment passes auth settings); call register_tools on it."""
-    return MCPServer("caerness", instructions=INSTRUCTIONS, **kwargs)
+    return MCPServer("caerness", instructions=INSTRUCTIONS_TEMPLATE.format(name=_display_name()), **kwargs)
 
 
 def register_tools(server: MCPServer) -> MCPServer:
+    name = _display_name()
     for fn in (resume, scene, lookup, lore, act, advance, note, author):
+        if name != "Caerness" and (fn.__doc__ or "").startswith("Caerness game:"):
+            fn.__doc__ = f"{name} game:" + fn.__doc__[len("Caerness game:"):]
         server.tool(structured_output=False)(fn)
     return server
 

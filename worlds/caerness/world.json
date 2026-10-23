@@ -6,8 +6,8 @@
   "bible_sha256": "45947d046f816a95d118167e03a7d24872867b1521eb1a9414c5fe4349d995e3",
   "seed_path": "../../game/seeds/Caerness_Initial_World_State_Seed_v1_4.json",
   "seed_namespace": "caerness_seed_v1_1",
-  "rulebook_section": "../../connector/rulebook.md",
-  "creation_section": "../../connector/creation.md",
+  "rulebook_section": "rulebook_section.md",
+  "creation_section": "creation_section.md",
   "systems": {
     "cultivation": true,
     "elixir": true,

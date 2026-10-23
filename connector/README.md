@@ -65,4 +65,4 @@ Restore a snapshot on the VM:
 
 ## New campaigns: the protagonist
 
-A campaign with no protagonist answers `resume` with `needs_character` and `creation.md`. The GM designs the person with the player and calls `author` with `kind="protagonist"` (preview with `accept=false`, then `accept=true`). The engine only vetoes contradictions (`engine/veto.py`), scales down what the place cannot supply, and fills a lived past (`engine/new_character.py`). `python tools/give_lived_past.py --campaign NAME [--apply]` gives an existing protagonist the same kind of past.
+A campaign with no protagonist answers `resume` with `needs_character` and the world package's creation text (`worlds/<id>/creation_section.md`). The GM designs the person with the player and calls `author` with `kind="protagonist"` (preview with `accept=false`, then `accept=true`). The engine only vetoes contradictions (`engine/veto.py`), scales down what the place cannot supply, and fills a lived past (`engine/new_character.py`). `python tools/give_lived_past.py --campaign NAME [--apply]` gives an existing protagonist the same kind of past.
