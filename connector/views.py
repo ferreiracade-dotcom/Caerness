@@ -257,7 +257,8 @@ def _holdings(conn, me: int) -> dict:
 
 def compact_scene(conn) -> dict:
     """Commits (it drops its own audit packet), so never call it inside a run_once callback."""
-    from engine.civil_calendar import format_sv_date, season_for_day
+    from engine import world_calendar
+    from engine.world_package import current_package
     from engine.player import build_scene_packet
 
     p = build_scene_packet(conn)
@@ -265,6 +266,7 @@ def compact_scene(conn) -> dict:
     conn.execute("DELETE FROM scene_packets WHERE id=?", (p["scene_packet_id"],))
     conn.commit()
     day = int(p["world"]["day"])
+    pkg = current_package(conn)
     me, loc = p["player"], p["location"]
     people = [a for a in p["present_actors"] if a.get("actor_type") == "character"]
     here = loc["id"]
@@ -309,8 +311,8 @@ def compact_scene(conn) -> dict:
         "commitments": [{"what": _clip(c["what"], 100), "kind": c["kind"], "due_in_days": max(0, int(c["due_day"]) - day) if c["due_day"] is not None else None}
                         for c in pending_work] or None,
         "day": day,
-        "date": format_sv_date(day),
-        "season": season_for_day(day),
+        "date": world_calendar.format_date(pkg, day),
+        "season": world_calendar.season(pkg, day),
         "location": {"id": loc["id"], "name": loc["name"], "description": _clip(desc, 140)},
         "protagonist": _drop_none({"id": me["actor_id"], "name": me["name"], "age": _age(conn, me["actor_id"], day),
                                    "role": _clip(me.get("subtype") or me.get("actor_type"), 100)}),
