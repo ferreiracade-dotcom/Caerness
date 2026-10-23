@@ -474,8 +474,15 @@ def resolve_opening_family(conn: sqlite3.Connection) -> dict[str, int]:
     canon_family = _canon_family_ids(conn)
     counts = {"married": 0, "widowed": 0, "never_married": 0, "canon_record": 0, "canon_partial": 0,
               "spouses_revealed": 0, "latent_children": 0, "already_resolved": 0}
+    from .world_package import package_for
+    seed_is_authoritative = not package_for(conn).opening_family.get("marry_adults_on_day0", True)
     for p in _person_rows(conn, day):
         aid = int(p["id"])
+        if seed_is_authoritative and p["source_key"] is not None:
+            # The seed's own relationships stand: no invented day-0 spouse for a named adult of the seed.
+            if not json.loads(p["metadata_json"] or "{}").get("marital_status_basis"):
+                _mark(conn, aid, {"marital_status": "unresolved", "marital_status_basis": "seed_authoritative"})
+            continue
         kids = _kids_of(conn, aid)
         outcome = resolve_family_for(conn, aid, day=day, canon_family=canon_family)
         if outcome is None:

@@ -36,6 +36,9 @@ class WorldPackage:
     systems: dict[str, bool]
     data: dict[str, Path] = field(default_factory=dict)
     name_pools: dict = field(default_factory=dict)
+    mortality: dict = field(default_factory=lambda: {"model": "gompertz_premodern"})
+    background: dict = field(default_factory=lambda: {"stage_distribution": True})
+    opening_family: dict = field(default_factory=lambda: {"marry_adults_on_day0": True})
 
 
 def worlds_dir() -> Path:
@@ -89,6 +92,9 @@ def load_package(pkg_id: str) -> WorldPackage:
         systems=systems,
         data={name: _need(pkg_id, root, rel) for name, rel in (m.get("data") or {}).items()},
         name_pools=dict(m.get("name_pools") or {}),
+        mortality=dict(m.get("mortality") or {"model": "gompertz_premodern"}),
+        background={"stage_distribution": True, **(m.get("background") or {})},
+        opening_family={"marry_adults_on_day0": True, **(m.get("opening_family") or {})},
     )
 
 

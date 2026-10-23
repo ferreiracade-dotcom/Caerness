@@ -227,5 +227,90 @@ def run():
     print("world_activation_switches_test passed")
 
 
+US_1980_MALE = {"0": 0.0140, "1": 0.0011, "5": 0.0006, "10": 0.0006, "15": 0.0016, "20": 0.0019, "30": 0.0021,
+                "40": 0.0034, "50": 0.0087, "60": 0.0200, "70": 0.0450, "80": 0.0900, "90": 0.1700, "100": 0.3000}
+POOLS = {"male": ["Carmine", "Sal", "Tommy"], "female": ["Rosa", "Gina", "Maureen"],
+         "family": ["Sabatini", "Rossi", "Murphy", "Katz"]}
+
+
+def run_background():
+    import numpy as np
+
+    os.environ.pop("CAERNESS_WORLD_PACKAGE", None)
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        tmp = Path(tmp)
+        good = hashlib.sha256(b"x").hexdigest()
+        widower = _person("p:w", "Carmine Sabatini", 60)
+        late = _person("p:l", "Rosa Sabatini", 55, life_status="deceased")
+        late["death_day"] = -400
+        late["death_date"] = None  # filled below once the calendar is known
+        persons = [widower, late, _person("p:a", "Gina Rossi", 35), _person("p:b", "Tommy Murphy", 41)]
+        worlds = _build(tmp, "sj8", _seed(good, persons), pkg_hash=good)
+        # the seed needs the deceased spouse's date in the package's calendar
+        from engine import world_calendar
+        from engine.world_package import load_package, set_campaign_package
+        os.environ["CAERNESS_WORLDS_DIR"] = str(worlds)
+        _install_caerness(worlds)
+        m = json.loads((worlds / "sj8" / "world.json").read_text(encoding="utf-8"))
+        m.update({"name_pools": POOLS, "mortality": {"model": "table", "table": US_1980_MALE},
+                  "background": {"stage_distribution": False}, "opening_family": {"marry_adults_on_day0": False}})
+        (worlds / "sj8" / "world.json").write_text(json.dumps(m), encoding="utf-8")
+        pkg = load_package("sj8")
+        late["death_date"] = world_calendar.format_date(pkg, late["death_day"])
+        late["birth_day"] = late["death_day"] - 55 * 365
+        late["birth_date"] = world_calendar.format_date(pkg, late["birth_day"])
+        late["age"] = 55
+        seed = _seed(good, persons)
+        seed["relationships"] = [{"type": "spouse", "from": "p:w", "to": "p:l"}]
+        (worlds / "sj8" / "seed.json").write_text(json.dumps(seed), encoding="utf-8")
+
+        from engine.activation import activate_existing_loops
+        from engine.current_seed import import_current_seed
+        pkg = load_package("sj8")
+        assert pkg.name_pools == POOLS and pkg.opening_family["marry_adults_on_day0"] is False
+        conn = _fresh(tmp, "sj8")
+        set_campaign_package(conn, "sj8")
+        import_current_seed(conn, package=pkg)
+        activate_existing_loops(conn)
+        conn.commit()
+
+        given = set(POOLS["male"]) | set(POOLS["female"])
+        rows = conn.execute("SELECT given_name,family_name,current_stage FROM background_person_profiles").fetchall()
+        assert len(rows) > 100
+        for g, f, stage in rows:
+            assert g in given and f in POOLS["family"], (g, f)
+            assert stage is None
+        for (name,) in conn.execute("""SELECT a.name FROM actors a WHERE a.actor_type='character' AND NOT EXISTS
+                                       (SELECT 1 FROM source_identity_map m WHERE m.entity_kind='actor' AND m.entity_id=a.id)"""):
+            parts = name.split()
+            assert parts[0] in given and parts[1] in POOLS["family"], name
+        assert conn.execute("SELECT COUNT(*) FROM cultivation_profiles").fetchone()[0] == 0
+        wid = conn.execute("SELECT id FROM actors WHERE name='Carmine Sabatini'").fetchone()[0]
+        assert conn.execute("SELECT COUNT(*) FROM household_unions WHERE actor_a_id=? OR actor_b_id=?", (wid, wid)).fetchone()[0] == 0
+        late_id = conn.execute("SELECT id FROM actors WHERE name='Rosa Sabatini'").fetchone()[0]
+        spouses = {r[0] for r in conn.execute("SELECT actor_b_id FROM kinship_links WHERE kin_kind='spouse' AND actor_a_id=?", (wid,))}
+        assert spouses <= {late_id}, spouses  # only the seed's own (deceased) wife: no invented spouse
+        # the package table also sets the band mortality rates
+        assert abs(conn.execute("SELECT annual_mortality_rate FROM background_population_age_cohorts WHERE age_band='60_plus' LIMIT 1").fetchone()[0] - 0.045) < 1e-9
+        conn.close()
+
+    from engine.background_population import annual_mortality
+    from engine.health import natural_annual_hazard
+    table = {"model": "table", "table": US_1980_MALE}
+    days = lambda y: np.array([y * 365.2425])
+    male = np.array([0], dtype=np.uint8)
+    p30 = float(annual_mortality(days(30), table, male)[0])
+    p80 = float(annual_mortality(days(80), table, male)[0])
+    assert 0.001 <= p30 <= 0.004 and 0.05 <= p80 <= 0.12, (p30, p80)
+    assert p30 < natural_annual_hazard(30, "ordinary")
+    series = [float(annual_mortality(days(y), table, male)[0]) for y in range(10, 101)]
+    assert all(b >= a for a, b in zip(series, series[1:]))
+    # the Caerness default is the premodern step function, unchanged
+    assert abs(float(annual_mortality(days(30))[0]) - 0.0018) < 1e-12
+    assert abs(float(annual_mortality(days(80))[0]) - 0.085) < 1e-12
+    print("world_activation_switches_test (background) passed")
+
+
 if __name__ == "__main__":
     run()
+    run_background()

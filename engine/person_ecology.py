@@ -18,7 +18,7 @@ from typing import Any, Iterable
 from .background_population import create_partition, load_partition
 from .continuity import upsert_continuity_core, set_resolution
 from .health import ensure_health_profile
-from .world_package import system_enabled
+from .world_package import package_for, system_enabled
 
 # Given names follow the identity's already-drawn sex (players read these names as gendered).
 FIRST_MALE = (
@@ -72,7 +72,23 @@ def _source_location(conn: sqlite3.Connection, source: sqlite3.Row, seed: int, u
     return int(rows[idx][0])
 
 
-def given_name_for(seed: int, uid: int, sex: str | None) -> str:
+def _pool_pick(pool: Any, seed: int, uid: int, stream: str) -> str:
+    """Draw from a package name pool: a list of names, or {name: weight} for a weighted mix."""
+    if isinstance(pool, dict):
+        names = tuple(pool)
+        x = _score(seed, uid, stream) * float(sum(float(pool[n]) for n in names))
+        for n in names:
+            x -= float(pool[n])
+            if x < 0:
+                return n
+        return names[-1]
+    return _pick(tuple(pool), seed, uid, stream)
+
+
+def given_name_for(seed: int, uid: int, sex: str | None, pools: dict | None = None) -> str:
+    pool = (pools or {}).get("female" if sex == "female" else "male")
+    if pool:
+        return _pool_pick(pool, seed, uid, "given")
     return _pick(FIRST_FEMALE if sex == "female" else FIRST_MALE, seed, uid, "given")
 
 
@@ -202,6 +218,9 @@ def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int,
     """Give every reservoir identity without one its demand-independent profile; returns how many were made."""
     sid = int(source["id"])
     created_profiles = 0
+    pkg = package_for(conn)
+    pools = pkg.name_pools or {}
+    staged = bool(pkg.systems.get("cultivation")) and bool(pkg.background.get("stage_distribution", True))
     for uid in state.uid.tolist():
         uid = int(uid)
         if conn.execute("SELECT 1 FROM background_person_profiles WHERE partition_id=? AND local_uid=?", (pid, uid)).fetchone():
@@ -209,10 +228,13 @@ def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int,
         snap = state.snapshot(uid)
         loc = _source_location(conn, source, seed, uid)
         from .cultivation import location_in_hearth
-        open_core, stage = _profile_stage(seed, uid, location_in_hearth(conn, loc), snap["demographic_sex"])
+        if staged:
+            open_core, stage = _profile_stage(seed, uid, location_in_hearth(conn, loc), snap["demographic_sex"])
+        else:
+            open_core, stage = 0, None
         occupation, past = occupation_with_past(seed, uid, stage, _pick(_OCCUPATIONS, seed, uid, "occupation"), int(snap["age_days"]) // 365)
-        given = given_name_for(seed, uid, snap["demographic_sex"])
-        family = _pick(_LAST, seed, uid, "family")
+        given = given_name_for(seed, uid, snap["demographic_sex"], pools)
+        family = _pool_pick(pools["family"], seed, uid, "family") if pools.get("family") else _pick(_LAST, seed, uid, "family")
         # The local uid is not visible in ordinary naming unless a collision must be resolved.
         # Store the stable identity's ordinary name before any demand appears.
         base = f"{given} {family}"
@@ -294,6 +316,9 @@ def redraw_unresolved_profile_cores(conn: sqlite3.Connection) -> int:
 def _free_name(conn: sqlite3.Connection, given: str, family: str, sex: str | None, suffix: int) -> str:
     """The identity's own name if free, else another name of the same sex, and a number only as a last resort."""
     names = FIRST_FEMALE if sex == "female" else FIRST_MALE
+    pool = (package_for(conn).name_pools or {}).get("female" if sex == "female" else "male")
+    if pool:
+        names = tuple(dict.fromkeys(pool))
     start = names.index(given) if given in names else 0
     for g in ((given,) if given not in names else ()) + names[start:] + names[:start]:
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (f"{g} {family}",)).fetchone():

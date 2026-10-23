@@ -68,7 +68,23 @@ def _draw(uid: np.ndarray, step_index: int, stream: int, seed: int) -> np.ndarra
     return ((z >> np.uint64(11)).astype(np.float64)) * (1.0 / (1 << 53))
 
 
-def _mortality_probability(age_days: np.ndarray) -> np.ndarray:
+def _table_annual(table: dict, age: np.ndarray, sex: np.ndarray | None) -> np.ndarray:
+    """Annual death probability from a package life table: {age_years: p} or {"male": {...}, "female": {...}}.
+
+    Linear between listed ages, flat beyond the last."""
+    def curve(t: dict) -> np.ndarray:
+        pts = sorted((float(k), float(v)) for k, v in t.items())
+        return np.interp(age, [a for a, _ in pts], [p for _, p in pts])
+    if "male" in table or "female" in table:
+        male, female = curve(table.get("male") or table["female"]), curve(table.get("female") or table["male"])
+        return male if sex is None else np.where(np.asarray(sex) == 1, female, male)
+    return curve(table)
+
+
+def annual_mortality(age_days: np.ndarray, mortality: dict | None = None, sex: np.ndarray | None = None) -> np.ndarray:
+    """Annual death probability for ordinary background identities (sex: 1 = female, 0 = male)."""
+    if mortality and mortality.get("model") == "table":
+        return _table_annual(mortality["table"], np.asarray(age_days) / 365.2425, sex)
     from .health import FIRST_YEAR_MORTALITY, DEFAULT_COHORT_MORTALITY as C
     age = age_days / 365.2425
     # Childhood follows the world's premodern demography (DEMO-04), exactly as named children do.
@@ -81,7 +97,29 @@ def _mortality_probability(age_days: np.ndarray) -> np.ndarray:
         np.where(age < 65, 0.009,
         np.where(age < 75, 0.03, 0.085)))))),
     )
-    return annual / 12.0
+    return annual
+
+
+def _mortality_probability(age_days: np.ndarray, mortality: dict | None = None, sex: np.ndarray | None = None) -> np.ndarray:
+    return annual_mortality(age_days, mortality, sex) / 12.0
+
+
+_BAND_MID_AGE = {"0_4": 2.0, "5_12": 8.0, "13_17": 15.0, "18_39": 28.0, "40_59": 50.0, "60_plus": 70.0}
+
+
+def _cohort_mortality(mortality: dict | None, band: str) -> float:
+    """Annual mortality of an age band: the premodern default, or the package table at the band's middle age."""
+    if mortality and mortality.get("model") == "table":
+        return float(annual_mortality(np.array([_BAND_MID_AGE[band] * 365.2425]), mortality)[0])
+    from .health import DEFAULT_COHORT_MORTALITY
+    return float(DEFAULT_COHORT_MORTALITY[band])
+
+
+def _band_shares(conn: sqlite3.Connection) -> list[float]:
+    """Age-band shares: the campaign default, or the package's `background.age_shares` override."""
+    from .world_package import package_for
+    over = package_for(conn).background.get("age_shares") or {}
+    return [float(over.get(band, share)) for band, share, _lo, _hi in _AGE_BANDS]
 
 
 @dataclass
@@ -232,7 +270,8 @@ def activate_population_sources(conn: sqlite3.Connection) -> dict[str, int]:
 
 def activate_population_life_course(conn: sqlite3.Connection) -> dict[str, int]:
     """Seed six live age bands per disjoint source without creating person rows."""
-    from .health import DEFAULT_COHORT_MORTALITY
+    from .world_package import package_for
+    mortality = package_for(conn).mortality
     day = _day(conn)
     created = dynamics = 0
     for src in conn.execute("SELECT * FROM background_population_sources ORDER BY id").fetchall():
@@ -240,7 +279,9 @@ def activate_population_life_course(conn: sqlite3.Connection) -> dict[str, int]:
         if not conn.execute("SELECT 1 FROM background_population_age_cohorts WHERE source_id=? LIMIT 1", (sid,)).fetchone():
             total = float(src['population_estimate'])
             allocated = 0.0
-            for idx, (band, share, _lo, _hi) in enumerate(_AGE_BANDS):
+            shares = _band_shares(conn)
+            for idx, (band, _share, _lo, _hi) in enumerate(_AGE_BANDS):
+                share = shares[idx]
                 # Float populations are intentional aggregate expected counts; final band takes residual exactly.
                 pop = total - allocated if idx == len(_AGE_BANDS) - 1 else total * float(share)
                 allocated += pop
@@ -248,7 +289,7 @@ def activate_population_life_course(conn: sqlite3.Connection) -> dict[str, int]:
                     """INSERT INTO background_population_age_cohorts(
                          source_id,age_band,population,baseline_population,annual_mortality_rate,last_review_day,metadata_json)
                        VALUES (?,?,?,?,?,?,?)""",
-                    (sid, band, pop, pop, float(DEFAULT_COHORT_MORTALITY[band]), day,
+                    (sid, band, pop, pop, _cohort_mortality(mortality, band), day,
                      _j({'authority': 'POPLIFE01_CAMPAIGN_CALIBRATION', 'age_distribution': 'campaign_assumption_v1'})),
                 )
                 created += 1
@@ -397,8 +438,8 @@ def current_world_population(conn: sqlite3.Connection) -> int:
         return int(row[0])
     return int(conn.execute("SELECT COALESCE(SUM(population_estimate),0) FROM population_scale_buckets").fetchone()[0])
 
-def _sample_age_days(rng: np.random.Generator, n: int) -> np.ndarray:
-    shares = np.array([b[1] for b in _AGE_BANDS], dtype=np.float64)
+def _sample_age_days(rng: np.random.Generator, n: int, shares: list[float] | None = None) -> np.ndarray:
+    shares = np.array(shares if shares is not None else [b[1] for b in _AGE_BANDS], dtype=np.float64)
     bands = rng.choice(len(_AGE_BANDS), size=n, p=shares / shares.sum())
     ages = np.empty(n, dtype=np.int32)
     for idx, (_, _, low, high) in enumerate(_AGE_BANDS):
@@ -439,7 +480,7 @@ def create_partition(
     uid = np.arange(1, sample_size + 1, dtype=np.int64)
     state = PartitionState(
         uid=uid,
-        age_days=_sample_age_days(rng, sample_size),
+        age_days=_sample_age_days(rng, sample_size, _band_shares(conn)),
         alive=np.ones(sample_size, dtype=np.bool_),
         demographic_sex=rng.integers(0, 2, size=sample_size, dtype=np.uint8),
         exposure_score=np.zeros(sample_size, dtype=np.float32),
@@ -481,7 +522,7 @@ def extend_partition(conn: sqlite3.Connection, partition_id: int, batch: int) ->
     start = state.sample_size
     uid = np.arange(start + 1, start + n + 1, dtype=np.int64)
     state.uid = np.concatenate([state.uid, uid])
-    state.age_days = np.concatenate([state.age_days, _sample_age_days(rng, n).astype(state.age_days.dtype)])
+    state.age_days = np.concatenate([state.age_days, _sample_age_days(rng, n, _band_shares(conn)).astype(state.age_days.dtype)])
     state.alive = np.concatenate([state.alive, np.ones(n, dtype=np.bool_)])
     state.demographic_sex = np.concatenate([state.demographic_sex, rng.integers(0, 2, size=n, dtype=np.uint8)])
     state.exposure_score = np.concatenate([state.exposure_score, np.zeros(n, dtype=np.float32)])
@@ -524,7 +565,8 @@ def step_partition_month(conn: sqlite3.Connection, partition_id: int, *, day: in
     ages += 30
     alive = state.alive[slots].copy()
     step_index = max(0, int(day) // 30)
-    deaths = alive & (_draw(uid, step_index, 1, int(row['seed'])) < _mortality_probability(ages))
+    from .world_package import package_for
+    deaths = alive & (_draw(uid, step_index, 1, int(row['seed'])) < _mortality_probability(ages, package_for(conn).mortality, state.demographic_sex[slots]))
     alive[deaths] = False
     state.age_days[slots] = ages
     state.alive[slots] = alive
