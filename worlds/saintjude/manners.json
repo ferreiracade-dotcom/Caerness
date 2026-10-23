@@ -1,0 +1,17 @@
+{
+  "bar": "A bar keeps its own order: the bartender knows the regulars, strangers are noticed, and what is said here travels. Men with weight are left room at the rail, and nobody picks a quarrel in front of the owner without a reason.",
+  "club": "A social club is a family's room. Members are easy with each other and wary of outsiders; you are there because someone vouches for you, and everyone remembers who that was. Business is talked about quietly and rarely in front of guests.",
+  "church": "A church asks for quiet and good clothes. Old neighbours nod, the priest knows more than he says, and people who would not speak to each other outside will sit in the same pew. Nothing loud is done here.",
+  "precinct": "A precinct is all desks, radios and cigarette smoke. The sergeant at the front decides who waits. Cops are courteous to people they know or fear, curt to people they don't, and every word may be written down.",
+  "office": "An office runs on appointments, secretaries and paper. People are polite, say little before they know who is asking, and keep a record of who called and when.",
+  "street": "The street watches. Neighbours on stoops notice who comes and goes, shopkeepers greet the people they owe or respect, and a stranger is looked over before he is spoken to.",
+  "restaurant": "A restaurant has its own grammar: the owner greets who matters first, the best tables go to the right people, and waiters hear everything and forget it on cue.",
+  "diner": "A diner is plain and open to all. Waitresses call everyone hon, regulars hold their stools, and talk is about the game, the weather and who got laid off.",
+  "shop": "A shop knows its neighbourhood. The owner is civil to customers, careful with strangers, and keeps a short list of people he does not charge or does not cross.",
+  "home": "A home has its own rules. Elders are served first, guests are fed, the women of the house know more than they say, and an invited man behaves.",
+  "warehouse": "A warehouse is work and watchfulness. Foremen decide who comes in, men keep their heads down, and anyone not expected is asked what he wants.",
+  "docks": "The docks run on shifts, hiring lines and old loyalties. Men who work them know each other's families, and a stranger asking questions is remembered.",
+  "courthouse": "A courthouse is all procedure and waiting. Lawyers, clerks and bailiffs know each other, voices drop in the corridors, and everyone is conscious of who may be listening.",
+  "hospital": "A hospital is hushed, hurried and short of patience. Nurses and orderlies see who comes to visit and who does not, and visiting rules bend for people who matter.",
+  "default": "Ordinary manners apply: people are polite to strangers, easier with those they know, and careful about what they say in front of anyone whose loyalties they do not know."
+}
