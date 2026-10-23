@@ -311,6 +311,34 @@ def run_background():
     print("world_activation_switches_test (background) passed")
 
 
+def run_archetypes():
+    os.environ.pop("CAERNESS_WORLD_PACKAGE", None)
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        tmp = Path(tmp)
+        worlds = tmp / "worlds"
+        worlds.mkdir()
+        os.environ["CAERNESS_WORLDS_DIR"] = str(worlds)
+        _install_caerness(worlds)
+        d = _write_pkg(worlds, "pz", data={"archetypes": "archetypes.json"})
+        pizzeria = {"name": "Pizzeria", "sector": "food", "enterprise_kind": "shop", "base_revenue": 900.0, "cost_ratio": 0.6,
+                    "weights": {"food": 1.0}, "regulation": 0.1, "skill_sensitive": True, "capital_sensitive": False}
+        (d / "archetypes.json").write_text(json.dumps({"pizzeria": pizzeria}), encoding="utf-8")
+        from engine.authoring import _archetype
+        from engine.business import archetypes, seed_business_archetypes
+        from engine.world_package import set_campaign_package
+        conn = _fresh(tmp, "arch")
+        assert _archetype("an inn on the road", None, conn)[0] == "inn"  # Caerness: unbound campaign
+        set_campaign_package(conn, "pz")
+        assert list(archetypes(conn)) == ["pizzeria"]
+        seed_business_archetypes(conn)
+        assert [r[0] for r in conn.execute("SELECT archetype_key FROM business_archetypes")] == ["pizzeria"]
+        assert _archetype("a pizzeria on Ocean Ave", None, conn) == ("pizzeria", "shop")
+        assert _archetype("something odd", None, conn)[0] == "pizzeria"
+        conn.close()
+    print("world_activation_switches_test (archetypes) passed")
+
+
 if __name__ == "__main__":
     run()
     run_background()
+    run_archetypes()

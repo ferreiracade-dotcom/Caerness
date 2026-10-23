@@ -133,9 +133,23 @@ def _loads(text: str | None) -> dict[str, Any]:
         return {}
 
 
+def archetypes(conn: sqlite3.Connection | None = None) -> dict[str, dict[str, Any]]:
+    """The world package's archetypes.json when it defines one, else the Caerness vocabulary."""
+    if conn is not None and conn.execute("SELECT 1 FROM engine_meta WHERE key='world_package_id'").fetchone():
+        from .world_package import package_for
+        path = package_for(conn).data.get("archetypes")
+        if path is not None:
+            return json.loads(path.read_text(encoding="utf-8"))
+    return _ARCHETYPES
+
+
 def seed_business_archetypes(conn: sqlite3.Connection) -> int:
     count = 0
-    for key, spec in _ARCHETYPES.items():
+    catalog = archetypes(conn)
+    if catalog is not _ARCHETYPES:  # a package with its own vocabulary: drop the unused Caerness rows seeded at init
+        conn.execute("DELETE FROM business_archetypes WHERE archetype_key NOT IN (%s) AND id NOT IN (SELECT archetype_id FROM enterprise_business_profiles)"
+                     % ",".join("?" * len(catalog)), tuple(catalog))
+    for key, spec in catalog.items():
         conn.execute(
             """INSERT INTO business_archetypes(
                    archetype_key,name,sector,default_enterprise_kind,base_revenue_per_30,base_cost_ratio,

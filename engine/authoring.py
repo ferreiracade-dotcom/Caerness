@@ -362,11 +362,12 @@ _BY_WORD = (("inn", "inn"), ("tavern", "tavern"), ("ale", "tavern"), ("cloth", "
             ("pawn", "pawnbroker"), ("lamp", "carpenter"), ("food", "food_shop"), ("bak", "food_shop"), ("grocer", "food_shop"))
 
 
-def _archetype(trade: str, hint: str | None = None) -> tuple[str, str]:
+def _archetype(trade: str, hint: str | None = None, conn=None) -> tuple[str, str]:
     """(archetype key, enterprise kind) for free trade text: a scored keyword map over the archetypes, else a wholesaler."""
-    from .business import _ARCHETYPES
+    from .business import archetypes
+    _ARCHETYPES = archetypes(conn)
     t = f"{trade} {hint or ''}".lower().replace("-", " ").replace("_", " ")
-    best, score = "wholesaler", 0
+    best, score = "wholesaler" if "wholesaler" in _ARCHETYPES else next(iter(_ARCHETYPES)), 0
     for key, a in _ARCHETYPES.items():
         words = set(key.split("_")) | set(str(a["name"]).lower().replace("/", " ").split())
         s = sum(len(w) for w in words if len(w) > 2 and w in t)
@@ -427,7 +428,7 @@ def _business(conn, me: int, d: dict, call_id: str) -> dict:
     cap_new = max(1, math.ceil(veto.PROPORTION["business_share"] * max(sc["enterprises"], sc["population"] / 1000.0)))
     if _authored_count(conn, loc, "enterprise") >= cap_new:
         _no("the town has no room for another business of that kind")
-    archetype, kind = _archetype(trade, d.get("enterprise_kind"))
+    archetype, kind = _archetype(trade, d.get("enterprise_kind"), conn)
     word = d.get("amount", d.get("capital"))
     if word is not None:
         try:

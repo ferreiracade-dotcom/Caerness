@@ -219,7 +219,8 @@ def backfill_front_profiles(conn: sqlite3.Connection) -> int:
                                       metadata={"underworld_front": True, "generated_underworld": True, "backfilled": 114})
         n += 1
     # opening city businesses that run as businesses and belong to nobody
-    from .business import _ARCHETYPES
+    from .business import archetypes
+    _ARCHETYPES = archetypes(conn)
     for e in conn.execute(
             """SELECT e.id,e.enterprise_kind FROM civilian_enterprises e WHERE e.metadata_json LIKE '%procedural_city_business%' AND e.status<>'closed'
                AND NOT EXISTS (SELECT 1 FROM enterprise_business_profiles p WHERE p.enterprise_id=e.id) ORDER BY e.id""").fetchall():
