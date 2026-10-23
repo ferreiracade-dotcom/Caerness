@@ -53,7 +53,7 @@ def _fresh(tmp, tag):
 
 def run():
     os.environ.pop("CAERNESS_WORLD_PACKAGE", None)
-    with tempfile.TemporaryDirectory() as tmp:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         tmp = Path(tmp)
         good = hashlib.sha256(b"x").hexdigest()  # _write_pkg writes bible.docx = b"x"
         persons = [_person("p:a", "Ann Rossi", 40), _person("p:b", "Bob Rossi", 12),

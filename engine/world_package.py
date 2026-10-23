@@ -108,3 +108,29 @@ def set_campaign_package(conn, pkg_id: str) -> None:
 
 def configured_package_id() -> str:
     return os.environ.get("CAERNESS_WORLD_PACKAGE") or DEFAULT_PACKAGE
+
+
+_SWITCH_CACHE: dict[tuple, "WorldPackage"] = {}
+
+
+def package_for(conn) -> "WorldPackage":
+    """current_package(conn), memoised on the manifest's identity and mtime (cheap enough for per-person hot paths)."""
+    try:
+        row = conn.execute("SELECT value FROM engine_meta WHERE key=?", (META_KEY,)).fetchone()
+    except Exception:
+        row = None
+    pkg_id = str(row[0]) if row and row[0] else DEFAULT_PACKAGE
+    manifest = worlds_dir() / pkg_id / "world.json"
+    try:
+        key = (str(manifest), manifest.stat().st_mtime_ns)
+    except OSError:
+        key = (str(manifest), 0)
+    pkg = _SWITCH_CACHE.get(key)
+    if pkg is None:
+        pkg = _SWITCH_CACHE[key] = load_package(pkg_id)
+    return pkg
+
+
+def system_enabled(conn, key: str) -> bool:
+    """True when the campaign's world package switches the system `key` on."""
+    return bool(package_for(conn).systems.get(key, False))

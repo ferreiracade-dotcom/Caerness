@@ -232,19 +232,21 @@ def _materialize_latent_person(conn: sqlite3.Connection, latent: sqlite3.Row, da
     # FAMILY-02: no unresolved sex for a new named person (given name, else seeded roll).
     from .demographic_sex import resolve_missing_demographic_sex
     resolve_missing_demographic_sex(conn,actor_id=aid)
-    # Ordinary crystallization starts Closed-Core unless the latent evidence explicitly says otherwise.
-    open_core=bool(constraints.get('open_core') or hist.get('open_core'))
-    stage_name=(constraints.get('stage') or hist.get('stage')) if open_core else None
-    conn.execute("""INSERT INTO cultivation_profiles(actor_id,core_state,current_stage,active,vessel_adaptation,realization_integration,
-                    training_effort,resource_access,teacher_support,injury_constraint,realization_aptitude,vessel_aptitude,
-                    next_realization_check_day,last_review_day,next_review_day,status,metadata_json)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                 (aid,'Open-Core' if open_core else 'Closed-Core',stage_name,1 if open_core and stage_name else 0,
-                  30 if open_core else 0,20 if open_core else 0,45 if open_core else 0,45,0,0,1.0,1.0,day+365,day,day+30,
-                  'active' if open_core and stage_name else 'paused',_j({'latent_entity_id':int(latent['id']),'not_canon':True})))
-    # A Stage held before crystallization sits somewhere inside that Stage, like any canon person's.
-    from .cultivation import calibrate_revealed_profile
-    calibrate_revealed_profile(conn,aid)
+    from .world_package import system_enabled
+    if system_enabled(conn,'cultivation'):
+        # Ordinary crystallization starts Closed-Core unless the latent evidence explicitly says otherwise.
+        open_core=bool(constraints.get('open_core') or hist.get('open_core'))
+        stage_name=(constraints.get('stage') or hist.get('stage')) if open_core else None
+        conn.execute("""INSERT INTO cultivation_profiles(actor_id,core_state,current_stage,active,vessel_adaptation,realization_integration,
+                        training_effort,resource_access,teacher_support,injury_constraint,realization_aptitude,vessel_aptitude,
+                        next_realization_check_day,last_review_day,next_review_day,status,metadata_json)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                     (aid,'Open-Core' if open_core else 'Closed-Core',stage_name,1 if open_core and stage_name else 0,
+                      30 if open_core else 0,20 if open_core else 0,45 if open_core else 0,45,0,0,1.0,1.0,day+365,day,day+30,
+                      'active' if open_core and stage_name else 'paused',_j({'latent_entity_id':int(latent['id']),'not_canon':True})))
+        # A Stage held before crystallization sits somewhere inside that Stage, like any canon person's.
+        from .cultivation import calibrate_revealed_profile
+        calibrate_revealed_profile(conn,aid)
     conn.execute("INSERT INTO actor_drives(actor_id,aggression,risk_tolerance,patience,loyalty,ambition,pragmatism) VALUES (?,?,?,?,?,?,?)",
                  (aid,.35+(aid%17)/100,.45+(aid%13)/100,.55+(aid%11)/100,.55,.62,.68))
     from .health import ensure_health_profile

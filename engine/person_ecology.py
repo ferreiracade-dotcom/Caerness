@@ -18,6 +18,7 @@ from typing import Any, Iterable
 from .background_population import create_partition, load_partition
 from .continuity import upsert_continuity_core, set_resolution
 from .health import ensure_health_profile
+from .world_package import system_enabled
 
 # Given names follow the identity's already-drawn sex (players read these names as gendered).
 FIRST_MALE = (
@@ -491,19 +492,23 @@ def resolve_background_person(
              **({"martial_past": True} if json.loads(profile["metadata_json"] or "{}").get("martial_past") else {})})),
     )
     open_core = bool(profile["open_core"]); stage = str(profile["current_stage"]) if profile["current_stage"] else None
-    conn.execute(
-        """INSERT INTO cultivation_profiles(actor_id,core_state,current_stage,active,vessel_adaptation,realization_integration,
-             training_effort,resource_access,teacher_support,injury_constraint,realization_aptitude,vessel_aptitude,
-             next_realization_check_day,last_review_day,next_review_day,status,metadata_json)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-        (aid,"Open-Core" if open_core else "Closed-Core",stage,1 if open_core and stage else 0,
-         32 if open_core else 0,20 if open_core else 0,45 if open_core else 0,45,0,0,1.0,1.0,
-         day+365,day,day+30,"active" if open_core and stage else "paused",
-         _j({"source":"PERSONECO01","preexisting_trait":True})),
-    )
+    cultivating = system_enabled(conn, "cultivation")
+    if not cultivating:
+        open_core, stage = False, None
+    if cultivating:
+        conn.execute(
+            """INSERT INTO cultivation_profiles(actor_id,core_state,current_stage,active,vessel_adaptation,realization_integration,
+                 training_effort,resource_access,teacher_support,injury_constraint,realization_aptitude,vessel_aptitude,
+                 next_realization_check_day,last_review_day,next_review_day,status,metadata_json)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (aid,"Open-Core" if open_core else "Closed-Core",stage,1 if open_core and stage else 0,
+             32 if open_core else 0,20 if open_core else 0,45 if open_core else 0,45,0,0,1.0,1.0,
+             day+365,day,day+30,"active" if open_core and stage else "paused",
+             _j({"source":"PERSONECO01","preexisting_trait":True})),
+        )
     # A pre-existing Stage sits somewhere inside that Stage, calibrated like any canon person's.
     from .cultivation import calibrate_revealed_profile
-    calibrate_revealed_profile(conn, aid)
+    if cultivating: calibrate_revealed_profile(conn, aid)
     conn.execute(
         """INSERT INTO simulation_profiles(actor_id,tier,cadence_days,volatility,agency,last_review_day,next_review_day,wake_threshold)
            VALUES (?,'DORMANT',180,.30,.55,?,?,3)""", (aid,day,day+180)

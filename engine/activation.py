@@ -1072,15 +1072,44 @@ def activate_post80_organization_lifecycle(conn: sqlite3.Connection) -> dict[str
     return out
 
 
-def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
+# Steps whose content is Caerness-specific, keyed by step name -> the world-package `systems` switch that must be on.
+# A step not listed here runs for every world.
+STEP_SWITCH: dict[str, str] = {
+    'activate_missing_merchant_anchors': 'merchant_houses',
+    'activate_economic_substrate': 'caerness_trade',
+    'activate_aggregate_trade': 'caerness_trade',
+    'activate_elixir_substrate': 'elixir',
+    'activate_religion_and_culture': 'caerness_religions',
+    'seed_cultivation_from_current_source': 'cultivation',
+    'seed_current_groundbinding': 'groundbinding',
+    'activate_tournament_substrate': 'cultivation',
+    'activate_spectacle_substrate': 'cultivation',
+    'activate_underworld_substrate': 'caerness_underworld',
+    'seed_all_settlements': 'caerness_underworld',
+    'activate_hollow_substrate': 'hollow',
+}
+
+
+def activate_existing_loops(conn: sqlite3.Connection, package=None) -> dict[str,Any]:
+    from .world_package import current_package
+    package = package if package is not None else current_package(conn)
     out={}
+    skipped: list[str] = []
+
+    def step(name: str, fn):
+        """Run a package-gated step; a disabled one is recorded in skipped_steps instead."""
+        if not package.systems.get(STEP_SWITCH[name], False):
+            skipped.append(name)
+            return
+        out.update(fn())
+
     from .opening_world_state import resolve_opening_institution_locations, resolve_opening_character_locations
     # The canon travel graph must exist before anything that routes people, goods, news or armies.
     from .route_network import ensure_canon_route_network
     out.update({k:v for k,v in ensure_canon_route_network(conn).items() if k!='routes01_missing_places'})
     out['opening_institution_locations_resolved']=resolve_opening_institution_locations(conn)
     out.update({f'opening_character_locations_{k}':v for k,v in resolve_opening_character_locations(conn).items()})
-    out.update(activate_missing_merchant_anchors(conn))
+    step('activate_missing_merchant_anchors', lambda: activate_missing_merchant_anchors(conn))
     out['opening_institution_locations_post_anchors']=resolve_opening_institution_locations(conn)
     out.update(activate_explicit_teaching(conn))
     out.update({f'opening_character_locations_post_teaching_{k}':v for k,v in resolve_opening_character_locations(conn).items()})
@@ -1089,7 +1118,7 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     out.update(activate_institution_training_contexts(conn))
     out['structural_training_cohorts_created']=ensure_structural_training_cohorts(conn,0)
     out.update(activate_commercial_anchors(conn))
-    out.update(activate_economic_substrate(conn))
+    step('activate_economic_substrate', lambda: activate_economic_substrate(conn))
     from .scale import activate_scale_authority
     out.update(activate_scale_authority(conn))
     from .background_population import activate_population_sources, activate_population_life_course
@@ -1102,8 +1131,8 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     from .opening_world_state import activate_institutional_authority
     out.update(activate_institutional_authority(conn))
     from .aggregate_trade import activate_aggregate_trade
-    out.update(activate_aggregate_trade(conn))
-    out.update(activate_elixir_substrate(conn))
+    step('activate_aggregate_trade', lambda: activate_aggregate_trade(conn))
+    step('activate_elixir_substrate', lambda: activate_elixir_substrate(conn))
     out.update(activate_current_ecology(conn))
     from .conflict_geometry import activate_conflict_geometry
     out.update(activate_conflict_geometry(conn))
@@ -1111,28 +1140,28 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
     out.update(activate_polities(conn))
     out.update(activate_military_logistics(conn))
     out.update(activate_ordinary_economic_state_substrate(conn))
-    out.update(activate_religion_and_culture(conn))
+    step('activate_religion_and_culture', lambda: activate_religion_and_culture(conn))
     out.update(activate_information_channels(conn))
-    out.update(seed_cultivation_from_current_source(conn))
+    step('seed_cultivation_from_current_source', lambda: seed_cultivation_from_current_source(conn))
     from .groundbinding import seed_current_groundbinding
-    out.update(seed_current_groundbinding(conn))
+    step('seed_current_groundbinding', lambda: seed_current_groundbinding(conn))
     from .tournaments import activate_tournament_substrate
-    out.update(activate_tournament_substrate(conn))
+    step('activate_tournament_substrate', lambda: activate_tournament_substrate(conn))
     from .spectacle import activate_spectacle_substrate
-    out.update(activate_spectacle_substrate(conn))
+    step('activate_spectacle_substrate', lambda: activate_spectacle_substrate(conn))
     from .underworld_rebuild import enforce_rebuild_firewall
     out['v060_legacy_underworld_retired'] = enforce_rebuild_firewall(conn)
     from .underworld import activate_underworld_substrate
     # v0.60 keeps the old module only for generic law/evidence compatibility. Legacy named
     # underworld institutions are retired by the schema firewall and therefore do not reactivate.
-    out.update(activate_underworld_substrate(conn))
+    step('activate_underworld_substrate', lambda: activate_underworld_substrate(conn))
     from .underworld_ecology import seed_all_settlements
     # Canon-shaped underworld in every settlement (gap 4a); replaces the Aldergate-only procedural city.
-    out.update(seed_all_settlements(conn))
+    step('seed_all_settlements', lambda: seed_all_settlements(conn))
     out.update(activate_post76_agency_conflict(conn))
     out.update(activate_post80_organization_lifecycle(conn))
     from .hollow import activate_hollow_substrate
-    out.update(activate_hollow_substrate(conn))
+    step('activate_hollow_substrate', lambda: activate_hollow_substrate(conn))
     out.update(activate_integration_opening_substrate(conn))
     from .merchant_taxonomy import activate_merchant_taxonomy
     out.update(activate_merchant_taxonomy(conn))
@@ -1148,4 +1177,6 @@ def activate_existing_loops(conn: sqlite3.Connection) -> dict[str,Any]:
         "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
         (str(CURRENT_CANON_ACTIVATION_VERSION),),
     )
+    if skipped:
+        out['skipped_steps'] = skipped
     return out
