@@ -27,6 +27,11 @@ def sex_of(c,name):
 
 
 def run():
+    # A seed person may state sex outright (Carmine, Rocco ... are in no given-name list); it outranks the text scan.
+    from engine.demographic_sex import _canon_text_sex
+    assert _canon_text_sex('Carmine Sabatini',{'demographic_sex':'male','role':'Boss','public_identity_text':'Dotes on his mother and sister.'})=='male'
+    assert _canon_text_sex('Rosa Test',{'demographic_sex':'female','role':'Uncle'})=='female'
+    assert _canon_text_sex('Robin Mears',{'role':'Boss'}) is None
     c,path=bootstrap()
     # Every named character leaves activation resolved; nothing stays 'unspecified'.
     assert c.execute("""SELECT COUNT(*) FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id

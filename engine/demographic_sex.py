@@ -90,6 +90,9 @@ WORLD_BIBLE_SEX = {
 def _canon_text_sex(name: str, payload: dict[str, Any], source_key: str | None = None) -> str | None:
     if source_key in WORLD_BIBLE_SEX:
         return WORLD_BIBLE_SEX[source_key]
+    stated = str(payload.get("demographic_sex") or "").lower()
+    if stated in ("male", "female"):  # the seed says so outright; no text scan needed
+        return stated
     titles, _ = _split_name(name)
     text = " ".join([*titles, str(payload.get("role") or ""), str(payload.get("public_identity_text") or "")]).lower()
     female, male = bool(_FEMALE_WORDS.search(text)), bool(_MALE_WORDS.search(text))
