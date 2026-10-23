@@ -509,7 +509,20 @@ def advance_connection_legacy(conn: sqlite3.Connection, days: int) -> list[sqlit
 
 
 
-def build_default_process_registry(*, eager_requery: bool = True):
+# World-package system switch -> simulation processes it owns (a switched-off system is never registered).
+SYSTEM_PROCESSES = {
+    "caerness_underworld": ("underworld", "underworld_medicine"),
+}
+
+
+def disabled_process_keys(conn: sqlite3.Connection) -> frozenset[str]:
+    """Process keys the campaign's world package switches off (loaded once per advance)."""
+    from .world_package import current_package
+    systems = current_package(conn).systems
+    return frozenset(k for sw, keys in SYSTEM_PROCESSES.items() if not systems.get(sw, False) for k in keys)
+
+
+def build_default_process_registry(*, eager_requery: bool = True, disabled: frozenset[str] = frozenset()):
     """Build the production domain-process registry.
 
     SQL due dates remain authoritative.  ``eager_requery=True`` is deliberate: the
@@ -519,6 +532,8 @@ def build_default_process_registry(*, eager_requery: bool = True):
     """
     from .process_registry import ProcessRegistry, ProcessSpec
     reg = ProcessRegistry(eager_requery=eager_requery)
+    _register = reg.register
+    reg.register = lambda spec: None if spec.key in disabled else _register(spec)
     reg.register(ProcessSpec("resolution", next_resolution_due_day, process_due_resolution, needs_event_logger=False))
     reg.register(ProcessSpec("world", next_world_process_due_day, process_due_world_processes,
                              terminal_run=catch_up_world_processes, terminal_key="world_catchup"))
@@ -601,7 +616,10 @@ def advance_connection_registry(conn: sqlite3.Connection, days: int) -> list[sql
     cursor_day = start_day
     end = start_day + days
     from .player import process_camera_succession
-    registry = build_default_process_registry(eager_requery=True)
+    disabled = disabled_process_keys(conn)
+    registry = build_default_process_registry(eager_requery=True, disabled=disabled)
+    block_a = [k for k in _REGISTRY_BLOCK_A if k not in disabled]
+    block_b = [k for k in _REGISTRY_BLOCK_B if k not in disabled]
     logger = _world_event_logger(conn)
 
     def running_coverage_id() -> int | None:
@@ -646,10 +664,10 @@ def advance_connection_registry(conn: sqlite3.Connection, days: int) -> list[sql
 
         cov = running_coverage_id()
         registry.run_due(conn, checkpoint, event_logger=logger, coverage_run_id=cov,
-                         only_keys=list(_REGISTRY_BLOCK_A), run_one_off=False)
+                         only_keys=block_a, run_one_off=False)
         process_camera_succession(conn)
         registry.run_due(conn, checkpoint, event_logger=logger, coverage_run_id=cov,
-                         only_keys=list(_REGISTRY_BLOCK_B), run_one_off=True)
+                         only_keys=block_b, run_one_off=True)
         cursor_day = checkpoint
 
     # Reaching the caller-requested end day is *not* itself a causal checkpoint.

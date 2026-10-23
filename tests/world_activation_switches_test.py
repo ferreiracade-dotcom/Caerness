@@ -171,6 +171,10 @@ GATED_TABLE_PATTERNS = ("cultivation_%", "elixir_%", "hollow_%", "groundbinding_
 CAERNESS_WORDS = ("Vein-Root", "Salt Road", "Brass Lantern", "Grand Coven", "Fenwick")
 
 
+SIM_GATED_PATTERNS = ("underworld_%", "grand_coven_%")
+SIM_GATED_KEYS = ("underworld", "underworld_medicine")
+
+
 def _install_caerness(worlds: Path):
     shutil.copytree(ROOT / "worlds" / "caerness", worlds / "caerness")
     m = json.loads((worlds / "caerness" / "world.json").read_text(encoding="utf-8"))
@@ -338,7 +342,54 @@ def run_archetypes():
     print("world_activation_switches_test (archetypes) passed")
 
 
+def run_simulation():
+    """Tasks 12-13: a 30-day advance in a world with the systems off leaves their tables empty."""
+    os.environ.pop("CAERNESS_WORLD_PACKAGE", None)
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        tmp = Path(tmp)
+        good = hashlib.sha256(b"x").hexdigest()
+        persons = [_person(f"p:{i}", n, a) for i, (n, a) in enumerate([("Ann Rossi", 40), ("Bob Rossi", 12), ("Carl Rossi", 70)])]
+        worlds = _build(tmp, "sj9", _seed(good, persons), pkg_hash=good)
+        os.environ["CAERNESS_WORLDS_DIR"] = str(worlds)
+        _install_caerness(worlds)
+
+        from engine.activation import activate_existing_loops
+        from engine.current_seed import import_current_seed
+        from engine.simulation import advance_connection, build_default_process_registry, current_day, disabled_process_keys
+        from engine.world_package import load_package, set_campaign_package
+
+        pkg = load_package("sj9")
+        conn = _fresh(tmp, "sj9")
+        set_campaign_package(conn, "sj9")
+        import_current_seed(conn, package=pkg)
+        activate_existing_loops(conn)
+        conn.commit()
+        off = disabled_process_keys(conn)
+        assert set(SIM_GATED_KEYS) <= off, off
+        assert not off & set(build_default_process_registry(disabled=off).registered_keys())
+        start = current_day(conn)
+        advance_connection(conn, 30)
+        conn.commit()
+        assert current_day(conn) == start + 30
+        names_like = " OR ".join("name LIKE '%s'" % p for p in SIM_GATED_PATTERNS)
+        tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND (%s)" % names_like)]
+        assert tables
+        ran = {r[0] for r in conn.execute("SELECT DISTINCT process_key FROM process_execution_log")}
+        assert not ran & set(SIM_GATED_KEYS), ran & set(SIM_GATED_KEYS)
+        for t in tables:
+            n = conn.execute('SELECT COUNT(*) FROM "%s"' % t).fetchone()[0]
+            assert n == 0, f"{t} has {n} rows after a 30-day advance with the system off"
+        conn.close()
+
+        os.environ.pop("CAERNESS_WORLDS_DIR", None)
+        conn = _fresh(tmp, "caerness_sim")
+        assert disabled_process_keys(conn) == frozenset()  # absent package id means Caerness: nothing gated
+        conn.close()
+    print("world_activation_switches simulation passed")
+
+
 if __name__ == "__main__":
     run()
     run_background()
     run_archetypes()
+    run_simulation()
