@@ -25,6 +25,8 @@ The owner now plays **only through the Claude apps (desktop and phone, Claude Pr
 
 **Latest (2026-10-16, end of day):** step 1 and the remote connector are live; owner playtests found gaps. Next agent: read `docs/superpowers/plans/2026-10-16-connector-handoff.md` first.
 
+**New stream (2026-10-23): world packages and Saint Jude.** Branch `feat/world-packages-bellacorte`. The engine becomes world-agnostic and gains a second world, Saint Jude, a 1980s mob city. Design approved: `docs/superpowers/specs/2026-10-23-bellacorte-living-city-design.md`. Next agent: read `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md` first, then plan project 1.
+
 ### Earlier streams (2026-10-09)
 
 Branches: **`master` is current.** `worldhist01a-stage1` and `pop01-phase0` are the feature branches it was fast-forwarded from (kept for history).
