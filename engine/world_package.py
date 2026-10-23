@@ -36,6 +36,7 @@ class WorldPackage:
     systems: dict[str, bool]
     data: dict[str, Path] = field(default_factory=dict)
     name_pools: dict = field(default_factory=dict)
+    name_groups: dict = field(default_factory=dict)
     mortality: dict = field(default_factory=lambda: {"model": "gompertz_premodern"})
     background: dict = field(default_factory=lambda: {"stage_distribution": True})
     opening_family: dict = field(default_factory=lambda: {"marry_adults_on_day0": True})
@@ -78,6 +79,13 @@ def load_package(pkg_id: str) -> WorldPackage:
         raise WorldPackageError(f"package '{pkg_id}': calendar.kind must be 'sv' or 'gregorian'")
     systems = {k: bool((m.get("systems") or {}).get(k, False)) for k in SYSTEM_KEYS}
     optional = lambda k: _need(pkg_id, root, m[k]) if m.get(k) else None
+    data = {name: _need(pkg_id, root, rel) for name, rel in (m.get("data") or {}).items()}
+    name_groups = {}
+    if "names" in data:  # ethnic groups: a person's given and family names are drawn from the same group
+        try:
+            name_groups = dict(json.loads(data["names"].read_text(encoding="utf-8")).get("groups") or {})
+        except ValueError as e:
+            raise WorldPackageError(f"package '{pkg_id}': file '{m['data']['names']}' invalid: {e}") from e
     return WorldPackage(
         id=pkg_id,
         display_name=str(m["display_name"]),
@@ -90,8 +98,9 @@ def load_package(pkg_id: str) -> WorldPackage:
         rulebook_section=optional("rulebook_section"),
         creation_section=optional("creation_section"),
         systems=systems,
-        data={name: _need(pkg_id, root, rel) for name, rel in (m.get("data") or {}).items()},
+        data=data,
         name_pools=dict(m.get("name_pools") or {}),
+        name_groups=name_groups,
         mortality=dict(m.get("mortality") or {"model": "gompertz_premodern"}),
         background={"stage_distribution": True, **(m.get("background") or {})},
         opening_family={"marry_adults_on_day0": True, **(m.get("opening_family") or {})},

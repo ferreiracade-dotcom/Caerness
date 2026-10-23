@@ -1,7 +1,7 @@
 {
  "about": "Saint Jude's ethnic mix and name pools for background people. Each group has male, female and family names; the groups' weights are their share of ordinary residents. The merged weighted pools that the engine reads are in world.json under name_pools.",
  "assumption": true,
- "basis": "The mix is an owner-reviewable assumption: the design names the groups (Italian, Irish, Black, Jewish, Russian, Puerto Rican, old-money WASP) but gives no shares, so the weights are set for a mid-1970s Atlantic port city like Newark, Boston or Philadelphia. Given and family names are drawn independently by the engine, so a pair may cross groups; that is a limit of the draw, not a claim about the city.",
+ "basis": "The mix is an owner-reviewable assumption: the design names the groups (Italian, Irish, Black, Jewish, Russian, Puerto Rican, old-money WASP) but gives no shares, so the weights are set for a mid-1970s Atlantic port city like Newark, Boston or Philadelphia. The engine draws a person's group first, by weight, and takes the given and family names from that group, so a generated pair never crosses groups.",
  "groups": {
   "italian": {
    "weight": 0.28,

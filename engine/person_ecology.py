@@ -92,6 +92,27 @@ def given_name_for(seed: int, uid: int, sex: str | None, pools: dict | None = No
     return _pick(FIRST_FEMALE if sex == "female" else FIRST_MALE, seed, uid, "given")
 
 
+def generated_name_for(seed: int, uid: int, sex: str | None, pools: dict | None = None, groups: dict | None = None) -> tuple[str, str]:
+    """(given, family) for a generated identity. With ethnic name groups the group is drawn first, by its
+    weight, and both names come from it, so a pair never crosses groups; without groups the draws stay independent."""
+    pools = pools or {}
+    if groups:
+        key = "female" if sex == "female" else "male"
+        names = tuple(groups)
+        x = _score(seed, uid, "ethnicity") * float(sum(float(groups[n].get("weight", 1.0)) for n in names))
+        pick = names[-1]
+        for n in names:
+            x -= float(groups[n].get("weight", 1.0))
+            if x < 0:
+                pick = n
+                break
+        grp = groups[pick]
+        return _pick(tuple(grp[key]), seed, uid, "given"), _pick(tuple(grp["family"]), seed, uid, "family")
+    given = given_name_for(seed, uid, sex, pools)
+    family = _pool_pick(pools["family"], seed, uid, "family") if pools.get("family") else _pick(_LAST, seed, uid, "family")
+    return given, family
+
+
 # Canon staged headcounts (AGENTS.md): Hearth, and the rest of the continent (global minus Hearth).  Sixth is
 # never drawn for a background identity; the few Sixths are known people.
 _STAGED_HEADCOUNTS = {
@@ -233,8 +254,7 @@ def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int,
         else:
             open_core, stage = 0, None
         occupation, past = occupation_with_past(seed, uid, stage, _pick(_OCCUPATIONS, seed, uid, "occupation"), int(snap["age_days"]) // 365)
-        given = given_name_for(seed, uid, snap["demographic_sex"], pools)
-        family = _pool_pick(pools["family"], seed, uid, "family") if pools.get("family") else _pick(_LAST, seed, uid, "family")
+        given, family = generated_name_for(seed, uid, snap["demographic_sex"], pools, pkg.name_groups)
         # The local uid is not visible in ordinary naming unless a collision must be resolved.
         # Store the stable identity's ordinary name before any demand appears.
         base = f"{given} {family}"
@@ -316,7 +336,10 @@ def redraw_unresolved_profile_cores(conn: sqlite3.Connection) -> int:
 def _free_name(conn: sqlite3.Connection, given: str, family: str, sex: str | None, suffix: int) -> str:
     """The identity's own name if free, else another name of the same sex, and a number only as a last resort."""
     names = FIRST_FEMALE if sex == "female" else FIRST_MALE
-    pool = (package_for(conn).name_pools or {}).get("female" if sex == "female" else "male")
+    pkg = package_for(conn)
+    key = "female" if sex == "female" else "male"
+    home = [g for g in (pkg.name_groups or {}).values() if family in g.get("family", ())]
+    pool = [n for g in home for n in g[key]] if home else (pkg.name_pools or {}).get(key)  # a family keeps its own group
     if pool:
         names = tuple(dict.fromkeys(pool))
     start = names.index(given) if given in names else 0
