@@ -4748,7 +4748,8 @@ def init_db() -> None:
         _backup_raw(path, f"pre_migration_v{prior_version}_to_v{SCHEMA_VERSION}")
     with connect() as conn:
         conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
-        conn.execute("INSERT OR IGNORE INTO world_state(id, world_name, current_day) VALUES (1, 'Caerness', 0)")
+        from .world_package import configured_package_id, load_package
+        conn.execute("INSERT OR IGNORE INTO world_state(id, world_name, current_day) VALUES (1, ?, 0)", (load_package(configured_package_id()).display_name,))
         conn.execute("INSERT OR IGNORE INTO campaign_setup_state(id,bootstrap_complete,player_setup_complete) VALUES (1,0,0)")
         # If the database had no version metadata, treat its existing engine version as the baseline.
         stored = conn.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()
