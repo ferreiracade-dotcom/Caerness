@@ -1,0 +1,69 @@
+{
+  "about": "Each taboo is an act that the people who care will react to, not one that cannot happen. Reactions run from least to most severe and depend on who learns of it, how sure they are, how much they care and what they can do. Source: bible section 3.2 and design section 7; the lists are ranges for judging plausibility, not a menu to choose from.",
+  "taboos": {
+    "killing_a_cop": {
+      "name": "Killing a cop",
+      "who_cares": ["the precinct and the whole police department", "the FBI and federal prosecutors", "the press", "the Governor and City Hall", "every family whose business a manhunt would disrupt"],
+      "typical_reactions": ["raids and pressure on every social club and bar the dead officer's colleagues know", "the families disown or hand over the killer to end the heat", "a manhunt that does not stop for months", "federal cases built around the killing and the crew behind it"],
+      "scales_with": ["the officer's rank and reputation", "witnesses", "whether the killer is known", "how much heat the families already carry"],
+      "can_be_permitted_by": ["a boss with the consent of the other families, which is rare and still costs the family dearly"]
+    },
+    "killing_a_reporter": {
+      "name": "Killing a reporter",
+      "who_cares": ["the paper and its owners", "other papers and broadcasters", "politicians and the Governor", "federal authorities", "the families, who fear what a martyred reporter does to public tolerance"],
+      "typical_reactions": ["national attention and a crackdown", "pressure from other bosses on whoever allowed it", "the killer given up or disowned", "a story told by the paper after the death that sinks the people involved"],
+      "scales_with": ["how well known the reporter was", "what they were working on", "witnesses", "the paper's willingness to fight"],
+      "can_be_permitted_by": ["a boss, knowing the usual substitutes (a smashed camera, a lost Sunday edition) exist because a killing is so expensive"]
+    },
+    "killing_or_striking_a_made_man_without_sanction": {
+      "name": "Killing or striking a made man without sanction",
+      "who_cares": ["the man's capo, crew and sponsor", "his boss", "the other families"],
+      "typical_reactions": ["a demand for explanation", "a sit-down", "a retaliatory killing", "a war between crews or families", "quiet acceptance, or even relief, if a boss wanted it"],
+      "scales_with": ["the victim's weight and kin", "who can prove what", "how the boss feels about the victim", "the balance between the families"],
+      "can_be_permitted_by": ["the victim's boss", "the commission, for a killing across families"]
+    },
+    "holding_out": {
+      "name": "Holding out",
+      "who_cares": ["the capo or boss being shorted", "anyone who learns of it", "partners and crew who also did not get a share"],
+      "typical_reactions": ["a beating and a debt (a tune-up)", "a demotion or the loss of a racket", "exile or a ruined name", "death, for a large or repeated theft"],
+      "scales_with": ["the amount hidden", "how sure they are", "how much the man is worth to the crew", "whether he confesses before he is found out"],
+      "can_be_permitted_by": ["the capo or boss, who may forgive or let a man repay"]
+    },
+    "informing": {
+      "name": "Informing",
+      "who_cares": ["everyone who might be named", "law enforcement, who protect the informant", "the families, who hunt him"],
+      "typical_reactions": ["suspicion that ends a man's standing", "isolation, then a killing on bad information", "a hunt for a confirmed informant and sometimes his relatives", "protection in the Witness Security program at a price"],
+      "scales_with": ["how sure anyone is", "how much was given away", "how well protected he is", "whether kin are within reach"],
+      "can_be_permitted_by": ["a boss who orders a man to feed the Feds chosen information on purpose"]
+    },
+    "narcotics_against_the_family_ban": {
+      "name": "Dealing narcotics where the family forbids it",
+      "who_cares": ["a boss and capos who forbid it for honor, heat or belief", "the young zealots who believe in the ban", "police and the Feds, if the trade draws attention"],
+      "typical_reactions": ["ignored", "taxed through a front man", "demoted, fined or cut off", "killed, depending on whom he deals for and who is looking"],
+      "scales_with": ["the amount involved", "whom he deals for", "how openly it is done", "what the boss really believes"],
+      "can_be_permitted_by": ["a boss, who may officially forbid it and still take a cut"]
+    },
+    "a_made_mans_wife": {
+      "name": "A made man's wife",
+      "who_cares": ["the husband", "his brothers-in-law and sponsor", "the family as a whole"],
+      "typical_reactions": ["a beating", "forced exile or a sit-down", "an unsanctioned killing", "a feud carried into another family's house if the marriage was between families"],
+      "scales_with": ["whether it was an insult or an affair", "how many people know", "how the husband's crew regards him", "the lover's own protection"],
+      "can_be_permitted_by": ["the husband, by forgiving or hushing it", "his boss, who may decide it is not worth a war"]
+    },
+    "violence_in_the_oakridge_sanctuary": {
+      "name": "Violence in the Oakridge sanctuary",
+      "who_cares": ["all four families", "the residents of Oakridge", "the suburban police", "judges and politicians who live there"],
+      "typical_reactions": ["retaliation from every family", "a surge of police and press attention", "hostile witnesses from wealthy, well-connected people", "the sanctuary understanding broken for everyone"],
+      "scales_with": ["who is hurt", "who sees it", "whether it was planned", "the state of the peace between the families"],
+      "can_be_permitted_by": ["all four bosses together, or the commission, for a particular case"]
+    },
+    "disrespecting_a_boss_in_public": {
+      "name": "Disrespecting a boss in public",
+      "who_cares": ["the boss", "his men", "everyone watching"],
+      "typical_reactions": ["an apology and a payment", "a beating", "a public humiliation in return", "a sanctioned killing"],
+      "scales_with": ["the boss's temperament", "his current strength or weakness", "who witnessed it", "whether the insult was deliberate"],
+      "can_be_permitted_by": ["the boss himself, who may swallow it and so decide something about himself"]
+    }
+  },
+  "drift": "A boss can quietly permit what his family officially forbids, and a taboo fades when the people who enforced it are dead or discredited. Two crews can disagree about whether an act was a violation at all. Consequences flow through the knowledge and rumour systems: who learns what, and when."
+}

@@ -140,3 +140,45 @@ def package_for(conn) -> "WorldPackage":
 def system_enabled(conn, key: str) -> bool:
     """True when the campaign's world package switches the system `key` on."""
     return bool(package_for(conn).systems.get(key, False))
+
+
+_TIMELINE_CACHE: dict[tuple, dict[str, dict]] = {}
+
+
+def _timeline(pkg: "WorldPackage") -> dict[str, dict]:
+    """The package's dated timeline (data "timeline"), indexed by lower-cased name and alias; empty when it has none."""
+    path = pkg.data.get("timeline")
+    if path is None:
+        return {}
+    try:
+        key = (str(path), path.stat().st_mtime_ns)
+    except OSError:
+        key = (str(path), 0)
+    index = _TIMELINE_CACHE.get(key)
+    if index is None:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        entries = raw.get("entries", []) if isinstance(raw, dict) else raw
+        index = {}
+        for e in entries:
+            for label in [e["name"], *(e.get("aliases") or [])]:
+                index[str(label).strip().lower()] = e
+        _TIMELINE_CACHE[key] = index
+    return index
+
+
+def timeline_status(pkg: "WorldPackage", name: str, date) -> str:
+    """Where a named thing stands on `date` (an ISO string or a datetime.date) in the package's timeline.
+
+    "unknown" when the package does not list the name; otherwise "not_yet" before it exists, then "exists", "available"
+    and "common" as each stage's date is reached. A stage with no date (null) is never reached, so a thing without a
+    "common" date stays "available". Names match case-insensitively and by alias."""
+    entry = _timeline(pkg).get(str(name).strip().lower())
+    if entry is None:
+        return "unknown"
+    day = (date.isoformat() if hasattr(date, "isoformat") else str(date))[:10]
+    status = "not_yet"
+    for stage in ("exists", "available", "common"):
+        stage_date = entry.get(stage)
+        if stage_date is not None and day >= stage_date:
+            status = stage
+    return status
