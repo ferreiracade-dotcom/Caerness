@@ -1,6 +1,6 @@
 """Create/open a campaign copy and optionally set its protagonist.
 
-Usage: python connector/setup_campaign.py --campaign NAME [--actor "Full Name"]
+Usage: python connector/setup_campaign.py --campaign NAME [--actor "Full Name"] [--package ID]
 """
 from __future__ import annotations
 
@@ -15,11 +15,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--campaign", required=True)
     ap.add_argument("--actor", default="")
+    ap.add_argument("--package", default=None, help="world package for a NEW campaign (default: caerness)")
     a = ap.parse_args()
     from connector.campaign import connect_campaign, open_campaign
     from engine.player import get_player, set_player
 
-    path = open_campaign(a.campaign)
+    path = open_campaign(a.campaign, package=a.package)
     print(f"campaign: {path}", file=sys.stderr)
     with connect_campaign() as conn:
         if a.actor:
