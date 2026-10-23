@@ -294,7 +294,7 @@ def _sexword(conn, aid: int) -> str:
 
 
 def _knowledge(conn, aid: int, *, key: str, day: int, loc: int, cat: str, kin: list[int]) -> int:
-    from .manners_canon import MANNERS, culture_key
+    from .manners_canon import manners_for
     they = "he" if _sexword(conn, aid) == "male" else "she"
     rng = _rng(f"{key}:knowledge")
     s = _settlement(conn, loc)
@@ -317,7 +317,7 @@ def _knowledge(conn, aid: int, *, key: str, day: int, loc: int, cat: str, kin: l
     facts = facts[:rng.randint(12, 25)]
     for k in kin:
         facts.append((f"person:{k}", f"{_name(conn, k)} is someone {they} know{'s' if they != 'they' else ''} well."))
-    facts.append(("manners:place", MANNERS[culture_key(conn, loc)]))
+    facts.append(("manners:place", manners_for(conn, loc)))
     n = 0
     for fk, text in facts:
         n += conn.execute("INSERT OR IGNORE INTO knowledge(knower_actor_id,fact_key,belief_text,confidence,truth_event_id,learned_day) VALUES (?,?,?,?,NULL,?)",
@@ -558,7 +558,7 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
             raise
     loc, cat = facts["location"], facts["category"]
     age = int(p["age"])
-    stage = authoring._stage_name(p.get("stage"))
+    stage = authoring._stage_name(p.get("stage"), conn)
     plan = _holdings_plan(p)
     scaled_in = [dict(h, amount=h.get("amount", "modest")) for h in plan["businesses"]] + ([{"kind": "cash", "amount": plan["cash"]}] if plan["cash"] else [])
     adj, down = veto.holdings_in_proportion(conn, loc, scaled_in)

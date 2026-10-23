@@ -294,7 +294,9 @@ def check_proposal(conn: sqlite3.Connection, proposal: dict) -> dict:
     if loc is None:
         raise Contradiction(f"there is no place called {p.get('place')!r} in the world")
     cat = categorise(p.get("work"), p.get("category"))
-    stage_plausible(age, cat, p.get("stage"))
+    from .world_package import system_enabled
+    claimed = p.get("stage") if system_enabled(conn, "cultivation") else None  # no cultivation: a Stage is never claimed
+    stage_plausible(age, cat, claimed)
     fam = p.get("family") or {}
     for key, text in fam.items():
         items = text if isinstance(text, list) else [text]
@@ -317,7 +319,7 @@ def check_proposal(conn: sqlite3.Connection, proposal: dict) -> dict:
     aff = p.get("affiliation") or {}
     if aff and (aff.get("name") or aff.get("text")):
         held_by_other(conn, str(aff.get("name") or aff.get("text")), aff.get("role"), new=bool(aff.get("new")))
-    window = pool_can_supply(conn, loc=loc, sex=sex, age=age, category=cat if p.get("work") else None, stage=p.get("stage") if p.get("stage") in
+    window = pool_can_supply(conn, loc=loc, sex=sex, age=age, category=cat if p.get("work") else None, stage=claimed if claimed in
                     ("First", "Temper", "Third", "Breach", "Fifth") else None, elsewhere=bool(p.get("from_elsewhere")),
                     pick_seed=f"{p.get('draw', 0)}", exact=bool(p.get("_exact")))
     return {"location": loc, "category": cat, "sex": sex, "window": window}

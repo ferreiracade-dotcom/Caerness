@@ -167,8 +167,12 @@ def _sex(conn, aid: int) -> str | None:
     return r[0] if r else None
 
 
-def _stage_name(text: Any) -> str | None:
-    """Free text to a Stage name, or None when no Stage is claimed ("a quiet talent")."""
+def _stage_name(text: Any, conn=None) -> str | None:
+    """Free text to a Stage name, or None when no Stage is claimed ("a quiet talent"), or the world has no cultivation."""
+    if conn is not None:
+        from .world_package import system_enabled
+        if not system_enabled(conn, "cultivation"):
+            return None
     t = str(text or "").lower()
     return next((s for s in STAGE_NAMES if s.lower() in t), None)
 
@@ -240,7 +244,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
         _no("age must be a whole number of years", "input_gap")
     work_text = d.get("work")
     work = veto.categorise(work_text, d.get("category")) if work_text else None
-    stage = _stage_name(d.get("stage"))
+    stage = _stage_name(d.get("stage"), conn)
     retired = bool(work and work not in ("soldier", "criminal") and stage in ("Breach", "Fifth", "Sixth"))
     if retired and age is not None and age < 45:
         _no(f"a {work} at that Stage is unheard of unless a retired master (aged 45 or more)")

@@ -81,5 +81,61 @@ def run():
     print("world_connector_test passed")
 
 
+def run_no_cultivation():
+    """A package without cultivation: Stage is ignored in proposals and the scene never says martial/Stage/cultivat."""
+    import hashlib
+    import json
+    from world_activation_switches_test import _install_caerness
+    from world_seed_import_test import _build, _fresh, _person, _seed
+
+    os.environ.pop("CAERNESS_WORLD_PACKAGE", None)
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        tmp = Path(tmp)
+        good = hashlib.sha256(b"x").hexdigest()
+        persons = [_person("p:a", "Ann Rossi", 40), _person("p:b", "Bob Rossi", 41)]
+        for p in persons:
+            p["runtime_v1_1"] = {"current_location_ref": "pl:main"}
+        seed = _seed(good, persons)
+        seed["places"] = [{"id": "pl:main", "name": "Main Street", "kind": "settlement", "political_owner": "Saint Jude", "population": 5000}]
+        worlds = _build(tmp, "nocult", seed, pkg_hash=good)
+        os.environ["CAERNESS_WORLDS_DIR"] = str(worlds)
+        _install_caerness(worlds)
+        from engine.activation import activate_existing_loops
+        from engine.current_seed import import_current_seed
+        from engine.player import set_player
+        from engine.world_package import load_package, set_campaign_package
+        from connector import store
+        from connector.authoring import author
+        from connector.views import compact_scene
+
+        conn = _fresh(tmp, "nocult")
+        set_campaign_package(conn, "nocult")
+        import_current_seed(conn, package=load_package("nocult"))
+        activate_existing_loops(conn)
+        store.ensure_connector_schema(conn)
+        me = int(conn.execute("SELECT id FROM actors WHERE actor_type='character' AND current_location_id IS NOT NULL ORDER BY id LIMIT 1").fetchone()[0])
+        set_player(conn, me)
+        conn.commit()
+        conn.execute("UPDATE background_person_profiles SET current_location_id=? WHERE current_location_id IS NULL", (conn.execute("SELECT id FROM locations").fetchone()[0],))
+        before = conn.execute("SELECT COUNT(*) FROM cultivation_profiles").fetchone()[0]
+        r = author(conn, "nc-1", "person", {"sex": "male", "age": 36, "stage": "Sixth", "from_elsewhere": True})
+        assert r["status"] == "created", r
+        assert conn.execute("SELECT COUNT(*) FROM cultivation_profiles").fetchone()[0] == before == 0
+        text = json.dumps(compact_scene(conn)).lower()
+        for bad in ("martial", "stage", "cultivat"):
+            assert bad not in text, bad
+        from engine.manners_canon import manners_for
+        lid = conn.execute("SELECT id FROM locations").fetchone()[0]
+        (worlds / "nocult" / "manners.json").write_text(json.dumps({"settlement": "Neighbours greet by first name.", "default": "Plain."}), encoding="utf-8")
+        m = json.loads((worlds / "nocult" / "world.json").read_text(encoding="utf-8"))
+        m["data"] = {"manners": "manners.json"}
+        (worlds / "nocult" / "world.json").write_text(json.dumps(m), encoding="utf-8")
+        assert manners_for(conn, lid) == "Neighbours greet by first name." and manners_for(conn, None) == "Plain."
+        conn.close()
+    os.environ.pop("CAERNESS_WORLDS_DIR", None)
+    print("world_connector_test (no cultivation) passed")
+
+
 if __name__ == "__main__":
     run()
+    run_no_cultivation()

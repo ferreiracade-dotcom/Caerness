@@ -52,6 +52,8 @@ LOCATORS: dict[str, tuple[str, ...]] = {
     "default": ("[24]", "[488]-[516]"),
 }
 
+_NEUTRAL = "Formality follows power: distance and address are keyed to office, birth or standing, and a breach reads loudly. Elders and hosts are deferred to."
+
 _BY_POLITY = {"Dunmoor": "dunmoor", "Greywood": "greywood", "Windmere": "windmere", "Sunreach Confederacy": "sunreach",
               "Thornward": "thornward", "Stormhollow": "stormhollow"}
 
@@ -82,5 +84,22 @@ def culture_key(conn: sqlite3.Connection, place_id: int | None, *, churn: bool =
 
 
 def manners_for(conn: sqlite3.Connection, place_id: int | None, *, churn: bool = False) -> str:
-    """The one line of room manners for a place. `churn` picks the Churn line inside the Hearth."""
+    """The one line of room manners for a place. `churn` picks the Churn line inside the Hearth.
+
+    A world package supplies its own phrases (data "manners": place kind -> phrase, with a "default");
+    a package without cultivation and without phrases gets a neutral line. Only Caerness uses MANNERS."""
+    import json
+    from .world_package import package_for
+
+    pkg = package_for(conn)
+    path = pkg.data.get("manners")
+    if path is not None:
+        table = json.loads(path.read_text(encoding="utf-8"))
+        kind = None
+        if place_id is not None:
+            row = conn.execute("SELECT kind FROM locations WHERE id=?", (int(place_id),)).fetchone()
+            kind = row[0] if row else None
+        return str(table.get(kind) or table.get("default") or _NEUTRAL)
+    if not pkg.systems.get("cultivation"):
+        return _NEUTRAL
     return MANNERS[culture_key(conn, place_id, churn=churn)]
