@@ -29,7 +29,8 @@ VOLATILE_COLUMNS: dict[str, set[str]] = {}
 
 
 def build_opening(db_path: Path, seed_path: Path | None = None, package: str = "caerness") -> None:
-    if package != "caerness":
+    from engine.world_package import DEFAULT_PACKAGE, list_packages
+    if package != DEFAULT_PACKAGE and package not in list_packages():
         raise ValueError(f"unknown package {package!r}")
     os.environ["CAERNESS_DB_PATH"] = str(db_path)
     from engine.activation import activate_existing_loops
@@ -38,7 +39,12 @@ def build_opening(db_path: Path, seed_path: Path | None = None, package: str = "
 
     init_db()
     with connect() as conn:
-        import_current_seed(conn, str(seed_path or DEFAULT_CURRENT_SEED))
+        if package != DEFAULT_PACKAGE:  # a Caerness database carries no package row, so its opening is unchanged
+            from engine.world_package import set_campaign_package
+            set_campaign_package(conn, package)
+            import_current_seed(conn, str(seed_path) if seed_path else None)
+        else:
+            import_current_seed(conn, str(seed_path or DEFAULT_CURRENT_SEED))
         activate_existing_loops(conn)
         conn.commit()
 
