@@ -155,6 +155,7 @@ def run_package_surface():
         os.environ["CAERNESS_WORLDS_DIR"] = str(worlds)
         import connector.campaign as cc
         import engine.canon as canon
+        from connector.lore import lore
         from connector.session import load_creation, load_rulebook, resume
         from engine.player import set_player
 
@@ -167,6 +168,10 @@ def run_package_surface():
         try:
             cc.open_campaign("sj1", package="saintjude")
             with cc.connect_campaign() as conn:
+                assert [r[0] for r in conn.execute("SELECT heading_path FROM canon_chunks")] == ["Harbour"]
+                got = lore(conn, "zorblat")["passages"]
+                assert got and "diesel" in got[0]["text"], got
+                assert not lore(conn, "Cairnholt")["passages"]
                 rb = load_rulebook(conn)
                 assert rb.startswith("You are the game master for Saint Jude."), rb[:80]
                 assert "Caerness" not in rb and load_creation(conn) .startswith("Design a Saint Jude resident.")
@@ -175,7 +180,7 @@ def run_package_surface():
                 set_player(conn, me)
                 conn.commit()
                 out = resume(conn)
-                assert out["rulebook"] == rb
+                assert out["rulebook"] == rb and out["scene"]["date"] == "Monday 4 March 1985", out["scene"]["date"]
             cc.open_campaign("bare1", package="bare")
             with cc.connect_campaign() as conn:
                 rb = load_rulebook(conn)
