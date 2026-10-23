@@ -96,6 +96,18 @@ def extract_docx_blocks(path: Path) -> list[tuple[str, str]]:
     return blocks
 
 
+def extract_markdown_blocks(path: Path) -> list[tuple[str, str]]:
+    """("Heading N", text) for '#' lines, ("Normal", text) for other non-empty lines, as extract_docx_blocks yields."""
+    blocks: list[tuple[str, str]] = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        m = re.match(r"(#{1,6})\s+(.*\S)", line)
+        blocks.append((f"Heading {len(m.group(1))}", m.group(2)) if m else ("Normal", line))
+    return blocks
+
+
 def _heading_level(style: str) -> int | None:
     m = re.search(r"heading\s*([1-9])", style, re.I)
     return int(m.group(1)) if m else None
@@ -164,7 +176,7 @@ def index_canon(path: Path | str = DEFAULT_CANON, force: bool = False) -> dict:
         source_key = str(path)
     raw = path.read_bytes()
     digest = _sha256(raw)
-    blocks = extract_docx_blocks(path)
+    blocks = extract_markdown_blocks(path) if path.suffix.lower() == ".md" else extract_docx_blocks(path)
     chunks = _chunk_blocks(blocks)
 
     with connect() as conn:
@@ -279,8 +291,10 @@ def search_canon(query: str, limit: int = 6, conn: sqlite3.Connection | None = N
     init_db()
     with connect() as owned:
         has_chunks = owned.execute("SELECT COUNT(*) FROM canon_chunks").fetchone()[0]
-    if not has_chunks and DEFAULT_CANON.exists():
-        index_canon(DEFAULT_CANON)
+        from .world_package import current_package
+        bible = current_package(owned).bible_path
+    if not has_chunks and bible.exists():
+        index_canon(bible)
     with connect() as owned:
         return _search_canon_with_conn(owned, query, limit)
 
