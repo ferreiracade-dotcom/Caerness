@@ -11,11 +11,38 @@ from .continuity import create_cohort, set_institution_profile, set_resolution, 
 from .civilian import add_household_member, create_household
 from .health import ensure_health_profile
 from .household_life import add_kinship, create_union
-from .civil_calendar import format_sv_date
+from . import world_calendar
+from .world_package import WorldPackage, current_package
 
 SOURCE_NAMESPACE = "caerness_seed_v1_1"
 DEFAULT_CURRENT_SEED = Path(__file__).resolve().parent.parent / "game" / "seeds" / "Caerness_Initial_World_State_Seed_v1_4.json"
 REJECTED_NAMES = {"malcolm vane"}
+
+# Package in force during an import (namespace, calendar, switches).  Set by import_current_seed.
+_ACTIVE: dict[str, Any] = {}
+
+
+def _namespace() -> str:
+    pkg = _ACTIVE.get("package")
+    return pkg.seed_namespace if pkg is not None else SOURCE_NAMESPACE
+
+
+def _calendar_pkg():
+    pkg = _ACTIVE.get("package")
+    return pkg if pkg is not None else current_package_default()
+
+
+def current_package_default() -> WorldPackage:
+    from .world_package import load_package, DEFAULT_PACKAGE
+    return load_package(DEFAULT_PACKAGE)
+
+
+def _birth_text(item: dict[str, Any]) -> Any:
+    return item.get("birth_date") if item.get("birth_date") is not None else item.get("birth_date_sv")
+
+
+def _death_text(item: dict[str, Any]) -> Any:
+    return item.get("death_date") if item.get("death_date") is not None else item.get("death_date_sv")
 
 
 def _j(v: Any) -> str:
@@ -31,7 +58,7 @@ def _prov(v: Any) -> list[Any]:
 def _mapped(conn: sqlite3.Connection, source_key: str) -> tuple[str, int] | None:
     r = conn.execute(
         "SELECT entity_kind,entity_id FROM source_identity_map WHERE source_namespace=? AND source_key=?",
-        (SOURCE_NAMESPACE, source_key),
+        (_namespace(), source_key),
     ).fetchone()
     return (str(r[0]), int(r[1])) if r else None
 
@@ -43,7 +70,7 @@ def _map(conn: sqlite3.Connection, source_key: str, entity_kind: str, entity_id:
            ON CONFLICT(source_namespace,source_key) DO UPDATE SET entity_kind=excluded.entity_kind,entity_id=excluded.entity_id,
              canon_status=excluded.canon_status,provenance_json=excluded.provenance_json,source_payload_json=excluded.source_payload_json,
              updated_day=excluded.updated_day""",
-        (SOURCE_NAMESPACE, source_key, entity_kind, entity_id, canon_status, _j(_prov(item.get("provenance"))), _j(item), 0, 0),
+        (_namespace(), source_key, entity_kind, entity_id, canon_status, _j(_prov(item.get("provenance"))), _j(item), 0, 0),
     )
 
 
@@ -162,9 +189,10 @@ def _validate_person_chronology(item: dict[str, Any]) -> None:
         raise ValueError(f"Named person {name} requires a concrete non-negative integer age")
     if not isinstance(birth_day, int):
         raise ValueError(f"Named person {name} requires an explicit opening-relative birth_day")
-    expected_birth_date = format_sv_date(birth_day)
-    if item.get("birth_date_sv") != expected_birth_date:
-        raise ValueError(f"Named person {name} birth_date_sv mismatch: expected {expected_birth_date!r}, got {item.get('birth_date_sv')!r}")
+    cal = _calendar_pkg()
+    expected_birth_date = world_calendar.birth_date_for(cal, birth_day)
+    if _birth_text(item) != expected_birth_date:
+        raise ValueError(f"Named person {name} birth_date_sv mismatch: expected {expected_birth_date!r}, got {_birth_text(item)!r}")
     if item.get("life_status") == "living":
         derived = max(0, (-birth_day) // 365)
         if derived != age:
@@ -175,9 +203,9 @@ def _validate_person_chronology(item: dict[str, Any]) -> None:
             raise ValueError(f"Historical named person {name} requires an explicit death_day")
         if death_day <= birth_day:
             raise ValueError(f"Historical named person {name} has death_day before/equal birth_day")
-        expected_death_date = format_sv_date(death_day)
-        if item.get("death_date_sv") != expected_death_date:
-            raise ValueError(f"Historical named person {name} death_date_sv mismatch: expected {expected_death_date!r}, got {item.get('death_date_sv')!r}")
+        expected_death_date = world_calendar.format_date(cal, death_day)
+        if _death_text(item) != expected_death_date:
+            raise ValueError(f"Historical named person {name} death_date_sv mismatch: expected {expected_death_date!r}, got {_death_text(item)!r}")
         derived = max(0, (death_day - birth_day) // 365)
         if derived != age:
             raise ValueError(f"Historical named person {name} age-at-death mismatch: age={age}, derived={derived}")
@@ -192,7 +220,7 @@ def _repair_existing_person_chronology(conn: sqlite3.Connection, actor_id: int, 
                    metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.source_age',?,'$.age_status','KNOWN',
                                           '$.birth_date_status','KNOWN_SV','$.birth_date_sv',?,'$.age_basis',?,'$.death_day',?)
            WHERE actor_id=?""",
-        (int(item["birth_day"]), _life_stage(item), int(item["age"]), item.get("birth_date_sv"), item.get("age_basis") or "opening_age", item.get("death_day"), actor_id),
+        (int(item["birth_day"]), _life_stage(item), int(item["age"]), _birth_text(item), item.get("age_basis") or "opening_age", item.get("death_day"), actor_id),
     )
     # Keep continuity/source payload aligned while leaving campaign-evolved facts untouched.
     row = conn.execute("SELECT core_json FROM continuity_cores WHERE entity_kind='actor' AND entity_id=?", (actor_id,)).fetchone()
@@ -202,10 +230,10 @@ def _repair_existing_person_chronology(conn: sqlite3.Connection, actor_id: int, 
         except Exception:
             core = {}
         core['age'] = int(item['age']); core['age_known'] = True; core['birth_day'] = int(item['birth_day'])
-        core['birth_date_sv'] = item.get('birth_date_sv')
+        core['birth_date_sv'] = _birth_text(item)
         core['age_basis'] = item.get('age_basis') or 'opening_age'
         if item.get('death_day') is not None: core['death_day'] = int(item['death_day'])
-        if item.get('death_date_sv') is not None: core['death_date_sv'] = item.get('death_date_sv')
+        if _death_text(item) is not None: core['death_date_sv'] = _death_text(item)
         conn.execute("UPDATE continuity_cores SET core_json=? WHERE entity_kind='actor' AND entity_id=?", (_j(core), actor_id))
 
 
@@ -242,7 +270,7 @@ def _ensure_person(conn: sqlite3.Connection, item: dict[str, Any]) -> int:
            VALUES (?,?,?,?,?,?,?)
            ON CONFLICT(actor_id) DO UPDATE SET birth_day=excluded.birth_day,life_stage=excluded.life_stage,life_status=excluded.life_status,metadata_json=excluded.metadata_json""",
         (aid, birth_day, _life_stage(item), 0, "living" if item.get("life_status") == "living" else "deceased", 0,
-         _j({"source_age": age, "age_status": "KNOWN", "birth_date_status": "KNOWN_SV", "birth_date_sv": item.get("birth_date_sv"), "age_basis": item.get("age_basis") or "opening_age", "death_day": item.get("death_day"), "death_date_sv": item.get("death_date_sv"), "core_state": item.get("core_state"), "retirement_eligible": runtime.get("retirement_eligible")})),
+         _j({"source_age": age, "age_status": "KNOWN", "birth_date_status": "KNOWN_SV", "birth_date_sv": _birth_text(item), "age_basis": item.get("age_basis") or "opening_age", "death_day": item.get("death_day"), "death_date_sv": _death_text(item), "core_state": item.get("core_state"), "retirement_eligible": runtime.get("retirement_eligible")})),
     )
     if item.get("life_status") == "living":
         tier = runtime.get("resolution_tier") or ("STRATEGIC" if item.get("strategic_hint") else "DORMANT")
@@ -256,10 +284,12 @@ def _ensure_person(conn: sqlite3.Connection, item: dict[str, Any]) -> int:
         )
         longevity = str(item.get("stage") or "ordinary").lower()
         if longevity not in {"first","temper","third","breach","fifth","sixth"}: longevity = "ordinary"
+        pkg = _ACTIVE.get("package")
+        if pkg is not None and not pkg.systems.get("cultivation", True): longevity = "ordinary"
         ensure_health_profile(conn, aid, longevity_class=longevity)
 
     core = {
-        "source_id": item["id"], "age": age, "age_known": True, "birth_day": birth_day, "birth_date_sv": item.get("birth_date_sv"), "age_basis": item.get("age_basis") or "opening_age", "death_day": item.get("death_day"), "death_date_sv": item.get("death_date_sv"), "core_state": item.get("core_state"),
+        "source_id": item["id"], "age": age, "age_known": True, "birth_day": birth_day, "birth_date_sv": _birth_text(item), "age_basis": item.get("age_basis") or "opening_age", "death_day": item.get("death_day"), "death_date_sv": _death_text(item), "core_state": item.get("core_state"),
         "stage": item.get("stage"), "current": item.get("current"), "long_road": item.get("long_road"),
         "state_sphere": item.get("state_sphere"), "role": item.get("role"), "training_provenance_text": item.get("training_provenance_text"),
         "public_identity_text": item.get("public_identity_text"), "training_state": runtime.get("training_state"),
@@ -275,9 +305,19 @@ def _relationship_key(idx: int, rel: dict[str, Any]) -> str:
     return f"relationship:{idx:04d}:{rel.get('type')}:{rel.get('from')}:{rel.get('to')}"
 
 
-def import_current_seed(conn: sqlite3.Connection, seed_path: str | Path | None = None) -> dict[str, Any]:
-    seed_path = Path(seed_path) if seed_path is not None else DEFAULT_CURRENT_SEED
-    current_maps = int(conn.execute("SELECT COUNT(*) FROM source_identity_map WHERE source_namespace=?", (SOURCE_NAMESPACE,)).fetchone()[0])
+def import_current_seed(conn: sqlite3.Connection, seed_path: str | Path | None = None, package: WorldPackage | None = None) -> dict[str, Any]:
+    package = package if package is not None else current_package(conn)
+    _ACTIVE["package"] = package
+    try:
+        return _import_current_seed(conn, seed_path, package)
+    finally:
+        _ACTIVE.clear()
+
+
+def _import_current_seed(conn: sqlite3.Connection, seed_path: str | Path | None, package: WorldPackage) -> dict[str, Any]:
+    ns = package.seed_namespace
+    seed_path = Path(seed_path) if seed_path is not None else package.seed_path
+    current_maps = int(conn.execute("SELECT COUNT(*) FROM source_identity_map WHERE source_namespace=?", (ns,)).fetchone()[0])
     existing_actors = int(conn.execute("SELECT COUNT(*) FROM actors").fetchone()[0])
     if existing_actors and current_maps == 0:
         raise ValueError("Refusing to import the current Caerness seed into a non-empty unmapped runtime. Use a clean database or a deliberate migration path; do not append current canon to a legacy campaign.")
@@ -286,9 +326,10 @@ def import_current_seed(conn: sqlite3.Connection, seed_path: str | Path | None =
     # World Bible bytes packaged as canon authority.  This prevents a newer Library master
     # and an older tested seed from silently drifting apart again.
     expected_hash = str((seed.get("meta") or {}).get("world_bible_sha256") or "").strip()
-    actual_hash = hashlib.sha256((DEFAULT_CURRENT_SEED.parent.parent.parent / "canon" / "world_bible_current.docx").read_bytes()).hexdigest()
-    if not expected_hash or expected_hash != actual_hash:
-        raise ValueError("Current Caerness seed does not match canon/world_bible_current.docx; reconcile/version the seed before import")
+    if package.bible_sha256:
+        actual_hash = hashlib.sha256(package.bible_path.read_bytes()).hexdigest()
+        if not expected_hash or expected_hash != actual_hash:
+            raise ValueError(f"Current {package.display_name} seed does not match {package.bible_path.parent.name}/{package.bible_path.name}; reconcile/version the seed before import")
     # Canon firewall + chronology completeness: current named registry may not contain age/birth nulls.
     for p in seed.get("persons", []):
         if str(p.get("name", "")).strip().lower() in REJECTED_NAMES:
@@ -446,10 +487,10 @@ def import_current_seed(conn: sqlite3.Connection, seed_path: str | Path | None =
         _map(conn, p["id"], "process", pid, p, canon_status=p.get("status"))
     counts["processes"] = len(seed.get("processes", []))
 
-    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_seed_namespace',?)", (SOURCE_NAMESPACE,))
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_seed_namespace',?)", (ns,))
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_seed_version','1.4')")
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_seed_world_bible_sha256',?)", (expected_hash,))
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('civil_calendar_version','sv_624_fixed_365_v1')")
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('named_person_chronology_contract','explicit_age_birth_day_and_sv_date_required')")
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_seed_import_complete','1')")
-    return {"source_namespace": SOURCE_NAMESPACE, **counts}
+    return {"source_namespace": ns, **counts}
