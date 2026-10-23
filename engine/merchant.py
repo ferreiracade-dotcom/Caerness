@@ -465,7 +465,8 @@ def _ordinary_market_cycle(conn: sqlite3.Connection, day: int) -> dict[str, int]
 def next_merchant_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int | None:
     candidates: list[int] = []
     from .aggregate_trade import next_aggregate_trade_due_day
-    aggregate_due = next_aggregate_trade_due_day(conn, after_day, end_day)
+    from .world_package import system_enabled
+    aggregate_due = next_aggregate_trade_due_day(conn, after_day, end_day) if system_enabled(conn, "caerness_trade") else None
     if aggregate_due is not None:
         candidates.append(int(aggregate_due))
     cycle = _merchant_cycle_due(conn)
@@ -488,7 +489,8 @@ def next_merchant_due_day(conn: sqlite3.Connection, after_day: int, end_day: int
 
 def process_due_merchant(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dict[str, int | float]:
     from .aggregate_trade import process_due_aggregate_trade
-    aggregate_result = process_due_aggregate_trade(conn, day, event_logger=event_logger)
+    from .world_package import system_enabled
+    aggregate_result = process_due_aggregate_trade(conn, day, event_logger=event_logger) if system_enabled(conn, "caerness_trade") else {}
     cycle_result = {'offers_created':0,'observations':0,'offer_awareness':0}
     cycle = _merchant_cycle_due(conn)
     if cycle is not None and cycle <= day:

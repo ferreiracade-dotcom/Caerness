@@ -171,8 +171,8 @@ GATED_TABLE_PATTERNS = ("cultivation_%", "elixir_%", "hollow_%", "groundbinding_
 CAERNESS_WORDS = ("Vein-Root", "Salt Road", "Brass Lantern", "Grand Coven", "Fenwick")
 
 
-SIM_GATED_PATTERNS = ("underworld_%", "grand_coven_%")
-SIM_GATED_KEYS = ("underworld", "underworld_medicine")
+SIM_GATED_PATTERNS = GATED_TABLE_PATTERNS
+SIM_GATED_KEYS = ("underworld", "underworld_medicine", "cultivation", "tournament", "spectacle", "groundbinding", "hollow", "religion")
 
 
 def _install_caerness(worlds: Path):
@@ -379,6 +379,8 @@ def run_simulation():
         for t in tables:
             n = conn.execute('SELECT COUNT(*) FROM "%s"' % t).fetchone()[0]
             assert n == 0, f"{t} has {n} rows after a 30-day advance with the system off"
+        from engine.merchant import process_due_merchant
+        assert not any(k.startswith("aggregate") for k in process_due_merchant(conn, start + 31)), "aggregate trade ran with caerness_trade off"
         conn.close()
 
         os.environ.pop("CAERNESS_WORLDS_DIR", None)

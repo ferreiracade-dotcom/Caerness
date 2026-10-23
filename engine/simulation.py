@@ -512,6 +512,10 @@ def advance_connection_legacy(conn: sqlite3.Connection, days: int) -> list[sqlit
 # World-package system switch -> simulation processes it owns (a switched-off system is never registered).
 SYSTEM_PROCESSES = {
     "caerness_underworld": ("underworld", "underworld_medicine"),
+    "cultivation": ("cultivation", "tournament", "spectacle"),
+    "groundbinding": ("groundbinding",),
+    "hollow": ("hollow",),
+    "caerness_religions": ("religion",),
 }
 
 
