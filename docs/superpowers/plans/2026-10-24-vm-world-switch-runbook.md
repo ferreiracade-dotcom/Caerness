@@ -19,7 +19,7 @@ sudo -u caerness env CAERNESS_CAMPAIGN_DIR=/var/lib/caerness/campaigns CAERNESS_
 Find the newest `main` snapshot (this is the one to use below and for rollback; it prints as `main-<UTC time>-manual.db`):
 
 ```bash
-sudo ls -t /var/lib/caerness/backups/main-*.db | head -1
+sudo sh -c 'ls -t /var/lib/caerness/backups/main-*.db | head -1'
 ```
 
 ## 2. Rehearse on a copy (as the service user, nothing real is touched)
@@ -39,7 +39,7 @@ git -C /opt/caerness checkout -B feat/world-packages-saintjude --track origin/fe
 Create the scratch dir and copy the snapshot in:
 
 ```bash
-S=$(sudo mktemp -d) && sudo chown caerness:caerness "$S" && sudo -u caerness mkdir "$S/campaigns" "$S/backups" && sudo -u caerness cp "$(sudo ls -t /var/lib/caerness/backups/main-*.db | head -1)" "$S/campaigns/main.db" && echo "$S"
+S=$(sudo mktemp -d) && sudo chown caerness:caerness "$S" && sudo -u caerness mkdir "$S/campaigns" "$S/backups" && sudo -u caerness cp "$(sudo sh -c 'ls -t /var/lib/caerness/backups/main-*.db | head -1')" "$S/campaigns/main.db" && echo "$S"
 ```
 
 Run the rehearsal with the same shell variable `S` (it fails loudly on any `error` key):
@@ -109,7 +109,7 @@ In the Claude app, new chat, Caerness connector on:
 
 ## Rollback
 
-Restores both the code and the `main` campaign (the new code migrated `main.db`, so old code needs the pre-switch snapshot). Use the snapshot from step 1 (`sudo ls -t /var/lib/caerness/backups/main-*-manual.db | head -1`).
+Restores both the code and the `main` campaign (the new code migrated `main.db`, so old code needs the pre-switch snapshot). Use the snapshot from step 1 (`sudo sh -c 'ls -t /var/lib/caerness/backups/main-*-manual.db | head -1'`).
 
 ```bash
 sudo systemctl stop caerness
@@ -120,7 +120,7 @@ git -C /opt/caerness checkout feat/claude-connector
 ```
 
 ```bash
-sudo -u caerness env CAERNESS_CAMPAIGN_DIR=/var/lib/caerness/campaigns CAERNESS_BACKUP_DIR=/var/lib/caerness/backups /opt/caerness/.venv/bin/python -m connector.import_campaign "$(sudo ls -t /var/lib/caerness/backups/main-*-manual.db | head -1)" --campaign main --replace
+sudo -u caerness env CAERNESS_CAMPAIGN_DIR=/var/lib/caerness/campaigns CAERNESS_BACKUP_DIR=/var/lib/caerness/backups /opt/caerness/.venv/bin/python -m connector.import_campaign "$(sudo sh -c 'ls -t /var/lib/caerness/backups/main-*-manual.db | head -1')" --campaign main --replace
 ```
 
 The old backup code has no `--all`, so put the old unit back before the timer next fires:
