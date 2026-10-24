@@ -122,8 +122,80 @@ def named_settlement_population_map() -> dict[str, tuple[str, int]]:
     return out
 
 
-def activate_scale_authority(conn: sqlite3.Connection) -> dict[str, int]:
+def _package_scale(conn: sqlite3.Connection) -> dict[str, Any] | None:
+    """The active world package's own `background.scale` block, or None for Caerness."""
+    try:
+        from .world_package import package_for
+        scale = (package_for(conn).background or {}).get("scale")
+    except Exception:
+        return None
+    return scale if isinstance(scale, dict) and scale.get("buckets") else None
+
+
+def _activate_package_scale(conn: sqlite3.Connection, scale: dict[str, Any]) -> dict[str, int]:
+    """A world package's population scale: its own buckets and named settlements, not Caerness's 52m."""
     day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+    buckets: dict[str, dict[str, Any]] = scale["buckets"]
+    world_total = sum(int(b["population"]) for b in buckets.values())
+    authority = str(scale.get("authority") or "PACKAGE_SCALE")
+    for key, b in buckets.items():
+        population, urban = int(b["population"]), int(b.get("urban", 0))
+        conn.execute(
+            """INSERT INTO population_scale_buckets(bucket_key,label,population_estimate,urban_population,rural_population,calibration_status,metadata_json)
+               VALUES (?,?,?,?,?,'CAMPAIGN_CALIBRATION',?)
+               ON CONFLICT(bucket_key) DO UPDATE SET label=excluded.label,population_estimate=excluded.population_estimate,
+                 urban_population=excluded.urban_population,rural_population=excluded.rural_population,metadata_json=excluded.metadata_json""",
+            (key, str(b.get("label") or key), population, urban, population - urban, json.dumps({
+                "authority": authority, "world_population_denominator": world_total, "not_runtime_quota": True,
+                "source": b.get("source"),
+            }, sort_keys=True)),
+        )
+    profiles = 0
+    missing: list[str] = []
+    for name, s in (scale.get("settlements") or {}).items():
+        row = conn.execute("SELECT id FROM locations WHERE name=?", (name,)).fetchone()
+        if not row:
+            missing.append(name)
+            continue
+        population = int(s["population"])
+        conn.execute(
+            """INSERT INTO settlement_scale_profiles(location_id,bucket_key,population_estimate,settlement_tier,named_urban,calibration_status,updated_day,metadata_json)
+               VALUES (?,?,?,?,1,'CAMPAIGN_CALIBRATION',?,?)
+               ON CONFLICT(location_id) DO UPDATE SET bucket_key=excluded.bucket_key,population_estimate=excluded.population_estimate,
+                 settlement_tier=excluded.settlement_tier,updated_day=excluded.updated_day,metadata_json=excluded.metadata_json""",
+            (int(row[0]), str(s["bucket"]), population, settlement_tier(population), day, json.dumps({
+                "authority": authority, "source": s.get("source"),
+            }, sort_keys=True)),
+        )
+        profiles += 1
+    named_urban = int(conn.execute("SELECT COALESCE(SUM(population_estimate),0) FROM settlement_scale_profiles").fetchone()[0])
+    urban_total = sum(int(b.get("urban", 0)) for b in buckets.values())
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('scale01_named_urban_population',?)", (str(named_urban),))
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('scale01_structural_urban_population',?)", (str(urban_total - named_urban),))
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('scale01_missing_named_settlements',?)", (json.dumps(missing),))
+    military = 0
+    if scale.get("military", True):
+        for key, b in buckets.items():
+            population = int(b["population"])
+            conn.execute(
+                """INSERT INTO military_scale_profiles(bucket_key,standing_professional,local_garrison_establishment,trained_reserve,
+                       sustainable_field_capacity,emergency_mobilization_ceiling,military_age_pool,metadata_json)
+                   VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(bucket_key) DO NOTHING""",
+                (key, int(round(population * .003)), int(round(population * .002)), int(round(population * .020)),
+                 int(round(population * .015)), int(round(population * .050)), int(round(population * .200)),
+                 json.dumps({"authority": authority}, sort_keys=True)),
+            )
+            military += 1
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('scale01_activation_version','1')")
+    return {"scale_population_buckets": len(buckets), "settlement_scale_profiles": profiles,
+            "missing_scale_settlements": len(missing), "military_scale_profiles": military}
+
+
+def activate_scale_authority(conn: sqlite3.Connection) -> dict[str, int]:
+    pkg = _package_scale(conn)
+    if pkg is not None:
+        return _activate_package_scale(conn, pkg)
+    day =int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
     for key, (label, population, urban) in POPULATION_BUCKETS.items():
         conn.execute(
             """INSERT INTO population_scale_buckets(bucket_key,label,population_estimate,urban_population,rural_population,calibration_status,metadata_json)

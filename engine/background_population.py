@@ -122,6 +122,42 @@ def _band_shares(conn: sqlite3.Connection) -> list[float]:
     return [float(over.get(band, share)) for band, share, _lo, _hi in _AGE_BANDS]
 
 
+def _background_block(conn: sqlite3.Connection) -> dict:
+    from .world_package import package_for
+    return package_for(conn).background or {}
+
+
+def _birth_rate(conn: sqlite3.Connection) -> float:
+    """Gross annual birth rate: the package's `background.annual_birth_rate`, else the Caerness 27 per thousand."""
+    v = _background_block(conn).get("annual_birth_rate")
+    return float(v) if isinstance(v, (int, float)) else 0.027
+
+
+def _infant_mortality(conn: sqlite3.Connection) -> float:
+    """Share of births dying in the first year: the package's `background.infant_mortality`, else the premodern default."""
+    v = _background_block(conn).get("infant_mortality")
+    if isinstance(v, (int, float)):
+        return float(v)
+    from .health import FIRST_YEAR_MORTALITY
+    return float(FIRST_YEAR_MORTALITY)
+
+
+def _population_path(conn: sqlite3.Connection, source_id: int) -> dict | None:
+    """A package-declared net path for one source: `background.population_path[<bucket_key or source_key>]`
+    = {"figure": <design figure, percent per year>, "sign": -1 for a loss}. None for every other source."""
+    paths = _background_block(conn).get("population_path") or {}
+    if not paths:
+        return None
+    src = conn.execute("SELECT source_key,bucket_key FROM background_population_sources WHERE id=?", (source_id,)).fetchone()
+    if not src:
+        return None
+    for key in (str(src['source_key']), str(src['bucket_key'])):
+        p = paths.get(key)
+        if isinstance(p, dict) and p.get("figure"):
+            return p
+    return None
+
+
 @dataclass
 class PartitionState:
     uid: np.ndarray
@@ -240,14 +276,15 @@ def activate_population_sources(conn: sqlite3.Connection) -> dict[str, int]:
                 location_id=None, opening_population=structural_urban, urban=1,
                 metadata={'authority': 'SCALE01_DERIVED_DISJOINT_SOURCE', 'exact_location_unresolved': True},
             )
-        _upsert_population_source(
-            conn, source_key=f'rural:{key}', source_kind='rural_residual', bucket_key=key,
-            location_id=None, opening_population=int(b['rural_population']), urban=0,
-            metadata={'authority': 'SCALE01_DERIVED_DISJOINT_SOURCE', 'exact_local_distribution_unresolved': True},
-        )
+        if int(b['rural_population']) > 0:  # an all-urban package bucket (Saint Jude's city) has no rural pool
+            _upsert_population_source(
+                conn, source_key=f'rural:{key}', source_kind='rural_residual', bucket_key=key,
+                location_id=None, opening_population=int(b['rural_population']), urban=0,
+                metadata={'authority': 'SCALE01_DERIVED_DISJOINT_SOURCE', 'exact_local_distribution_unresolved': True},
+            )
 
     valid_keys = {str(r[0]) for r in conn.execute("SELECT 'settlement:'||location_id FROM settlement_scale_profiles")}
-    valid_keys |= {f"rural:{str(r['bucket_key'])}" for r in conn.execute("SELECT bucket_key FROM population_scale_buckets")}
+    valid_keys |= {f"rural:{str(r['bucket_key'])}" for r in conn.execute("SELECT bucket_key FROM population_scale_buckets WHERE rural_population>0")}
     for r in conn.execute("SELECT bucket_key,urban_population FROM population_scale_buckets"):
         named = int(conn.execute("SELECT COALESCE(SUM(population_estimate),0) FROM settlement_scale_profiles WHERE bucket_key=?", (r['bucket_key'],)).fetchone()[0])
         if int(r['urban_population']) > named:
@@ -295,8 +332,8 @@ def activate_population_life_course(conn: sqlite3.Connection) -> dict[str, int]:
                 created += 1
         conn.execute(
             """INSERT INTO background_population_dynamics(source_id,annual_birth_rate,health_modifier,last_review_day,status,metadata_json)
-               VALUES (?,0.027,1,?,'active',?) ON CONFLICT(source_id) DO NOTHING""",
-            (sid, day, _j({'authority': 'POPLIFE01_CAMPAIGN_CALIBRATION', 'birth_rate_basis': 'DEMO04_gross_birth_rate_27_per_thousand'})),
+               VALUES (?,?,1,?,'active',?) ON CONFLICT(source_id) DO NOTHING""",
+            (sid, _birth_rate(conn), day, _j({'authority': 'POPLIFE01_CAMPAIGN_CALIBRATION', 'birth_rate_basis': 'DEMO04_gross_birth_rate_27_per_thousand'})),
         )
         dynamics += 1
     # Reconcile exact source totals to their seeded live cohorts.
@@ -339,10 +376,26 @@ def _advance_source_one_year(conn: sqlite3.Connection, source_id: int, step_day:
         closing[band] -= aged
         closing[nxt[band]] += aged
     births = opening * max(0.0, min(1.0, float(dyn['annual_birth_rate'])))
-    from .health import FIRST_YEAR_MORTALITY
-    infant_deaths = births * FIRST_YEAR_MORTALITY
+    infant_share = _infant_mortality(conn)
+    infant_deaths = births * infant_share
     deaths += infant_deaths
     closing['0_4'] += births - infant_deaths
+    # Package Design path (e.g. Saint Jude's city decline): after natural change, a net movement brings the
+    # year's closing to exactly opening x (1 + sign x figure/100). The movement is spread over every age band in
+    # proportion to the band's size, so the age structure is not distorted. Sources without a path are untouched.
+    movement_net = 0.0
+    path = _population_path(conn, source_id)
+    if path:
+        from . import design
+        rate = design.figure(conn, str(path["figure"]))
+        if rate is not None:
+            target = opening * (1.0 + float(path.get("sign", -1)) * float(rate) / 100.0)
+            natural = sum(closing.values())
+            if natural > 0 and target >= 0:
+                factor = target / natural
+                for band in closing:
+                    closing[band] *= factor
+                movement_net = target - natural
     for band in closing:
         conn.execute(
             "UPDATE background_population_age_cohorts SET population=?,last_review_day=? WHERE source_id=? AND age_band=?",
@@ -351,12 +404,20 @@ def _advance_source_one_year(conn: sqlite3.Connection, source_id: int, step_day:
     new_total = sum(closing.values())
     conn.execute("UPDATE background_population_sources SET population_estimate=? WHERE id=?", (int(round(new_total)), source_id))
     conn.execute("UPDATE background_population_dynamics SET last_review_day=? WHERE source_id=?", (int(step_day), source_id))
+    if path:
+        meta = {'method': 'aggregate_age_band_life_course', 'no_quota_rebalancing': True,
+                'movement': 'package_design_figure_path', 'figure': str(path["figure"]),
+                'note': 'movement_net follows a package Design figure; it is not a SCALE-01 quota rebalance',
+                'infant_deaths_share_of_gross_births': infant_share, 'calibration': 'package'}
+    else:
+        meta = {'method': 'aggregate_age_band_life_course', 'no_quota_rebalancing': True,
+                'infant_deaths_share_of_gross_births': infant_share, 'calibration': 'DEMO-04'}
     conn.execute(
         """INSERT OR REPLACE INTO background_population_yearly_balances(
              source_id,period_day,opening_population,births,deaths,movement_net,closing_population,metadata_json)
-           VALUES (?,?,?,?,?,0,?,?)""",
-        (source_id, int(step_day), opening, births, deaths, new_total,
-         _j({'method': 'aggregate_age_band_life_course', 'no_quota_rebalancing': True, 'infant_deaths_share_of_gross_births': 0.10, 'calibration': 'DEMO-04'})),
+           VALUES (?,?,?,?,?,?,?,?)""",
+        (source_id, int(step_day), opening, births, deaths, movement_net, new_total,
+         _j(meta)),
     )
     return opening, births, deaths, new_total
 
