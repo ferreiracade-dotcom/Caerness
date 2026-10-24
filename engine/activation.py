@@ -1104,6 +1104,9 @@ def activate_existing_loops(conn: sqlite3.Connection, package=None) -> dict[str,
         out.update(fn())
 
     from .opening_world_state import resolve_opening_institution_locations, resolve_opening_character_locations
+    # Design figures (packages that carry them) are drawn once, before anything reads them.
+    from .design import draw_all
+    out.update(draw_all(conn))
     # The canon travel graph must exist before anything that routes people, goods, news or armies.
     from .route_network import ensure_canon_route_network
     out.update({k:v for k,v in ensure_canon_route_network(conn).items() if k!='routes01_missing_places'})
