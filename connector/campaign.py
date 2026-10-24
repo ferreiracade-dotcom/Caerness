@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import sys
 import sqlite3
 from pathlib import Path
 
@@ -160,6 +161,6 @@ def open_startup(default_campaign: str) -> Path:
     if world and world != DEFAULT_PACKAGE and world in list_packages():
         try:
             return open_campaign(campaign_name_for(world), package=world)
-        except Exception:
-            pass  # fall back to the configured campaign rather than refuse to start
+        except Exception as e:  # fall back to the configured campaign rather than refuse to start
+            print(f"could not reopen last-played world {world!r}: {e}; opening {default_campaign}", file=sys.stderr)
     return open_campaign(default_campaign)

@@ -111,8 +111,7 @@ def resume(world: str | None = None) -> dict:
     before = None
     if world is not None and str(world).strip():
         from connector import campaign
-        want = _resolve_world(str(world))
-        before = lambda: campaign.switch_to(want)  # noqa: E731
+        before = lambda: campaign.switch_to(_resolve_world(str(world)))  # noqa: E731  (resolved inside the lock and try)
     return _call(go, "resume", before=before)
 
 
