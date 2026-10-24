@@ -20,6 +20,13 @@ EXEC_AGES = (50, 75)
 CAPO_AGES = (38, 65)
 SOLDIER_AGES = (25, 65)
 ASSOCIATE_AGES = (17, 45)
+# Other outfits, by rank key: elders and the men who run things are older, the youngest rung is 18-30.
+GANG_AGES = {
+    "elder": (45, 75), "middle": (30, 55), "young": (18, 30),
+    "banker": (40, 70), "controller": (25, 55), "runner": (18, 35),
+    "president": (35, 60), "officer": (28, 55), "member": (22, 50), "prospect": (18, 30),
+    "senior": (50, 75), "man": (22, 55),
+}
 OWN_GROUP_SHARE = 0.80  # associates: share from the outfit's own name group, the rest from the city's other groups
 
 
@@ -60,17 +67,22 @@ def pull_up(conn: sqlite3.Connection, n: int, *, stream: str, name_group: str | 
     )
 
 
-def seeded_by_rank(conn: sqlite3.Connection, outfit_id: int, rules: dict) -> tuple[dict[str, list[int]], list[tuple[int, str]]]:
-    """Seeded members of an outfit by rank (first word of the role text through seed_role_to_rank), plus the ones left out."""
+def seeded_by_rank(conn: sqlite3.Connection, outfit_id: int, rules: dict, spec: dict | None = None) -> tuple[dict[str, list[int]], list[tuple[int, str]]]:
+    """Seeded members of an outfit by rank, plus the ones left out. A family reads the first word of the role text
+    through seed_role_to_rank; an outfit with `seed_roles` (phrase in the role text -> rank, first match wins) reads those."""
     mapping = rules.get("seed_role_to_rank", {})
+    phrases = list((spec or {}).get("seed_roles", {}).items())
     out: dict[str, list[int]] = {}
     unplaced: list[tuple[int, str]] = []
     for r in conn.execute(
         """SELECT m.member_actor_id,m.role_text FROM institution_memberships m JOIN actors a ON a.id=m.member_actor_id
            WHERE m.institution_actor_id=? AND m.status='active' AND a.status='active' ORDER BY m.member_actor_id""", (outfit_id,)
     ).fetchall():
-        word = (r["role_text"] or "").split(" ", 1)[0]
-        rank = mapping.get(word)
+        text = r["role_text"] or ""
+        if phrases:
+            rank = next((rk for ph, rk in phrases if ph.lower() in text.lower()), None)
+        else:
+            rank = mapping.get(text.split(" ", 1)[0])
         if rank is None:
             unplaced.append((int(r["member_actor_id"]), str(r["role_text"])))
         else:
@@ -210,6 +222,57 @@ def build_families(conn: sqlite3.Connection, day: int) -> dict:
     return out
 
 
+def build_outfit(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, day: int) -> dict:
+    """A non-family outfit (loyalties, banks, club, handful): each rank filled to its figure, seeded people first."""
+    inst = spec["institution"]
+    shape = spec["shape"]
+    outfit_id = outfit_actor(conn, inst)
+    group = spec.get("name_group")  # None (the club has no group of its own): the city's group weights
+    male_share = float(rules["male_share"][shape])
+    rng = random.Random(f"{run_seed(conn)}:outfit:{key}:structure")
+    seeded, unplaced = seeded_by_rank(conn, outfit_id, rules, spec)
+    ranks = spec["ranks"]
+    members: dict[str, list[int]] = {}
+    for rank, r in ranks.items():
+        wanted = int(r["count"]) if r.get("count") else int(round(figure(conn, r["figure"])))
+        got = list(seeded.get(rank, []))[:wanted]
+        unplaced.extend((i, f"surplus {rank}") for i in seeded.get(rank, [])[wanted:])
+        plan = ["male" if rng.random() < male_share else "female" for _ in range(wanted - len(got))]
+        for sex in sorted(set(plan)):
+            got += pull_up(conn, plan.count(sex), stream=f"{key}:{rank}:{sex}", name_group=group, sex=sex, ages=GANG_AGES[rank],
+                           subtype=seat_subtype(rank, inst), criminal_weight=1.0)
+        rng.shuffle(got)
+        members[rank] = got
+    top = next(iter(ranks))
+    for rank, r in ranks.items():
+        for i, a in enumerate(members[rank]):
+            sup = None
+            if shape == "banks" and rank != top and members[top]:
+                sup = members[top][i % len(members[top])]
+            elif shape == "club" and rank == "officer" and members.get("president"):
+                sup = members["president"][0]
+            elif shape == "club" and rank in ("member", "prospect") and members.get("officer"):
+                sup = members["officer"][i % len(members["officer"])]
+            elif shape == "handful" and rank != top and members[top]:
+                sup = members[top][0]
+            add_member(conn, a, outfit_id, rank, crew_id=None, superior_actor_id=sup, level=int(r["level"]), day=day)
+            if sup is not None:
+                feelings_toward(conn, a, sup, day, rng)
+            elif shape == "loyalties" and rank == "young":  # no chain of command: an older man got him the job
+                patrons = members["elder"] + members["middle"]
+                if patrons:
+                    feelings_toward(conn, a, patrons[i % len(patrons)], day, rng)
+            if r.get("count") == 1:
+                _fill_open_seat(conn, inst, rank, a)
+    return {"counts": {rank: len(m) for rank, m in members.items()}, "unplaced": unplaced}
+
+
+def build_other_outfits(conn: sqlite3.Connection, day: int) -> dict:
+    rules = outfit_rules(package_for(conn))
+    return {key: build_outfit(conn, key, spec, rules, day) for key, spec in rules.get("outfits", {}).items()
+            if spec.get("shape") != "family"}
+
+
 def build(conn: sqlite3.Connection) -> dict[str, int]:
     """Everything outfit-shaped at the opening; counts by outfit and rank ("sabatini:capo": 8)."""
     if not system_enabled(conn, "outfits"):
@@ -220,5 +283,9 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
         for rank, n in res["counts"].items():
             counts[f"{key}:{rank}"] = n
         counts[f"{key}:crews"] = res["crews"]
+        counts[f"{key}:unplaced_seeded"] = len(res["unplaced"])
+    for key, res in build_other_outfits(conn, day).items():
+        for rank, n in res["counts"].items():
+            counts[f"{key}:{rank}"] = n
         counts[f"{key}:unplaced_seeded"] = len(res["unplaced"])
     return counts

@@ -18,6 +18,7 @@ from engine.design import figure
 from engine.world_package import package_for
 
 FAMILIES = ("sabatini", "pellegrino", "ferrante", "vannucci")
+FAMILY_ONLY = "r.outfit_actor_id IN (SELECT id FROM actors WHERE name LIKE '%% Family')"  # the gangs are task 6
 MADE = ("boss", "underboss", "consigliere", "capo", "soldier")
 
 
@@ -100,8 +101,8 @@ def test_seeded_examples_hold_their_seats():
 def test_levels_and_rhythm():
     conn, _ = _open()
     rows = conn.execute("SELECT r.rank_key,r.level,s.cadence_days,s.quiet_routine,s.tier FROM outfit_ranks r "
-                        "JOIN simulation_profiles s ON s.actor_id=r.actor_id").fetchall()
-    assert rows and len(rows) == conn.execute("SELECT COUNT(*) FROM outfit_ranks").fetchone()[0]
+                        "JOIN simulation_profiles s ON s.actor_id=r.actor_id WHERE %s" % FAMILY_ONLY).fetchall()
+    assert rows and len(rows) == conn.execute("SELECT COUNT(*) FROM outfit_ranks r WHERE %s" % FAMILY_ONLY).fetchone()[0]
     for r in rows:
         if r["rank_key"] in ("boss", "underboss", "consigliere", "capo"):
             assert (r["level"], r["cadence_days"], r["quiet_routine"], r["tier"]) == (4, 1, 1, "ACTIVE"), dict(r)
@@ -113,7 +114,7 @@ def test_all_made_men_are_male_and_italian():
     conn, pkg = _open()
     italian = set(pkg.name_groups["italian"]["family"])
     made = conn.execute("SELECT a.id,a.name,l.demographic_sex FROM outfit_ranks r JOIN actors a ON a.id=r.actor_id "
-                        "JOIN actor_life_profiles l ON l.actor_id=a.id WHERE r.rank_key<>'associate'").fetchall()
+                        "JOIN actor_life_profiles l ON l.actor_id=a.id WHERE r.rank_key<>'associate' AND %s" % FAMILY_ONLY).fetchall()
     assert made
     pulled = {r[0] for r in conn.execute("SELECT actor_id FROM person_resolution_provenance WHERE resolution_reason='outfit_opening'")}
     assert len(pulled) > 100
@@ -122,18 +123,18 @@ def test_all_made_men_are_male_and_italian():
         if m["id"] in pulled:
             assert m["name"].split()[-1] in italian, dict(m)
     assoc = conn.execute("SELECT l.demographic_sex FROM outfit_ranks r JOIN actor_life_profiles l ON l.actor_id=r.actor_id "
-                         "WHERE r.rank_key='associate'").fetchall()
+                         "WHERE r.rank_key='associate' AND %s" % FAMILY_ONLY).fetchall()
     assert sum(1 for a in assoc if a[0] == "male") / len(assoc) >= 0.99
 
 
 def test_feelings_toward_superior_exist():
     conn, _ = _open()
-    rows = conn.execute("SELECT actor_id,superior_actor_id FROM outfit_ranks WHERE superior_actor_id IS NOT NULL").fetchall()
+    rows = conn.execute("SELECT actor_id,superior_actor_id FROM outfit_ranks r WHERE superior_actor_id IS NOT NULL AND %s" % FAMILY_ONLY).fetchall()
     assert rows
     for r in rows:
         assert conn.execute("SELECT 1 FROM relationships WHERE actor_a_id=? AND actor_b_id=?",
                             (r["actor_id"], r["superior_actor_id"])).fetchone(), dict(r)
-    assert conn.execute("SELECT COUNT(*) FROM outfit_ranks WHERE superior_actor_id IS NULL AND rank_key<>'boss'").fetchone()[0] == 0
+    assert conn.execute("SELECT COUNT(*) FROM outfit_ranks r WHERE superior_actor_id IS NULL AND rank_key<>'boss' AND %s" % FAMILY_ONLY).fetchone()[0] == 0
 
 
 def _fingerprint(db: Path) -> str:

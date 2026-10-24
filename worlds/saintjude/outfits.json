@@ -68,6 +68,11 @@
      "level": 3
     }
    },
+   "seed_roles": {
+    "Senior man": "elder",
+    "Crane-crew boss": "middle",
+    "Brigades man": "young"
+   },
    "name_group": "irish",
    "upward": {
     "kind": "gift_to_elder",
@@ -92,6 +97,9 @@
     }
    },
    "name_group": "black",
+   "seed_roles": {
+    "banker": "banker"
+   },
    "upward": {
     "kind": "bank_net_to_banker"
    },
@@ -120,6 +128,9 @@
      "figure": "horsemen_prospects",
      "level": 3
     }
+   },
+   "seed_roles": {
+    "President": "president"
    },
    "upward": {
     "kind": "dues",
