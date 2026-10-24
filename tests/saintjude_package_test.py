@@ -1,4 +1,4 @@
-"""Task 16: the Saint Jude bible (worlds/saintjude/bible.md) adapted from the Bellacorte codex."""
+"""Task 16: the Saint Jude bible (worlds/saintjude/bible.md), the seven setting-bible files (Index, Parts I to VI) joined by tools/build_saintjude_bible.py."""
 from __future__ import annotations
 
 import os
@@ -30,16 +30,16 @@ def run():
 
         init_db()
         res = canon.index_canon(BIBLE, force=True)
-        assert res["chunks"] >= 60, res
+        assert res["chunks"] >= 400, res
         with connect() as conn:
             rows = conn.execute("SELECT heading_path, text FROM canon_chunks ORDER BY chunk_index").fetchall()
-            assert len(rows) >= 60
+            assert len(rows) >= 400
             for r in rows:
                 hp = r["heading_path"] or ""
                 assert hp and hp != "Document", hp
 
             # Names: the city is Saint Jude; Bellacorte is only a district.
-            assert not re.search(r"city of Bellacorte|Bellacorte, ", text), "Bellacorte used as a city name"
+            assert not re.search(r"city of Bellacorte", text), "Bellacorte used as a city name"  # Bellacorte is District Four
             for old in ("Port St. Jude", "Meadowlands"):
                 assert old not in text, old
             for city_use in ("Bellacorte Daily", "Bellacorte Chronicle", "Bellacorte Police", "Bellacorte MCC",
@@ -47,29 +47,39 @@ def run():
                 assert city_use not in text, city_use
 
             # Hard-coded character secrets and pressures appear only under an "Examples" heading, if at all.
-            for needle in ("Sally Glasses", "Vinny Scales", "David Rossi", "Matty", "Barber Shop Hit"):
+            for needle in ("Sally Glasses", "Vinny Scales", "David Rossi", "Matty"):  # the bible names its old "Barber Shop Hit" only to withdraw it (Part I 2.5)
                 for r in rows:
                     if needle in r["text"]:
                         assert "Examples" in (r["heading_path"] or ""), (needle, r["heading_path"])
             assert "Roster" not in text and "Private Vector" not in text
 
-            # Shape: required sections.
-            paths = "\n".join(r["heading_path"] for r in rows)
-            for need in ("Founding and history", "Adaptation notes", "Taboos", "Street dictionary",
-                         "Technology", "Economic reference ledger"):
+            # Shape: the seven files in order, each Part under its own H2, with the sections the engine leans on.
+            paths = chr(10).join(r["heading_path"] for r in rows)
+            heads = ("Index and Status", "Part I: The City", "Part II: The Law", "Part III: The Underworld",
+                     "Part IV: The Upperworld", "Part V: The Outside Groups", "Part VI: The Price Book")
+            at = [text.index("## " + h) for h in heads]
+            assert at == sorted(at), at
+            for need in ("The Period Mind", "Taboos: Acts and Their Consequences", "Names", "Women in Saint Jude",
+                         "Price Weather", "Law Weather"):
                 assert need.lower() in paths.lower(), need
-            assert "never impossible" in text
-            assert text.count("Assumption:") >= 8, text.count("Assumption:")
-            notes = text[text.index("## Adaptation notes"):]
-            for fix in ("8.1", "8.2", "12.2", "13.2", "Pressure 2"):
-                assert fix in notes, fix
+            assert "A taboo is never a wall" in text and "women are never made" in text
+            assert "**Content limits.** No real person acts or speaks." in text
+            assert text.count("[verified") >= 100, text.count("[verified")
+            assert "Pellegrino" in text and "Ferrante" in text  # the renamed families
+
+            # The package's bible is exactly the seven source files (bible_sources.json records their hashes).
+            import hashlib
+            import json
+            src = json.loads((PKG / "bible_sources.json").read_text(encoding="utf-8"))
+            assert src["files"][0]["file"] == "Saint_Jude_Bible_Index.md" and len(src["files"]) == 7
+            assert src["bible_md_sha256"] == hashlib.sha256(BIBLE.read_bytes()).hexdigest()
 
             # lore() finds the renamed places and the founding story.
             out = lore(conn, "Killbuck Point")
             assert out["passages"], out
             assert any("Killbuck Point" in p["text"] for p in out["passages"])
-            out = lore(conn, "founding church cathedral St. Jude's")
-            assert any("cathedral" in p["text"] for p in out["passages"])
+            out = lore(conn, "St. Jude's Cathedral")
+            assert out["passages"] and any("athedral" in p["text"] for p in out["passages"]), out
             out = lore(conn, "the Pines")
             assert any("Pines" in p["text"] for p in out["passages"])
     print("saintjude_package_test (bible) passed")
@@ -162,8 +172,28 @@ def run_data():
     assert wp.timeline_status(pkg, "teleporter", "1980-01-01") == "unknown"
     assert wp.timeline_status(pkg, "Title III wiretap", "1967-12-31") == "not_yet"
     assert wp.timeline_status(pkg, "cellular phone", "1984-02-01") == "available"
+    # Dates from the bible (Part II 6, 9; Part I 13; Part IV 2.3; Part VI 10): a rule is never applied early.
+    ts = lambda name, day: wp.timeline_status(pkg, name, day)
+    assert ts("pen register", "1979-05-31") == "exists" and ts("pen register", "1979-07-01") == "available"
+    assert ts("RICO", "1970-09-30") == "not_yet" and ts("RICO", "1971-01-01") == "exists" and ts("RICO", "1973-11-01") == "available"
+    assert ts("RICO used against organized crime", "1977-12-31") == "not_yet" and ts("RICO used against organized crime", "1978-01-01") == "exists"
+    assert ts("RICO prosecution of a Mafia leadership", "1985-02-24") == "not_yet" and ts("RICO prosecution of a Mafia leadership", "1985-02-25") == "exists"
+    assert ts("federal preventive detention", "1984-10-11") == "not_yet" and ts("Bail Reform Act of 1984", "1984-10-12") == "available"
+    assert ts("Landrum-Griffin Act", "1980-01-01") == "available" and ts("union-office bar lengthened to thirteen years", "1984-10-11") == "not_yet"
+    assert ts("Title III wiretap", "1968-12-31") == "available" and ts("Witness Security Program", "1971-06-01") == "exists"
+    assert ts("Pick-3", "1975-05-21") == "not_yet" and ts("Pick-it", "1975-05-22") == "available"
+    assert ts("Atlantic City casino", "1978-05-25") == "not_yet" and ts("Atlantic City casino", "1978-05-26") == "available"
+    assert ts("Elizabeth Marine Terminal", "1962-08-14") == "not_yet" and ts("Elizabeth Marine Terminal", "1962-08-15") == "available"
+    assert ts("State Commission of Investigation", "1968-12-31") == "exists" and ts("SCI", "1969-01-01") == "available"
+    assert ts("forensic DNA profiling", "1985-12-31") == "not_yet" and ts("forensic DNA profiling", "1987-12-31") == "available"
+    assert ts("crack cocaine", "1983-12-31") == "not_yet" and ts("crack", "1985-01-01") == "available"
+    assert ts("cellular phone", "1983-12-30") == "not_yet" and ts("Bell breakup", "1984-12-30") == "not_yet"
     entries = json.loads(pkg.data["timeline"].read_text(encoding="utf-8"))
     assert isinstance(entries, list) and len(entries) >= 25
+    assert all(isinstance(e.get("from_bible"), bool) for e in entries)  # every entry says whether the bible dates it
+    assert all(e["from_bible"] or "Not from the bible" in e["source"] for e in entries)
+    assert all(not e["from_bible"] or re.search(r"Part (I|II|III|IV|V|VI) \d", e["source"]) for e in entries)  # a bible entry cites its section
+    assert not [e["name"] for e in entries if re.search(r"codex|Appendix|section A\d", e["source"], re.I)]
     iso = re.compile(r"^\d{4}-\d{2}-\d{2}$")
     seen = set()
     for e in entries:
@@ -190,15 +220,14 @@ def run_data():
     assert mw["value_1975"] == 2.10 and mw["value_1980"] == 3.10
     cpi = next(b for b in prices["national_benchmarks"] if b["key"] == "cpi_u_annual_average")
     assert abs(prices["ratios"]["goods"]["value"] - cpi["value_1975"] / cpi["value_1980"]) < 0.001
-    rows = prices["saint_jude_estimates"]
-    assert len(rows) >= 60
+    rows = prices["rows"]  # Part VI: every row has a default or a range, a mark and a Part VI source
+    assert len(rows) >= 200
     price_keys = [r["key"] for r in rows]
     assert len(price_keys) == len(set(price_keys))
     for r in rows:
-        assert str(r.get("basis", "")).strip() and r.get("assumption") is True, r["key"]
-        assert 0 < r["low"] <= r["high"], r["key"]
-        top = max(float(v.replace(",", "")) for v in re.findall(r"\$([\d,]+(?:\.\d+)?)", r["ledger_1980"]))
-        assert 0.5 <= r["high"] / top <= 0.8, (r["key"], r["high"], top)
+        assert r.get("default") is not None or r.get("range"), r["key"]
+        assert r.get("mark") and re.match(r"Part VI \d", str(r.get("source", ""))), r["key"]
+        assert r.get("tag") in ("Fixed", "Open", "Weather", "Anchor", "Tendency", "Design", "Example"), r["key"]
 
     # Archetypes: the same required shape as the Caerness vocabulary, built on the 1975 price rows.
     arch = json.loads(pkg.data["archetypes"].read_text(encoding="utf-8"))
@@ -216,11 +245,15 @@ def run_data():
         assert a["weights"] and set(a["weights"]) <= context, (key, set(a["weights"]) - context)
         assert set(a.get("price_refs", [])) <= set(price_keys), (key, set(a.get("price_refs", [])) - set(price_keys))
         assert str(a.get("basis", "")).strip() and a.get("assumption") is True, key
-    assert all(a["price_refs"] for k, a in arch.items() if k not in ("numbers_bank", "sports_book", "funeral_home"))
+    # price_refs point at Part VI 4.4 trade rows; a trade the bible is silent on has none and says so.
+    assert all(a["price_refs"] or "bible silent" in a.get("price_refs_note", "") for a in arch.values())
+    assert all(ref.startswith("trade_") for a in arch.values() for ref in a["price_refs"])
 
-    # Taboos: who cares and a range of reactions; nothing is declared impossible.
-    taboos = json.loads(pkg.data["taboos"].read_text(encoding="utf-8"))["taboos"]
-    assert len(taboos) == 9, list(taboos)
+    # Taboos (Part III 9: 15 rows; Part V 10.4: 8 rows): who cares and a range of reactions; each is a price, not a wall.
+    tdoc = json.loads(pkg.data["taboos"].read_text(encoding="utf-8"))
+    taboos = tdoc["taboos"]
+    assert len(taboos) == 23, list(taboos)
+    assert [t["source"] for t in taboos.values()].count("Part III 9") == 15 and [t["source"] for t in taboos.values()].count("Part V 10.4") == 8
     banned = re.compile(r"forbidden|impossible|never", re.I)
 
     def keys_of(node):
@@ -234,18 +267,33 @@ def run_data():
 
     assert not [k for k in keys_of(taboos) if banned.search(k)]
     for key, t in taboos.items():
-        assert t["who_cares"] and len(t["typical_reactions"]) >= 2 and t["can_be_permitted_by"], key
-    for need in ("killing_a_cop", "killing_a_reporter", "holding_out", "informing", "a_made_mans_wife",
-                 "violence_in_the_oakridge_sanctuary", "disrespecting_a_boss_in_public"):
+        assert t["kind"] == "taboo_price" and t["act"] and t["tag"] == "Fixed", key
+        assert t["who_cares"] and t["typical_reactions"] and t["can_be_excused_by"], key
+        assert "women" not in key or key in ("a_made_mans_wife_or_daughter", "touching_a_civilian_woman_or_child"), key
+    for need in ("killing_a_police_officer", "killing_a_reporter", "striking_a_made_man", "killing_a_made_man_of_another_family",
+                 "holding_out", "informing", "violence_in_a_church_or_at_a_wake", "touching_a_civilian_woman_or_child",
+                 "betraying_a_compare", "lying_to_a_boss", "violence_in_the_oakridge_sanctuary", "publicly_disrespecting_a_boss"):
         assert need in taboos, need
+    # The one absolute is not a priced taboo: women are never made (Part III 9, Part I 12.2).
+    rules = tdoc["fixed_rules"]
+    assert [r["key"] for r in rules] == ["women_are_never_made"] and rules[0]["kind"] == "fixed_rule" and rules[0]["carries_no_price"] is True
+    assert "typical_reactions" not in rules[0] and "women_are_never_made" not in taboos
 
-    # Names: seven groups, >= 40 names in every pool, and world.json's weighted pools are the merge of names.json.
-    names = json.loads(pkg.data["names"].read_text(encoding="utf-8"))["groups"]
-    assert set(names) == {"italian", "irish", "black", "jewish", "russian", "puerto_rican", "wasp"}
+    # Names (Part I 14.1: 11 groups; Part I 7.1 shares): world.json's weighted pools are the merge of names.json.
+    ndoc = json.loads(pkg.data["names"].read_text(encoding="utf-8"))
+    names = ndoc["groups"]
+    assert set(names) == {"italian", "irish", "polish_slavic", "portuguese", "black", "jewish", "old_protestant",
+                          "puerto_rican_latino", "greek_lebanese_armenian", "soviet_jewish_emigre", "chinese"}
     assert abs(sum(g["weight"] for g in names.values()) - 1.0) < 1e-9
+    assert names["black"]["weight"] > names["italian"]["weight"] > names["irish"]["weight"] > names["old_protestant"]["weight"] > names["polish_slavic"]["weight"]
+    assert names["soviet_jewish_emigre"]["weight"] == 0 and ndoc["gaps"]
     for gname, g in names.items():
         for kind in ("male", "female", "family"):
-            assert len(g[kind]) >= 40 and len(set(g[kind])) == len(g[kind]), (gname, kind)
+            assert len(g[kind]) >= 6 and len(set(g[kind])) == len(g[kind]), (gname, kind)
+    assert "Pellegrino" in names["italian"]["family"] and "Ferrante" in names["italian"]["family"] and "Gabriel" in names["italian"]["male"]
+    assert "Castellano" not in names["italian"]["family"] and "Moretti" not in names["italian"]["family"]
+    assert len(names["italian"]["family"]) == 27 and len(names["italian"]["female"]) == 10 and len(names["black"]["female"]) == 6
+    assert [k for k, g in names.items() if g["female_source"] == "bible"] == ["italian", "black"]  # the rest are labelled fallbacks
     for kind in ("male", "female", "family"):
         pool = pkg.name_pools[kind]
         assert isinstance(pool, dict) and abs(sum(pool.values()) - 1.0) < 1e-3, kind
@@ -253,7 +301,7 @@ def run_data():
         for g in names.values():
             for n in g[kind]:
                 expect[n] = expect.get(n, 0.0) + g["weight"] / len(g[kind])
-        assert set(pool) == set(expect), kind
+        assert set(pool) == {n for n in expect if expect[n] > 0}, kind
         assert all(abs(pool[n] - expect[n]) < 1e-5 for n in pool), kind
 
     # Mortality: a published-style table, assumption recorded, plausible and rising with age.

@@ -1,0 +1,41 @@
+{
+  "about": "Setting bible files concatenated into bible.md by tools/build_saintjude_bible.py, in this order, joined by one blank line.",
+  "files": [
+    {
+      "file": "Saint_Jude_Bible_Index.md",
+      "bytes": 7424,
+      "sha256": "59548d9329b17999407850697f2378d0e88d40ead7c3474d371485ec8d7293c2"
+    },
+    {
+      "file": "Saint_Jude_Bible_Part_I_The_City.md",
+      "bytes": 93621,
+      "sha256": "85b69052080990e6d51faafb60a0a8504fa0aaefd2c8b585af45bd6d78ebef66"
+    },
+    {
+      "file": "Saint_Jude_Bible_Part_II_The_Law.md",
+      "bytes": 41767,
+      "sha256": "45e44edc8adbd6905bb1e3384b3d726e05b1654e3900e6d0af8e3247721d082f"
+    },
+    {
+      "file": "Saint_Jude_Bible_Part_III_The_Underworld.md",
+      "bytes": 78343,
+      "sha256": "e1da04cbafb5286e02bc04856e34be4902aa32229a36d46755296cecdd1ebb42"
+    },
+    {
+      "file": "Saint_Jude_Bible_Part_IV_The_Upperworld.md",
+      "bytes": 131198,
+      "sha256": "16ab8f778a0d48453b2ed30731f6d900e67c00acfbb3b84855803cc4678c6873"
+    },
+    {
+      "file": "Saint_Jude_Bible_Part_V_The_Outside_Groups.md",
+      "bytes": 81931,
+      "sha256": "445078485493b74b405c8961f0372e3f5159cc63c6f6be2ff565fb2ad5927376"
+    },
+    {
+      "file": "Saint_Jude_Bible_Part_VI_The_Price_Book.md",
+      "bytes": 149005,
+      "sha256": "c6c372ca5bf8e378536f57872507c889726257970660153d1750d7f991ca6950"
+    }
+  ],
+  "bible_md_sha256": "3283846d6bd0305c4990fe472b7d082a283c9873fa4e467b06eabafb14ef5567"
+}

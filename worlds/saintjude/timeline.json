@@ -1,130 +1,939 @@
 [
-    {"name": "cellular phone", "aliases": ["handheld cellular phone", "mobile phone", "cell phone", "DynaTAC"],
-     "exists": "1983-10-13", "available": "1984-01-01", "common": "1995-01-01",
-     "source": "'Exists' means a commercial product and service, not a prototype: Motorola's first handheld call was made on 3 April 1973, but the first US commercial cellular service opened in Chicago on 13 October 1983 and in the Washington-Baltimore area that December, with the Motorola DynaTAC 8000X approved in 1983 (Motorola and Smithsonian notes in the codex, Appendix D). Saint Jude is assumed to follow in early 1984; 'common' is a loose estimate.",
-     "assumption": true},
-    {"name": "car phone", "aliases": ["mobile telephone", "installed car phone"],
-     "exists": "1946-06-17", "available": "1964-01-01", "common": null,
-     "source": "Bell System Mobile Telephone Service began in St. Louis in June 1946; the improved IMTS followed in 1964. Always expensive and limited to a few channels per city.",
-     "assumption": false},
-    {"name": "pager", "aliases": ["beeper", "tone pager", "voice pager"],
-     "exists": "1949-01-01", "available": "1964-01-01", "common": null,
-     "source": "Al Gross's hospital pager dates from 1949; Motorola's Pageboy I tone-only pager was released in 1964. By 1980 pagers are used in some professional and business circles; they are never routine for ordinary people in the period.",
-     "assumption": false},
-    {"name": "numeric display pager", "aliases": ["numeric pager", "display pager", "pager codes"],
-     "exists": "1980-01-01", "available": "1982-01-01", "common": "1988-01-01",
-     "source": "Bible section A6 puts numeric pagers as a street tool in the early to mid 1980s; the exact first date is approximate.",
-     "assumption": true},
-    {"name": "fax machine", "aliases": ["fax", "facsimile", "telecopier"],
-     "exists": "1964-01-01", "available": "1966-01-01", "common": "1986-01-01",
-     "source": "Xerox's Long Distance Xerography (1964) and the Magnafax Telecopier (1966) were slow office machines; Group 3 machines in 1980 and falling prices brought wide adoption in the mid 1980s (codex Appendix A: wider adoption 1986-89).",
-     "assumption": true},
-    {"name": "videocassette recorder", "aliases": ["VCR", "VHS", "Betamax", "video recorder"],
-     "exists": "1971-01-01", "available": "1975-11-01", "common": "1985-01-01",
-     "source": "Sony's U-matic arrived in 1971; Betamax reached the US in November 1975 and VHS in 1977. Ownership became visible in the early 1980s and common in the mid 1980s (codex Appendix A: video ownership and rental more visible 1984-85).",
-     "assumption": true},
-    {"name": "video rental store", "aliases": ["video rental", "videotape rental", "VHS duplication", "bootleg videotapes"],
-     "exists": "1977-01-01", "available": "1978-01-01", "common": "1984-01-01",
-     "source": "The first prerecorded-tape sales and rental shops opened in 1977-78 in Michigan and Los Angeles; the bible section A6 gates VHS duplication to 1977 onward and small in 1980.",
-     "assumption": true},
-    {"name": "answering machine", "aliases": ["telephone answering machine"],
-     "exists": "1949-01-01", "available": "1971-01-01", "common": "1985-01-01",
-     "source": "Early machines were sold from the late 1940s; the consumer Phone-Mate machine arrived in 1971. Human answering services remain routine throughout (codex Appendix A3).",
-     "assumption": true},
-    {"name": "answering service", "aliases": ["telephone answering service"],
-     "exists": "1930-01-01", "available": "1930-01-01", "common": "1950-01-01",
-     "source": "A human switchboard service, routine by 1980 (codex Appendix A3). The dates are loose estimates.",
-     "assumption": true},
-    {"name": "portable tape recorder", "aliases": ["cassette recorder", "tape recorder"],
-     "exists": "1963-08-30", "available": "1965-01-01", "common": "1975-01-01",
-     "source": "Philips introduced the compact cassette in August 1963; portable recorders were affordable by the late 1960s. Reel-to-reel recorders were used earlier (codex Appendix A).",
-     "assumption": true},
-    {"name": "body recorder", "aliases": ["Nagra", "wire", "concealed recorder"],
-     "exists": "1951-01-01", "available": "1965-01-01", "common": null,
-     "source": "Nagra recorders date from 1951 (the codex names the Nagra body recorder); federal agencies and prosecutors use them on informants from the 1960s. Availability to ordinary people is not claimed.",
-     "assumption": true},
-    {"name": "closed-circuit camera", "aliases": ["CCTV", "security camera"],
-     "exists": "1949-01-01", "available": "1960-01-01", "common": null,
-     "source": "Closed-circuit television exists at specific sites in 1980 (codex A3 and A4); a modern, citywide camera network does not, and is not modelled before 1990.",
-     "assumption": true},
-    {"name": "personal computer", "aliases": ["microcomputer", "home computer"],
-     "exists": "1975-01-01", "available": "1977-06-05", "common": "1990-01-01",
-     "source": "The Altair 8800 was announced in January 1975; the Apple II went on sale in June 1977 and the IBM PC in August 1981. Specialist workplaces first; wider adoption from 1986 (codex Appendix A).",
-     "assumption": true},
-    {"name": "office photocopier", "aliases": ["photocopier", "Xerox"],
-     "exists": "1959-09-16", "available": "1960-01-01", "common": "1972-01-01",
-     "source": "The Xerox 914 was shown in September 1959 (codex Appendix A lists office photocopiers by 1980). 'Common' is an estimate.",
-     "assumption": true},
-    {"name": "automatic teller machine", "aliases": ["ATM", "cash machine"],
-     "exists": "1967-06-27", "available": "1969-09-02", "common": "1980-01-01",
-     "source": "The first cash machine ran at a Barclays branch in London in June 1967; Chemical Bank installed the first US machines in New York in September 1969. Spread through the 1970s; 'common' is an estimate.",
-     "assumption": true},
-    {"name": "bank credit card", "aliases": ["credit card", "BankAmericard", "Master Charge"],
-     "exists": "1958-09-01", "available": "1966-01-01", "common": "1975-01-01",
-     "source": "BankAmericard launched in September 1958 and the Interbank (Master Charge) association in 1966. 'Common' is an estimate; no credit-card authorisation threshold is universal (codex A5).",
-     "assumption": true},
-    {"name": "arcade video game", "aliases": ["video arcade", "video game cabinet", "Pong"],
-     "exists": "1971-11-01", "available": "1972-11-29", "common": "1978-01-01",
-     "source": "Computer Space (1971) and Pong (November 1972) began the coin-operated video game; Space Invaders (1978) made arcades a routine amusement-route business. The bible section A6 gates it to the late 1970s.",
-     "assumption": true},
-    {"name": "Pac-Man", "aliases": [],
-     "exists": "1980-05-22", "available": "1980-10-26", "common": "1981-01-01",
-     "source": "Released in Japan in May 1980 and in North America in October 1980 (bible section A6).",
-     "assumption": false},
-    {"name": "Atlantic City casino", "aliases": ["casino junket", "Atlantic City junket"],
-     "exists": "1978-05-26", "available": "1978-05-26", "common": "1980-01-01",
-     "source": "Resorts International opened as the first legal casino in Atlantic City on 26 May 1978 (bible section A6 gates Atlantic City junkets to 1978 onward).",
-     "assumption": false},
-    {"name": "compact disc", "aliases": ["CD", "compact disc player"],
-     "exists": "1982-10-01", "available": "1983-03-02", "common": "1990-01-01",
-     "source": "Compact disc players went on sale in Japan in October 1982 and in the US in March 1983; wide adoption by about 1990.",
-     "assumption": true},
-    {"name": "Lincoln Town Car", "aliases": ["Town Car"],
-     "exists": "1980-10-01", "available": "1980-10-01", "common": "1983-01-01",
-     "source": "The Town Car name replaced the Continental Town Car for the 1981 model year, on sale from late 1980 (codex A5 says it is not a default 1980 vehicle). Estimate.",
-     "assumption": true},
-    {"name": "Title III wiretap", "aliases": ["Title III", "court-authorized wiretap", "bug warrant", "probe"],
-     "exists": "1968-06-19", "available": "1969-01-01", "common": null,
-     "source": "Title III of the Omnibus Crime Control and Safe Streets Act, signed 19 June 1968, set up court-authorised wiretaps and bugs for federal and state officials; use stays constrained by law, evidence, staffing and budgets (codex A4). Routine use against organised crime grew through the 1970s and 1980s.",
-     "assumption": false},
-    {"name": "pen register", "aliases": ["phone records", "toll records"],
-     "exists": "1960-01-01", "available": "1977-12-07", "common": null,
-     "source": "United States v. New York Telephone Co. (7 December 1977) upheld court orders for pen registers; Smith v. Maryland (1979) held that no warrant was needed. Telephone company records of calls placed exist well before this. Estimate for the early date.",
-     "assumption": true},
-    {"name": "RICO", "aliases": ["RICO statute", "Racketeer Influenced and Corrupt Organizations Act"],
-     "exists": "1970-10-15", "available": "1971-01-01", "common": "1981-01-01",
-     "source": "Title IX of the Organized Crime Control Act of 1970, signed 15 October 1970 (codex A4: RICO exists in the early 1980s). Early prosecutions were few and cautious; systematic use against Mafia families grew in the early 1980s, so 'available' and 'common' are estimates.",
-     "assumption": true},
-    {"name": "RICO prosecution of a crime family", "aliases": ["RICO against the families", "RICO conspiracy indictment"],
-     "exists": "1975-01-01", "available": "1979-01-01", "common": "1983-01-01",
-     "source": "Federal prosecutors first used RICO against Mafia leadership in the late 1970s and made it routine in the early 1980s; the Commission case followed in 1985. These dates are rough estimates for a fictional city.",
-     "assumption": true},
-    {"name": "Witness Security Program", "aliases": ["WITSEC", "witness protection"],
-     "exists": "1970-10-15", "available": "1971-01-01", "common": null,
-     "source": "Authorised by the Organized Crime Control Act of 1970 (signed 15 October 1970); the US Marshals Service has run it since 1971. Never routine; it is a tool of federal prosecutors.",
-     "assumption": false},
-    {"name": "Bank Secrecy Act", "aliases": ["currency transaction report", "CTR"],
-     "exists": "1970-10-26", "available": "1970-10-26", "common": "1980-01-01",
-     "source": "Currency and Foreign Transactions Reporting Act, signed 26 October 1970, requires banks to report large cash transactions; enforcement was patchy until the 1980s. 'Common' is an estimate.",
-     "assumption": true},
-    {"name": "money laundering statute", "aliases": ["Money Laundering Control Act", "money laundering charge"],
-     "exists": "1986-10-27", "available": "1986-10-27", "common": "1990-01-01",
-     "source": "The Money Laundering Control Act of 1986, signed 27 October 1986, made laundering itself a federal crime. Before it, prosecutors used the Bank Secrecy Act, tax and conspiracy charges. Washing cash through a front is an offence in a hazier sense before then.",
-     "assumption": false},
-    {"name": "federal preventive detention", "aliases": ["Comprehensive Crime Control Act of 1984", "Bail Reform Act of 1984", "preventive detention"],
-     "exists": "1984-10-12", "available": "1984-10-12", "common": "1985-01-01",
-     "source": "The Comprehensive Crime Control Act of 1984, including the Bail Reform Act, was signed 12 October 1984 (codex A4 and A5: do not apply it to a case that predates it).",
-     "assumption": false},
-    {"name": "forensic DNA profiling", "aliases": ["DNA profiling", "DNA evidence", "DNA fingerprinting"],
-     "exists": "1984-09-10", "available": "1987-11-06", "common": "1995-01-01",
-     "source": "Alec Jeffreys announced DNA fingerprinting in 1984; the first US criminal conviction using DNA evidence came in Florida in November 1987 (codex A4: not a routine tool in 1980). 'Common' is an estimate.",
-     "assumption": true},
-    {"name": "crack cocaine", "aliases": ["crack", "retail crack market"],
-     "exists": "1984-01-01", "available": "1985-01-01", "common": "1986-01-01",
-     "source": "Retail crack markets are a mid-1980s development (bible section A6). Approximate dates.",
-     "assumption": true},
-    {"name": "TEC-9", "aliases": ["Intratec TEC-9", "Tec-9"],
-     "exists": "1985-01-01", "available": "1985-01-01", "common": "1990-01-01",
-     "source": "Intratec's TEC-9 pistol was introduced in 1985 (the codex's use of it for earlier years was an anachronism; see the adaptation notes). Estimate for the 'common' date.",
-     "assumption": true}
-  ]
+ {
+  "name": "Miranda warnings",
+  "aliases": [
+   "Miranda rights"
+  ],
+  "exists": "1966-12-31",
+  "available": "1966-12-31",
+  "common": null,
+  "source": "Part II 6.1: Miranda warnings (1966) are in force; a suspect may refuse to talk and may have a lawyer. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "memory",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "Title III wiretap",
+  "aliases": [
+   "Title III",
+   "court-authorized wiretap",
+   "bug warrant",
+   "probe"
+  ],
+  "exists": "1968-12-31",
+  "available": "1968-12-31",
+  "common": null,
+  "source": "Part II 6.3: the federal wiretap statute (Title III, 1968) permits eavesdropping only on a judge's order, for a limited set of serious crimes, for 30 days (renewable), with a duty to minimize; Justice Department sign-off first. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "New Jersey one-party consent recording",
+  "aliases": [
+   "one-party consent",
+   "N.J.S.A. 2A:156A-4"
+  ],
+  "exists": "1968-12-31",
+  "available": "1968-12-31",
+  "common": null,
+  "source": "Part II 6.3: New Jersey's wiretap act (1968) allows recording with the consent of one party (N.J.S.A. 2A:156A-4). The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "verified in outline",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "informant body wire",
+  "aliases": [
+   "body wire",
+   "informant transmitter",
+   "United States v. White"
+  ],
+  "exists": "1971-04-05",
+  "available": "1971-04-05",
+  "common": null,
+  "source": "Part II 6.3: an informant may carry a transmitter or recorder and agents may testify to what they hear, without a warrant (United States v. White, decided 5 April 1971, six to three).",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "pen register",
+  "aliases": [
+   "phone records",
+   "toll records"
+  ],
+  "exists": "1975-01-01",
+  "available": "1979-06-30",
+  "common": null,
+  "source": "Part II 6.3: a pen register needs no warrant after Smith v. Maryland (June 1979); before then its status is murkier (so it exists, status unsettled, at the 1975 baseline: the bible gives no earlier date). Part II 9: 1979, 'fixed after'. The bible gives the month only; the last day of the month is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "grand jury civil contempt, 18 months at most",
+  "aliases": [
+   "civil contempt for refusing to testify",
+   "28 U.S.C. 1826",
+   "contempt maximum"
+  ],
+  "exists": "1975-01-01",
+  "available": "1975-01-01",
+  "common": null,
+  "source": "Part II 6.4: a witness who refuses after immunity can be jailed for civil contempt until he talks, until the grand jury's term ends, or for 18 months at most (28 U.S.C. 1826). The bible gives no enactment date; the rule is in force at the 1 January 1975 baseline.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "RICO",
+  "aliases": [
+   "RICO statute",
+   "Racketeer Influenced and Corrupt Organizations Act"
+  ],
+  "exists": "1970-10-31",
+  "available": "1973-10-31",
+  "common": null,
+  "source": "Part II 6.6: enacted October 1970 but little used; the first jury conviction under it was United States v. Parness, October 1973 (affirmed 1974). Before the late 1970s prosecutors prefer gambling, extortion, tax evasion, narcotics conspiracy, Hobbs Act, interstate theft, labor racketeering. 'Available' is the first conviction. The bible gives months only; the last day of the month is used.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "RICO used against organized crime",
+  "aliases": [
+   "RICO begins to be used against organized crime",
+   "RICO against the families"
+  ],
+  "exists": "1978-01-01",
+  "available": null,
+  "common": null,
+  "source": "Part II 9 (1978 onward, rising) and Part III 13.2: RICO begins to be used against organized crime. Part II 6.6 Weather: from the late 1970s to 1985 it moves from the law books to the front line. A pressure of rising strength, not an outcome.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "RICO case against a union leader (United States v. Scotto)",
+  "aliases": [
+   "Scotto"
+  ],
+  "exists": "1979-09-30",
+  "available": "1979-09-30",
+  "common": null,
+  "source": "Part II 6.6: a RICO case against a New York longshoremen's union leader was brought in the Southern District of New York in September 1979. The real person is offstage only. The bible gives the month only; the last day of the month is used so that the rule is never applied early.",
+  "mark": "verified in outline",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "RICO prosecution of a Mafia leadership",
+  "aliases": [
+   "RICO prosecution of a crime family",
+   "Commission case",
+   "RICO conspiracy indictment"
+  ],
+  "exists": "1985-02-25",
+  "available": "1986-11-19",
+  "common": null,
+  "source": "Part II 6.6 and 9: the first major Mafia leadership case is the Commission case, indicted on 25 February 1985, tried in 1986, verdicts on 19 November 1986. Use against Mafia leadership comes later than the first RICO convictions.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Witness Security Program",
+  "aliases": [
+   "WITSEC",
+   "witness protection"
+  ],
+  "exists": "1970-12-31",
+  "available": "1971-12-31",
+  "common": null,
+  "source": "Part II 6.7: WITSEC is authorized in 1970 and begins in 1971, run by the U.S. Marshals; untested in a mob context at scale until the late 1970s. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Bank Secrecy Act",
+  "aliases": [
+   "currency transaction report",
+   "CTR"
+  ],
+  "exists": "1970-12-31",
+  "available": "1970-12-31",
+  "common": null,
+  "source": "Part I 9.6 and Part III 7.8: since the Bank Secrecy Act of 1970, banks file reports on cash transactions above $10,000; on paper after 1970, few filed. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "memory",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "Landrum-Griffin Act",
+  "aliases": [
+   "union-office bar, five years",
+   "union office bar"
+  ],
+  "exists": "1959-12-31",
+  "available": "1959-12-31",
+  "common": null,
+  "source": "Part IV 2.3: the 1959 labor-management reporting law requires secret-ballot election of local officers at least every three years and bars certain convicted persons from union office for five years after conviction or release, whichever is later; the bar does not take effect until the conviction is upheld on appeal. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "memory",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "union-office bar lengthened to thirteen years",
+  "aliases": [
+   "Comprehensive Crime Control Act union bar",
+   "thirteen-year union bar"
+  ],
+  "exists": "1984-10-12",
+  "available": "1984-10-12",
+  "common": null,
+  "source": "Part IV 2.3 and 2.9: on 12 October 1984 the Comprehensive Crime Control Act lengthens the bar from five years to thirteen for later convictions, lets a court cut it to no less than three, and makes it take effect at conviction.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "federal preventive detention",
+  "aliases": [
+   "Comprehensive Crime Control Act of 1984",
+   "Bail Reform Act of 1984",
+   "Bail Reform Act",
+   "detention for dangerousness"
+  ],
+  "exists": "1984-10-12",
+  "available": "1984-10-12",
+  "common": null,
+  "source": "Part II 6.2 and 9: before the Bail Reform Act of 1984 federal defendants in non-capital cases had a right to release unless a judge believed they would flee; dangerousness was not a ground for detention, so do not hold a boss without bail on the strength of his reputation. The 1984 act (12 October 1984 per Part IV 2.3) allows detention for dangerousness; the Supreme Court upholds it in 1987.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "preventive detention upheld by the Supreme Court",
+  "aliases": [
+   "detention without bail upheld"
+  ],
+  "exists": "1987-12-31",
+  "available": "1987-12-31",
+  "common": null,
+  "source": "Part II 6.2 and 9: 'fixed after' 1987. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "forensic DNA profiling",
+  "aliases": [
+   "DNA profiling",
+   "DNA evidence",
+   "DNA fingerprinting"
+  ],
+  "exists": "1986-12-31",
+  "available": "1987-12-31",
+  "common": null,
+  "source": "Part II 6.8: no DNA testing in 1975; forensic DNA profiling arrives in 1986 and reaches courts from 1987. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "memory",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "undercover infiltration of a Mafia family",
+  "aliases": [
+   "FBI undercover agent in a family"
+  ],
+  "exists": "1976-01-01",
+  "available": null,
+  "common": null,
+  "source": "Part II 7.2 and 9: such an operation, if it occurs, begins no earlier than 1976 and is rare and hard; a famous New York case runs September 1976 to July 1981. A possibility from 1976, not an event.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "FBI Top Echelon Criminal Informant Program",
+  "aliases": [
+   "Top Echelon"
+  ],
+  "exists": "1961-12-31",
+  "available": "1961-12-31",
+  "common": null,
+  "source": "Part II 7.1: began in 1961 and ran until 1978, when the Bureau replaced it with a general Criminal Informant Program. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Attorney General guidelines on informants",
+  "aliases": [
+   "Levi guidelines"
+  ],
+  "exists": "1976-12-15",
+  "available": "1976-12-15",
+  "common": null,
+  "source": "Part II 7.1 and 9: first Attorney General guidelines on informants, 15 December 1976 (domestic security investigations guidelines 6 April 1976).",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Church Committee",
+  "aliases": [
+   "Senate intelligence hearings"
+  ],
+  "exists": "1975-01-31",
+  "available": "1976-04-30",
+  "common": null,
+  "source": "Part II 9: Senate select committee formed January 1975, report April 1976; Bureau cautious about bugs and informants. 'Available' is the report. The bible gives the month only; the last day of the month is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Parole Commission",
+  "aliases": [
+   "U.S. Parole Commission"
+  ],
+  "exists": "1976-05-31",
+  "available": "1976-05-31",
+  "common": null,
+  "source": "Part II 8: a Parole Commission reorganized in May 1976 sets release dates by guideline. The bible gives the month only; the last day of the month is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "DEA",
+  "aliases": [
+   "Drug Enforcement Administration"
+  ],
+  "exists": "1973-07-01",
+  "available": "1973-07-01",
+  "common": null,
+  "source": "Part II 5: DEA formed 1 July 1973; works heroin and cocaine cases and is the FBI's rival over drugs.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "ERISA",
+  "aliases": [
+   "Employee Retirement Income Security Act"
+  ],
+  "exists": "1974-09-02",
+  "available": "1975-01-01",
+  "common": null,
+  "source": "Part II 5 and Part IV 2.6: signed 2 September 1974 (Public Law 93-406); reporting and disclosure rules and most fiduciary standards take effect 1 January 1975.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Abscam",
+  "aliases": [
+   "Abscam sting"
+  ],
+  "exists": "1978-03-31",
+  "available": "1980-02-28",
+  "common": null,
+  "source": "Part II 9: a sting begins in March 1978 and becomes public in early February 1980; congressional convictions follow in 1981. 'Available' is the public disclosure. The bible gives the month only; the last day of the month is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "New Jersey death penalty reinstated",
+  "aliases": [
+   "death penalty reinstated"
+  ],
+  "exists": "1982-12-31",
+  "available": "1982-12-31",
+  "common": null,
+  "source": "Part II 8: de facto ban from 1972, reinstated in 1982 (last execution 22 January 1963). The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "New Jersey Lottery",
+  "aliases": [
+   "state lottery"
+  ],
+  "exists": "1969-11-20",
+  "available": "1969-11-20",
+  "common": null,
+  "source": "Part III 7.2 and Part VI 2.3: created 20 November 1969. A weekly game with long odds that did not compete with the illegal numbers game (Part I 9.8).",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "State daily numbers game (Pick-it)",
+  "aliases": [
+   "Pick-3",
+   "Pick-it",
+   "state numbers game",
+   "daily number"
+  ],
+  "exists": "1975-05-22",
+  "available": "1975-05-22",
+  "common": null,
+  "source": "Part I 9.8, 13 and Part VI 2.3, 10: the State's daily three-digit game begins 22 May 1975, first called Pick-it and renamed Pick-3 in 1987; prizes parimutuel. A strong, slow pressure on the numbers banks, not a fixed outcome.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Pennsylvania daily number",
+  "aliases": [],
+  "exists": "1977-03-01",
+  "available": "1977-03-01",
+  "common": null,
+  "source": "Part VI 10.1: begins 1 March 1977.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "New Jersey Pick-6",
+  "aliases": [
+   "Pick-6"
+  ],
+  "exists": "1980-05-09",
+  "available": "1980-05-09",
+  "common": null,
+  "source": "Part VI 11.2 (anchors): Pick-6 began 9 May 1980.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "New York daily number",
+  "aliases": [],
+  "exists": "1980-12-31",
+  "available": "1980-12-31",
+  "common": null,
+  "source": "Part VI 10.1: begins 1980; the exact start date is Open. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "verified in outline",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Atlantic City casino gambling referendum",
+  "aliases": [
+   "casino vote"
+  ],
+  "exists": "1976-11-30",
+  "available": "1976-11-30",
+  "common": null,
+  "source": "Part I 13 and Part VI 10.1: New Jersey votes for casinos in November 1976, for Atlantic City only. The bible gives the month only; the last day of the month is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Atlantic City casino",
+  "aliases": [
+   "Resorts",
+   "casino junket",
+   "Atlantic City junket"
+  ],
+  "exists": "1978-05-26",
+  "available": "1978-05-26",
+  "common": null,
+  "source": "Part I 9.9, 13 and Part VI 10.1: Resorts opens 26 May 1978; Saint Jude gets no casino.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Contraband Cigarette Trafficking Act",
+  "aliases": [
+   "cigarette trafficking law"
+  ],
+  "exists": "1978-11-02",
+  "available": "1979-03-01",
+  "common": null,
+  "source": "Part VI 10.1: enacted 2 November 1978 (Public Law 95-575), trafficking provision in effect about 1 March 1979.",
+  "mark": "verified in outline",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "New Jersey income tax",
+  "aliases": [
+   "state income tax"
+  ],
+  "exists": "1976-07-31",
+  "available": "1976-09-03",
+  "common": null,
+  "source": "Part VI 10.1: passed July 1976, first withholding 3 September 1976. The bible gives the month only; the last day of the month is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "containerization at Port Newark",
+  "aliases": [
+   "Ideal X"
+  ],
+  "exists": "1956-04-26",
+  "available": "1956-04-26",
+  "common": null,
+  "source": "Part I 3.1a: containerization began at Port Newark on 26 April 1956 (the Ideal X).",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Elizabeth Marine Terminal",
+  "aliases": [],
+  "exists": "1962-08-15",
+  "available": "1962-08-15",
+  "common": null,
+  "source": "Part I 3.1a: opened 15 August 1962.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Gannet Terminal",
+  "aliases": [
+   "container port",
+   "Gannet Terminal opens"
+  ],
+  "exists": "1968-12-31",
+  "available": "1968-12-31",
+  "common": null,
+  "source": "Part I 2.5 (history table: the container port opens on the South Flats, the Gannet Terminal opens in 1968), tagged Anchor model; second tier next to Newark and Elizabeth. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "Anchor model",
+  "tag": "Anchor",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "State Commission of Investigation",
+  "aliases": [
+   "SCI"
+  ],
+  "exists": "1968-12-31",
+  "available": "1969-01-01",
+  "common": null,
+  "source": "Part I 3.1a and Part II 1.1, 4.5: the real New Jersey body, created in 1968, working from 1 January 1969, with subpoena power and public hearings but no power to prosecute.",
+  "mark": "verified",
+  "tag": "Fixed",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "Killbuck Waterfront Commission",
+  "aliases": [
+   "Waterfront Commission"
+  ],
+  "exists": "1954-12-31",
+  "available": "1954-12-31",
+  "common": null,
+  "source": "Part I 2.5 (history table): created by the State in 1954 as a sister to the real bi-state Waterfront Commission of New York Harbor of 1953; registers dock workers. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "Anchor model",
+  "tag": "Anchor",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "Conrail",
+  "aliases": [
+   "rail restructuring"
+  ],
+  "exists": "1976-12-31",
+  "available": "1976-12-31",
+  "common": null,
+  "source": "Part I 13: Conrail forms in 1976 (Penn Central bankruptcy 1970). The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "Anchor",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "Motor Carrier Act and Staggers Rail Act",
+  "aliases": [
+   "trucking deregulation"
+  ],
+  "exists": "1980-12-31",
+  "available": "1980-12-31",
+  "common": null,
+  "source": "Part I 13 and Part IV 2.9: deregulate trucking and rail in 1980. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "Anchor",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "cellular phone",
+  "aliases": [
+   "commercial cellular service",
+   "mobile phone",
+   "cell phone",
+   "handheld cellular phone",
+   "DynaTAC"
+  ],
+  "exists": "1983-12-31",
+  "available": "1983-12-31",
+  "common": null,
+  "source": "Part I 13: commercial cellular service begins late 1983 [memory]. The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "memory",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "telephone monopoly breakup",
+  "aliases": [
+   "Bell breakup",
+   "Bell System breakup"
+  ],
+  "exists": "1984-12-31",
+  "available": "1984-12-31",
+  "common": null,
+  "source": "Part I 13: the telephone monopoly breaks up (1984). The bible gives the year only; the last day of the year is used so that the rule is never applied early.",
+  "mark": "Anchor",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "Pizza Connection",
+  "aliases": [
+   "Pizza Connection arrests",
+   "Pizza Connection trial"
+  ],
+  "exists": "1984-04-30",
+  "available": "1985-09-30",
+  "common": null,
+  "source": "Part III 13.1 and Part V: arrests April 1984; trial September 1985 to March 1987. 'Available' is the start of the trial. The bible gives the month only; the last day of the month is used so that the rule is never applied early.",
+  "mark": "verified",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": false
+ },
+ {
+  "name": "money laundering statute",
+  "aliases": [
+   "Money Laundering Control Act",
+   "money laundering charge",
+   "forfeiture and money-laundering laws"
+  ],
+  "exists": "1984-01-01",
+  "available": "1986-12-31",
+  "common": null,
+  "source": "Part IV 3.7, 7 (Weather) and Part VI 10.1: federal forfeiture, money-laundering and currency-reporting enforcement tightens from 1984 (Part VI: 1984 to 1985; Part IV: 'an act of 1986'). 'Exists' is the start of the tightening, 'available' the year of the act, year only so the last day is used. Both marks are [memory, to verify].",
+  "mark": "memory, to verify",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "crack cocaine",
+  "aliases": [
+   "crack",
+   "rock cocaine",
+   "retail crack market"
+  ],
+  "exists": "1984-01-01",
+  "available": "1985-01-01",
+  "common": null,
+  "source": "Part I 13, Part II 9, Part III 13.1, Part V 9.5, Part VI 10.1: rock cocaine is rare in the Northeast until about 1984; appears 1984 to 1985; the boom is 1985 to 1987. 'Exists' is the start of the appearance window, 'available' the start of the boom. A pressure, not an outcome.",
+  "mark": "memory, to verify",
+  "tag": "Weather",
+  "from_bible": true,
+  "assumption": true
+ },
+ {
+  "name": "car phone",
+  "aliases": [
+   "mobile telephone",
+   "installed car phone"
+  ],
+  "exists": "1946-06-17",
+  "available": "1964-01-01",
+  "common": null,
+  "source": "Not from the bible (it has no technology ladder): Bell System Mobile Telephone Service began in St. Louis in June 1946; the improved IMTS followed in 1964. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "pager",
+  "aliases": [
+   "beeper",
+   "tone pager",
+   "voice pager"
+  ],
+  "exists": "1949-01-01",
+  "available": "1964-01-01",
+  "common": null,
+  "source": "Not from the bible (it has no technology ladder): Al Gross's hospital pager dates from 1949; Motorola's Pageboy I tone pager from 1964. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "numeric display pager",
+  "aliases": [
+   "numeric pager",
+   "display pager",
+   "pager codes"
+  ],
+  "exists": "1980-01-01",
+  "available": "1982-01-01",
+  "common": "1988-01-01",
+  "source": "Not from the bible (it has no technology ladder): approximate dates. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "fax machine",
+  "aliases": [
+   "fax",
+   "facsimile",
+   "telecopier"
+  ],
+  "exists": "1964-01-01",
+  "available": "1966-01-01",
+  "common": "1986-01-01",
+  "source": "Not from the bible (it has no technology ladder): Xerox Long Distance Xerography (1964), Magnafax Telecopier (1966); wide adoption in the mid 1980s. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "videocassette recorder",
+  "aliases": [
+   "VCR",
+   "VHS",
+   "Betamax",
+   "video recorder"
+  ],
+  "exists": "1971-01-01",
+  "available": "1975-11-01",
+  "common": "1985-01-01",
+  "source": "Not from the bible (it has no technology ladder): Sony U-matic 1971, Betamax in the US November 1975, VHS 1977; common in the mid 1980s (estimate). Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "video rental store",
+  "aliases": [
+   "video rental",
+   "videotape rental",
+   "VHS duplication",
+   "bootleg videotapes"
+  ],
+  "exists": "1977-01-01",
+  "available": "1978-01-01",
+  "common": "1984-01-01",
+  "source": "Not from the bible (it has no technology ladder): the first rental shops opened in 1977 to 1978 (estimate). Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "answering machine",
+  "aliases": [
+   "telephone answering machine"
+  ],
+  "exists": "1949-01-01",
+  "available": "1971-01-01",
+  "common": "1985-01-01",
+  "source": "Not from the bible (it has no technology ladder): sold from the late 1940s; the consumer Phone-Mate in 1971; 'common' is an estimate. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "answering service",
+  "aliases": [
+   "telephone answering service"
+  ],
+  "exists": "1930-01-01",
+  "available": "1930-01-01",
+  "common": "1950-01-01",
+  "source": "Not from the bible (it has no technology ladder): a human switchboard service; the dates are loose estimates. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "portable tape recorder",
+  "aliases": [
+   "cassette recorder",
+   "tape recorder"
+  ],
+  "exists": "1963-08-30",
+  "available": "1965-01-01",
+  "common": "1975-01-01",
+  "source": "Not from the bible (it has no technology ladder): the Philips compact cassette appeared in August 1963; 'available' and 'common' are estimates. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "body recorder",
+  "aliases": [
+   "Nagra",
+   "wire",
+   "concealed recorder"
+  ],
+  "exists": "1951-01-01",
+  "available": "1965-01-01",
+  "common": null,
+  "source": "Not from the bible (it has no technology ladder): Nagra recorders date from 1951; agencies used them on informants from the 1960s. The legal side (informant wire without a warrant, 5 April 1971) is in the 'informant body wire' entry. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "closed-circuit camera",
+  "aliases": [
+   "CCTV",
+   "security camera"
+  ],
+  "exists": "1949-01-01",
+  "available": "1960-01-01",
+  "common": null,
+  "source": "Not from the bible (it has no technology ladder): closed-circuit television exists at specific sites; no citywide network is modelled before 1990. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "personal computer",
+  "aliases": [
+   "microcomputer",
+   "home computer"
+  ],
+  "exists": "1975-01-01",
+  "available": "1977-06-05",
+  "common": "1990-01-01",
+  "source": "Not from the bible (it has no technology ladder): the Altair 8800 was announced in January 1975, the Apple II went on sale in June 1977, the IBM PC in August 1981; 'common' is an estimate. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "office photocopier",
+  "aliases": [
+   "photocopier",
+   "Xerox"
+  ],
+  "exists": "1959-09-16",
+  "available": "1960-01-01",
+  "common": "1972-01-01",
+  "source": "Not from the bible (it has no technology ladder): the Xerox 914 was shown in September 1959; 'common' is an estimate. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "automatic teller machine",
+  "aliases": [
+   "ATM",
+   "cash machine"
+  ],
+  "exists": "1967-06-27",
+  "available": "1969-09-02",
+  "common": "1980-01-01",
+  "source": "Not from the bible (it has no technology ladder): first cash machine in London in June 1967, first US machines in New York in September 1969; 'common' is an estimate. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "bank credit card",
+  "aliases": [
+   "credit card",
+   "BankAmericard",
+   "Master Charge"
+  ],
+  "exists": "1958-09-01",
+  "available": "1966-01-01",
+  "common": "1975-01-01",
+  "source": "Not from the bible (it has no technology ladder): BankAmericard launched September 1958, Master Charge association 1966; 'common' is an estimate. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ },
+ {
+  "name": "compact disc",
+  "aliases": [
+   "CD",
+   "compact disc player"
+  ],
+  "exists": "1982-10-01",
+  "available": "1983-03-02",
+  "common": "1990-01-01",
+  "source": "Not from the bible (it has no technology ladder): players on sale in Japan October 1982 and in the US March 1983; 'common' is an estimate. Package assumption, real-world dates.",
+  "mark": "not from the bible",
+  "tag": null,
+  "from_bible": false,
+  "assumption": true
+ }
+]

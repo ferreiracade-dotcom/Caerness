@@ -24,7 +24,7 @@ def run():
 
     pkg = load_package("saintjude")
     groups = pkg.name_groups
-    assert len(groups) == 7
+    assert len(groups) == 11  # Part I 14.1 names eleven communities
     seen = {k: 0 for k in groups}
     n = 4000
     for uid in range(n):

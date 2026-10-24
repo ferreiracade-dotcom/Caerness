@@ -1,69 +1,450 @@
 {
-  "about": "Each taboo is an act that the people who care will react to, not one that cannot happen. Reactions run from least to most severe and depend on who learns of it, how sure they are, how much they care and what they can do. Source: bible section 3.2 and design section 7; the lists are ranges for judging plausibility, not a menu to choose from.",
+  "about": "Each taboo is an act that the people who care will react to, not one that cannot happen: a taboo is a price, not a wall (Part III 9; Part V 10.4). The reactions are ranges for judging plausibility, not a menu to choose from, and each reaction is individual (Tendency): a boss, a capo and a man who learns of the act each decide for himself. The one exception is in fixed_rules: women are never made, and that carries no price.",
+  "source": "Part III 9 (15 rows, Fixed) and Part V 10.4 (8 rows, Fixed); the reaction ranges are Tendency. Wording of the cells follows the bible; a row's cell that was a range 'from X to Y' is split into its ends and steps.",
   "taboos": {
-    "killing_a_cop": {
-      "name": "Killing a cop",
-      "who_cares": ["the precinct and the whole police department", "the FBI and federal prosecutors", "the press", "the Governor and City Hall", "every family whose business a manhunt would disrupt"],
-      "typical_reactions": ["raids and pressure on every social club and bar the dead officer's colleagues know", "the families disown or hand over the killer to end the heat", "a manhunt that does not stop for months", "federal cases built around the killing and the crew behind it"],
-      "scales_with": ["the officer's rank and reputation", "witnesses", "whether the killer is known", "how much heat the families already carry"],
-      "can_be_permitted_by": ["a boss with the consent of the other families, which is rare and still costs the family dearly"]
+    "killing_a_police_officer": {
+      "kind": "taboo_price",
+      "act": "Killing a police officer",
+      "who_cares": [
+        "Every cop",
+        "the Commissioner",
+        "the FBI",
+        "the Mayor",
+        "the bosses, who want no heat"
+      ],
+      "typical_reactions": [
+        "a sudden law-enforcement storm, with raids, arrests, and the Pad suspended",
+        "the killer delivered to the police or killed by his own Family"
+      ],
+      "can_be_excused_by": [
+        "the boss, if the officer was a threat",
+        "never the police"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     },
     "killing_a_reporter": {
-      "name": "Killing a reporter",
-      "who_cares": ["the paper and its owners", "other papers and broadcasters", "politicians and the Governor", "federal authorities", "the families, who fear what a martyred reporter does to public tolerance"],
-      "typical_reactions": ["national attention and a crackdown", "pressure from other bosses on whoever allowed it", "the killer given up or disowned", "a story told by the paper after the death that sinks the people involved"],
-      "scales_with": ["how well known the reporter was", "what they were working on", "witnesses", "the paper's willingness to fight"],
-      "can_be_permitted_by": ["a boss, knowing the usual substitutes (a smashed camera, a lost Sunday edition) exist because a killing is so expensive"]
+      "kind": "taboo_price",
+      "act": "Killing a reporter",
+      "who_cares": [
+        "The press",
+        "the public",
+        "the Mayor",
+        "the Governor",
+        "the federal government"
+      ],
+      "typical_reactions": [
+        "a front-page outcry and a task force",
+        "quiet, if the victim was minor and the story is buried"
+      ],
+      "can_be_excused_by": [
+        "the boss, rarely"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     },
-    "killing_or_striking_a_made_man_without_sanction": {
-      "name": "Killing or striking a made man without sanction",
-      "who_cares": ["the man's capo, crew and sponsor", "his boss", "the other families"],
-      "typical_reactions": ["a demand for explanation", "a sit-down", "a retaliatory killing", "a war between crews or families", "quiet acceptance, or even relief, if a boss wanted it"],
-      "scales_with": ["the victim's weight and kin", "who can prove what", "how the boss feels about the victim", "the balance between the families"],
-      "can_be_permitted_by": ["the victim's boss", "the commission, for a killing across families"]
+    "killing_a_made_man_without_sanction": {
+      "kind": "taboo_price",
+      "act": "Killing a made man without sanction",
+      "who_cares": [
+        "His capo",
+        "his Family",
+        "the boss"
+      ],
+      "typical_reactions": [
+        "a death sentence on the killer",
+        "a payment and a quiet"
+      ],
+      "can_be_excused_by": [
+        "the boss of the dead man's Family"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "striking_a_made_man": {
+      "kind": "taboo_price",
+      "act": "Striking a made man",
+      "who_cares": [
+        "The same (his capo, his Family, the boss)"
+      ],
+      "typical_reactions": [
+        "a beating in return",
+        "a sit-down and an apology"
+      ],
+      "can_be_excused_by": [
+        "the boss",
+        "the capo"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "killing_a_made_man_of_another_family": {
+      "kind": "taboo_price",
+      "act": "Killing a made man of another family",
+      "who_cares": [
+        "Both bosses",
+        "the Iron Balance"
+      ],
+      "typical_reactions": [
+        "war",
+        "a sit-down",
+        "a payment",
+        "the killer's surrender"
+      ],
+      "can_be_excused_by": [
+        "both bosses"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     },
     "holding_out": {
-      "name": "Holding out",
-      "who_cares": ["the capo or boss being shorted", "anyone who learns of it", "partners and crew who also did not get a share"],
-      "typical_reactions": ["a beating and a debt (a tune-up)", "a demotion or the loss of a racket", "exile or a ruined name", "death, for a large or repeated theft"],
-      "scales_with": ["the amount hidden", "how sure they are", "how much the man is worth to the crew", "whether he confesses before he is found out"],
-      "can_be_permitted_by": ["the capo or boss, who may forgive or let a man repay"]
+      "kind": "taboo_price",
+      "act": "Holding out (hiding a score, shorting the envelope)",
+      "who_cares": [
+        "The capo",
+        "the boss"
+      ],
+      "typical_reactions": [
+        "a beating",
+        "a fine",
+        "a demotion",
+        "shelving",
+        "death if the sum is large"
+      ],
+      "can_be_excused_by": [
+        "the capo",
+        "the boss"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     },
     "informing": {
-      "name": "Informing",
-      "who_cares": ["everyone who might be named", "law enforcement, who protect the informant", "the families, who hunt him"],
-      "typical_reactions": ["suspicion that ends a man's standing", "isolation, then a killing on bad information", "a hunt for a confirmed informant and sometimes his relatives", "protection in the Witness Security program at a price"],
-      "scales_with": ["how sure anyone is", "how much was given away", "how well protected he is", "whether kin are within reach"],
-      "can_be_permitted_by": ["a boss who orders a man to feed the Feds chosen information on purpose"]
+      "kind": "taboo_price",
+      "act": "Informing",
+      "who_cares": [
+        "Every man in the Life",
+        "the Family"
+      ],
+      "typical_reactions": [
+        "death",
+        "a hunt across the country",
+        "a curse on the family"
+      ],
+      "can_be_excused_by": [
+        "none; a boss may let an informant live out of calculation, but only for his own reasons"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     },
-    "narcotics_against_the_family_ban": {
-      "name": "Dealing narcotics where the family forbids it",
-      "who_cares": ["a boss and capos who forbid it for honor, heat or belief", "the young zealots who believe in the ban", "police and the Feds, if the trade draws attention"],
-      "typical_reactions": ["ignored", "taxed through a front man", "demoted, fined or cut off", "killed, depending on whom he deals for and who is looking"],
-      "scales_with": ["the amount involved", "whom he deals for", "how openly it is done", "what the boss really believes"],
-      "can_be_permitted_by": ["a boss, who may officially forbid it and still take a cut"]
+    "dealing_narcotics_where_the_family_forbids_it": {
+      "kind": "taboo_price",
+      "act": "Dealing narcotics where the Family forbids it",
+      "who_cares": [
+        "The boss",
+        "the older capos"
+      ],
+      "typical_reactions": [
+        "warning",
+        "loss of status",
+        "shelving",
+        "death"
+      ],
+      "can_be_excused_by": [
+        "the boss, who may be in the trade himself"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     },
-    "a_made_mans_wife": {
-      "name": "A made man's wife",
-      "who_cares": ["the husband", "his brothers-in-law and sponsor", "the family as a whole"],
-      "typical_reactions": ["a beating", "forced exile or a sit-down", "an unsanctioned killing", "a feud carried into another family's house if the marriage was between families"],
-      "scales_with": ["whether it was an insult or an affair", "how many people know", "how the husband's crew regards him", "the lover's own protection"],
-      "can_be_permitted_by": ["the husband, by forgiving or hushing it", "his boss, who may decide it is not worth a war"]
+    "a_made_mans_wife_or_daughter": {
+      "kind": "taboo_price",
+      "act": "A made man's wife or daughter (adultery, seduction, violence)",
+      "who_cares": [
+        "The man",
+        "his Family"
+      ],
+      "typical_reactions": [
+        "a killing",
+        "a beating",
+        "a quiet divorce"
+      ],
+      "can_be_excused_by": [
+        "the offended man"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     },
     "violence_in_the_oakridge_sanctuary": {
-      "name": "Violence in the Oakridge sanctuary",
-      "who_cares": ["all four families", "the residents of Oakridge", "the suburban police", "judges and politicians who live there"],
-      "typical_reactions": ["retaliation from every family", "a surge of police and press attention", "hostile witnesses from wealthy, well-connected people", "the sanctuary understanding broken for everyone"],
-      "scales_with": ["who is hurt", "who sees it", "whether it was planned", "the state of the peace between the families"],
-      "can_be_permitted_by": ["all four bosses together, or the commission, for a particular case"]
+      "kind": "taboo_price",
+      "act": "Violence in the Oakridge sanctuary",
+      "who_cares": [
+        "All four bosses"
+      ],
+      "typical_reactions": [
+        "harsh and immediate: the offender is delivered to the injured party"
+      ],
+      "can_be_excused_by": [
+        "the bosses, together"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     },
-    "disrespecting_a_boss_in_public": {
-      "name": "Disrespecting a boss in public",
-      "who_cares": ["the boss", "his men", "everyone watching"],
-      "typical_reactions": ["an apology and a payment", "a beating", "a public humiliation in return", "a sanctioned killing"],
-      "scales_with": ["the boss's temperament", "his current strength or weakness", "who witnessed it", "whether the insult was deliberate"],
-      "can_be_permitted_by": ["the boss himself, who may swallow it and so decide something about himself"]
+    "violence_in_a_church_or_at_a_wake": {
+      "kind": "taboo_price",
+      "act": "Violence in a church or at a wake",
+      "who_cares": [
+        "All",
+        "the Church"
+      ],
+      "typical_reactions": [
+        "disgrace",
+        "a ban from the Family",
+        "a death"
+      ],
+      "can_be_excused_by": [
+        "the boss"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "publicly_disrespecting_a_boss": {
+      "kind": "taboo_price",
+      "act": "Publicly disrespecting a boss",
+      "who_cares": [
+        "The boss",
+        "his men",
+        "the rival family"
+      ],
+      "typical_reactions": [
+        "a beating",
+        "a payment",
+        "a public apology",
+        "death if the insult is deep and the boss is proud"
+      ],
+      "can_be_excused_by": [
+        "the boss"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "touching_a_civilian_woman_or_child": {
+      "kind": "taboo_price",
+      "act": "Touching a civilian woman or child",
+      "who_cares": [
+        "The Family, as a matter of honor"
+      ],
+      "typical_reactions": [
+        "contempt",
+        "expulsion",
+        "death; but the Life has men who do it"
+      ],
+      "can_be_excused_by": [
+        "the boss"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "betraying_a_compare": {
+      "kind": "taboo_price",
+      "act": "Betraying a compare",
+      "who_cares": [
+        "The sponsor",
+        "the sponsor's family"
+      ],
+      "typical_reactions": [
+        "the worst vengeance the Family knows"
+      ],
+      "can_be_excused_by": [
+        "none"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "lying_to_a_boss": {
+      "kind": "taboo_price",
+      "act": "Lying to a boss",
+      "who_cares": [
+        "The boss"
+      ],
+      "typical_reactions": [
+        "depends on the lie"
+      ],
+      "can_be_excused_by": [
+        "the boss"
+      ],
+      "source": "Part III 9",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "made_man_kills_outside_group_man_without_leave": {
+      "kind": "taboo_price",
+      "act": "A made man kills an outside-group man without leave",
+      "who_cares": [
+        "The family's boss",
+        "the group's senior man"
+      ],
+      "typical_reactions": [
+        "a payment and an apology",
+        "a sit-down",
+        "a war"
+      ],
+      "can_be_excused_by": [
+        "both seniors"
+      ],
+      "source": "Part V 10.4",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "outside_group_man_kills_a_made_man": {
+      "kind": "taboo_price",
+      "act": "An outside-group man kills a made man",
+      "who_cares": [
+        "The made man's family and capo",
+        "the boss"
+      ],
+      "typical_reactions": [
+        "a hunt for the killer",
+        "delivery of the killer",
+        "a payment",
+        "a war"
+      ],
+      "can_be_excused_by": [
+        "the made man's boss"
+      ],
+      "source": "Part V 10.4",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "made_man_takes_cut_from_outside_game_on_another_familys_ground": {
+      "kind": "taboo_price",
+      "act": "A made man takes a cut from an outside group's game on another family's ground",
+      "who_cares": [
+        "The ground's family"
+      ],
+      "typical_reactions": [
+        "a fine",
+        "a sit-down",
+        "a death"
+      ],
+      "can_be_excused_by": [
+        "the ground's boss"
+      ],
+      "source": "Part V 10.4",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "outside_group_deals_a_familys_drug_without_leave": {
+      "kind": "taboo_price",
+      "act": "An outside group deals in a family's drug without the family's leave",
+      "who_cares": [
+        "The family's boss"
+      ],
+      "typical_reactions": [
+        "a warning",
+        "a beating",
+        "a fee",
+        "a war"
+      ],
+      "can_be_excused_by": [
+        "the family's boss"
+      ],
+      "source": "Part V 10.4",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "outside_group_man_brings_gunfire_to_oakridge": {
+      "kind": "taboo_price",
+      "act": "An outside group's man brings gunfire to Oakridge",
+      "who_cares": [
+        "All four bosses"
+      ],
+      "typical_reactions": [
+        "harsh and immediate, the offender is delivered"
+      ],
+      "can_be_excused_by": [
+        "the bosses together"
+      ],
+      "source": "Part V 10.4",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "outside_group_man_informs_on_a_family": {
+      "kind": "taboo_price",
+      "act": "An outside-group man informs on a family",
+      "who_cares": [
+        "The family",
+        "the group"
+      ],
+      "typical_reactions": [
+        "death for him",
+        "a hunt across the country"
+      ],
+      "can_be_excused_by": [
+        "none"
+      ],
+      "source": "Part V 10.4",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "family_informs_on_an_outside_group_to_the_police": {
+      "kind": "taboo_price",
+      "act": "A family informs on an outside group to the police",
+      "who_cares": [
+        "The group"
+      ],
+      "typical_reactions": [
+        "a war",
+        "a long cold peace"
+      ],
+      "can_be_excused_by": [
+        "none"
+      ],
+      "source": "Part V 10.4",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
+    },
+    "made_man_disrespects_a_priest_pastor_or_association_elder": {
+      "kind": "taboo_price",
+      "act": "A made man disrespects a priest, a pastor or an association elder in front of his people",
+      "who_cares": [
+        "The group",
+        "often the community"
+      ],
+      "typical_reactions": [
+        "an apology",
+        "a payment",
+        "the offender's disgrace"
+      ],
+      "can_be_excused_by": [
+        "the community's elder"
+      ],
+      "source": "Part V 10.4",
+      "tag": "Fixed",
+      "reactions_tag": "Tendency"
     }
   },
-  "drift": "A boss can quietly permit what his family officially forbids, and a taboo fades when the people who enforced it are dead or discredited. Two crews can disagree about whether an act was a violation at all. Consequences flow through the knowledge and rumour systems: who learns what, and when."
+  "fixed_rules": [
+    {
+      "kind": "fixed_rule",
+      "key": "women_are_never_made",
+      "rule": "Women are never made.",
+      "carries_no_price": true,
+      "note": "Not a taboo and not an act a player can do and pay for: no price and no event breaks it (Part III 9: 'that rule carries no price'; Part I 12.2). Women reach power by other routes (Part I 12.4).",
+      "source": "Part III 9; Part I 12.2; Part III 11",
+      "tag": "Fixed"
+    }
+  ]
 }

@@ -1,0 +1,4393 @@
+{
+ "about": "Design and derived figures the engine draws once per run (kind draw), derives (kind derived, formula over other figure defaults) or holds (kind fixed), from Saint Jude Setting Bible Part VI and the Parts it cites. Dollars are 1975 dollars; *_m keys are USD millions. pools is the Part VI 9.3A allocation table (family shares sum to 100). Checked by tools/check_saintjude_pools.py.",
+ "figures": {
+  "population_city_1975_m": {
+   "default": 1.1,
+   "range": null,
+   "unit": "million",
+   "tag": "Fixed",
+   "source": "Part I 4.1",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "population_metro_m": {
+   "default": 2.4,
+   "range": null,
+   "unit": "million",
+   "tag": "Fixed",
+   "source": "Part I 4.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "the metropolitan total is Open"
+  },
+  "population_decline_pct": {
+   "default": 0.8,
+   "range": [
+    0.4,
+    1.5
+   ],
+   "unit": "percent per year",
+   "tag": "Design",
+   "source": "Part I 4.1",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "positive number is a loss; drawn once and held unless the run moves it"
+  },
+  "population_rate_max_step_pts": {
+   "default": 0.3333,
+   "range": null,
+   "unit": "points per year",
+   "tag": "Tendency",
+   "source": "Part I 4.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "rule: the rate moves toward a new value by at most a third of a point a year; a change needs a dated cause"
+  },
+  "population_growth_cap_pct_before_1990": {
+   "default": 0.5,
+   "range": null,
+   "unit": "percent per year",
+   "tag": "Tendency",
+   "source": "Part I 4.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "rule: growth capped at 0.5 percent a year before 1990"
+  },
+  "population_change_requires_dated_cause": {
+   "default": true,
+   "range": null,
+   "unit": "bool",
+   "tag": "Tendency",
+   "source": "Part I 4.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "slow, stop or reverse the fall only for a cause the run can date"
+  },
+  "population_1980_m": {
+   "default": 1.06,
+   "range": null,
+   "unit": "million",
+   "tag": "Design",
+   "source": "Part I 4.1; Index 3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "population_city_1975_m*(1-population_decline_pct/100)**5",
+   "tol": 0.01
+  },
+  "population_1985_m": {
+   "default": 1.02,
+   "range": null,
+   "unit": "million",
+   "tag": "Design",
+   "source": "Part I 4.1; Index 3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "population_city_1975_m*(1-population_decline_pct/100)**10",
+   "tol": 0.01
+  },
+  "population_1990_m": {
+   "default": 0.98,
+   "range": null,
+   "unit": "million",
+   "tag": "Design",
+   "source": "Part I 4.1; Index 3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "population_city_1975_m*(1-population_decline_pct/100)**15",
+   "tol": 0.01
+  },
+  "sjpd_sworn": {
+   "default": 4800,
+   "range": [
+    4200,
+    5400
+   ],
+   "unit": "officers",
+   "tag": "Design",
+   "source": "Part II 2.1",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "sjpd_floor_if_layoffs_1977": {
+   "default": 4300,
+   "range": null,
+   "unit": "officers",
+   "tag": "Weather",
+   "source": "Part II 2.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "worst version of the 1975-1977 crisis"
+  },
+  "sjpd_avg_pay": {
+   "default": 15200,
+   "range": null,
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 7.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "average across Part II 2.2's ranks"
+  },
+  "sjpd_wage_bill_m": {
+   "default": 73,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "sjpd_sworn*sjpd_avg_pay/1e6",
+   "tol": 0.2,
+   "note": "about $73M"
+  },
+  "made_men_sabatini": {
+   "default": 55,
+   "range": [
+    50,
+    60
+   ],
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part III 3.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "default not stated in Part III 3.2, midpoint used (Part VI 9 intro also uses the midpoint)"
+  },
+  "made_men_pellegrino": {
+   "default": 45,
+   "range": [
+    40,
+    50
+   ],
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part III 3.2",
+   "kind": "draw",
+   "mark": "Design",
+   "extended_range": [
+    51,
+    55
+   ],
+   "extended_requires": "a dated cause (Part III 3.2; Part VI 9.9 item 2)",
+   "ceiling": 55
+  },
+  "made_men_ferrante": {
+   "default": 45,
+   "range": [
+    40,
+    50
+   ],
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part III 3.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "default not stated in Part III 3.2, midpoint used (Part VI 9 intro also uses the midpoint)"
+  },
+  "made_men_vannucci": {
+   "default": 35,
+   "range": [
+    30,
+    40
+   ],
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part III 3.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "default not stated in Part III 3.2, midpoint used (Part VI 9 intro also uses the midpoint)"
+  },
+  "made_men_total": {
+   "default": 180,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part VI 9 intro; Index 3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "made_men_sabatini+made_men_pellegrino+made_men_ferrante+made_men_vannucci",
+   "tol": 0.5,
+   "note": "ranges sum 160 to 200, about 180 to 190"
+  },
+  "associates_per_man_sabatini": {
+   "default": 6.7,
+   "range": [
+    5,
+    8
+   ],
+   "unit": "associates",
+   "tag": "Design",
+   "source": "Part VI 9.2 default; Part III 3.2 range",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "associates_per_man_pellegrino": {
+   "default": 6.7,
+   "range": [
+    5,
+    8
+   ],
+   "unit": "associates",
+   "tag": "Design",
+   "source": "Part VI 9.2 default; Part III 3.2 range",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "associates_per_man_ferrante": {
+   "default": 7.0,
+   "range": [
+    6,
+    8
+   ],
+   "unit": "associates",
+   "tag": "Design",
+   "source": "Part VI 9.2 default; Part III 3.2 range",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "associates_per_man_vannucci": {
+   "default": 6.2,
+   "range": [
+    5,
+    7
+   ],
+   "unit": "associates",
+   "tag": "Design",
+   "source": "Part VI 9.2 default; Part III 3.2 range",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "associates_total": {
+   "default": 1202,
+   "range": null,
+   "unit": "associates",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "made_men_sabatini*associates_per_man_sabatini+made_men_pellegrino*associates_per_man_pellegrino+made_men_ferrante*associates_per_man_ferrante+made_men_vannucci*associates_per_man_vannucci",
+   "tol": 1.0,
+   "note": "1,202 at 180 men, inside Part III 3.2's 1,200 to 1,500"
+  },
+  "capo_one_per_men": {
+   "default": 8,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "capo_minimum_per_family": {
+   "default": 2,
+   "range": null,
+   "unit": "capos",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "executives_per_family": {
+   "default": 3,
+   "range": null,
+   "unit": "executives",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "prison_widow_share_of_men_pct": {
+   "default": 8,
+   "range": null,
+   "unit": "percent of men",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "prison_widow_support": {
+   "default": 7800,
+   "range": null,
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "ceremonies_funerals_per_man": {
+   "default": 600,
+   "range": null,
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 9.2, 7.7",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "payday": {
+   "default": "Friday",
+   "range": null,
+   "unit": "weekday",
+   "tag": "Fixed",
+   "source": "Part III 3.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "living_soldier": {
+   "default": 30000,
+   "range": [
+    20000,
+    45000
+   ],
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "range is the lean to comfortable standard; default is the default standard",
+   "levels": {
+    "lean": 20000,
+    "default": 30000,
+    "comfortable": 45000
+   }
+  },
+  "living_capo": {
+   "default": 90000,
+   "range": [
+    60000,
+    140000
+   ],
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "range is the lean to comfortable standard; default is the default standard",
+   "levels": {
+    "lean": 60000,
+    "default": 90000,
+    "comfortable": 140000
+   }
+  },
+  "living_executive": {
+   "default": 300000,
+   "range": [
+    200000,
+    500000
+   ],
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "range is the lean to comfortable standard; default is the default standard",
+   "levels": {
+    "lean": 200000,
+    "default": 300000,
+    "comfortable": 500000
+   }
+  },
+  "living_associate": {
+   "default": 7500,
+   "range": [
+    5000,
+    10000
+   ],
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "range is the lean to comfortable standard; default is the default standard",
+   "levels": {
+    "lean": 5000,
+    "default": 7500,
+    "comfortable": 10000
+   }
+  },
+  "living_lawyers_family": {
+   "default": 250000,
+   "range": [
+    150000,
+    400000
+   ],
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 9.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "range is the lean to comfortable standard; default is the default standard",
+   "levels": {
+    "lean": 150000,
+    "default": 250000,
+    "comfortable": 400000
+   }
+  },
+  "ladder_associate_to_soldier": {
+   "default": 0.225,
+   "range": [
+    0.2,
+    0.25
+   ],
+   "unit": "share of net",
+   "tag": "Tendency",
+   "source": "Part III 3.3; Part VI 9.6",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "ladder_soldier_to_capo": {
+   "default": 0.183,
+   "range": [
+    0.16666666666666666,
+    0.2
+   ],
+   "unit": "share of net",
+   "tag": "Tendency",
+   "source": "Part III 3.3; Part VI 9.6",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "ladder_capo_to_boss": {
+   "default": 0.117,
+   "range": [
+    0.1,
+    0.14285714285714285
+   ],
+   "unit": "share of regime net",
+   "tag": "Tendency",
+   "source": "Part III 3.3; Part VI 9.6",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "Part VI 9.6 prints midpoint 0.117; the arithmetic midpoint of 1/10 and 1/7 is 0.121"
+  },
+  "ladder_assoc_to_soldiers_sabatini_m": {
+   "default": 0.8,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 9.6",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "made_men_sabatini*associates_per_man_sabatini*(living_associate/(1-ladder_associate_to_soldier))*ladder_associate_to_soldier/1e6",
+   "tol": 0.02,
+   "note": "associates earn spend/(1-pay-up); about 0.80 for Sabatini at 55 men"
+  },
+  "numbers_handle_m": {
+   "default": 25.0,
+   "range": [
+    15,
+    40
+   ],
+   "unit": "USD million/year",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "numbers_payout_odds": {
+   "default": 600,
+   "range": null,
+   "unit": "to 1",
+   "tag": "Fixed",
+   "source": "Part III 7.2; Part VI 2.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "numbers_true_odds": {
+   "default": 1000,
+   "range": null,
+   "unit": "1 in",
+   "tag": "Fixed",
+   "source": "Part III 7.2; Part VI 2.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "numbers_hold": {
+   "default": 0.4,
+   "range": null,
+   "unit": "per dollar of handle",
+   "tag": "Fixed",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "1-numbers_payout_odds/numbers_true_odds",
+   "tol": 0.0005
+  },
+  "numbers_runner_commission": {
+   "default": 0.1,
+   "range": null,
+   "unit": "per dollar",
+   "tag": "Design",
+   "source": "Part III 7.2; Part VI 2.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "numbers_controller_cut": {
+   "default": 0.075,
+   "range": [
+    0.05,
+    0.1
+   ],
+   "unit": "per dollar",
+   "tag": "Design",
+   "source": "Part III 7.2; Part VI 2.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "numbers_left_before_costs": {
+   "default": 0.225,
+   "range": null,
+   "unit": "per dollar",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_hold-numbers_runner_commission-numbers_controller_cut",
+   "tol": 0.0005
+  },
+  "numbers_pad_baddebt": {
+   "default": 0.145,
+   "range": [
+    0.07,
+    0.195
+   ],
+   "unit": "per dollar",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "pad, bad debt, cheating, variance"
+  },
+  "numbers_net_margin": {
+   "default": 0.08,
+   "range": [
+    0.03,
+    0.15
+   ],
+   "unit": "per dollar of handle",
+   "tag": "Design",
+   "source": "Part VI 2.1, 2.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "numbers_net_margin_chain": {
+   "default": 0.08,
+   "range": null,
+   "unit": "per dollar",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_left_before_costs-numbers_pad_baddebt",
+   "tol": 0.0005,
+   "note": "chain check; note 0.225-0.07 = 0.155 against the printed top of 0.15"
+  },
+  "numbers_share_eastside_pct": {
+   "default": 64,
+   "range": null,
+   "unit": "percent of handle",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "numbers_share_puerto_rican_pct": {
+   "default": 12,
+   "range": null,
+   "unit": "percent of handle",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "numbers_share_irish_pct": {
+   "default": 16,
+   "range": null,
+   "unit": "percent of handle",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "numbers_share_chinatown_pct": {
+   "default": 8,
+   "range": null,
+   "unit": "percent of handle",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "numbers_handle_eastside_m": {
+   "default": 16.0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_m*numbers_share_eastside_pct/100",
+   "tol": 0.01
+  },
+  "numbers_handle_puerto_rican_m": {
+   "default": 3.0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_m*numbers_share_puerto_rican_pct/100",
+   "tol": 0.01
+  },
+  "numbers_handle_irish_m": {
+   "default": 4.0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_m*numbers_share_irish_pct/100",
+   "tol": 0.01
+  },
+  "numbers_handle_chinatown_m": {
+   "default": 2.0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_m*numbers_share_chinatown_pct/100",
+   "tol": 0.01
+  },
+  "numbers_bank_net_m": {
+   "default": 2.0,
+   "range": [
+    0.75,
+    3.75
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_m*numbers_net_margin",
+   "tol": 0.005,
+   "note": "bank net = handle x margin"
+  },
+  "italian_numbers_share_pct": {
+   "default": 35,
+   "range": [
+    20,
+    50
+   ],
+   "unit": "percent of Eastside net",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "taken on the Eastside banks only"
+  },
+  "numbers_italian_net_m": {
+   "default": 0.45,
+   "range": [
+    0.1,
+    1.2
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_eastside_m*numbers_net_margin*italian_numbers_share_pct/100",
+   "tol": 0.005,
+   "note": "numbers_it; printed range 0.1-1.2 does not follow from the 20-50 percent range"
+  },
+  "numbers_combine_net_m": {
+   "default": 0.83,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2, 8.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_eastside_m*numbers_net_margin-numbers_italian_net_m",
+   "tol": 0.01,
+   "note": "Part VI 8.2 prints 0.8"
+  },
+  "numbers_pr_net_m": {
+   "default": 0.24,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2, 8.7",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_puerto_rican_m*numbers_net_margin",
+   "tol": 0.005
+  },
+  "numbers_irish_net_m": {
+   "default": 0.32,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2, 8.1",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_irish_m*numbers_net_margin",
+   "tol": 0.005
+  },
+  "numbers_chinatown_net_m": {
+   "default": 0.16,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2, 8.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_handle_chinatown_m*numbers_net_margin",
+   "tol": 0.005
+  },
+  "numbers_claims_total_m": {
+   "default": 2.0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_italian_net_m+numbers_combine_net_m+numbers_pr_net_m+numbers_irish_net_m+numbers_chinatown_net_m",
+   "tol": 0.01,
+   "note": "claims on the banks' net: Italian 0.45, combine ~0.83, PR 0.24, Irish 0.32, Chinatown 0.16"
+  },
+  "pick3_start": {
+   "default": "1975-05-22",
+   "range": null,
+   "unit": "date",
+   "tag": "Anchor",
+   "source": "Part I 9.8; Part VI 2.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "pick3_state_rake": {
+   "default": 0.5,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "source": "Part III 7.2; Part VI 2.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "pick3_variable_net_per_dollar": {
+   "default": 0.1375,
+   "range": null,
+   "unit": "per dollar of handle",
+   "tag": "Design",
+   "source": "Part VI 2.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_left_before_costs-0.03-0.0575",
+   "tol": 0.0005
+  },
+  "pick3_fixed_cost_m": {
+   "default": 1.44,
+   "range": [
+    0,
+    2.875
+   ],
+   "unit": "USD million/year",
+   "tag": "Design",
+   "source": "Part VI 2.3",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "half of the remaining 0.115 per dollar at the default handle; range none to all of it"
+  },
+  "pick3_fixed_cost_chain_m": {
+   "default": 1.44,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "0.5*(numbers_pad_baddebt-0.03)*numbers_handle_m",
+   "tol": 0.01
+  },
+  "pick3_net_loss_1980_pct": {
+   "default": 24,
+   "range": [
+    14,
+    34
+   ],
+   "unit": "percent of 1974 net",
+   "tag": "Design",
+   "source": "Part VI 2.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "book_handle_m": {
+   "default": 80,
+   "range": [
+    50,
+    120
+   ],
+   "unit": "USD million/year",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "book_margin_pct": {
+   "default": 2.0,
+   "range": [
+    0.9,
+    3.5
+   ],
+   "unit": "percent of handle",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "book_net_m": {
+   "default": 1.6,
+   "range": [
+    0.45,
+    4.2
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "book_handle_m*book_margin_pct/100",
+   "tol": 0.01
+  },
+  "book_italian_share_pct": {
+   "default": 55,
+   "range": [
+    35,
+    70
+   ],
+   "unit": "percent of net",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "book_italian_net_m": {
+   "default": 0.88,
+   "range": [
+    0.16,
+    2.94
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "book_net_m*book_italian_share_pct/100",
+   "tol": 0.01
+  },
+  "book_combine_share_pct": {
+   "default": 20,
+   "range": null,
+   "unit": "percent of net",
+   "tag": "Design",
+   "source": "Part VI 8.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "book_other_share_pct": {
+   "default": 25,
+   "range": null,
+   "unit": "percent of net",
+   "tag": "Design",
+   "source": "Part VI 8.2",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Jewish books, Irish pubs, Sixth Ward"
+  },
+  "layoff_handle_m": {
+   "default": 10,
+   "range": [
+    6,
+    20
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "layoff_margin_pct": {
+   "default": 3.5,
+   "range": null,
+   "unit": "percent of layoff handle",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "layoff_family_keeps_share": {
+   "default": 0.5,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "after partners and swings"
+  },
+  "layoff_family_net_m": {
+   "default": 0.175,
+   "range": [
+    0.105,
+    0.35
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "layoff_handle_m*layoff_margin_pct/100*layoff_family_keeps_share",
+   "tol": 0.002
+  },
+  "sports_real_growth_pct": {
+   "default": 3,
+   "range": null,
+   "unit": "percent per year",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "1975-1990, about $125M in 1975 dollars by 1990"
+  },
+  "bayview_meet_week_uplift_pct": {
+   "default": 20,
+   "range": [
+    15,
+    25
+   ],
+   "unit": "percent of illegal horse handle",
+   "tag": "Design",
+   "source": "Part VI 2.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "casino_gambling_net_drop_pct_1978_1980": {
+   "default": 10,
+   "range": null,
+   "unit": "percent",
+   "tag": "Weather",
+   "source": "Part VI 2.6",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "steady-game and Strip gambling net, half of it recovers; moderate strength from May 1978"
+  },
+  "steady_games": {
+   "default": 35,
+   "range": [
+    20,
+    55
+   ],
+   "unit": "games",
+   "tag": "Design",
+   "source": "Part VI 2.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "steady_game_net_per_week": {
+   "default": 1400,
+   "range": [
+    700,
+    2200
+   ],
+   "unit": "USD/week",
+   "tag": "Design",
+   "source": "Part VI 2.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "floating_dice_m": {
+   "default": 0.5,
+   "range": null,
+   "unit": "USD million/year",
+   "tag": "Design",
+   "source": "Part VI 2.5",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "cards_dice_net_m": {
+   "default": 3.0,
+   "range": [
+    1.5,
+    5.0
+   ],
+   "unit": "USD million/year",
+   "tag": "Design",
+   "source": "Part VI 2.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "cards_dice_net_chain_m": {
+   "default": 3.0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 2.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "steady_games*steady_game_net_per_week*52/1e6+floating_dice_m",
+   "tol": 0.06,
+   "note": "35 x 1400 x 52 + 0.5 = 3.05"
+  },
+  "loan_book_street_m": {
+   "default": 0.8,
+   "range": [
+    0.4,
+    1.4
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "loan_book_commercial_m": {
+   "default": 1.2,
+   "range": [
+    0.6,
+    2.2
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "loan_book_six_for_five_m": {
+   "default": 0.06,
+   "range": [
+    0.03,
+    0.12
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "loan_weeks_per_year": {
+   "default": 50,
+   "range": null,
+   "unit": "weeks",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "loan_rate_street_pct": {
+   "default": 5,
+   "range": null,
+   "unit": "percent/week",
+   "tag": "Design",
+   "source": "Part VI 3.1",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "loan_rate_commercial_pct": {
+   "default": 2.5,
+   "range": null,
+   "unit": "percent/week",
+   "tag": "Design",
+   "source": "Part VI 3.1",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "loan_rate_six_for_five_pct": {
+   "default": 20,
+   "range": null,
+   "unit": "percent/week",
+   "tag": "Design",
+   "source": "Part VI 3.1",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "loan_rate_wholesale_pct": {
+   "default": 1,
+   "range": null,
+   "unit": "percent/week",
+   "tag": "Design",
+   "source": "Part VI 3.1",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "loan_interest_due_m": {
+   "default": 4.1,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "(loan_book_street_m*loan_rate_street_pct+loan_book_commercial_m*loan_rate_commercial_pct+loan_book_six_for_five_m*loan_rate_six_for_five_pct)*loan_weeks_per_year/100",
+   "tol": 0.02
+  },
+  "loan_collection_rate_pct": {
+   "default": 72,
+   "range": [
+    55,
+    88
+   ],
+   "unit": "percent of interest due",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "loan_principal_loss_pct": {
+   "default": 15,
+   "range": [
+    8,
+    25
+   ],
+   "unit": "percent of book per year",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "loan_collection_cost_pct": {
+   "default": 6,
+   "range": null,
+   "unit": "percent of collections",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "loan_wholesale_capital_m": {
+   "default": 1.5,
+   "range": [
+    0.8,
+    2.6
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "loan_wholesale_interest_m": {
+   "default": 0.75,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "loan_wholesale_capital_m*loan_rate_wholesale_pct*loan_weeks_per_year/100",
+   "tol": 0.01
+  },
+  "loan_retail_net_m": {
+   "default": 1.72,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "loan_interest_due_m*loan_collection_rate_pct/100*(1-loan_collection_cost_pct/100)-(loan_book_street_m+loan_book_commercial_m+loan_book_six_for_five_m)*loan_principal_loss_pct/100-loan_wholesale_interest_m",
+   "tol": 0.03
+  },
+  "loan_total_net_m": {
+   "default": 2.47,
+   "range": [
+    1.0,
+    4.5
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "loan_retail_net_m+loan_wholesale_interest_m",
+   "tol": 0.03
+  },
+  "brigades_share_loans_pct": {
+   "default": 10,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 3.2, 8.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Brigades' blocks; of the rest S30 P20 V20 F30"
+  },
+  "loan_family_net_m": {
+   "default": 2.22,
+   "range": [
+    0.9,
+    4.05
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 9.3A",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "loan_total_net_m*(1-brigades_share_loans_pct/100)",
+   "tol": 0.02
+  },
+  "brigades_share_protection_pct": {
+   "default": 10,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 3.3, 8.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Brigades' blocks; of the rest V30 P25 F25 S20"
+  },
+  "protection_total_m": {
+   "default": 2.13,
+   "range": [
+    1.3,
+    3.2
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "protection_table_sum_m",
+   "tol": 0.02,
+   "note": "computed from tables.protection"
+  },
+  "protection_family_net_m": {
+   "default": 1.92,
+   "range": [
+    1.17,
+    2.88
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 9.3A",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "protection_total_m*(1-brigades_share_protection_pct/100)",
+   "tol": 0.02
+  },
+  "construction_put_in_place_m": {
+   "default": 330,
+   "range": [
+    220,
+    450
+   ],
+   "unit": "USD million/year",
+   "tag": "Design",
+   "source": "Part VI 3.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "club_covered_share_pct": {
+   "default": 12,
+   "range": [
+    7,
+    18
+   ],
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 3.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "club_covered_volume_m": {
+   "default": 40,
+   "range": [
+    20,
+    70
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "club_covered_volume_chain_m": {
+   "default": 40,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "construction_put_in_place_m*club_covered_share_pct/100",
+   "tol": 0.5,
+   "note": "39.6, printed as 40"
+  },
+  "club_take_pct": {
+   "default": 2,
+   "range": null,
+   "unit": "percent of covered value",
+   "tag": "Anchor",
+   "source": "Part III 7.4; Part VI 3.4",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "passes the test only as a share of a 5-10 percent bid-rigging overcharge"
+  },
+  "club_take_m": {
+   "default": 0.8,
+   "range": [
+    0.4,
+    1.4
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "club_covered_volume_m*club_take_pct/100",
+   "tol": 0.01
+  },
+  "sabatini_construction_firms_profit_m": {
+   "default": 1.0,
+   "range": [
+    0.4,
+    1.8
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "sabatini_rigged_profit_share_m": {
+   "default": 0.9,
+   "range": [
+    0.3,
+    1.8
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "concrete_club_total_m": {
+   "default": 2.7,
+   "range": [
+    1.1,
+    5.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.4, 9.3A",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "club_take_m+sabatini_construction_firms_profit_m+sabatini_rigged_profit_share_m",
+   "tol": 0.01
+  },
+  "longshoremen": {
+   "default": 7000,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part I 9.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "longshore_avg_pay": {
+   "default": 12000,
+   "range": null,
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "docks_payroll_m": {
+   "default": 84,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "longshoremen*longshore_avg_pay/1e6",
+   "tol": 0.5
+  },
+  "labor_docks_m": {
+   "default": 3.0,
+   "range": [
+    1.4,
+    4.8
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "docks_pellegrino_share_pct": {
+   "default": 75,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "docks_pellegrino_m": {
+   "default": 2.25,
+   "range": [
+    1.05,
+    3.6
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 9.3A",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "labor_docks_m*docks_pellegrino_share_pct/100",
+   "tol": 0.01
+  },
+  "docks_brigades_m": {
+   "default": 0.75,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3, 8.1",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "labor_docks_m*(1-docks_pellegrino_share_pct/100)",
+   "tol": 0.01
+  },
+  "brigades_cross_river_items_m": {
+   "default": 0.15,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Brigades' half of the cross-river items (tugs, lighterage, pilferage); belongs to no named pool in 9.3A or 4.3"
+  },
+  "labor_trucking_m": {
+   "default": 2.0,
+   "range": [
+    0.9,
+    3.4
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "labor_building_m": {
+   "default": 1.5,
+   "range": [
+    0.7,
+    2.6
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "labor_garment_m": {
+   "default": 0.6,
+   "range": [
+    0.25,
+    1.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "labor_hotel_m": {
+   "default": 0.4,
+   "range": [
+    0.15,
+    0.7
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "labor_mills_m": {
+   "default": 0.6,
+   "range": [
+    0.25,
+    1.1
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "labor_total_m": {
+   "default": 8.1,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "labor_docks_m+labor_trucking_m+labor_building_m+labor_garment_m+labor_hotel_m+labor_mills_m",
+   "tol": 0.01
+  },
+  "labor_families_m": {
+   "default": 7.35,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "labor_total_m-docks_brigades_m",
+   "tol": 0.01
+  },
+  "front_profit_sabatini_m": {
+   "default": 2.5,
+   "range": [
+    1.0,
+    4.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "front_profit_ferrante_m": {
+   "default": 1.2,
+   "range": [
+    0.6,
+    2.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "front_profit_pellegrino_m": {
+   "default": 0.5,
+   "range": [
+    0.2,
+    1.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "front_profit_vannucci_m": {
+   "default": 0.8,
+   "range": [
+    0.3,
+    1.4
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "fronts_total_m": {
+   "default": 5.0,
+   "range": [
+    2.1,
+    8.4
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5, 9.3A",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "front_profit_sabatini_m+front_profit_ferrante_m+front_profit_pellegrino_m+front_profit_vannucci_m",
+   "tol": 0.01
+  },
+  "carting_m": {
+   "default": 4.5,
+   "range": [
+    2.0,
+    7.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "carting_family_keeps_pct": {
+   "default": 90,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 9.3A",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "9.3A pool is 4.05 = 90 percent of 4.5 (10 percent to non-family partners); Vannucci 3.6"
+  },
+  "carting_family_pool_m": {
+   "default": 4.05,
+   "range": [
+    1.8,
+    6.3
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 9.3A",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "carting_m*carting_family_keeps_pct/100",
+   "tol": 0.01
+  },
+  "strip_m": {
+   "default": 3.6,
+   "range": [
+    2.0,
+    6.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "strip_family_keeps_pct": {
+   "default": 90,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 9.3A",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "10 percent to independent owners"
+  },
+  "strip_family_pool_m": {
+   "default": 3.24,
+   "range": [
+    1.8,
+    5.4
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 9.3A",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "strip_m*strip_family_keeps_pct/100",
+   "tol": 0.01
+  },
+  "fish_market_m": {
+   "default": 1.5,
+   "range": [
+    0.8,
+    2.6
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "tristate_freight_m": {
+   "default": 0.4,
+   "range": [
+    0.2,
+    0.7
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "bolita_handle_m": {
+   "default": 3.0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.7",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "bolita_net_m": {
+   "default": 0.24,
+   "range": [
+    0.1,
+    0.5
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.7",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "bolita_handle_m*numbers_net_margin",
+   "tol": 0.005
+  },
+  "bolita_tax_m": {
+   "default": 0.06,
+   "range": [
+    0.03,
+    0.15
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.7, 4.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "bolita_net_m*0.25",
+   "tol": 0.005,
+   "note": "a quarter of the net, to Ferrante"
+  },
+  "specialists_fees_m": {
+   "default": 0.3,
+   "range": [
+    0.15,
+    0.5
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 4.5, 5.4, 8.6",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "theft_loads": {
+   "default": 200,
+   "range": [
+    120,
+    320
+   ],
+   "unit": "loads/year",
+   "tag": "Design",
+   "source": "Part VI 5.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "theft_cargo_value": {
+   "default": 90000,
+   "range": [
+    60000,
+    130000
+   ],
+   "unit": "USD",
+   "tag": "Design",
+   "source": "Part VI 5.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "theft_fence_pct": {
+   "default": 30,
+   "range": [
+    22,
+    38
+   ],
+   "unit": "percent of wholesale",
+   "tag": "Design",
+   "source": "Part VI 5.3",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "theft_finder_fee_pct": {
+   "default": 10,
+   "range": null,
+   "unit": "percent of fence price",
+   "tag": "Design",
+   "source": "Part VI 5.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "theft_driver_costs_pct": {
+   "default": 10.7,
+   "range": null,
+   "unit": "percent of fence price",
+   "tag": "Design",
+   "source": "Part VI 5.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "theft_after_costs_share": {
+   "default": 0.79,
+   "range": null,
+   "unit": "share of fence price",
+   "tag": "Design",
+   "source": "Part VI 5.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "theft_failure_loss_pct": {
+   "default": 40,
+   "range": null,
+   "unit": "percent of fenced value",
+   "tag": "Design",
+   "source": "Part VI 5.3",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "theft_net_m": {
+   "default": 2.56,
+   "range": [
+    0.75,
+    7.5
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "theft_loads*theft_cargo_value*theft_fence_pct/100*theft_after_costs_share*(1-theft_failure_loss_pct/100)/1e6",
+   "tol": 0.01
+  },
+  "row_goods_factor": {
+   "default": 1.5,
+   "range": null,
+   "unit": "times Italian-held loads",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "row_resale_pct": {
+   "default": 55,
+   "range": null,
+   "unit": "percent of wholesale",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "row_carrying_cost_pct_of_markup": {
+   "default": 30,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "row_tax_pct": {
+   "default": 10,
+   "range": null,
+   "unit": "percent of dealer net",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "row_goods_wholesale_m": {
+   "default": 27,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "theft_loads*theft_cargo_value*row_goods_factor/1e6",
+   "tol": 0.01
+  },
+  "row_bought_m": {
+   "default": 8.1,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "row_goods_wholesale_m*theft_fence_pct/100",
+   "tol": 0.01
+  },
+  "row_resold_m": {
+   "default": 14.85,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "row_goods_wholesale_m*row_resale_pct/100",
+   "tol": 0.01
+  },
+  "row_markup_m": {
+   "default": 6.75,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "row_resold_m-row_bought_m",
+   "tol": 0.01
+  },
+  "row_dealer_net_m": {
+   "default": 4.73,
+   "range": [
+    2.0,
+    9.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "row_dealer_net_chain_m": {
+   "default": 4.73,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "row_markup_m*(1-row_carrying_cost_pct_of_markup/100)",
+   "tol": 0.01
+  },
+  "row_tax_m": {
+   "default": 0.47,
+   "range": [
+    0.2,
+    0.9
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "row_dealer_net_m*row_tax_pct/100",
+   "tol": 0.01
+  },
+  "user_burglary_goods_m_lo": {
+   "default": 25,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4, 6.6",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "user burglary adds $25M to $33M of small goods a year, fenced mostly outside the Row"
+  },
+  "user_burglary_goods_m_hi": {
+   "default": 33,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.4, 6.6",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "chop_shop_m": {
+   "default": 0.5,
+   "range": [
+    0.25,
+    0.9
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "untaxed_goods_m": {
+   "default": 0.2,
+   "range": [
+    0.05,
+    0.5
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 5.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "cigarette_smuggler_net_per_carton": {
+   "default": 0.8,
+   "range": [
+    0.5,
+    1.1
+   ],
+   "unit": "USD per carton",
+   "tag": "Design",
+   "source": "Part VI 5.1",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "0.80 in 1975 and 1978; 0.56 from 1979 (federal act, in effect about March 1979); 0.70 from 1983 (NJ rate up)"
+  },
+  "heroin_users_per_1000_1975": {
+   "default": 5.0,
+   "range": [
+    3,
+    9
+   ],
+   "unit": "per 1,000 residents",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "heroin_users_headcount_1975": {
+   "default": 5500,
+   "range": null,
+   "unit": "users",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "heroin_users_per_1000_1975*population_city_1975_m*1000",
+   "tol": 1,
+   "note": "held as a headcount as the city shrinks"
+  },
+  "heroin_spend_per_user_1975": {
+   "default": 5400,
+   "range": null,
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "heroin_price_per_pure_gram_1975": {
+   "default": 1500,
+   "range": [
+    1000,
+    2500
+   ],
+   "unit": "USD nominal",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "heroin_purity_1975_pct": {
+   "default": 5,
+   "range": [
+    3,
+    8
+   ],
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "cocaine_users_per_1000_1975": {
+   "default": 2,
+   "range": [
+    1,
+    5
+   ],
+   "unit": "per 1,000 residents",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "cocaine_users_headcount_1975": {
+   "default": 2200,
+   "range": null,
+   "unit": "users",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "cocaine_users_per_1000_1975*population_city_1975_m*1000",
+   "tol": 1,
+   "note": "about 2,200 buyers"
+  },
+  "cocaine_street_gram_1975": {
+   "default": 110,
+   "range": [
+    70,
+    170
+   ],
+   "unit": "USD nominal",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "cocaine_purity_1975_pct": {
+   "default": 30,
+   "range": [
+    20,
+    45
+   ],
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "marijuana_users_monthly_1975": {
+   "default": 78000,
+   "range": null,
+   "unit": "users",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "marijuana_spend_per_user_1975": {
+   "default": 150,
+   "range": null,
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "drug_market_heroin_m": {
+   "default": 29.7,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 6.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "heroin_users_headcount_1975*heroin_spend_per_user_1975/1e6",
+   "tol": 0.05
+  },
+  "drug_market_cocaine_m": {
+   "default": 3.1,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 6.3",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "spend per cocaine user not stated; 3.1M over 2,200 users implies about $1,410"
+  },
+  "drug_market_marijuana_m": {
+   "default": 11.7,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 6.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "marijuana_users_monthly_1975*marijuana_spend_per_user_1975/1e6",
+   "tol": 0.05
+  },
+  "drug_market_pills_m": {
+   "default": 8.0,
+   "range": [
+    4,
+    15
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "drug_market_crank_m": {
+   "default": 1.8,
+   "range": [
+    0.6,
+    4
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 6.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "drug_market_total_m": {
+   "default": 54.3,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 6.3",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "drug_market_heroin_m+drug_market_cocaine_m+drug_market_marijuana_m+drug_market_pills_m+drug_market_crank_m",
+   "tol": 0.05
+  },
+  "chain_source_gross_pct": {
+   "default": 52,
+   "range": null,
+   "unit": "percent of consumer dollar",
+   "tag": "Design",
+   "source": "Part VI 6.4",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "offstage, net not modeled"
+  },
+  "chain_wholesale_gross_pct": {
+   "default": 18,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 6.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "chain_wholesale_net_pct": {
+   "default": 9.1,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 6.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "chain_retail_gross_pct": {
+   "default": 30,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 6.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "chain_retail_net_pct": {
+   "default": 18,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 6.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "chain_financing_pct": {
+   "default": 3,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 6.4",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "paid out of the source and wholesale shares"
+  },
+  "chain_crew_net_pct": {
+   "default": 27.1,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 6.4, 6.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "chain_wholesale_net_pct+chain_retail_net_pct",
+   "tol": 0.001
+  },
+  "dial_step2_tax_share_pct": {
+   "default": 15,
+   "range": [
+    10,
+    25
+   ],
+   "unit": "percent of crews' net",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "dial_step1_financing_kept_pct": {
+   "default": 60,
+   "range": null,
+   "unit": "percent of the financing pool",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "40 percent goes to loss and the front man"
+  },
+  "dial_step1_take_per_10m": {
+   "default": 180000,
+   "range": null,
+   "unit": "USD per $10M retail spend on own ground",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "dial_step2_take_per_10m": {
+   "default": 407000,
+   "range": null,
+   "unit": "USD per $10M retail spend on own ground",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "dial_step3_take_per_10m": {
+   "default": 770000,
+   "range": null,
+   "unit": "USD per $10M retail spend on own ground",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "dial_step1_check": {
+   "default": 180000,
+   "range": null,
+   "unit": "USD",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "dial_step1_financing_kept_pct/100*chain_financing_pct/100*1e7",
+   "tol": 1
+  },
+  "dial_step2_check": {
+   "default": 407000,
+   "range": null,
+   "unit": "USD",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "dial_step2_tax_share_pct/100*chain_crew_net_pct/100*1e7",
+   "tol": 1000,
+   "note": "406,500 by arithmetic"
+  },
+  "dial_step3_check": {
+   "default": 770000,
+   "range": null,
+   "unit": "USD",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "(0.45*chain_wholesale_net_pct+0.20*chain_retail_net_pct)/100*1e7",
+   "tol": 1000,
+   "note": "769,500 by arithmetic"
+  },
+  "drug_ground_italian_heroin_pct": {
+   "default": 25,
+   "range": null,
+   "unit": "percent of city market on Italian ground",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Open to the run; the single most important driver of family drug income"
+  },
+  "drug_ground_italian_cocaine_pct": {
+   "default": 50,
+   "range": null,
+   "unit": "percent of city market on Italian ground",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Open to the run; the single most important driver of family drug income"
+  },
+  "drug_ground_italian_marijuana_pct": {
+   "default": 45,
+   "range": null,
+   "unit": "percent of city market on Italian ground",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Open to the run; the single most important driver of family drug income"
+  },
+  "drug_ground_italian_pills_pct": {
+   "default": 55,
+   "range": null,
+   "unit": "percent of city market on Italian ground",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Open to the run; the single most important driver of family drug income"
+  },
+  "drug_ground_italian_crank_pct": {
+   "default": 40,
+   "range": null,
+   "unit": "percent of city market on Italian ground",
+   "tag": "Design",
+   "source": "Part VI 6.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "Open to the run; the single most important driver of family drug income"
+  },
+  "heroin_habit_per_day": {
+   "default": 30,
+   "range": [
+    15,
+    60
+   ],
+   "unit": "USD",
+   "tag": "Design",
+   "source": "Part VI 6.6",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "heroin_habit_per_year": {
+   "default": 10950,
+   "range": null,
+   "unit": "USD",
+   "tag": "Design",
+   "source": "Part VI 6.6",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "heroin_habit_per_day*365",
+   "tol": 1
+  },
+  "city_budget_m": {
+   "default": 540,
+   "range": [
+    420,
+    700
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_employees": {
+   "default": 25000,
+   "range": [
+    20000,
+    31000
+   ],
+   "unit": "employees",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_avg_pay": {
+   "default": 12500,
+   "range": [
+    10500,
+    15000
+   ],
+   "unit": "USD/year",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_wages_m": {
+   "default": 312,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "city_employees*city_avg_pay/1e6",
+   "tol": 1
+  },
+  "city_benefits_pct_of_wages": {
+   "default": 30,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "city_benefits_m": {
+   "default": 94,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "city_wages_m*city_benefits_pct_of_wages/100",
+   "tol": 1
+  },
+  "city_wages_benefits_m": {
+   "default": 406,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "city_wages_m+city_benefits_m",
+   "tol": 1
+  },
+  "city_wages_benefits_share_pct": {
+   "default": 75,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 7.2; Part IV 6.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "city_wages_benefits_m/city_budget_m*100",
+   "tol": 1
+  },
+  "city_debt_service_m": {
+   "default": 65,
+   "range": [
+    45,
+    90
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_other_costs_m": {
+   "default": 69,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "city_budget_m-city_wages_benefits_m-city_debt_service_m",
+   "tol": 1.5
+  },
+  "city_debt_outstanding_m": {
+   "default": 600,
+   "range": [
+    450,
+    800
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_pension_contribution_m": {
+   "default": 45,
+   "range": [
+    30,
+    65
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_property_levy_m": {
+   "default": 330,
+   "range": [
+    260,
+    420
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_state_aid_m": {
+   "default": 110,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "city_federal_aid_m": {
+   "default": 50,
+   "range": [
+    30,
+    75
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_fees_fines_m": {
+   "default": 50,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "city_revenue_total_m": {
+   "default": 540,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "city_property_levy_m+city_state_aid_m+city_federal_aid_m+city_fees_fines_m",
+   "tol": 0.5
+  },
+  "city_true_property_value_m": {
+   "default": 7300,
+   "range": [
+    5500,
+    9000
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_effective_tax_rate_pct": {
+   "default": 4.5,
+   "range": [
+    3.5,
+    6
+   ],
+   "unit": "percent of true value",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_assessment_ratio_pct": {
+   "default": 45,
+   "range": [
+    30,
+    60
+   ],
+   "unit": "percent of true value",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design"
+  },
+  "city_effective_rate_check_pct": {
+   "default": 4.5,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "city_property_levy_m/city_true_property_value_m*100",
+   "tol": 0.1
+  },
+  "bond_yield_high_grade_pct": {
+   "default": 6.25,
+   "range": [
+    6.0,
+    6.5
+   ],
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "memory, to verify",
+   "note": "default not stated, midpoint of 'about 6 to 6.5' used"
+  },
+  "bond_yield_saint_jude_pct": {
+   "default": 8.75,
+   "range": [
+    8.0,
+    9.5
+   ],
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 7.2",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "default not stated, midpoint of 8 to 9.5 used"
+  },
+  "pad_total_m": {
+   "default": 1.6,
+   "range": [
+    0.9,
+    2.7
+   ],
+   "unit": "USD million/year",
+   "tag": "Design",
+   "source": "Part VI 7.5",
+   "kind": "draw",
+   "mark": "Design",
+   "note": "a separate Design figure, not the sum of the weekly table (7.5)"
+  },
+  "pad_share_of_wage_bill_pct": {
+   "default": 2.2,
+   "range": null,
+   "unit": "percent",
+   "tag": "Design",
+   "source": "Part VI 7.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "pad_total_m/sjpd_wage_bill_m*100",
+   "tol": 0.1
+  },
+  "brigades_docks_m": {
+   "default": 0.9,
+   "range": [
+    0.4,
+    1.6
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.1",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "docks_brigades_m+brigades_cross_river_items_m",
+   "tol": 0.01
+  },
+  "brigades_numbers_m": {
+   "default": 0.32,
+   "range": [
+    0.12,
+    0.6
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.1",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_irish_net_m",
+   "tol": 0.005
+  },
+  "brigades_loans_protection_m": {
+   "default": 0.46,
+   "range": [
+    0.15,
+    0.75
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.1",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "(loan_total_net_m*brigades_share_loans_pct+protection_total_m*brigades_share_protection_pct)/100",
+   "tol": 0.01
+  },
+  "brigades_tribute_m": {
+   "default": 0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Fixed",
+   "source": "Part V 3.6, 10.1; Part VI 8.1",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "the Brigades pay no tribute"
+  },
+  "brigades_total_m": {
+   "default": 1.7,
+   "range": [
+    0.7,
+    3.0
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.1, 8.8",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "brigades_docks_m+brigades_numbers_m+brigades_loans_protection_m",
+   "tol": 0.05
+  },
+  "combine_own_lines_m": {
+   "default": 1.1,
+   "range": [
+    0.25,
+    2.3
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "numbers_combine_net_m+book_net_m*book_combine_share_pct/100",
+   "tol": 0.06
+  },
+  "heroin_pool_off_italian_ground_m": {
+   "default": 6.0,
+   "range": [
+    2,
+    12
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "drug_market_heroin_m*(1-drug_ground_italian_heroin_pct/100)*chain_crew_net_pct/100",
+   "tol": 0.05
+  },
+  "other_drug_pool_off_italian_ground_m": {
+   "default": 3.1,
+   "range": [
+    1.3,
+    7
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.2",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "(drug_market_cocaine_m*(1-drug_ground_italian_cocaine_pct/100)+drug_market_marijuana_m*(1-drug_ground_italian_marijuana_pct/100)+drug_market_pills_m*(1-drug_ground_italian_pills_pct/100))*chain_crew_net_pct/100",
+   "tol": 0.05
+  },
+  "shared_drug_pool_m": {
+   "default": 9.1,
+   "range": [
+    3.3,
+    19
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.8",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "heroin_pool_off_italian_ground_m+other_drug_pool_off_italian_ground_m",
+   "tol": 0.1
+  },
+  "horsemen_crank_m": {
+   "default": 0.3,
+   "range": [
+    0.1,
+    0.65
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "drug_market_crank_m*(1-drug_ground_italian_crank_pct/100)*chain_crew_net_pct/100",
+   "tol": 0.01
+  },
+  "horsemen_roadhouse_security_m": {
+   "default": 0.2,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "horsemen_stolen_vehicles_m": {
+   "default": 0.15,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.4",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "horsemen_tribute_m": {
+   "default": 0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Fixed",
+   "source": "Part V 6.5, 10.1; Part VI 8.4",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "a courtesy paid in work, not cash"
+  },
+  "horsemen_total_m": {
+   "default": 0.65,
+   "range": [
+    0.2,
+    1.5
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.4",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "horsemen_crank_m+horsemen_roadhouse_security_m+horsemen_stolen_vehicles_m",
+   "tol": 0.02
+  },
+  "chinatown_halls": {
+   "default": 4,
+   "range": null,
+   "unit": "halls",
+   "tag": "Design",
+   "source": "Part VI 8.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "range 3 to 6"
+  },
+  "chinatown_hall_net": {
+   "default": 75000,
+   "range": null,
+   "unit": "USD/year each",
+   "tag": "Design",
+   "source": "Part VI 8.5",
+   "kind": "fixed",
+   "mark": "Design"
+  },
+  "chinatown_halls_m": {
+   "default": 0.3,
+   "range": [
+    0.1,
+    0.8
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "chinatown_halls*chinatown_hall_net/1e6",
+   "tol": 0.005
+  },
+  "chinatown_total_m": {
+   "default": 0.5,
+   "range": [
+    0.2,
+    1.3
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.5, 8.8",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "chinatown_halls_m+numbers_chinatown_net_m",
+   "tol": 0.05,
+   "note": "0.46 by arithmetic, printed 0.5"
+  },
+  "chinatown_payment_to_italians_m_hi": {
+   "default": 0.05,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "range 0 to 0.05, Pellegrino, Open"
+  },
+  "row_financing_m": {
+   "default": 0.5,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.6",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "garment financing, range 0.2 to 1.0"
+  },
+  "pr_blocks_after_tax_m": {
+   "default": 0.2,
+   "range": [
+    0.1,
+    0.4
+   ],
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.8",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "bolita_net_m-bolita_tax_m",
+   "tol": 0.03
+  },
+  "outside_own_lines_total_m": {
+   "default": 9.4,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 8.8",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "brigades_total_m+combine_own_lines_m+horsemen_total_m+chinatown_total_m+row_dealer_net_m+row_financing_m+pr_blocks_after_tax_m",
+   "tol": 0.1
+  },
+  "russians_1975_m": {
+   "default": 0,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Weather",
+   "source": "Part V 5.3; Part VI 8.3",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "about 0.15 extortion + 0.3 fraud by 1980 (total about 0.45), fuel excise evasion from about 1982: 1M in 1983 to 3M by 1987; Italian tax about 2 cents a gallon"
+  },
+  "protection_table_sum_m": {
+   "default": 2.1268,
+   "range": null,
+   "unit": "USD million",
+   "tag": "Design",
+   "source": "Part VI 3.3",
+   "kind": "derived",
+   "formula": "table:protection",
+   "tol": 0.005,
+   "mark": "Design",
+   "note": "sum over the protection table of payers x weekly default x 52"
+  }
+ },
+ "pools": {
+  "numbers_it": {
+   "label": "Numbers (numbers_it)",
+   "default_m": 0.45,
+   "range_m": [
+    0.1,
+    1.2
+   ],
+   "section": "2.2",
+   "shares": {
+    "sabatini": 15,
+    "pellegrino": 0,
+    "vannucci": 25,
+    "ferrante": 60
+   },
+   "outside_m": 1.55,
+   "outside_note": "Irish, Puerto Rican and Chinatown play are outside the base; Eastside net not taken by the Italians also stays out",
+   "tie": {
+    "figure": "numbers_italian_net_m",
+    "tol": 0.005
+   }
+  },
+  "bookmaking": {
+   "label": "Bookmaking",
+   "default_m": 0.88,
+   "range_m": [
+    0.16,
+    2.94
+   ],
+   "section": "2.4, 8.2",
+   "shares": {
+    "sabatini": 35,
+    "pellegrino": 20,
+    "vannucci": 15,
+    "ferrante": 30
+   },
+   "outside_m": 0.72,
+   "outside_note": "45 percent of book net (combine 20, others 25)",
+   "tie": {
+    "figure": "book_italian_net_m",
+    "tol": 0.01
+   }
+  },
+  "layoff_bank": {
+   "label": "Layoff bank",
+   "default_m": 0.175,
+   "range_m": [
+    0.105,
+    0.35
+   ],
+   "section": "2.4",
+   "shares": {
+    "sabatini": 100,
+    "pellegrino": 0,
+    "vannucci": 0,
+    "ferrante": 0
+   },
+   "outside_m": 0.175,
+   "outside_note": "Partners and swings keep half",
+   "tie": {
+    "figure": "layoff_family_net_m",
+    "tol": 0.002
+   }
+  },
+  "cards_dice": {
+   "label": "Cards and dice",
+   "default_m": 3.0,
+   "range_m": [
+    1.5,
+    5.0
+   ],
+   "section": "2.5",
+   "shares": {
+    "sabatini": 15,
+    "pellegrino": 15,
+    "vannucci": 50,
+    "ferrante": 20
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "cards_dice_net_m",
+    "tol": 0.01
+   }
+  },
+  "loansharking": {
+   "label": "Loansharking",
+   "default_m": 2.22,
+   "range_m": [
+    0.9,
+    4.05
+   ],
+   "section": "3.2, 8.1",
+   "shares": {
+    "sabatini": 30,
+    "pellegrino": 20,
+    "vannucci": 20,
+    "ferrante": 30
+   },
+   "outside_m": 0.25,
+   "outside_note": "Brigades' blocks",
+   "tie": {
+    "figure": "loan_family_net_m",
+    "tol": 0.02
+   }
+  },
+  "protection": {
+   "label": "Protection",
+   "default_m": 1.92,
+   "range_m": [
+    1.17,
+    2.88
+   ],
+   "section": "3.3, 8.1",
+   "shares": {
+    "sabatini": 20,
+    "pellegrino": 25,
+    "vannucci": 30,
+    "ferrante": 25
+   },
+   "outside_m": 0.21,
+   "outside_note": "Brigades' blocks",
+   "tie": {
+    "figure": "protection_family_net_m",
+    "tol": 0.02
+   }
+  },
+  "concrete_club_and_firms": {
+   "label": "Concrete Club and firms",
+   "default_m": 2.7,
+   "range_m": [
+    1.1,
+    5.0
+   ],
+   "section": "3.4",
+   "shares": {
+    "sabatini": 100,
+    "pellegrino": 0,
+    "vannucci": 0,
+    "ferrante": 0
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "concrete_club_total_m",
+    "tol": 0.01
+   }
+  },
+  "docks_labor": {
+   "label": "Docks labor",
+   "default_m": 2.25,
+   "range_m": [
+    1.05,
+    3.6
+   ],
+   "section": "4.3, 8.1",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 100,
+    "vannucci": 0,
+    "ferrante": 0
+   },
+   "outside_m": 0.75,
+   "outside_note": "Brigades",
+   "tie": {
+    "figure": "docks_pellegrino_m",
+    "tol": 0.01
+   }
+  },
+  "trucking_labor": {
+   "label": "Trucking labor",
+   "default_m": 2.0,
+   "range_m": [
+    0.9,
+    3.4
+   ],
+   "section": "4.3",
+   "shares": {
+    "sabatini": 15,
+    "pellegrino": 15,
+    "vannucci": 15,
+    "ferrante": 55
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "labor_trucking_m",
+    "tol": 0.01
+   }
+  },
+  "building_labor": {
+   "label": "Building labor",
+   "default_m": 1.5,
+   "range_m": [
+    0.7,
+    2.6
+   ],
+   "section": "4.3",
+   "shares": {
+    "sabatini": 100,
+    "pellegrino": 0,
+    "vannucci": 0,
+    "ferrante": 0
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "labor_building_m",
+    "tol": 0.01
+   }
+  },
+  "garment_labor": {
+   "label": "Garment labor",
+   "default_m": 0.6,
+   "range_m": [
+    0.25,
+    1.0
+   ],
+   "section": "4.3",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 0,
+    "vannucci": 0,
+    "ferrante": 100
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "labor_garment_m",
+    "tol": 0.01
+   }
+  },
+  "hotel_restaurant_labor": {
+   "label": "Hotel and restaurant labor",
+   "default_m": 0.4,
+   "range_m": [
+    0.15,
+    0.7
+   ],
+   "section": "4.3",
+   "shares": {
+    "sabatini": 50,
+    "pellegrino": 0,
+    "vannucci": 50,
+    "ferrante": 0
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "labor_hotel_m",
+    "tol": 0.01
+   }
+  },
+  "mill_labor": {
+   "label": "Mill labor",
+   "default_m": 0.6,
+   "range_m": [
+    0.25,
+    1.1
+   ],
+   "section": "4.3",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 0,
+    "vannucci": 100,
+    "ferrante": 0
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "labor_mills_m",
+    "tol": 0.01
+   }
+  },
+  "theft": {
+   "label": "Theft (crew and sponsor)",
+   "default_m": 2.56,
+   "range_m": [
+    0.75,
+    7.5
+   ],
+   "section": "5.3",
+   "shares": {
+    "sabatini": 10,
+    "pellegrino": 25,
+    "vannucci": 15,
+    "ferrante": 50
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "theft_net_m",
+    "tol": 0.01
+   }
+  },
+  "hunts_row_tax": {
+   "label": "Hunts Row tax",
+   "default_m": 0.47,
+   "range_m": [
+    0.2,
+    0.9
+   ],
+   "section": "5.4",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 0,
+    "vannucci": 0,
+    "ferrante": 100
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "row_tax_m",
+    "tol": 0.005
+   }
+  },
+  "specialists_fees": {
+   "label": "Specialists' fees",
+   "default_m": 0.3,
+   "range_m": [
+    0.15,
+    0.5
+   ],
+   "section": "8.6",
+   "shares": {
+    "sabatini": 40,
+    "pellegrino": 0,
+    "vannucci": 0,
+    "ferrante": 60
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "specialists_fees_m",
+    "tol": 0.01
+   }
+  },
+  "chop_shops": {
+   "label": "Chop shops",
+   "default_m": 0.5,
+   "range_m": [
+    0.25,
+    0.9
+   ],
+   "section": "5.5",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 0,
+    "vannucci": 50,
+    "ferrante": 50
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "chop_shop_m",
+    "tol": 0.01
+   }
+  },
+  "untaxed_cigarettes_liquor": {
+   "label": "Untaxed cigarettes and liquor",
+   "default_m": 0.2,
+   "range_m": [
+    0.05,
+    0.5
+   ],
+   "section": "5.5",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 30,
+    "vannucci": 0,
+    "ferrante": 70
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "untaxed_goods_m",
+    "tol": 0.01
+   }
+  },
+  "legitimate_fronts": {
+   "label": "Legitimate fronts",
+   "default_m": 5.0,
+   "range_m": [
+    2.1,
+    8.4
+   ],
+   "section": "4.5",
+   "shares": {
+    "sabatini": 50.0,
+    "pellegrino": 10.0,
+    "vannucci": 16.0,
+    "ferrante": 24.0
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "fronts_total_m",
+    "tol": 0.01
+   },
+   "unit_basis": "dollars",
+   "family_m": {
+    "sabatini": 2.5,
+    "pellegrino": 0.5,
+    "vannucci": 0.8,
+    "ferrante": 1.2
+   },
+   "family_range_m": {
+    "sabatini": [
+     1.0,
+     4.0
+    ],
+    "pellegrino": [
+     0.2,
+     1.0
+    ],
+    "vannucci": [
+     0.3,
+     1.4
+    ],
+    "ferrante": [
+     0.6,
+     2.0
+    ]
+   },
+   "note": "Part VI 9.3A prints dollars in the family columns of this row, not percentages"
+  },
+  "carting_waste": {
+   "label": "Carting and waste",
+   "default_m": 4.05,
+   "range_m": [
+    1.8,
+    6.3
+   ],
+   "section": "4.5",
+   "shares": {
+    "sabatini": 11,
+    "pellegrino": 0,
+    "vannucci": 89,
+    "ferrante": 0
+   },
+   "outside_m": 0.45,
+   "outside_note": "10 percent of the $4.5M to non-family partners (new in revision 3)",
+   "tie": {
+    "figure": "carting_family_pool_m",
+    "tol": 0.01
+   }
+  },
+  "fish_market": {
+   "label": "Fish market",
+   "default_m": 1.5,
+   "range_m": [
+    0.8,
+    2.6
+   ],
+   "section": "4.5",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 100,
+    "vannucci": 0,
+    "ferrante": 0
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "fish_market_m",
+    "tol": 0.01
+   }
+  },
+  "tristate_freight": {
+   "label": "Tri-State Freight",
+   "default_m": 0.4,
+   "range_m": [
+    0.2,
+    0.7
+   ],
+   "section": "4.5",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 100,
+    "vannucci": 0,
+    "ferrante": 0
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "tristate_freight_m",
+    "tol": 0.01
+   }
+  },
+  "the_strip": {
+   "label": "The Strip",
+   "default_m": 3.24,
+   "range_m": [
+    1.8,
+    5.4
+   ],
+   "section": "4.5",
+   "shares": {
+    "sabatini": 22,
+    "pellegrino": 0,
+    "vannucci": 78,
+    "ferrante": 0
+   },
+   "outside_m": 0.36,
+   "outside_note": "10 percent of the $3.6M to independent owners (new in revision 3)",
+   "tie": {
+    "figure": "strip_family_pool_m",
+    "tol": 0.01
+   }
+  },
+  "bolita_tax": {
+   "label": "Bolita tax",
+   "default_m": 0.06,
+   "range_m": [
+    0.03,
+    0.15
+   ],
+   "section": "8.7",
+   "shares": {
+    "sabatini": 0,
+    "pellegrino": 0,
+    "vannucci": 0,
+    "ferrante": 100
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "bolita_tax_m",
+    "tol": 0.005
+   }
+  },
+  "drugs_by_dial_and_ground": {
+   "label": "Drugs (by dial and ground)",
+   "default_m": 0.54,
+   "range_m": [
+    0.27,
+    1.08
+   ],
+   "section": "6.5",
+   "shares": {
+    "sabatini": 25.93,
+    "pellegrino": 5.56,
+    "vannucci": 35.19,
+    "ferrante": 33.33
+   },
+   "outside_m": null,
+   "outside_note": "Range half to double (new). Shared drug pool on non-Italian ground is in figures.shared_drug_pool_m",
+   "unit_basis": "dollars",
+   "family_m": {
+    "sabatini": 0.14,
+    "pellegrino": 0.03,
+    "vannucci": 0.19,
+    "ferrante": 0.18
+   },
+   "computed_by": "drug dial x ground (allocation.drugs_1975)",
+   "note": "Part VI 9.3A prints dollars in the family columns of this row"
+  },
+  "pad": {
+   "label": "Pad (a cost)",
+   "default_m": 1.6,
+   "range_m": [
+    0.9,
+    2.7
+   ],
+   "section": "7.5",
+   "shares": {
+    "sabatini": 25.62,
+    "pellegrino": 18.75,
+    "vannucci": 33.12,
+    "ferrante": 22.5
+   },
+   "outside_m": null,
+   "outside_note": null,
+   "tie": {
+    "figure": "pad_total_m",
+    "tol": 0.005
+   },
+   "unit_basis": "dollars",
+   "kind": "cost",
+   "family_m": {
+    "sabatini": 0.41,
+    "pellegrino": 0.3,
+    "vannucci": 0.53,
+    "ferrante": 0.36
+   },
+   "note": "Part VI 9.3A prints dollars in the family columns of this row"
+  }
+ },
+ "allocation": {
+  "source": "Part VI 9.3, 9.3A",
+  "families": [
+   "sabatini",
+   "pellegrino",
+   "vannucci",
+   "ferrante"
+  ],
+  "family_gross_net_9_3": {
+   "sabatini": {
+    "gross_m": 10.9,
+    "pad_m": 0.41,
+    "net_m": 10.5,
+    "per_man_usd": 191000
+   },
+   "pellegrino": {
+    "gross_m": 7.2,
+    "pad_m": 0.3,
+    "net_m": 6.9,
+    "per_man_usd": 154000
+   },
+   "vannucci": {
+    "gross_m": 11.6,
+    "pad_m": 0.53,
+    "net_m": 11.1,
+    "per_man_usd": 317000
+   },
+   "ferrante": {
+    "gross_m": 7.7,
+    "pad_m": 0.36,
+    "net_m": 7.4,
+    "per_man_usd": 164000
+   },
+   "four": {
+    "gross_m": 37.5,
+    "pad_m": 1.6,
+    "net_m": 35.9,
+    "per_man_usd": 200000
+   }
+  },
+  "gross_tolerance_m": 0.1,
+  "drugs_1975": {
+   "dial_defaults": {
+    "sabatini": {
+     "heroin": 1,
+     "cocaine": 1,
+     "marijuana": 2,
+     "pills": 1,
+     "crank": 0
+    },
+    "pellegrino": {
+     "heroin": 0,
+     "cocaine": 1,
+     "marijuana": 1,
+     "pills": 1,
+     "crank": 0
+    },
+    "vannucci": {
+     "heroin": 2,
+     "cocaine": 2,
+     "marijuana": 2,
+     "pills": 2,
+     "crank": 1
+    },
+    "ferrante": {
+     "heroin": 1,
+     "cocaine": 2,
+     "marijuana": 2,
+     "pills": 2,
+     "crank": 1
+    }
+   },
+   "dial_source": "Part V 9.2 (steps 0 forbidden and enforced, 1 finance tolerated, 2 crews taxed, 3 run by the family)",
+   "ground_family_pct": {
+    "sabatini": 30,
+    "pellegrino": 15,
+    "vannucci": 25,
+    "ferrante": 30
+   },
+   "expected_take_m": {
+    "sabatini": 0.14,
+    "pellegrino": 0.03,
+    "vannucci": 0.19,
+    "ferrante": 0.18,
+    "four": 0.54
+   },
+   "tolerance_m": 0.006
+  },
+  "numbers_claims_m": {
+   "italian": 0.45,
+   "combine": 0.83,
+   "puerto_rican": 0.24,
+   "irish": 0.32,
+   "chinatown": 0.16,
+   "total": 2.0
+  },
+  "brigades_share_pct": {
+   "loansharking": 10,
+   "protection": 10
+  },
+  "pad_by_family_m": {
+   "sabatini": 0.41,
+   "pellegrino": 0.3,
+   "vannucci": 0.53,
+   "ferrante": 0.36
+  },
+  "associate_share_ceiling_note": "No made-man cap is enforced here; counts are drawn inside the ranges (figures.made_men_*)."
+ },
+ "tables": {
+  "pick3": {
+   "source": "Part VI 2.3",
+   "columns": [
+    "year",
+    "handle_lost_pct",
+    "city_handle_m",
+    "bank_net_m",
+    "italian_share_m",
+    "net_lost_vs_1974_pct"
+   ],
+   "rows": [
+    [
+     1974,
+     0,
+     25.0,
+     2.0,
+     0.45,
+     0
+    ],
+    [
+     1975,
+     1,
+     24.75,
+     1.97,
+     0.44,
+     2
+    ],
+    [
+     1976,
+     6,
+     23.5,
+     1.79,
+     0.4,
+     10
+    ],
+    [
+     1977,
+     10,
+     22.5,
+     1.66,
+     0.37,
+     17
+    ],
+    [
+     1978,
+     12,
+     22.0,
+     1.59,
+     0.36,
+     21
+    ],
+    [
+     1979,
+     13,
+     21.75,
+     1.55,
+     0.35,
+     22
+    ],
+    [
+     1980,
+     14,
+     21.5,
+     1.52,
+     0.34,
+     24
+    ],
+    [
+     1985,
+     19,
+     20.25,
+     1.35,
+     0.3,
+     33
+    ],
+    [
+     1990,
+     20,
+     20.0,
+     1.31,
+     0.29,
+     34
+    ]
+   ],
+   "bounds_1980_bank_net_m": {
+    "supplier": 1.76,
+    "rival": 1.28
+   }
+  },
+  "protection": {
+   "source": "Part VI 3.3",
+   "columns": [
+    "trade",
+    "businesses",
+    "share_paying_pct",
+    "payers",
+    "weekly_default",
+    "weekly_lo",
+    "weekly_hi",
+    "annual_k"
+   ],
+   "rows": [
+    [
+     "candy_store_newsstand",
+     800,
+     10,
+     80,
+     5,
+     3,
+     10,
+     21
+    ],
+    [
+     "bar_tavern",
+     1400,
+     25,
+     350,
+     25,
+     15,
+     50,
+     455
+    ],
+    [
+     "restaurant",
+     900,
+     15,
+     135,
+     35,
+     20,
+     80,
+     246
+    ],
+    [
+     "bakery_pork_store_grocery",
+     700,
+     15,
+     105,
+     15,
+     8,
+     30,
+     82
+    ],
+    [
+     "garment_shop",
+     1200,
+     20,
+     240,
+     20,
+     10,
+     60,
+     250
+    ],
+    [
+     "trucking_firm",
+     400,
+     30,
+     120,
+     40,
+     20,
+     150,
+     250
+    ],
+    [
+     "nightclub_supper_club",
+     40,
+     80,
+     32,
+     200,
+     100,
+     400,
+     333
+    ],
+    [
+     "strip_club_after_hours",
+     30,
+     100,
+     30,
+     300,
+     150,
+     600,
+     468
+    ],
+    [
+     "laundromat_vending_amusements",
+     150,
+     20,
+     30,
+     15,
+     8,
+     40,
+     23
+    ]
+   ],
+   "nominal_path_bar": {
+    "1975": 25,
+    "1978": 30,
+    "1980": 38,
+    "1984": 45,
+    "1988": 55
+   }
+  },
+  "concrete_3_4A": {
+   "source": "Part VI 3.4A",
+   "columns": [
+    "job_type",
+    "volume_m",
+    "club_covers_pct",
+    "covered_m",
+    "take_m"
+   ],
+   "rows": [
+    [
+     "public_buildings",
+     60,
+     21,
+     12.6,
+     0.25
+    ],
+    [
+     "roads_bridges_sewers_water",
+     70,
+     15,
+     10.5,
+     0.21
+    ],
+    [
+     "port_and_port_authority",
+     35,
+     8,
+     2.8,
+     0.06
+    ],
+    [
+     "large_private",
+     55,
+     20,
+     11.0,
+     0.22
+    ],
+    [
+     "renewal_federal_housing",
+     40,
+     10,
+     4.0,
+     0.08
+    ],
+    [
+     "small_private",
+     70,
+     0,
+     0,
+     0
+    ]
+   ],
+   "totals": {
+    "volume_m": 330,
+    "covered_m": 40.9,
+    "take_m": 0.82
+   }
+  },
+  "labor_drift": {
+   "source": "Part VI 4.3",
+   "columns": [
+    "year",
+    "flow_m",
+    "families_m"
+   ],
+   "rows": [
+    [
+     1975,
+     8.1,
+     7.35
+    ],
+    [
+     1980,
+     8.1,
+     7.35
+    ],
+    [
+     1985,
+     6.5,
+     5.9
+    ],
+    [
+     1990,
+     5.0,
+     4.5
+    ]
+   ],
+   "weather": "strong, 1976 onward, Open per run"
+  },
+  "theft_drift": {
+   "source": "Part VI 5.6",
+   "columns": [
+    "year",
+    "crew_net_m"
+   ],
+   "rows": [
+    [
+     1975,
+     2.56
+    ],
+    [
+     1980,
+     2.4
+    ],
+    [
+     1985,
+     1.9
+    ],
+    [
+     1990,
+     1.5
+    ]
+   ]
+  },
+  "pad_weekly": {
+   "source": "Part VI 7.5",
+   "note": "the annual total is a separate Design figure and not the sum of this table",
+   "columns": [
+    "rank",
+    "default",
+    "lo",
+    "hi"
+   ],
+   "rows": [
+    [
+     "patrolman_beat",
+     30,
+     15,
+     60
+    ],
+    [
+     "public_morals_detective",
+     150,
+     75,
+     400
+    ],
+    [
+     "sergeant",
+     100,
+     50,
+     200
+    ],
+    [
+     "lieutenant_precinct_squad",
+     250,
+     120,
+     500
+    ],
+    [
+     "captain_precinct",
+     400,
+     200,
+     1000
+    ],
+    [
+     "commander_and_above_bag",
+     1500,
+     500,
+     4000
+    ]
+   ]
+  },
+  "pad_drift": {
+   "source": "Part VI 7.5",
+   "columns": [
+    "year",
+    "total_m"
+   ],
+   "rows": [
+    [
+     1975,
+     1.6
+    ],
+    [
+     1977,
+     1.8
+    ],
+    [
+     1985,
+     1.3
+    ]
+   ]
+  },
+  "budget_drift": {
+   "source": "Part VI 7.8",
+   "columns": [
+    "year",
+    "budget_m_1975_dollars",
+    "federal_aid_m_1975_dollars"
+   ],
+   "rows": [
+    [
+     1975,
+     540,
+     50
+    ],
+    [
+     1977,
+     500,
+     55
+    ],
+    [
+     1980,
+     485,
+     55
+    ],
+    [
+     1982,
+     460,
+     38
+    ],
+    [
+     1985,
+     490,
+     35
+    ],
+    [
+     1990,
+     540,
+     30
+    ]
+   ]
+  },
+  "drug_market_by_year": {
+   "source": "Part VI 6.3",
+   "columns": [
+    "year",
+    "heroin",
+    "cocaine_crack",
+    "marijuana",
+    "pills",
+    "crank",
+    "total",
+    "nominal_total"
+   ],
+   "rows": [
+    [
+     1975,
+     29.7,
+     3.1,
+     11.7,
+     8.0,
+     1.8,
+     54.3,
+     54.3
+    ],
+    [
+     1980,
+     22.8,
+     9.9,
+     14.8,
+     9.0,
+     2.5,
+     59.0,
+     90.3
+    ],
+    [
+     1985,
+     18.0,
+     38.0,
+     10.0,
+     6.0,
+     3.0,
+     75.0,
+     150.0
+    ],
+    [
+     1990,
+     18.8,
+     47.7,
+     4.8,
+     4.0,
+     3.5,
+     78.8,
+     191.4
+    ]
+   ]
+  },
+  "heroin_by_year": {
+   "source": "Part VI 6.2",
+   "columns": [
+    "year",
+    "users_per_1000",
+    "price_per_pure_gram_nominal",
+    "purity_pct",
+    "spend_per_user_1975_usd"
+   ],
+   "rows": [
+    [
+     1975,
+     5.0,
+     1500,
+     5,
+     5400
+    ],
+    [
+     1977,
+     4.8,
+     1600,
+     5,
+     5200
+    ],
+    [
+     1980,
+     4.5,
+     1700,
+     4,
+     4600
+    ],
+    [
+     1981,
+     4.4,
+     1739,
+     4,
+     4500
+    ],
+    [
+     1983,
+     4.2,
+     2113,
+     6,
+     4300
+    ],
+    [
+     1985,
+     4.0,
+     1966,
+     8,
+     4100
+    ],
+    [
+     1987,
+     4.2,
+     2181,
+     11,
+     3900
+    ],
+    [
+     1990,
+     4.5,
+     2219,
+     16,
+     3800
+    ]
+   ]
+  },
+  "cocaine_by_year": {
+   "source": "Part VI 6.2",
+   "columns": [
+    "year",
+    "users_per_1000",
+    "street_gram_nominal",
+    "purity_pct"
+   ],
+   "rows": [
+    [
+     1975,
+     2,
+     110,
+     30
+    ],
+    [
+     1980,
+     6,
+     90,
+     35
+    ],
+    [
+     1983,
+     12,
+     92,
+     40
+    ],
+    [
+     1985,
+     20,
+     82,
+     40
+    ],
+    [
+     1987,
+     19,
+     124,
+     64
+    ],
+    [
+     1990,
+     18,
+     141,
+     69
+    ]
+   ]
+  },
+  "drug_take_by_year": {
+   "source": "Part VI 6.5",
+   "note": "dials held at Part V defaults",
+   "columns": [
+    "year",
+    "sabatini",
+    "pellegrino",
+    "vannucci",
+    "ferrante",
+    "four"
+   ],
+   "rows": [
+    [
+     1975,
+     0.14,
+     0.03,
+     0.19,
+     0.18,
+     0.54
+    ],
+    [
+     1980,
+     0.17,
+     0.05,
+     0.23,
+     0.24,
+     0.68
+    ],
+    [
+     1985,
+     0.2,
+     0.07,
+     0.32,
+     0.36,
+     0.95
+    ],
+    [
+     1990,
+     0.19,
+     0.08,
+     0.34,
+     0.38,
+     0.99
+    ]
+   ]
+  },
+  "russians_weather": {
+   "source": "Part VI 8.3",
+   "rows": [
+    [
+     "extortion_emigre_community_m",
+     "0 in Jan 1975; 0.15 by 1980",
+     [
+      0.05,
+      0.3
+     ]
+    ],
+    [
+     "insurance_auto_fraud_m",
+     "0.3 by 1980",
+     [
+      0.1,
+      0.6
+     ]
+    ],
+    [
+     "fuel_excise_evasion_m",
+     "1 in 1983 to 3 by 1987",
+     [
+      0.5,
+      8
+     ]
+    ],
+    [
+     "italian_tax_cents_per_gallon",
+     2,
+     null
+    ]
+   ]
+  }
+ }
+}

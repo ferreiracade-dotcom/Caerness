@@ -1,138 +1,375 @@
 {
   "bar": {
-    "name": "Bar", "sector": "hospitality", "enterprise_kind": "service",
-    "base_revenue": 16000, "cost_ratio": 0.60, "regulation": 0.12,
-    "weights": {"foot_traffic": 0.30, "disposable_income": 0.22, "event_activity": 0.18, "security": 0.10, "reputation_climate": 0.12, "cultural_activity": 0.08},
-    "price_refs": ["beer_in_an_ordinary_bar", "ordinary_bar_restaurant_lease"],
+    "name": "Bar",
+    "sector": "hospitality",
+    "enterprise_kind": "service",
+    "base_revenue": 16000,
+    "cost_ratio": 0.6,
+    "regulation": 0.12,
+    "weights": {
+      "foot_traffic": 0.3,
+      "disposable_income": 0.22,
+      "event_activity": 0.18,
+      "security": 0.1,
+      "reputation_climate": 0.12,
+      "cultural_activity": 0.08
+    },
+    "price_refs": [
+      "trade_tavern_sales",
+      "trade_tavern_rent"
+    ],
     "basis": "Dollars per 30 days at full utilisation: about 400 drinks a day at roughly 0.65 average over the bar plus spirits; a middling bar runs near half of this. Rent is the ordinary bar lease.",
     "assumption": true
   },
   "diner": {
-    "name": "Diner", "sector": "hospitality", "enterprise_kind": "service",
-    "base_revenue": 13000, "cost_ratio": 0.80, "regulation": 0.05,
-    "weights": {"foot_traffic": 0.38, "disposable_income": 0.16, "trade_flow": 0.18, "event_activity": 0.08, "security": 0.10, "reputation_climate": 0.10},
-    "price_refs": ["diner_breakfast", "diner_lunch", "diner_coffee"],
+    "name": "Diner",
+    "sector": "hospitality",
+    "enterprise_kind": "service",
+    "base_revenue": 13000,
+    "cost_ratio": 0.8,
+    "regulation": 0.05,
+    "weights": {
+      "foot_traffic": 0.38,
+      "disposable_income": 0.16,
+      "trade_flow": 0.18,
+      "event_activity": 0.08,
+      "security": 0.1,
+      "reputation_climate": 0.1
+    },
+    "price_refs": [
+      "trade_restaurant_sales",
+      "trade_restaurant_rent"
+    ],
     "basis": "About 250 covers a day at roughly 1.75 a check (breakfast and lunch average) over 30 days at full utilisation.",
-    "assumption": true
+    "assumption": true,
+    "price_refs_note": "nearest Part VI 4.4 row: sit-down restaurant"
   },
   "pizzeria": {
-    "name": "Pizzeria", "sector": "hospitality", "enterprise_kind": "shop",
-    "base_revenue": 17000, "cost_ratio": 0.74, "regulation": 0.05,
-    "weights": {"foot_traffic": 0.36, "disposable_income": 0.20, "event_activity": 0.14, "trade_flow": 0.10, "security": 0.10, "reputation_climate": 0.10},
-    "price_refs": ["family_restaurant_meal_per_person", "small_corner_shop_convenience_store"],
+    "name": "Pizzeria",
+    "sector": "hospitality",
+    "enterprise_kind": "shop",
+    "base_revenue": 17000,
+    "cost_ratio": 0.74,
+    "regulation": 0.05,
+    "weights": {
+      "foot_traffic": 0.36,
+      "disposable_income": 0.2,
+      "event_activity": 0.14,
+      "trade_flow": 0.1,
+      "security": 0.1,
+      "reputation_climate": 0.1
+    },
+    "price_refs": [
+      "trade_restaurant_sales",
+      "trade_restaurant_rent"
+    ],
     "basis": "About 220 customers a day at roughly 2.60, the low end of the restaurant meal range for a counter and takeaway trade, over 30 days at full utilisation.",
-    "assumption": true
+    "assumption": true,
+    "price_refs_note": "nearest Part VI 4.4 row: sit-down restaurant"
   },
   "social_club": {
-    "name": "Social Club", "sector": "hospitality", "enterprise_kind": "service",
-    "base_revenue": 6000, "cost_ratio": 0.55, "regulation": 0.10,
-    "weights": {"foot_traffic": 0.14, "disposable_income": 0.18, "event_activity": 0.24, "security": 0.18, "reputation_climate": 0.26},
-    "price_refs": ["beer_in_an_ordinary_bar", "ordinary_bar_restaurant_lease"],
+    "name": "Social Club",
+    "sector": "hospitality",
+    "enterprise_kind": "service",
+    "base_revenue": 6000,
+    "cost_ratio": 0.55,
+    "regulation": 0.1,
+    "weights": {
+      "foot_traffic": 0.14,
+      "disposable_income": 0.18,
+      "event_activity": 0.24,
+      "security": 0.18,
+      "reputation_climate": 0.26
+    },
+    "price_refs": [],
     "basis": "Members' drinks, cards, small dues and the occasional function; a small room that does not sell to the street, so far below a bar of the same size.",
-    "assumption": true
+    "assumption": true,
+    "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
   },
   "nightclub": {
-    "name": "Nightclub", "sector": "entertainment", "enterprise_kind": "service",
-    "base_revenue": 70000, "cost_ratio": 0.72, "regulation": 0.22,
-    "weights": {"foot_traffic": 0.18, "disposable_income": 0.26, "cultural_activity": 0.14, "event_activity": 0.20, "elite_patronage": 0.10, "security": 0.12},
-    "price_refs": ["nightclub_cabaret", "beer_in_an_ordinary_bar"],
+    "name": "Nightclub",
+    "sector": "entertainment",
+    "enterprise_kind": "service",
+    "base_revenue": 70000,
+    "cost_ratio": 0.72,
+    "regulation": 0.22,
+    "weights": {
+      "foot_traffic": 0.18,
+      "disposable_income": 0.26,
+      "cultural_activity": 0.14,
+      "event_activity": 0.2,
+      "elite_patronage": 0.1,
+      "security": 0.12
+    },
+    "price_refs": [
+      "trade_nightclub_sales",
+      "trade_nightclub_rent"
+    ],
     "basis": "About 400 patrons a night at roughly 7 each (cover, drinks, supper) over 26 working nights at full utilisation.",
-    "assumption": true, "capital_sensitive": true
+    "assumption": true,
+    "capital_sensitive": true
   },
   "trucking_firm": {
-    "name": "Trucking Firm", "sector": "logistics", "enterprise_kind": "shipping",
-    "base_revenue": 22000, "cost_ratio": 0.80, "regulation": 0.10,
-    "weights": {"trade_flow": 0.46, "construction_demand": 0.10, "security": 0.14, "credit_demand": 0.08, "reputation_climate": 0.14, "event_activity": 0.08},
-    "price_refs": ["small_trucking_delivery_operation", "warehouse_freight_worker", "light_commercial_van_pickup"],
+    "name": "Trucking Firm",
+    "sector": "logistics",
+    "enterprise_kind": "shipping",
+    "base_revenue": 22000,
+    "cost_ratio": 0.8,
+    "regulation": 0.1,
+    "weights": {
+      "trade_flow": 0.46,
+      "construction_demand": 0.1,
+      "security": 0.14,
+      "credit_demand": 0.08,
+      "reputation_climate": 0.14,
+      "event_activity": 0.08
+    },
+    "price_refs": [
+      "trade_trucking_sales",
+      "trade_trucking_staff_pay"
+    ],
     "basis": "A small fleet of about four trucks at roughly 5,500 a truck a month at full utilisation, with drivers at the freight wage range.",
-    "assumption": true, "capital_sensitive": true
+    "assumption": true,
+    "capital_sensitive": true
   },
   "warehouse": {
-    "name": "Warehouse", "sector": "trade", "enterprise_kind": "other",
-    "base_revenue": 14000, "cost_ratio": 0.62, "regulation": 0.06,
-    "weights": {"trade_flow": 0.48, "security": 0.20, "credit_demand": 0.08, "reputation_climate": 0.10, "foot_traffic": 0.04, "event_activity": 0.10},
-    "price_refs": ["warehouse_lease", "small_warehouse_distribution_business", "warehouse_freight_worker"],
+    "name": "Warehouse",
+    "sector": "trade",
+    "enterprise_kind": "other",
+    "base_revenue": 14000,
+    "cost_ratio": 0.62,
+    "regulation": 0.06,
+    "weights": {
+      "trade_flow": 0.48,
+      "security": 0.2,
+      "credit_demand": 0.08,
+      "reputation_climate": 0.1,
+      "foot_traffic": 0.04,
+      "event_activity": 0.1
+    },
+    "price_refs": [],
     "basis": "Storage and handling fees of about five to six times the monthly lease of an ordinary warehouse at full utilisation.",
-    "assumption": true
+    "assumption": true,
+    "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
   },
   "car_dealership": {
-    "name": "Car Dealership", "sector": "retail", "enterprise_kind": "shop",
-    "base_revenue": 60000, "cost_ratio": 0.90, "regulation": 0.12,
-    "weights": {"disposable_income": 0.30, "credit_demand": 0.20, "foot_traffic": 0.16, "reputation_climate": 0.20, "trade_flow": 0.08, "security": 0.06},
-    "price_refs": ["ordinary_used_car_running", "premium_new_sedan"],
+    "name": "Car Dealership",
+    "sector": "retail",
+    "enterprise_kind": "shop",
+    "base_revenue": 60000,
+    "cost_ratio": 0.9,
+    "regulation": 0.12,
+    "weights": {
+      "disposable_income": 0.3,
+      "credit_demand": 0.2,
+      "foot_traffic": 0.16,
+      "reputation_climate": 0.2,
+      "trade_flow": 0.08,
+      "security": 0.06
+    },
+    "price_refs": [],
     "basis": "About 30 used cars a month at roughly 2,000 at full utilisation; the high cost ratio is the price of the stock sold.",
-    "assumption": true, "capital_sensitive": true
+    "assumption": true,
+    "capital_sensitive": true,
+    "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
   },
   "construction_firm": {
-    "name": "Construction Firm", "sector": "construction", "enterprise_kind": "construction",
-    "base_revenue": 30000, "cost_ratio": 0.85, "regulation": 0.14,
-    "weights": {"construction_demand": 0.46, "trade_flow": 0.12, "credit_demand": 0.10, "reputation_climate": 0.16, "security": 0.06, "disposable_income": 0.10},
-    "price_refs": ["building_trades_worker", "small_construction_contractor"],
+    "name": "Construction Firm",
+    "sector": "construction",
+    "enterprise_kind": "construction",
+    "base_revenue": 30000,
+    "cost_ratio": 0.85,
+    "regulation": 0.14,
+    "weights": {
+      "construction_demand": 0.46,
+      "trade_flow": 0.12,
+      "credit_demand": 0.1,
+      "reputation_climate": 0.16,
+      "security": 0.06,
+      "disposable_income": 0.1
+    },
+    "price_refs": [
+      "trade_concrete_sub_sales",
+      "trade_concrete_sub_staff_pay"
+    ],
     "basis": "A crew of about six trades at the building wage range billed at roughly twice wage cost, plus materials, over 30 days at full utilisation.",
-    "assumption": true, "skill_sensitive": true, "capital_sensitive": true
+    "assumption": true,
+    "skill_sensitive": true,
+    "capital_sensitive": true,
+    "price_refs_note": "nearest Part VI 4.4 row: concrete or masonry subcontractor"
   },
   "laundromat": {
-    "name": "Laundromat", "sector": "retail", "enterprise_kind": "shop",
-    "base_revenue": 9000, "cost_ratio": 0.55, "regulation": 0.04,
-    "weights": {"foot_traffic": 0.40, "disposable_income": 0.12, "security": 0.18, "event_activity": 0.06, "reputation_climate": 0.08, "trade_flow": 0.16},
-    "price_refs": ["laundromat_load", "laundromat"],
+    "name": "Laundromat",
+    "sector": "retail",
+    "enterprise_kind": "shop",
+    "base_revenue": 9000,
+    "cost_ratio": 0.55,
+    "regulation": 0.04,
+    "weights": {
+      "foot_traffic": 0.4,
+      "disposable_income": 0.12,
+      "security": 0.18,
+      "event_activity": 0.06,
+      "reputation_climate": 0.08,
+      "trade_flow": 0.16
+    },
+    "price_refs": [
+      "trade_laundromat_sales",
+      "trade_laundromat_rent"
+    ],
     "basis": "About 400 loads a day at roughly 0.75 including dryers over 30 days at full utilisation.",
     "assumption": true
   },
   "vending_route": {
-    "name": "Vending Route", "sector": "retail", "enterprise_kind": "service",
-    "base_revenue": 6000, "cost_ratio": 0.68, "regulation": 0.06,
-    "weights": {"foot_traffic": 0.34, "disposable_income": 0.16, "trade_flow": 0.18, "security": 0.16, "event_activity": 0.08, "reputation_climate": 0.08},
-    "price_refs": ["cigarette_pack", "diner_coffee"],
+    "name": "Vending Route",
+    "sector": "retail",
+    "enterprise_kind": "service",
+    "base_revenue": 6000,
+    "cost_ratio": 0.68,
+    "regulation": 0.06,
+    "weights": {
+      "foot_traffic": 0.34,
+      "disposable_income": 0.16,
+      "trade_flow": 0.18,
+      "security": 0.16,
+      "event_activity": 0.08,
+      "reputation_climate": 0.08
+    },
+    "price_refs": [
+      "trade_vending_route_sales"
+    ],
     "basis": "About 60 machines at roughly 100 a month each (cigarettes, coffee, candy, jukebox and pinball) at full utilisation; the route driver and the product are most of the cost.",
     "assumption": true
   },
   "numbers_bank": {
-    "name": "Numbers Bank", "sector": "regulated_entertainment", "enterprise_kind": "service",
-    "base_revenue": 60000, "cost_ratio": 0.87, "regulation": 0.55,
-    "weights": {"foot_traffic": 0.24, "disposable_income": 0.26, "security": 0.20, "credit_demand": 0.08, "event_activity": 0.10, "reputation_climate": 0.12},
+    "name": "Numbers Bank",
+    "sector": "regulated_entertainment",
+    "enterprise_kind": "service",
+    "base_revenue": 60000,
+    "cost_ratio": 0.87,
+    "regulation": 0.55,
+    "weights": {
+      "foot_traffic": 0.24,
+      "disposable_income": 0.26,
+      "security": 0.2,
+      "credit_demand": 0.08,
+      "event_activity": 0.1,
+      "reputation_climate": 0.12
+    },
     "price_refs": [],
     "basis": "Gross handle of roughly 2,000 a day over 30 days at full utilisation. The cost ratio follows bible section 7.1: winning hits take most of the handle and the runners and controller the rest, leaving a net take of ten to fifteen percent. Not derived from the price ledger.",
-    "assumption": true, "capital_sensitive": true
+    "assumption": true,
+    "capital_sensitive": true,
+    "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
   },
   "sports_book": {
-    "name": "Sports Book", "sector": "regulated_entertainment", "enterprise_kind": "service",
-    "base_revenue": 90000, "cost_ratio": 0.95, "regulation": 0.55,
-    "weights": {"foot_traffic": 0.12, "disposable_income": 0.28, "event_activity": 0.30, "security": 0.14, "credit_demand": 0.08, "reputation_climate": 0.08},
+    "name": "Sports Book",
+    "sector": "regulated_entertainment",
+    "enterprise_kind": "service",
+    "base_revenue": 90000,
+    "cost_ratio": 0.95,
+    "regulation": 0.55,
+    "weights": {
+      "foot_traffic": 0.12,
+      "disposable_income": 0.28,
+      "event_activity": 0.3,
+      "security": 0.14,
+      "credit_demand": 0.08,
+      "reputation_climate": 0.08
+    },
     "price_refs": [],
     "basis": "Gross handle of roughly 3,000 a day over 30 days at full utilisation. The cost ratio follows bible section 7.1: with 11-to-10 pricing the winners are paid from the losers' money and the book keeps about five percent of balanced handle. Not derived from the price ledger.",
-    "assumption": true, "capital_sensitive": true
+    "assumption": true,
+    "capital_sensitive": true,
+    "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
   },
   "bakery": {
-    "name": "Bakery", "sector": "retail", "enterprise_kind": "shop",
-    "base_revenue": 14000, "cost_ratio": 0.72, "regulation": 0.03,
-    "weights": {"foot_traffic": 0.38, "disposable_income": 0.14, "event_activity": 0.16, "reputation_climate": 0.20, "trade_flow": 0.06, "security": 0.06},
-    "price_refs": ["loaf_of_ordinary_bread", "dozen_eggs"],
+    "name": "Bakery",
+    "sector": "retail",
+    "enterprise_kind": "shop",
+    "base_revenue": 14000,
+    "cost_ratio": 0.72,
+    "regulation": 0.03,
+    "weights": {
+      "foot_traffic": 0.38,
+      "disposable_income": 0.14,
+      "event_activity": 0.16,
+      "reputation_climate": 0.2,
+      "trade_flow": 0.06,
+      "security": 0.06
+    },
+    "price_refs": [
+      "trade_bakery_sales",
+      "trade_bakery_rent"
+    ],
     "basis": "About 350 customers a day at roughly 1.30 (bread, rolls and pastry) over 30 days at full utilisation.",
-    "assumption": true, "skill_sensitive": true
+    "assumption": true,
+    "skill_sensitive": true
   },
   "butcher": {
-    "name": "Butcher", "sector": "retail", "enterprise_kind": "shop",
-    "base_revenue": 16000, "cost_ratio": 0.80, "regulation": 0.05,
-    "weights": {"foot_traffic": 0.34, "disposable_income": 0.18, "reputation_climate": 0.22, "trade_flow": 0.14, "event_activity": 0.06, "security": 0.06},
-    "price_refs": ["small_corner_shop_convenience_store", "gallon_of_milk"],
+    "name": "Butcher",
+    "sector": "retail",
+    "enterprise_kind": "shop",
+    "base_revenue": 16000,
+    "cost_ratio": 0.8,
+    "regulation": 0.05,
+    "weights": {
+      "foot_traffic": 0.34,
+      "disposable_income": 0.18,
+      "reputation_climate": 0.22,
+      "trade_flow": 0.14,
+      "event_activity": 0.06,
+      "security": 0.06
+    },
+    "price_refs": [
+      "trade_bakery_sales",
+      "trade_bakery_rent"
+    ],
     "basis": "About 200 customers a day at roughly 2.75 over 30 days at full utilisation; meat prices are not in the ledger, so the average is an assumption scaled from the grocery rows.",
-    "assumption": true, "skill_sensitive": true
+    "assumption": true,
+    "skill_sensitive": true,
+    "price_refs_note": "Part VI 4.4 'Bakery or pork store' row used for the butcher"
   },
   "funeral_home": {
-    "name": "Funeral Home", "sector": "professional", "enterprise_kind": "service",
-    "base_revenue": 16000, "cost_ratio": 0.55, "regulation": 0.10,
-    "weights": {"health_demand": 0.30, "reputation_climate": 0.34, "foot_traffic": 0.10, "elite_patronage": 0.08, "disposable_income": 0.10, "event_activity": 0.08},
-    "price_refs": [],
+    "name": "Funeral Home",
+    "sector": "professional",
+    "enterprise_kind": "service",
+    "base_revenue": 16000,
+    "cost_ratio": 0.55,
+    "regulation": 0.1,
+    "weights": {
+      "health_demand": 0.3,
+      "reputation_climate": 0.34,
+      "foot_traffic": 0.1,
+      "elite_patronage": 0.08,
+      "disposable_income": 0.1,
+      "event_activity": 0.08
+    },
+    "price_refs": [
+      "trade_funeral_home_sales"
+    ],
     "basis": "About 14 services a month at roughly 1,150 each at full utilisation. The average is the 1980 median adult funeral (about 1,800, outside the ledger and recalled) scaled by the goods ratio; assumption.",
-    "assumption": true, "skill_sensitive": true
+    "assumption": true,
+    "skill_sensitive": true
   },
   "union_local_office": {
-    "name": "Union Local Office", "sector": "labor", "enterprise_kind": "service",
-    "base_revenue": 12000, "cost_ratio": 0.80, "regulation": 0.18,
-    "weights": {"construction_demand": 0.20, "trade_flow": 0.26, "credit_demand": 0.08, "reputation_climate": 0.22, "security": 0.10, "event_activity": 0.14},
-    "price_refs": ["building_trades_worker", "warehouse_freight_worker"],
+    "name": "Union Local Office",
+    "sector": "labor",
+    "enterprise_kind": "service",
+    "base_revenue": 12000,
+    "cost_ratio": 0.8,
+    "regulation": 0.18,
+    "weights": {
+      "construction_demand": 0.2,
+      "trade_flow": 0.26,
+      "credit_demand": 0.08,
+      "reputation_climate": 0.22,
+      "security": 0.1,
+      "event_activity": 0.14
+    },
+    "price_refs": [],
     "basis": "About 800 members paying about 15 a month in dues (a little over one percent of a trades or freight wage) at full utilisation; staff, the hall and pension and welfare administration are most of the cost.",
-    "assumption": true
+    "assumption": true,
+    "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
   }
 }

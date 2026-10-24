@@ -1,5 +1,7 @@
 """Build worlds/saintjude/seed.json (the 1975 starting snapshot) from tools/saintjude_seed_data.py.
 
+Authority is the Saint Jude Setting Bible (Index and Parts I to VI). Every named person is an Example.
+
 Usage: python tools/build_saintjude_seed.py [--check]
 
 Deterministic: ids are stable, lists are sorted by id, birth offsets come from a hash of the person's key.
@@ -23,7 +25,6 @@ from engine.world_package import load_package  # noqa: E402
 
 SEED_PATH = ROOT / "worlds" / "saintjude" / "seed.json"
 PACKAGE = "saintjude"
-YEARS_BACK = 5
 
 
 def pid(key: str) -> str:
@@ -43,9 +44,17 @@ def birth_offset(key: str) -> int:
 
 
 def _prices() -> dict:
+    """Part VI 4.4 trade rows of prices_1975.json, by row key."""
     pkg = load_package(PACKAGE)
     data = json.loads(pkg.data["prices"].read_text(encoding="utf-8"))
-    return {e["key"]: e for e in data["saint_jude_estimates"]}
+    return {r["key"]: r for r in data["rows"]}
+
+
+def _trade_profile(prices: dict, trade: str) -> dict:
+    sales, net = prices[f"trade_{trade}_sales"], prices[f"trade_{trade}_net_pct"]
+    return {"trade": trade, "sales_a_year": {"default": sales["default"], "range": sales["range"], "unit": sales["unit"]},
+            "net_pct_of_sales": {"default": net["default"], "range": net["range"]},
+            "source": f"worlds/saintjude/prices_1975.json trade_{trade}_sales and trade_{trade}_net_pct (Part VI 4.4, Design; the nearest trade)"}
 
 
 def _check_refs() -> None:
@@ -58,7 +67,7 @@ def _check_refs() -> None:
         assert a in places and b in places, (a, b)
     for i in D.INSTITUTIONS:
         assert i["place"] in places, i["key"]
-        assert i["founded"] <= 1975, i["key"]
+        assert i["founded"] is None or i["founded"] <= 1975, i["key"]
         for k in i["owners"] + i["leaders"]:
             assert k in people, (i["key"], k)
     for p in D.PERSONS:
@@ -98,10 +107,10 @@ def build() -> dict:
     for key, name, kind, parent, notes in sorted(D.PLACES, key=lambda x: x[0]):
         places.append({
             "id": plid(key), "name": name, "kind": kind, "state": None, "parent": None, "notes": notes,
-            "canon_status": "working", "coordinates": None, "provenance": ["Codex section 2 (renamed for Saint Jude); Saint Jude bible"],
+            "canon_status": "working", "coordinates": None, "provenance": ["Saint Jude Setting Bible, Parts I to VI"],
             "parent_ref": plid(parent) if parent else None, "identity_certainty": "ESTABLISHED_IDENTITY",
             "placement_certainty": "WORKING_RELATIVE", "coordinate_status": "OPEN_NOT_REQUIRED",
-            "source_anchor": "Saint Jude bible section 2",
+            "source_anchor": "Saint Jude Setting Bible Part I 3.2, 5 and 6",
         })
 
     name_of = {p[0]: p[1] for p in D.PLACES}
@@ -110,7 +119,7 @@ def build() -> dict:
         routes.append({
             "id": f"sj:route:{a}--{b}", "from_name": name_of[a], "to_name": name_of[b], "ordinary": ordinary,
             "courier": courier, "cultivated_light": None, "status": "working", "coordinates_required": False,
-            "provenance": "Saint Jude bible section 2 (estimated city travel times)",
+            "provenance": "Working estimate; the bible gives no travel times",
         })
     routes.sort(key=lambda r: r["id"])
 
@@ -120,43 +129,41 @@ def build() -> dict:
                 "asset_base": i["asset_base"], "debt_state": "NO_SPECIFIC_DEBT_SEEDED",
                 "shock_buffer": {"HIGH": "HIGH", "MEDIUM": "MEDIUM", "LOW": "LOW"}[i["band"]],
                 "canon_status": "ASSUMPTION"}
-        if i["price_key"]:
-            e = prices[i["price_key"]]
-            econ["valuation_1975"] = {"price_key": e["key"], "low": e["low"], "high": e["high"], "unit": e["unit"],
-                                      "source": "worlds/saintjude/prices_1975.json saint_jude_estimates (assumption)"}
+        if i["trade"]:
+            econ["trade_profile_1975"] = _trade_profile(prices, i["trade"])
         n = len(members_of[i["key"]])
         institutions.append({
             "id": iid(i["key"]), "name": i["name"], "category": i["category"], "current": None, "state": "Saint Jude",
             "status": "active", "place": name_of[i["place"]], "seeded_members": sorted(pid(k) for k in members_of[i["key"]]),
-            "notes": i["notes"], "founded": i["founded"], "founded_basis": i["founded_basis"],
+            "notes": i["notes"], "founded": i["founded"], "founded_basis": i["founded_basis"], "canon_tag": i["tag"],
             "owner_refs": sorted(pid(k) for k in i["owners"]),
-            "provenance": [f"Codex ({i['founded_basis']}); Saint Jude bible"], "place_ref": plid(i["place"]), "place_resolution": "KNOWN_WORKING",
+            "provenance": [f"Saint Jude Setting Bible ({i['tag']}); founded: {i['founded_basis']}"], "place_ref": plid(i["place"]), "place_resolution": "KNOWN_WORKING",
             "continuity_core": {
                 "load_bearing": bool(i["leaders"] or i["owners"]), "membership_seed_count": n,
                 "membership_scale_band": "STRUCTURAL_ONLY" if n == 0 else ("SMALL" if n < 4 else "MEDIUM"),
                 "leadership_ids": sorted(pid(k) for k in i["leaders"]), "owner_ids": sorted(pid(k) for k in i["owners"]),
                 "succession_rule": "UNSPECIFIED_BY_CANON", "pipeline_health": "BASELINE_STABLE_TEST_ASSUMPTION",
                 "active_disputes": [], "place_ref": plid(i["place"]),
-                "provenance": "Runtime scaffolding only; the Saint Jude bible is the authority.",
+                "provenance": "Runtime scaffolding only; the Saint Jude Setting Bible is the authority.",
             },
             "economic_state": econ,
         })
 
     persons = []
-    codex_ages: dict[str, int] = {}
-    backdating, age_only, added = [], [], []
     for p in sorted(D.PERSONS, key=lambda x: x["key"]):
         offset = birth_offset(p["key"])
         birth_day = -(p["age"] * 365 + offset)
         assert (-birth_day) // 365 == p["age"]
         bd = world_calendar.birth_date_for(pkg, birth_day)
         pid_ = pid(p["key"])
+        why = {"seat": "Part III 4.6 suggested starting seat", "carried": "old codex cast carried as an Example",
+               "added": "added Example for institutional structure"}[p["source"]]
         persons.append({
             "id": pid_, "name": p["name"], "life_status": "living", "age": p["age"], "core_state": None,
             "current": p["current"], "long_road": False, "institutions": sorted(iid(k) for k in memberships[p["key"]]),
             "state_sphere": None, "role": p["role"], "training_provenance_text": None, "public_identity_text": p["public"],
-            "demographic_sex": p["sex"], "canon_status": "working", "resolution_seed": "TRACKED",
-            "provenance": ["Codex section 10 (back-dated to 1975)" if p["age80"] else "Added for the 1975 snapshot (see meta.added_people)"],
+            "demographic_sex": p["sex"], "canon_status": "working", "canon_tag": "Example", "resolution_seed": "TRACKED",
+            "provenance": [f"Example (replaceable at seed): {why}"],
             "strategic_hint": p["tier"] != "DORMANT",
             "runtime_v1_1": {
                 "location_status": "KNOWN_WORKING", "current_location_ref": plid(p["loc"]), "residence_ref": plid(p["loc"]),
@@ -164,14 +171,6 @@ def build() -> dict:
             },
             "age_basis": "opening_age", "birth_day": birth_day, "birth_date": bd,
         })
-        if p["age80"] is not None:
-            codex_ages[pid_] = p["age80"]
-            assert p["age"] == p["age80"] - YEARS_BACK, p["key"]
-            entry = {"person": pid_, "name": p["name"], "post_1980": p["post80"], "post_1975": p["post75"], "reason": p["reason"]}
-            (age_only if p["post80"] == p["post75"] else backdating).append(entry)
-        else:
-            added.append({"person": pid_, "name": p["name"], "post_1975": p["post75"], "reason": p["reason"],
-                          "codex_named_without_age": p["reason"].startswith("Named in the codex")})
 
     relationships = []
     for n, (typ, a, b, note) in enumerate(sorted(D.RELATIONSHIPS, key=lambda r: (r[0], r[1], r[2])), 1):
@@ -179,15 +178,16 @@ def build() -> dict:
 
     households = [{
         "id": "sj:household:giuseppe-lucia-vannucci", "member_refs": [pid("giuseppe-vannucci"), pid("lucia-vannucci")],
-        "place_ref": plid("oakridge-estates"), "basis": "explicit spouse relationship", "status": "KNOWN_PARTIAL",
+        "place_ref": plid("oakridge"), "basis": "explicit spouse relationship", "status": "KNOWN_PARTIAL",
         "marriage_or_kinship_state": "EXPLICIT_RELATIONS_ONLY", "economic_state": "NOT_SEPARATELY_QUANTIFIED",
     }]
 
     targets = []
     for i in sorted(D.INSTITUTIONS, key=lambda x: x["key"]):
-        if i["key"] in ("sabatini", "castellano", "vannucci", "moretti", "charlestown", "vorovskoy", "mercer-kings", "iron-horsemen"):
+        if i["key"] in ("sabatini", "pellegrino", "ferrante", "vannucci", "charlestown", "eastside-combine", "russians", "iron-horsemen"):
             targets.append({
-                "institution_ref": iid(i["key"]), "opening_named_living": len(members_of[i["key"]]), "minimum_named_layer": 3,
+                "institution_ref": iid(i["key"]), "opening_named_living": len(members_of[i["key"]]),
+                "minimum_named_layer": 0 if i["key"] == "russians" else 3,
                 "crystallization_rule": "ONLY_IF_SIMULATION_NEEDS_A_PERSISTENT_ACTOR_AND_CANON_CONSTRAINTS_EXIST",
             })
 
@@ -202,17 +202,20 @@ def build() -> dict:
     women = sum(1 for p in D.PERSONS if p["sex"] == "female")
     meta = {
         "title": "Saint Jude Initial World-State Seed (1975 snapshot)",
-        "status": "starting snapshot back-dated five years from the 1980 codex; for owner review",
-        "source_authority": ["worlds/saintjude/bible.md", "Bellacorte_Living_World_Codex_Flexible_Date_Final.docx (changeable source)"],
-        "authority_rule": "The Saint Jude bible outranks this seed. Campaign history may add facts but may not rewrite setting canon.",
+        "status": "starting snapshot built from the Saint Jude Setting Bible (October 2026); for owner review",
+        "source_authority": ["Saint Jude Setting Bible: Index and Parts I to VI (worlds/saintjude/bible.md is its packaged form)"],
+        "authority_rule": "The bible outranks this seed. Campaign history may add facts but may not rewrite setting canon.",
         "opening_date": "1975-01-01", "calendar_rule": "Gregorian; day 0 is Wednesday 1 January 1975; birth_day is authoritative arithmetic and birth_date its rendering.",
-        "back_dating_rule": "Everyone is exactly five years younger than the codex's 1980 age; posts are what the man plausibly held in 1975.",
+        "example_rule": "Every named person is an Example (Part III 4.6, Part V 0.2) with canon_tag 'Example' and may be replaced; Fixed history in the claims names no person, only roles and events.",
+        "families_rule": "The four families are Sabatini, Pellegrino, Ferrante and Vannucci (Part III 0). Women are never made (Part I 12.2).",
+        "open_offices_rule": "Offices and institutions are seeded; the names of their holders are Open (Part I 15.1, Part II 10, Index 7) and are not seeded.",
         "no_pressures_rule": "No pressures, secrets, deadlines or plot hooks are stored; motives are ordinary traits.",
-        "codex_1980_ages": dict(sorted(codex_ages.items())),
-        "backdating_notes": backdating, "age_only_changes": age_only, "added_people": added,
-        "removed_post_1975_history": [{"item": a, "handling": b} for a, b in D.REMOVED_HISTORY],
+        "open_office_holders_not_seeded": D.OPEN_OFFICE_HOLDERS,
+        "bible_silent": D.BIBLE_SILENT,
+        "removed_from_old_seed": [{"item": a_, "handling": b_} for a_, b_ in D.REMOVED_FROM_OLD_SEED],
         "judgement_calls": D.JUDGEMENT_CALLS,
-        "counts": {"persons": len(persons), "women": women, "places": len(places), "institutions": len(institutions)},
+        "counts": {"persons": len(persons), "women": women, "places": len(places), "institutions": len(institutions),
+                   "claims": len(D.CLAIMS), "routes": len(routes)},
     }
     return {
         "meta": meta, "places": places, "routes": routes, "institutions": institutions, "persons": persons,
