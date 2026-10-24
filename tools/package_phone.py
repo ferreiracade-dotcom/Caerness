@@ -1,4 +1,4 @@
-"""Build the single zip to copy onto the phone (Termux home) for running and benchmarking Caerness.
+"""Build the single zip to copy onto the phone (Termux home) for running and benchmarking the Narrative Engine.
 
 Usage: python tools/package_phone.py [--out dist/caerness_phone.zip]
 The packaged opening is copied with the SQLite backup API so pending WAL content is included and the

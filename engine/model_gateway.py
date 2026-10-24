@@ -178,7 +178,7 @@ def render_packet(provider: str, request_id: int, task_type: str, payload: dict[
     contract = _task_contract(task_type, request_id)
     rules = _common_rules(task_type)
     return "\n".join([
-        f"# Caerness Engine — {label} Bridge Request #{request_id}",
+        f"# Narrative Engine — {label} Bridge Request #{request_id}",
         "",
         f"You are serving as a bounded `{task_type}` component for a persistent simulation.",
         "The SQLite engine, not you, owns world truth and state mutation.",

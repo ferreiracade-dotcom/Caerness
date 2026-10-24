@@ -1,6 +1,6 @@
-# Caerness connector
+# Narrative Engine connector
 
-A local MCP server so the Claude desktop app can play Caerness. Claude is the game master; the engine is memory and consequence.
+A local MCP server so the Claude desktop app can play the Narrative Engine's worlds (Caerness, Saint Jude). Claude is the game master; the engine is memory and consequence.
 
 1. Install requirements: `python -m pip install -r connector/requirements.txt` (Python 3.13).
 2. Create a campaign and choose the protagonist:

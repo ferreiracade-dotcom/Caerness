@@ -1,4 +1,4 @@
-"""Full-engine phone benchmark: how long Caerness takes to advance the packaged opening.
+"""Full-engine phone benchmark: how long the Narrative Engine takes to advance the packaged opening.
 
 Usage:
   python tools/bench_sim.py [--db data/caerness.db] [--out benchmarks/results/<label>_engine.json]

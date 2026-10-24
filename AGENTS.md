@@ -1,14 +1,19 @@
 # AGENTS.md — start here
 
-Read this first if you are an agent (or human) picking up Caerness. It says what the project is, where work stands, the rules the owner has set, how to run things, and what comes next. It is kept current; `README.md` is the long engine handoff and the many `*_ACCEPTANCE*.md`, `AUDIT_*`, `HANDOFF_*` and `POST_*_ROADMAP` files in the root are **historical evidence**: they do not override this file or README.
+Read this first if you are an agent (or human) picking up the Narrative Engine or one of its worlds. It says what the project is, where work stands, the rules the owner has set, how to run things, and what comes next. It is kept current; `README.md` is the long engine handoff and the many `*_ACCEPTANCE*.md`, `AUDIT_*`, `HANDOFF_*` and `POST_*_ROADMAP` files in the root are **historical evidence**: they do not override this file or README.
 
-## 1. What Caerness is
+## 1. What this is
 
-A persistent low-fantasy world simulation (a murim-style martial world plus Western-style kingdoms) with a narrative camera inside it. **The world exists and changes without the player; the player is the camera, not the centre of causality.** The owner wants to be able to play as a cultivator, a noble rebuilding a county, a soldier or general, a merchant/collector, or an underworld boss. All of those must work on one simulated world.
+The **Narrative Engine**: a persistent world simulation with a narrative camera inside it. **The world exists and changes without the player; the player is the camera, not the centre of causality.** The engine is world-agnostic; each world is a package under `worlds/`:
+
+- **Caerness** (`worlds/caerness/`): a low-fantasy world, a murim-style martial world plus Western-style kingdoms. The owner wants to be able to play as a cultivator, a noble rebuilding a county, a soldier or general, a merchant/collector, or an underworld boss. All of those must work on one simulated world.
+- **Saint Jude** (`worlds/saintjude/`): a mob city from 1 January 1975 (see §2).
+
+The repository folder and the `CAERNESS_*` environment variables, `data/caerness.db`, the deploy units and the VM paths keep their old names so the live connector keeps working; they do not mean the engine is Caerness.
 
 - Engine: Python + SQLite (`engine/`), schema migrations in `engine/db.py` (`SCHEMA_VERSION`), schema in `engine/schema.sql` (re-applied idempotently by `init_db`, so new `IF NOT EXISTS` indexes reach old saves).
-- Canon: `canon/world_bible_current.docx` (the World Bible) and seeds in `canon/` and `game/seeds/`.
-- Packaged opening world: `data/caerness.db` (schema 115, story day 0, 132 travel routes; households quantified and staffed, gap 5).
+- Caerness canon: `canon/world_bible_current.docx` (the World Bible) and seeds in `canon/` and `game/seeds/`. Saint Jude canon: `worlds/saintjude/bible.md`.
+- Packaged opening worlds: `data/saintjude.db`; Caerness `data/caerness.db` (schema 115, story day 0, 132 travel routes; households quantified and staffed, gap 5).
 - Design: `DESIGN.md`. Specs and plans for current work: `docs/superpowers/specs/`, `docs/superpowers/plans/`.
 
 ## 2. Where work stands
@@ -25,7 +30,7 @@ The owner now plays **only through the Claude apps (desktop and phone, Claude Pr
 
 **Latest (2026-10-16, end of day):** step 1 and the remote connector are live; owner playtests found gaps. Next agent: read `docs/superpowers/plans/2026-10-16-connector-handoff.md` first.
 
-**New stream (2026-10-23): world packages and Saint Jude.** Branch `feat/world-packages-bellacorte`. The engine becomes world-agnostic and gains a second world, Saint Jude, a 1980s mob city. Design approved: `docs/superpowers/specs/2026-10-23-bellacorte-living-city-design.md`. Next agent: read `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md` first, then plan project 1.
+**New stream (2026-10-23): world packages and Saint Jude.** Branch `feat/world-packages-saintjude`. The engine becomes world-agnostic and gains a second world, Saint Jude, a 1980s mob city. Design approved: `docs/superpowers/specs/2026-10-23-saint-jude-living-city-design.md`. Next agent: read `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md` first, then plan project 1.
 
 **Saint Jude bible reload (2026-10-24):** the package follows the new bible (Index + Parts I-VI, `worlds/saintjude/bible.md`); state, E-item answers and bible problems are in `docs/superpowers/plans/saintjude-bible-reload/` (`HANDOFF_2.md`, then the report). Packaged opening: `data/saintjude.db` (build with `python tools/build_opening.py --package saintjude`; a new connector campaign takes `CAERNESS_WORLD_PACKAGE`). Measured on the PC: opening 2.6 s, 30-day advance 0.1 s, 1 Jan 1975 to 1 Jan 1980 18.9 s, DB 5.8 MB (9.2 MB in 1980). The opening holds the 51 seeded Example persons and 83 institutions and no unnamed people (the bible invents Open people when needed: Part I 0.1, Part II 10). `tools/leak_scan.py DB` checks a Saint Jude database for Caerness and old-codex vocabulary.
 

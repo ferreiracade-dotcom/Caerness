@@ -1,4 +1,4 @@
-"""Caerness MCP server (stdio). Six tools; every call opens and closes its own connection."""
+"""Narrative Engine MCP server (stdio). Six tools; every call opens and closes its own connection."""
 from __future__ import annotations
 
 import contextlib
@@ -25,7 +25,7 @@ INSTRUCTIONS = INSTRUCTIONS_TEMPLATE.format(name="Caerness")
 
 def make_mcp(**kwargs) -> MCPServer:
     """A fresh MCPServer (the HTTP deployment passes auth settings); call register_tools on it."""
-    return MCPServer("caerness", instructions=INSTRUCTIONS_TEMPLATE.format(name=_display_name()), **kwargs)
+    return MCPServer("narrative-engine", instructions=INSTRUCTIONS_TEMPLATE.format(name=_display_name()), **kwargs)
 
 
 def register_tools(server: MCPServer) -> MCPServer:

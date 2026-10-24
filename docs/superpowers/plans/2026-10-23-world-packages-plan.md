@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.13, SQLite, stdlib only (no python-docx). Tests are plain scripts `tests/<name>_test.py` with a `run()`/asserts, discovered by `tools/run_suite.py` (every `tests/*_test.py`, own process, own scratch DB via `CAERNESS_DB_PATH`, `CAERNESS_TEST_MODE=1`).
 
-**Spec:** `docs/superpowers/specs/2026-10-23-bellacorte-living-city-design.md` (esp. §3.15, §4 leak list, §6, §10, §11, §12, §14). Context and binding rules: `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md`.
+**Spec:** `docs/superpowers/specs/2026-10-23-saint-jude-living-city-design.md` (esp. §3.15, §4 leak list, §6, §10, §11, §12, §14). Context and binding rules: `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md`.
 
 ## Global Constraints
 

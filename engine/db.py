@@ -127,7 +127,7 @@ def _existing_schema_version(path: Path) -> int:
 
 def _backup_raw(path: Path, label: str, *, keep: int = 20) -> str:
     if not _looks_like_caerness(path):
-        raise ValueError("Source does not look like a Caerness database.")
+        raise ValueError("Source does not look like a Narrative Engine database.")
     dest_dir = backup_dir()
     dest_dir.mkdir(parents=True, exist_ok=True)
     safe_label = "" if not label else "_" + "".join(c if c.isalnum() or c in "-_" else "_" for c in label)[:80]
@@ -4789,7 +4789,7 @@ def reset_db(*, force: bool = False, backup: bool = True) -> None:
     exists = any(Path(str(path) + suffix).exists() for suffix in ("", "-wal", "-shm"))
     if exists and not _running_tests() and not force:
         raise RuntimeError(
-            "Refusing to reset a non-test Caerness database without force=True. "
+            "Refusing to reset a non-test Narrative Engine database without force=True. "
             "Use the CLI 'reset --force' command; it creates a safety backup first by default."
         )
     if exists and backup and not _running_tests() and _looks_like_caerness(path):
@@ -4815,7 +4815,7 @@ def restore_db(path: str | Path) -> None:
     if not source.exists():
         raise FileNotFoundError(source)
     if not _looks_like_caerness(source):
-        raise ValueError("Backup does not contain a Caerness world_state table.")
+        raise ValueError("Backup does not contain a Narrative Engine world_state table.")
     target = database_path()
     if target.exists() and not _running_tests():
         _backup_raw(target, "pre_restore")

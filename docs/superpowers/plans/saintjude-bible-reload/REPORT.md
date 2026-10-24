@@ -1,6 +1,6 @@
 # Saint Jude bible reload: the report
 
-**Date:** 2026-10-24. **Branch:** `feat/world-packages-bellacorte`. The authority is the new bible (Index + Parts I–VI), joined verbatim in `worlds/saintjude/bible.md`. Detail lives in this folder: `step1_diff.md` (every change), `e_checks.md` (the first investigation of E-001 to E-028), `HANDOFF.md` and `HANDOFF_2.md` (state between sessions).
+**Date:** 2026-10-24. **Branch:** `feat/world-packages-saintjude`. The authority is the new bible (Index + Parts I–VI), joined verbatim in `worlds/saintjude/bible.md`. Detail lives in this folder: `step1_diff.md` (every change), `e_checks.md` (the first investigation of E-001 to E-028), `HANDOFF.md` and `HANDOFF_2.md` (state between sessions).
 
 ## 1. What changed from the old bible (Step 1, grouped by area)
 

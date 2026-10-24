@@ -1,7 +1,7 @@
 # Saint Jude: world packages and a living mob city
 
 **Status:** design, agreed in conversation on 2026-10-23; awaiting the owner's review of this written spec.
-**Branch:** `feat/world-packages-bellacorte` (from `feat/claude-connector`).
+**Branch:** `feat/world-packages-saintjude` (from `feat/claude-connector`).
 **Source material:** `D:\Theology\Bellacorte_Living_World_Codex_Flexible_Date_Final.docx` (the codex) and `D:\Theology\ChatGPT-Review Bellacorte Update-20261023-1016.md` (its critique).
 
 ## 1. Intent

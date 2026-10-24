@@ -119,7 +119,7 @@ def _find_actor(conn, name: str):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=f"Caerness Engine v{ENGINE_VERSION}")
+    parser = argparse.ArgumentParser(description=f"Narrative Engine v{ENGINE_VERSION}")
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("init")
     sub.add_parser("seed-demo")

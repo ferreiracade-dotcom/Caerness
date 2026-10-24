@@ -22,7 +22,7 @@ SQLITE_MAGIC = b"SQLite format 3\x00"
 
 
 def _check_raw(path: Path) -> None:
-    """Refuse anything that is not a sound Caerness campaign with a protagonist."""
+    """Refuse anything that is not a sound Narrative Engine campaign with a protagonist."""
     from engine.db import SCHEMA_VERSION
 
     with path.open("rb") as fh:
@@ -35,7 +35,7 @@ def _check_raw(path: Path) -> None:
                 raise ValueError("the database failed its integrity check")
             tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
             if not {"actors", "world_state", "player_state"} <= tables:
-                raise ValueError("the file is not a Caerness campaign (actors, world_state or player_state is missing)")
+                raise ValueError("the file is not a Narrative Engine campaign (actors, world_state or player_state is missing)")
             if "engine_meta" in tables:
                 row = conn.execute("SELECT value FROM engine_meta WHERE key='schema_version'").fetchone()
                 if row and str(row[0]).isdigit() and int(row[0]) > SCHEMA_VERSION:

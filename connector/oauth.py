@@ -237,11 +237,11 @@ _SECURITY_HEADERS = {
 
 _PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Caerness sign-in</title>
+<title>Narrative Engine sign-in</title>
 <style>body{{font-family:system-ui,sans-serif;max-width:26rem;margin:3rem auto;padding:0 1rem;line-height:1.4}}
 input,button{{font:inherit;padding:.6rem;width:100%;box-sizing:border-box;margin-top:.6rem}}
 .msg{{color:#9a1c1c}}</style></head><body>
-<h1>Caerness</h1>
+<h1>Narrative Engine</h1>
 {body}
 </body></html>"""
 
@@ -252,7 +252,7 @@ def _page(body: str, status: int = 200) -> HTMLResponse:
 
 def _form(req_id: str, client_name: str, redirect_host: str, message: str = "") -> HTMLResponse:
     msg = f'<p class="msg">{html.escape(message)}</p>' if message else ""
-    body = (f"<p>Allow <strong>{html.escape(client_name)}</strong> ({html.escape(redirect_host)}) to play Caerness?</p>{msg}"
+    body = (f"<p>Allow <strong>{html.escape(client_name)}</strong> ({html.escape(redirect_host)}) to play the Narrative Engine?</p>{msg}"
             f'<form method="post" action="/login"><input type="hidden" name="req" value="{html.escape(req_id)}">'
             '<label>Passphrase<input type="password" name="passphrase" autocomplete="current-password" required autofocus></label>'
             '<button type="submit">Sign in</button></form>')

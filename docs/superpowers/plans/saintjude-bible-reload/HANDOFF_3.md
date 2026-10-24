@@ -1,6 +1,6 @@
 # Handoff 3: bible fixes applied, two tests left to run
 
-Date: 2026-10-24. Branch: `feat/world-packages-bellacorte`. Nothing is committed.
+Date: 2026-10-24. Branch: `feat/world-packages-saintjude`. Nothing is committed.
 Read first: `BIBLE_FIXES.md` (what changed per problem number), then `REPORT.md` section 3 (the 27 problems).
 
 ## Do these first

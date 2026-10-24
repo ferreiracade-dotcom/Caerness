@@ -124,7 +124,7 @@ def run():
     v45_test.run()
     v46_test.run()
     v47_test.run()
-    print("All Caerness Engine v0.47.0 tests passed.")
+    print("All Narrative Engine v0.47.0 tests passed.")
 
 
 if __name__ == "__main__":

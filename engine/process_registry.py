@@ -3,7 +3,7 @@
 Replaces the manually enumerated due-day/execution blocks in engine/simulation.py's
 advance_connection with a single registration point per domain process, following the
 external-code research master's Vivarium-shaped contract (owner/reads/writes/dependencies/
-cadence/events emitted) over a Caerness-owned, SQL-authoritative registry.
+cadence/events emitted) over an engine-owned, SQL-authoritative registry.
 
 Scope of this spike, deliberately: the ~18 recurring "next_X_due_day / process_due_X"
 domain process pairs simulation.py already enumerates by hand. Clocks, actor reviews
@@ -16,7 +16,7 @@ this spike's five properties. New capability added here: durable one-off/schedul
 Mesa's mesa.time (EventList/Event/Priority) was inspected as a candidate backend for the
 in-memory "what's due next" cache. Its EventList is a heapq-backed priority queue with
 weakref callables — appropriate for a live in-process agent scheduler, but the weakref
-storage cannot survive a process restart, and Caerness's persistence/restart requirement
+storage cannot survive a process restart, and the engine's persistence/restart requirement
 is satisfied entirely by SQL, not by whatever sits in front of it. At the current process
 count (~18-30, not thousands), a plain dict-and-min() cache is exactly as fast as a heap
 and needs no dependency. So this registry does NOT depend on Mesa; see

@@ -2,7 +2,7 @@
 
 > **Done (2026-10-24):** Tasks 20-23 and the report are finished; read `REPORT.md` in this folder instead.
 
-**Written:** 2026-10-24. **Branch:** `feat/world-packages-bellacorte`. Read in this order: `AGENTS.md`, `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md` (§4 rules, §6 code map, §7 runbook), `HANDOFF.md` (this folder: the owner's brief, Steps 1 and 2, the E-check summary, the bible-problems list), then this file. This file supersedes HANDOFF.md §3, §4 and §6 where they differ.
+**Written:** 2026-10-24. **Branch:** `feat/world-packages-saintjude`. Read in this order: `AGENTS.md`, `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md` (§4 rules, §6 code map, §7 runbook), `HANDOFF.md` (this folder: the owner's brief, Steps 1 and 2, the E-check summary, the bible-problems list), then this file. This file supersedes HANDOFF.md §3, §4 and §6 where they differ.
 
 **Commits:** `6a9a1fd` holds Steps 1 and 2 (the reload) and the investigation notes. **Everything below in §1 is uncommitted.** The owner commits when asked. Leave `.claude/`, `data/caerness.pre-schema110.db` and `game/campaign_01/backups/` alone.
 

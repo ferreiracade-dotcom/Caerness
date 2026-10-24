@@ -29,7 +29,7 @@ def serve_http(host: str, port: int) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Caerness connector")
+    parser = argparse.ArgumentParser(description="Narrative Engine connector")
     parser.add_argument("--transport", choices=("stdio", "http"), default="stdio")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)

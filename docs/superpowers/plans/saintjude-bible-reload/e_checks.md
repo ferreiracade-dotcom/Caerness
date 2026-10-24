@@ -1,6 +1,6 @@
 # Saint Jude Engine Implications: E-001 to E-028 against the code
 
-Repo D:\Code\Caerness, branch feat/world-packages-bellacorte, HEAD c3e58b2. Read-only. All tests ran on scratch copies under this scratchpad (sj.db etc.), never the live DBs, never the caerness MCP tools.
+Repo D:\Code\Caerness, branch feat/world-packages-saintjude, HEAD c3e58b2. Read-only. All tests ran on scratch copies under this scratchpad (sj.db etc.), never the live DBs, never the caerness MCP tools.
 
 Caveat on the bible: worlds/saintjude/bible.md in the repo is the older codex adaptation (no Fixed/Open/Design/Weather tags, no ranges). The new "Saint Jude Bible Part I..VI" files in Downloads are not loaded by anything. Several NOs below are partly "the engine has not seen the new bible's structure yet".
 

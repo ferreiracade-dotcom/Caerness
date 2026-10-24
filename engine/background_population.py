@@ -16,7 +16,7 @@ The partition's sample_size is NEVER added to source or world population totals.
 Implementation pattern
 ----------------------
 The compact state borrows the useful part of Starsim's People/Arr architecture: stable raw
-slots plus a smaller active-UID view.  Caerness owns the resolution and persistence semantics.
+slots plus a smaller active-UID view.  The engine owns the resolution and persistence semantics.
 SQLite stores source/partition metadata, audit links and the serialized checkpoint; NumPy owns
 the high-volume in-memory state.
 """
