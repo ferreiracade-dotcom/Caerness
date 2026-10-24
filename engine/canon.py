@@ -99,12 +99,30 @@ def extract_docx_blocks(path: Path) -> list[tuple[str, str]]:
 def extract_markdown_blocks(path: Path) -> list[tuple[str, str]]:
     """("Heading N", text) for '#' lines, ("Normal", text) for other non-empty lines, as extract_docx_blocks yields."""
     blocks: list[tuple[str, str]] = []
+    in_part = False  # inside a '## Part ...' / '## Index ...' division
     for line in Path(path).read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
             continue
         m = re.match(r"(#{1,6})\s+(.*\S)", line)
-        blocks.append((f"Heading {len(m.group(1))}", m.group(2)) if m else ("Normal", line))
+        if not m:
+            blocks.append(("Normal", line))
+            continue
+        level = len(m.group(1))
+        if level == 1:
+            in_part = False
+            if any(b == ("Heading 1", m.group(2)) for b in blocks):
+                continue  # each joined Part file repeats the title line; keep the first only
+        elif level == 2:
+            # A joined multi-part bible repeats its '##' section numbers in every Part. Carry the Part
+            # line as a level above the sections that follow, so their heading paths stay distinct.
+            if re.match(r"(Part|Index)\b", m.group(2)):
+                in_part = True
+                blocks.append(("Heading 2", m.group(2)))
+                continue
+        if in_part and level >= 2:
+            level += 1
+        blocks.append((f"Heading {level}", m.group(2)))
     return blocks
 
 

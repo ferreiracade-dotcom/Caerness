@@ -25,6 +25,32 @@ def _packaged_db(pkg_id: str) -> Path:
     return PACKAGED_DB if pkg_id == DEFAULT_PACKAGE else ROOT / "data" / f"{pkg_id}.db"
 
 
+def _bible_needs_index(bible: Path, has_canon: int) -> bool:
+    """True when the campaign has no World Bible index, or the one it has was built from an older file.
+
+    The indexed file's sha256 is canon_sources.content_hash (written by index_canon). An existing index
+    with no row for this bible path (nothing recorded to compare) is left alone, so a Caerness campaign
+    whose bible is unchanged is never re-indexed.
+    """
+    if not has_canon:
+        return True
+    import hashlib
+
+    from engine.canon import ROOT as CANON_ROOT
+    from engine.db import connect
+
+    resolved = bible.resolve()
+    try:
+        key = str(resolved.relative_to(CANON_ROOT))
+    except ValueError:
+        key = str(resolved)
+    with connect() as conn:
+        row = conn.execute("SELECT content_hash FROM canon_sources WHERE source_path=?", (key,)).fetchone()
+    if row is None:
+        return False
+    return row["content_hash"] != hashlib.sha256(resolved.read_bytes()).hexdigest()
+
+
 def open_campaign(name: str, package: str | None = None) -> Path:
     if not isinstance(name, str) or not _NAME.match(name):
         raise ValueError("campaign name must match [A-Za-z0-9_-]{1,40}")
@@ -56,13 +82,11 @@ def open_campaign(name: str, package: str | None = None) -> Path:
         if created:
             set_campaign_package(conn, pkg_id)
         has_canon = conn.execute("SELECT COUNT(*) FROM canon_chunks").fetchone()[0]
-    if not has_canon:  # the packaged world ships without the World Bible index; `lore` needs it
+        bible = current_package(conn).bible_path
+    if bible.exists() and _bible_needs_index(bible, has_canon):
         from engine.canon import index_canon
 
-        with connect() as conn:
-            bible = current_package(conn).bible_path
-        if bible.exists():
-            index_canon(bible)
+        index_canon(bible)  # replaces that source's chunks; the stored content hash is the new file's
     return path
 
 
