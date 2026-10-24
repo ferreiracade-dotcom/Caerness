@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 NEW_FIGURES = (
     "brigades_elders brigades_middle brigades_young brigades_gift_share combine_bankers combine_controllers horsemen_officers "
-    "horsemen_members horsemen_prospects horsemen_dues_share russians_men_minus_senior bolita_bankers bolita_runners executive_share "
+    "horsemen_members horsemen_prospects horsemen_dues_share russians_men_minus_senior bolita_bankers bolita_runners executive_share bank_keep_share associate_pay_cap line_split_low "
     "homicide_honest_share bail_days case_review_days case_close_days pad_captain_officers pad_sergeant_officers pad_patrolman_officers "
     "pad_captain_weekly_usd pad_sergeant_weekly_usd pad_patrolman_weekly_usd pad_envelope_mean_check agency_capacity_low "
     "agency_capacity_mid agency_capacity_high agency_integrity_padded agency_integrity_clean evidence_threshold_homicide "

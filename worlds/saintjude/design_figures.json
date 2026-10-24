@@ -3123,6 +3123,36 @@
    "source": "unsourced",
    "note": "unsourced; share of a young man's/middle man's take that is a gift to an elder"
   },
+  "bank_keep_share": {
+   "default": 0.15,
+   "range": null,
+   "unit": "share of take",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; what a bank controller or runner keeps of what he collects; the rest goes to the banker"
+  },
+  "associate_pay_cap": {
+   "default": 0.5,
+   "range": null,
+   "unit": "share of line take",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; most of the take a patron's associates are paid out of"
+  },
+  "line_split_low": {
+   "default": 0.3,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; when men outnumber slices, the largest line splits at a seeded share between this and one minus this"
+  },
   "combine_bankers": {
    "default": 6,
    "range": null,

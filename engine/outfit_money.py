@@ -25,9 +25,6 @@ from .world_package import outfit_rules, package_for, system_enabled
 
 PERIOD_DAYS = 28
 MIN_ROW = 0.005  # amounts below half a cent are not posted
-ASSOCIATE_PAY_CAP = 0.5  # associates are never paid more than this share of the line take they live off
-# Design proposal (unsourced, like the other upward shares): what a bank controller or runner keeps of what he collects.
-BANK_KEEP_SHARE = 0.15
 
 _DEAD = ("dead", "deceased", "historical")
 
@@ -93,6 +90,7 @@ def _describe(kind: str, place: str | None) -> str:
 def _build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, pools: dict, day: int, seed: int) -> float:
     oid = outfit_actor(conn, spec["institution"])
     kinds = rules["line_kinds"]
+    split_low = float(figure(conn, "line_split_low", default=0.3))
     held: list[tuple[str, float, int]] = []  # (pool, yearly, holding id)
     gross = 0.0
     for pool, p in pools.items():
@@ -138,7 +136,7 @@ def _build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, p
             lines.append([amount, pool, hid, holder])
         for extra in men[len(slices):]:  # more men than slices: the largest line splits further
             big = max(lines, key=lambda ln: ln[0])
-            part = big[0] * rng.uniform(0.3, 0.7)
+            part = big[0] * rng.uniform(split_low, 1.0 - split_low)
             big[0] -= part
             lines.append([part, big[1], big[2], extra])
         for amount, pool, hid, holder in lines:
@@ -324,6 +322,8 @@ def post_period(conn: sqlite3.Connection, day: int, days: int) -> dict[str, floa
     exec_share = float(figure(conn, "executive_share", default=0.25))
     gift = float(figure(conn, "brigades_gift_share", default=0.1))
     dues = float(figure(conn, "horsemen_dues_share", default=0.1))
+    keep = float(figure(conn, "bank_keep_share", default=0.15))
+    pay_cap = float(figure(conn, "associate_pay_cap", default=0.5))
 
     take: dict[int, float] = defaultdict(float)
     hidden: dict[int, float] = defaultdict(float)
@@ -359,7 +359,7 @@ def post_period(conn: sqlite3.Connection, day: int, days: int) -> dict[str, floa
         by_patron[patron].append((a, base * (0.5 + float(r["reliability"]))))
     for patron, assoc in by_patron.items():
         want = sum(e for _, e in assoc)
-        f = min(1.0, ASSOCIATE_PAY_CAP * take[patron] / want)
+        f = min(1.0, pay_cap * take[patron] / want)
         for a, e in assoc:
             e *= f
             if e < MIN_ROW:
@@ -424,7 +424,7 @@ def post_period(conn: sqlite3.Connection, day: int, days: int) -> dict[str, floa
             sup = ros.earner(r["superior_actor_id"])
             bankers = [x for x in ros.top.get(oid, [])]
             dst = sup if sup is not None and sup != a and ros.ranks[sup]["rank_key"] == "banker" else _rendezvous(seed, "bank", a, bankers)
-            amount *= 1.0 - BANK_KEEP_SHARE
+            amount *= 1.0 - keep
         elif kind == "dues" and r["rank_key"] != "president":
             dst, amount = (ros.top.get(oid) or [None])[0], dues * amount
         else:
