@@ -197,6 +197,7 @@ def build() -> dict:
             "id": f"sj:claim:{key}", "type": typ, "subjects": [pid(k) for k in subjects], "text": text,
             "origin_place_refs": [plid(k) for k in origin], "known_at_opening": [plid(k) for k in known],
             "carrier_types": carriers, "confidence": conf, "provenance": prov, "canon_status": "CANONICAL_HISTORY",
+            "tag": D.CLAIM_TAGS[key],
         })
 
     women = sum(1 for p in D.PERSONS if p["sex"] == "female")
@@ -210,7 +211,7 @@ def build() -> dict:
         "families_rule": "The four families are Sabatini, Pellegrino, Ferrante and Vannucci (Part III 0). Women are never made (Part I 12.2).",
         "open_offices_rule": "Offices and institutions are seeded; the names of their holders are Open (Part I 15.1, Part II 10, Index 7) and are not seeded.",
         "no_pressures_rule": "No pressures, secrets, deadlines or plot hooks are stored; motives are ordinary traits.",
-        "open_office_holders_not_seeded": D.OPEN_OFFICE_HOLDERS,
+        "open_offices": D.OPEN_OFFICES,
         "bible_silent": D.BIBLE_SILENT,
         "removed_from_old_seed": [{"item": a_, "handling": b_} for a_, b_ in D.REMOVED_FROM_OLD_SEED],
         "judgement_calls": D.JUDGEMENT_CALLS,

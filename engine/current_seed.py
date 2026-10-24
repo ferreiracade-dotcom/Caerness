@@ -487,6 +487,10 @@ def _import_current_seed(conn: sqlite3.Connection, seed_path: str | Path | None,
         _map(conn, p["id"], "process", pid, p, canon_status=p.get("status"))
     counts["processes"] = len(seed.get("processes", []))
 
+    from . import facts  # tagged bible items (Fixed/Open/Example...); a package whose bible carries no tags gets no table
+    for k, v in facts.load_package_facts(conn, package, seed).items():
+        counts[f"facts_{k}"] = v
+
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_seed_namespace',?)", (ns,))
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_seed_version','1.4')")
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_seed_world_bible_sha256',?)", (expected_hash,))

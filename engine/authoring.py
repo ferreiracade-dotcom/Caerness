@@ -249,6 +249,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     if retired and age is not None and age < 45:
         _no(f"a {work} at that Stage is unheard of unless a retired master (aged 45 or more)")
     _domain(veto.stage_plausible, age if age is not None else 45, work or "soldier", stage)
+    slot = _office_slot(conn, d.get("holds"))
     loc = _place(conn, me, d)
     elsewhere = bool(d.get("from_elsewhere", False))
     wants = _text(d["wants"], "wants", 200) if d.get("wants") is not None else None
@@ -352,9 +353,44 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     for n in notes:
         conn.execute("UPDATE gm_notes SET subject_kind='actor',subject_id=? WHERE id=?", (aid, n))
     name = conn.execute("SELECT name FROM actors WHERE id=?", (aid,)).fetchone()[0]
+    held = _hold_office(conn, slot, aid, day, call_id) if slot is not None else None
     return {"status": "created", "kind": "person", "actor_id": aid, "name": name, "sex": sex, "age": me_age,
             "work": prof["occupation_domain"], "location": conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0],
-            "from": origin, **({"scaled_down": down} if down else {})}
+            "from": origin, **({"holds": held} if held else {}), **({"scaled_down": down} if down else {})}
+
+
+def _office_slot(conn, holds: Any):
+    """The Open office a new person is to hold (`holds`: a slot key or the office in words); refused while a living person holds it."""
+    if holds is None or (isinstance(holds, str) and not holds.strip()):
+        return None
+    from . import facts
+    if not isinstance(holds, str):
+        _no("holds must be the office in words, e.g. \"Killbuck County Prosecutor\"", "input_gap")
+    slot = facts.resolve(conn, holds, open_only=True, loose=True)
+    if slot is None:
+        _no(f"the world has no Open office called {holds!r}; name the office as the setting does (e.g. \"Killbuck County Prosecutor\"), "
+            "or leave `holds` out", "input_gap")
+    try:
+        facts.check_vacant(conn, slot["key"])
+    except facts.FactRefused as e:
+        _no(str(e))
+    return slot
+
+
+def _hold_office(conn, slot, aid: int, day: int, call_id: str) -> str:
+    """Fill the slot and give the holder a membership with the office as his role, so role lookups find him."""
+    from . import facts
+    facts.fill_open(conn, slot["key"], aid, f"authored in play ({call_id})")
+    if slot["institution_key"]:
+        row = conn.execute("SELECT entity_id FROM source_identity_map WHERE source_key=? AND entity_kind='institution'",
+                           (slot["institution_key"],)).fetchone()
+        if row:
+            conn.execute(
+                """INSERT INTO institution_memberships(institution_actor_id,member_actor_id,membership_kind,role_text,status,joined_day)
+                   VALUES (?,?,'office',?,'active',?)
+                   ON CONFLICT(institution_actor_id,member_actor_id,membership_kind) DO UPDATE SET role_text=excluded.role_text,status='active'""",
+                (int(row[0]), aid, slot["subject"], day))
+    return slot["subject"]
 
 
 # ---------------------------------------------------------------- business
@@ -660,6 +696,10 @@ def author(conn: sqlite3.Connection, me: int, kind: str, details: dict, call_id:
     """Make something invented real, or raise AuthoringRefused saying why not. All-or-nothing."""
     d = details if isinstance(details, dict) else {}
     target = _kind_of(kind, d)
+    try:  # the world package's text vetoes: a real town that is not here, a dated rule not yet in force
+        veto.check_world_text(conn, d)
+    except veto.Contradiction as e:
+        raise AuthoringRefused(str(e)) from e
     conn.execute("SAVEPOINT authoring")
     try:
         out = _KINDS[target](conn, int(me), d, str(call_id))

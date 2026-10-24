@@ -12,24 +12,189 @@
   "families_rule": "The four families are Sabatini, Pellegrino, Ferrante and Vannucci (Part III 0). Women are never made (Part I 12.2).",
   "open_offices_rule": "Offices and institutions are seeded; the names of their holders are Open (Part I 15.1, Part II 10, Index 7) and are not seeded.",
   "no_pressures_rule": "No pressures, secrets, deadlines or plot hooks are stored; motives are ordinary traits.",
-  "open_office_holders_not_seeded": [
-   "Mayor",
-   "Police Commissioner",
-   "Chief of Department",
-   "Special Agent in Charge (FBI)",
-   "Strike Force chief",
-   "U.S. Attorney",
-   "Killbuck County Prosecutor",
-   "Marsh County Prosecutor",
-   "State Attorney General",
-   "Medical Examiner",
-   "Superior Court and Municipal Court judges",
-   "Archbishop and pastors",
-   "Mirror and Chronicle publishers",
-   "Port Authority executive director and board",
-   "President of Local 402",
-   "Oakridge police chief",
-   "Sister of Mercy who runs Mercy General"
+  "open_offices": [
+   {
+    "subject": "Mayor",
+    "institution_ref": "sj:institution:city-hall",
+    "aliases": [
+     "Mayor of Saint Jude"
+    ],
+    "plural": false,
+    "source": "Part I 4.6, Part I 15.1"
+   },
+   {
+    "subject": "Police Commissioner",
+    "institution_ref": "sj:institution:sjpd",
+    "aliases": [
+     "SJPD Commissioner",
+     "Commissioner of Police"
+    ],
+    "plural": false,
+    "source": "Part II 10"
+   },
+   {
+    "subject": "Chief of Department",
+    "institution_ref": "sj:institution:sjpd",
+    "aliases": [
+     "SJPD Chief of Department"
+    ],
+    "plural": false,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Special Agent in Charge (FBI)",
+    "institution_ref": "sj:institution:fbi-field-office",
+    "aliases": [
+     "Special Agent in Charge",
+     "FBI Special Agent in Charge",
+     "SAC"
+    ],
+    "plural": false,
+    "source": "Part II 10"
+   },
+   {
+    "subject": "Strike Force chief",
+    "institution_ref": "sj:institution:strike-force",
+    "aliases": [
+     "chief of the Strike Force"
+    ],
+    "plural": false,
+    "source": "Part II 10"
+   },
+   {
+    "subject": "U.S. Attorney",
+    "institution_ref": "sj:institution:us-attorney",
+    "aliases": [
+     "US Attorney",
+     "United States Attorney"
+    ],
+    "plural": false,
+    "source": "Part II 10"
+   },
+   {
+    "subject": "Killbuck County Prosecutor",
+    "institution_ref": "sj:institution:county-prosecutor",
+    "aliases": [
+     "County Prosecutor",
+     "Prosecutor"
+    ],
+    "plural": false,
+    "source": "Part II 10, Part I 4.8"
+   },
+   {
+    "subject": "Marsh County Prosecutor",
+    "institution_ref": "sj:institution:marsh-county-prosecutor",
+    "aliases": [],
+    "plural": false,
+    "source": "Part II 10"
+   },
+   {
+    "subject": "State Attorney General",
+    "institution_ref": null,
+    "aliases": [
+     "Attorney General"
+    ],
+    "plural": false,
+    "source": "Part II 10"
+   },
+   {
+    "subject": "Medical Examiner",
+    "institution_ref": null,
+    "aliases": [
+     "county medical examiner"
+    ],
+    "plural": false,
+    "source": "Part II 10"
+   },
+   {
+    "subject": "Archbishop",
+    "institution_ref": "sj:institution:archdiocese",
+    "aliases": [
+     "Archbishop of Saint Jude"
+    ],
+    "plural": false,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Daily Mirror publisher",
+    "institution_ref": "sj:institution:daily-mirror",
+    "aliases": [
+     "Mirror publisher"
+    ],
+    "plural": false,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Chronicle publisher",
+    "institution_ref": "sj:institution:chronicle",
+    "aliases": [],
+    "plural": false,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Port Authority executive director",
+    "institution_ref": "sj:institution:port-authority",
+    "aliases": [
+     "Port Authority director"
+    ],
+    "plural": false,
+    "source": "Part I 8.1"
+   },
+   {
+    "subject": "President of Local 402",
+    "institution_ref": "sj:institution:local-402",
+    "aliases": [
+     "Local 402 president"
+    ],
+    "plural": false,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Oakridge police chief",
+    "institution_ref": "sj:institution:oakridge-borough-police",
+    "aliases": [
+     "Chief of Oakridge police"
+    ],
+    "plural": false,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Sister of Mercy who runs Mercy General",
+    "institution_ref": "sj:institution:mercy-general",
+    "aliases": [
+     "Mercy General administrator"
+    ],
+    "plural": false,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Superior Court and Municipal Court judges",
+    "institution_ref": null,
+    "aliases": [],
+    "plural": true,
+    "source": "Part I 4.8, Part I 15.1"
+   },
+   {
+    "subject": "Archbishop and pastors",
+    "institution_ref": null,
+    "aliases": [],
+    "plural": true,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Mirror and Chronicle publishers",
+    "institution_ref": null,
+    "aliases": [],
+    "plural": true,
+    "source": "Part I 15.1"
+   },
+   {
+    "subject": "Port Authority board",
+    "institution_ref": "sj:institution:port-authority",
+    "aliases": [],
+    "plural": true,
+    "source": "Part I 8.1"
+   }
   ],
   "bible_silent": [
    "Business and property valuations: bible silent (Part VI gives sales and margins by trade in 4.4, not purchase prices). No valuation field is seeded; where an institution is an ordinary trade (diner, supper club, funeral home, trucking firm, carting firm, tavern, restaurant) economic_state.trade_profile_1975 carries the Part VI 4.4 sales and net-margin rows for the nearest trade.",
@@ -7571,7 +7736,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.3 (Fixed)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:concrete-purge-1974",
@@ -7589,7 +7755,8 @@
    ],
    "confidence": "UNPROVEN_STREET_BELIEF",
    "provenance": "Part I 2.5, Part IV 3.6 (Fixed event; outcome Open)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:dock-strike-massacre-1973",
@@ -7612,7 +7779,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.5 (Fixed; who Open)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:dolan-commission-1970-1972",
@@ -7633,7 +7801,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.5, Part II 2.6 (Fixed; details Open)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:ferrante-schism-1958",
@@ -7655,7 +7824,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.5, 2.6 (Fixed; who started it Open)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:founding-1640s",
@@ -7677,7 +7847,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.1, 2.2 (Fixed)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:harbor-war-1946",
@@ -7700,7 +7871,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.5 (Fixed; details Open)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:harbor-wars-1929-1931",
@@ -7722,7 +7894,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.5 (Fixed; details Open)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:vannucci-split-1967",
@@ -7744,7 +7917,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.5 (Fixed)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   },
   {
    "id": "sj:claim:waterfront-commission-1954",
@@ -7765,7 +7939,8 @@
    ],
    "confidence": "ESTABLISHED_HISTORY",
    "provenance": "Part I 2.5 (Fixed)",
-   "canon_status": "CANONICAL_HISTORY"
+   "canon_status": "CANONICAL_HISTORY",
+   "tag": "Fixed"
   }
  ],
  "processes": []

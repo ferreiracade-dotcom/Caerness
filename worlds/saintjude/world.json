@@ -27,7 +27,9 @@
   "timeline": "timeline.json",
   "prices": "prices_1975.json",
   "taboos": "taboos.json",
-  "names": "names.json"
+  "names": "names.json",
+  "design": "design_figures.json",
+  "gazetteer": "gazetteer.json"
  },
  "name_pools": {
   "male": {
@@ -347,7 +349,61 @@
   "source": "Annual probability of death by exact age, rounded from the US national life tables of the late 1970s (National Center for Health Statistics, United States Life Tables 1975 to 1980; 1979-81 decennial tables for the older ages). Values were recalled and rounded, not copied from the tables; the engine interpolates linearly between listed ages. Recorded as an assumption for the owner to check."
  },
  "background": {
-  "stage_distribution": false
+  "stage_distribution": false,
+  "scale": {
+   "authority": "SAINTJUDE_BIBLE_PART_I_4_1",
+   "military": false,
+   "buckets": {
+    "saintjude_city": {
+     "label": "City of Saint Jude",
+     "population": 1100000,
+     "urban": 1100000,
+     "source": "Bible Part I 4.1: City of Saint Jude proper (also Killbuck County) about 1.1 million in 1975."
+    },
+    "saintjude_metro_remainder": {
+     "label": "Metropolitan remainder (Marsh, Pine and Shore counties, unsplit)",
+     "population": 1300000,
+     "urban": 0,
+     "source": "Bible Part I 4.1: metropolitan area about 2.4 million, less the 1.1 million city. The split of the suburbs among Marsh, Pine and Shore counties is Open in the bible, so the remainder is one unplaced rural_residual source."
+    }
+   },
+   "settlements": {
+    "Saint Jude": {
+     "bucket": "saintjude_city",
+     "population": 1100000,
+     "source": "Bible Part I 4.1 (about 1.1 million in 1975). No per-district figures are given and none are invented."
+    }
+   }
+  },
+  "population_path": {
+   "saintjude_city": {
+    "figure": "population_decline_pct",
+    "sign": -1,
+    "source": "Bible Part I 4.1 Design figure: the city loses about 0.8 percent a year from 1975 (range 0.4 to 1.5); drawn once and held. Net movement (out-migration) closes the gap between natural change and the figure. The metropolitan remainder has no path (the bible gives no suburban figure)."
+   }
+  },
+  "annual_birth_rate": 0.0146,
+  "annual_birth_rate_note": {
+   "assumption": true,
+   "source": "The bible is silent on birth rate. Recalled US 1975 national crude birth rate, about 14.6 per thousand; recorded as an assumption for the owner to check."
+  },
+  "infant_mortality": 0.016,
+  "infant_mortality_note": {
+   "assumption": true,
+   "source": "The bible is silent on infant mortality. Recalled US 1975 national infant mortality, about 16 deaths per 1,000 live births (share of births dying in the first year); recorded as an assumption for the owner to check."
+  },
+  "age_shares": {
+   "0_4": 0.07,
+   "5_12": 0.13,
+   "13_17": 0.095,
+   "18_39": 0.33,
+   "40_59": 0.21,
+   "60_plus": 0.165
+  },
+  "age_shares_note": {
+   "assumption": true,
+   "source": "The bible gives no age structure. Approximate US 1975 national age shares by band, recalled and rounded (sum 1.0); recorded as an assumption for the owner to check."
+  }
  },
  "opening_family": {
   "marry_adults_on_day0": false

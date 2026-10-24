@@ -125,7 +125,7 @@ def run():
         assert int(p["birth_date"].split()[-1]) < 1975, p["name"]
     for k in ("codex_1980_ages", "backdating_notes", "age_only_changes", "added_people", "removed_post_1975_history"):
         assert k not in meta, k
-    assert meta["removed_from_old_seed"] and meta["judgement_calls"] and meta["bible_silent"] and meta["open_office_holders_not_seeded"]
+    assert meta["removed_from_old_seed"] and meta["judgement_calls"] and meta["bible_silent"] and meta["open_offices"]
     assert "Setting Bible" in " ".join(meta["source_authority"])
     person = {p["name"]: p for p in seed["persons"]}
 

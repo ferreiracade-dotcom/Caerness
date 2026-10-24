@@ -648,12 +648,33 @@ CLAIMS = [
 # Review material that ends up in seed meta.
 # --------------------------------------------------------------------------------------------------
 # Offices and institutions seeded without a holder, because the bible leaves the name Open.
-OPEN_OFFICE_HOLDERS = [
-    "Mayor", "Police Commissioner", "Chief of Department", "Special Agent in Charge (FBI)", "Strike Force chief", "U.S. Attorney",
-    "Killbuck County Prosecutor", "Marsh County Prosecutor", "State Attorney General", "Medical Examiner", "Superior Court and Municipal Court judges",
-    "Archbishop and pastors", "Mirror and Chronicle publishers", "Port Authority executive director and board", "President of Local 402",
-    "Oakridge police chief", "Sister of Mercy who runs Mercy General",
+_I = "sj:institution:"
+_P1, _P2, _IX = "Part I 15.1, Part II 10, Index 7", "Part II 10", "Part I 15.1"
+OPEN_OFFICES = [
+    {"subject": "Mayor", "institution_ref": _I + "city-hall", "aliases": ["Mayor of Saint Jude"], "plural": False, "source": "Part I 4.6, Part I 15.1"},
+    {"subject": "Police Commissioner", "institution_ref": _I + "sjpd", "aliases": ["SJPD Commissioner", "Commissioner of Police"], "plural": False, "source": "Part II 10"},
+    {"subject": "Chief of Department", "institution_ref": _I + "sjpd", "aliases": ["SJPD Chief of Department"], "plural": False, "source": "Part I 15.1"},
+    {"subject": "Special Agent in Charge (FBI)", "institution_ref": _I + "fbi-field-office", "aliases": ["Special Agent in Charge", "FBI Special Agent in Charge", "SAC"], "plural": False, "source": "Part II 10"},
+    {"subject": "Strike Force chief", "institution_ref": _I + "strike-force", "aliases": ["chief of the Strike Force"], "plural": False, "source": "Part II 10"},
+    {"subject": "U.S. Attorney", "institution_ref": _I + "us-attorney", "aliases": ["US Attorney", "United States Attorney"], "plural": False, "source": "Part II 10"},
+    {"subject": "Killbuck County Prosecutor", "institution_ref": _I + "county-prosecutor", "aliases": ["County Prosecutor", "Prosecutor"], "plural": False, "source": "Part II 10, Part I 4.8"},
+    {"subject": "Marsh County Prosecutor", "institution_ref": _I + "marsh-county-prosecutor", "aliases": [], "plural": False, "source": "Part II 10"},
+    {"subject": "State Attorney General", "institution_ref": None, "aliases": ["Attorney General"], "plural": False, "source": "Part II 10"},
+    {"subject": "Medical Examiner", "institution_ref": None, "aliases": ["county medical examiner"], "plural": False, "source": "Part II 10"},
+    {"subject": "Archbishop", "institution_ref": _I + "archdiocese", "aliases": ["Archbishop of Saint Jude"], "plural": False, "source": "Part I 15.1"},
+    {"subject": "Daily Mirror publisher", "institution_ref": _I + "daily-mirror", "aliases": ["Mirror publisher"], "plural": False, "source": "Part I 15.1"},
+    {"subject": "Chronicle publisher", "institution_ref": _I + "chronicle", "aliases": [], "plural": False, "source": "Part I 15.1"},
+    {"subject": "Port Authority executive director", "institution_ref": _I + "port-authority", "aliases": ["Port Authority director"], "plural": False, "source": "Part I 8.1"},
+    {"subject": "President of Local 402", "institution_ref": _I + "local-402", "aliases": ["Local 402 president"], "plural": False, "source": "Part I 15.1"},
+    {"subject": "Oakridge police chief", "institution_ref": _I + "oakridge-borough-police", "aliases": ["Chief of Oakridge police"], "plural": False, "source": "Part I 15.1"},
+    {"subject": "Sister of Mercy who runs Mercy General", "institution_ref": _I + "mercy-general", "aliases": ["Mercy General administrator"], "plural": False, "source": "Part I 15.1"},
+    {"subject": "Superior Court and Municipal Court judges", "institution_ref": None, "aliases": [], "plural": True, "source": "Part I 4.8, Part I 15.1"},
+    {"subject": "Archbishop and pastors", "institution_ref": None, "aliases": [], "plural": True, "source": "Part I 15.1"},
+    {"subject": "Mirror and Chronicle publishers", "institution_ref": None, "aliases": [], "plural": True, "source": "Part I 15.1"},
+    {"subject": "Port Authority board", "institution_ref": _I + "port-authority", "aliases": [], "plural": True, "source": "Part I 8.1"},
 ]
+# Explicit bible tag of each seed claim (all are Fixed history; an Open detail inside one is named in its provenance).
+CLAIM_TAGS = {c[0]: "Fixed" for c in CLAIMS}
 
 # Where the bible is silent and the seed records the fact as an assumption or leaves it unplaced.
 BIBLE_SILENT = [

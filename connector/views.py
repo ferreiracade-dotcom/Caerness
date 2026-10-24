@@ -364,6 +364,11 @@ def _role_hits(conn, q: str) -> list[tuple]:
             if r["id"] not in seen:
                 seen.add(r["id"])
                 out.append((r, str(r["role"])))
+    from engine import facts  # holders of filled Open offices ("the Killbuck County Prosecutor")
+    for a, office in facts.holder_hits(conn, q):
+        if a["id"] not in seen:
+            seen.add(a["id"])
+            out.append((a, office))
     return out[:8]
 
 
@@ -436,6 +441,15 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
              ("household", [h for h in _find(conn, "households", q) if _knows_of(conn, me0, "household", h)]),
              ("crew", [c for c in _find(conn, "underworld_crews", q) if _knows_of(conn, me0, "crew", c)])]
     hits = [(k, r) for k, rows in kinds for r in rows]
+    from engine import facts
+    slot = facts.resolve(conn, q, open_only=True)  # an office named in the setting's words is answered by its holder, or by "Open"
+    if slot is not None:
+        holder = facts.holder_of(conn, slot["key"])
+        if holder is None:
+            return {"found": False, "open": True, "office": slot["subject"], "tag": "Open", "fact": "Open: not yet decided",
+                    "text": slot["text"][:300], "key": slot["key"],
+                    "hint": f"nobody is recorded as {slot['subject']}; author a person with holds={slot['subject']!r} to make him real"}
+        hits = [("actor", conn.execute("SELECT * FROM actors WHERE id=?", (holder["actor_id"],)).fetchone())]
     roles = []
     if len(hits) != 1:
         exact = [h for h in hits if str(h[1]["name"]).lower() == q.lower()]
@@ -449,7 +463,9 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
         if roles:
             return {"found": False, "candidates": [f"{r['name']} ({role})" for r, role in roles[:5]], "by_role": True,
                     **({"more_candidates": len(roles) - 5} if len(roles) > 5 else {})}
-        return {"found": False, "candidates": [h[1]["name"] for h in hits[:5]], **({"more_candidates": len(hits) - 5} if len(hits) > 5 else {})}
+        miss = {"found": False, "candidates": [h[1]["name"] for h in hits[:5]], **({"more_candidates": len(hits) - 5} if len(hits) > 5 else {})}
+        known = facts.search(conn, q) if not hits else []
+        return {**miss, "facts": known} if known else miss
     kind, r = hits[0]
     out = {"found": True, "kind": kind, "id": int(r["id"]), "name": r["name"]}
     pl = get_player(conn)
@@ -501,6 +517,21 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
             cm = commitments.active(conn, me, _PAGE, offset)
             if cm:
                 out["commitments"] = [{"what": _clip(c["what"], 140), "kind": c["kind"], "due_day": c["due_day"]} for c in cm]
+    if kind == "actor":
+        office = facts.office_of(conn, out["id"])
+        if office:
+            out["office"] = office
+    if slot is not None:
+        out["fact"] = facts.view_of(conn, slot)
+    else:
+        named = facts.search(conn, str(r["name"]), 3, text_too=False)
+        if kind == "actor":  # a seeded man is an Example: replaceable, and claims never depend on him
+            if any(f["tag"] == "Example" and f["subject"] == r["name"] for f in named):
+                out["tag"] = "Example"
+        elif named:
+            out["facts"] = [f for f in named if f["tag"] != "Example"] or None
+            if out["facts"] is None:
+                del out["facts"]
     notes = store.notes_for(conn, kind, out["id"], _PAGE, offset)
     if notes:
         out["notes"] = [_clip(n, 160) for n in notes]

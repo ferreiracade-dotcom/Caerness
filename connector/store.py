@@ -107,7 +107,7 @@ def notes_count(conn, subject_kind: str, subject_id: int) -> int:
     return int(conn.execute("SELECT COUNT(*) FROM gm_notes WHERE subject_kind=? AND subject_id=?", (subject_kind, int(subject_id))).fetchone()[0])
 
 
-NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error")
+NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact")
 SHEET_FIELDS = ("appearance", "voice", "temperament", "ambitions", "habits", "history", "standing")
 _CLIP = {"recap": 600, "thread": 160, "sheet": 300, "rule": 300, "error": 500}
 MAX_THREADS = 8
@@ -121,10 +121,18 @@ def _clip(text, n: int) -> str:
 
 
 def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "general", subject_id: int | None = None,
-           threads: list[str] | None = None, field: str | None = None) -> dict:
+           threads: list[str] | None = None, field: str | None = None, cause: str | None = None) -> dict:
     """Record something that should last across chats. Does not commit: callers run it inside run_once."""
     if kind not in NOTE_TYPES:
         raise ValueError(f"kind must be one of {NOTE_TYPES}")
+    if kind == "fact":  # field = the fact's key or name; text = what it becomes; a Fixed fact needs a stated cause
+        from engine import facts
+        if not str(field or "").strip():
+            raise ValueError("kind=fact needs field: the key or name of the world fact, and cause when it is Fixed")
+        try:
+            return facts.override(conn, str(field), _clip(text, 500), cause, call_id)
+        except facts.FactRefused as e:
+            raise ValueError(str(e)) from e
     if kind == "detail":
         return add_note(conn, subject_kind, subject_id, text, call_id)
     body = _clip(text, _CLIP[kind])
