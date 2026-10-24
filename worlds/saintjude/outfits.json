@@ -1,0 +1,236 @@
+{
+ "outfits": {
+  "sabatini": {
+   "institution": "Sabatini Family",
+   "shape": "family",
+   "made_men_figure": "made_men_sabatini",
+   "associates_figure": "associates_per_man_sabatini",
+   "name_group": "italian",
+   "ground": [
+    "Crown Harbor",
+    "North Hill",
+    "The Vesuvio Social and Athletic Club"
+   ]
+  },
+  "pellegrino": {
+   "institution": "Pellegrino Family",
+   "shape": "family",
+   "made_men_figure": "made_men_pellegrino",
+   "associates_figure": "associates_per_man_pellegrino",
+   "name_group": "italian",
+   "ground": [
+    "The North Piers",
+    "The Fish Market",
+    "South Hill",
+    "Pier 4 Diner"
+   ]
+  },
+  "ferrante": {
+   "institution": "Ferrante Family",
+   "shape": "family",
+   "made_men_figure": "made_men_ferrante",
+   "associates_figure": "associates_per_man_ferrante",
+   "name_group": "italian",
+   "ground": [
+    "The Racks",
+    "The East Slope",
+    "The I-95 Freight Corridor",
+    "The Pompeii Social Club"
+   ]
+  },
+  "vannucci": {
+   "institution": "Vannucci Family",
+   "shape": "family",
+   "made_men_figure": "made_men_vannucci",
+   "associates_figure": "associates_per_man_vannucci",
+   "name_group": "italian",
+   "ground": [
+    "Mercer Avenue (the Strip)",
+    "The Ironworks",
+    "Killbuck Flats",
+    "The Starlight Cabaret"
+   ]
+  },
+  "brigades": {
+   "institution": "Charlestown Brigades",
+   "shape": "loyalties",
+   "ranks": {
+    "elder": {
+     "figure": "brigades_elders",
+     "level": 4
+    },
+    "middle": {
+     "figure": "brigades_middle",
+     "level": 3
+    },
+    "young": {
+     "figure": "brigades_young",
+     "level": 3
+    }
+   },
+   "name_group": "irish",
+   "upward": {
+    "kind": "gift_to_elder",
+    "figure": "brigades_gift_share"
+   },
+   "ground": [
+    "Kerrytown",
+    "The Harp and Crown"
+   ]
+  },
+  "combine": {
+   "institution": "The Eastside Combine",
+   "shape": "banks",
+   "ranks": {
+    "banker": {
+     "figure": "combine_bankers",
+     "level": 4
+    },
+    "controller": {
+     "figure": "combine_controllers",
+     "level": 3
+    }
+   },
+   "name_group": "black",
+   "upward": {
+    "kind": "bank_net_to_banker"
+   },
+   "ground": [
+    "The Eastside",
+    "Freeman Terraces"
+   ]
+  },
+  "horsemen": {
+   "institution": "Iron Horsemen MC",
+   "shape": "club",
+   "ranks": {
+    "president": {
+     "count": 1,
+     "level": 4
+    },
+    "officer": {
+     "figure": "horsemen_officers",
+     "level": 4
+    },
+    "member": {
+     "figure": "horsemen_members",
+     "level": 3
+    },
+    "prospect": {
+     "figure": "horsemen_prospects",
+     "level": 3
+    }
+   },
+   "upward": {
+    "kind": "dues",
+    "figure": "horsemen_dues_share"
+   },
+   "ground": [
+    "Iron Horsemen Clubhouse"
+   ]
+  },
+  "russians": {
+   "institution": "The Russians of Brighton Point",
+   "shape": "handful",
+   "ranks": {
+    "senior": {
+     "count": 1,
+     "level": 4
+    },
+    "man": {
+     "figure": "russians_men_minus_senior",
+     "level": 3
+    }
+   },
+   "name_group": "soviet_jewish_emigre",
+   "ground": [
+    "Brighton Point"
+   ]
+  },
+  "bolita": {
+   "institution": "The Puerto Rican Blocks",
+   "shape": "banks",
+   "ranks": {
+    "banker": {
+     "figure": "bolita_bankers",
+     "level": 4
+    },
+    "runner": {
+     "figure": "bolita_runners",
+     "level": 3
+    }
+   },
+   "name_group": "puerto_rican_latino",
+   "ground": [
+    "The Racks"
+   ]
+  }
+ },
+ "family_ranks": [
+  "boss",
+  "underboss",
+  "consigliere",
+  "capo",
+  "soldier",
+  "associate"
+ ],
+ "executive_ranks": [
+  "boss",
+  "underboss",
+  "consigliere"
+ ],
+ "seed_role_to_rank": {
+  "Boss": "boss",
+  "Underboss": "underboss",
+  "Consigliere": "consigliere",
+  "Capo": "capo",
+  "Soldier": "soldier",
+  "Associate": "associate"
+ },
+ "male_share": {
+  "made": 1.0,
+  "loyalties": 1.0,
+  "club": 1.0,
+  "handful": 1.0,
+  "associate": 0.995,
+  "banks": 0.99,
+  "pad_officer": 0.99
+ },
+ "cadence_days": {
+  "4": 1,
+  "3": 7
+ },
+ "executive_share_of_boss_receipts": "executive_share",
+ "induction": {
+  "father_name_group": "italian",
+  "vouch_required": true
+ },
+ "line_kinds": {
+  "numbers_it": "a numbers route",
+  "bookmaking": "a book",
+  "layoff_bank": "a layoff book",
+  "cards_dice": "a card game",
+  "loansharking": "a loan book",
+  "protection": "protection on the shops",
+  "concrete_club_and_firms": "a share in a contractor's job",
+  "docks_labor": "a hold on a pier gang",
+  "trucking_labor": "a hold on a trucking local",
+  "building_labor": "a hold on a building local",
+  "garment_labor": "a hold on a garment shop",
+  "hotel_restaurant_labor": "a hold on a hotel or restaurant local",
+  "mill_labor": "a hold on a mill local",
+  "theft": "a theft crew",
+  "hunts_row_tax": "a cut of a Hunts Row dealer",
+  "specialists_fees": "a specialist's fee",
+  "chop_shops": "a chop shop",
+  "untaxed_cigarettes_liquor": "untaxed cigarettes and liquor",
+  "legitimate_fronts": "a front business",
+  "carting_waste": "a carting route",
+  "fish_market": "a stall at the fish market",
+  "tristate_freight": "a freight account",
+  "the_strip": "a club on the Strip",
+  "bolita_tax": "a tax on the bolita banks",
+  "drugs_by_dial_and_ground": "a drug market on the family's ground"
+ },
+ "note": "Every count, share and cadence not printed in the bible is a Design proposal in design_figures.json, referred to here by figure key. male_share, cadence_days and induction values are Design proposals recorded here (Part I 12.4: women never inducted; the rest unsourced). Ground names are rows of the Saint Jude locations table, from Part III 4.0-4.4 and the gazetteer. Motives are added in Tasks 10 and 11."
+}

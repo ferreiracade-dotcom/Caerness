@@ -97,6 +97,11 @@ def _seed_day(conn: sqlite3.Connection) -> tuple[int, int]:
     return int(row[0] or 0), int(row[1] or 0)
 
 
+def run_seed(conn: sqlite3.Connection) -> int:
+    """The run seed draw_all uses (world_state.rng_seed); streams derive from it as f"{run_seed}:{stream}:{key}"."""
+    return _seed_day(conn)[0]
+
+
 def _rng(seed: int, key: str) -> random.Random:
     h = hashlib.sha256(f"design:{seed}:{key}".encode()).digest()
     return random.Random(int.from_bytes(h[:8], "big"))

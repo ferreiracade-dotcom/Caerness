@@ -516,6 +516,7 @@ SYSTEM_PROCESSES = {
     "groundbinding": ("groundbinding",),
     "hollow": ("hollow",),
     "caerness_religions": ("religion",),
+    "outfits": ("outfit_money", "outfit_incidents", "crime_response"),
 }
 
 

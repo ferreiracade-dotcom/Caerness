@@ -3082,6 +3082,358 @@
    "tol": 0.005,
    "mark": "Design",
    "note": "sum over the protection table of payers x weekly default x 52"
+  },
+  "brigades_elders": {
+   "default": 6,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Brigades elder tier (level 4)"
+  },
+  "brigades_middle": {
+   "default": 14,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "brigades_young": {
+   "default": 30,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "brigades_gift_share": {
+   "default": 0.1,
+   "range": null,
+   "unit": "share of take",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; share of a young man's/middle man's take that is a gift to an elder"
+  },
+  "combine_bankers": {
+   "default": 6,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "combine_controllers": {
+   "default": 24,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "horsemen_officers": {
+   "default": 4,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "horsemen_members": {
+   "default": 25,
+   "range": [
+    20,
+    40
+   ],
+   "unit": "men",
+   "tag": "Design",
+   "kind": "draw",
+   "mark": "Design proposal",
+   "source": "Part V 6 (Design: twenty to forty full members in 1975, unsourced); default set inside the range"
+  },
+  "horsemen_prospects": {
+   "default": 20,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Part V 6 says prospects and hangarounds add about as many again as full members"
+  },
+  "horsemen_dues_share": {
+   "default": 0.1,
+   "range": null,
+   "unit": "share of take",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "russians_men_minus_senior": {
+   "default": 6,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "bolita_bankers": {
+   "default": 3,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "bolita_runners": {
+   "default": 9,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "executive_share": {
+   "default": 0.25,
+   "range": null,
+   "unit": "share of boss receipts",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; each of underboss and consigliere gets this share of the boss's receipts"
+  },
+  "homicide_honest_share": {
+   "default": 0.6,
+   "range": null,
+   "unit": "share of homicides",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "Part II 3.4 says the honest Homicide men are out of the Pad's reach; the share is unsourced",
+   "note": "unsourced"
+  },
+  "bail_days": {
+   "default": 3,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "case_review_days": {
+   "default": 14,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "case_close_days": {
+   "default": 90,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "pad_captain_officers": {
+   "default": 35,
+   "range": null,
+   "unit": "officers",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Pad tier: precinct captains and above, and lieutenants (a collapsed tier of the Part VI 7.5 table)"
+  },
+  "pad_sergeant_officers": {
+   "default": 90,
+   "range": null,
+   "unit": "officers",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Pad tier: sergeants and Vice detectives"
+  },
+  "pad_patrolman_officers": {
+   "default": 175,
+   "range": null,
+   "unit": "officers",
+   "tag": "Design",
+   "kind": "derived",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Pad tier: patrolmen, the rest of pad_officers",
+   "formula": "pad_officers-pad_captain_officers-pad_sergeant_officers",
+   "tol": 0.5
+  },
+  "pad_captain_weekly_usd": {
+   "default": 397.5,
+   "range": null,
+   "unit": "USD/week",
+   "tag": "Design",
+   "kind": "derived",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; captain tier weekly envelope; bible 7.5 prints $400 for a precinct captain; scales with pad_total_m so the tiers always average the Pad's mean envelope",
+   "formula": "pad_mean_envelope_usd_year/52*3.9",
+   "tol": 0.01
+  },
+  "pad_sergeant_weekly_usd": {
+   "default": 127.4038,
+   "range": null,
+   "unit": "USD/week",
+   "tag": "Design",
+   "kind": "derived",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; sergeant tier weekly envelope; bible 7.5 prints $100",
+   "formula": "pad_mean_envelope_usd_year/52*1.25",
+   "tol": 0.01
+  },
+  "pad_patrolman_weekly_usd": {
+   "default": 29.7033,
+   "range": null,
+   "unit": "USD/week",
+   "tag": "Design",
+   "kind": "derived",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; patrolman tier weekly envelope; bible 7.5 prints $30",
+   "formula": "pad_mean_envelope_usd_year/52*0.291429",
+   "tol": 0.01
+  },
+  "pad_envelope_mean_check": {
+   "default": 101.9231,
+   "range": null,
+   "unit": "USD/week",
+   "tag": "Design",
+   "kind": "derived",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; derivation check: officer-weighted mean of the three tiers must equal pad_mean_envelope_usd_year/52 within $1",
+   "formula": "(pad_captain_officers*pad_captain_weekly_usd+pad_sergeant_officers*pad_sergeant_weekly_usd+pad_patrolman_officers*pad_patrolman_weekly_usd)/pad_officers",
+   "tol": 1.0
+  },
+  "agency_capacity_low": {
+   "default": 0.3,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; agency capacity tier"
+  },
+  "agency_capacity_mid": {
+   "default": 0.6,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "agency_capacity_high": {
+   "default": 0.85,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "agency_integrity_padded": {
+   "default": 0.35,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a Pad-reachable agency's integrity (Part II 3.4: not all of it is reachable)"
+  },
+  "agency_integrity_clean": {
+   "default": 0.9,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; agencies the Pad does not reach (Part II 3.4)"
+  },
+  "evidence_threshold_homicide": {
+   "default": 0.5,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "evidence_threshold_assault": {
+   "default": 0.6,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "evidence_threshold_robbery": {
+   "default": 0.55,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
+  },
+  "evidence_threshold_racket": {
+   "default": 0.75,
+   "range": null,
+   "unit": "0..1 weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced"
   }
  },
  "pools": {

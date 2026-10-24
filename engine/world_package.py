@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_PACKAGE = "caerness"
 META_KEY = "world_package_id"
 SYSTEM_KEYS = ("cultivation", "elixir", "hollow", "groundbinding", "caerness_underworld",
-               "caerness_religions", "caerness_trade", "merchant_houses")
+               "caerness_religions", "caerness_trade", "merchant_houses", "outfits")
 
 
 class WorldPackageError(ValueError):
@@ -247,3 +247,32 @@ def gazetteer(pkg: "WorldPackage") -> dict:
         except ValueError:
             _GAZ_CACHE[key] = {}
     return _GAZ_CACHE[key]
+
+_RULES_CACHE: dict[tuple, dict] = {}
+
+
+def _data_json(pkg: "WorldPackage", name: str) -> dict:
+    """A package data file parsed as JSON, cached on path and mtime; {} when the package has no such file."""
+    path = pkg.data.get(name)
+    if path is None:
+        return {}
+    try:
+        key = (str(path), path.stat().st_mtime_ns)
+    except OSError:
+        key = (str(path), 0)
+    if key not in _RULES_CACHE:
+        try:
+            _RULES_CACHE[key] = json.loads(path.read_text(encoding="utf-8"))
+        except ValueError:
+            _RULES_CACHE[key] = {}
+    return _RULES_CACHE[key]
+
+
+def outfit_rules(pkg: "WorldPackage") -> dict:
+    """The package's outfit rules (data "outfits"); empty when it has none."""
+    return _data_json(pkg, "outfits")
+
+
+def law_rules(pkg: "WorldPackage") -> dict:
+    """The package's law and enforcement rules (data "law"); empty when it has none."""
+    return _data_json(pkg, "law")

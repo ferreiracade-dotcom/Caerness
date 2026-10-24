@@ -36,7 +36,7 @@ def run():
         from engine.db import SCHEMA_VERSION, _migration_115, connect, init_db
         init_db()
         c = connect()
-        assert SCHEMA_VERSION == 115 and c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 115
+        assert SCHEMA_VERSION >= 115 and c.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION
         rep = json.loads(c.execute("SELECT value FROM engine_meta WHERE key='schema115_report'").fetchone()[0])
         assert rep["quantified"] == 263 and rep["location_less"] == 3 and rep["staff_hired"] > 40, rep
         hh = c.execute("SELECT COUNT(*),SUM(json_extract(metadata_json,'$.economic_basis')='family_means') FROM households").fetchone()

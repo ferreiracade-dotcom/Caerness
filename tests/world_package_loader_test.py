@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 SYSTEM_KEYS = ["cultivation", "elixir", "hollow", "groundbinding", "caerness_underworld",
-               "caerness_religions", "caerness_trade", "merchant_houses"]
+               "caerness_religions", "caerness_trade", "merchant_houses", "outfits"]
 
 
 def _write_pkg(worlds: Path, pkg_id: str, **over):
@@ -40,7 +40,7 @@ def run():
     assert p.calendar["kind"] == "sv"
     assert p.bible_path.resolve() == (ROOT / "canon" / "world_bible_current.docx").resolve()
     assert p.bible_sha256
-    assert set(p.systems) == set(SYSTEM_KEYS) and all(p.systems.values())
+    assert set(p.systems) == set(SYSTEM_KEYS) and all(v for k, v in p.systems.items() if k != "outfits") and not p.systems["outfits"]
     assert p.seed_namespace == "caerness_seed_v1_1"
     assert p.seed_path.exists()
     assert "caerness" in wp.list_packages()

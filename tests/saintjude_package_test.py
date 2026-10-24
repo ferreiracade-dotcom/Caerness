@@ -155,7 +155,7 @@ def run_data():
     assert pkg.id == "saintjude" and pkg.display_name == "Saint Jude"
     assert pkg.calendar == {"kind": "gregorian", "start": "1975-01-01"}, pkg.calendar
     assert pkg.bible_sha256 is None and pkg.seed_namespace == "saintjude_seed_v1"
-    assert set(pkg.systems) == set(wp.SYSTEM_KEYS) and not any(pkg.systems.values()), pkg.systems
+    assert set(pkg.systems) == set(wp.SYSTEM_KEYS) and [k for k, v in pkg.systems.items() if v] == ["outfits"], pkg.systems  # only the outfits system is on
     assert pkg.background["stage_distribution"] is False and pkg.opening_family["marry_adults_on_day0"] is False
     assert pkg.rulebook_section and pkg.creation_section and pkg.bible_path.name == "bible.md"
     for name in ("archetypes", "manners", "timeline", "prices", "taboos", "names"):
@@ -292,7 +292,7 @@ def run_data():
             assert len(g[kind]) >= 6 and len(set(g[kind])) == len(g[kind]), (gname, kind)
     assert "Pellegrino" in names["italian"]["family"] and "Ferrante" in names["italian"]["family"] and "Gabriel" in names["italian"]["male"]
     assert "Castellano" not in names["italian"]["family"] and "Moretti" not in names["italian"]["family"]
-    assert len(names["italian"]["family"]) == 27 and len(names["italian"]["female"]) == 10 and len(names["black"]["female"]) == 6
+    assert len(names["italian"]["family"]) >= 80 and len(names["italian"]["female"]) == 10 and len(names["black"]["female"]) == 6
     assert [k for k, g in names.items() if g["female_source"] == "bible"] == ["italian", "black"]  # the rest are labelled fallbacks
     for kind in ("male", "female", "family"):
         pool = pkg.name_pools[kind]

@@ -1,0 +1,346 @@
+{
+ "about": "Law and enforcement package data for the outfits system (Saint Jude). Numbers are figure keys in design_figures.json (Design proposals). priority: lower is first in line for an ordinary crime in that jurisdiction. Sources: Part II 3.4 (what the Pad cannot buy), Part II 2.7, Part IV 2.7 and 4.4.",
+ "jurisdictions": {
+  "city": {
+   "authority_kind": "municipal",
+   "priority": 1
+  },
+  "killbuck_county": {
+   "authority_kind": "county",
+   "priority": 2
+  },
+  "marsh_county": {
+   "authority_kind": "county",
+   "priority": 2
+  },
+  "state": {
+   "authority_kind": "state",
+   "priority": 3
+  },
+  "federal": {
+   "authority_kind": "federal",
+   "priority": 4
+  }
+ },
+ "agencies": {
+  "sjpd": {
+   "institution": "Saint Jude Police Department",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_high",
+   "integrity": "agency_integrity_padded"
+  },
+  "occd": {
+   "institution": "Organized Crime Control Division",
+   "jurisdiction": "city",
+   "pad_reaches": false,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_clean",
+   "note": "police intelligence unit; Part II 3.4 puts IAD and the honest Homicide men out of reach, this unit is treated alike (unsourced)"
+  },
+  "precinct_2": {
+   "institution": "2nd Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_3": {
+   "institution": "3rd Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_4": {
+   "institution": "4th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_6": {
+   "institution": "6th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_8": {
+   "institution": "8th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_9": {
+   "institution": "9th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_11": {
+   "institution": "11th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_14": {
+   "institution": "14th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_15": {
+   "institution": "15th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_17": {
+   "institution": "17th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_19": {
+   "institution": "19th Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_21": {
+   "institution": "21st Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "precinct_23": {
+   "institution": "23rd Precinct",
+   "jurisdiction": "city",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "killbuck_prosecutor": {
+   "institution": "Killbuck County Prosecutor's Office",
+   "jurisdiction": "killbuck_county",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_padded"
+  },
+  "marsh_prosecutor": {
+   "institution": "Marsh County Prosecutor's Office",
+   "jurisdiction": "marsh_county",
+   "pad_reaches": true,
+   "capacity": "agency_capacity_low",
+   "integrity": "agency_integrity_padded"
+  },
+  "state_ag": {
+   "institution": null,
+   "office": "office:state:state-attorney-general",
+   "jurisdiction": "state",
+   "pad_reaches": false,
+   "capacity": "agency_capacity_mid",
+   "integrity": "agency_integrity_clean",
+   "note": "no institution row in the opening; the office slot exists (level4_offices)"
+  },
+  "fbi": {
+   "institution": "FBI Saint Jude Field Office",
+   "jurisdiction": "federal",
+   "pad_reaches": false,
+   "capacity": "agency_capacity_high",
+   "integrity": "agency_integrity_clean"
+  },
+  "strike_force": {
+   "institution": "Organized Crime and Racketeering Strike Force",
+   "jurisdiction": "federal",
+   "pad_reaches": false,
+   "capacity": "agency_capacity_high",
+   "integrity": "agency_integrity_clean"
+  },
+  "us_attorney": {
+   "institution": "U.S. Attorney's Office",
+   "jurisdiction": "federal",
+   "pad_reaches": false,
+   "capacity": "agency_capacity_high",
+   "integrity": "agency_integrity_clean"
+  }
+ },
+ "rules": {
+  "homicide": {
+   "evidence_threshold": "evidence_threshold_homicide"
+  },
+  "assault": {
+   "evidence_threshold": "evidence_threshold_assault"
+  },
+  "robbery": {
+   "evidence_threshold": "evidence_threshold_robbery"
+  },
+  "racket": {
+   "evidence_threshold": "evidence_threshold_racket"
+  }
+ },
+ "pad_limits": {
+  "public_killing_forces_arrest": true,
+  "killed_officer_all_agencies": true,
+  "new_commander_reopens": true,
+  "honest_homicide_figure": "homicide_honest_share",
+  "source": "Part II 3.4"
+ },
+ "level4_offices": [
+  "office:sjpd:police-commissioner",
+  "office:sjpd:chief-of-department",
+  "office:county-prosecutor:killbuck-county-prosecutor",
+  "office:marsh-county-prosecutor:marsh-county-prosecutor",
+  "office:fbi-field-office:special-agent-in-charge-fbi",
+  "office:strike-force:strike-force-chief",
+  "office:us-attorney:u-s-attorney",
+  "office:state:state-attorney-general",
+  "office:state:medical-examiner",
+  "office:city-hall:mayor",
+  "office:local-402:president-of-local-402"
+ ],
+ "level4_roles": [
+  {
+   "institution": "Saint Jude Police Department",
+   "role_text": "Chief of Detectives",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "Organized Crime Control Division",
+   "role_text": "Head of the Organized Crime Control Division",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "2nd Precinct",
+   "role_text": "Captain, 2nd Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "3rd Precinct",
+   "role_text": "Captain, 3rd Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "4th Precinct",
+   "role_text": "Captain, 4th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "6th Precinct",
+   "role_text": "Captain, 6th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "8th Precinct",
+   "role_text": "Captain, 8th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "9th Precinct",
+   "role_text": "Captain, 9th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "11th Precinct",
+   "role_text": "Captain, 11th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "14th Precinct",
+   "role_text": "Captain, 14th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "15th Precinct",
+   "role_text": "Captain, 15th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "17th Precinct",
+   "role_text": "Captain, 17th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "19th Precinct",
+   "role_text": "Captain, 19th Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "21st Precinct",
+   "role_text": "Captain, 21st Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "23rd Precinct",
+   "role_text": "Captain, 23rd Precinct",
+   "occupation_domain": "soldier"
+  },
+  {
+   "institution": "City Hall",
+   "role_text": "Alderman of a ward on mob ground",
+   "occupation_domain": "clerk",
+   "note": "one per mob ward; the ward lines are Open in the bible (Part IV 4.4 sketch), so the opening builder draws them"
+  },
+  {
+   "institution": "Local 1201, Longshoremen",
+   "role_text": "President of Local 1201, Longshoremen",
+   "occupation_domain": "labor"
+  },
+  {
+   "institution": "Teamsters Local 814",
+   "role_text": "President of Teamsters Local 814",
+   "occupation_domain": "labor"
+  },
+  {
+   "institution": "Building and Construction Trades Council",
+   "role_text": "President of the Building and Construction Trades Council",
+   "occupation_domain": "labor",
+   "created_by_builder": true
+  },
+  {
+   "institution": "Garment Locals",
+   "role_text": "President of the Garment Locals",
+   "occupation_domain": "labor",
+   "created_by_builder": true
+  },
+  {
+   "institution": "Steelworkers' District (Killbuck Steel and the Flats)",
+   "role_text": "President of the Steelworkers' District (Killbuck Steel and the Flats)",
+   "occupation_domain": "labor",
+   "created_by_builder": true
+  },
+  {
+   "institution": "Hotel, Restaurant and Bartenders' Local",
+   "role_text": "President of the Hotel, Restaurant and Bartenders' Local",
+   "occupation_domain": "labor",
+   "created_by_builder": true
+  },
+  {
+   "institution": "Hospital Workers' Local",
+   "role_text": "President of the Hospital Workers' Local",
+   "occupation_domain": "labor",
+   "created_by_builder": true
+  },
+  {
+   "institution": "Sanitation Local",
+   "role_text": "President of the Sanitation Local",
+   "occupation_domain": "labor",
+   "created_by_builder": true
+  },
+  {
+   "institution": "Patrolmen's Benevolent Association",
+   "role_text": "President of the Patrolmen's Benevolent Association",
+   "occupation_domain": "labor",
+   "created_by_builder": true
+  }
+ ]
+}
