@@ -26,11 +26,13 @@ PROPORTION = {"wealth_share": 0.05, "outfit_share": 0.15, "business_share": 0.10
 _KEYWORDS = (
     ("physician", ("physician", "healer", "doctor", "surgeon", "apothecar", "herbal", "midwife", "nurse", "medic", "bonesetter")),
     ("soldier", ("soldier", "guard", "warden", "knight", "captain", "mercenar", "sergeant", "militia", "officer", "marshal", "warrior",
-                 "swordsman", "duelist", "lancer", "archer", "general", "garrison", "cadet")),
+                 "swordsman", "duelist", "lancer", "archer", "general", "garrison", "cadet",
+                 "police", "constable", "sheriff", "deputy", "detective", "patrolm", "trooper")),
     ("criminal", ("thief", "smuggl", "gang", "mobster", "crime", "thug", "gangster", "racket", "fence", "pimp", "bandit", "outlaw", "criminal", "brothel", "gambl", "enforcer",
                   "cutpurse", "underworld", "crime boss", "extortion")),
     ("clerk", ("clerk", "scribe", "notary", "accountant", "bookkeep", "secretary", "steward", "registrar", "archivist", "official",
-               "magistrate", "bailiff", "tax", "reeve")),
+               "magistrate", "bailiff", "tax", "reeve",
+               "mayor", "judge", "prosecutor", "alderman", "councilman", "councillor", "senator", "governor")),
     ("teacher", ("teacher", "tutor", "scholar", "professor", "priest", "monk", "abbot", "instructor", "lecturer", "sage", "preacher")),
     ("hospitality", ("innkeep", "tavern", "inn", "cook", "brewer", "servant", "maid", "butler", "host", "baker", "kitchen", "barkeep", "caterer")),
     ("transport", ("carter", "sailor", "ferry", "courier", "driver", "boatman", "teamster", "navigator", "caravan", "coachman", "porter",
@@ -215,13 +217,19 @@ def name_taken(conn: sqlite3.Connection, name: str | None) -> None:
         raise Contradiction(f"the name {name} is already in use")
 
 
-def name_sex(name: str | None, sex: str | None) -> str | None:
+def name_sex(name: str | None, sex: str | None, conn: sqlite3.Connection | None = None) -> str | None:
     """Names follow sex. Returns the sex the name implies (or None if the given name is unlisted, as single names may be);
     raises if it belongs to the other sex than the one stated."""
     if not name:
         return None
     given = str(name).split(" ", 1)[0]
-    implied = "female" if given in FIRST_FEMALE else "male" if given in FIRST_MALE else None
+    implied = None
+    if conn is not None:  # a given name found only on one sex's list in the world package's name pools
+        from .demographic_sex import _package_names
+        pk = _package_names(conn)
+        if pk and (given in pk[0]) != (given in pk[1]):
+            implied = "male" if given in pk[0] else "female"
+    implied = implied or ("female" if given in FIRST_FEMALE else "male" if given in FIRST_MALE else None)
     if sex in ("male", "female") and implied and implied != sex:
         raise Contradiction(f"the name {given} belongs to the other sex; names follow sex (stated {sex})")
     return implied
@@ -371,7 +379,7 @@ def check_proposal(conn: sqlite3.Connection, proposal: dict) -> dict:
     canon_figure(conn, name)
     check_world_text(conn, {k: v for k, v in p.items() if k != "name"})
     name_taken(conn, name)
-    implied = name_sex(name, p.get("sex"))
+    implied = name_sex(name, p.get("sex"), conn)
     sex = p.get("sex") if p.get("sex") in ("male", "female") else implied
     age = p.get("age")
     if isinstance(age, bool) or not isinstance(age, int) or age < 0:

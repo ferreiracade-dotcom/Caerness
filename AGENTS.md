@@ -27,6 +27,8 @@ The owner now plays **only through the Claude apps (desktop and phone, Claude Pr
 
 **New stream (2026-10-23): world packages and Saint Jude.** Branch `feat/world-packages-bellacorte`. The engine becomes world-agnostic and gains a second world, Saint Jude, a 1980s mob city. Design approved: `docs/superpowers/specs/2026-10-23-bellacorte-living-city-design.md`. Next agent: read `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md` first, then plan project 1.
 
+**Saint Jude bible reload (2026-10-24):** the package follows the new bible (Index + Parts I-VI, `worlds/saintjude/bible.md`); state, E-item answers and bible problems are in `docs/superpowers/plans/saintjude-bible-reload/` (`HANDOFF_2.md`, then the report). Packaged opening: `data/saintjude.db` (build with `python tools/build_opening.py --package saintjude`; a new connector campaign takes `CAERNESS_WORLD_PACKAGE`). Measured on the PC: opening 2.6 s, 30-day advance 0.1 s, 1 Jan 1975 to 1 Jan 1980 18.9 s, DB 5.8 MB (9.2 MB in 1980). The opening holds the 51 seeded Example persons and 83 institutions and no unnamed people (the bible invents Open people when needed: Part I 0.1, Part II 10). `tools/leak_scan.py DB` checks a Saint Jude database for Caerness and old-codex vocabulary.
+
 ### Earlier streams (2026-10-09)
 
 Branches: **`master` is current.** `worldhist01a-stage1` and `pop01-phase0` are the feature branches it was fast-forwarded from (kept for history).

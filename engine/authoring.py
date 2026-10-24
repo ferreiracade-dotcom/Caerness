@@ -258,7 +258,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
         full = _text(d["name"], "name", 60)  # a single name ("Brother Tam") is a name
         _domain(veto.canon_figure, conn, full)
         _domain(veto.name_taken, conn, full)
-        implied = _domain(veto.name_sex, full, sex)
+        implied = _domain(veto.name_sex, full, sex, conn)
         sex = sex or implied
     sex_drawn = sex is None
     if sex_drawn:  # nobody said: the name, else a seeded roll

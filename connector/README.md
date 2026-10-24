@@ -63,6 +63,10 @@ Restore a snapshot on the VM:
 | Tool times out after 240 s | Lower `CAERNESS_MAX_ADVANCE_DAYS` in `/etc/caerness/caerness.env` (default and hard maximum 30), restart |
 | Signed out after a long time | Refresh tokens last 90 days and rotate on use; sign in again from the connector's settings |
 
+## World packages: Caerness or Saint Jude
+
+A new campaign copies its package's opening world: `data/caerness.db` for Caerness, `data/saintjude.db` for Saint Jude (rebuild with `python tools/build_opening.py --package saintjude`). The server's campaign (`CAERNESS_CAMPAIGN`, default `main`) is created in the package named by `CAERNESS_WORLD_PACKAGE` (unset means Caerness). Once a campaign exists, its package is the one recorded in its database, whatever the variable says. To play Saint Jude on the VM, ship `data/saintjude.db` with the update, set `CAERNESS_WORLD_PACKAGE=saintjude` and a new `CAERNESS_CAMPAIGN` name in `/etc/caerness/caerness.env`, and restart `caerness` (switch the two back to return to the Caerness campaign). Existing Caerness campaigns need nothing.
+
 ## New campaigns: the protagonist
 
 A campaign with no protagonist answers `resume` with `needs_character` and the world package's creation text (`worlds/<id>/creation_section.md`). The GM designs the person with the player and calls `author` with `kind="protagonist"` (preview with `accept=false`, then `accept=true`). The engine only vetoes contradictions (`engine/veto.py`), scales down what the place cannot supply, and fills a lived past (`engine/new_character.py`). `python tools/give_lived_past.py --campaign NAME [--apply]` gives an existing protagonist the same kind of past.

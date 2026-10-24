@@ -63,7 +63,14 @@ def _mapped(conn: sqlite3.Connection, source_key: str) -> tuple[str, int] | None
     return (str(r[0]), int(r[1])) if r else None
 
 
+def _cultivation_on() -> bool:
+    pkg = _ACTIVE.get("package")
+    return pkg is None or bool(pkg.systems.get("cultivation", True))
+
+
 def _map(conn: sqlite3.Connection, source_key: str, entity_kind: str, entity_id: int, item: dict[str, Any], *, canon_status: str | None = None) -> None:
+    if not _cultivation_on():
+        item = {k: v for k, v in item.items() if k != "cultivated_light"}
     conn.execute(
         """INSERT INTO source_identity_map(source_namespace,source_key,entity_kind,entity_id,canon_status,provenance_json,source_payload_json,created_day,updated_day)
            VALUES (?,?,?,?,?,?,?,?,?)
@@ -294,7 +301,7 @@ def _ensure_person(conn: sqlite3.Connection, item: dict[str, Any]) -> int:
         "state_sphere": item.get("state_sphere"), "role": item.get("role"), "training_provenance_text": item.get("training_provenance_text"),
         "public_identity_text": item.get("public_identity_text"), "training_state": runtime.get("training_state"),
     }
-    upsert_continuity_core(conn, "actor", aid, core, source_kind="canon", notes="Current seed identity; competence is not derived from Stage.")
+    upsert_continuity_core(conn, "actor", aid, core, source_kind="canon", notes="Current seed identity; competence is not derived from Stage." if _cultivation_on() else "Current seed identity.")
     level = "TRACKED" if item.get("life_status") == "living" else "STRUCTURAL"
     set_resolution(conn, "actor", aid, level, reason=runtime.get("resolution_reason") or "named persistent seed", locked_min_level="STRUCTURAL", review_cadence_days=90 if level == "TRACKED" else 365, next_review_day=90 if level == "TRACKED" else 365, metadata={"source_id": item["id"], "seed_tier": runtime.get("resolution_tier")})
     _map(conn, item["id"], "actor", aid, item, canon_status=item.get("canon_status"))
@@ -366,7 +373,7 @@ def _import_current_seed(conn: sqlite3.Connection, seed_path: str | Path | None,
             else:
                 cur = conn.execute(
                     "INSERT INTO travel_routes(from_location_id,to_location_id,route_kind,base_days,status,metadata_json) VALUES (?,?,'road',?,?,?)",
-                    (int(a[0]), int(b[0]), _route_days(item.get("ordinary")), "open" if item.get("status") == "working" else "restricted", _j({"ordinary":item.get("ordinary"),"courier":item.get("courier"),"cultivated_light":item.get("cultivated_light"),"coordinates_required":item.get("coordinates_required")})),
+                    (int(a[0]), int(b[0]), _route_days(item.get("ordinary")), "open" if item.get("status") == "working" else "restricted", _j({"ordinary":item.get("ordinary"),"courier":item.get("courier"),**({"cultivated_light":item.get("cultivated_light")} if _cultivation_on() else {}),"coordinates_required":item.get("coordinates_required")})),
                 )
                 rid = int(cur.lastrowid)
             _map(conn, item["id"], "route", rid, item, canon_status=item.get("status"))

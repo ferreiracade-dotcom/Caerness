@@ -33,6 +33,8 @@ def build_opening(db_path: Path, seed_path: Path | None = None, package: str = "
     if package != DEFAULT_PACKAGE and package not in list_packages():
         raise ValueError(f"unknown package {package!r}")
     os.environ["CAERNESS_DB_PATH"] = str(db_path)
+    # init_db names the world from the configured package, so the argument must win over a stale environment.
+    os.environ["CAERNESS_WORLD_PACKAGE"] = package
     from engine.activation import activate_existing_loops
     from engine.current_seed import DEFAULT_CURRENT_SEED, import_current_seed
     from engine.db import connect, init_db
@@ -79,8 +81,23 @@ def fingerprint(db_path: Path) -> dict[str, str]:
         conn.close()
 
 
+def build_packaged(package: str, out: Path) -> None:
+    """Write a package's opening world (e.g. data/saintjude.db) through a temp file, so a failed build leaves none."""
+    tmp = out.with_name(out.name + ".building")
+    for p in (tmp, Path(f"{tmp}-wal"), Path(f"{tmp}-shm")):
+        p.unlink(missing_ok=True)
+    build_opening(tmp, package=package)
+    os.replace(tmp, out)
+    print(f"wrote {out} ({out.stat().st_size / 1e6:.1f} MB)")
+
+
 def main() -> None:
     import tempfile
+    if "--package" in sys.argv:
+        package = sys.argv[sys.argv.index("--package") + 1]
+        out = Path(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv else ROOT / "data" / f"{package}.db"
+        build_packaged(package, out)
+        return
     write = "--write-fixture" in sys.argv
     with tempfile.TemporaryDirectory() as tmp:
         db = Path(tmp) / "opening.db"

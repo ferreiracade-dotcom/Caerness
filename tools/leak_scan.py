@@ -55,7 +55,12 @@ ALLOW: tuple[tuple[str, str], ...] = (
 
 # Tables that are engine vocabulary and never reach Claude. Each needs a reason. Deliberately empty:
 # every table found leaking is reported first and only moved here once shown to be unread by the connector.
-ALLOW_TABLES: dict[str, str] = {}
+ALLOW_TABLES: dict[str, str] = {
+    "schema_migrations": "migration ledger written by init_db; no connector or engine view returns its text",
+    "engine_meta": "engine key/value bookkeeping (versions, cycle markers); only looked up by key, never listed to Claude",
+    "coverage_registry": "engine self-audit registry (engine/coverage.py); connector never imports it",
+    "process_execution_log": "engine process timing/result log; connector never reads it",
+}
 
 # canon_chunks / canon_sources rows that belong to the package's own bible are the authority, so they are skipped.
 _OWN_BIBLE_NAME = "bible.md"
@@ -148,14 +153,37 @@ def _seed_text_without_meta() -> str:
     return "\n".join(s for _, s in _walk_json(d))
 
 
+def _pool_names() -> set[str]:
+    """Every given name and surname in the package's name pools (names.json male/female/family lists)."""
+    p = PACKAGE_DIR / "names.json"
+    out: set[str] = set()
+    if not p.exists():
+        return out
+
+    def walk(node):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k in ("male", "female", "family") and isinstance(v, list):
+                    out.update(x for x in v if isinstance(x, str))
+                else:
+                    walk(v)
+
+    walk(json.loads(p.read_text(encoding="utf-8")))
+    return out
+
+
 def _split_old_bible() -> tuple[tuple[str, ...], tuple[str, ...]]:
     # The authorities are the new bible AND the Saint Jude seed (minus meta): a candidate present in either is
     # a 1975 name, not a leak (e.g. Arthur Blum, Mikey Saints, Teamsters Local 814 are seeded cast/institutions).
+    # A two-word name made only of pool names (e.g. Hector Rivera) can be drawn by the name generator, so finding
+    # it proves nothing; such a man's nickname, where he had one, stays on the list.
     bible = _bible_text() + "\n" + _seed_text_without_meta()
+    pool = _pool_names()
     keep: list[str] = []
     dropped: list[str] = []
     for s in _OLD_BIBLE_CANDIDATES:
-        if bible and re.search(_word_re(s), bible):
+        parts = s.split()
+        if (bible and re.search(_word_re(s), bible)) or (len(parts) == 2 and all(t in pool for t in parts)):
             dropped.append(s)
         else:
             keep.append(s)

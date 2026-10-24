@@ -237,10 +237,12 @@ def draw_family_history(key: str, *, age: float, sex: str, longevity_class: str,
 
 def _spouse_name(conn: sqlite3.Connection, key: str, sex: str) -> str:
     from .demographic_sex import FEMALE_GIVEN_NAMES, MALE_GIVEN_NAMES
+    from .demographic_sex import package_person_name
     given = sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
     rng = _rng(f"name:{key}")
     for _ in range(400):
-        name = f"{rng.choice(given)} {rng.choice(_SPOUSE_SURNAMES)}"
+        pk = package_person_name(conn, rng, sex)
+        name = f"{pk[0]} {pk[1]}" if pk else f"{rng.choice(given)} {rng.choice(_SPOUSE_SURNAMES)}"
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
             return name
     raise RuntimeError("could not produce a unique spouse name")
@@ -734,7 +736,7 @@ def reveal_latent_adult_child(conn: sqlite3.Connection, parent_id: int, *, reaso
     families concentrates them").
     """
     from .continuity import set_resolution
-    from .demographic_sex import FEMALE_GIVEN_NAMES, MALE_GIVEN_NAMES, seeded_sex
+    from .demographic_sex import FEMALE_GIVEN_NAMES, MALE_GIVEN_NAMES, package_given_pool, package_person_name, seeded_sex
     from .household_life import add_kinship
     from .resolution_controller import _materialize_latent_person
     day = _day(conn) if day is None else int(day)
@@ -760,8 +762,11 @@ def reveal_latent_adult_child(conn: sqlite3.Connection, parent_id: int, *, reaso
         key = f"latent-child:{int(g['id'])}:{bd}"
         sex = seeded_sex(key)
         rng = _rng(key)
-        given = sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
-        surname = _surname(pname) or rng.choice(_SPOUSE_SURNAMES)
+        surname = _surname(pname)
+        given = package_given_pool(conn, sex, surname) or sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
+        if not surname:
+            pk = package_person_name(conn, rng, sex)
+            surname = pk[1] if pk else rng.choice(_SPOUSE_SURNAMES)
         name = None
         for _ in range(400):
             cand = f"{rng.choice(given)} {surname}"

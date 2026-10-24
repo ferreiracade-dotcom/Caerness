@@ -7,7 +7,7 @@ import shutil
 import sqlite3
 from pathlib import Path
 
-from engine.world_package import DEFAULT_PACKAGE, current_package, load_package, set_campaign_package
+from engine.world_package import DEFAULT_PACKAGE, configured_package_id, current_package, load_package, set_campaign_package
 
 ROOT = Path(__file__).resolve().parent.parent
 PACKAGED_DB = ROOT / "data" / "caerness.db"
@@ -57,7 +57,7 @@ def open_campaign(name: str, package: str | None = None) -> Path:
     path = campaign_dir() / f"{name}.db"
     created = False
     if not path.exists():
-        pkg_id = package or DEFAULT_PACKAGE
+        pkg_id = package or configured_package_id()  # CAERNESS_WORLD_PACKAGE picks a new campaign's world; unset is Caerness
         load_package(pkg_id)  # unknown or broken package raises before anything is written
         source = _packaged_db(pkg_id)
         if not source.is_file():

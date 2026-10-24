@@ -99,8 +99,65 @@ def _canon_text_sex(name: str, payload: dict[str, Any], source_key: str | None =
     return "female" if female and not male else "male" if male and not female else None
 
 
-def _given_name_sex(name: str) -> str | None:
+def _package_names(conn: sqlite3.Connection | None):
+    """(male, female) given-name sets from the active world package's name pools and groups, or None when it has none."""
+    if conn is None:
+        return None
+    from .world_package import package_for
+    pkg = package_for(conn)
+    male: set[str] = set()
+    female: set[str] = set()
+    for g in (pkg.name_groups or {}).values():
+        male.update(g.get("male", ())); female.update(g.get("female", ()))
+    pools = pkg.name_pools or {}
+    male.update(pools.get("male") or ()); female.update(pools.get("female") or ())
+    return (male, female) if male or female else None
+
+
+def package_given_pool(conn: sqlite3.Connection, sex: str, family: str | None = None) -> list[str] | None:
+    """Sorted given names of this sex from the world package (the family's own group when it has one), else None
+    so the caller keeps the Caerness lists."""
+    from .world_package import package_for
+    pkg = package_for(conn)
+    key = "female" if sex == "female" else "male"
+    groups = pkg.name_groups or {}
+    home = [g for g in groups.values() if family and family in g.get("family", ())]
+    names = [n for g in (home or groups.values()) for n in g.get(key, ())]
+    if not names:
+        names = list((pkg.name_pools or {}).get(key) or ())
+    return sorted(dict.fromkeys(names)) or None
+
+
+def package_person_name(conn: sqlite3.Connection, rng, sex: str) -> tuple[str, str] | None:
+    """A (given, family) pair from one weighted package name group, so the pair never crosses groups; None when the
+    package has no name pools (the Caerness lists stay in force)."""
+    from .world_package import package_for
+    pkg = package_for(conn)
+    key = "female" if sex == "female" else "male"
+    groups = {k: g for k, g in (pkg.name_groups or {}).items() if g.get(key) and g.get("family")}
+    if groups:
+        keys = sorted(groups)
+        w = [float(groups[k].get("weight", 1.0)) for k in keys]
+        g = groups[rng.choices(keys, weights=w if sum(w) > 0 else None)[0]]
+        return rng.choice(sorted(g[key])), rng.choice(sorted(g["family"]))
+    pools = pkg.name_pools or {}
+    def draw(p):
+        if isinstance(p, dict):
+            ks = sorted(p)
+            return rng.choices(ks, weights=[float(p[k]) for k in ks])[0]
+        return rng.choice(sorted(p))
+    if pools.get(key) and pools.get("family"):
+        return draw(pools[key]), draw(pools["family"])
+    return None
+
+
+def _given_name_sex(name: str, conn: sqlite3.Connection | None = None) -> str | None:
     _, given = _split_name(name)
+    pk = _package_names(conn)
+    if pk and given:
+        in_m, in_f = given in pk[0], given in pk[1]
+        if in_m != in_f:
+            return "male" if in_m else "female"
     if given in FEMALE_GIVEN_NAMES:
         return "female"
     if given in MALE_GIVEN_NAMES:
@@ -170,7 +227,7 @@ def resolve_missing_demographic_sex(conn: sqlite3.Connection, *, actor_id: int |
         if sex is None and aid in mantle:
             sex, basis = "male", "canon_rule"
         if sex is None:
-            sex, basis = _given_name_sex(name), "given_name"
+            sex, basis = _given_name_sex(name, conn), "given_name"
         if sex is None:
             sex, basis = seeded_sex(source_key or f"actor:{world_seed}:{aid}"), "seeded_roll"
         conn.execute(

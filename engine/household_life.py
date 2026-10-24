@@ -308,7 +308,8 @@ def _newborn_name(conn: sqlite3.Connection, father: int, mother: int, sex: str, 
     import hashlib
     names = {int(r[0]): str(r[1]) for r in conn.execute("SELECT id,name FROM actors WHERE id IN (?,?)", (father, mother))}
     family = _family_name(names.get(father, "")) or _family_name(names.get(mother, ""))
-    pool = sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
+    from .demographic_sex import package_given_pool
+    pool = package_given_pool(conn, sex, family) or sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
     start = int(hashlib.sha256(key.encode()).hexdigest(), 16) % len(pool)
     for given in pool[start:] + pool[:start]:
         name = f"{given} {family}" if family else given

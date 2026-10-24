@@ -1,5 +1,7 @@
 # Handoff: Saint Jude world packages (plan, then implement)
 
+> **Update 2026-10-24:** project 1 (the world package, Tasks 1-23) is done and the package follows the new bible. Current state: `docs/superpowers/plans/saintjude-bible-reload/REPORT.md`. Next: project 2 (the underworld model: Pad, Ladder, pools, dials, rackets; see REPORT section 5), then project 3 (pre-history run).
+
 **Written:** 2026-10-23. **Branch:** `feat/world-packages-bellacorte` (from `feat/claude-connector`; not pushed).
 **Design (approved, committed `e7c1eb0`):** `docs/superpowers/specs/2026-10-23-bellacorte-living-city-design.md`. Read it in full first; this handoff only adds context the design doesn't carry.
 

@@ -53,7 +53,11 @@ def competence_band(score: float) -> CompetenceBand:
 
 
 def seed_competence_domains(conn: sqlite3.Connection) -> None:
+    from .world_package import system_enabled
+    cultivation = system_enabled(conn, "cultivation")
     for key, meta in DEFAULT_DOMAINS.items():
+        if key == "martial" and not cultivation:
+            continue
         conn.execute(
             """INSERT OR IGNORE INTO competence_domains(domain_key,name,description,default_visibility)
                VALUES (?,?,?,'private')""",

@@ -64,7 +64,8 @@ def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: st
     from .health import configure_health_profile
     from .resolution_controller import _materialize_latent_person
     rng = _rng(f"reveal:{key}")
-    given = sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
+    from .demographic_sex import package_given_pool
+    given = package_given_pool(conn, sex, family) or sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
     name = None
     for _ in range(400):
         cand = f"{rng.choice(given)} {family}"
@@ -439,7 +440,7 @@ def resolve_sex(conn, proposal: dict, key: str) -> tuple[str, bool]:
     """(sex, drawn). Stated, else implied by the name, else drawn: a power role skews male (92/85/85/70), elsewhere the population (even)."""
     if proposal.get("sex") in ("male", "female"):
         return proposal["sex"], False
-    implied = veto.name_sex(proposal.get("name"), None)
+    implied = veto.name_sex(proposal.get("name"), None, conn)
     if implied:
         return implied, False
     p = POWER_P_MALE.get(power_class(proposal), 0.5)

@@ -258,6 +258,8 @@ def _seed_competence_domains(conn: sqlite3.Connection) -> None:
         ("art_culture", "Art and culture"), ("regional", "Regional knowledge"),
     ]
     for key, name in default_domains:
+        if key == "martial" and not _package_switch(conn, "cultivation"):
+            continue  # the cultivation-aware martial domain belongs to packages that switch cultivation on
         conn.execute(
             "INSERT OR IGNORE INTO competence_domains(domain_key,name,description,default_visibility) VALUES (?,?,NULL,'private')",
             (key, name),
@@ -269,7 +271,24 @@ def _seed_business_vocab(conn: sqlite3.Connection) -> None:
     seed_business_archetypes(conn)
 
 
+def _package_switch(conn: sqlite3.Connection, key: str) -> bool:
+    """True when this database's world package switches the system `key` on.
+
+    A campaign records its package in engine_meta and init_db re-runs on every open with no package in the
+    environment, so the recorded package wins; the configured one only decides a database not yet stamped.
+    """
+    from .world_package import META_KEY, configured_package_id, load_package
+    try:
+        row = conn.execute("SELECT value FROM engine_meta WHERE key=?", (META_KEY,)).fetchone()
+    except sqlite3.Error:
+        row = None
+    pkg_id = str(row[0]) if row and row[0] else configured_package_id()
+    return bool(load_package(pkg_id).systems.get(key, False))
+
+
 def _seed_religion_vocab(conn: sqlite3.Connection) -> None:
+    if not _package_switch(conn, "caerness_religions"):
+        return
     from .religion import seed_religious_traditions
     seed_religious_traditions(conn)
 
@@ -3358,7 +3377,8 @@ def _migration_82(conn: sqlite3.Connection) -> None:
     );
     CREATE INDEX IF NOT EXISTS idx_seek_procurement_due ON seek_procurement_contracts(status,due_day,id);
     """)
-    conn.execute("INSERT OR IGNORE INTO market_goods(good_key,name,category,base_price,unit,perishability,skill_intensity,luxury,notes) VALUES ('horses_remounts','Horses and military remounts','livestock',18,'horse',0.02,0.75,0.25,'Ordinary riding horses, bred remounts and military-quality horses; quality is separately represented by provider/contract state.')")
+    if _package_switch(conn, "caerness_trade"):
+        conn.execute("INSERT OR IGNORE INTO market_goods(good_key,name,category,base_price,unit,perishability,skill_intensity,luxury,notes) VALUES ('horses_remounts','Horses and military remounts','livestock',18,'horse',0.02,0.75,0.25,'Ordinary riding horses, bred remounts and military-quality horses; quality is separately represented by provider/contract state.')")
     conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('seek01_version','1')")
 
 

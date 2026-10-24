@@ -1087,6 +1087,7 @@ STEP_SWITCH: dict[str, str] = {
     'activate_underworld_substrate': 'caerness_underworld',
     'seed_all_settlements': 'caerness_underworld',
     'activate_hollow_substrate': 'hollow',
+    'activate_information_channels': 'caerness_trade',
 }
 
 
@@ -1144,7 +1145,7 @@ def activate_existing_loops(conn: sqlite3.Connection, package=None) -> dict[str,
     out.update(activate_military_logistics(conn))
     out.update(activate_ordinary_economic_state_substrate(conn))
     step('activate_religion_and_culture', lambda: activate_religion_and_culture(conn))
-    out.update(activate_information_channels(conn))
+    step('activate_information_channels', lambda: activate_information_channels(conn))
     step('seed_cultivation_from_current_source', lambda: seed_cultivation_from_current_source(conn))
     from .groundbinding import seed_current_groundbinding
     step('seed_current_groundbinding', lambda: seed_current_groundbinding(conn))

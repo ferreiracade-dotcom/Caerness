@@ -133,7 +133,7 @@ def advance(call_id: str, days: int, purpose: str, domain: str | None = None, de
 
 def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "general", subject_id: int | None = None,
          threads: list[str] | None = None, field: str | None = None, cause: str | None = None) -> dict:
-    """Caerness game: record what should last. kind=detail (a fact about an actor/location/business/outfit/household/crew/institution/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake; field=fixed with a `corrections` entry's text or id marks it done), fact (change a tagged world fact: field = its key or name from lookup, text = what it becomes; a Fixed fact needs `cause`, what happened in the world to change it)."""
+    """Caerness game: record what should last. kind=detail (a fact about an actor/location/business/outfit/household/crew/institution/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake; field=fixed with a `corrections` entry's text or id marks it done), fact (change a tagged world fact: field = its key or name from lookup, text = new value; a Fixed fact needs `cause`, the event that changed it)."""
     from connector import store
 
     request = {"kind": kind, "text": text, "subject_kind": subject_kind, "subject_id": subject_id,
@@ -147,7 +147,7 @@ def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "gen
 
 
 def author(call_id: str, kind: str, details: dict | None = None) -> dict:
-    """Caerness game: make something new real. kind is free text: person (age, work, name, stage, ties as {actor_id, as: relation in words}, wants, from_elsewhere; sex optional; holds = an Open office he takes, e.g. "Killbuck County Prosecutor", once only), business (name, trade, amount), organisation (name, type, members), rumour (text, spread), or protagonist (a whole proposal when the campaign has none; see the creation text). The engine only vetoes contradictions, scales down what the place cannot supply (scaled_down) and fills the rest; a refusal names the clash and has a reason_kind."""
+    """Caerness game: make something new real. kind is free text: person (age, work, name, stage, ties as {actor_id, as: relation in words}, wants, from_elsewhere; sex optional; holds = an Open office taken, once only), business (name, trade, amount), organisation (name, type, members), rumour (text, spread), or protagonist (a whole proposal when the campaign has none; see the creation text). The engine only vetoes contradictions, scales down what the place cannot supply (scaled_down) and fills the rest; a refusal names the clash and has a reason_kind."""
     from connector.authoring import author as _author
     return _call(lambda c: _author(c, call_id, kind, details), "author")
 

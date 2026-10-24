@@ -305,8 +305,12 @@ Seed format = `game/seeds/Caerness_Initial_World_State_Seed_v1_4.json` (places w
 
 ## Measurements (filled by Task 20)
 
+Measured 2026-10-24 on the PC (`runs/h2/build_sj.py`, `runs/h2/five_years.py`). The Oracle VM has no Saint Jude campaign yet, so there is no server column.
+
 | Measure | PC | Server profile |
 |---|---|---|
-| Saint Jude opening build | | |
-| 30-day advance | | |
-| DB size | | |
+| Saint Jude opening build (`python tools/build_opening.py --package saintjude`) | 2.6 s | not measured |
+| 30-day advance | 0.1 s | not measured |
+| 1 Jan 1975 to 1 Jan 1980 (E-024 default entry) | 18.9 s (3.1 to 4.4 s a year) | not measured |
+| DB size | 5.8 MB opening (`data/saintjude.db`); 8.0 MB after 30 days with the bible indexed; 9.2 MB at 1 Jan 1980 | |
+| Opening contents | 134 actors (51 seeded Example persons plus the seeded institutions' actors), 70 locations, 83 institutions, 64 background identity profiles, no unnamed people | |
