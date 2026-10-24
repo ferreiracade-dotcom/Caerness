@@ -17,13 +17,13 @@ from connector import server  # noqa: E402
 def serve_http(host: str, port: int) -> None:
     import uvicorn
 
-    from connector.campaign import open_campaign
+    from connector.campaign import open_startup
     from connector.http_app import build_app
     from connector.settings import Settings
 
     settings = Settings.from_env()
     with contextlib.redirect_stdout(sys.stderr):
-        open_campaign(settings.campaign)
+        open_startup(settings.campaign)
         app = build_app(settings)
     uvicorn.run(app, host=host, port=port, proxy_headers=True, forwarded_allow_ips="127.0.0.1")
 

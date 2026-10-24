@@ -9,7 +9,7 @@ WorkingDirectory=/opt/caerness
 EnvironmentFile=/etc/caerness/caerness.env
 Environment=CAERNESS_CAMPAIGN_DIR=/var/lib/caerness/campaigns
 Environment=PYTHONDONTWRITEBYTECODE=1
-ExecStart=/opt/caerness/.venv/bin/python -m connector.backup --campaign ${CAERNESS_CAMPAIGN} --label daily
+ExecStart=/opt/caerness/.venv/bin/python -m connector.backup --all --label daily
 NoNewPrivileges=yes
 ProtectSystem=strict
 ReadWritePaths=/var/lib/caerness

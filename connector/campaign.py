@@ -7,7 +7,7 @@ import shutil
 import sqlite3
 from pathlib import Path
 
-from engine.world_package import DEFAULT_PACKAGE, configured_package_id, current_package, load_package, set_campaign_package
+from engine.world_package import DEFAULT_PACKAGE, configured_package_id, current_package, list_packages, load_package, set_campaign_package
 
 ROOT = Path(__file__).resolve().parent.parent
 PACKAGED_DB = ROOT / "data" / "caerness.db"
@@ -96,3 +96,70 @@ def connect_campaign() -> sqlite3.Connection:
     conn = connect()
     conn.execute("PRAGMA busy_timeout=30000")
     return conn
+
+
+LAST_FILE = "last_campaign"
+
+
+def campaign_name_for(world: str) -> str:
+    """The live campaign's name for a world: the default world keeps `main`, every other world is named by its package id."""
+    return "main" if world == DEFAULT_PACKAGE else world
+
+
+def last_played() -> str | None:
+    """The world id last switched to (text file beside the campaigns), or None."""
+    try:
+        text = (campaign_dir() / LAST_FILE).read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+    return text or None
+
+
+def remember_last(name: str) -> None:
+    (campaign_dir() / LAST_FILE).write_text(name.strip() + "\n", encoding="utf-8")
+
+
+def list_worlds() -> list[dict]:
+    """Every installed world package: its id, display name (from the package), campaign name, and whether that campaign exists."""
+    out = []
+    for pkg_id in list_packages():
+        try:
+            display = load_package(pkg_id).display_name
+        except Exception:  # a broken package is listed by id; opening it reports the real error
+            display = pkg_id
+        name = campaign_name_for(pkg_id)
+        out.append({"world": pkg_id, "display_name": display, "campaign": name, "exists": (campaign_dir() / f"{name}.db").is_file()})
+    return out
+
+
+def switch_to(world: str) -> Path:
+    """Open (creating from the packaged opening if new) the world's campaign, make it current, and remember it.
+
+    An unknown or broken world raises before CAERNESS_DB_PATH changes. The package caches in engine.world_package
+    are keyed by manifest path and mtime (never by package id alone), so nothing needs clearing on a switch.
+    """
+    if not isinstance(world, str) or world not in list_packages():
+        raise ValueError(f"unknown world '{world}'; known: {', '.join(list_packages()) or 'none'}")
+    load_package(world)
+    previous = os.environ.get("CAERNESS_DB_PATH")
+    try:
+        path = open_campaign(campaign_name_for(world), package=world)
+    except Exception:
+        if previous is None:
+            os.environ.pop("CAERNESS_DB_PATH", None)
+        else:
+            os.environ["CAERNESS_DB_PATH"] = previous
+        raise
+    remember_last(world)
+    return path
+
+
+def open_startup(default_campaign: str) -> Path:
+    """Start-up: the world last played if there is one, else the configured campaign (a new Caerness campaign as before)."""
+    world = last_played()
+    if world and world != DEFAULT_PACKAGE and world in list_packages():
+        try:
+            return open_campaign(campaign_name_for(world), package=world)
+        except Exception:
+            pass  # fall back to the configured campaign rather than refuse to start
+    return open_campaign(default_campaign)

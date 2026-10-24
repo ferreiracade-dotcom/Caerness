@@ -44,6 +44,13 @@ def load_creation(conn=None) -> str:
     return (_package(conn).creation_section or CREATION_CORE_PATH).read_text(encoding="utf-8")
 
 
+def world_info(conn) -> dict:
+    """Which world this campaign is, and the other installed worlds a resume(world=...) can switch to."""
+    from connector.campaign import list_worlds
+    pkg = current_package(conn)
+    return {"world": pkg.display_name, "other_worlds": [w["display_name"] for w in list_worlds() if w["world"] != pkg.id]}
+
+
 def resume(conn) -> dict:
     player = get_player(conn)
     if not player:  # a new campaign: design the protagonist with the player (creation text is returned only now)

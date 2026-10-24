@@ -126,20 +126,32 @@ def main(argv: list[str] | None = None) -> int:
     from connector.campaign import _NAME as CAMPAIGN_NAME, campaign_dir
     from connector.settings import Settings
 
-    ap = argparse.ArgumentParser(description="Snapshot a campaign and rotate old snapshots")
-    ap.add_argument("--campaign", required=True)
+    ap = argparse.ArgumentParser(description="Snapshot a campaign (or every campaign) and rotate old snapshots")
+    ap.add_argument("--campaign")
+    ap.add_argument("--all", action="store_true", help="every *.db in the campaign directory")
     ap.add_argument("--label", default="daily", choices=LABELS)
     args = ap.parse_args(argv)
     settings = Settings.from_env()
     try:
-        if not CAMPAIGN_NAME.match(args.campaign):
-            raise ValueError("invalid campaign name")
+        if bool(args.campaign) == bool(args.all):
+            raise ValueError("give exactly one of --campaign NAME or --all")
         if settings.backup_dir is None:
             raise ValueError("CAERNESS_BACKUP_DIR is not set")
-        path = snapshot(campaign_dir() / f"{args.campaign}.db", settings.backup_dir, args.label)
-        prune(settings.backup_dir, args.campaign)
-        print(f"snapshot: {path}")
-        return 0
+        names = sorted(p.stem for p in campaign_dir().glob("*.db")) if args.all else [args.campaign]
+        if not names:
+            raise ValueError("no campaigns to back up")
+        failed = 0
+        for name in names:
+            try:
+                if not CAMPAIGN_NAME.match(name):
+                    raise ValueError("invalid campaign name")
+                path = snapshot(campaign_dir() / f"{name}.db", settings.backup_dir, args.label)
+                prune(settings.backup_dir, name)
+                print(f"snapshot: {path}")
+            except Exception as e:
+                failed += 1
+                print(f"backup failed for {name}: {e}", file=sys.stderr)
+        return 1 if failed else 0
     except Exception as e:
         print(f"backup failed: {e}", file=sys.stderr)
         return 1

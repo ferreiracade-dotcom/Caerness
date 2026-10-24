@@ -18,7 +18,7 @@ uv pip install --python "$PY" -r "$APP/connector/requirements.txt" numpy
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 chown caerness:caerness "$scratch"
-for smoke in connector_http_test.py connector_oauth_test.py; do
+for smoke in connector_http_test.py connector_oauth_test.py connector_world_switch_test.py; do
     echo "== $smoke"
     runuser -u caerness -- env CAERNESS_CAMPAIGN_DIR="$scratch/campaigns" TMPDIR="$scratch" \
         PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$APP" "$PY" "$APP/tests/$smoke"

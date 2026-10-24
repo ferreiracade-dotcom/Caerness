@@ -8,16 +8,19 @@ import threading
 
 from mcp.server.mcpserver import MCPServer
 
-INSTRUCTIONS_TEMPLATE = ("{name} is the user's text role-playing game. When the user says \"resume\", \"play\" or mentions {name}, "
-                         "call the resume tool first and follow the game-master rulebook it returns.")
+INSTRUCTIONS_TEMPLATE = ("{name} is the user's text role-playing game. When the user says \"resume\", \"play\" or mentions any of them, "
+                         "call the resume tool first and follow the game-master rulebook it returns. "
+                         "resume takes an optional world (its name) to switch to another world's campaign.")
 
 
-def _display_name() -> str:
-    from engine.world_package import configured_package_id, load_package
+def _world_names() -> str:
+    """Every installed world's display name joined with ' or ' (from the packages, never hard-coded)."""
     try:
-        return load_package(configured_package_id()).display_name
+        from connector.campaign import list_worlds
+        names = [w["display_name"] for w in list_worlds()]
     except Exception:  # an unreadable package must not stop the server from starting
-        return "Caerness"
+        names = []
+    return " or ".join(names) or "Caerness"
 
 
 INSTRUCTIONS = INSTRUCTIONS_TEMPLATE.format(name="Caerness")
@@ -25,14 +28,19 @@ INSTRUCTIONS = INSTRUCTIONS_TEMPLATE.format(name="Caerness")
 
 def make_mcp(**kwargs) -> MCPServer:
     """A fresh MCPServer (the HTTP deployment passes auth settings); call register_tools on it."""
-    return MCPServer("narrative-engine", instructions=INSTRUCTIONS_TEMPLATE.format(name=_display_name()), **kwargs)
+    return MCPServer("narrative-engine", instructions=INSTRUCTIONS_TEMPLATE.format(name=_world_names()), **kwargs)
+
+
+_DOC_PREFIX = "Caerness game:"
 
 
 def register_tools(server: MCPServer) -> MCPServer:
-    name = _display_name()
+    name = _world_names()
     for fn in (resume, scene, lookup, lore, act, advance, note, author):
-        if name != "Caerness" and (fn.__doc__ or "").startswith("Caerness game:"):
-            fn.__doc__ = f"{name} game:" + fn.__doc__[len("Caerness game:"):]
+        original = getattr(fn, "_original_doc", None)
+        if original is None:
+            original = fn._original_doc = fn.__doc__ or ""
+        fn.__doc__ = f"{name} game:" + original[len(_DOC_PREFIX):] if original.startswith(_DOC_PREFIX) else original
         server.tool(structured_output=False)(fn)
     return server
 
@@ -43,10 +51,15 @@ _CALL_LOCK = threading.Lock()  # one campaign writer at a time; also guards the 
 FRESH_CHAT_HINT = "A good moment to suggest a fresh chat once this scene ends."
 
 
-def _call(fn, tool: str) -> dict:
-    """Run fn(conn) with stdout redirected to stderr (stdout is the MCP protocol channel)."""
+def _call(fn, tool: str, before=None) -> dict:
+    """Run fn(conn) with stdout redirected to stderr (stdout is the MCP protocol channel).
+
+    `before`, when given, runs inside the lock first (a campaign switch); if it raises nothing else runs.
+    """
     with _CALL_LOCK, contextlib.redirect_stdout(sys.stderr):
         try:
+            if before is not None:
+                before()
             from connector import store
             from connector.campaign import connect_campaign
 
@@ -86,10 +99,31 @@ def _snapshot_before_advance() -> None:
         print(f"pre-advance snapshot failed: {e}", file=sys.stderr)
 
 
-def resume() -> dict:
-    """Caerness game: call first when the user says resume or wants to play; returns the GM rulebook and current scene."""
+def resume(world: str | None = None) -> dict:
+    """Caerness game: call first when the user says resume or wants to play; returns the GM rulebook and current scene. world (optional) is the name of the world to play; omit it to continue the world last played."""
     from connector.session import resume as _resume
-    return _call(_resume, "resume")
+    from connector.session import world_info
+
+    def go(conn):
+        out = _resume(conn)
+        return out if "error" in out else {**out, **world_info(conn)}
+
+    before = None
+    if world is not None and str(world).strip():
+        from connector import campaign
+        want = _resolve_world(str(world))
+        before = lambda: campaign.switch_to(want)  # noqa: E731
+    return _call(go, "resume", before=before)
+
+
+def _resolve_world(text: str) -> str:
+    """A world given by id or by display name (any case) -> its package id; anything else is passed on to fail in switch_to."""
+    from connector.campaign import list_worlds
+    t = text.strip().lower()
+    for w in list_worlds():
+        if t in (w["world"].lower(), w["display_name"].lower()):
+            return w["world"]
+    return text.strip()
 
 
 def scene() -> dict:
@@ -156,8 +190,8 @@ mcp = register_tools(make_mcp())  # the stdio server
 
 
 def main() -> None:
-    from connector.campaign import open_campaign
+    from connector.campaign import open_startup
 
     with contextlib.redirect_stdout(sys.stderr):
-        open_campaign(os.environ.get("CAERNESS_CAMPAIGN", "main"))
+        open_startup(os.environ.get("CAERNESS_CAMPAIGN", "main"))
     mcp.run()
