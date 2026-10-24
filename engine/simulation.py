@@ -245,6 +245,13 @@ def _resolve_background_process(conn: sqlite3.Connection, row: sqlite3.Row, day:
     )
 
 
+def _quiet_routine(profile: sqlite3.Row) -> bool:
+    try:
+        return bool(profile["quiet_routine"])
+    except (IndexError, KeyError):
+        return False
+
+
 def _review_actor(conn: sqlite3.Connection, profile: sqlite3.Row, day: int) -> None:
     actor_id = int(profile["actor_id"])
     tier = _effective_tier(profile, day)
@@ -284,6 +291,19 @@ def _review_actor(conn: sqlite3.Connection, profile: sqlite3.Row, day: int) -> N
             (day, day + cadence, actor_id),
         )
         return
+
+    # Saint Jude outfit members run a quiet routine: reviewed daily only while sped up, otherwise weekly,
+    # and no self-initiated choice unless a registered reason check fires. Anything that happens TO the man
+    # (wake-ups, forced tiers, agenda items) still reaches him through the profile and the checks.
+    if _quiet_routine(profile):
+        from .outfits import has_reason_to_choose
+        forced = profile["forced_tier"] == "ACTIVE" and profile["forced_until_day"] is not None and int(profile["forced_until_day"]) >= day
+        q_cadence = 1 if forced else int(profile["cadence_days"])
+        if not has_reason_to_choose(conn, actor_id, day):
+            conn.execute("UPDATE simulation_profiles SET last_review_day=?, next_review_day=? WHERE actor_id=?",
+                         (day, day + q_cadence, actor_id))
+            return
+        cadence = q_cadence
 
     # v0.2: every reviewed non-player actor makes a structured decision. Active/Strategic actors
     # get frequent decisions; Dormant actors make coarser decisions at their slower cadence.
