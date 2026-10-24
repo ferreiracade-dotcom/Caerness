@@ -1177,6 +1177,11 @@ def activate_existing_loops(conn: sqlite3.Connection, package=None) -> dict[str,
     # Opening family life and relationships need resolved sex, locations, teaching and memberships.
     from .opening_family import resolve_opening_history
     out.update(resolve_opening_history(conn))
+    # The outfits as people (Saint Jude): needs the seeded members, the background population and opening relationships.
+    from .world_package import system_enabled
+    if system_enabled(conn, "outfits"):
+        from .outfit_opening import build as build_outfits
+        out.update({f'outfit_opening_{k}': v for k, v in build_outfits(conn).items()})
     conn.execute(
         "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
         (str(CURRENT_CANON_ACTIVATION_VERSION),),
