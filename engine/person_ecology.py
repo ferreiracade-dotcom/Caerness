@@ -242,9 +242,10 @@ def _profile_identities(conn: sqlite3.Connection, source: sqlite3.Row, pid: int,
     pkg = package_for(conn)
     pools = pkg.name_pools or {}
     staged = bool(pkg.systems.get("cultivation")) and bool(pkg.background.get("stage_distribution", True))
+    have = {int(r[0]) for r in conn.execute("SELECT local_uid FROM background_person_profiles WHERE partition_id=?", (pid,))}
     for uid in state.uid.tolist():
         uid = int(uid)
-        if conn.execute("SELECT 1 FROM background_person_profiles WHERE partition_id=? AND local_uid=?", (pid, uid)).fetchone():
+        if uid in have:
             continue
         snap = state.snapshot(uid)
         loc = _source_location(conn, source, seed, uid)
@@ -375,6 +376,7 @@ def _candidate_rows(
     conn: sqlite3.Connection, *, location_id: int | None = None, occupation_domains: Iterable[str] | None = None,
     min_age: int = 18, max_age: int = 85, require_open_core: bool | None = None,
     required_stage: str | None = None, demographic_sex: str | None = None, exact_stage: bool = False,
+    families: Iterable[str] | None = None,
 ) -> list[sqlite3.Row]:
     day = _day(conn)
     where = ["p.status='background'", "l.actor_id IS NULL", "(l.status IS NULL OR l.status<>'dead')", "p.birth_day<=?", "p.birth_day>=?"]
@@ -397,6 +399,10 @@ def _candidate_rows(
         allowed = [required_stage] if exact_stage else [s for s,v in order.items() if v >= order.get(required_stage,1)]
         where.append("p.current_stage IN (%s)" % ",".join("?" for _ in allowed))
         args.extend(allowed)
+    if families is not None:
+        fam = [str(x) for x in families]
+        where.append("p.family_name IN (%s)" % ",".join("?" for _ in fam))
+        args.extend(fam)
     sql = f"""SELECT p.* FROM background_person_profiles p
               LEFT JOIN background_population_identity_links l
                 ON l.partition_id=p.partition_id AND l.local_uid=p.local_uid
@@ -411,7 +417,7 @@ _GROWTH_BATCHES = 4
 _RESERVOIR_CAP = 2048
 
 
-def grow_identity_reservoir(conn: sqlite3.Connection, location_id: int, batch: int = _GROWTH_BATCH) -> int:
+def grow_identity_reservoir(conn: sqlite3.Connection, location_id: int, batch: int = _GROWTH_BATCH, cap: int = _RESERVOIR_CAP) -> int:
     """Draw ``batch`` more identities of the settlement's own population and profile them; returns how many."""
     from .background_population import extend_partition
     source = conn.execute("SELECT * FROM background_population_sources WHERE location_id=? ORDER BY id LIMIT 1",
@@ -420,7 +426,7 @@ def grow_identity_reservoir(conn: sqlite3.Connection, location_id: int, batch: i
         return 0
     part = conn.execute("SELECT id,seed FROM background_population_partitions WHERE source_id=?", (int(source["id"]),)).fetchone()
     size = int(conn.execute("SELECT sample_size FROM background_population_partitions WHERE id=?", (int(part["id"]),)).fetchone()[0]) if part else 0
-    if part is None or size >= _RESERVOIR_CAP or not extend_partition(conn, int(part["id"]), min(batch, _RESERVOIR_CAP - size)):
+    if part is None or size >= cap or not extend_partition(conn, int(part["id"]), min(batch, cap - size)):
         return 0
     _, state = load_partition(conn, int(part["id"]))
     return _profile_identities(conn, source, int(part["id"]), int(part["seed"]), state, _day(conn))
@@ -433,11 +439,13 @@ def find_background_candidate(
     medical_weight: float = 0, teaching_weight: float = 0, criminal_weight: float = 0,
     demographic_sex: str | None = None, allow_elsewhere: bool = True, strict_stage: bool = False,
     prefer_open_core: bool = True, pick_seed: int | str | None = None, exact_stage: bool = False,
-    growth_batches: int | None = None,
+    growth_batches: int | None = None, name_group: str | None = None,
 ) -> sqlite3.Row | None:
+    families = _group_families(conn, name_group)
     rows = _candidate_rows(
         conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
         require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex, exact_stage=exact_stage,
+        families=families,
     )
     for _ in range(growth_batches or _GROWTH_BATCHES):
         # A settlement's first sample is small; when nobody in it fits, draw more of its real population
@@ -449,6 +457,7 @@ def find_background_candidate(
         rows = _candidate_rows(
             conn, location_id=location_id, occupation_domains=occupation_domains, min_age=min_age, max_age=max_age,
             require_open_core=require_open_core, required_stage=required_stage, demographic_sex=demographic_sex, exact_stage=exact_stage,
+            families=families,
         )
     if not rows and location_id is not None and allow_elsewhere:
         # The world may reveal someone from the same broader population bucket rather than conjure
@@ -469,6 +478,8 @@ def find_background_candidate(
                 where.append("p.open_core=?"); args.append(1 if require_open_core else 0)
             if demographic_sex:
                 where.append("p.demographic_sex=?"); args.append(str(demographic_sex))
+            if families is not None:
+                where.append("p.family_name IN (%s)" % ",".join("?" for _ in families)); args.extend(families)
             if strict_stage and required_stage:  # the broadened search normally ignores Stage; authoring asks for it to count
                 order = {"First":1,"Temper":2,"Third":3,"Breach":4,"Fifth":5,"Sixth":6}
                 allowed = [required_stage] if exact_stage else [k for k,v in order.items() if v >= order.get(required_stage,1)]
@@ -504,7 +515,7 @@ def resolve_background_person(
     teaching_weight: float = 0, criminal_weight: float = 0, demographic_sex: str | None = None,
     allow_elsewhere: bool = True, strict_stage: bool = False, name: str | None = None,
     prefer_open_core: bool = True, pick_seed: int | str | None = None, exact_stage: bool = False,
-    growth_batches: int | None = None,
+    growth_batches: int | None = None, name_group: str | None = None,
 ) -> int | None:
     """Reveal one pre-existing POPBACK identity as a tracked actor.
 
@@ -517,9 +528,18 @@ def resolve_background_person(
         economic_weight=economic_weight, medical_weight=medical_weight, teaching_weight=teaching_weight,
         criminal_weight=criminal_weight, demographic_sex=demographic_sex, allow_elsewhere=allow_elsewhere, strict_stage=strict_stage,
         prefer_open_core=prefer_open_core, pick_seed=pick_seed, exact_stage=exact_stage, growth_batches=growth_batches,
+        name_group=name_group,
     )
     if profile is None:
         return None
+    return _link_profile_as_actor(conn, profile, reason=reason, demand_kind=demand_kind, subtype=subtype, name=name)
+
+
+def _link_profile_as_actor(conn: sqlite3.Connection, profile: sqlite3.Row, *, reason: str, demand_kind: str | None,
+                           subtype: str | None, name: str | None) -> int:
+    """Write the actor rows, identity link and provenance that make one background profile a tracked person.
+
+    The single and the batch pull-up both end here, so they write identical rows."""
     day = _day(conn)
     if name is not None:  # a chosen name replaces the identity's own; the profile keeps it as its stable name
         given, _, family = name.partition(" ")
@@ -600,6 +620,64 @@ def resolve_background_person(
     except sqlite3.OperationalError:
         pass
     return aid
+
+
+def _group_families(conn: sqlite3.Connection, name_group: str | None) -> list[str] | None:
+    """The surnames of one package name group (None = no group filter); an unknown group is a caller error."""
+    if name_group is None:
+        return None
+    groups = package_for(conn).name_groups or {}
+    if name_group not in groups:
+        raise ValueError(f"unknown name group {name_group!r}; the package has {sorted(groups)}")
+    return sorted(str(f) for f in groups[name_group].get("family", ()))
+
+
+# A batch pull-up draws far more people than one demand, so its reservoir ceiling is a share of the real
+# settlement population rather than the single-demand cap; extend_partition still never exceeds the population.
+_BATCH_RESERVOIR_SHARE = 0.05
+_BATCH_GROWTH_MAX = 4096
+
+
+def resolve_background_people(
+    conn: sqlite3.Connection, n: int, *, reason: str, demand_kind: str | None = None, subtype: str | None = None,
+    location_id: int | None = None, min_age: int = 18, max_age: int = 85, demographic_sex: str | None = None,
+    name_group: str | None = None, criminal_weight: float = 0.0, pick_seed: int | str = "batch",
+) -> list[int]:
+    """Reveal up to ``n`` pre-existing identities as tracked actors, every one from a background profile.
+
+    Candidates are unlinked ``background`` profiles of the place, sex and age band, and of ``name_group`` when given.
+    When too few fit, the settlement's sample grows in batches (one candidate query per batch) with the ordinary
+    generator, blind to this demand; nothing is forced into a group.  Returns fewer than ``n`` only when growth can
+    add no more (the reservoir ceiling).  ``criminal_weight`` biases the pick toward higher criminal familiarity.
+    """
+    n = int(n)
+    if n <= 0:
+        return []
+    families = _group_families(conn, name_group)
+    kw = dict(location_id=location_id, min_age=min_age, max_age=max_age, demographic_sex=demographic_sex, families=families)
+    rows = _candidate_rows(conn, **kw)
+    if location_id is not None:
+        pop = conn.execute("SELECT s.population_estimate FROM background_population_sources s WHERE s.location_id=? ORDER BY s.id LIMIT 1",
+                           (int(location_id),)).fetchone()
+        cap = max(_RESERVOIR_CAP, int(int(pop[0]) * _BATCH_RESERVOIR_SHARE)) if pop else _RESERVOIR_CAP
+        while len(rows) < n:
+            size = conn.execute("SELECT p.sample_size FROM background_population_sources s JOIN background_population_partitions p "
+                                "ON p.source_id=s.id WHERE s.location_id=? ORDER BY s.id LIMIT 1", (int(location_id),)).fetchone()
+            rate = max(len(rows), 1) / max(int(size[0]) if size else 1, 1)  # fitting share of the sample so far
+            want = int((n - len(rows)) / rate * 1.15) + 1
+            if not grow_identity_reservoir(conn, int(location_id), max(_GROWTH_BATCH, min(want, _BATCH_GROWTH_MAX)), cap=cap):
+                break
+            rows = _candidate_rows(conn, **kw)
+    if not rows:
+        return []
+    rng = random.Random(f"pick:{pick_seed}")
+    if criminal_weight:
+        keyed = [(rng.random() ** (1.0 / (1.0 + float(criminal_weight) * float(r["criminal_familiarity"]) / 10.0)), r) for r in rows]
+        keyed.sort(key=lambda kr: (-kr[0], int(kr[1]["partition_id"]), int(kr[1]["local_uid"])))
+        chosen = [r for _, r in keyed[:n]]
+    else:
+        chosen = rng.sample(rows, min(n, len(rows)))
+    return [_link_profile_as_actor(conn, r, reason=reason, demand_kind=demand_kind, subtype=subtype, name=None) for r in chosen]
 
 
 def background_person_summary(conn: sqlite3.Connection) -> dict[str, int]:
