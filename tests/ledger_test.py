@@ -56,6 +56,15 @@ def run():
             assert ledger.transfer(conn, ("business", e), ("person", me), 100, flow_kind="other", purpose="t", allow_partial=True) == 6
             assert ledger.balance(conn, ("business", e)) == 0
 
+            # money from outside every holder: credited, returned, validated, no flow row (it has no source purse)
+            n = flows()
+            b = ledger.balance(conn, ("person", me))
+            assert ledger.receive(conn, ("person", me), 7.5, purpose="t") == 7.5
+            assert abs(ledger.balance(conn, ("person", me)) - (b + 7.5)) < 1e-9 and flows() == n
+            _raises(lambda: ledger.receive(conn, ("person", me), 0, purpose="t"), "positive")
+            _raises(lambda: ledger.receive(conn, ("person", me), 1, purpose=" "), "purpose")
+            _raises(lambda: ledger.receive(conn, ("person", 999999999), 1, purpose="t"), "unknown person")
+
             assert ledger.scale_word(8) == "substantial"
             assert ledger.scale_word(0.01) == "nothing"
             assert ledger.amount_of("modest") == 3.0

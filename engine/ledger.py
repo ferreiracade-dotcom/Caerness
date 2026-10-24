@@ -147,6 +147,20 @@ def spend(conn: sqlite3.Connection, src: Holder, amount: float, *, purpose: str,
     return amount
 
 
+def receive(conn: sqlite3.Connection, dst: Holder, amount: float, *, purpose: str) -> float:
+    """Money that enters a purse from outside every holder: a racket's victims, a wage from the unmodelled world.
+    The only way coin is created; like `spend` it names no counterpart and leaves no flow row (a flow needs a source
+    purse), so the caller records the receipt. Returns the amount credited."""
+    amount = float(amount)
+    if amount <= 0:
+        raise ValueError("amount must be positive")
+    if not str(purpose or "").strip():
+        raise ValueError("a receipt needs a purpose")
+    _check_exists(conn, dst)
+    _credit(conn, dst, amount)
+    return amount
+
+
 _SHARES = {"all": 1.0, "everything": 1.0, "the lot": 1.0, "whole": 1.0, "half": 0.5, "third": 1 / 3, "quarter": 0.25,
            "fifth": 0.2, "tenth": 0.1}
 

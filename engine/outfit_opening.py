@@ -288,4 +288,7 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
         for rank, n in res["counts"].items():
             counts[f"{key}:{rank}"] = n
         counts[f"{key}:unplaced_seeded"] = len(res["unplaced"])
+    from . import outfit_money  # after the people: holdings need the crews and men (outfit_money imports this module)
+    for key, gross in outfit_money.build_holdings(conn, day).items():
+        counts[f"{key}:gross_yearly"] = int(round(gross))
     return counts

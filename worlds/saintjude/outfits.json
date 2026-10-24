@@ -81,7 +81,31 @@
    "ground": [
     "Kerrytown",
     "The Harp and Crown"
-   ]
+   ],
+   "money": {
+    "pools": [
+     {
+      "key": "brigades_docks",
+      "figure": "brigades_docks_m",
+      "line_kind": "a hold on a pier gang"
+     },
+     {
+      "key": "brigades_numbers",
+      "figure": "brigades_numbers_m",
+      "line_kind": "a numbers route"
+     },
+     {
+      "key": "brigades_loans_protection",
+      "figure": "brigades_loans_protection_m",
+      "line_kind": "a loan book and protection on the blocks"
+     }
+    ],
+    "holder_ranks": [
+     "elder",
+     "middle",
+     "young"
+    ]
+   }
   },
   "combine": {
    "institution": "The Eastside Combine",
@@ -106,7 +130,19 @@
    "ground": [
     "The Eastside",
     "Freeman Terraces"
-   ]
+   ],
+   "money": {
+    "pools": [
+     {
+      "key": "combine_own_lines",
+      "figure": "combine_own_lines_m",
+      "line_kind": "a bank and a book on the Eastside"
+     }
+    ],
+    "holder_ranks": [
+     "controller"
+    ]
+   }
   },
   "horsemen": {
    "institution": "Iron Horsemen MC",
@@ -138,7 +174,34 @@
    },
    "ground": [
     "Iron Horsemen Clubhouse"
-   ]
+   ],
+   "money": {
+    "pools": [
+     {
+      "key": "horsemen_crank",
+      "figure": "horsemen_crank_m",
+      "line_kind": "a crank market"
+     },
+     {
+      "key": "horsemen_roadhouse_security",
+      "figure": "horsemen_roadhouse_security_m",
+      "line_kind": "roadhouse security"
+     },
+     {
+      "key": "horsemen_stolen_vehicles",
+      "figure": "horsemen_stolen_vehicles_m",
+      "line_kind": "stolen vehicles"
+     }
+    ],
+    "holder_ranks": [
+     "officer",
+     "member",
+     "prospect"
+    ],
+    "rank_weight": {
+     "prospect": 0.5
+    }
+   }
   },
   "russians": {
    "institution": "The Russians of Brighton Point",
@@ -174,7 +237,20 @@
    "name_group": "puerto_rican_latino",
    "ground": [
     "The Racks"
-   ]
+   ],
+   "money": {
+    "pools": [
+     {
+      "key": "bolita_net",
+      "figure": "bolita_net_m",
+      "less_figure": "bolita_tax_m",
+      "line_kind": "a bolita bank"
+     }
+    ],
+    "holder_ranks": [
+     "runner"
+    ]
+   }
   }
  },
  "family_ranks": [
