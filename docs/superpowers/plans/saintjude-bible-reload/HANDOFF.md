@@ -1,5 +1,7 @@
 # Handoff: Saint Jude bible reload, Steps 3–4 and the report
 
+> **Superseded in part (2026-10-24):** continue from `HANDOFF_2.md` in this folder (Step 3 critical items done; start at Task 20).
+
 **Written:** 2026-10-24. **Branch:** `feat/world-packages-bellacorte`. **Nothing is committed** (the owner commits when asked). Read `AGENTS.md`, then `docs/superpowers/plans/2026-10-23-saint-jude-handoff.md` (§4 rules, §6 code map, §7 runbook), then this file.
 
 ## 0. The owner's brief (binding, summarised)
