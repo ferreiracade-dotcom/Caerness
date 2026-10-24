@@ -115,14 +115,99 @@ def place_scale(conn: sqlite3.Connection, location_id: int) -> dict[str, float]:
 # ---------------------------------------------------------------- the checks (each raises Contradiction or returns)
 
 def canon_figure(conn: sqlite3.Connection, name: str | None) -> None:
-    """The protagonist is never a canon figure: neither by name nor by likeness."""
+    """The protagonist is never a canon figure: neither by name nor by likeness. A world package may also name real people
+    (gazetteer.json): they stay offstage, so a new person never carries their name."""
     if not name:
         return
+    real_person(conn, name)
     want = norm(name)
     for r in conn.execute("SELECT a.name FROM actors a JOIN source_identity_map m ON m.entity_kind IN ('actor','institution') AND m.entity_id=a.id "
                           "WHERE a.actor_type='character'"):
         if norm(r["name"]) == want or (len(want.split()) >= 2 and norm(r["name"]).split()[:2] == want.split()[:2]):
             raise Contradiction(f"the name {name} is already taken by a canon figure ({r['name']}); a new person needs a new name")
+
+
+def _gazetteer(conn: sqlite3.Connection) -> dict:
+    from .world_package import gazetteer, package_for
+    try:
+        return gazetteer(package_for(conn))
+    except Exception:  # no engine_meta yet (bare test databases): no package, no gazetteer
+        return {}
+
+
+def real_person(conn: sqlite3.Connection, name: str | None) -> None:
+    """Refuses a person whose whole name is a real person's (world package gazetteer `real_people`): real people stay offstage."""
+    want = norm(name)
+    if not want:
+        return
+    for r in _gazetteer(conn).get("real_people", []):
+        if norm(r.get("name")) == want:
+            raise Contradiction(f"{r['name']} is a real person ({r.get('source', 'the bible')}); real people stay offstage and never act or speak: "
+                                "use a stand-in of this world instead")
+
+
+def real_town(conn: sqlite3.Connection, text: Any) -> None:
+    """Refuses a real town the world package says does not exist here (gazetteer `real_towns_replaced`) named as a setting.
+    A town whose name a Saint Jude place already borrows (a neighbourhood authored under that name) is allowed."""
+    towns = _gazetteer(conn).get("real_towns_replaced", [])
+    t = str(text or "")
+    if not towns or not t:
+        return
+    for r in towns:
+        name = r["name"]
+        pat = r"(?<![\w-])" + re.escape(name) + r"(?![\w-])"
+        if r.get("ambiguous"):  # also an ordinary word: needs a place cue
+            pat = (r"(?:\b(?:in|at|to|near|outside|from|into|toward|towards|around)\s+" + re.escape(name) + r"(?![\w-]))|(?:(?<![\w-])" +
+                   re.escape(name) + r"(?:,\s*(?:NJ|N\.J\.|New Jersey)|\s+(?:borough|township))\b)")
+            if not re.search(pat, t):
+                continue
+        elif not re.search(pat, t, re.I):
+            continue
+        if find_location(conn, name) is not None:
+            continue
+        raise Contradiction(f"{name} does not exist in this world: the city stands on that ground ({r.get('source', 'the bible')}). "
+                            f"Use a place of this world, or author a neighbourhood that borrows the name {name} and set the scene there")
+
+
+def dated_rules(conn: sqlite3.Connection, text: Any) -> None:
+    """Refuses text that names a dated thing of the world package's timeline before it exists on the campaign's current date."""
+    from datetime import date as _d, timedelta
+    from .world_package import not_yet_mentions, package_for
+    try:
+        pkg = package_for(conn)
+        if not pkg.data.get("timeline") or pkg.calendar.get("kind") != "gregorian":
+            return
+        day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+        today = (_d.fromisoformat(pkg.calendar["start"]) + timedelta(days=day))
+    except Exception:
+        return
+    for e, phrase in not_yet_mentions(pkg, str(text or ""), today):
+        arrives = _d.fromisoformat(e["exists"])
+        when = f"{arrives.day} {arrives.strftime('%B')} {arrives.year}"
+        label = phrase if phrase.lower() == e["name"].lower() else f"{e['name']} (written as {phrase!r})"
+        src = " ".join(str(e.get("source") or "").split())
+        if len(src) > 420:
+            src = src[:419] + "…"
+        raise Contradiction(f"{label} does not exist yet: it arrives {when} and today is {today.day} {today.strftime('%B')} {today.year}. {src}")
+
+
+def _strings(v: Any):
+    if isinstance(v, str):
+        yield v
+    elif isinstance(v, dict):
+        for x in v.values():
+            yield from _strings(x)
+    elif isinstance(v, (list, tuple)):
+        for x in v:
+            yield from _strings(x)
+
+
+def check_world_text(conn: sqlite3.Connection, *parts: Any) -> None:
+    """The world package's text vetoes for free text (an act intent, an authored thing's words): a real town that does not
+    exist here, a dated rule not yet in force. Packages without a gazetteer or timeline (Caerness) are unaffected."""
+    text = " | ".join(s for p in parts for s in _strings(p))
+    real_town(conn, text)
+    dated_rules(conn, text)
 
 
 def name_taken(conn: sqlite3.Connection, name: str | None) -> None:
@@ -284,6 +369,7 @@ def check_proposal(conn: sqlite3.Connection, proposal: dict) -> dict:
     p = proposal
     name = p.get("name")
     canon_figure(conn, name)
+    check_world_text(conn, {k: v for k, v in p.items() if k != "name"})
     name_taken(conn, name)
     implied = name_sex(name, p.get("sex"))
     sex = p.get("sex") if p.get("sex") in ("male", "female") else implied

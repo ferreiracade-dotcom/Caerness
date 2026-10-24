@@ -146,6 +146,11 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
         if problem:
             return _refuse(action_type, problem, call_id)
         me = int(get_player(conn)["player_actor_id"])
+        try:  # the world package's text vetoes: a real town that does not exist here, a dated rule not yet in force
+            from engine import veto
+            veto.check_world_text(conn, intent, details or {})
+        except veto.Contradiction as e:
+            return _refuse(action_type, str(e), call_id, "contradiction")
         if action_type in OPERATION_TYPES:
             from engine import player_operations
             out = player_operations.execute(conn, me, action_type, target_actor_id=target_actor_id,

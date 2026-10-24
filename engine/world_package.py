@@ -191,3 +191,59 @@ def timeline_status(pkg: "WorldPackage", name: str, date) -> str:
         if stage_date is not None and day >= stage_date:
             status = stage
     return status
+
+
+def _entries(pkg: "WorldPackage") -> list[dict]:
+    seen: dict[int, dict] = {}
+    for e in _timeline(pkg).values():
+        seen[id(e)] = e
+    return list(seen.values())
+
+
+def timeline_mentions(pkg: "WorldPackage", text: str) -> list[tuple[dict, str]]:
+    """Timeline entries named in free `text`, as (entry, phrase as written). The name and any multi-word alias match as a
+    whole phrase, case-insensitively; a single-word alias matches only when written capitalised and at least five letters
+    long (so 'crack' or 'CD' in ordinary talk is never taken for the thing). One hit per entry."""
+    import re
+    text = str(text or "")
+    out: list[tuple[dict, str]] = []
+    for e in _entries(pkg):
+        for label in [e["name"], *(e.get("aliases") or [])]:
+            label = str(label).strip()
+            if not label:
+                continue
+            single = len(label.split()) == 1 and label != e["name"]
+            if single:
+                m = re.search(r"(?<![\w-])" + re.escape(label) + r"(?![\w-])", text) if label[:1].isupper() and len(label) >= 5 else None
+            else:
+                m = re.search(r"(?<![\w-])" + re.escape(label) + r"(?![\w-])", text, re.I)
+            if m:
+                out.append((e, m.group(0)))
+                break
+    return out
+
+
+def not_yet_mentions(pkg: "WorldPackage", text: str, date) -> list[tuple[dict, str]]:
+    """The timeline entries named in `text` that do not yet exist on `date` (ISO string or datetime.date)."""
+    day = (date.isoformat() if hasattr(date, "isoformat") else str(date))[:10]
+    return [(e, p) for e, p in timeline_mentions(pkg, text) if timeline_status(pkg, e["name"], day) == "not_yet"]
+
+
+_GAZ_CACHE: dict[tuple, dict] = {}
+
+
+def gazetteer(pkg: "WorldPackage") -> dict:
+    """The package's gazetteer (data "gazetteer": real_towns_replaced, real_people); empty when it has none."""
+    path = pkg.data.get("gazetteer")
+    if path is None:
+        return {}
+    try:
+        key = (str(path), path.stat().st_mtime_ns)
+    except OSError:
+        key = (str(path), 0)
+    if key not in _GAZ_CACHE:
+        try:
+            _GAZ_CACHE[key] = json.loads(path.read_text(encoding="utf-8"))
+        except ValueError:
+            _GAZ_CACHE[key] = {}
+    return _GAZ_CACHE[key]
