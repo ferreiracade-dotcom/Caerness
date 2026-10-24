@@ -42,11 +42,19 @@ def outfit_actor(conn: sqlite3.Connection, institution: str) -> int:
     return int(row[0])
 
 
+def seat_subtype(rank_key: str, institution: str) -> str:
+    """The subtype a seated person carries, worded like the seeded ones ("Soldier in the <Name> Family").
+
+    It must not be the pull-up default ("resolved_<occupation>"): the role-kind readers match words in the subtype,
+    and an ordinary soldier-by-trade would be handed a Caerness household-retainer career."""
+    return f"{rank_key.capitalize()} {'in' if rank_key in ('capo', 'soldier') else 'of'} the {institution}"
+
+
 def pull_up(conn: sqlite3.Connection, n: int, *, stream: str, name_group: str | None, sex: str | None,
-            ages: tuple[int, int], criminal_weight: float = 1.0) -> list[int]:
+            ages: tuple[int, int], subtype: str | None = None, criminal_weight: float = 1.0) -> list[int]:
     """A batch pull-up for one outfit role. The run seed is part of the pick seed, so a redraw is a different crowd."""
     return resolve_background_people(
-        conn, n, reason="outfit_opening", demand_kind="outfit_member", subtype=None, location_id=city_location(conn),
+        conn, n, reason="outfit_opening", demand_kind="outfit_member", subtype=subtype, location_id=city_location(conn),
         min_age=ages[0], max_age=ages[1], demographic_sex=sex, name_group=name_group, criminal_weight=criminal_weight,
         pick_seed=f"{run_seed(conn)}:outfit:{stream}",
     )
@@ -134,7 +142,7 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
     for rank in execs:
         got = settle(rank, seeded.get(rank, []), 1)
         if not got:
-            got = pull_up(conn, 1, stream=f"{key}:{rank}", name_group=group, sex="male", ages=EXEC_AGES)
+            got = pull_up(conn, 1, stream=f"{key}:{rank}", name_group=group, sex="male", ages=EXEC_AGES, subtype=seat_subtype(rank, inst))
         seat[rank] = got[0]
     boss = seat["boss"]
     for rank in execs:
@@ -146,7 +154,7 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
 
     # Capos, each leading a crew on a ground of the family.
     capos = list(seeded.get("capo", []))
-    capos += pull_up(conn, capos_wanted - len(capos), stream=f"{key}:capo", name_group=group, sex="male", ages=CAPO_AGES)
+    capos += pull_up(conn, capos_wanted - len(capos), stream=f"{key}:capo", name_group=group, sex="male", ages=CAPO_AGES, subtype=seat_subtype("capo", inst))
     grounds = [int(r[0]) for name in spec["ground"] for r in conn.execute("SELECT id FROM locations WHERE name=?", (name,)).fetchall()]
     rng.shuffle(grounds)
     crews: list[int] = []
@@ -162,7 +170,7 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
 
     # Soldiers dealt to the crews round-robin in a seeded order.
     soldiers = list(seeded.get("soldier", []))
-    soldiers += pull_up(conn, soldiers_wanted - len(soldiers), stream=f"{key}:soldier", name_group=group, sex="male", ages=SOLDIER_AGES)
+    soldiers += pull_up(conn, soldiers_wanted - len(soldiers), stream=f"{key}:soldier", name_group=group, sex="male", ages=SOLDIER_AGES, subtype=seat_subtype("soldier", inst))
     rng.shuffle(soldiers)
     made_men: list[tuple[int, int]] = [(c, cr) for c, cr in zip(capos, crews)]
     for i, s in enumerate(soldiers):
@@ -178,7 +186,8 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
     plan = _associate_groups(conn, rules, group, need, rng)
     for (g, sex) in sorted(set(plan)):
         n = plan.count((g, sex))
-        assoc += pull_up(conn, n, stream=f"{key}:associate:{g}:{sex}", name_group=g, sex=sex, ages=ASSOCIATE_AGES, criminal_weight=0.5)
+        assoc += pull_up(conn, n, stream=f"{key}:associate:{g}:{sex}", name_group=g, sex=sex, ages=ASSOCIATE_AGES,
+                         subtype=seat_subtype("associate", inst), criminal_weight=0.5)
     rng.shuffle(assoc)
     patrons = list(made_men)
     rng.shuffle(patrons)

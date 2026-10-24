@@ -96,6 +96,10 @@ def _open_core(conn: sqlite3.Connection, actor_id: int) -> sqlite3.Row | None:
 
 
 def _role_kind(conn: sqlite3.Connection, actor_id: int) -> tuple[str | None, Any]:
+    # An outfit member's place is his rank, not a household-retainer or escort career: the subtype words below
+    # ("soldier" in "Soldier in the <Name> Family") are Caerness vocabulary and must not give him one.
+    if conn.execute("SELECT 1 FROM outfit_ranks WHERE actor_id=?", (actor_id,)).fetchone():
+        return None, None
     st = _subtype(conn, actor_id)
     uw = _active_underworld_enterprise(conn, actor_id)
     if uw is not None or any(x in st for x in ('gang ', 'gang collector', 'racket', 'enforcer', 'underworld')):
