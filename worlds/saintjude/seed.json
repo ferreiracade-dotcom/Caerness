@@ -198,7 +198,7 @@
   ],
   "bible_silent": [
    "Business and property valuations: bible silent (Part VI gives sales and margins by trade in 4.4, not purchase prices). No valuation field is seeded; where an institution is an ordinary trade (diner, supper club, funeral home, trucking firm, carting firm, tavern, restaurant) economic_state.trade_profile_1975 carries the Part VI 4.4 sales and net-margin rows for the nearest trade.",
-   "The location of the Master Layoff bank, the car-crushing yard, Fenwick, Docks Chinatown (which bank of the river) and Greenwood's exact line; the seed places them with a note.",
+   "Greenwood's exact line (the bible says only that about half of it lies in Marsh County); the seed places it with a note.",
    "Travel times between districts; the routes are working estimates.",
    "Founding years of most institutions; founded is null unless the bible dates the body.",
    "Which families own which named business beyond Part III 4.1 to 4.4; the businesses attached to the example seats are Examples.",
@@ -272,8 +272,7 @@
    "Dennis McCaffrey is made a Captain, the commander of the 14th Precinct, rather than a Lieutenant.",
    "The seed records Design ranges for family size in the family notes; it does not roster 180 made men. Named persons are a thin layer over a much larger unnamed population.",
    "Business valuations in economic_state come from prices_1975.json ranges; they are assumptions, not accounts.",
-   "Nicknames are in public_identity_text as street names; no secret, pressure or plot hook is attached to any of them.",
-   "Part I 6.1 names a Monsignor Boyle although Part I 15.1 makes pastors' names Open; the seed names no pastor."
+   "Nicknames are in public_identity_text as street names; no secret, pressure or plot hook is attached to any of them."
   ],
   "counts": {
    "persons": 51,
@@ -453,7 +452,7 @@
    "kind": "neighborhood",
    "state": null,
    "parent": null,
-   "notes": "A dozen blocks of Chinese restaurants and laundries and a family association building; about 1 percent of the city. Tongs, family associations and gambling halls; it pays a courtesy to the Pellegrino family. The bible does not say which bank of the river it lies on.",
+   "notes": "A dozen blocks of Chinese restaurants and laundries and a family association building; about 1 percent of the city. Tongs, family associations and gambling halls; it pays a courtesy to the Pellegrino family. Part I 6.4 puts it on the north bank behind the North Piers.",
    "canon_status": "working",
    "coordinates": null,
    "provenance": [
@@ -525,7 +524,7 @@
    "kind": "scrapyard",
    "state": null,
    "parent": null,
-   "notes": "A car-crushing yard on Ferrante ground (Part III 4.3). The bible does not place it more exactly.",
+   "notes": "A car-crushing yard on Ferrante ground (Part III 4.3). Part III 4.3 puts it in the Eastside rail yards.",
    "canon_status": "working",
    "coordinates": null,
    "provenance": [
@@ -543,7 +542,7 @@
    "kind": "neighborhood",
    "state": null,
    "parent": null,
-   "notes": "The Federal Building (twelve floors, 1966), the Federal Courthouse and the Metropolitan Correctional Center (fourteen stories, opened 1974, joined to the courthouse by a tunnel). The FBI field office and the U.S. Attorney's office are in the Federal Building.",
+   "notes": "The Federal Building (twelve floors, 1966), the Federal Courthouse and the federal detention center (name Open; fourteen stories, opened 1974, joined to the courthouse by a tunnel). The FBI field office and the U.S. Attorney's office are in the Federal Building.",
    "canon_status": "working",
    "coordinates": null,
    "provenance": [
@@ -561,7 +560,7 @@
    "kind": "neighborhood",
    "state": null,
    "parent": null,
-   "notes": "The university district: Saint Jude's College (Augustinian; the Friars), Saint Jude State University, a medical school and the teaching hospital (Saint Jude University Hospital). The bible does not say where in the city it lies.",
+   "notes": "The university district: Saint Jude's College (Augustinian; the Friars), Saint Jude State University, a medical school and the teaching hospital (Saint Jude University Hospital). Part I 6.4 puts it on the north bank west of Crown Harbor, between Bellacorte and Greenwood.",
    "canon_status": "working",
    "coordinates": null,
    "provenance": [
@@ -3300,7 +3299,7 @@
    "seeded_members": [
     "sj:person:ettore-conti"
    ],
-   "notes": "Layoff book that takes other bookies' heavy action and balances it across the city. Where the Master Layoff bank sits in the city is not stated in the bible.",
+   "notes": "Layoff book that takes other bookies' heavy action and balances it across the city. Part III 4.1 keeps the Master Layoff bank in Crown Harbor.",
    "founded": null,
    "founded_basis": "not_stated_in_bible",
    "canon_tag": "Fixed",

@@ -44,7 +44,7 @@ PLACES = [
     ("city-hall", "City Hall", "government building", "civic-center", "Built 1911. Seat of the strong mayor and the fifteen-member City Council."),
     ("sjpd-headquarters", "SJPD Headquarters", "government building", "civic-center", "Headquarters of the Saint Jude Police Department and its citywide bureaus."),
     ("federal-complex", "The Federal Complex", "neighborhood", "crown-harbor",
-     "The Federal Building (twelve floors, 1966), the Federal Courthouse and the Metropolitan Correctional Center (fourteen stories, opened 1974, joined to the courthouse by a tunnel). The FBI field office and the U.S. Attorney's office are in the Federal Building."),
+     "The Federal Building (twelve floors, 1966), the Federal Courthouse and the federal detention center (name Open; fourteen stories, opened 1974, joined to the courthouse by a tunnel). The FBI field office and the U.S. Attorney's office are in the Federal Building."),
     ("financial-blocks", "The Financial Blocks", "neighborhood", "crown-harbor",
      "First Harbor National Bank and four other banks, insurance companies, brokers and the law firms that serve them."),
     ("steakhouse-row", "Steakhouse Row", "neighborhood", "crown-harbor", "Four blocks of expensive restaurants where deals are made over lunch."),
@@ -94,7 +94,7 @@ PLACES = [
     ("hunts-row-exchange", "Hunts Row Textile and Diamond Exchange", "business premises", "hunts-row",
      "The city's master fence: a market where goods are bought, sold and re-labeled, run by a mixed class of Jewish and Italian dealers on Ferrante ground, which the family protects and taxes (Part V 7.1)."),
     ("rail-yards", "The Rail Yards and Produce Terminal", "freight yard", "eastside", "A vast freight yard and a produce market where trucks arrive at 2 a.m. The Penn Central bankruptcy of 1970 changed who owns the sidings."),
-    ("eastside-auto-crush", "Eastside Auto Crush", "scrapyard", "rail-yards", "A car-crushing yard on Ferrante ground (Part III 4.3). The bible does not place it more exactly."),
+    ("eastside-auto-crush", "Eastside Auto Crush", "scrapyard", "rail-yards", "A car-crushing yard on Ferrante ground (Part III 4.3). Part III 4.3 puts it in the Eastside rail yards."),
     ("dunmore-avenue", "Dunmore Avenue", "avenue", "eastside",
      "About two miles of Black-owned banks, insurance offices, barbershops, funeral homes, churches (Mount Zion Baptist, Bethel A.M.E.), nightclubs, the Courier and Mount Zion Hospital. For forty years the center of the numbers game. The 17th Precinct."),
     ("mount-zion-hospital", "Mount Zion Hospital", "hospital", "dunmore-avenue", "Black-founded hospital now in financial trouble."),
@@ -129,10 +129,10 @@ PLACES = [
     ("kosciuszko-park", "Kosciuszko Park", "neighborhood", "saint-jude", "Polish neighborhood in the north-west between the Flats and the Heights: red-brick bungalows, bakeries and butchers, St. Stanislaus Kostka, the Polish Falcons hall. A source of voters, steelworkers, cops and nuns."),
     ("greenwood", "Greenwood", "neighborhood", "saint-jude", "Middle-class neighborhood on the western line of the city, half in Marsh County: Jewish professionals and merchants who left the Eastside, synagogues, delicatessens, Beth Israel Hospital."),
     ("fenwick", "Fenwick (College Hill)", "neighborhood", "saint-jude",
-     "The university district: Saint Jude's College (Augustinian; the Friars), Saint Jude State University, a medical school and the teaching hospital (Saint Jude University Hospital). The bible does not say where in the city it lies."),
+     "The university district: Saint Jude's College (Augustinian; the Friars), Saint Jude State University, a medical school and the teaching hospital (Saint Jude University Hospital). Part I 6.4 puts it on the north bank west of Crown Harbor, between Bellacorte and Greenwood."),
     ("sixth-ward", "The Sixth Ward", "neighborhood", "saint-jude", "Old shrinking Greek, Lebanese and Armenian quarter near the Basin: three Orthodox churches, coffee houses, some of the best restaurants. The diner business is largely Greek."),
     ("docks-chinatown", "Docks Chinatown", "neighborhood", "saint-jude",
-     "A dozen blocks of Chinese restaurants and laundries and a family association building; about 1 percent of the city. Tongs, family associations and gambling halls; it pays a courtesy to the Pellegrino family. The bible does not say which bank of the river it lies on."),
+     "A dozen blocks of Chinese restaurants and laundries and a family association building; about 1 percent of the city. Tongs, family associations and gambling halls; it pays a courtesy to the Pellegrino family. Part I 6.4 puts it on the north bank behind the North Piers."),
     ("bayview-downs", "Bayview Downs", "racetrack", "saint-jude", "Thoroughbred track, March to November, governed by the State Racing Commission."),
     # ---- Beyond the city
     ("the-pines", "The Pines", "region", None,
@@ -356,7 +356,7 @@ INSTITUTIONS = [
     I("deluca-cadillac", "DeLuca Cadillac-Oldsmobile", "car dealership", "oakridge", None,
       "Gold Coast car dealership, the kind of cash business that launders well. Example.", band="MEDIUM", owners=["lorenzo-deluca"], asset_base="PROPERTY", tag="Example"),
     I("layoff-bank", "The Master Layoff Bank", "betting layoff bank", "financial-blocks", None,
-      "Layoff book that takes other bookies' heavy action and balances it across the city. Where the Master Layoff bank sits in the city is not stated in the bible.", band="HIGH", owners=["ettore-conti"], liquidity="CASH_RICH"),
+      "Layoff book that takes other bookies' heavy action and balances it across the city. Part III 4.1 keeps the Master Layoff bank in Crown Harbor.", band="HIGH", owners=["ettore-conti"], liquidity="CASH_RICH"),
     # ---- Pellegrino businesses
     I("pier-4-biz", "Pier 4 Diner", "diner", "pier-4-diner", None,
       "Dockside diner open from 4 AM, the boss's morning office.", band="LOW", owners=["matteo-pellegrino"], trade="restaurant"),
@@ -679,7 +679,7 @@ CLAIM_TAGS = {c[0]: "Fixed" for c in CLAIMS}
 # Where the bible is silent and the seed records the fact as an assumption or leaves it unplaced.
 BIBLE_SILENT = [
     "Business and property valuations: bible silent (Part VI gives sales and margins by trade in 4.4, not purchase prices). No valuation field is seeded; where an institution is an ordinary trade (diner, supper club, funeral home, trucking firm, carting firm, tavern, restaurant) economic_state.trade_profile_1975 carries the Part VI 4.4 sales and net-margin rows for the nearest trade.",
-    "The location of the Master Layoff bank, the car-crushing yard, Fenwick, Docks Chinatown (which bank of the river) and Greenwood's exact line; the seed places them with a note.",
+    "Greenwood's exact line (the bible says only that about half of it lies in Marsh County); the seed places it with a note.",
     "Travel times between districts; the routes are working estimates.",
     "Founding years of most institutions; founded is null unless the bible dates the body.",
     "Which families own which named business beyond Part III 4.1 to 4.4; the businesses attached to the example seats are Examples.",
@@ -719,5 +719,4 @@ JUDGEMENT_CALLS = [
     "The seed records Design ranges for family size in the family notes; it does not roster 180 made men. Named persons are a thin layer over a much larger unnamed population.",
     "Business valuations in economic_state come from prices_1975.json ranges; they are assumptions, not accounts.",
     "Nicknames are in public_identity_text as street names; no secret, pressure or plot hook is attached to any of them.",
-    "Part I 6.1 names a Monsignor Boyle although Part I 15.1 makes pastors' names Open; the seed names no pastor.",
 ]

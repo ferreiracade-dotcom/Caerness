@@ -3,13 +3,13 @@
   "files": [
     {
       "file": "Saint_Jude_Bible_Index.md",
-      "bytes": 7424,
-      "sha256": "59548d9329b17999407850697f2378d0e88d40ead7c3474d371485ec8d7293c2"
+      "bytes": 7383,
+      "sha256": "339ea26416b98f8b6593a28b8735640662a3c7dff8c46fd360babcf9e4c20353"
     },
     {
       "file": "Saint_Jude_Bible_Part_I_The_City.md",
-      "bytes": 93621,
-      "sha256": "85b69052080990e6d51faafb60a0a8504fa0aaefd2c8b585af45bd6d78ebef66"
+      "bytes": 94936,
+      "sha256": "4c4bc00d0e3be37b0d423c61d8185eca08a7d04fd55bbe3cf03cfb5a885c165c"
     },
     {
       "file": "Saint_Jude_Bible_Part_II_The_Law.md",
@@ -18,8 +18,8 @@
     },
     {
       "file": "Saint_Jude_Bible_Part_III_The_Underworld.md",
-      "bytes": 78343,
-      "sha256": "e1da04cbafb5286e02bc04856e34be4902aa32229a36d46755296cecdd1ebb42"
+      "bytes": 78608,
+      "sha256": "b3d1e88cb6fd9d3e2001ad0c5a1e1801a5e91bec65b2cdc9304e3152e649ae70"
     },
     {
       "file": "Saint_Jude_Bible_Part_IV_The_Upperworld.md",
@@ -33,9 +33,9 @@
     },
     {
       "file": "Saint_Jude_Bible_Part_VI_The_Price_Book.md",
-      "bytes": 149005,
-      "sha256": "c6c372ca5bf8e378536f57872507c889726257970660153d1750d7f991ca6950"
+      "bytes": 149763,
+      "sha256": "7870a4823d38cff3879468d609f835d0841bcb3731ddd09bab5a59c17259e827"
     }
   ],
-  "bible_md_sha256": "3283846d6bd0305c4990fe472b7d082a283c9873fa4e467b06eabafb14ef5567"
+  "bible_md_sha256": "22fdac0415685bb736bfdb392589b8c4bd38c371ca2a405de1d12e8924b6593e"
 }

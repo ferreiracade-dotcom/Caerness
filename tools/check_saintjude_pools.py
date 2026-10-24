@@ -170,7 +170,7 @@ def check(data: dict) -> list[str]:
             errs.append(f"net {fam}: gross - Pad = {net:.3f}, 9.3 prints {exp['net_m']}")
         if abs(pad[fam] - exp["pad_m"]) > 1e-9:
             errs.append(f"Pad {fam}: pool {pad[fam]}, 9.3 prints {exp['pad_m']}")
-        men = g(f"made_men_{fam}")
+        men = g(f"made_men_{fam}_mid")  # 9.3 prints per-man figures at the range midpoints
         if abs(exp["net_m"] * 1e6 / men - exp["per_man_usd"]) > 1500:
             errs.append(f"per made man {fam}: {exp['net_m'] * 1e6 / men:.0f} against {exp['per_man_usd']}")
     four = alloc["family_gross_net_9_3"]["four"]
@@ -181,7 +181,7 @@ def check(data: dict) -> list[str]:
         errs.append(f"net after the Pad is {net4:.3f}, expected 35.9")
     if abs(four["net_m"] - 35.9) > 1e-9:
         errs.append("allocation four-family net is not 35.9")
-    if abs(four["net_m"] * 1e6 / g("made_men_total") - four["per_man_usd"]) > 1500:
+    if abs(four["net_m"] * 1e6 / g("made_men_total_mid") - four["per_man_usd"]) > 1500:
         errs.append("per made man across the four does not match 200,000")
 
     # 6. population path

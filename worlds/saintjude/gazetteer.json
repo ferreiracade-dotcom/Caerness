@@ -1,5 +1,5 @@
 {
- "about": "Two lists the engine uses as vetoes (engine/veto.py) and nothing else. real_towns_replaced: real New Jersey municipalities inside Saint Jude's footprint (the northern Monmouth shore and bayshore, and the inner Monmouth and Middlesex country), which the bible says do not exist in this world (Part I 3.1a, Naming rule); the engine refuses them as a place where something is set or happens, and the Storyteller may borrow a name only by authoring a Saint Jude neighborhood of that name. Entries with from_bible true are named in the bible; from_bible false entries are the other real municipalities of the same footprint, listed on the strength of the Naming rule, and are the engine's reading, not the bible's words (the bible does not enumerate the footprint, so places on its edge, such as Perth Amboy or New Brunswick, are deliberately left out). Entries marked ambiguous are also ordinary words and match only with a place cue ('in Deal', 'Deal, NJ'). real_people: the real people the bible itself names as historical or offstage figures; 'No real person acts or speaks' (Index), so the engine refuses a new person or protagonist carrying one of these full names; Saint Jude stand-ins do that work. Real places the bible says exist (Newark, Elizabeth, Trenton, Atlantic City, Point Pleasant, Toms River) are not listed.",
+ "about": "Two lists the engine uses as vetoes (engine/veto.py) and nothing else. real_towns_replaced: real New Jersey municipalities inside Saint Jude's footprint (the northern Monmouth shore and bayshore, and the inner Monmouth and Middlesex country), which the bible says do not exist in this world (Part I 3.1a, Naming rule); the engine refuses them as a place where something is set or happens, and the Storyteller may borrow a name only by authoring a Saint Jude neighborhood of that name. Every entry is named in Part I 3.1a, which lists the whole replaced ground; real places beyond it, such as Perth Amboy, New Brunswick, Edison and Wall, exist as they are. Entries marked ambiguous are also ordinary words and match only with a place cue ('in Deal', 'Deal, NJ'). real_people: the real people the bible itself names as historical or offstage figures; 'No real person acts or speaks' (Index), so the engine refuses a new person or protagonist carrying one of these full names; Saint Jude stand-ins do that work. Real places the bible says exist (Newark, Elizabeth, Trenton, Atlantic City, Point Pleasant, Toms River) are not listed.",
  "real_towns_replaced": [
   {
    "name": "Long Branch",
@@ -27,270 +27,233 @@
   },
   {
    "name": "Sea Bright",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Monmouth Beach",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Oceanport",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "West Long Branch",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Eatontown",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Shrewsbury",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Little Silver",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Fair Haven",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Rumson",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Tinton Falls",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Highlands",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country",
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood",
    "ambiguous": true
   },
   {
    "name": "Middletown",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Keansburg",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Hazlet",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Holmdel",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country",
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood",
    "ambiguous": true
   },
   {
    "name": "Union Beach",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Keyport",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Aberdeen",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Matawan",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Interlaken",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country",
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood",
    "ambiguous": true
   },
   {
    "name": "Deal",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country",
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood",
    "ambiguous": true
   },
   {
    "name": "Allenhurst",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Loch Arbour",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Ocean Township",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Neptune",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country",
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood",
    "ambiguous": true
   },
   {
    "name": "Neptune City",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Bradley Beach",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Avon-by-the-Sea",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Belmar",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Freehold",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country",
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood",
    "ambiguous": true
   },
   {
    "name": "Marlboro",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country",
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood",
    "ambiguous": true
   },
   {
    "name": "Colts Neck",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Manalapan",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Englishtown",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "Old Bridge",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country",
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood",
    "ambiguous": true
   },
   {
    "name": "Sayreville",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   },
   {
    "name": "South Amboy",
-   "source": "Part I 3.1a (Naming rule)",
-   "from_bible": false,
-   "basis": "real municipality inside the footprint defined in Part I 3.1a",
-   "note": "not named in the bible; listed because the municipality lies in the northern Monmouth shore and bayshore or the inner Monmouth and Middlesex country"
+   "source": "Part I 3.1a",
+   "from_bible": true,
+   "note": "named by the bible (Part I 3.1a); the Storyteller may borrow the name for a neighborhood"
   }
  ],
  "real_people": [

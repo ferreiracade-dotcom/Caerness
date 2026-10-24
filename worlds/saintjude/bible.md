@@ -84,7 +84,7 @@ Total: about 98,000 words. Cross-references are written "Part IV 2.7B" or "secti
 
 **Left to the run:** names of officials (Commissioner, SAC, prosecutors), which officers the Dolan Commission convicted, who started the Ferrante Schism, whether any family moves to dial step 3 on cocaine, the shape of the crack market, and the real centre of criminal revenue.
 
-**Process:** **ChatGPT, Gemini and a Claude audit reviewed the bible in October 2026, and a second Gemini review followed revision 3. Their agreed fixes are applied (Part VI 9.3 carries a correction note). Part VI 9 has been rebuilt from a full allocation table (9.3A).** Nothing has been loaded into the engine.
+**Process:** **ChatGPT, Gemini and a Claude audit reviewed the bible in October 2026, and a second Gemini review followed revision 3. Their agreed fixes are applied (Part VI 9.3 carries a correction note). Part VI 9 has been rebuilt from a full allocation table (9.3A).**
 
 ---
 
@@ -237,10 +237,8 @@ Tradition says the settlement nearly ended in its second winter, with food gone 
 | 1970 to 1972 | **The Dolan Commission.** A mayor's investigation into police corruption (modelled on the Knapp Commission) finds "grass-eaters" and "meat-eaters" in the SJPD. Transfers and rotation follow | invented; Anchor: Knapp Commission, 1970 to 1972 |
 | 1973 | **The Dock Strike Massacre.** Pellegrino crews use cargo hooks and shotguns to crush an independent longshoremen's strike on the South Piers. **A Kerrytown longshoreman is killed, and his brother is still in Kerrytown (Open who).** Kerrytown does not forget | from the codex |
 | 1974 | **The Concrete Purge.** **The Sabatini boss of the day takes the Concrete Club into his own hands. A brother-in-law and three contractors are gone. What happened to them is Open; the city has only rumor (Tier 4).** | from the codex |
-| 1974 | The Federal MCC opens downtown | Anchor, local detail invented |
+| 1974 | The federal detention center opens downtown | Anchor, local detail invented |
 | 1974 to 1975 | Court-ordered school desegregation in Saint Jude | Anchor model |
-
-**The old codex timeline's "1982 Barber Shop Hit," later "1977," is no longer history.** If it happens, it happens in the simulation.
 
 ### 2.6 What the History Leaves Open
 
@@ -258,7 +256,7 @@ The tide runs strong. The river is tidal as far as the falls, twenty-two miles u
 
 ### 3.1a Where Saint Jude Sits on the Real Map
 
-**Fixed (decision).** Saint Jude is a fictional city set into the real State of **New Jersey**, on the central Atlantic coast. It stands where the northern Monmouth County shore stands in the real world, from the Sandy Hook peninsula (our Brighton Point) south and inland along the bayshore. In this world the city occupies that ground, as Gotham or Springfield occupy a place on a map that has no such city. The real towns there (Long Branch, Asbury Park, Red Bank and their neighbors) do not exist, and the Storyteller may borrow their names for neighborhoods. This is ordinary practice in fiction.
+**Fixed (decision).** Saint Jude is a fictional city set into the real State of **New Jersey**, on the central Atlantic coast. It stands where the northern Monmouth County shore stands in the real world, from the Sandy Hook peninsula (our Brighton Point) south and inland along the bayshore. In this world the city occupies that ground, as Gotham or Springfield occupy a place on a map that has no such city. The real towns there do not exist: Highlands, Atlantic Highlands, Middletown, Keansburg, Hazlet, Union Beach, Keyport, Aberdeen and Matawan on the bayshore; Sea Bright, Monmouth Beach, Long Branch, West Long Branch, Oceanport, Eatontown, Deal, Allenhurst, Loch Arbour, Asbury Park, Ocean Township, Neptune, Neptune City, Bradley Beach, Avon-by-the-Sea and Belmar on the shore; Red Bank, Little Silver, Fair Haven, Rumson, Shrewsbury, Tinton Falls, Interlaken and Holmdel along the river and inland; Freehold, Marlboro, Colts Neck, Manalapan and Englishtown in the inner Monmouth country; and Old Bridge, Sayreville and South Amboy in Middlesex. The Storyteller may borrow their names for neighborhoods. Real places beyond that ground, such as Perth Amboy, New Brunswick, Edison and Wall, exist as they are. This is ordinary practice in fiction.
 
 **Design (size).** The city covers about 105 square miles of land (range 90 to 130), about 10,500 residents per square mile in 1975. That matches Baltimore, the civic model (about 850,000 people on about 80 square miles in the mid 1970s [memory, to verify]). It is far denser than the real towns it replaces, which held a fraction of 1.1 million [memory, to verify]. That is a deliberate fictional choice.
 
@@ -299,7 +297,7 @@ Orient to the sea. East is the Atlantic. The river comes in from the west.
 3. **The I-95 freight corridor**, truck depots and rail sidings, linked to the Point by the **Narrows Bridge**.
 4. **The Ironworks and Killbuck Flats**, going upriver on both banks, mostly south.
 
-**Beyond the city:** **Oakridge** (north-west suburbs), **Greenwood** (west), **the Pines** (west, thirty miles), **Point Pleasant** and the Shore (south along the coast, forty minutes).
+**Beyond the city:** **Oakridge** (north-west suburbs), **Greenwood** (west), **the Pines** (south-west, thirty miles), **Point Pleasant** and the Shore (south along the coast, forty minutes).
 
 ### 3.3 Ground
 
@@ -342,16 +340,18 @@ The city keeps a civil and religious calendar in addition to the criminal one.
 
 **Fixed.** The **metropolitan area** has about **2.4 million** people. The **City of Saint Jude** proper, which is also **Killbuck County**, has about **1.1 million** in 1975, down from a peak of 1.35 million in 1950 and still falling (Weather: the decline continues through the decade).
 
+**Design (outside the city).** The metropolitan area outside the city, about 1.3 million people in 1975, is not split by county in this bible. The engine holds it as one suburban remainder, and its birth, infant-death and age figures follow the 1975 United States rates until a revision of this Part sets them.
+
 **Design (population path).** The city loses about 0.8 percent of its people a year from 1975 (range 0.4 to 1.5), which is about 1.06 million in 1980, 1.02 million in 1985 and 0.98 million in 1990. The rate continues the 1950 to 1975 decline (1.35 million to 1.1 million). Those who leave are mostly working and middle class; the poor, the old and the newest arrivals stay. The engine draws the rate once and holds it unless the run moves it.
 
-**Tendency (reversal).** The run may slow, stop or reverse the fall, but only for a cause it can date: a port or industrial revival, a wave of new arrivals, a building or casino boom, a fall in crime, a city that pays its bills. The rate moves toward its new value by at most a third of a point a year, because people move over years and not at once. Before 1990 growth is capped at 0.5 percent a year. Newark, Baltimore, Philadelphia, Pittsburgh, Cleveland, Detroit, St. Louis and Buffalo all lost people between 1980 and 1990 [verified, HUD, State of the Cities 1999, table 9], so a reversal before 1990 is rare and should be earned. Who arrives matters as much as how many: new arrivals to the Eastside and the blocks (Part V) change the city differently from a return to the Heights. The metropolitan total is Open; the suburbs take most of those who leave the city.
+**Tendency (reversal).** The run may slow, stop or reverse the fall, but only for a cause it can date: a port or industrial revival, a wave of new arrivals, a building or casino boom, a fall in crime, a city that pays its bills. The rate moves toward its new value by at most a third of a point a year, because people move over years and not at once. Before 1990 growth is capped at 0.5 percent a year. Newark, Baltimore, Philadelphia, Pittsburgh, Cleveland, Detroit, St. Louis and Buffalo all lost people between 1980 and 1990 [verified, HUD, State of the Cities 1999, table 9], so a reversal before 1990 is rare and should be earned. Who arrives matters as much as how many: new arrivals to the Eastside and the blocks (Part V) change the city differently from a return to the Heights. The 1975 metropolitan total of 2.4 million is Fixed. Only its later path is Open, and the suburbs take most of those who leave the city.
 
 The city is close to Baltimore in shape (Anchor, as a model): an old port on a tidal river, row houses, ethnic neighborhoods, heavy industry on the waterfront, a Catholic origin, and a city government that is also its own county. The mob geography in the codex was modelled on Newark, Boston and Philadelphia. The civic geography follows Baltimore.
 
 The city is surrounded by suburban counties.
 
 - **Marsh County** (west and north-west): Oakridge, Greenwood, and the commuter towns.
-- **Pine County** (west): the Pines and the outer exurbs.
+- **Pine County** (south-west): the Pines and the outer exurbs.
 - **Shore County** (south along the coast): Point Pleasant and the beach towns.
 
 **Open.** The suburbs, their politics, and their police are available for invention.
@@ -440,7 +440,7 @@ Saint Jude has eight **districts** (the old codex's list, expanded), each contai
 **The neighborhoods.**
 
 - **The Civic Center.** City Hall (1911), the Municipal Court, the Superior Court, the County Prosecutor's offices, the SJPD Headquarters, and the Hall of Records.
-- **The Federal Complex.** The **Federal Building** (twelve floors, 1966), the **Federal Courthouse**, and the **Metropolitan Correctional Center** (fourteen stories, opened 1974, joined to the courthouse by a tunnel). The FBI field office and the U.S. Attorney's Office are in the Federal Building.
+- **The Federal Complex.** The **Federal Building** (twelve floors, 1966), the **Federal Courthouse**, and the **federal detention center** (name **Open**; fourteen stories, opened 1974, joined to the courthouse by a tunnel). The FBI field office and the U.S. Attorney's Office are in the Federal Building.
 - **The Financial Blocks.** **First Harbor National Bank** is the city's biggest bank, and there are four others. Insurance companies and brokers, and the law firms that serve them.
 - **Steakhouse Row.** Four blocks of expensive restaurants where deals are made over lunch.
 - **The Basin Front.** A line of old warehouses being converted, slowly, to offices.
@@ -535,7 +535,7 @@ Saint Jude has eight **districts** (the old codex's list, expanded), each contai
 
 - **Decline and deregulation of vice.** Courts loosen obscenity rules in the 1970s. Peep shows, massage parlors, and adult theaters multiply. Money is in this.
 - **Disco** (about 1977 onward) makes nightclubs very profitable.
-- **The street is a stage.** Reputation is made and unmade here. See the Economy of Face in Part III.
+- **The street is a stage.** Reputation is made and unmade here. See Part III 2, Courtesy and Ceremony.
 - **Redevelopment threats.** Every few years a plan is floated to clear the Strip.
 
 **Open.**
@@ -594,7 +594,9 @@ Saint Jude has eight **districts** (the old codex's list, expanded), each contai
 
 **Open.**
 
-### 5.8 District Eight: The Heights and Oakridge (the Gold Coast)
+### 5.8 District Eight: The Heights (the Gold Coast)
+
+**Oakridge** lies outside the city line, in Marsh County (3.1a, 4.1). It is described here because the Heights' money, clubs and families reach into it.
 
 **Character.** The money. **The Heights** is the old-money ridge inside the city, north-west, with Victorian and Georgian mansions on large lots, a golf club, the oldest Protestant churches, and a few Catholic mansions. **Oakridge** is the suburb beyond the city line, in Marsh County: Tudor and split-level houses on winding streets, willows, private Catholic academies, country clubs. Together they are the **Gold Coast**.
 
@@ -628,7 +630,7 @@ The eight districts do not exhaust Saint Jude. Other neighborhoods have their ow
 
 **The economy.** The docks. The city payroll. Taverns.
 
-**The institutions.** **St. Jude's Cathedral** and school; **Monsignor Boyle's** rectory; the Hibernian halls; **Local 1201** (South Pier longshoremen); the **Kerrytown Firemen's Association**; the **Harp and Crown** and thirty other pubs.
+**The institutions.** **St. Jude's Cathedral** and school; the cathedral rectory; the Hibernian halls; **Local 1201** (South Pier longshoremen); the **Kerrytown Firemen's Association**; the **Harp and Crown** and thirty other pubs.
 
 **Underworld.** The **Charlestown Brigades**, an Irish dockside organization, are the strongest. Italian men rarely enter after dark without a reason. The Irish have a different relation to violence: the family is the neighborhood, the loyalties are older, and the Brigades take an interest in the politics of Belfast.
 
@@ -672,11 +674,11 @@ A city this size contains communities where no family holds a seat or a crew. Ea
 
 - **Kosciuszko Park.** A Polish neighborhood in the north-west, between the Flats and the Heights. Red-brick bungalows, Polish bakeries and butchers, a big church (**St. Stanislaus Kostka**), an active Polish Falcons hall, and a stubborn pride. Skilled workers and union men. A reliable source of voters, steelworkers, cops, and nuns.
 - **Greenwood.** A middle-class neighborhood on the western line of the city, half in Marsh County. Jewish professionals and merchants who left the Eastside and the Racks in the 1950s and 1960s. Synagogues, delicatessens, and a country club of their own. Doctors, lawyers, accountants, and retailers. This is where the Racks' owners live.
-- **Fenwick (College Hill).** The university district. **Saint Jude's College** (Augustinian; the Friars; a nationally ranked basketball team), **Saint Jude State University** (a public campus), a medical school and the teaching hospital, bookshops, bars, and student apartments. Radical politics in 1970, quieter by 1975.
+- **Fenwick (College Hill).** The university district, on the north bank west of Crown Harbor, between Bellacorte and Greenwood. **Saint Jude's College** (Augustinian; the Friars; a nationally ranked basketball team), **Saint Jude State University** (a public campus), a medical school and the teaching hospital, bookshops, bars, and student apartments. Radical politics in 1970, quieter by 1975.
 - **The Sixth Ward.** An old, shrinking Greek, Lebanese, and Armenian quarter near the Basin, with three Orthodox churches, coffee houses, and some of the best restaurants in the city. The diner business in Saint Jude is largely Greek.
-- **The Docks Chinatown.** A dozen blocks of Chinese restaurants and laundries, a family association building, and a **small community, about 1 percent of the city,** that has kept its business to itself.
+- **The Docks Chinatown.** On the north bank behind the North Piers, a dozen blocks of Chinese restaurants and laundries, a family association building, and a **small community, about 1 percent of the city,** that has kept its business to itself.
 - **The Shore.** Point Pleasant and the beach towns: a faded 1950s resort with a boardwalk, motels, an arcade, and an off-season population of retirees and cheap-room renters. Talk of casinos there is live in 1975. The Atlantic City-only vote of November 1976 (Weather, see 9.9) will settle it.
-- **The Pines.** Thirty miles west in Pine County: pine barrens, abandoned cranberry bogs, sandy roads, hunting cabins, and a very low population. Also a state park, a few retirees, and rumors.
+- **The Pines.** Thirty miles south-west in Pine County: pine barrens, abandoned cranberry bogs, sandy roads, hunting cabins, and a very low population. Also a state park, a few retirees, and rumors.
 
 **Open.**
 
@@ -700,7 +702,8 @@ A city this size contains communities where no family holds a seat or a crew. Ea
 | Portuguese | about 2% | Pescadores Row |
 | Greek, Lebanese, Armenian | about 2% | The Sixth Ward, diners everywhere |
 | Chinese and other Asian | about 1% | Docks Chinatown |
-| Mixed, other | about 8% | Everywhere |
+| Soviet Jewish émigrés | about 0.2% | Brighton Point |
+| Mixed, other | about 7.8% | Everywhere |
 
 The suburbs are whiter and richer. In 1975 the city is roughly 60% white and 30% Black, and the white share is falling.
 
@@ -841,7 +844,7 @@ Cash dominates the street economy. A great many businesses, from bars to bakerie
 
 **Fixed.** The State started a lottery in the early 1970s (Anchor: several Northeastern states began lotteries in 1967 to 1971). It was a weekly game with long odds and slow payouts. It did not compete with the illegal numbers game.
 
-**Weather (strong, from 22 May 1975).** The State's daily three-digit game, **Pick-3**, begins on 22 May 1975 (Anchor [verified]: New Jersey). A state game pays less than an illegal game, offers no credit, and cannot be played on the corner. The illegal game survives by paying more, extending credit, and offering convenience. But the state game is a competitor, and it shrinks the illegal market over several years.
+**Weather (strong, from 22 May 1975).** The State's daily three-digit game, **Pick-it** (renamed Pick-3 in 1987), begins on 22 May 1975 (Anchor [verified]: New Jersey). A state game pays less than an illegal game, offers no credit, and cannot be played on the corner. The illegal game survives by paying more, extending credit, and offering convenience. But the state game is a competitor, and it shrinks the illegal market over several years.
 
 For the Eastside, where the numbers banks have employed hundreds and financed churches and businesses for fifty years, this is a threat to the economy.
 
@@ -977,7 +980,7 @@ This is a list of the standing conditions of the period that bear on the city as
 | 1971 to 1985 | Soviet Jewish emigration | moderate, growing | Brighton Point, the Vorovskoy, the Racks |
 | 1976 | Conrail forms; rail restructuring | moderate | the Rail Yards, trucking |
 | 1976 to 1980 | Casino gambling arrives in the region | moderate | the Shore, state politics, organized crime |
-| 1975 onward | State daily numbers game (Pick-3, 22 May 1975) | strong | the Eastside combine, every numbers bank |
+| 1975 onward | State daily numbers game (Pick-it, 22 May 1975; Pick-3 from 1987) | strong | the Eastside combine, every numbers bank |
 | 1977 to 1979 | Disco boom; collapse in 1979 and 1980 | moderate | the Strip, nightclubs, skimming |
 | 1978 to 1980 | Hazardous waste becomes a national scandal | moderate | the Flats, waste hauling, the Vannucci |
 | 1979 to 1980 | Second energy crisis | strong | trucking, prices, tempers |
@@ -1060,7 +1063,7 @@ These are the real-world facts this Part leans on. They are here so that they ca
 - The New York fiscal crisis and municipal layoffs (1975).
 - Federal Community Development Block Grants (1974).
 - Atlantic City casino referendum (November 1976) and first casino (26 May 1978) [verified].
-- The real State of New Jersey: Trenton, Governor Byrne (1974 to 1982), the State Commission of Investigation (1969), Atlantic City, the Pine Barrens, Route 9 [verified except distances].
+- The real State of New Jersey: Trenton, Governor Byrne (1974 to 1982), the State Commission of Investigation (created 1968, working from 1 January 1969), Atlantic City, the Pine Barrens, Route 9 [verified except distances].
 - **The New Jersey Constitution of 1947: the Governor appoints Superior Court judges and county prosecutors with the Senate's consent [verified].**
 - Women admitted as FBI special agents (1972).
 - Soviet Jewish emigration to Brighton Beach from the 1970s; Evsei Agron's arrival in October 1975.
@@ -1477,7 +1480,7 @@ Baseline: the start of 1975. Section 0 of Part II (the Period Mind) governs ever
 
 **Sizes and sums are design estimates.** Membership figures, tribute rates, and prices are tagged **design** and are meant to be changed. Where a fact about the real world is used, it is tagged **[verified]** or **[memory]** as in Part II.
 
-**A note on scale (a decision for Cade).** The old codex gave four families a combined 265 made men. The largest real families, in New York, had a few hundred members each, and a city of about a million (Philadelphia, say) held one family of roughly a hundred. Four families in a city of 1.1 million (2.4 million metro) with a major port is a stretch. This Part therefore sets the four families at **30 to 60 made men each**, **about 180 to 190 in all (see 3.2)**. Even so, that is generous. The port, the rail yards, and the highways justify it, and the four are described as small, crowded, and quarrelsome because of it. If you want them bigger, say so.
+**A note on scale.** The old codex gave four families a combined 265 made men. The largest real families, in New York, had a few hundred members each, and a city of about a million (Philadelphia, say) held one family of roughly a hundred. Four families in a city of 1.1 million (2.4 million metro) with a major port is a stretch. This Part therefore sets the four families at **30 to 60 made men each**, **about 180 to 190 in all (see 3.2)**. Even so, that is generous. The port, the rail yards, and the highways justify it, and the four are described as small, crowded, and quarrelsome because of it. If you want them bigger, say so.
 
 **A note on names.** The old codex's Castellano and Moretti families are renamed **Pellegrino** and **Ferrante**, because Castellano is the name of a real Gambino boss (Paul Castellano, boss from November 1976 until he was shot on 16 December 1985 [verified]) and Moretti is the name of a real New Jersey mobster of the 1940s and early 1950s. The old names may survive in the codex and the repo, and Code needs to carry the rename through. Pellegrino means "pilgrim," which suits a family of the Saint Jude docks.
 
@@ -1627,12 +1630,12 @@ The neutral grounds in Saint Jude are listed in section 6.
 
 | Family | Made men | Associates per made man | Notes |
 |---|---|---|---|
-| Sabatini | 50 to 60 | 5 to 8 | richest, most political, oldest men |
+| Sabatini | 50 to 60, default 57 | 5 to 8 | richest, most political, oldest men |
 | Pellegrino | **40 to 50, default 45. A run may push the count to 55 only by a dated cause (Part VI 9.9, item 2)** | 5 to 8 | docks and trucks; the biggest street presence |
-| Ferrante | 40 to 50 | 6 to 8 | the Racks and the highways; many gunmen |
-| Vannucci | 30 to 40 | 5 to 7 | smallest, hardest, most closed |
+| Ferrante | 40 to 50, default 44 | 6 to 8 | the Racks and the highways; many gunmen |
+| Vannucci | 30 to 40, default 36 | 5 to 7 | smallest, hardest, most closed |
 
-Total around **180 to 190** made men (**the four ranges sum to 160 to 200**) and roughly 1,200 to 1,500 associates. These are estimates and the simulation may move them. **The count is Open and tied to revenue (Part VI 9). The engine draws a family's count inside its range from its revenue, and a revenue shock (a lost Club contract, a docks decline, a Pick-3 hit) shrinks the count over years by attrition, not at once. Part VI's scale test does not rule out about 190 and does not prove it. The Pellegrino default is lowered because their modeled revenue is thinnest per man (Part VI 9.5). That is a design call made in the Part VI pass and **accepted by Cade**, **and a count above 50, up to 55, needs a dated cause (the table above)**. Read "associates" as people who touch a made man's business, not as people he supports.** A family's strength is not its head count alone. See section 3.4.
+Total around **180 to 190** made men (**the four ranges sum to 160 to 200**) and roughly 1,200 to 1,500 associates. These are estimates and the simulation may move them. **The count is Open and tied to revenue (Part VI 9). The engine draws a family's count inside its range from its revenue, and a revenue shock (a lost Club contract, a docks decline, a Pick-3 hit) shrinks the count over years by attrition, not at once. Part VI's scale test does not rule out about 190 and does not prove it. The Pellegrino default is lowered because their modeled revenue is thinnest per man (Part VI 9.5). That is a design call made in the Part VI pass and **accepted by Cade**, **and a count above 50, up to 55, needs a dated cause (the table above)**. Read "associates" as people who touch a made man's business, not as people he supports.** The defaults in the table are the peaks of the engine's draw and sum to 182, inside 180 to 190. Part VI's scale test uses the range midpoints (55, 45, 45 and 35, which sum to 180). A family's strength is not its head count alone. See section 3.4.
 
 ### 3.3 Money Flows Upward
 
@@ -1706,7 +1709,7 @@ Each family is described as an institution. Sections 4.1 to 4.4 list tendencies,
 
 **Seat.** Crown Harbor and North San Lorenzo. The Vesuvio Social and Athletic Club on North Hill is the working office.
 
-**Trade.** Construction, concrete, bid-rigging, city contracts, zoning, the building trades, high-end loansharking to developers and merchants, the Master Layoff bank, restaurants and nightclubs downtown, casinos if they come. The family has the best lawyers and the most friends in City Hall, the building department, and the courts.
+**Trade.** Construction, concrete, bid-rigging, city contracts, zoning, the building trades, high-end loansharking to developers and merchants, the Master Layoff bank (kept in Crown Harbor), restaurants and nightclubs downtown, casinos if they come. The family has the best lawyers and the most friends in City Hall, the building department, and the courts.
 
 **Character.** The "diplomats." They like business and avoid war. Their bosses have been politicians for two generations. Younger men feel the family has grown fat and slow. Elder men think the young are in a hurry to die.
 
@@ -1728,7 +1731,7 @@ Each family is described as an institution. Sections 4.1 to 4.4 list tendencies,
 
 **Seat.** The Racks, the Eastside rail yards, the I-95 trucking depots, the East Slope of the Hill. The Pompeii Social Club on the East Slope, a block from Hunts Row, is the stronghold.
 
-**Trade.** Garment trucking, cargo hijacking, fencing (the Hunts Row textile and diamond exchange is the city's master fence, a mixed class of Jewish and Italian dealers working on Ferrante ground, which the family protects and taxes; see 5.5 and Part V), chop shops, a car-crushing yard, wholesale gambling, loansharking to garment manufacturers, interstate trucking, and the Teamsters. Also cocaine wholesale, when the market comes.
+**Trade.** Garment trucking, cargo hijacking, fencing (the Hunts Row textile and diamond exchange is the city's master fence, a mixed class of Jewish and Italian dealers working on Ferrante ground, which the family protects and taxes; see 5.5 and Part V), chop shops, a car-crushing yard in the Eastside rail yards, wholesale gambling, loansharking to garment manufacturers, interstate trucking, and the Teamsters. Also cocaine wholesale, when the market comes.
 
 **Character.** The family born of a war, who still call themselves "the independents." They hold that the Sabatinis stole the Racks and that they took it back. Plainspoken, restless, with a surplus of gunmen who have to earn something. They think the other families have grown soft.
 
@@ -1906,7 +1909,7 @@ All sums are 1975 dollars unless stated, and are **design** estimates. **Part VI
 
 **Sports book.** Bettors lay $11 to win $10 (the "eleven to ten" or "vig"). When the book has equal money on both sides, it pays winners $10 for every $11 collected from losers. For every $220 wagered in a matched pair of bets, the book keeps $10, about **4.5 percent of the handle**. Everything else a bookmaker earns comes from unbalanced action, in which he holds the risk and wins or loses with the game, or lays off the excess with a bigger book for a fee. A bookmaker's costs are his runners, his wire room, a telephone, and the Pad. His backer, a made man, supplies a bankroll, protection, and a layoff line, and takes a share (often half of the net) [design].
 
-**Numbers (policy).** The daily number is a three-digit figure drawn from public results: the last digits of a racetrack's total handle, or, where the state runs a daily numbers game, its drawing. In Saint Jude the traditional source in season is the parimutuel handle at Bayview Downs, which races from March through November (Part I, section 11.3). In the winter months the banks take their number from an out-of-state track's published handle or another public figure [design]. A bettor wagers a small sum (a nickel, a dime, a quarter, a dollar) on a number. The true odds against a winning number are 999 to 1. The street pays **600 to 1** (500 to 1 in some cities), so the bank keeps about **40 cents of every dollar** wagered when play is spread evenly, and less when players favor certain numbers (dates, dream-book numbers, repeats like 777) [verified: the 600 to 1 payout, the 999 to 1 odds, and the roughly $600 paid out per $1,000 wagered]. Out of that hold the bank pays its commissions. In the cities where the figures are recorded, the runner who takes the bets kept **10 percent** of the play, and the runner's share is **10 percent** of the play [verified for Cleveland in the 1950s and Atlanta in 1944]. The writer or controller above him takes **5 to 10 percent** of the play (design; an earlier draft's "up to 25 percent" cannot be a share of the play against a 40 percent hold, and may have been a share of the bank's hold). That leaves about 20 to 25 cents of each dollar before the Pad and the occasional heavy hit. Net to the bank, after the Pad, bad debt, cheating and the occasional heavy hit, is **3 to 15 cents on the dollar, default 8 (Part VI 2.1 and 2.2). The earlier figure of 10 to 20 is withdrawn, because Reuter and Rubinstein found numbers margins smaller and more variable than the popular picture [verified, NCJ 83192, abstract]**, which is why the numbers are the poor man's gold mine: enormous in aggregate, tiny per bettor, almost impossible to stamp out.
+**Numbers (policy).** The daily number is a three-digit figure drawn from public results: the last digits of a racetrack's total handle, or, where the state runs a daily numbers game, its drawing. In Saint Jude the traditional source in season is the parimutuel handle at Bayview Downs, which races from March through November (Part I, section 11.3). In the winter months the banks take their number from an out-of-state track's published handle or another public figure [design]. A bettor wagers a small sum (a nickel, a dime, a quarter, a dollar) on a number. The true odds against a winning number are 999 to 1. The street pays **600 to 1** (500 to 1 in some cities), so the bank keeps about **40 cents of every dollar** wagered when play is spread evenly, and less when players favor certain numbers (dates, dream-book numbers, repeats like 777) [verified: the 600 to 1 payout, the 999 to 1 odds, and the roughly $600 paid out per $1,000 wagered]. Out of that hold the bank pays its commissions. In the cities where the figures are recorded, the runner who takes the bets kept **10 percent** of the play [verified for Cleveland in the 1950s and Atlanta in 1944]. The writer or controller above him takes **5 to 10 percent** of the play (design; an earlier draft's "up to 25 percent" cannot be a share of the play against a 40 percent hold, and may have been a share of the bank's hold). That leaves about 20 to 25 cents of each dollar before the Pad and the occasional heavy hit. Net to the bank, after the Pad, bad debt, cheating and the occasional heavy hit, is **3 to 15 cents on the dollar, default 8 (Part VI 2.1 and 2.2). The earlier figure of 10 to 20 is withdrawn, because Reuter and Rubinstein found numbers margins smaller and more variable than the popular picture [verified, NCJ 83192, abstract]**, which is why the numbers are the poor man's gold mine: enormous in aggregate, tiny per bettor, almost impossible to stamp out.
 
 **Fixed [verified].** The first modern state lottery began in New Hampshire in 1964, and New York held its first drawing on 20 July 1967. New Jersey's lottery **was created on 20 November 1969 [verified, Wikipedia, New Jersey Lottery]**, and its daily three-digit game, **first called Pick-it and renamed Pick-3 in 1987,** began on 22 May 1975 **[verified, same]**. State daily games take a rake of about 50 percent, against 20 to 40 percent for the street game. Saint Jude's State is New Jersey (Part I, section 3.1a), so this is the State's own game. It begins five months into the baseline year, on 22 May 1975, and is **Weather** inside the run, not part of the 1 January 1975 state. **Pennsylvania's daily number began on 1 March 1977 [verified, Wikipedia, Pennsylvania Lottery]. New York's Numbers game appears in New York's open-data catalogue from 1980 [verified in outline]; its exact start date is still Open. New Jersey's lottery prizes were parimutuel, not a fixed 500 for 1, so a winning ticket paid a variable sum [verified, Wikipedia, New Jersey Lottery].** A legal numbers game takes business from the street bank, but the street pays better (600 to 1), allows credit, pays no tax, and delivers the winnings to the door. The families lose less than the state expects. After 22 May 1975 many street banks take the State's own daily number as their number, so Pick-3 is both a rival and a supplier of an honest public figure [memory, to verify]. In Massachusetts in the 1970s the Winter Hill Gang moved its bookies toward sports betting as the state lottery began, and the numbers game did not die [verified in outline].
 
@@ -2037,7 +2040,7 @@ Beatings, threats, burnt cars, broken windows, a dead dog on a doorstep, and a f
 
 ### 8.7 The Gun, the Knife, and the Rest
 
-**Fixed.** The Life prefers the pistol or revolver, the shotgun, the garrote, the knife, the club, and the baseball bat. The submachine gun is a Prohibition image. Bombs and car bombs are rare in the mid 1970s, used more by the Irish, the bikers, and the arsonists, and become better known later [memory]. **Guns come from the bikers, the gun shows and the Armorer.**
+**Fixed.** The Life prefers the pistol or revolver, the shotgun, the garrote, the knife, the club, and the baseball bat. The submachine gun is a Prohibition image. Bombs and car bombs are rare in the mid 1970s, used more by the Irish, the bikers, and the arsonists, and become better known later [memory]. **Guns come from the bikers, the gun shows and the armorer, an **Open** role: whoever supplies a family's guns, invented when needed.**
 
 ---
 
@@ -4308,7 +4311,7 @@ The chain from a dollar of handle:
 | Runner's commission | 0.10 | Part III 7.2 |
 | Controller's cut | 0.05 to 0.10, default 0.075 | Part III 7.2 |
 | Left to the bank before costs | 0.225 | arithmetic |
-| Pad, bad debt, cheating, variance | 0.145 default, 0.07 to 0.195 | **Design** |
+| Pad, bad debt, cheating, variance | 0.145 default, 0.075 to 0.195 | **Design** |
 | Net to the bank | 0.08 default, range 0.03 to 0.15 | **Design** |
 
 **Handle, early 1975 (Design):** city-wide numbers handle **$25 million a year** (range $15 million to $40 million).
@@ -4320,7 +4323,7 @@ The chain from a dollar of handle:
 | Charlestown, Kerrytown and other Irish and mixed blocks | 16 percent | $4.0M | Smaller banks, many independents |
 | Chinatown lottery and fan-tan side (Part V 7.2) | 8 percent | $2.0M | **Included in the $25M. The Italian share below is not taken on this row** |
 
-**Net to banks, default:** $25M times 8 percent is **$2.0 million** (range $0.75M to $3.75M at the default handle). The Italian families take their share through financing, the controller's seat and street tax, **35 percent of net by default (range 20 to 50)**, **taken on the Eastside banks only ($16.0M of handle, $1.28M of net), which is $0.45 million** (range $0.1M to $1.2M at the default handle). The combine's share to the families is Part V 4.3. **The Irish, Puerto Rican and Chinatown games pay the families nothing through this line. The bolita tax (8.7) and the Chinatown courtesy (8.5) are their only payments.** The Italian share is carried to section 9 under the name numbers_it. **The State's lottery was created on 20 November 1969 [verified, Wikipedia, New Jersey Lottery], so the State game of Part I 9.8 predates the baseline by five years; Pick-3 is the daily game that matters.**
+**Net to banks, default:** $25M times 8 percent is **$2.0 million** (range $0.75M to $3.75M at the default handle). The Italian families take their share through financing, the controller's seat and street tax, **35 percent of net by default (range 20 to 50)**, **taken on the Eastside banks only ($16.0M of handle, $1.28M of net), which is $0.45 million** (range $0.1M to $1.2M, taking the ranges of handle, net and Italian share together). The combine's share to the families is Part V 4.3. **The Irish, Puerto Rican and Chinatown games pay the families nothing through this line. The bolita tax (8.7) and the Chinatown courtesy (8.5) are their only payments.** The Italian share is carried to section 9 under the name numbers_it. **The State's lottery was created on 20 November 1969 [verified, Wikipedia, New Jersey Lottery], so the State game of Part I 9.8 predates the baseline by five years; Pick-3 is the daily game that matters.**
 
 **Counterargument.** The Reuter and Rubinstein result suggests the Italian share should be lower than 35 percent. The reply: Saint Jude's combine is organized and has an old relation to the Italian families (Part V 4.3). 35 percent is the default and the 20 percent end is as likely as the 50.
 
@@ -4637,7 +4640,7 @@ Revision 1's single laundromat-and-vending figure of 14 percent is split: laundr
 | Legitimate-front profit, Pellegrino | **$0.5M** | $0.2M to $1.0M, **Design** |
 | Legitimate-front profit, Vannucci | **$0.8M** | $0.3M to $1.4M, **Design** |
 
-The fronts are real businesses (Part III 7.8). Their profit is what the family may spend without laundering. **Flag.** The four front figures are the least-grounded in the model, and are the one family income that survives a prosecution of the rackets.
+The fronts are real businesses (Part III 7.8). Their profit is what the family may spend without laundering. **Flag.** The four front figures are the least-grounded in the model, and are the one family income that survives a prosecution of the rackets. **The $2.5M of Sabatini front profit does not include the Sabatini construction firms (section 3.4, $1.0M), which are counted under the Concrete Club line in 9.3A. The two are separate and are not to be added twice.**
 
 Other commercial flows, all **Design**: carting and waste to the Vannucci, $4.5M (range $2.0M to $7.0M), of which the family keeps $3.6M; the fish market to Pellegrino, $1.5M ($0.8M to $2.6M); Tri-State Freight to Pellegrino, $0.4M ($0.2M to $0.7M); the Strip to Vannucci mostly, $3.6M ($2.0M to $6.0M); the bolita tax and the **fees and shares that the Jewish specialists pay to the families (Part V 10.1; section 8)** at **$0.06M** and $0.3M. These are carried to section 9 under their names.
 
@@ -4995,7 +4998,7 @@ The Pad is paid by those who run vice and gambling to police who look away. Fede
 | Captain, precinct | **$400** | **$200 to $1,000** | The precinct's attention itself. **A captain earns $24,000 (Part II 2.2). Revision 1's $600 a week was $31,000 a year, more than his pay, and is lowered** |
 | Commander and above (the "bag", through an intermediary, **Part II 3.2**) | $1,500 | $500 to $4,000 | Orders, transfers; very rare |
 
-**Annual cost to the families, all together: $1.6M (range $0.9M to $2.7M), split Sabatini $0.41M, Pellegrino $0.30M, Vannucci $0.53M (the 14th Precinct Vice's price, Part III 4.4), Ferrante $0.36M. Revision 2's default was $2.7M; at the default envelopes that bought about 500 officers, a tenth of the force, which Part II 3.2 ("Fewer men are in it") does not allow. $1.6M buys about 300.** The total is paid by the families for their own rackets (cards and dice, the Strip, after-hours, loans). Payments by numbers banks and bookmakers sit inside their margins (2.2, 2.4) and are not part of it. This is about **2.2** percent of the SJPD's wage bill (**about $73M at 4,800 officers and a $15,200 average across Part II 2.2's ranks, Design**), a plausible size for a graft system, but not a documented one. **The annual total is a separate Design figure and is not the sum of the weekly table.** The sum is taken as a cost against family revenue in section 9.
+**Annual cost to the families, all together: $1.6M (range $0.9M to $2.7M), split Sabatini $0.41M, Pellegrino $0.30M, Vannucci $0.53M (the 14th Precinct Vice's price, Part III 4.4), Ferrante $0.36M. Revision 2's default was $2.7M; at the default envelopes that bought about 500 officers, a tenth of the force, which Part II 3.2 ("Fewer men are in it") does not allow. $1.6M buys about 300.** The total is paid by the families for their own rackets (cards and dice, the Strip, after-hours, loans). Payments by numbers banks and bookmakers sit inside their margins (2.2, 2.4) and are not part of it. This is about **2.2** percent of the SJPD's wage bill (**about $73M at 4,800 officers and a $15,200 average across Part II 2.2's ranks, Design**), a plausible size for a graft system, but not a documented one. **The annual total is a separate Design figure and is not the sum of the weekly table. Its default is about 300 officers on the Pad at a mean envelope of about $5,300 a year (about $100 a week). The table prices each rank, and the mix of ranks that gives that mean is left to the run.** The sum is taken as a cost against family revenue in section 9.
 
 **What it cannot buy.** A federal case. A prosecutor outside the county's office. A cop who is not on the Pad. A scene the press has already seen. The Storyteller should show the Pad as a relation and not a purchase.
 
@@ -5064,11 +5067,11 @@ Part V gives the groups as institutions (sections 3 to 8) and lists the money it
 
 | Flow | Default | Range | Driver |
 |---|---|---|---|
-| Port and union: the Irish side of the docks (Local 1201, Part V 3) | **$0.9M** | $0.4M to $1.6M | **The 25 percent of the $3.0M docks flow that does not go to Pellegrino ($0.75M, section 4.3), plus the Brigades' half of the cross-river items, $0.15M (tugs, lighterage and ship-side pilferage, the 50/50, Part V section 1 #1)** |
+| Port and union: the Irish side of the docks (Local 1201, Part V 3) | **$0.75M** | $0.4M to $1.6M | **The 25 percent of the $3.0M docks flow that does not go to Pellegrino (section 4.3). It includes the Brigades' half of the cross-river items (tugs, lighterage and ship-side pilferage, the 50/50, Part V section 1 #1). The Pellegrino half sits inside the other 75 percent** |
 | Numbers, policy, small banks | **$0.32M** | $0.12M to $0.6M | Charlestown and Kerrytown handle, $4.0M (section 2.2) at the 8 percent net **(revision 1 had $0.4M)** |
 | Loans and protection on their own blocks | **$0.46M** | **$0.15M to $0.75M** | **A tenth of the loansharking net (section 3.2, $2.47M) and a tenth of the protection (3.3, $2.13M), taken out of the families' shares** |
 | Tribute to an Italian family | **$0** | **$0** | **Part V 3.6 and 10.1: the Brigades pay no tribute. The 50/50 is a cross-river share, not tribute** |
-| **Total** | **$1.7M** | **$0.7M to $3.0M** | |
+| **Total** | **$1.5M** | **$0.7M to $3.0M** | |
 
 **Counterargument.** The Brigades are a set of loyalties and not a roster (Part V 3.1), so the money belongs to men, and a "Brigade total" overstates what any group can spend. The engine should draw each man's income, not the group's.
 
@@ -5076,9 +5079,9 @@ Part V gives the groups as institutions (sections 3 to 8) and lists the money it
 
 | Flow | Default | Range | Driver |
 |---|---|---|---|
-| Numbers banks, net, Eastside share | $0.8M | $0.15M to $1.5M | 64 percent of the $25M handle (section 2.2) at 8 percent, less the Italian share of 35 percent, which is counted under the Italian families |
-| Bookmaking, net to the combine | **$0.3M** | **$0.1M to $0.8M** | **20 percent of $1.6M (section 2.4). The other 25 percent ($0.4M) is the Jewish books, the Irish pubs and the Sixth Ward (Part III 5.5; Part V 3.2, 8.4)** |
-| **Combine's own lines** | **$1.1M** | **$0.25M to $2.3M** | |
+| Numbers banks, net, Eastside share | $0.83M | $0.15M to $1.5M | 64 percent of the $25M handle (section 2.2) at 8 percent, less the Italian share of 35 percent, which is counted under the Italian families |
+| Bookmaking, net to the combine | **$0.32M** | **$0.1M to $0.8M** | **20 percent of $1.6M (section 2.4). The other 25 percent ($0.4M) is the Jewish books, the Irish pubs and the Sixth Ward (Part III 5.5; Part V 3.2, 8.4)** |
+| **Combine's own lines** | **$1.15M** | **$0.25M to $2.3M** | |
 | Tribute to the Italians | already in sections 2 and 6 | | The numbers share (35 percent of net) and the dial taxes. **Part V 4.3: a negotiated slice, not a tribute** |
 
 **The drug pool on non-Italian ground (shared, not a payroll).**
@@ -5155,17 +5158,17 @@ The Row's long-term survival is **Open** (Part V 7.1: the garment decline). If t
 
 | Group | Default net, own lines, January 1975 | Range |
 |---|---|---|
-| Brigades | **$1.7M** | **$0.7M to $3.0M** |
-| Eastside combine, own lines | **$1.1M** | **$0.25M to $2.3M** |
+| Brigades | **$1.5M** | **$0.7M to $3.0M** |
+| Eastside combine, own lines | **$1.15M** | **$0.25M to $2.3M** |
 | Russians | **$0 (about $0.45M by 1980, fuel later)** | $0.15M to $0.9M by 1980 |
 | Horsemen | **$0.65M** | $0.2M to $1.5M |
-| Chinatown | **$0.5M** | **$0.2M to $1.3M** |
+| Chinatown | **$0.46M** | **$0.2M to $1.3M** |
 | Hunts Row | $4.7M plus $0.5M financing | $2M to $10M |
 | Puerto Rican blocks, after tax | **$0.2M** | $0.1M to $0.4M |
-| **Own lines, total** | **$9.4M** | |
+| **Own lines, total** | **$9.2M** | |
 | Shared drug pool on non-Italian ground | **$9.1M** | $3.3M to $19M |
 
-**Reading.** The outside groups' own lines come to about $9.4M, and the shared drug pool adds about $9.1M, about $18.5M in all. The Italian families' modeled net is **$35.9M** after the Pad (section 9), so the outside groups hold about a third of the two combined and the Italian families about two thirds. The count leaves out the many retail sellers' own incomes and all freelance crime, so the Italian share of the city's illegal income is lower than two thirds. That fits Reuter and Rubinstein (section 2.1) and Part V's picture of independent groups that meet the families only at points of need. **The outside groups' flows to the Italian families are small: the Hunts Row tax ($0.47M), the Jewish specialists' fees ($0.30M), the *bolita* tax (**$0.06M**), the numbers and bookmaking shares (sections 2.2 and 2.4), and the dial taxes (6.5). The Brigades and the Horsemen pay none.**
+**Reading.** The outside groups' own lines come to about $9.2M, and the shared drug pool adds about $9.1M, about $18.3M in all. The Italian families' modeled net is **$35.9M** after the Pad (section 9), so the outside groups hold about a third of the two combined and the Italian families about two thirds. The count leaves out the many retail sellers' own incomes and all freelance crime, so the Italian share of the city's illegal income is lower than two thirds. That fits Reuter and Rubinstein (section 2.1) and Part V's picture of independent groups that meet the families only at points of need. **The outside groups' flows to the Italian families are small: the Hunts Row tax ($0.47M), the Jewish specialists' fees ($0.30M), the *bolita* tax (**$0.06M**), the numbers and bookmaking shares (sections 2.2 and 2.4), and the dial taxes (6.5). The Brigades and the Horsemen pay none.**
 
 ### 8.9 Open from this section
 
@@ -5227,14 +5230,14 @@ Each Monte Carlo draw picks every sector from its low, default and high (a trian
 | Specialists' fees | 0.30 (0.15 to 0.5) | 40 | | | 60 | | 8.6 |
 | Chop shops | 0.5 (0.25 to 0.9) | | | 50 | 50 | | 5.5 |
 | Untaxed cigarettes and liquor | 0.2 (0.05 to 0.5) | | 30 *new* | | 70 *new* | | 5.5 |
-| Legitimate fronts | 5.0 (2.1 to 8.4) | 2.5 (1.0 to 4.0) | 0.5 (0.2 to 1.0) | 0.8 (0.3 to 1.4) | 1.2 (0.6 to 2.0) | | 4.5 |
+| Legitimate fronts | 5.0 (2.1 to 8.4) | 50 | 10 | 16 | 24 | Family ranges, $M: Sabatini 1.0 to 4.0, Pellegrino 0.2 to 1.0, Vannucci 0.3 to 1.4, Ferrante 0.6 to 2.0 | 4.5 |
 | Carting and waste | 4.05 (1.8 to 6.3) | 11 | | 89 | | 10 percent of the $4.5M to non-family partners *new* | 4.5 |
 | Fish market | 1.5 (0.8 to 2.6) | | 100 | | | | 4.5 |
 | Tri-State Freight | 0.4 (0.2 to 0.7) | | 100 | | | | 4.5 |
 | The Strip | 3.24 (1.8 to 5.4) | 22 | | 78 | | 10 percent of the $3.6M to independent owners *new* | 4.5 |
 | *Bolita* tax | 0.06 (0.03 to 0.15) | | | | 100 | | 8.7 |
-| Drugs (by dial and ground) | 0.54 (0.27 to 1.08) | 0.14 | 0.03 | 0.19 | 0.18 | Range half to double, *new* | 6.5 |
-| **Pad (a cost)** | **1.6 (0.9 to 2.7)** | **0.41** | **0.30** | **0.53** | **0.36** | | 7.5 |
+| Drugs (by dial and ground) | 0.54 (0.27 to 1.08) | 26 | 6 | 35 | 33 | Dollars by family, $M: Sabatini 0.14, Pellegrino 0.03, Vannucci 0.19, Ferrante 0.18. Range half to double, *new* | 6.5 |
+| **Pad (a cost)** | **1.6 (0.9 to 2.7)** | **26** | **19** | **33** | **22** | Dollars by family, $M: Sabatini 0.41, Pellegrino 0.30, Vannucci 0.53, Ferrante 0.36 | 7.5 |
 
 **What the table changed.** Rebuilt with revision 2's inputs, these shares give $39.1M of gross against the $39.7M revision 2 printed. About $0.6M of revision 2's gross came from shares its script never recorded, and most of it went to Ferrante. Ferrante's lower total below is the effect of writing the shares down, not of any new input. The *new* shares are the author's to move.
 
@@ -5305,7 +5308,7 @@ In the skeptic case (default standard) the figures are Sabatini **59**, Pellegri
 **Reading.**
 - **Pellegrino.** At default revenue the claimed 40 to 50 is supported at the default standard or leaner (maximum **66**). At the comfortable standard a midpoint of 45 needs **107** percent of the default criminal revenue, and in the skeptic case the family supports 27, which is below even the lowered range. The Pellegrino count is the most exposed to any cut to the docks line (section 4.3) or to the fish market.
 - **Ferrante.** **Close behind Pellegrino once its shares are written down (9.3A): maximum 69 at the default standard, and a midpoint of 45 needs 103 percent of its default criminal revenue at the comfortable standard. Its theft line (5.3) carries the most weight and the widest range.**
-- **Vannucci.** They net the most per head (**$317,000**), more than the Sabatini, and their revenue would support **117** men against a claim of 30 to 40. Part III 4.4 described them as squeezed between the others, with the fewest men. Part III 4.4 now says they are squeezed on territory and not on income, a small, rich family with many associates (my call; 11.5). Their allocation is still the least secure line in the model: the carting line (80 percent of $4.5M to Vannucci) and the Strip line (70 percent of $3.6M) are Design.
+- **Vannucci.** They net the most per head (**$317,000**), more than the Sabatini, and their revenue would support **117** men against a claim of 30 to 40. Part III 4.4 described them as squeezed between the others, with the fewest men. Part III 4.4 now says they are squeezed on territory and not on income, a small, rich family with many associates (my call; 11.5). Their allocation is still the least secure line in the model: the carting line (89 percent of the $4.05M family pool to Vannucci) and the Strip line (78 percent of the $3.24M family pool) are Design.
 - **Sabatini.** Supported at default standard and revenue. It fails the comfortable standard in the skeptic case (**36** of 50 to 60), as does Ferrante (**18** of 40 to 50).
 
 ### 9.6 The Ladder cross-check (Part III 3.3)
@@ -5416,7 +5419,7 @@ Revision 1 listed eight edits to earlier Parts. **Revision 2 applied them. 11.5 
 | 1983 | New Jersey cigarette tax rises from 19 to 23 cents | weak | Smuggling margin up | inferred from collections (5.1) | |
 | Apr 1984 | Pizza Connection arrests | moderate | Heroin finance (step 1) becomes riskier; Sabatini and Vannucci tighten (6.5) | [verified, carried] | |
 | **1984** | **Bail Reform Act: detention before trial for dangerousness (upheld 1987)** | **strong** | **Bosses can be held; bond premiums and the bondsman's trade fall; lawyers' fees rise (7.6)** | **[verified, Part II 6.2]** | |
-| 1984 to 1985 | Forfeiture and money-laundering laws | strong | Family laundering costs up; lawyers' fees up | [memory, to verify] | |
+| 1984 to 1986 | Forfeiture law (1984) and money-laundering law (1986) | strong | Family laundering costs up; lawyers' fees up | [memory, to verify] | |
 | 1984 to 1985 | Rock cocaine appears | strong | Crack market $5M in 1985, $18M in 1990, in 1975 dollars (6.3) | [carried] | Effect on the core |
 | Sep 1985 to Mar 1987 | Pizza Connection trial | moderate | Federal pressure on heroin and wholesale; Pad and lawyer costs up | [verified, carried] | |
 | 1985 to 1987 | Crack boom | strong | Retail drug pools rise; **the Eastside and the Strip change** | [carried] | |

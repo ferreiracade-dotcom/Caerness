@@ -37,6 +37,10 @@ def _plain_role(subtype) -> str:
 
 def _who(conn, a) -> str:
     """One line on who someone is; kin and partners say whose, so nobody is mistaken for the protagonist's."""
+    office = conn.execute("""SELECT role_text FROM institution_memberships WHERE member_actor_id=? AND membership_kind='office'
+                             AND status='active' AND role_text IS NOT NULL ORDER BY joined_day DESC LIMIT 1""", (a["id"],)).fetchone()
+    if office:  # an office says who he is better than the engine's work domain (police fall under 'soldier')
+        return _clip(str(office[0]), 80)
     role = _plain_role(a["subtype"] or a["actor_type"])
     partner = conn.execute(
         """SELECT b.name,b.subtype FROM household_unions u JOIN actors b ON b.id=CASE WHEN u.actor_a_id=? THEN u.actor_b_id ELSE u.actor_a_id END

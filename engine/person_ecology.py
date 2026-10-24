@@ -338,7 +338,8 @@ def _free_name(conn: sqlite3.Connection, given: str, family: str, sex: str | Non
     names = FIRST_FEMALE if sex == "female" else FIRST_MALE
     pkg = package_for(conn)
     key = "female" if sex == "female" else "male"
-    home = [g for g in (pkg.name_groups or {}).values() if family in g.get("family", ())]
+    from .demographic_sex import family_home_groups
+    home = family_home_groups(conn, pkg.name_groups or {}, family)
     pool = [n for g in home for n in g[key]] if home else (pkg.name_pools or {}).get(key)  # a family keeps its own group
     if pool:
         names = tuple(dict.fromkeys(pool))

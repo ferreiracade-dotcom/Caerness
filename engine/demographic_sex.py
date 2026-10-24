@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import random
 import re
 import sqlite3
 from typing import Any
@@ -114,6 +115,32 @@ def _package_names(conn: sqlite3.Connection | None):
     return (male, female) if male or female else None
 
 
+def family_home_groups(conn: sqlite3.Connection, groups: dict, family: str | None) -> list[dict]:
+    """The name groups a family belongs to. A surname no group lists (an authored family) belongs to the group whose
+    given names its living members already bear, else to one group drawn by weight from the surname, so its children
+    never take names from another community."""
+    if not family or not groups:
+        return []
+    home = [g for g in groups.values() if family in g.get("family", ())]
+    if home:
+        return home
+    kin = [str(r[0]).split(" ")[0] for r in conn.execute("SELECT name FROM actors WHERE name LIKE ?", (f"% {family}",)).fetchall()
+           if str(r[0]).endswith(f" {family}")]
+    keys = sorted(groups)
+    hits = {k: sum(1 for n in kin if n in groups[k].get("male", ()) or n in groups[k].get("female", ())) for k in keys}
+    best = max(hits.values(), default=0)
+    if best:
+        tied = [k for k in keys if hits[k] == best]
+        if len(tied) == 1:
+            return [groups[tied[0]]]
+        keys = tied
+    w = [max(float(groups[k].get("weight", 1.0)), 0.0) for k in keys]
+    if sum(w) <= 0:
+        w = [1.0] * len(keys)
+    rng = random.Random(int(hashlib.sha256(f"family-group:{family}".encode()).hexdigest()[:16], 16))
+    return [groups[rng.choices(keys, weights=w)[0]]]
+
+
 def package_given_pool(conn: sqlite3.Connection, sex: str, family: str | None = None) -> list[str] | None:
     """Sorted given names of this sex from the world package (the family's own group when it has one), else None
     so the caller keeps the Caerness lists."""
@@ -121,7 +148,7 @@ def package_given_pool(conn: sqlite3.Connection, sex: str, family: str | None = 
     pkg = package_for(conn)
     key = "female" if sex == "female" else "male"
     groups = pkg.name_groups or {}
-    home = [g for g in groups.values() if family and family in g.get("family", ())]
+    home = family_home_groups(conn, groups, family)
     names = [n for g in (home or groups.values()) for n in g.get(key, ())]
     if not names:
         names = list((pkg.name_pools or {}).get(key) or ())

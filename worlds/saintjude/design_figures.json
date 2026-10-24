@@ -18,7 +18,7 @@
    "source": "Part I 4.1",
    "kind": "fixed",
    "mark": "Design",
-   "note": "the metropolitan total is Open"
+   "note": "the 1975 figure is Fixed; only its later path is Open"
   },
   "population_decline_pct": {
    "default": 0.8,
@@ -141,7 +141,7 @@
    "note": "about $73M"
   },
   "made_men_sabatini": {
-   "default": 55,
+   "default": 57,
    "range": [
     50,
     60
@@ -151,7 +151,7 @@
    "source": "Part III 3.2",
    "kind": "draw",
    "mark": "Design",
-   "note": "default not stated in Part III 3.2, midpoint used (Part VI 9 intro also uses the midpoint)"
+   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_sabatini_mid)"
   },
   "made_men_pellegrino": {
    "default": 45,
@@ -169,10 +169,11 @@
     55
    ],
    "extended_requires": "a dated cause (Part III 3.2; Part VI 9.9 item 2)",
-   "ceiling": 55
+   "ceiling": 55,
+   "note": "default 45 stated in Part III 3.2; Part VI 9 also uses it as the midpoint"
   },
   "made_men_ferrante": {
-   "default": 45,
+   "default": 44,
    "range": [
     40,
     50
@@ -182,10 +183,10 @@
    "source": "Part III 3.2",
    "kind": "draw",
    "mark": "Design",
-   "note": "default not stated in Part III 3.2, midpoint used (Part VI 9 intro also uses the midpoint)"
+   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_ferrante_mid)"
   },
   "made_men_vannucci": {
-   "default": 35,
+   "default": 36,
    "range": [
     30,
     40
@@ -195,10 +196,10 @@
    "source": "Part III 3.2",
    "kind": "draw",
    "mark": "Design",
-   "note": "default not stated in Part III 3.2, midpoint used (Part VI 9 intro also uses the midpoint)"
+   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_vannucci_mid)"
   },
   "made_men_total": {
-   "default": 180,
+   "default": 182,
    "range": null,
    "unit": "men",
    "tag": "Design",
@@ -207,7 +208,59 @@
    "mark": "Design",
    "formula": "made_men_sabatini+made_men_pellegrino+made_men_ferrante+made_men_vannucci",
    "tol": 0.5,
-   "note": "ranges sum 160 to 200, about 180 to 190"
+   "note": "sum of the drawn defaults; ranges sum 160 to 200, about 180 to 190 (Part III 3.2)"
+  },
+  "made_men_sabatini_mid": {
+   "default": 55,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part VI 9 intro (range midpoint)",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_sabatini"
+  },
+  "made_men_pellegrino_mid": {
+   "default": 45,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part VI 9 intro (range midpoint)",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_pellegrino"
+  },
+  "made_men_ferrante_mid": {
+   "default": 45,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part VI 9 intro (range midpoint)",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_ferrante"
+  },
+  "made_men_vannucci_mid": {
+   "default": 35,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part VI 9 intro (range midpoint)",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_vannucci"
+  },
+  "made_men_total_mid": {
+   "default": 180,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "source": "Part VI 9 intro",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "made_men_sabatini_mid+made_men_pellegrino_mid+made_men_ferrante_mid+made_men_vannucci_mid",
+   "tol": 0.5,
+   "note": "the 180 men of the scale test"
   },
   "associates_per_man_sabatini": {
    "default": 6.7,
@@ -265,7 +318,7 @@
    "source": "Part VI 9.2",
    "kind": "derived",
    "mark": "Design",
-   "formula": "made_men_sabatini*associates_per_man_sabatini+made_men_pellegrino*associates_per_man_pellegrino+made_men_ferrante*associates_per_man_ferrante+made_men_vannucci*associates_per_man_vannucci",
+   "formula": "made_men_sabatini_mid*associates_per_man_sabatini+made_men_pellegrino_mid*associates_per_man_pellegrino+made_men_ferrante_mid*associates_per_man_ferrante+made_men_vannucci_mid*associates_per_man_vannucci",
    "tol": 1.0,
    "note": "1,202 at 180 men, inside Part III 3.2's 1,200 to 1,500"
   },
@@ -467,7 +520,7 @@
    "source": "Part VI 9.6",
    "kind": "derived",
    "mark": "Design",
-   "formula": "made_men_sabatini*associates_per_man_sabatini*(living_associate/(1-ladder_associate_to_soldier))*ladder_associate_to_soldier/1e6",
+   "formula": "made_men_sabatini_mid*associates_per_man_sabatini*(living_associate/(1-ladder_associate_to_soldier))*ladder_associate_to_soldier/1e6",
    "tol": 0.02,
    "note": "associates earn spend/(1-pay-up); about 0.80 for Sabatini at 55 men"
   },
@@ -547,7 +600,7 @@
   "numbers_pad_baddebt": {
    "default": 0.145,
    "range": [
-    0.07,
+    0.075,
     0.195
    ],
    "unit": "per dollar",
@@ -714,7 +767,7 @@
    "mark": "Design",
    "formula": "numbers_handle_eastside_m*numbers_net_margin-numbers_italian_net_m",
    "tol": 0.01,
-   "note": "Part VI 8.2 prints 0.8"
+   "note": "Part VI 8.2 now prints 0.83"
   },
   "numbers_pr_net_m": {
    "default": 0.24,
@@ -1463,16 +1516,6 @@
    "mark": "Design",
    "formula": "labor_docks_m*(1-docks_pellegrino_share_pct/100)",
    "tol": 0.01
-  },
-  "brigades_cross_river_items_m": {
-   "default": 0.15,
-   "range": null,
-   "unit": "USD million",
-   "tag": "Design",
-   "source": "Part VI 8.1",
-   "kind": "fixed",
-   "mark": "Design",
-   "note": "Brigades' half of the cross-river items (tugs, lighterage, pilferage); belongs to no named pool in 9.3A or 4.3"
   },
   "labor_trucking_m": {
    "default": 2.0,
@@ -2712,6 +2755,28 @@
    "mark": "Design",
    "note": "a separate Design figure, not the sum of the weekly table (7.5)"
   },
+  "pad_officers": {
+   "default": 300,
+   "range": null,
+   "unit": "officers",
+   "tag": "Design",
+   "source": "Part VI 7.5",
+   "kind": "fixed",
+   "mark": "Design",
+   "note": "about 300 officers on the Pad at the default total"
+  },
+  "pad_mean_envelope_usd_year": {
+   "default": 5300,
+   "range": null,
+   "unit": "USD/year per officer",
+   "tag": "Design",
+   "source": "Part VI 7.5",
+   "kind": "derived",
+   "mark": "Design",
+   "formula": "pad_total_m*1e6/pad_officers",
+   "tol": 100,
+   "note": "about $100 a week"
+  },
   "pad_share_of_wage_bill_pct": {
    "default": 2.2,
    "range": null,
@@ -2724,7 +2789,7 @@
    "tol": 0.1
   },
   "brigades_docks_m": {
-   "default": 0.9,
+   "default": 0.75,
    "range": [
     0.4,
     1.6
@@ -2734,8 +2799,9 @@
    "source": "Part VI 8.1",
    "kind": "derived",
    "mark": "Design",
-   "formula": "docks_brigades_m+brigades_cross_river_items_m",
-   "tol": 0.01
+   "formula": "docks_brigades_m",
+   "tol": 0.01,
+   "note": "Part VI 8.1 corrected: the Brigades' half of the cross-river items sits inside the 25 percent docks share, so there is no separate 0.15"
   },
   "brigades_numbers_m": {
    "default": 0.32,
@@ -2776,7 +2842,7 @@
    "note": "the Brigades pay no tribute"
   },
   "brigades_total_m": {
-   "default": 1.7,
+   "default": 1.5,
    "range": [
     0.7,
     3.0
@@ -2790,7 +2856,7 @@
    "tol": 0.05
   },
   "combine_own_lines_m": {
-   "default": 1.1,
+   "default": 1.15,
    "range": [
     0.25,
     2.3
@@ -2801,7 +2867,8 @@
    "kind": "derived",
    "mark": "Design",
    "formula": "numbers_combine_net_m+book_net_m*book_combine_share_pct/100",
-   "tol": 0.06
+   "tol": 0.06,
+   "note": "0.32 + 0.83 by arithmetic; printed 1.15"
   },
   "heroin_pool_off_italian_ground_m": {
    "default": 6.0,
@@ -2935,7 +3002,7 @@
    "tol": 0.005
   },
   "chinatown_total_m": {
-   "default": 0.5,
+   "default": 0.46,
    "range": [
     0.2,
     1.3
@@ -2946,8 +3013,8 @@
    "kind": "derived",
    "mark": "Design",
    "formula": "chinatown_halls_m+numbers_chinatown_net_m",
-   "tol": 0.05,
-   "note": "0.46 by arithmetic, printed 0.5"
+   "tol": 0.01,
+   "note": "0.46 by arithmetic; printed 0.46"
   },
   "chinatown_payment_to_italians_m_hi": {
    "default": 0.05,
@@ -2984,7 +3051,7 @@
    "tol": 0.03
   },
   "outside_own_lines_total_m": {
-   "default": 9.4,
+   "default": 9.2,
    "range": null,
    "unit": "USD million",
    "tag": "Design",

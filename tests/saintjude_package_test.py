@@ -286,7 +286,7 @@ def run_data():
                           "puerto_rican_latino", "greek_lebanese_armenian", "soviet_jewish_emigre", "chinese"}
     assert abs(sum(g["weight"] for g in names.values()) - 1.0) < 1e-9
     assert names["black"]["weight"] > names["italian"]["weight"] > names["irish"]["weight"] > names["old_protestant"]["weight"] > names["polish_slavic"]["weight"]
-    assert names["soviet_jewish_emigre"]["weight"] == 0 and ndoc["gaps"]
+    assert abs(names["soviet_jewish_emigre"]["weight"] - 0.2 / 92.2) < 1e-6 and ndoc["gaps"]  # Part I 7.1 gives them 0.2 percent
     for gname, g in names.items():
         for kind in ("male", "female", "family"):
             assert len(g[kind]) >= 6 and len(set(g[kind])) == len(g[kind]), (gname, kind)

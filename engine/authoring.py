@@ -355,7 +355,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     name = conn.execute("SELECT name FROM actors WHERE id=?", (aid,)).fetchone()[0]
     held = _hold_office(conn, slot, aid, day, call_id) if slot is not None else None
     return {"status": "created", "kind": "person", "actor_id": aid, "name": name, "sex": sex, "age": me_age,
-            "work": prof["occupation_domain"], "location": conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0],
+            "work": held or prof["occupation_domain"], **({"work_domain": prof["occupation_domain"]} if held else {}), "location": conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0],
             "from": origin, **({"holds": held} if held else {}), **({"scaled_down": down} if down else {})}
 
 

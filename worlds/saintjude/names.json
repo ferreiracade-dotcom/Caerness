@@ -1,11 +1,11 @@
 {
  "about": "Saint Jude's communities and name pools for background people, rebuilt from Part I 14.1 (names) and Part I 7.1 (shares). Each group has male, female and family names; its weight is its share of ordinary residents. The merged weighted pools that the engine reads are in world.json under name_pools.",
  "source": "Part I 14.1 (all 11 groups) and Part I 7.1 (shares, tagged Design: each share within about 20 percent of its figure).",
- "mapping": "Each 14.1 group is mapped to the 7.1 community in its 'community' field. Weight = that community's 7.1 share divided by 92, the sum of the shares that have name groups (7.1's 'Mixed, other 8%' has no names, so it is spread over the other communities in proportion). The Soviet Jewish emigre group has no 7.1 share and weight 0.",
+ "mapping": "Each 14.1 group is mapped to the 7.1 community in its 'community' field. Weight = that community's 7.1 share divided by 92, the sum of the shares that have name groups (7.1's 'Mixed, other 8%' has no names, so it is spread over the other communities in proportion). The Soviet Jewish emigre group has no 7.1 share; it takes a proposed weight of about 0.2 percent. A family keeps to one group's given names, and an authored surname no group lists is assigned one group.",
  "gaps": [
   "Part I 14.1 gives women's names only for the Italian (10) and Black (6) groups. Every other group's female list, marked 'female_source': 'fallback, not from the bible', is a minimal engine fallback (the engine needs a female list for every group) and should be replaced when the bible supplies women's names.",
   "Part I 14.1 gives no given names for the Chinese group, only surnames; its male list is a fallback, not from the bible.",
-  "Part I 7.1 gives no share to the Soviet Jewish emigre community and none to 'Mixed, other' (8%).",
+  "Part I 7.1 now gives the Soviet Jewish emigre community 0.2 percent and 'Mixed, other' 7.8 percent (October 2026 revision). 'Mixed, other' has no name list, so each weight is the group's share divided by the total of the named groups (92.2).",
   "Several lists are short (6 to 29 names); the old 40-name minimum no longer holds."
  ],
  "assumption": false,
@@ -13,7 +13,7 @@
   "italian": {
    "community": "Italian-American",
    "share_7_1": 17,
-   "weight": 0.18478261,
+   "weight": 0.18438178,
    "male": [
     "Salvatore",
     "Vincent",
@@ -86,7 +86,7 @@
   "irish": {
    "community": "Irish-American",
    "share_7_1": 12,
-   "weight": 0.13043478,
+   "weight": 0.13015184,
    "male": [
     "Patrick",
     "Michael",
@@ -132,7 +132,7 @@
   "polish_slavic": {
    "community": "Polish, Slovak, Ukrainian, Lithuanian",
    "share_7_1": 8,
-   "weight": 0.08695652,
+   "weight": 0.0867679,
    "male": [
     "Stanley",
     "Walter",
@@ -170,7 +170,7 @@
   "portuguese": {
    "community": "Portuguese",
    "share_7_1": 2,
-   "weight": 0.02173913,
+   "weight": 0.02169197,
    "male": [
     "Manuel",
     "Joao",
@@ -208,7 +208,7 @@
   "black": {
    "community": "Black",
    "share_7_1": 30,
-   "weight": 0.32608696,
+   "weight": 0.32537961,
    "male": [
     "James",
     "Robert",
@@ -255,7 +255,7 @@
   "jewish": {
    "community": "Jewish",
    "share_7_1": 4,
-   "weight": 0.04347826,
+   "weight": 0.04338395,
    "male": [
     "Morris",
     "Irving",
@@ -296,7 +296,7 @@
   "old_protestant": {
    "community": "Old Protestant stock (English, Scots, German, Dutch)",
    "share_7_1": 10,
-   "weight": 0.10869565,
+   "weight": 0.10845987,
    "male": [
     "Harrison",
     "Franklin",
@@ -333,7 +333,7 @@
   "puerto_rican_latino": {
    "community": "Puerto Rican and other Latino",
    "share_7_1": 6,
-   "weight": 0.06521739,
+   "weight": 0.06507592,
    "male": [
     "Luis",
     "Jose",
@@ -372,7 +372,7 @@
   "greek_lebanese_armenian": {
    "community": "Greek, Lebanese, Armenian",
    "share_7_1": 2,
-   "weight": 0.02173913,
+   "weight": 0.02169197,
    "male": [
     "Nick",
     "George",
@@ -406,8 +406,8 @@
   },
   "soviet_jewish_emigre": {
    "community": "Soviet Jewish emigre (1975); Part V's Russians",
-   "share_7_1": 0,
-   "weight": 0.0,
+   "share_7_1": 0.2,
+   "weight": 0.0021692,
    "male": [
     "Evsei",
     "Boris",
@@ -443,7 +443,7 @@
   "chinese": {
    "community": "Chinese and other Asian",
    "share_7_1": 1,
-   "weight": 0.01086957,
+   "weight": 0.01084599,
    "male": [
     "Frank",
     "Henry",
