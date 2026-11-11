@@ -307,8 +307,70 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
 
 
 def _post_pad(conn: sqlite3.Connection, day: int, days: int, ctx: dict) -> float:
-    """Hook for the Pad (task 8): pays the officers' envelopes out of the families' purses and returns the amount paid."""
-    return 0.0
+    """The Pad: every active envelope is paid out of the paying family's capos' purses through a bagman.
+
+    Each family's capos pay what the family owes in proportion to their regimes' take (the take posted this period by
+    their men and themselves); a bagman collects the envelopes of his group, keeps his own and hands the rest to the
+    officers. One row per payer, payee and kind: capo to bagman, bagman to officer. The amount returned is what the
+    families paid out (the envelopes' total), not the bagmen's onward hand-offs."""
+    rows = conn.execute(
+        """SELECT e.* FROM pad_envelopes e WHERE e.status='active' AND e.started_day<=? AND (e.ended_day IS NULL OR e.ended_day>?)
+           ORDER BY e.id""", (int(day), int(day))).fetchall()
+    if not rows:
+        return 0.0
+    ros: _Roster = ctx["roster"]
+    alive = {int(r[0]) for r in conn.execute(
+        """SELECT a.id FROM actors a LEFT JOIN actor_life_profiles lp ON lp.actor_id=a.id
+           WHERE a.id IN (%s) AND lower(COALESCE(a.status,'active')) NOT IN ('dead','deceased','historical')
+             AND COALESCE(lp.life_status,'living')='living'""" % ",".join(str(int(e["officer_actor_id"])) for e in rows))}
+    # who collects each officer's envelope: his bagman when the bagman lives, else the officer himself
+    owed: dict[tuple[int, int], float] = defaultdict(float)  # (paying family, collector) -> amount for the period
+    onward: dict[tuple[int, int], float] = defaultdict(float)  # (collector, officer) -> amount handed on
+    for e in rows:
+        officer, bag = int(e["officer_actor_id"]), e["bagman_actor_id"]
+        if officer not in alive:
+            continue  # the Pad pays the position, but there is no one to hand the envelope to until a man sits in it
+        amount = float(e["weekly_usd"]) * days / 7.0
+        collector = int(bag) if bag is not None and int(bag) in alive else officer
+        owed[(int(e["payer_outfit_actor_id"]), collector)] += amount
+        if collector != officer:
+            onward[(collector, officer)] += amount
+    # regime weights: the take each capo's regime brought in this period
+    regime: dict[int, dict[int, float]] = defaultdict(lambda: defaultdict(float))
+    for _, earner, amount, _line in ctx["entries"]["take"]:
+        r = ros.ranks.get(int(earner))
+        if r is None:
+            continue
+        oid = int(r["outfit_actor_id"])
+        if r["rank_key"] == "capo":
+            capo = int(earner)
+        else:
+            capo = ros.crew_leader.get(int(r["crew_id"])) if r["crew_id"] is not None else None
+            if capo is None or not ros.alive(capo):
+                capo = (ros.top.get(oid) or [None])[0]
+        if capo is not None:
+            regime[oid][int(capo)] += float(amount)
+    paid_out = 0.0
+    pay_rows: list[tuple] = []
+    for (family, collector), amount in sorted(owed.items()):
+        weights = regime.get(family) or ({ros.top[family][0]: 1.0} if ros.top.get(family) else {})
+        if not weights:
+            continue
+        total = sum(weights.values())
+        for capo, w in sorted(weights.items()):
+            part = amount * w / total
+            if part < MIN_ROW or capo == collector:
+                continue
+            got = ledger.transfer(conn, ("person", capo), ("person", collector), part, flow_kind="bribe", purpose="the Pad", allow_partial=True)
+            if got > 0:
+                paid_out += got
+                pay_rows.append((int(day), "pad", capo, collector, None, got))
+    for (collector, officer), amount in sorted(onward.items()):
+        got = ledger.transfer(conn, ("person", collector), ("person", officer), amount, flow_kind="bribe", purpose="the Pad", allow_partial=True)
+        if got > 0:
+            pay_rows.append((int(day), "pad", collector, officer, None, got))
+    conn.executemany("INSERT INTO outfit_money(day,kind,from_actor_id,to_actor_id,line_id,amount) VALUES (?,?,?,?,?,?)", pay_rows)
+    return paid_out
 
 
 def post_period(conn: sqlite3.Connection, day: int, days: int) -> dict[str, float]:

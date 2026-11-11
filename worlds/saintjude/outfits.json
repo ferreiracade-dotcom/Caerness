@@ -319,5 +319,169 @@
   "bolita_tax": "a tax on the bolita banks",
   "drugs_by_dial_and_ground": "a drug market on the family's ground"
  },
- "note": "Every count, share and cadence not printed in the bible is a Design proposal in design_figures.json, referred to here by figure key. male_share, cadence_days and induction values are Design proposals recorded here (Part I 12.4: women never inducted; the rest unsourced). Ground names are rows of the Saint Jude locations table, from Part III 4.0-4.4 and the gazetteer. Motives are added in Tasks 10 and 11."
+ "note": "Every count, share and cadence not printed in the bible is a Design proposal in design_figures.json, referred to here by figure key. male_share, cadence_days and induction values are Design proposals recorded here (Part I 12.4: women never inducted; the rest unsourced). Ground names are rows of the Saint Jude locations table, from Part III 4.0-4.4 and the gazetteer. Motives are added in Tasks 10 and 11.",
+ "connected": [
+  {
+   "institution": "First Harbor National Bank",
+   "role_text": "President of First Harbor National Bank",
+   "occupation_domain": "merchant",
+   "tied_to": null,
+   "count": 1,
+   "name_group": "old_protestant",
+   "note": "Part I 9.6: the city's biggest bank; a friendly banker's seat (Part III 7.1)"
+  },
+  {
+   "institution": "Dunmore Savings Bank",
+   "role_text": "President of the Dunmore Savings Bank",
+   "occupation_domain": "merchant",
+   "tied_to": "combine",
+   "count": 1,
+   "name_group": "black",
+   "note": "Part IV 3.7, 4.7: the combine's clean-money bank"
+  },
+  {
+   "institution": "Italian Credit Union",
+   "role_text": "Manager of the Italian Credit Union",
+   "occupation_domain": "clerk",
+   "tied_to": "sabatini",
+   "count": 1,
+   "name_group": "italian",
+   "note": "Part IV 4.3: the Italian wing's credit union on the Hill"
+  },
+  {
+   "institution": "The Concrete Club",
+   "role_text": "Contractor in the Concrete Club",
+   "occupation_domain": "merchant",
+   "tied_to": "sabatini",
+   "count": 6,
+   "name_group": "italian",
+   "note": "Part III 7.4, Part IV 3.6: the Club's contractors; three were lost in 1974"
+  },
+  {
+   "institution": "Sterling Properties",
+   "role_text": "Developer, Sterling Properties",
+   "occupation_domain": "merchant",
+   "tied_to": "sabatini",
+   "count": 1,
+   "note": "seeded; Part IV 3.2: developers touch Sabatini through the Concrete Club and the Board of Public Works"
+  },
+  {
+   "institution": "Hunts Row Textile and Diamond Exchange",
+   "role_text": "Jewish dealer on Hunts Row",
+   "occupation_domain": "merchant",
+   "tied_to": "ferrante",
+   "count": 3,
+   "name_group": "jewish",
+   "note": "Part V 7.1: a mixed class of Jewish and Italian dealers on Ferrante ground"
+  },
+  {
+   "institution": "Hunts Row Textile and Diamond Exchange",
+   "role_text": "Italian dealer on Hunts Row",
+   "occupation_domain": "merchant",
+   "tied_to": "ferrante",
+   "count": 2,
+   "name_group": "italian",
+   "note": "Part V 7.1: the Italian newcomers on the Row"
+  },
+  {
+   "institution": "The Master Layoff Bank",
+   "role_text": "Bookmaker who keeps a layoff book",
+   "occupation_domain": "merchant",
+   "tied_to": "sabatini",
+   "count": 3,
+   "name_group": "jewish",
+   "note": "Part III 5.5: bookmaking and layoff banks; they cannot be made, so they are connected, not inducted"
+  },
+  {
+   "institution": "Blum and Associates",
+   "role_text": "Attorney; head of Blum and Associates",
+   "occupation_domain": "clerk",
+   "tied_to": null,
+   "count": 1,
+   "name_group": "jewish",
+   "note": "seeded; Part III 5.5: law and accounting"
+  },
+  {
+   "institution": null,
+   "role_text": "Accountant who keeps a family's books",
+   "occupation_domain": "clerk",
+   "tied_to": "ferrante",
+   "count": 1,
+   "name_group": "jewish",
+   "note": "Part V 7.1: the accountant who knows both sets of books"
+  },
+  {
+   "institution": null,
+   "role_text": "Garment-district financier",
+   "occupation_domain": "merchant",
+   "tied_to": "ferrante",
+   "count": 3,
+   "name_group": "jewish",
+   "note": "Part III 5.5, Part V 7.1: garment-district and jewelry-district finance, the manufacturer's loan"
+  },
+  {
+   "institution": null,
+   "role_text": "Lawyer to the Sabatini Family",
+   "occupation_domain": "clerk",
+   "tied_to": "sabatini",
+   "count": 1,
+   "name_group": "italian",
+   "note": "Part IV 4.3: the Italian wing's growing bench of lawyers"
+  },
+  {
+   "institution": null,
+   "role_text": "Lawyer to the Pellegrino Family",
+   "occupation_domain": "clerk",
+   "tied_to": "pellegrino",
+   "count": 1,
+   "name_group": "italian",
+   "note": "as above"
+  },
+  {
+   "institution": null,
+   "role_text": "Lawyer to the Vannucci Family",
+   "occupation_domain": "clerk",
+   "tied_to": "vannucci",
+   "count": 1,
+   "name_group": "italian",
+   "note": "as above"
+  },
+  {
+   "institution": null,
+   "role_text": "Lawyer to the Ferrante Family",
+   "occupation_domain": "clerk",
+   "tied_to": "ferrante",
+   "count": 1,
+   "name_group": "italian",
+   "note": "as above"
+  },
+  {
+   "institution": "Docks Chinatown Associations",
+   "role_text": "Head of a family association",
+   "occupation_domain": "merchant",
+   "tied_to": "pellegrino",
+   "count": 2,
+   "name_group": "chinese",
+   "note": "Part V 7.2: its leaders only; the Pellegrino family is the nearest and gets a courtesy payment"
+  },
+  {
+   "institution": "Docks Chinatown Associations",
+   "role_text": "Head of a district association",
+   "occupation_domain": "merchant",
+   "tied_to": "pellegrino",
+   "count": 1,
+   "name_group": "chinese",
+   "note": "Part V 7.2"
+  },
+  {
+   "institution": "Docks Chinatown Associations",
+   "role_text": "Tong elder",
+   "occupation_domain": "merchant",
+   "tied_to": "pellegrino",
+   "count": 2,
+   "name_group": "chinese",
+   "note": "Part V 7.2"
+  }
+ ],
+ "connected_note": "Counts are Design proposals (unsourced) except where the bible names the seat; level 4 for each (spec 6.3); the Jewish financiers and bookmakers belong to no family (Part III 5.5) and tied_to is the family they deal with. A seeded head of the named institution is used first."
 }

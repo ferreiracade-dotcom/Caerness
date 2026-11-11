@@ -3464,6 +3464,49 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced"
+  },
+  "mob_wards": {
+   "default": 6,
+   "range": [
+    4,
+    8
+   ],
+   "unit": "wards",
+   "tag": "Design",
+   "kind": "draw",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how many of the fifteen City Council wards (Part I 4.3) lie on mob ground and so seat an alderman at level 4; the ward lines are Open in the bible"
+  },
+  "pad_bagmen_per_precinct": {
+   "default": 2,
+   "range": null,
+   "unit": "sergeants",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Part II 3.2 says most Pad money moves through intermediaries; sergeants carry it, one to two per precinct and paying family"
+  },
+  "male_share_law_official": {
+   "default": 0.97,
+   "range": null,
+   "unit": "share male",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Part I 11 and Part II 2.1: women under 2 percent of the SJPD, no woman mayor, commissioner, County Prosecutor or dock union president; the other level-4 officials are drawn at this share"
+  },
+  "male_share_connected": {
+   "default": 0.9,
+   "range": null,
+   "unit": "share male",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Part I 11 puts women in the connected roles around the Life (a bookkeeper, a bar owner who looks away), so the share is lower than for gangs"
   }
  },
  "pools": {

@@ -1,9 +1,7 @@
 """Rackets as money in the Saint Jude outfits: holdings, crew slices, lines, the monthly flow (mob minimum, task 7).
 
 Run: CAERNESS_DB_PATH=<tmp>.db PYTHONPATH=. python tests/saintjude_outfit_money_test.py
-test_family_net_over_a_year_matches_9_3 is an EXPECTED FAILURE until Task 8 adds the Pad (the net is gross minus the
-Pad); the runner below reports it as "xfail" and the file still passes. When Task 8 makes it pass the runner says
-"XPASS" and fails, so the marker must then be removed (delete the name from EXPECTED_FAILURES)."""
+The Pad (task 8) is paid in the flow, so a family's yearly net is its drawn gross less its Pad (9.3)."""
 from __future__ import annotations
 
 import os
@@ -23,7 +21,7 @@ from engine.outfit_opening import outfit_actor
 from engine.world_package import outfit_rules, package_for
 
 FAMILIES = ("sabatini", "pellegrino", "vannucci", "ferrante")
-EXPECTED_FAILURES = {"test_family_net_over_a_year_matches_9_3"}  # Task 8 (the Pad) makes this pass
+EXPECTED_FAILURES: set[str] = set()
 
 
 def _open():
@@ -120,7 +118,8 @@ def test_money_is_conserved_in_a_period():
     day = _day(conn) + 28
     out = outfit_money.post_period(conn, day, 28)
     assert out["take"] > 0 and out["kickup"] > 0 and out["associate_earning"] > 0 and out["executive_share"] > 0
-    assert abs((_cash(conn, ids) - before) - out["take"]) < 0.01
+    assert out["pad"] > 0
+    assert abs((_cash(conn, ids) - before) - (out["take"] - out["pad"])) < 0.01  # the Pad leaves the outfits; nothing else does
     rows = conn.execute("SELECT kind,from_actor_id,to_actor_id,amount FROM outfit_money WHERE day=?", (day,)).fetchall()
     sums = {k: sum(r["amount"] for r in rows if r["kind"] == k) for k in ("take", "associate_earning", "kickup", "executive_share")}
     for k in sums:
@@ -170,10 +169,13 @@ def test_family_net_over_a_year_matches_9_3():
         q = ",".join("?" * len(ids))
         take = conn.execute(f"SELECT SUM(amount) FROM outfit_money WHERE kind='take' AND to_actor_id IN ({q})", ids).fetchone()[0]
         pad = conn.execute(f"SELECT COALESCE(SUM(amount),0) FROM outfit_money WHERE kind='pad' AND from_actor_id IN ({q})", ids).fetchone()[0]
-        # 9.3: net = gross - pad. This run's gross is drawn, so the target is the run's gross less 9.3A's pad for the family.
-        want = _drawn_gross_m(conn, fam) - alloc[fam]["pad_m"]
+        # 9.3: net = gross - pad. This run's gross and Pad total are drawn, so the target is the run's gross less the family's
+        # 9.3A share of the run's Pad total (at the default total of 1.6 that is 9.3A's pad_m itself).
+        scale = figure(conn, "pad_total_m") / sum(a["pad_m"] for k, a in alloc.items() if k in FAMILIES)
+        want = _drawn_gross_m(conn, fam) - alloc[fam]["pad_m"] * scale
         assert abs(take / 1e6 - _drawn_gross_m(conn, fam)) < 0.01, (fam, take / 1e6)  # a year of takes is the year's gross
         assert abs(take / 1e6 - pad / 1e6 - want) <= 0.15, (fam, take / 1e6, pad / 1e6, want)
+        assert abs(pad / 1e6 - alloc[fam]["pad_m"] * scale) <= 0.05, (fam, pad / 1e6, alloc[fam]["pad_m"] * scale)
 
 
 def test_dead_holder_line_goes_to_capo():

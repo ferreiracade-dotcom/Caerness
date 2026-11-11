@@ -32,14 +32,14 @@ def run():
         assert facts.exists(conn)
         tags = {r[0]: r[1] for r in conn.execute("SELECT tag,COUNT(*) FROM world_facts GROUP BY tag")}
         assert tags.get("Fixed", 0) > 10 and tags.get("Open", 0) >= 10 and tags.get("Example", 0) >= 40, tags
-        slot = facts.resolve(conn, "Killbuck County Prosecutor", open_only=True)
+        slot = facts.resolve(conn, "Chronicle publisher", open_only=True)
         assert slot is not None and slot["tag"] == "Open" and slot["holder_actor_id"] is None
         assert facts.holder_of(conn, slot["key"]) is None
         # claims carry the tag from the bible, and an Example person is marked as one
         assert conn.execute("SELECT tag FROM world_facts WHERE key='claim:founding-1640s'").fetchone()[0] == "Fixed"
 
-        # an Open office unfilled: lookup says so
-        got = views.lookup(conn, "Killbuck County Prosecutor")
+        # an Open office unfilled: lookup says so (the level-4 offices are filled at the opening, so the test uses one the underworld does not deal with)
+        got = views.lookup(conn, "Chronicle publisher")
         assert got["found"] is False and got.get("open") and "not yet decided" in got["fact"], got
 
         me = conn.execute("SELECT id FROM actors WHERE actor_type='character' AND current_location_id IS NOT NULL ORDER BY id LIMIT 1").fetchone()[0]
@@ -48,20 +48,20 @@ def run():
         ex = conn.execute("SELECT name FROM actors WHERE id=?", (me,)).fetchone()[0]
         assert views.lookup(conn, ex).get("tag") == "Example"
 
-        out = author(conn, "a1", "person", {"work": "prosecutor", "age": 52, "sex": "male", "holds": "Killbuck County Prosecutor"})
-        assert out.get("status") == "created" and out.get("holds") == "Killbuck County Prosecutor", out
+        out = author(conn, "a1", "person", {"work": "publisher", "age": 52, "sex": "male", "holds": "Chronicle publisher"})
+        assert out.get("status") == "created" and out.get("holds") == "Chronicle publisher", out
         aid = out["actor_id"]
         assert facts.holder_of(conn, slot["key"])["actor_id"] == aid
-        got = views.lookup(conn, "County Prosecutor")
-        assert got.get("found") and got["id"] == aid and got.get("office") == ["Killbuck County Prosecutor"], got
+        got = views.lookup(conn, "Chronicle publisher")
+        assert got.get("found") and got["id"] == aid and got.get("office") == ["Chronicle publisher"], got
 
         advance_connection(conn, 30)
         conn.commit()
-        got = views.lookup(conn, "the Killbuck County Prosecutor")
+        got = views.lookup(conn, "the Chronicle publisher")
         assert got.get("found") and got["id"] == aid, got
-        assert views.lookup(conn, "prosecutor").get("found") in (True, False)
+        assert views.lookup(conn, "publisher").get("found") in (True, False)
 
-        dup = author(conn, "a2", "person", {"work": "prosecutor", "age": 45, "sex": "male", "holds": "County Prosecutor"})
+        dup = author(conn, "a2", "person", {"work": "publisher", "age": 45, "sex": "male", "holds": "Chronicle publisher"})
         assert dup.get("status") == "refused" and "held by" in dup["reason"] and out["name"] in dup["reason"], dup
         assert conn.execute("SELECT COUNT(*) FROM authored_entities WHERE call_id='a2'").fetchone()[0] == 0
         bad = author(conn, "a3", "person", {"age": 40, "sex": "male", "holds": "Grand Vizier"})

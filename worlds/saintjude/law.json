@@ -3,23 +3,30 @@
  "jurisdictions": {
   "city": {
    "authority_kind": "municipal",
-   "priority": 1
+   "priority": 1,
+   "name": "City of Saint Jude",
+   "location": "Saint Jude"
   },
   "killbuck_county": {
    "authority_kind": "county",
-   "priority": 2
+   "priority": 2,
+   "name": "Killbuck County"
   },
   "marsh_county": {
    "authority_kind": "county",
-   "priority": 2
+   "priority": 2,
+   "name": "Marsh County",
+   "location": "Marsh County"
   },
   "state": {
    "authority_kind": "state",
-   "priority": 3
+   "priority": 3,
+   "name": "The State"
   },
   "federal": {
    "authority_kind": "federal",
-   "priority": 4
+   "priority": 4,
+   "name": "The United States (federal)"
   }
  },
  "agencies": {
@@ -43,91 +50,104 @@
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_3": {
    "institution": "3rd Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_4": {
    "institution": "4th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_6": {
    "institution": "6th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_8": {
    "institution": "8th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_9": {
    "institution": "9th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_11": {
    "institution": "11th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_14": {
    "institution": "14th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_15": {
    "institution": "15th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_17": {
    "institution": "17th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_19": {
    "institution": "19th Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_21": {
    "institution": "21st Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "precinct_23": {
    "institution": "23rd Precinct",
    "jurisdiction": "city",
    "pad_reaches": true,
    "capacity": "agency_capacity_mid",
-   "integrity": "agency_integrity_padded"
+   "integrity": "agency_integrity_padded",
+   "kind": "precinct"
   },
   "killbuck_prosecutor": {
    "institution": "Killbuck County Prosecutor's Office",
@@ -288,7 +308,11 @@
    "institution": "City Hall",
    "role_text": "Alderman of a ward on mob ground",
    "occupation_domain": "clerk",
-   "note": "one per mob ward; the ward lines are Open in the bible (Part IV 4.4 sketch), so the opening builder draws them"
+   "note": "one per mob ward; the ward lines are Open in the bible (Part IV 4.4 sketch), so the opening builder draws them",
+   "figure": "mob_wards",
+   "seed_roles": [
+    "Member of the City Council"
+   ]
   },
   {
    "institution": "Local 1201, Longshoremen",
@@ -342,5 +366,83 @@
    "occupation_domain": "labor",
    "created_by_builder": true
   }
- ]
+ ],
+ "agency_routing": {
+  "city": {
+   "default": "precinct",
+   "fallback": "sjpd",
+   "racket": "occd"
+  },
+  "county": {
+   "marsh_county": "marsh_prosecutor",
+   "killbuck_county": "killbuck_prosecutor"
+  },
+  "federal": {
+   "default": "fbi",
+   "racket": "strike_force"
+  },
+  "note": "A street matter goes to the precinct that covers the place (the SJPD where none does); an organized-crime matter to the OCCD; a place inside a county jurisdiction's own location to that county's prosecutor; a federal matter to the FBI, a racket to the Strike Force. Unsourced routing."
+ },
+ "office_domains": {
+  "office:local-402:president-of-local-402": "labor",
+  "office:state:medical-examiner": "physician",
+  "office:sjpd:police-commissioner": "soldier",
+  "office:sjpd:chief-of-department": "soldier",
+  "default": "clerk",
+  "note": "occupation domain of the person who sits in an office; soldier is the engine's word for a sworn officer"
+ },
+ "no_woman_seats": [
+  "office:city-hall:mayor",
+  "office:sjpd:police-commissioner",
+  "office:county-prosecutor:killbuck-county-prosecutor",
+  "President of Local 1201, Longshoremen",
+  "President of Teamsters Local 814"
+ ],
+ "no_woman_note": "Part I 11: no woman has been mayor, police commissioner, County Prosecutor or union president on the docks; the Teamsters seat is added by analogy (unsourced)",
+ "pad": {
+  "officers_figure": "pad_officers",
+  "total_figure": "pad_total_m",
+  "family_split": "pad_by_family_m",
+  "bagmen_figure": "pad_bagmen_per_precinct",
+  "tiers": [
+   {
+    "key": "captain",
+    "officers_figure": "pad_captain_officers",
+    "weekly_figure": "pad_captain_weekly_usd",
+    "title": "Lieutenant",
+    "ages": [
+     40,
+     60
+    ]
+   },
+   {
+    "key": "sergeant",
+    "officers_figure": "pad_sergeant_officers",
+    "weekly_figure": "pad_sergeant_weekly_usd",
+    "title": "Sergeant",
+    "ages": [
+     32,
+     55
+    ]
+   },
+   {
+    "key": "patrolman",
+    "officers_figure": "pad_patrolman_officers",
+    "weekly_figure": "pad_patrolman_weekly_usd",
+    "title": "Patrolman",
+    "ages": [
+     22,
+     45
+    ]
+   }
+  ],
+  "officer_name_groups": [
+   "italian",
+   "irish",
+   "polish_slavic",
+   "portuguese",
+   "old_protestant"
+  ],
+  "note": "Part II 2.1: the SJPD is overwhelmingly white, male and Catholic, so officers are drawn from the city's white ethnic groups at their weights; the captain tier's first seat in each precinct is the precinct captain, the rest are lieutenants and detective heads. Ages and tier titles are unsourced."
+ }
 }
