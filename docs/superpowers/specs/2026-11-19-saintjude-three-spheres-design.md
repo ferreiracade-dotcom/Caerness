@@ -89,6 +89,22 @@ The engine's job: make requests plausible (friction, never refusal unless it con
 
 **Checked against other campaigns:** event organiser for big artists (ventures; drivers are artist demand, venues, season and rival promoters; links to stagehands and Teamsters, scalping and concessions, the arena lease and the press); property developer (ventures, zoning votes, building unions, mob concrete); running for alderman then mayor (election as a dated outcome from people); newspaper owner (circulation, advertisers, pressmen's union); the casino (bible Open: a referendum and licence fight before it is a business); shipping or trucking (freight volume, unions, theft); boxing promoter (small ventures, fixed fights). All of them fit: org core plus drivers plus ventures plus property.
 
+### 5.2b Where the GM's story and the engine can drift apart (agreed 2026-11-19)
+
+Core work, in priority order:
+1. **Agreements and obligations ledger.** Promises, debts, favours and deals narrated in play are recorded with parties, terms and due dates. People act on them, and breaking one has consequences.
+2. **Orders and standing policies.** The player's instructions to people become their agenda items or lasting policies. How well they are carried out follows the person's skill, loyalty and interests.
+3. **Time-skips.** (a) The protagonist keeps his routine, drawn from what he was doing before (work, family, people he sees, habits), and the skip's focus is added on top. (b) The player's focus becomes ventures and orders that the engine carries out. (c) The world keeps moving, and a real event that touches him (arrest, a death in the family, a rival's move, a deal souring, an opportunity) **interrupts** the skip and hands the moment back.
+4. **Vague goals within competence.** "Make it leaner" or "win over the Irish" are translated into drivers moved and costs paid, bounded by the character's skills, experience, people and temperament (or the people he hires). They are never ignored.
+5. **The engine resolves, then the GM narrates.** For persuasion, fights and heists, the GM supplies the substance (the offer, the plan) and the engine weighs it against the people involved. The narration follows the outcome.
+6. **Record what is named.** Every person, place or business named in narration is recorded (`author`/`note`). The engine may detect names that weren't recorded.
+7. **Knowledge firewall.** The GM's views show what the protagonist knows. The engine's hidden truth (hidden lines, informants, plans) is reached through investigations it settles.
+8. **Time budget.** Each new layer carries a cost budget per simulated day, and long skips stay fast.
+
+**Real people.** Real public figures (artists, athletes, national and state politicians, celebrities) appear as fully as possible in their real public roles, and push on events. Limits: no invented crimes, scandals or private wrongdoing for a real person (shady acts belong to fictional characters only); their appearances fit the public record of where they were and what they did in that year. Saint Jude's own local officials are fictional, as the city is.
+
+**Conscience follows the character, not the owner.** The engine models the protagonist's own beliefs and temperament. Inner costs (guilt, confession, a strained marriage, hardening over time) follow who he is, and they can change over a life.
+
 ### 5.3 Order of work
 
 1. **Core refactor (new task 9b):** schema 117 migration, role rules from data, rename and generalise tasks 3/7/8/9 code; all existing Saint Jude tests stay green and Caerness regression passes.
