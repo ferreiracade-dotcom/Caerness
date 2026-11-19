@@ -122,7 +122,10 @@ def org_provider(conn: sqlite3.Connection, actor_id: int, tier: str, day: int, e
     """Candidates for a seated man; [] for anyone else."""
     if not is_living(conn, actor_id):
         return []
-    seats = _declared_seats(conn, actor_id)
+    try:
+        seats = _declared_seats(conn, actor_id)
+    except sqlite3.OperationalError:  # a database from before organisation seats existed
+        return []
     if not seats:
         return []
     out: list[DecisionCandidate] = []
