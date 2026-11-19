@@ -740,7 +740,7 @@ def _resolve_social_contacts(conn: sqlite3.Connection, day: int) -> int:
           AND NOT EXISTS (SELECT 1 FROM household_unions u WHERE u.status='active' AND (u.actor_a_id=lp.actor_id OR u.actor_b_id=lp.actor_id))
           -- An outfit's hundreds of members are not a courtship pool: this pairwise scan is quadratic per institution and
           -- ran daily (28 s a day at the Saint Jude opening). Outfit men meet people through their own lives, not here.
-          AND NOT EXISTS (SELECT 1 FROM outfit_ranks o WHERE o.actor_id=lp.actor_id)
+          AND NOT EXISTS (SELECT 1 FROM org_seats o WHERE o.actor_id=lp.actor_id)
         ORDER BY im.institution_actor_id,lp.actor_id""").fetchall()
     by_inst={}
     for r in candidates: by_inst.setdefault(int(r['institution_actor_id']),[]).append(r)

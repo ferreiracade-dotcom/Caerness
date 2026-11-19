@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 116
+SCHEMA_VERSION = 117
 
 
 def _running_tests() -> bool:
@@ -4601,16 +4601,174 @@ def _migration_115(conn: sqlite3.Connection) -> None:
     conn.execute("INSERT OR IGNORE INTO engine_meta(key,value) VALUES ('schema115_report',?)", (json.dumps(report, sort_keys=True),))
 
 
+# Schema 116's outfit and Pad tables, frozen as they were. Schema 117 renames them (and drops them); a DB stopped at 116,
+# and every fresh DB passing through 116, still gets this DDL, because 117 migrates data out of these tables.
+_OUTFIT_TABLES_116 = """
+CREATE TABLE IF NOT EXISTS outfit_crews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    outfit_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    leader_actor_id INTEGER REFERENCES actors(id),
+    label TEXT NOT NULL,
+    ground_location_id INTEGER REFERENCES locations(id),
+    status TEXT NOT NULL DEFAULT 'active',
+    created_day INTEGER NOT NULL DEFAULT 0,
+    ended_day INTEGER
+);
+CREATE TABLE IF NOT EXISTS outfit_ranks (
+    actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
+    outfit_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    rank_key TEXT NOT NULL,
+    crew_id INTEGER REFERENCES outfit_crews(id),
+    superior_actor_id INTEGER REFERENCES actors(id),
+    level INTEGER NOT NULL CHECK (level IN (3,4)),
+    joined_day INTEGER NOT NULL DEFAULT 0,
+    made_day INTEGER,
+    standing REAL NOT NULL DEFAULT 0,
+    greed REAL NOT NULL DEFAULT 0.5,
+    reliability REAL NOT NULL DEFAULT 0.5,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','held','retired','dead','out')),
+    left_day INTEGER,
+    history_due INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS outfit_holdings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    outfit_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    pool_key TEXT NOT NULL,
+    share_pct REAL NOT NULL DEFAULT 0,
+    yearly_take REAL NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active',
+    source TEXT NOT NULL CHECK (source IN ('opening','started','taken','authored')),
+    started_day INTEGER NOT NULL DEFAULT 0,
+    ended_day INTEGER
+);
+CREATE TABLE IF NOT EXISTS outfit_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    holding_id INTEGER REFERENCES outfit_holdings(id) ON DELETE CASCADE,
+    crew_id INTEGER REFERENCES outfit_crews(id),
+    holder_actor_id INTEGER REFERENCES actors(id),
+    description TEXT NOT NULL,
+    location_id INTEGER REFERENCES locations(id),
+    weekly_take REAL NOT NULL DEFAULT 0,
+    hidden INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active',
+    started_day INTEGER NOT NULL DEFAULT 0,
+    ended_day INTEGER
+);
+CREATE TABLE IF NOT EXISTS outfit_money (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    kind TEXT NOT NULL CHECK (kind IN ('take','associate_earning','kickup','executive_share','pad')),
+    from_actor_id INTEGER,
+    to_actor_id INTEGER NOT NULL,
+    line_id INTEGER REFERENCES outfit_lines(id),
+    amount REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS outfit_agenda (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    due_day INTEGER NOT NULL,
+    subject_kind TEXT,
+    subject_id INTEGER,
+    status TEXT NOT NULL DEFAULT 'open',
+    created_day INTEGER NOT NULL DEFAULT 0,
+    resolved_day INTEGER,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS outfit_incidents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    offender_actor_id INTEGER NOT NULL,
+    victim_actor_id INTEGER,
+    victim_line_id INTEGER,
+    location_id INTEGER,
+    matters INTEGER NOT NULL DEFAULT 0,
+    raised_to_outfit_actor_id INTEGER,
+    status TEXT NOT NULL DEFAULT 'open',
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS pad_envelopes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    officer_actor_id INTEGER NOT NULL REFERENCES actors(id),
+    payer_outfit_actor_id INTEGER NOT NULL REFERENCES actors(id),
+    position_key TEXT NOT NULL,
+    weekly_usd REAL NOT NULL DEFAULT 0,
+    bagman_actor_id INTEGER REFERENCES actors(id),
+    status TEXT NOT NULL DEFAULT 'active',
+    started_day INTEGER NOT NULL DEFAULT 0,
+    ended_day INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_outfit_ranks_outfit_rank ON outfit_ranks(outfit_actor_id, rank_key);
+CREATE INDEX IF NOT EXISTS idx_outfit_ranks_superior ON outfit_ranks(superior_actor_id);
+CREATE INDEX IF NOT EXISTS idx_outfit_lines_holder ON outfit_lines(holder_actor_id);
+CREATE INDEX IF NOT EXISTS idx_outfit_agenda_actor ON outfit_agenda(actor_id, status, due_day);
+"""
+
+
 def _migration_116(conn: sqlite3.Connection) -> None:
-    """Saint Jude mob minimum: the outfit, Pad, crime-report and custody tables come from schema.sql (IF NOT EXISTS);
-    here the one column added to an existing table, guarded on its existence."""
+    """Saint Jude mob minimum: the outfit and Pad tables (old DDL, frozen above), then the one column added to an
+    existing table, guarded on its existence. The crime-report and custody tables come from schema.sql (IF NOT EXISTS)."""
+    conn.executescript(_OUTFIT_TABLES_116)
     if _has_table(conn, "simulation_profiles"):
         cols = {r[1] for r in conn.execute("PRAGMA table_info(simulation_profiles)")}
         if "quiet_routine" not in cols:
             conn.execute("ALTER TABLE simulation_profiles ADD COLUMN quiet_routine INTEGER NOT NULL DEFAULT 0")
 
 
+def _migration_117(conn: sqlite3.Connection) -> None:
+    """Organisation core: the outfit tables become organisation tables (every row kept, the old tables dropped).
+
+    outfit_crews->org_units, outfit_ranks->org_seats (rank_key->role_key, crew_id->unit_id, made_day->inducted_day,
+    id PK, UNIQUE(actor,org)), outfit_holdings->org_holdings, outfit_lines->org_lines, outfit_money->org_money (the
+    kind CHECK goes; new org_actor_id), outfit_agenda->org_agenda, outfit_incidents->org_incidents,
+    pad_envelopes->org_arrangements (kind 'envelope'; the payer outfit becomes payer_kind 'org' + payer_id; officer ->
+    official, bagman -> go_between). Primary keys are copied, so every reference between the tables still holds.
+
+    org_money.org_actor_id (the organisation whose books a row is in) is the payer's seat organisation, else the
+    payee's seat organisation; a Pad row whose payer (a bagman) and payee (an officer) hold no seat takes the paying
+    outfit of the payee's arrangement. org_profiles gets one row per outfit institution the DB's package declares
+    (org_kind = the outfit's shape, sphere 'underworld', package_key = the outfits key); a package with no outfits
+    (Caerness) writes none. The new tables come from schema.sql (IF NOT EXISTS), run here only when init_db has not."""
+    if not _has_table(conn, "org_units"):
+        conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+    if _has_table(conn, "outfit_crews"):
+        run = conn.execute
+        run("""INSERT INTO org_units(id,org_actor_id,leader_actor_id,label,ground_location_id,status,created_day,ended_day)
+               SELECT id,outfit_actor_id,leader_actor_id,label,ground_location_id,status,created_day,ended_day FROM outfit_crews ORDER BY id""")
+        run("""INSERT INTO org_seats(actor_id,org_actor_id,role_key,unit_id,superior_actor_id,level,joined_day,inducted_day,standing,greed,
+                                     reliability,status,left_day,history_due)
+               SELECT actor_id,outfit_actor_id,rank_key,crew_id,superior_actor_id,level,joined_day,made_day,standing,greed,
+                      reliability,status,left_day,history_due FROM outfit_ranks ORDER BY actor_id""")
+        run("""INSERT INTO org_holdings(id,org_actor_id,pool_key,share_pct,yearly_take,status,source,started_day,ended_day)
+               SELECT id,outfit_actor_id,pool_key,share_pct,yearly_take,status,source,started_day,ended_day FROM outfit_holdings ORDER BY id""")
+        run("""INSERT INTO org_lines(id,holding_id,unit_id,holder_actor_id,description,location_id,weekly_take,hidden,status,started_day,ended_day)
+               SELECT id,holding_id,crew_id,holder_actor_id,description,location_id,weekly_take,hidden,status,started_day,ended_day FROM outfit_lines ORDER BY id""")
+        run("""INSERT INTO org_money(id,day,kind,from_actor_id,to_actor_id,line_id,amount,org_actor_id)
+               SELECT m.id,m.day,m.kind,m.from_actor_id,m.to_actor_id,m.line_id,m.amount,
+                      COALESCE((SELECT s.org_actor_id FROM org_seats s WHERE s.actor_id=m.from_actor_id ORDER BY s.id LIMIT 1),
+                               (SELECT s.org_actor_id FROM org_seats s WHERE s.actor_id=m.to_actor_id ORDER BY s.id LIMIT 1),
+                               (SELECT e.payer_outfit_actor_id FROM pad_envelopes e WHERE m.kind='pad' AND e.officer_actor_id=m.to_actor_id
+                                ORDER BY e.id LIMIT 1))
+               FROM outfit_money m ORDER BY m.id""")
+        run("""INSERT INTO org_agenda(id,actor_id,kind,due_day,subject_kind,subject_id,status,created_day,resolved_day,metadata_json)
+               SELECT id,actor_id,kind,due_day,subject_kind,subject_id,status,created_day,resolved_day,metadata_json FROM outfit_agenda ORDER BY id""")
+        run("""INSERT INTO org_incidents(id,day,kind,offender_actor_id,victim_actor_id,victim_line_id,location_id,matters,raised_to_org_actor_id,status,metadata_json)
+               SELECT id,day,kind,offender_actor_id,victim_actor_id,victim_line_id,location_id,matters,raised_to_outfit_actor_id,status,metadata_json FROM outfit_incidents ORDER BY id""")
+        run("""INSERT INTO org_arrangements(id,kind,official_actor_id,payer_kind,payer_id,position_key,weekly_usd,go_between_actor_id,status,started_day,ended_day)
+               SELECT id,'envelope',officer_actor_id,'org',payer_outfit_actor_id,position_key,weekly_usd,bagman_actor_id,status,started_day,ended_day FROM pad_envelopes ORDER BY id""")
+        for table in ("outfit_money", "outfit_lines", "outfit_ranks", "outfit_agenda", "outfit_incidents", "pad_envelopes", "outfit_holdings", "outfit_crews"):
+            conn.execute(f"DROP TABLE {table}")
+    from .world_package import outfit_rules, package_for
+    for key, spec in (outfit_rules(package_for(conn)).get("outfits") or {}).items():
+        row = conn.execute("SELECT id FROM actors WHERE name=? AND actor_type='institution'", (spec["institution"],)).fetchone()
+        if row is not None:
+            conn.execute("INSERT OR IGNORE INTO org_profiles(org_actor_id,org_kind,sphere,package_key) VALUES (?,?,'underworld',?)",
+                         (int(row[0]), spec["shape"], key))
+
+
 _MIGRATIONS: dict[int, Migration] = {
+    117: ("organisation_core", "Outfit tables become organisation tables (org_profiles, units, seats, holdings, lines, money, agenda, incidents, arrangements)", _migration_117),
     1: ("baseline", "Original persistent world schema", None),
     2: ("canon_decisions", "Canon retrieval and structured decisions", None),
     3: ("interactions", "Causal actor interactions", None),
@@ -4730,7 +4888,7 @@ _MIGRATIONS: dict[int, Migration] = {
 }
 
 
-def _apply_migrations(conn: sqlite3.Connection, from_version: int) -> None:
+def _apply_migrations(conn: sqlite3.Connection, from_version: int, target_version: int = SCHEMA_VERSION) -> None:
     # v0.26 is the first release with a persistent migration ledger. When upgrading an
     # older save, record the already-recognized historical schema levels before applying
     # new migrations. The timestamp is the recognition/import time, not a claim about
@@ -4741,7 +4899,7 @@ def _apply_migrations(conn: sqlite3.Connection, from_version: int) -> None:
             "INSERT OR IGNORE INTO schema_migrations(version,migration_key,description) VALUES (?,?,?)",
             (version, key, description + " [recognized from pre-v0.26 save]"),
         )
-    for version in range(max(0, from_version) + 1, SCHEMA_VERSION + 1):
+    for version in range(max(0, from_version) + 1, target_version + 1):
         key, description, fn = _MIGRATIONS[version]
         if fn is not None:
             fn(conn)

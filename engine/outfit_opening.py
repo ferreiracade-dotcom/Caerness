@@ -49,6 +49,12 @@ def outfit_actor(conn: sqlite3.Connection, institution: str) -> int:
     return int(row[0])
 
 
+def write_profile(conn: sqlite3.Connection, key: str, spec: dict, outfit_id: int) -> None:
+    """What kind of organisation this institution is: its shape from outfits.json, the underworld sphere, its package key."""
+    conn.execute("INSERT OR IGNORE INTO org_profiles(org_actor_id,org_kind,sphere,package_key) VALUES (?,?,'underworld',?)",
+                 (int(outfit_id), spec["shape"], key))
+
+
 def seat_subtype(rank_key: str, institution: str) -> str:
     """The subtype a seated person carries, worded like the seeded ones ("Soldier in the <Name> Family").
 
@@ -132,6 +138,7 @@ def _associate_groups(conn: sqlite3.Connection, rules: dict, own_group: str, n: 
 def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, day: int) -> dict:
     inst = spec["institution"]
     outfit_id = outfit_actor(conn, inst)
+    write_profile(conn, key, spec, outfit_id)
     group = spec["name_group"]
     rng = random.Random(f"{run_seed(conn)}:outfit:{key}:structure")
     seeded, unplaced = seeded_by_rank(conn, outfit_id, rules)
@@ -173,7 +180,7 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
     for i, capo in enumerate(capos):
         surname = str(conn.execute("SELECT name FROM actors WHERE id=?", (capo,)).fetchone()[0]).split()[-1]
         crew = int(conn.execute(
-            "INSERT INTO outfit_crews(outfit_actor_id,leader_actor_id,label,ground_location_id,created_day) VALUES (?,?,?,?,?)",
+            "INSERT INTO org_units(org_actor_id,leader_actor_id,label,ground_location_id,created_day) VALUES (?,?,?,?,?)",
             (outfit_id, capo, f"{surname} crew", grounds[i % len(grounds)] if grounds else None, day)).lastrowid)
         crews.append(crew)
         add_member(conn, capo, outfit_id, "capo", crew_id=crew, superior_actor_id=boss, level=4, day=day,
@@ -227,6 +234,7 @@ def build_outfit(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
     inst = spec["institution"]
     shape = spec["shape"]
     outfit_id = outfit_actor(conn, inst)
+    write_profile(conn, key, spec, outfit_id)
     group = spec.get("name_group")  # None (the club has no group of its own): the city's group weights
     male_share = float(rules["male_share"][shape])
     rng = random.Random(f"{run_seed(conn)}:outfit:{key}:structure")

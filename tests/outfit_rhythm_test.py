@@ -27,7 +27,7 @@ def _open():
 
 
 def _member_ids(conn):
-    return [int(r[0]) for r in conn.execute("SELECT actor_id FROM outfit_ranks WHERE status='active'")]
+    return [int(r[0]) for r in conn.execute("SELECT actor_id FROM org_seats WHERE status='active'")]
 
 
 def _decision_rows(conn, ids):
@@ -53,15 +53,15 @@ def test_routine_week_writes_no_decision_rows():
     print(f"28-day outfit advance: {time.time() - t0:.1f}s")
     assert _decision_rows(conn, ids) - before == 0
     reviewed = conn.execute(
-        "SELECT COUNT(*) FROM simulation_profiles WHERE actor_id IN (SELECT actor_id FROM outfit_ranks) AND last_review_day>0").fetchone()[0]
+        "SELECT COUNT(*) FROM simulation_profiles WHERE actor_id IN (SELECT actor_id FROM org_seats) AND last_review_day>0").fetchone()[0]
     assert reviewed > 0, "members are still reviewed on schedule (rescheduled, not frozen)"
 
 
 def test_agenda_item_makes_a_weekly_man_daily_until_it_passes():
     conn = _open()
     soldier = int(conn.execute(
-        "SELECT o.actor_id FROM outfit_ranks o JOIN simulation_profiles p ON p.actor_id=o.actor_id "
-        "WHERE o.rank_key='soldier' AND p.cadence_days=7 ORDER BY o.actor_id LIMIT 1").fetchone()[0])
+        "SELECT o.actor_id FROM org_seats o JOIN simulation_profiles p ON p.actor_id=o.actor_id "
+        "WHERE o.role_key='soldier' AND p.cadence_days=7 ORDER BY o.actor_id LIMIT 1").fetchone()[0])
     today = current_day(conn)
     aid = outfits.add_agenda(conn, soldier, "collect_debt", due_day=today + 5)
     seen: list[int] = []

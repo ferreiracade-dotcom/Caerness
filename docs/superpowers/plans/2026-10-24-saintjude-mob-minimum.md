@@ -538,6 +538,8 @@ def test_non_quiet_profiles_unchanged():
 
 ### Task 10: What a man chooses: motives read from the world
 
+Amended by `2026-11-19-saintjude-org-core.md` section B; read that first.
+
 The owner's rule (2026-10-24): no choice hangs on one trait roll. Each choice has **several motives, each read from the man's real situation**, and the world around him changes the odds. Motives are open package data (a named reader function plus its weight figure), so new ones can be added without touching the choice code; the lists below are the minimum, not a closed set.
 
 **Files:**

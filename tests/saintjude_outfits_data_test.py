@@ -18,8 +18,8 @@ NEW_FIGURES = (
     "agency_capacity_mid agency_capacity_high agency_integrity_padded agency_integrity_clean evidence_threshold_homicide "
     "evidence_threshold_assault evidence_threshold_robbery evidence_threshold_racket"
 ).split()
-TABLES = {"outfit_ranks", "outfit_crews", "outfit_holdings", "outfit_lines", "outfit_money", "outfit_agenda",
-          "outfit_incidents", "pad_envelopes", "crime_reports", "custody"}
+TABLES = {"org_seats", "org_units", "org_holdings", "org_lines", "org_money", "org_agenda",
+          "org_incidents", "org_arrangements", "crime_reports", "custody"}
 FIGURE_KEYS = ("figure", "made_men_figure", "associates_figure", "capacity", "integrity", "evidence_threshold",
                "honest_homicide_figure", "executive_share_of_boss_receipts")
 
@@ -72,14 +72,14 @@ def run():
         sj = connect(db)
         os.environ["CAERNESS_DB_PATH"] = str(db)
 
-        # schema 116
-        assert SCHEMA_VERSION == 116
+        # schema 117 (tables of 116 renamed)
+        assert SCHEMA_VERSION == 117
         assert TABLES <= tables(sj), TABLES - tables(sj)
         assert "quiet_routine" in columns(sj, "simulation_profiles")
         idx = {r[0] for r in sj.execute("SELECT name FROM sqlite_master WHERE type='index'")}
-        assert {"idx_outfit_ranks_outfit_rank", "idx_outfit_ranks_superior", "idx_outfit_lines_holder",
-                "idx_outfit_agenda_actor", "idx_crime_reports_status"} <= idx
-        assert sj.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 116
+        assert {"idx_org_seats_org_role", "idx_org_seats_superior", "idx_org_lines_holder",
+                "idx_org_agenda_actor", "idx_crime_reports_status"} <= idx
+        assert sj.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 117
 
         # the switch, on for Saint Jude only
         assert system_enabled(sj, "outfits")
@@ -91,7 +91,7 @@ def run():
         cae = engine_connect()
         assert not system_enabled(cae, "outfits")
         assert TABLES <= tables(cae)  # the tables exist everywhere; only Saint Jude uses them
-        assert cae.execute("SELECT COUNT(*) FROM outfit_ranks").fetchone()[0] == 0
+        assert cae.execute("SELECT COUNT(*) FROM org_seats").fetchone()[0] == 0
         cae.close()
         os.environ["CAERNESS_DB_PATH"] = str(db)
 

@@ -4917,10 +4917,18 @@ CREATE TABLE IF NOT EXISTS payroll_arrears (
     last_paid_day INTEGER, updated_day INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (holder_kind, holder_id)
 );
 
--- Schema 116 (Saint Jude mob minimum): outfit ranks, lines, money, agenda, incidents; the Pad; crime reports and custody.
-CREATE TABLE IF NOT EXISTS outfit_crews (
+-- Schema 117 (organisation core): outfit tables generalised to organisation tables; the Pad generalised to arrangements.
+-- Schema 116 tables that did not change (crime reports, custody) stay below.
+CREATE TABLE IF NOT EXISTS org_profiles (
+    org_actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
+    org_kind TEXT NOT NULL,
+    sphere TEXT NOT NULL,
+    package_key TEXT,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS org_units (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    outfit_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    org_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
     leader_actor_id INTEGER REFERENCES actors(id),
     label TEXT NOT NULL,
     ground_location_id INTEGER REFERENCES locations(id),
@@ -4928,25 +4936,27 @@ CREATE TABLE IF NOT EXISTS outfit_crews (
     created_day INTEGER NOT NULL DEFAULT 0,
     ended_day INTEGER
 );
-CREATE TABLE IF NOT EXISTS outfit_ranks (
-    actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
-    outfit_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
-    rank_key TEXT NOT NULL,
-    crew_id INTEGER REFERENCES outfit_crews(id),
+CREATE TABLE IF NOT EXISTS org_seats (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    org_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    role_key TEXT NOT NULL,
+    unit_id INTEGER REFERENCES org_units(id),
     superior_actor_id INTEGER REFERENCES actors(id),
-    level INTEGER NOT NULL CHECK (level IN (3,4)),
+    level INTEGER NOT NULL CHECK (level BETWEEN 1 AND 4),
     joined_day INTEGER NOT NULL DEFAULT 0,
-    made_day INTEGER,
+    inducted_day INTEGER,
     standing REAL NOT NULL DEFAULT 0,
     greed REAL NOT NULL DEFAULT 0.5,
     reliability REAL NOT NULL DEFAULT 0.5,
     status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','held','retired','dead','out')),
     left_day INTEGER,
-    history_due INTEGER NOT NULL DEFAULT 0
+    history_due INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (actor_id, org_actor_id)
 );
-CREATE TABLE IF NOT EXISTS outfit_holdings (
+CREATE TABLE IF NOT EXISTS org_holdings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    outfit_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    org_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
     pool_key TEXT NOT NULL,
     share_pct REAL NOT NULL DEFAULT 0,
     yearly_take REAL NOT NULL DEFAULT 0,
@@ -4955,10 +4965,10 @@ CREATE TABLE IF NOT EXISTS outfit_holdings (
     started_day INTEGER NOT NULL DEFAULT 0,
     ended_day INTEGER
 );
-CREATE TABLE IF NOT EXISTS outfit_lines (
+CREATE TABLE IF NOT EXISTS org_lines (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    holding_id INTEGER REFERENCES outfit_holdings(id) ON DELETE CASCADE,
-    crew_id INTEGER REFERENCES outfit_crews(id),
+    holding_id INTEGER REFERENCES org_holdings(id) ON DELETE CASCADE,
+    unit_id INTEGER REFERENCES org_units(id),
     holder_actor_id INTEGER REFERENCES actors(id),
     description TEXT NOT NULL,
     location_id INTEGER REFERENCES locations(id),
@@ -4968,16 +4978,18 @@ CREATE TABLE IF NOT EXISTS outfit_lines (
     started_day INTEGER NOT NULL DEFAULT 0,
     ended_day INTEGER
 );
-CREATE TABLE IF NOT EXISTS outfit_money (
+-- kind is validated in code against the package's orgs.json flows (no CHECK list here)
+CREATE TABLE IF NOT EXISTS org_money (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     day INTEGER NOT NULL,
-    kind TEXT NOT NULL CHECK (kind IN ('take','associate_earning','kickup','executive_share','pad')),
+    kind TEXT NOT NULL,
     from_actor_id INTEGER,
     to_actor_id INTEGER NOT NULL,
-    line_id INTEGER REFERENCES outfit_lines(id),
-    amount REAL NOT NULL
+    line_id INTEGER REFERENCES org_lines(id),
+    amount REAL NOT NULL,
+    org_actor_id INTEGER
 );
-CREATE TABLE IF NOT EXISTS outfit_agenda (
+CREATE TABLE IF NOT EXISTS org_agenda (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
     kind TEXT NOT NULL,
@@ -4989,7 +5001,7 @@ CREATE TABLE IF NOT EXISTS outfit_agenda (
     resolved_day INTEGER,
     metadata_json TEXT NOT NULL DEFAULT '{}'
 );
-CREATE TABLE IF NOT EXISTS outfit_incidents (
+CREATE TABLE IF NOT EXISTS org_incidents (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     day INTEGER NOT NULL,
     kind TEXT NOT NULL,
@@ -4998,17 +5010,19 @@ CREATE TABLE IF NOT EXISTS outfit_incidents (
     victim_line_id INTEGER,
     location_id INTEGER,
     matters INTEGER NOT NULL DEFAULT 0,
-    raised_to_outfit_actor_id INTEGER,
+    raised_to_org_actor_id INTEGER,
     status TEXT NOT NULL DEFAULT 'open',
     metadata_json TEXT NOT NULL DEFAULT '{}'
 );
-CREATE TABLE IF NOT EXISTS pad_envelopes (
+CREATE TABLE IF NOT EXISTS org_arrangements (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    officer_actor_id INTEGER NOT NULL REFERENCES actors(id),
-    payer_outfit_actor_id INTEGER NOT NULL REFERENCES actors(id),
+    kind TEXT NOT NULL,
+    official_actor_id INTEGER NOT NULL REFERENCES actors(id),
+    payer_kind TEXT NOT NULL CHECK (payer_kind IN ('org','actor')),
+    payer_id INTEGER NOT NULL,
     position_key TEXT NOT NULL,
     weekly_usd REAL NOT NULL DEFAULT 0,
-    bagman_actor_id INTEGER REFERENCES actors(id),
+    go_between_actor_id INTEGER REFERENCES actors(id),
     status TEXT NOT NULL DEFAULT 'active',
     started_day INTEGER NOT NULL DEFAULT 0,
     ended_day INTEGER
@@ -5038,8 +5052,8 @@ CREATE TABLE IF NOT EXISTS custody (
     since_day INTEGER NOT NULL,
     until_day INTEGER
 );
-CREATE INDEX IF NOT EXISTS idx_outfit_ranks_outfit_rank ON outfit_ranks(outfit_actor_id, rank_key);
-CREATE INDEX IF NOT EXISTS idx_outfit_ranks_superior ON outfit_ranks(superior_actor_id);
-CREATE INDEX IF NOT EXISTS idx_outfit_lines_holder ON outfit_lines(holder_actor_id);
-CREATE INDEX IF NOT EXISTS idx_outfit_agenda_actor ON outfit_agenda(actor_id, status, due_day);
+CREATE INDEX IF NOT EXISTS idx_org_seats_org_role ON org_seats(org_actor_id, role_key);
+CREATE INDEX IF NOT EXISTS idx_org_seats_superior ON org_seats(superior_actor_id);
+CREATE INDEX IF NOT EXISTS idx_org_lines_holder ON org_lines(holder_actor_id);
+CREATE INDEX IF NOT EXISTS idx_org_agenda_actor ON org_agenda(actor_id, status, due_day);
 CREATE INDEX IF NOT EXISTS idx_crime_reports_status ON crime_reports(status);

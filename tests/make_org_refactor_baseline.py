@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
 from tests.sj_fixture import build_saintjude, connect
 from engine import outfit_money
 
-TABLE = "outfit_money"
+TABLE = "org_money"
 
 
 def main() -> dict:

@@ -15,16 +15,16 @@ def clamp01(v: float) -> float:
 
 def members(conn: sqlite3.Connection, outfit_actor_id: int, rank_key: str | None = None, status: str = "active") -> list[sqlite3.Row]:
     """The outfit's members of one rank (all ranks when None), in actor-id order."""
-    sql = "SELECT * FROM outfit_ranks WHERE outfit_actor_id=? AND status=?"
+    sql = "SELECT * FROM org_seats WHERE org_actor_id=? AND status=?"
     args: list = [int(outfit_actor_id), status]
     if rank_key is not None:
-        sql += " AND rank_key=?"
+        sql += " AND role_key=?"
         args.append(rank_key)
     return conn.execute(sql + " ORDER BY actor_id", args).fetchall()
 
 
 def superior_of(conn: sqlite3.Connection, actor_id: int) -> int | None:
-    r = conn.execute("SELECT superior_actor_id FROM outfit_ranks WHERE actor_id=?", (int(actor_id),)).fetchone()
+    r = conn.execute("SELECT superior_actor_id FROM org_seats WHERE actor_id=?", (int(actor_id),)).fetchone()
     return int(r[0]) if r and r[0] is not None else None
 
 
@@ -34,17 +34,17 @@ def capo_of(conn: sqlite3.Connection, actor_id: int) -> int | None:
     cur: int | None = int(actor_id)
     while cur is not None and cur not in seen:
         seen.add(cur)
-        row = conn.execute("SELECT rank_key,superior_actor_id FROM outfit_ranks WHERE actor_id=?", (cur,)).fetchone()
+        row = conn.execute("SELECT role_key,superior_actor_id FROM org_seats WHERE actor_id=?", (cur,)).fetchone()
         if row is None:
             return None
-        if row["rank_key"] == "capo":
+        if row["role_key"] == "capo":
             return cur
         cur = int(row["superior_actor_id"]) if row["superior_actor_id"] is not None else None
     return None
 
 
 def boss_of(conn: sqlite3.Connection, outfit_actor_id: int) -> int | None:
-    r = conn.execute("SELECT actor_id FROM outfit_ranks WHERE outfit_actor_id=? AND rank_key='boss' AND status='active' "
+    r = conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key='boss' AND status='active' "
                      "ORDER BY actor_id LIMIT 1", (int(outfit_actor_id),)).fetchone()
     return int(r[0]) if r else None
 
@@ -54,7 +54,7 @@ def set_level(conn: sqlite3.Connection, actor_id: int, level: int, day: int) -> 
     cadence_by_level = outfit_rules(package_for(conn)).get("cadence_days", {})
     cadence = int(cadence_by_level[str(int(level))])
     tier = "ACTIVE" if int(level) == 4 else "STRATEGIC"
-    conn.execute("UPDATE outfit_ranks SET level=? WHERE actor_id=?", (int(level), int(actor_id)))
+    conn.execute("UPDATE org_seats SET level=? WHERE actor_id=?", (int(level), int(actor_id)))
     conn.execute(
         """INSERT INTO simulation_profiles(actor_id,tier,cadence_days,last_review_day,next_review_day,quiet_routine)
            VALUES (?,?,?,?,?,1)
@@ -86,7 +86,7 @@ def add_member(
     """Put a person in an outfit at a rank: the rank row, membership row, personality and simulation level."""
     greed, reliability = give_personality(conn, actor_id, "outfit")
     conn.execute(
-        """INSERT INTO outfit_ranks(actor_id,outfit_actor_id,rank_key,crew_id,superior_actor_id,level,joined_day,made_day,standing,greed,reliability)
+        """INSERT INTO org_seats(actor_id,org_actor_id,role_key,unit_id,superior_actor_id,level,joined_day,inducted_day,standing,greed,reliability)
            VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
         (int(actor_id), int(outfit_actor_id), rank_key, crew_id, superior_actor_id, int(level), int(day), made_day,
          float(standing), greed, reliability),
@@ -126,7 +126,7 @@ def has_reason_to_choose(conn: sqlite3.Connection, actor_id: int, day: int) -> b
 
 
 def _open_agenda_due(conn: sqlite3.Connection, actor_id: int, day: int) -> bool:
-    return conn.execute("SELECT 1 FROM outfit_agenda WHERE actor_id=? AND status='open' AND due_day<=? LIMIT 1",
+    return conn.execute("SELECT 1 FROM org_agenda WHERE actor_id=? AND status='open' AND due_day<=? LIMIT 1",
                         (int(actor_id), int(day))).fetchone() is not None
 
 
@@ -153,7 +153,7 @@ def add_agenda(conn: sqlite3.Connection, actor_id: int, kind: str, due_day: int,
                subject_id: int | None = None, metadata: dict | None = None) -> int:
     """An item on a man's list that falls due on `due_day`; he is reviewed daily from now until a week after."""
     cur = conn.execute(
-        """INSERT INTO outfit_agenda(actor_id,kind,due_day,subject_kind,subject_id,created_day,metadata_json)
+        """INSERT INTO org_agenda(actor_id,kind,due_day,subject_kind,subject_id,created_day,metadata_json)
            VALUES (?,?,?,?,?,?,?)""",
         (int(actor_id), kind, int(due_day), subject_kind, subject_id, _today(conn), json.dumps(metadata or {}, sort_keys=True)),
     )
@@ -162,4 +162,4 @@ def add_agenda(conn: sqlite3.Connection, actor_id: int, kind: str, due_day: int,
 
 
 def resolve_agenda(conn: sqlite3.Connection, agenda_id: int, day: int) -> None:
-    conn.execute("UPDATE outfit_agenda SET status='resolved', resolved_day=? WHERE id=?", (int(day), int(agenda_id)))
+    conn.execute("UPDATE org_agenda SET status='resolved', resolved_day=? WHERE id=?", (int(day), int(agenda_id)))

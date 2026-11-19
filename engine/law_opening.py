@@ -270,7 +270,7 @@ def head_of(conn: sqlite3.Connection, outfit_key: str, spec: dict) -> int | None
     if spec.get("shape") == "family":
         return boss_of(conn, oid)
     top = next(iter(spec["ranks"]))
-    r = conn.execute("SELECT actor_id FROM outfit_ranks WHERE outfit_actor_id=? AND rank_key=? AND status='active' ORDER BY actor_id LIMIT 1",
+    r = conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active' ORDER BY actor_id LIMIT 1",
                      (oid, top)).fetchone()
     return int(r[0]) if r else None
 
@@ -380,7 +380,7 @@ def _family_precincts(conn: sqlite3.Connection, oc: dict, precincts) -> dict[str
             continue
         oid = outfit_actor(conn, spec["institution"])
         cnt: Counter = Counter()
-        for r in conn.execute("SELECT ground_location_id FROM outfit_crews WHERE outfit_actor_id=? AND ground_location_id IS NOT NULL ORDER BY id", (oid,)):
+        for r in conn.execute("SELECT ground_location_id FROM org_units WHERE org_actor_id=? AND ground_location_id IS NOT NULL ORDER BY id", (oid,)):
             p = _nearest_precinct(conn, r[0], precincts)
             if p is not None:
                 cnt[p[0]] += 1
@@ -493,7 +493,7 @@ def _build_pad(conn: sqlite3.Connection, rules: dict, oc: dict, day: int, heads:
                     s["bagman"] = None
     payer = {f: outfit_actor(conn, oc["outfits"][f]["institution"]) for f in fams}
     conn.executemany(
-        "INSERT INTO pad_envelopes(officer_actor_id,payer_outfit_actor_id,position_key,weekly_usd,bagman_actor_id,status,started_day) VALUES (?,?,?,?,?,'active',?)",
+        "INSERT INTO org_arrangements(kind,official_actor_id,payer_kind,payer_id,position_key,weekly_usd,go_between_actor_id,status,started_day) VALUES ('envelope',?,'org',?,?,?,?,'active',?)",
         [(s["officer"], payer[s["family"]], f"{s['precinct']}:{s['tier']}:{s['n']}", weekly[s["tier"]], s.get("bagman"), day)
          for s in sorted(slots, key=lambda x: (x["precinct"], x["tier"], x["n"]))])
     return {"pad_officers": len(slots), "pad_precincts": len(primary),
