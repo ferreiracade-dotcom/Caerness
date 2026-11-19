@@ -2,7 +2,7 @@
 
 The package ("orgtest") has no outfits, no places and no names: its orgs.json declares two organisation kinds,
 `firm` (head "chair", unit leader "manager") and `solo` (head "owner", no unit leader), and the flows
-["take", "salary"]. Nothing here names a Saint Jude role.
+["take", "salary", "gift"] (gift: the flow of the `envelope` arrangement kind). Nothing here names a Saint Jude role.
 
     from tests.org_core_fixture import build
     f = build(); conn = f.conn
@@ -24,11 +24,12 @@ if str(ROOT) not in sys.path:
 ORGS = {
     "period_days": 28,
     "cadence_days": {"4": 1, "3": 7},
-    "flows": ["take", "salary"],
+    "flows": ["take", "salary", "gift"],
     "ledger_kinds": {"salary": "wage"},
     "ledger_purpose": "org {flow}",
+    "arrangement_kinds": {"envelope": {"flow": "gift", "ledger_kind": "bribe", "purpose": "an envelope"}},
     "kinds": {
-        "firm": {"sphere": "commerce", "head": "chair", "unit_leader": "manager", "courtship_scan": True,
+        "firm": {"sphere": "commerce", "head": "chair", "unit_leader": "manager", "purse_roles": ["manager"], "courtship_scan": True,
                  "labels": {"chair": "Chair", "manager": "Manager", "clerk": "Clerk"}, "rules": []},
         "solo": {"sphere": "commerce", "head": "owner", "unit_leader": None, "courtship_scan": True,
                  "labels": {"owner": "Owner", "hand": "Hand"}, "rules": []},

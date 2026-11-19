@@ -4759,8 +4759,12 @@ def _migration_117(conn: sqlite3.Connection) -> None:
                SELECT id,'envelope',officer_actor_id,'org',payer_outfit_actor_id,position_key,weekly_usd,bagman_actor_id,status,started_day,ended_day FROM pad_envelopes ORDER BY id""")
         for table in ("outfit_money", "outfit_lines", "outfit_ranks", "outfit_agenda", "outfit_incidents", "pad_envelopes", "outfit_holdings", "outfit_crews"):
             conn.execute(f"DROP TABLE {table}")
-    from .world_package import outfit_rules, package_for
-    for key, spec in (outfit_rules(package_for(conn)).get("outfits") or {}).items():
+    from .world_package import WorldPackageError, outfit_rules, package_for
+    try:
+        outfits = outfit_rules(package_for(conn)).get("outfits") or {}
+    except WorldPackageError:  # a package that cannot be loaded declares no outfits
+        outfits = {}
+    for key, spec in outfits.items():
         row = conn.execute("SELECT id FROM actors WHERE name=? AND actor_type='institution'", (spec["institution"],)).fetchone()
         if row is not None:
             conn.execute("INSERT OR IGNORE INTO org_profiles(org_actor_id,org_kind,sphere,package_key) VALUES (?,?,'underworld',?)",

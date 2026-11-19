@@ -5,8 +5,8 @@ pool); a family's holdings are split over its crews, and each crew's slices over
 Every line has a holder, a description and a place. Other outfits hold one line per working man.
 
 The periodic posting (take in from outside, then up the Ladder) lives in `org_money.post_period`, driven by the
-package's orgs.json; this module keeps the opening builders, the design figures and the Pad flow (`post_pad`, named
-in orgs.json `flow_handlers`).
+package's orgs.json, and the envelopes of the Pad by `org_money.post_arrangements`; this module keeps the opening
+builders and the design figures.
 """
 from __future__ import annotations
 
@@ -15,9 +15,7 @@ import random
 import sqlite3
 from collections import defaultdict
 
-from . import ledger
 from .design import figure, run_seed
-from .org_money import MIN_ROW
 from .outfit_opening import outfit_actor
 from .world_package import outfit_rules, package_for, system_enabled
 
@@ -182,65 +180,3 @@ def build_holdings(conn: sqlite3.Connection, day: int | None = None) -> dict[str
         if spec["shape"] != "family":
             out[key] = _build_other(conn, key, spec, day, seed)
     return out
-
-
-def post_pad(conn: sqlite3.Connection, day: int, days: int, ctx: dict) -> float:
-    """The Pad: every active envelope is paid out of the paying family's capos' purses through a bagman.
-
-    Each family's capos pay what the family owes in proportion to their regimes' take (the take posted this period by
-    their men and themselves); a bagman collects the envelopes of his group, keeps his own and hands the rest to the
-    officers. One row per payer, payee and kind: capo to bagman, bagman to officer. The amount returned is what the
-    families paid out (the envelopes' total), not the bagmen's onward hand-offs."""
-    rows = conn.execute(
-        """SELECT e.* FROM org_arrangements e WHERE e.status='active' AND e.started_day<=? AND (e.ended_day IS NULL OR e.ended_day>?)
-           ORDER BY e.id""", (int(day), int(day))).fetchall()
-    if not rows:
-        return 0.0
-    ros = ctx["roster"]
-    alive = {int(r[0]) for r in conn.execute(
-        """SELECT a.id FROM actors a LEFT JOIN actor_life_profiles lp ON lp.actor_id=a.id
-           WHERE a.id IN (%s) AND lower(COALESCE(a.status,'active')) NOT IN ('dead','deceased','historical')
-             AND COALESCE(lp.life_status,'living')='living'""" % ",".join(str(int(e["official_actor_id"])) for e in rows))}
-    # who collects each officer's envelope: his bagman when the bagman lives, else the officer himself
-    owed: dict[tuple[int, int], float] = defaultdict(float)  # (paying family, collector) -> amount for the period
-    onward: dict[tuple[int, int], float] = defaultdict(float)  # (collector, officer) -> amount handed on
-    onward_org: dict[tuple[int, int], int] = {}  # (collector, officer) -> the paying outfit whose books carry the hand-off
-    for e in rows:
-        officer, bag = int(e["official_actor_id"]), e["go_between_actor_id"]
-        if officer not in alive:
-            continue  # the Pad pays the position, but there is no one to hand the envelope to until a man sits in it
-        amount = float(e["weekly_usd"]) * days / 7.0
-        collector = int(bag) if bag is not None and int(bag) in alive else officer
-        owed[(int(e["payer_id"]), collector)] += amount
-        if collector != officer:
-            onward[(collector, officer)] += amount
-            onward_org.setdefault((collector, officer), int(e["payer_id"]))
-    # regime weights: the take each capo's regime brought in this period
-    regime: dict[int, dict[int, float]] = defaultdict(lambda: defaultdict(float))
-    for _, earner, amount, _line, oid in ctx["entries"]["take"]:
-        capo = ros.unit_leader(int(earner), oid)
-        if capo is None or not ros.alive(capo, oid):
-            capo = ros.head(oid)
-        if capo is not None:
-            regime[oid][int(capo)] += float(amount)
-    paid_out = 0.0
-    pay_rows: list[tuple] = []
-    for (family, collector), amount in sorted(owed.items()):
-        weights = regime.get(family) or ({ros.head(family): 1.0} if ros.head(family) is not None else {})
-        if not weights:
-            continue
-        total = sum(weights.values())
-        for capo, w in sorted(weights.items()):
-            part = amount * w / total
-            if part < MIN_ROW or capo == collector:
-                continue
-            got = ledger.transfer(conn, ("person", capo), ("person", collector), part, flow_kind="bribe", purpose="the Pad", allow_partial=True)
-            if got > 0:
-                paid_out += got
-                pay_rows.append((int(day), "pad", capo, collector, None, got, family))
-    for (collector, officer), amount in sorted(onward.items()):
-        got = ledger.transfer(conn, ("person", collector), ("person", officer), amount, flow_kind="bribe", purpose="the Pad", allow_partial=True)
-        if got > 0:
-            pay_rows.append((int(day), "pad", collector, officer, None, got, onward_org.get((collector, officer))))
-    conn.executemany("INSERT INTO org_money(day,kind,from_actor_id,to_actor_id,line_id,amount,org_actor_id) VALUES (?,?,?,?,?,?,?)", pay_rows)
-    return paid_out

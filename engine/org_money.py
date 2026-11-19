@@ -4,12 +4,12 @@ Sphere-free: roles, flows and the rules that move money between roles come from 
 "_doc"). Every `period_days` from the opening, `post_period` brings each line's take in from outside (`ledger.receive`,
 the only money organisations ever gain) and then moves it between existing purses with `ledger.transfer`, stage by
 stage so every man holds what he passes on before he passes it. Each movement is one `org_money` row. Nothing is created
-or lost inside the organisations. A flow with its own function (`flow_handlers` in orgs.json) is posted by that function.
+or lost inside the organisations. Arrangements with an official (`org_arrangements`) are posted after the stages, by
+`post_arrangements`, in the flow their kind names in orgs.json `arrangement_kinds`.
 """
 from __future__ import annotations
 
 import hashlib
-import importlib
 import sqlite3
 from collections import defaultdict
 
@@ -102,6 +102,26 @@ class Roster:
                 return cur
             cur = int(r["superior_actor_id"]) if r["superior_actor_id"] is not None else None
         return None
+
+    def purse_holder(self, actor_id: int, org: int) -> int | None:
+        """Who pays for this man's regime: himself or the first holder of a purse role up his chain of superiors,
+        when he is alive; else the head. None when no one is alive to pay."""
+        roles = set(self.kinds.get(int(org), {}).get("purse_roles") or [])
+        seen: set[int] = set()
+        cur: int | None = int(actor_id)
+        found: int | None = None
+        while roles and cur is not None and cur not in seen:
+            seen.add(cur)
+            r = self.seats.get((cur, int(org)))
+            if r is None:
+                break
+            if r["role_key"] in roles:
+                found = cur
+                break
+            cur = int(r["superior_actor_id"]) if r["superior_actor_id"] is not None else None
+        if found is not None and self.alive(found, org):
+            return found
+        return self.head(org)
 
     def earner(self, actor_id: int | None, org: int) -> int | None:
         """The man who earns on this man's behalf: himself, else his unit leader, else the head; None if no one."""
@@ -316,12 +336,6 @@ _RULES = {
 }
 
 
-def _handler(name: str):
-    """A flow's own posting function from orgs.json flow_handlers ("module:function" under the engine package)."""
-    module, _, fn = name.partition(":")
-    return getattr(importlib.import_module(f".{module}", __package__), fn)
-
-
 def post_period(conn: sqlite3.Connection, day: int, days: int) -> dict[str, float]:
     """Post one period: bring the take in, move it up by the kinds' rules. Returns the amount by flow (plus "rows"
     and "unearned_lines", the lines left out because nobody alive could earn on them)."""
@@ -380,7 +394,122 @@ def post_period(conn: sqlite3.Connection, day: int, days: int) -> dict[str, floa
             entries_by_flow[flow].append((src, dst, amount, line_id, org))
     conn.executemany("INSERT INTO org_money(day,kind,from_actor_id,to_actor_id,line_id,amount,org_actor_id) VALUES (?,?,?,?,?,?,?)", rows)
     out["rows"] = float(len(rows))
-    ctx = {"roster": ros, "entries": entries_by_flow}
-    for flow, name in (rules.get("flow_handlers") or {}).items():
-        out[flow] = float(_handler(name)(conn, day, days, ctx))
+    paid: dict[str, float] = {}
+    post_arrangements(conn, day, days, ros, take_entries=entries_by_flow.get(inflow, []), by_flow=paid)
+    for flow, amount in paid.items():
+        out[flow] = out.get(flow, 0.0) + amount
     return out
+
+
+# ---- arrangements with an official ----
+
+def add_arrangement(conn: sqlite3.Connection, *, kind: str, payer_kind: str, payer_id: int, official_actor_id: int,
+                    weekly_usd: float, day: int, go_between_actor_id: int | None = None, position_key: str = "") -> int:
+    """An active arrangement: `payer_id` (an organisation or a person, by `payer_kind` 'org' | 'actor') pays the official
+    `weekly_usd` a week, through the go-between when there is one. Returns its id."""
+    if payer_kind not in ("org", "actor"):
+        raise ValueError(f"payer_kind must be 'org' or 'actor', not {payer_kind!r}")
+    return int(conn.execute(
+        """INSERT INTO org_arrangements(kind,official_actor_id,payer_kind,payer_id,position_key,weekly_usd,go_between_actor_id,status,started_day)
+           VALUES (?,?,?,?,?,?,?,'active',?)""",
+        (kind, int(official_actor_id), payer_kind, int(payer_id), position_key, float(weekly_usd),
+         None if go_between_actor_id is None else int(go_between_actor_id), int(day))).lastrowid)
+
+
+def _living(conn: sqlite3.Connection, ids: set[int]) -> set[int]:
+    if not ids:
+        return set()
+    return {int(r[0]) for r in conn.execute(
+        """SELECT a.id FROM actors a LEFT JOIN actor_life_profiles lp ON lp.actor_id=a.id
+           WHERE a.id IN (%s) AND lower(COALESCE(a.status,'active')) NOT IN ('dead','deceased','historical')
+             AND COALESCE(lp.life_status,'living')='living'""" % ",".join(str(i) for i in ids))}
+
+
+def post_arrangements(conn: sqlite3.Connection, day: int, days: int, roster: Roster, *,
+                      take_entries: list[tuple] | None = None, by_flow: dict[str, float] | None = None) -> float:
+    """Post every active arrangement for `days`: `weekly_usd * days / 7`, in the flow its kind names in orgs.json
+    `arrangement_kinds` ({flow, ledger_kind, purpose}).
+
+    An organisation pays from the holders of its kind's `purse_roles`, each in proportion to the take of the men under
+    him posted this period (`take_entries`, (from, to, amount, line, org) tuples as post_period builds them); with
+    no purse roles, or no take, the head pays. A person pays from his own purse. A payer who is not alive posts nothing
+    and the arrangement lapses; an official who is not alive is skipped (the position is still paid, to whoever sits in
+    it next). Each amount goes through the go-between when he is alive (payer to go-between to official, one row per
+    hop), else straight to the official. Returns what the payers paid out (the first hop; the officials' total when
+    nothing is held back by thin purses); `by_flow`, when given, gets that amount added under the kind's flow."""
+    rows = conn.execute(
+        """SELECT * FROM org_arrangements WHERE status='active' AND started_day<=? AND (ended_day IS NULL OR ended_day>?) ORDER BY id""",
+        (int(day), int(day))).fetchall()
+    if not rows:
+        return 0.0
+    kinds = _rules(conn).get("arrangement_kinds") or {}
+    for e in rows:
+        if e["kind"] not in kinds:
+            raise ValueError(f"arrangement kind {e['kind']!r} is not declared in the package's orgs.json arrangement_kinds")
+    people = {int(e["official_actor_id"]) for e in rows} | {int(e["payer_id"]) for e in rows if e["payer_kind"] == "actor"} \
+        | {int(e["go_between_actor_id"]) for e in rows if e["go_between_actor_id"] is not None}
+    alive = _living(conn, people)
+    weight: dict[int, dict[int, float]] = defaultdict(lambda: defaultdict(float))  # org -> purse holder -> take this period
+    for _src, earner, amount, _line, org in take_entries or []:
+        holder = roster.purse_holder(int(earner), int(org))
+        if holder is not None:
+            weight[int(org)][holder] += float(amount)
+
+    def payers_of(org: int) -> dict[int, float]:
+        head = roster.head(org)
+        return dict(weight.get(org) or ({head: 1.0} if head is not None else {}))
+
+    def book_org(actor_id: int) -> int | None:
+        seats = [int(r[0]) for r in conn.execute("SELECT org_actor_id FROM org_seats WHERE actor_id=? AND status='active'", (int(actor_id),))]
+        return seats[0] if len(seats) == 1 else None
+
+    owed: dict[tuple[str, int, int, str], float] = defaultdict(float)  # (payer kind, payer, collector, kind) -> amount
+    onward: dict[tuple[int, int, str], float] = defaultdict(float)  # (collector, official, kind) -> amount handed on
+    onward_org: dict[tuple[int, int, str], int | None] = {}  # whose books carry the hand-off
+    lapse: list[int] = []
+    for e in rows:
+        official, bag = int(e["official_actor_id"]), e["go_between_actor_id"]
+        if official not in alive:
+            continue
+        pk, pid = e["payer_kind"], int(e["payer_id"])
+        if (pk == "actor" and pid not in alive) or (pk == "org" and not payers_of(pid)):
+            lapse.append(int(e["id"]))
+            continue
+        amount = float(e["weekly_usd"]) * days / 7.0
+        collector = int(bag) if bag is not None and int(bag) in alive else official
+        owed[(pk, pid, collector, e["kind"])] += amount
+        if collector != official:
+            onward[(collector, official, e["kind"])] += amount
+            onward_org.setdefault((collector, official, e["kind"]), pid if pk == "org" else book_org(pid))
+    paid_out = 0.0
+    pay_rows: list[tuple] = []
+
+    def pay(src: int, dst: int, amount: float, kind: str, org: int | None) -> float:
+        spec = kinds[kind]
+        got = ledger.transfer(conn, ("person", src), ("person", dst), amount, flow_kind=spec["ledger_kind"],
+                              purpose=str(spec.get("purpose") or kind), allow_partial=True)
+        if got > 0:
+            pay_rows.append((int(day), spec["flow"], src, dst, None, got, org))
+        return got
+
+    for (pk, pid, collector, kind), amount in sorted(owed.items()):
+        if pk == "actor":
+            parts = {pid: 1.0}
+            where = book_org(pid)
+        else:
+            parts, where = payers_of(pid), pid
+        total = sum(parts.values())
+        for holder, share in sorted(parts.items()):
+            part = amount * share / total
+            if part < MIN_ROW or holder == collector:
+                continue
+            got = pay(holder, collector, part, kind, where)
+            paid_out += got
+            if by_flow is not None:
+                by_flow[kinds[kind]["flow"]] = by_flow.get(kinds[kind]["flow"], 0.0) + got
+    for (collector, official, kind), amount in sorted(onward.items()):
+        pay(collector, official, amount, kind, onward_org.get((collector, official, kind)))
+    conn.executemany("INSERT INTO org_money(day,kind,from_actor_id,to_actor_id,line_id,amount,org_actor_id) VALUES (?,?,?,?,?,?,?)", pay_rows)
+    for i in lapse:
+        conn.execute("UPDATE org_arrangements SET status='lapsed', ended_day=? WHERE id=?", (int(day), i))
+    return paid_out

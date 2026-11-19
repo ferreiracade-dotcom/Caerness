@@ -487,8 +487,8 @@ def _build_pad(conn: sqlite3.Connection, rules: dict, oc: dict, day: int, heads:
                     s["bagman"] = None
     payer = {f: outfit_actor(conn, oc["outfits"][f]["institution"]) for f in fams}
     conn.executemany(
-        "INSERT INTO org_arrangements(kind,official_actor_id,payer_kind,payer_id,position_key,weekly_usd,go_between_actor_id,status,started_day) VALUES ('envelope',?,'org',?,?,?,?,'active',?)",
-        [(s["officer"], payer[s["family"]], f"{s['precinct']}:{s['tier']}:{s['n']}", weekly[s["tier"]], s.get("bagman"), day)
+        "INSERT INTO org_arrangements(kind,official_actor_id,payer_kind,payer_id,position_key,weekly_usd,go_between_actor_id,status,started_day) VALUES (?,?,'org',?,?,?,?,'active',?)",
+        [(pad["arrangement_kind"], s["officer"], payer[s["family"]], f"{s['precinct']}:{s['tier']}:{s['n']}", weekly[s["tier"]], s.get("bagman"), day)
          for s in sorted(slots, key=lambda x: (x["precinct"], x["tier"], x["n"]))])
     return {"pad_officers": len(slots), "pad_precincts": len(primary),
             "pad_bagmen": len({s["bagman"] for s in slots if s.get("bagman") is not None})}

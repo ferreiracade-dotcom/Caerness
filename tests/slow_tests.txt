@@ -1,0 +1,9 @@
+# Tests skipped by `tools/run_suite.py --quick` (each over 60 s in the 2026-11 full run). Run the full suite before shipping.
+world_pushes_back_test          # ~18 min
+v26_candidate_scale_test        # ~18 min
+arch01_process_registry_test    # ~7 min
+underworld_rackets_assets_test  # ~4.5 min
+schema115_test                  # ~4.5 min
+saintjude_leak_scan_test        # ~3 min
+saintjude_connector_play_test   # ~2.5 min
+arch02_scheduler_chunk_invariance_test  # ~1.5 min
