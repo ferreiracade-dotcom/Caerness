@@ -101,7 +101,7 @@ Core work, in priority order:
 7. **Knowledge firewall.** The GM's views show what the protagonist knows. The engine's hidden truth (hidden lines, informants, plans) is reached through investigations it settles.
 8. **Time budget.** Each new layer carries a cost budget per simulated day, and long skips stay fast.
 
-**Real people.** Real public figures (artists, athletes, national and state politicians, celebrities) appear as fully as possible in their real public roles, and push on events. Limits: no invented crimes, scandals or private wrongdoing for a real person (shady acts belong to fictional characters only); their appearances fit the public record of where they were and what they did in that year. Saint Jude's own local officials are fictional, as the city is.
+**Real people.** Real public figures (artists, athletes, national and state politicians, celebrities) appear as fully as possible in their real public roles, and push on events. The run is an **alternate timeline**: each real figure starts from who they really were in that year (career, standing, character), then the run may diverge (an added tour date, a different political fight) when the world gives them reason to. Dated real events happen by default unless the run plausibly changes them. One limit: no invented crimes, scandals or private wrongdoing for a real person; shady acts belong to fictional characters only. Saint Jude's own local officials are fictional, as the city is.
 
 **Conscience follows the character, not the owner.** The engine models the protagonist's own beliefs and temperament. Inner costs (guilt, confession, a strained marriage, hardening over time) follow who he is, and they can change over a life.
 
