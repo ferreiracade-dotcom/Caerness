@@ -48,6 +48,18 @@ The owner asked for the generic/specific split "only if best for the engine". It
 
 ## 5. The design
 
+### 5.0 Engine, layers, packages (agreed 2026-11-19)
+
+Almost everything in this document is engine work, not Saint Jude work. The three spheres are reusable layers that Saint Jude is simply the first to use. Three tiers:
+
+1. **Core (every world):** people in organisations (§5.1); B/C depth and the flag for where play is heading; shared drivers, ventures, property and places (§5.2a); deals ledger, orders, time-skips with routine and interrupts, goals within competence, recording what is named, the knowledge firewall, time budget, conscience per character (§5.2b); widening circles and the dated timeline; the real-figures and hindsight rules wherever a world uses real history.
+2. **Layers (reusable, switched on per world in the manifest's `systems`):** business (companies, contracts, markets); politics as **offices and how they are filled** (election, appointment, inheritance, purchase, seizure come from data, so a 1975 alderman and a medieval duke sit on one layer); underworld (rackets, payoffs, protection, so a thieves' guild or a football agent's bungs use it too); later sport (season, matches, transfers) and war.
+3. **Package (one world):** bible, the actual organisations and people, real figures for its era, prices, sex ratios, manners, which layers are on, and its circles as data (Saint Jude: city, New Jersey, US, world; football: club, league, country, Europe; medieval: manor, duchy, kingdom).
+
+Checked: football is core + business + sport, with light politics and underworld; medieval is core + politics + business + war + underworld.
+
+**World-only code lives in its package.** The engine never names a world. A package may carry its own rule code (e.g. `worlds/saintjude/rules/`), listed in its manifest, plugged into points the engine offers (opening builders, choices, money flows, law kinds). Mechanisms that would serve another world stay in the engine as layers; only one world's content moves. For Saint Jude this means `outfit_opening.py`, `law_opening.py` and any other Saint-Jude-only builder move into the package, done with the org-core refactor while the branch is unshipped (the builder chooses the hook mechanism). **Caerness is shelved for now** and its world-only code (cultivation, elixir, Hollow, groundbinding) stays where it is. Caerness is the eventual final package where the layers built for the other worlds come together, so it gets moved when that work begins.
+
 ### 5.1 The core (world-agnostic, `engine/orgs*.py`)
 
 Rename and generalise the outfit tables in one migration (schema 117): `outfit_*` → `org_*`, `pad_envelopes` → `org_arrangements`.
