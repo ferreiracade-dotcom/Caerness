@@ -283,10 +283,6 @@
   "banks": 0.99,
   "pad_officer": 0.99
  },
- "cadence_days": {
-  "4": 1,
-  "3": 7
- },
  "executive_share_of_boss_receipts": "executive_share",
  "induction": {
   "father_name_group": "italian",
@@ -319,7 +315,7 @@
   "bolita_tax": "a tax on the bolita banks",
   "drugs_by_dial_and_ground": "a drug market on the family's ground"
  },
- "note": "Every count, share and cadence not printed in the bible is a Design proposal in design_figures.json, referred to here by figure key. male_share, cadence_days and induction values are Design proposals recorded here (Part I 12.4: women never inducted; the rest unsourced). Ground names are rows of the Saint Jude locations table, from Part III 4.0-4.4 and the gazetteer. Motives are added in Tasks 10 and 11.",
+ "note": "Every count, share and cadence not printed in the bible is a Design proposal in design_figures.json, referred to here by figure key. male_share and induction values (cadence_days now lives in orgs.json) are Design proposals recorded here (Part I 12.4: women never inducted; the rest unsourced). Ground names are rows of the Saint Jude locations table, from Part III 4.0-4.4 and the gazetteer. Motives are added in Tasks 10 and 11.",
  "connected": [
   {
    "institution": "First Harbor National Bank",

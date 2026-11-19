@@ -732,16 +732,20 @@ def _resolve_social_contacts(conn: sqlite3.Connection, day: int) -> int:
         changed+=1
 
     # At most one new institutional contact per single eligible actor per annual review window.
+    from .world_package import org_rules, package_for
+    scan_kinds=[k for k,v in (org_rules(package_for(conn)).get("kinds") or {}).items() if v.get("courtship_scan")]
     candidates=conn.execute("""SELECT lp.actor_id,lp.birth_day,im.institution_actor_id,a.current_location_id
         FROM actor_life_profiles lp JOIN actors a ON a.id=lp.actor_id
         JOIN institution_memberships im ON im.member_actor_id=lp.actor_id AND im.status='active'
         WHERE lp.life_status='living' AND lp.life_stage='adult' AND lp.family_formation_eligible=1
           AND a.status='active' AND a.actor_type='character'
           AND NOT EXISTS (SELECT 1 FROM household_unions u WHERE u.status='active' AND (u.actor_a_id=lp.actor_id OR u.actor_b_id=lp.actor_id))
-          -- An outfit's hundreds of members are not a courtship pool: this pairwise scan is quadratic per institution and
-          -- ran daily (28 s a day at the Saint Jude opening). Outfit men meet people through their own lives, not here.
-          AND NOT EXISTS (SELECT 1 FROM org_seats o WHERE o.actor_id=lp.actor_id)
-        ORDER BY im.institution_actor_id,lp.actor_id""").fetchall()
+          -- An organisation's hundreds of members are not a courtship pool: this pairwise scan is quadratic per institution
+          -- and ran daily (28 s a day at the Saint Jude opening). Members of a kind whose courtship_scan is false (orgs.json)
+          -- meet people through their own lives, not here.
+          AND NOT EXISTS (SELECT 1 FROM org_seats o LEFT JOIN org_profiles op ON op.org_actor_id=o.org_actor_id
+                          WHERE o.actor_id=lp.actor_id AND (op.org_kind IS NULL OR op.org_kind NOT IN (%s)))
+        ORDER BY im.institution_actor_id,lp.actor_id""" % (",".join("?"*len(scan_kinds)) if scan_kinds else "NULL"),tuple(scan_kinds)).fetchall()
     by_inst={}
     for r in candidates: by_inst.setdefault(int(r['institution_actor_id']),[]).append(r)
     already=set()

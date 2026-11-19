@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tests.sj_fixture import build_saintjude, connect
-from engine import outfits
+from engine import orgs
 from engine.simulation import advance_connection, current_day
 
 
@@ -63,7 +63,7 @@ def test_agenda_item_makes_a_weekly_man_daily_until_it_passes():
         "SELECT o.actor_id FROM org_seats o JOIN simulation_profiles p ON p.actor_id=o.actor_id "
         "WHERE o.role_key='soldier' AND p.cadence_days=7 ORDER BY o.actor_id LIMIT 1").fetchone()[0])
     today = current_day(conn)
-    aid = outfits.add_agenda(conn, soldier, "collect_debt", due_day=today + 5)
+    aid = orgs.add_agenda(conn, soldier, "collect_debt", due_day=today + 5)
     seen: list[int] = []
     for _ in range(25):
         advance_connection(conn, 1)
@@ -74,15 +74,15 @@ def test_agenda_item_makes_a_weekly_man_daily_until_it_passes():
     due_plus = today + 5 + 7
     after = [d for d in seen if d > due_plus]
     assert len(after) >= 2 and after[1] - after[0] == 7, seen
-    assert outfits.has_reason_to_choose(conn, soldier, today + 5)
-    outfits.resolve_agenda(conn, aid, today + 6)
-    assert not outfits.has_reason_to_choose(conn, soldier, today + 6)
+    assert orgs.has_reason_to_choose(conn, soldier, today + 5)
+    orgs.resolve_agenda(conn, aid, today + 6)
+    assert not orgs.has_reason_to_choose(conn, soldier, today + 6)
 
 
 def test_reason_check_registration_is_idempotent():
-    n = len(outfits._REASON_CHECKS)
-    outfits.register_reason_check(outfits._open_agenda_due)
-    assert len(outfits._REASON_CHECKS) == n
+    n = len(orgs._REASON_CHECKS)
+    orgs.register_reason_check(orgs._open_agenda_due)
+    assert len(orgs._REASON_CHECKS) == n
 
 
 def _fingerprint(conn):

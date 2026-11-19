@@ -11,7 +11,8 @@ import sqlite3
 
 from . import facts
 from .design import figure, run_seed
-from .outfits import add_member, clamp01
+from . import orgs
+from .orgs import clamp01
 from .person_ecology import resolve_background_people
 from .relationships import ensure_relationship
 from .world_package import outfit_rules, package_for, system_enabled
@@ -47,6 +48,10 @@ def outfit_actor(conn: sqlite3.Connection, institution: str) -> int:
     if row is None:
         raise RuntimeError(f"outfit institution {institution!r} is not an actor in this opening")
     return int(row[0])
+
+
+def _seat(conn: sqlite3.Connection, actor_id: int, org_actor_id: int, role_key: str, **kw) -> int:
+    return orgs.seat(conn, actor_id, org_actor_id, role_key, provenance="outfit opening", **kw)
 
 
 def write_profile(conn: sqlite3.Connection, key: str, spec: dict, outfit_id: int) -> None:
@@ -165,8 +170,8 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
         seat[rank] = got[0]
     boss = seat["boss"]
     for rank in execs:
-        add_member(conn, seat[rank], outfit_id, rank, crew_id=None, superior_actor_id=None if rank == "boss" else boss, level=4,
-                   day=day, made_day=made_day_for(conn, seat[rank], day, rng))
+        _seat(conn, seat[rank], outfit_id, rank, unit_id=None, superior_actor_id=None if rank == "boss" else boss, level=4,
+              day=day, inducted_day=made_day_for(conn, seat[rank], day, rng))
         if rank != "boss":
             feelings_toward(conn, seat[rank], boss, day, rng)
         _fill_open_seat(conn, inst, rank, seat[rank])
@@ -183,8 +188,8 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
             "INSERT INTO org_units(org_actor_id,leader_actor_id,label,ground_location_id,created_day) VALUES (?,?,?,?,?)",
             (outfit_id, capo, f"{surname} crew", grounds[i % len(grounds)] if grounds else None, day)).lastrowid)
         crews.append(crew)
-        add_member(conn, capo, outfit_id, "capo", crew_id=crew, superior_actor_id=boss, level=4, day=day,
-                   made_day=made_day_for(conn, capo, day, rng))
+        _seat(conn, capo, outfit_id, "capo", unit_id=crew, superior_actor_id=boss, level=4, day=day,
+              inducted_day=made_day_for(conn, capo, day, rng))
         feelings_toward(conn, capo, boss, day, rng)
 
     # Soldiers dealt to the crews round-robin in a seeded order.
@@ -194,8 +199,8 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
     made_men: list[tuple[int, int]] = [(c, cr) for c, cr in zip(capos, crews)]
     for i, s in enumerate(soldiers):
         capo, crew = capos[i % len(capos)], crews[i % len(crews)]
-        add_member(conn, s, outfit_id, "soldier", crew_id=crew, superior_actor_id=capo, level=3, day=day,
-                   made_day=made_day_for(conn, s, day, rng))
+        _seat(conn, s, outfit_id, "soldier", unit_id=crew, superior_actor_id=capo, level=3, day=day,
+              inducted_day=made_day_for(conn, s, day, rng))
         feelings_toward(conn, s, capo, day, rng)
         made_men.append((s, crew))
 
@@ -212,8 +217,8 @@ def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
     rng.shuffle(patrons)
     for i, a in enumerate(assoc):
         sup, crew = patrons[i % len(patrons)]
-        add_member(conn, a, outfit_id, "associate", crew_id=crew, superior_actor_id=sup, level=3, day=day,
-                   standing=clamp01(rng.gauss(0.3, 0.2)))
+        _seat(conn, a, outfit_id, "associate", unit_id=crew, superior_actor_id=sup, level=3, day=day,
+              standing=clamp01(rng.gauss(0.3, 0.2)))
         feelings_toward(conn, a, sup, day, rng)
 
     return {"counts": {"boss": 1, "underboss": 1, "consigliere": 1, "capo": len(capos), "soldier": len(soldiers), "associate": len(assoc)},
@@ -263,7 +268,7 @@ def build_outfit(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, da
                 sup = members["officer"][i % len(members["officer"])]
             elif shape == "handful" and rank != top and members[top]:
                 sup = members[top][0]
-            add_member(conn, a, outfit_id, rank, crew_id=None, superior_actor_id=sup, level=int(r["level"]), day=day)
+            _seat(conn, a, outfit_id, rank, unit_id=None, superior_actor_id=sup, level=int(r["level"]), day=day)
             if sup is not None:
                 feelings_toward(conn, a, sup, day, rng)
             elif shape == "loyalties" and rank == "young":  # no chain of command: an older man got him the job

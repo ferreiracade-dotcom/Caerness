@@ -3,10 +3,10 @@
 Everything is read from the package's law data (`law_rules`) and outfit data (`outfit_rules`): jurisdictions, rules,
 agencies (one `law_enforcement_profiles` row each, plus a `law_offices` row), the level-4 seats the underworld must deal
 with, the connected people the setting ties to the outfits, and the Pad: an envelope for each of `pad_officers`
-officers, paid from the families' purses through a bagman (the money moves in `outfit_money.post_period`).
+officers, paid from the families' purses through a bagman (the money moves in `org_money.post_period`).
 
 Every person is pulled up from the city's background population (never a new actor row). Level 4 people are
-reviewed daily, level 3 weekly, both on a quiet routine (`outfits.set_level`). Open seats are filled with
+reviewed daily, level 3 weekly, both on a quiet routine (`orgs.set_level`). Open seats are filled with
 `facts.fill_open`. No world-specific word or number lives here: names, titles and figures come from package data.
 """
 from __future__ import annotations
@@ -21,7 +21,7 @@ from . import facts
 from .design import figure, run_seed
 from .law import add_rule, create_jurisdiction, create_office
 from .outfit_opening import city_location, feelings_toward, outfit_actor, pull_up
-from .outfits import boss_of, give_personality, set_level
+from .orgs import give_personality, head_of, set_level
 from .world_package import law_rules, outfit_rules, package_for, system_enabled
 
 OFFICIAL_AGES = (40, 65)
@@ -264,15 +264,9 @@ def _pull_slots(conn: sqlite3.Connection, stream: str, slots: list[dict], ages: 
     return out
 
 
-def head_of(conn: sqlite3.Connection, outfit_key: str, spec: dict) -> int | None:
-    """The man at the top of an outfit: a family's boss, otherwise the first man of its top rank."""
-    oid = outfit_actor(conn, spec["institution"])
-    if spec.get("shape") == "family":
-        return boss_of(conn, oid)
-    top = next(iter(spec["ranks"]))
-    r = conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active' ORDER BY actor_id LIMIT 1",
-                     (oid, top)).fetchone()
-    return int(r[0]) if r else None
+def outfit_head(conn: sqlite3.Connection, outfit_key: str, spec: dict) -> int | None:
+    """The man at the top of an outfit: the first active holder of its kind's head role."""
+    return head_of(conn, outfit_actor(conn, spec["institution"]))
 
 
 def _create_institution(conn: sqlite3.Connection, name: str, domain: str, note: str) -> int:
@@ -364,7 +358,7 @@ def _fill_connected(conn: sqlite3.Connection, oc: dict, day: int, used: set[int]
         c, a = p["c"], p["aid"]
         _seat(conn, a, p["inst"], c["role_text"], "connected", day)
         if c.get("tied_to"):
-            boss = head_of(conn, c["tied_to"], oc["outfits"][c["tied_to"]])
+            boss = outfit_head(conn, c["tied_to"], oc["outfits"][c["tied_to"]])
             if boss is not None and boss != a:
                 feelings_toward(conn, a, boss, day, _rng(conn, f"connected:tie:{a}"))
     return {"connected": len(plan)}

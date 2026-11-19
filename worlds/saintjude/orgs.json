@@ -1,0 +1,52 @@
+{
+ "_doc": {
+  "what": "Organisation roles and money flows for the world package (engine/orgs.py and engine/org_money.py read this; they hold no role words).",
+  "kinds": "One entry per org_profiles.org_kind (the outfit shape). head: the role of the organisation's top seat. unit_leader: the role that leads a unit (null: no units, a dead earner's line passes straight to the head). labels: role_key to the title used in the membership text ('<label> in the <org>'). courtship_scan: whether the household courtship scan may pair these members (false: the organisation is not a courtship pool). purse_roles and inducted_label are carried for later tasks.",
+  "orgs": "Per-organisation additions keyed by org_profiles.package_key (the outfit key): 'rules' are appended to the kind's rules.",
+  "flows": "Ordered flow names written to org_money.kind. The first is the inflow from outside (posted with ledger.receive); every other flow is a transfer between purses. ledger_kinds maps a flow to its ledger flow_kind; ledger_purpose is the ledger purpose text ({flow} is the flow name). flow_handlers: a flow posted by its own function 'module:function' under the engine package, called as fn(conn, day, days, ctx) -> float after the stages below.",
+  "rules": "Per-kind lists applied in order. Each rule has a type, a flow, a stage (int; transfers are applied stage by stage, so a man holds what he passes on) and roles. A share is {figure, default}: a design figure key and the value used when the package has no such figure. Types: paid_by_patron (members in roles are paid out of the take of the man they work under, i.e. the earner of their superior: living = a yearly sum (the person's net of the return share), cap = the largest share of the patron's take paid out, reliability spreads the pay, return_share goes straight back to the patron as the return_flow); to_superior (members in roles who earn pass a share of net take to the earner over them); regime_to_head (members in roles pass a share of their own net take plus what to_superior sent them to the head); head_share (the head's receipts from to_superior and regime_to_head are shared out to members in roles); to_head_pick (every earner outside the head role passes share of take to a head chosen by a stable hash, tag); to_head_via_superior (as to_head_pick but to the earner's superior when he holds the head role; the earner keeps 'keep' of it); to_first_head (every earner outside the head role passes share of take to the first head)."
+ },
+ "period_days": 28,
+ "cadence_days": {"4": 1, "3": 7},
+ "flows": ["take", "associate_earning", "kickup", "executive_share", "pad"],
+ "ledger_kinds": {"associate_earning": "wage", "kickup": "tribute", "executive_share": "share"},
+ "ledger_purpose": "outfit {flow}",
+ "flow_handlers": {"pad": "outfit_money:post_pad"},
+ "arrangement_kinds": {"envelope": {"flow": "pad"}},
+ "kinds": {
+  "family": {
+   "sphere": "underworld", "head": "boss", "unit_leader": "capo", "purse_roles": ["capo"], "inducted_label": "made", "courtship_scan": false,
+   "labels": {"boss": "Boss", "underboss": "Underboss", "consigliere": "Consigliere", "capo": "Capo", "soldier": "Soldier", "associate": "Associate"},
+   "rules": [
+    {"type": "paid_by_patron", "flow": "associate_earning", "stage": 1, "roles": ["associate"], "return_flow": "kickup", "return_stage": 2,
+     "living": {"figure": "living_associate", "default": 7500.0},
+     "return_share": {"figure": "ladder_associate_to_soldier", "default": 0.225},
+     "cap": {"figure": "associate_pay_cap", "default": 0.5}},
+    {"type": "to_superior", "flow": "kickup", "stage": 3, "roles": ["soldier"], "share": {"figure": "ladder_soldier_to_capo", "default": 0.183}},
+    {"type": "regime_to_head", "flow": "kickup", "stage": 3, "roles": ["capo"], "share": {"figure": "ladder_capo_to_boss", "default": 0.117}},
+    {"type": "head_share", "flow": "executive_share", "stage": 4, "roles": ["underboss", "consigliere"], "share": {"figure": "executive_share", "default": 0.25}}
+   ]
+  },
+  "loyalties": {
+   "sphere": "underworld", "head": "elder", "unit_leader": null, "courtship_scan": false,
+   "labels": {"elder": "Elder", "middle": "Middle", "young": "Young"}, "rules": []
+  },
+  "banks": {
+   "sphere": "underworld", "head": "banker", "unit_leader": null, "courtship_scan": false,
+   "labels": {"banker": "Banker", "controller": "Controller", "runner": "Runner"}, "rules": []
+  },
+  "club": {
+   "sphere": "underworld", "head": "president", "unit_leader": null, "courtship_scan": false,
+   "labels": {"president": "President", "officer": "Officer", "member": "Member", "prospect": "Prospect"}, "rules": []
+  },
+  "handful": {
+   "sphere": "underworld", "head": "senior", "unit_leader": null, "courtship_scan": false,
+   "labels": {"senior": "Senior", "man": "Man"}, "rules": []
+  }
+ },
+ "orgs": {
+  "brigades": {"rules": [{"type": "to_head_pick", "flow": "kickup", "stage": 3, "tag": "gift", "share": {"figure": "brigades_gift_share", "default": 0.1}}]},
+  "combine": {"rules": [{"type": "to_head_via_superior", "flow": "kickup", "stage": 3, "tag": "bank", "keep": {"figure": "bank_keep_share", "default": 0.15}}]},
+  "horsemen": {"rules": [{"type": "to_first_head", "flow": "kickup", "stage": 3, "share": {"figure": "horsemen_dues_share", "default": 0.1}}]}
+ }
+}

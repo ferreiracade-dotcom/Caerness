@@ -273,6 +273,11 @@ def outfit_rules(pkg: "WorldPackage") -> dict:
     return _data_json(pkg, "outfits")
 
 
+def org_rules(pkg: "WorldPackage") -> dict:
+    """The package's organisation rules (data "orgs": kinds, roles, money flows); empty when it has none."""
+    return _data_json(pkg, "orgs")
+
+
 def law_rules(pkg: "WorldPackage") -> dict:
     """The package's law and enforcement rules (data "law"); empty when it has none."""
     return _data_json(pkg, "law")

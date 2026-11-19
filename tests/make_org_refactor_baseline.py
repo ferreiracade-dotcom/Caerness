@@ -16,7 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tests.sj_fixture import build_saintjude, connect
-from engine import outfit_money
+from engine import org_money
 
 TABLE = "org_money"
 
@@ -28,7 +28,7 @@ def main() -> dict:
     conn = connect(path)
     from engine.design import run_seed
     day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]) + 28
-    outfit_money.post_period(conn, day, 28)
+    org_money.post_period(conn, day, 28)
     sums = {k: float(conn.execute(f"SELECT COALESCE(SUM(amount),0) FROM {TABLE} WHERE kind=? AND day=?", (k, day)).fetchone()[0])
             for k in ("pad", "take", "kickup")}
     sums["note"] = (f"package saintjude, run seed {run_seed(conn)}, day {day} (opening day + 28), days 28; "

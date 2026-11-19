@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tests.sj_fixture import build_saintjude, connect
-from engine import ledger, outfit_money, outfits
+from engine import ledger, org_money, orgs, outfit_money
 from engine.design import figure
 from engine.household_life import mark_actor_deceased
 from engine.outfit_opening import outfit_actor
@@ -116,7 +116,7 @@ def test_money_is_conserved_in_a_period():
     ids = _member_ids(conn)
     before = _cash(conn, ids)
     day = _day(conn) + 28
-    out = outfit_money.post_period(conn, day, 28)
+    out = org_money.post_period(conn, day, 28)
     assert out["take"] > 0 and out["kickup"] > 0 and out["associate_earning"] > 0 and out["executive_share"] > 0
     assert out["pad"] > 0
     assert abs((_cash(conn, ids) - before) - (out["take"] - out["pad"])) < 0.01  # the Pad leaves the outfits; nothing else does
@@ -142,7 +142,7 @@ def test_ladder_shares_apply():
         """SELECT a.actor_id AS assoc, a.superior_actor_id AS sold FROM org_seats a JOIN org_seats s ON s.actor_id=a.superior_actor_id
            WHERE a.org_actor_id=? AND a.role_key='associate' AND s.role_key='soldier' ORDER BY a.actor_id LIMIT 1""", (oid,)).fetchone()
     day = _day(conn) + 28
-    outfit_money.post_period(conn, day, 28)
+    org_money.post_period(conn, day, 28)
     earn = conn.execute("SELECT SUM(amount) FROM org_money WHERE day=? AND kind='associate_earning' AND to_actor_id=?", (day, pair["assoc"])).fetchone()[0]
     kick = conn.execute("SELECT SUM(amount) FROM org_money WHERE day=? AND kind='kickup' AND from_actor_id=? AND to_actor_id=?",
                         (day, pair["assoc"], pair["sold"])).fetchone()[0]
@@ -162,7 +162,7 @@ def test_family_net_over_a_year_matches_9_3():
     alloc = _alloc(conn)["family_gross_net_9_3"]
     day = _day(conn)
     for i in range(13):
-        outfit_money.post_period(conn, day + 28 * (i + 1), 28)
+        org_money.post_period(conn, day + 28 * (i + 1), 28)
     for fam in FAMILIES:
         oid = _oid(conn, outfits_[fam])
         ids = tuple(_member_ids(conn, oid))
@@ -185,17 +185,17 @@ def test_dead_holder_line_goes_to_capo():
         """SELECT l.id,l.holder_actor_id,r.superior_actor_id AS capo FROM org_lines l JOIN org_seats r ON r.actor_id=l.holder_actor_id
            WHERE r.org_actor_id=? AND r.role_key='soldier' ORDER BY l.id LIMIT 1""", (oid,)).fetchone()
     soldier, capo, line = int(row["holder_actor_id"]), int(row["capo"]), int(row["id"])
-    assert outfit_money.line_holder(conn, line) == soldier
+    assert org_money.line_holder(conn, line) == soldier
     day = _day(conn) + 28
     mark_actor_deceased(conn, soldier)
     conn.execute("UPDATE org_seats SET status='dead', left_day=? WHERE actor_id=?", (day - 1, soldier))  # task 12 will do this on death
-    assert outfit_money.line_holder(conn, line) == capo
+    assert org_money.line_holder(conn, line) == capo
     # a held man's line goes up too, and a capo who is also gone sends it to the boss
-    boss = int(outfits.boss_of(conn, oid))
+    boss = int(orgs.head_of(conn, oid))
     conn.execute("UPDATE org_seats SET status='held' WHERE actor_id=?", (capo,))
-    assert outfit_money.line_holder(conn, line) == boss
+    assert org_money.line_holder(conn, line) == boss
     conn.execute("UPDATE org_seats SET status='active' WHERE actor_id=?", (capo,))
-    outfit_money.post_period(conn, day, 28)
+    org_money.post_period(conn, day, 28)
     assert not conn.execute("SELECT 1 FROM org_money WHERE day>=? AND to_actor_id=?", (day - 1, soldier)).fetchone()
     assert not conn.execute("SELECT 1 FROM org_money WHERE day>=? AND from_actor_id=?", (day - 1, soldier)).fetchone()
     assert conn.execute("SELECT 1 FROM org_money WHERE day=? AND kind='take' AND to_actor_id=?", (day, capo)).fetchone()
@@ -205,7 +205,7 @@ def test_process_posts_every_28_days_from_the_opening():
     from engine.simulation import advance_connection
     conn, _ = _open()
     start = _day(conn)
-    assert outfit_money.next_due_day(conn, start, start + 100) == start + 28
+    assert org_money.next_due_day(conn, start, start + 100) == start + 28
     advance_connection(conn, 57)
     days = sorted({r[0] for r in conn.execute("SELECT DISTINCT day FROM org_money WHERE kind='take'")})
     assert days == [start + 28, start + 56], days

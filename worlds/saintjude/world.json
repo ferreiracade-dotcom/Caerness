@@ -32,6 +32,7 @@
   "design": "design_figures.json",
   "gazetteer": "gazetteer.json",
   "outfits": "outfits.json",
+  "orgs": "orgs.json",
   "law": "law.json"
  },
  "name_pools": {

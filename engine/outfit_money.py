@@ -4,15 +4,12 @@ Opening: every outfit pool in design_figures.json becomes a holding (family shar
 pool); a family's holdings are split over its crews, and each crew's slices over its capo and soldiers as lines.
 Every line has a holder, a description and a place. Other outfits hold one line per working man.
 
-Every 28 days from the opening, `post_period` brings each line's take in from outside (`ledger.receive`, the only
-money the outfits ever gain) and then moves it up the Ladder with `ledger.transfer` between existing purses:
-associates are paid out of the line's take and kick back a share, soldiers kick up to their capo, capos to the
-boss, the boss pays the underboss and consigliere. Each movement is one `org_money` row per man per kind per
-period. Nothing is created or lost inside the outfits.
+The periodic posting (take in from outside, then up the Ladder) lives in `org_money.post_period`, driven by the
+package's orgs.json; this module keeps the opening builders, the design figures and the Pad flow (`post_pad`, named
+in orgs.json `flow_handlers`).
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import random
 import sqlite3
@@ -20,14 +17,9 @@ from collections import defaultdict
 
 from . import ledger
 from .design import figure, run_seed
+from .org_money import MIN_ROW
 from .outfit_opening import outfit_actor
 from .world_package import outfit_rules, package_for, system_enabled
-
-PERIOD_DAYS = 28
-MIN_ROW = 0.005  # amounts below half a cent are not posted
-
-_DEAD = ("dead", "deceased", "historical")
-
 
 # ---- data ----
 
@@ -43,29 +35,6 @@ def design_allocation(conn: sqlite3.Connection) -> dict:
 
 def _day(conn: sqlite3.Connection) -> int:
     return int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
-
-
-def _meta(conn: sqlite3.Connection) -> dict[int, dict]:
-    """outfit actor id -> {key, shape, spec}."""
-    out: dict[int, dict] = {}
-    for key, spec in outfit_rules(package_for(conn)).get("outfits", {}).items():
-        try:
-            oid = outfit_actor(conn, spec["institution"])
-        except RuntimeError:
-            continue
-        out[oid] = {"key": key, "shape": spec["shape"], "spec": spec}
-    return out
-
-
-def _top_rank(meta: dict) -> str:
-    return "boss" if meta["shape"] == "family" else next(iter(meta["spec"]["ranks"]))
-
-
-def _rendezvous(seed: int, tag: str, actor_id: int, candidates: list[int]) -> int | None:
-    """Pick one of `candidates` for a man by a stable hash, so a tie holds until the man he is tied to goes."""
-    if not candidates:
-        return None
-    return max(candidates, key=lambda c: hashlib.sha256(f"{seed}:{tag}:{actor_id}:{c}".encode()).digest())
 
 
 # ---- holdings, crews, lines (opening) ----
@@ -215,107 +184,7 @@ def build_holdings(conn: sqlite3.Connection, day: int | None = None) -> dict[str
     return out
 
 
-# ---- who is alive to earn ----
-
-def _alive_ranks(conn: sqlite3.Connection) -> dict[int, sqlite3.Row]:
-    """Every outfit man with his rank row; `alive` is False when the rank row or the actor says dead, held or out."""
-    rows = {}
-    for r in conn.execute(
-        """SELECT r.*, COALESCE(lp.life_status,'living') AS life_status, lower(COALESCE(a.status,'active')) AS actor_status
-           FROM org_seats r JOIN actors a ON a.id=r.actor_id LEFT JOIN actor_life_profiles lp ON lp.actor_id=r.actor_id"""):
-        rows[int(r["actor_id"])] = r
-    return rows
-
-
-def _is_alive(r: sqlite3.Row | None) -> bool:
-    return r is not None and r["status"] == "active" and r["life_status"] == "living" and r["actor_status"] not in _DEAD
-
-
-class _Roster:
-    """Live men of every outfit, and who stands in for a man who cannot earn (his capo, then the top of the outfit)."""
-
-    def __init__(self, conn: sqlite3.Connection):
-        self.ranks = _alive_ranks(conn)
-        self.meta = _meta(conn)
-        self.crew_leader = {int(r[0]): int(r[1]) for r in conn.execute("SELECT id,leader_actor_id FROM org_units")}
-        self.top: dict[int, list[int]] = defaultdict(list)
-        for a, r in self.ranks.items():
-            m = self.meta.get(int(r["org_actor_id"]))
-            if m and r["role_key"] == _top_rank(m) and _is_alive(r):
-                self.top[int(r["org_actor_id"])].append(a)
-        for v in self.top.values():
-            v.sort()
-
-    def alive(self, actor_id: int | None) -> bool:
-        return actor_id is not None and _is_alive(self.ranks.get(int(actor_id)))
-
-    def earner(self, actor_id: int | None) -> int | None:
-        """The man who earns on this man's behalf: himself, else his crew's capo, else the top of his outfit; None if no one."""
-        if actor_id is None:
-            return None
-        r = self.ranks.get(int(actor_id))
-        if r is None:
-            return None
-        if _is_alive(r):
-            return int(actor_id)
-        capo = self.crew_leader.get(int(r["unit_id"])) if r["unit_id"] is not None else None
-        if capo is not None and self.alive(capo):
-            return capo
-        top = self.top.get(int(r["org_actor_id"]))
-        return top[0] if top else None
-
-
-def line_holder(conn: sqlite3.Connection, line_id: int) -> int:
-    """The live earner of a line: its holder, or when he is dead, held or out, his capo, or when the capo is too, the boss."""
-    row = conn.execute("SELECT holder_actor_id FROM org_lines WHERE id=?", (int(line_id),)).fetchone()
-    if row is None:
-        raise ValueError(f"no line {line_id}")
-    earner = _Roster(conn).earner(row[0])
-    if earner is None:
-        raise RuntimeError(f"line {line_id} has no live earner")
-    return earner
-
-
-# ---- the posting ----
-
-def _last_posted(conn: sqlite3.Connection) -> int | None:
-    r = conn.execute("SELECT MAX(day) FROM org_money WHERE kind='take'").fetchone()
-    if r and r[0] is not None:
-        return int(r[0])
-    r = conn.execute("SELECT MIN(started_day) FROM org_holdings WHERE source='opening'").fetchone()
-    return int(r[0]) if r and r[0] is not None else None
-
-
-def next_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int | None:
-    last = _last_posted(conn)
-    if last is None:
-        return None
-    due = max(last + PERIOD_DAYS, int(after_day) + 1)
-    return due if due <= end_day else None
-
-
-def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dict:
-    last = _last_posted(conn)
-    out: dict = {"periods": 0}
-    while last is not None and last + PERIOD_DAYS <= day:
-        last += PERIOD_DAYS
-        res = post_period(conn, last, PERIOD_DAYS)
-        out["periods"] += 1
-        for k, v in res.items():
-            out[k] = out.get(k, 0) + v
-    return out
-
-
-def _books_of(ros: "_Roster", src: int | None, dst: int | None) -> int | None:
-    """The organisation whose books a movement is in: the payer's seat, else the payee's (the migration's rule)."""
-    for a in (src, dst):
-        r = ros.ranks.get(int(a)) if a is not None else None
-        if r is not None:
-            return int(r["org_actor_id"])
-    return None
-
-
-def _post_pad(conn: sqlite3.Connection, day: int, days: int, ctx: dict) -> float:
+def post_pad(conn: sqlite3.Connection, day: int, days: int, ctx: dict) -> float:
     """The Pad: every active envelope is paid out of the paying family's capos' purses through a bagman.
 
     Each family's capos pay what the family owes in proportion to their regimes' take (the take posted this period by
@@ -327,7 +196,7 @@ def _post_pad(conn: sqlite3.Connection, day: int, days: int, ctx: dict) -> float
            ORDER BY e.id""", (int(day), int(day))).fetchall()
     if not rows:
         return 0.0
-    ros: _Roster = ctx["roster"]
+    ros = ctx["roster"]
     alive = {int(r[0]) for r in conn.execute(
         """SELECT a.id FROM actors a LEFT JOIN actor_life_profiles lp ON lp.actor_id=a.id
            WHERE a.id IN (%s) AND lower(COALESCE(a.status,'active')) NOT IN ('dead','deceased','historical')
@@ -348,23 +217,16 @@ def _post_pad(conn: sqlite3.Connection, day: int, days: int, ctx: dict) -> float
             onward_org.setdefault((collector, officer), int(e["payer_id"]))
     # regime weights: the take each capo's regime brought in this period
     regime: dict[int, dict[int, float]] = defaultdict(lambda: defaultdict(float))
-    for _, earner, amount, _line in ctx["entries"]["take"]:
-        r = ros.ranks.get(int(earner))
-        if r is None:
-            continue
-        oid = int(r["org_actor_id"])
-        if r["role_key"] == "capo":
-            capo = int(earner)
-        else:
-            capo = ros.crew_leader.get(int(r["unit_id"])) if r["unit_id"] is not None else None
-            if capo is None or not ros.alive(capo):
-                capo = (ros.top.get(oid) or [None])[0]
+    for _, earner, amount, _line, oid in ctx["entries"]["take"]:
+        capo = ros.unit_leader(int(earner), oid)
+        if capo is None or not ros.alive(capo, oid):
+            capo = ros.head(oid)
         if capo is not None:
             regime[oid][int(capo)] += float(amount)
     paid_out = 0.0
     pay_rows: list[tuple] = []
     for (family, collector), amount in sorted(owed.items()):
-        weights = regime.get(family) or ({ros.top[family][0]: 1.0} if ros.top.get(family) else {})
+        weights = regime.get(family) or ({ros.head(family): 1.0} if ros.head(family) is not None else {})
         if not weights:
             continue
         total = sum(weights.values())
@@ -382,145 +244,3 @@ def _post_pad(conn: sqlite3.Connection, day: int, days: int, ctx: dict) -> float
             pay_rows.append((int(day), "pad", collector, officer, None, got, onward_org.get((collector, officer))))
     conn.executemany("INSERT INTO org_money(day,kind,from_actor_id,to_actor_id,line_id,amount,org_actor_id) VALUES (?,?,?,?,?,?,?)", pay_rows)
     return paid_out
-
-
-def post_period(conn: sqlite3.Connection, day: int, days: int) -> dict[str, float]:
-    """Post one period: bring the take in, move it up the Ladder. Returns the amount by kind (plus "rows")."""
-    seed = run_seed(conn)
-    ros = _Roster(conn)
-    a2s = float(figure(conn, "ladder_associate_to_soldier", default=0.225))
-    s2c = float(figure(conn, "ladder_soldier_to_capo", default=0.183))
-    c2b = float(figure(conn, "ladder_capo_to_boss", default=0.117))
-    living = float(figure(conn, "living_associate", default=7500.0))
-    exec_share = float(figure(conn, "executive_share", default=0.25))
-    gift = float(figure(conn, "brigades_gift_share", default=0.1))
-    dues = float(figure(conn, "horsemen_dues_share", default=0.1))
-    keep = float(figure(conn, "bank_keep_share", default=0.15))
-    pay_cap = float(figure(conn, "associate_pay_cap", default=0.5))
-
-    take: dict[int, float] = defaultdict(float)
-    hidden: dict[int, float] = defaultdict(float)
-    take_line: dict[int, tuple[float, int]] = {}
-    for r in conn.execute(
-        """SELECT l.id,l.holder_actor_id,l.weekly_take,l.hidden FROM org_lines l JOIN org_holdings h ON h.id=l.holding_id
-           WHERE l.status='active' AND h.status='active' AND l.started_day<=? ORDER BY l.id""", (int(day),)):
-        earner = ros.earner(r["holder_actor_id"])
-        if earner is None:
-            continue
-        amount = float(r["weekly_take"]) * days / 7.0
-        take[earner] += amount
-        if r["hidden"]:
-            hidden[earner] += amount
-        if earner not in take_line or amount > take_line[earner][0]:
-            take_line[earner] = (amount, int(r["id"]))
-
-    entries: dict[str, list[tuple[int | None, int, float, int | None]]] = {k: [] for k in
-        ("take", "associate_earning", "assoc_kickup", "kickup", "executive_share")}
-    for a, amount in take.items():
-        entries["take"].append((None, a, amount, take_line[a][1]))
-
-    net: dict[int, float] = dict(take)  # what each earner keeps of his line take
-    # Associates are paid out of the take of the man they work under (his stand-in when he cannot earn).
-    by_patron: dict[int, list[tuple[int, float]]] = defaultdict(list)
-    base = living / (1.0 - a2s) * days / 365.0
-    for a, r in ros.ranks.items():
-        if r["role_key"] != "associate" or not _is_alive(r):
-            continue
-        patron = ros.earner(r["superior_actor_id"])
-        if patron is None or take.get(patron, 0.0) <= 0 or patron == a:
-            continue
-        by_patron[patron].append((a, base * (0.5 + float(r["reliability"]))))
-    for patron, assoc in by_patron.items():
-        want = sum(e for _, e in assoc)
-        f = min(1.0, pay_cap * take[patron] / want)
-        for a, e in assoc:
-            e *= f
-            if e < MIN_ROW:
-                continue
-            entries["associate_earning"].append((patron, a, e, None))
-            entries["assoc_kickup"].append((a, patron, e * a2s, None))
-            net[patron] -= e * (1.0 - a2s)
-
-    kick_in: dict[int, float] = defaultdict(float)  # kickups received by capos and bosses (their regime / receipts)
-    boss_in: dict[int, float] = defaultdict(float)
-    for a in list(take):
-        r = ros.ranks[a]
-        m = ros.meta.get(int(r["org_actor_id"]))
-        if m is None:
-            continue
-        shape, spec = m["shape"], m["spec"]
-        base_net = max(0.0, net[a] - hidden.get(a, 0.0))
-        if shape == "family":
-            if r["role_key"] == "capo" or r["role_key"] == "soldier":
-                superior = ros.earner(r["superior_actor_id"]) if r["role_key"] == "soldier" else None
-                if r["role_key"] == "soldier" and superior is not None and superior != a:
-                    amount = s2c * base_net
-                    if amount >= MIN_ROW:
-                        entries["kickup"].append((a, superior, amount, None))
-                        kick_in[superior] += amount
-    # Capos kick up a share of their regime (own net plus what their soldiers sent) to the boss.
-    for a, r in ros.ranks.items():
-        if r["role_key"] != "capo" or not _is_alive(r):
-            continue
-        regime = max(0.0, net.get(a, 0.0) - hidden.get(a, 0.0)) + kick_in.get(a, 0.0)
-        top = ros.top.get(int(r["org_actor_id"]))
-        if regime > 0 and top:
-            amount = c2b * regime
-            if amount >= MIN_ROW:
-                entries["kickup"].append((a, top[0], amount, None))
-                boss_in[top[0]] += amount
-    # Soldiers whose capo could not be replaced by a capo sent their kickup straight to the boss: count it as receipts.
-    for dst, amount in kick_in.items():
-        if ros.ranks[dst]["role_key"] == "boss":
-            boss_in[dst] += amount
-    for boss, receipts in boss_in.items():
-        oid = int(ros.ranks[boss]["org_actor_id"])
-        for r in ros.ranks.values():
-            if int(r["org_actor_id"]) == oid and r["role_key"] in ("underboss", "consigliere") and _is_alive(r):
-                amount = exec_share * receipts
-                if amount >= MIN_ROW:
-                    entries["executive_share"].append((boss, int(r["actor_id"]), amount, None))
-
-    # Other outfits: money passes up to the elder, banker or president.
-    for a in list(take):
-        r = ros.ranks[a]
-        m = ros.meta.get(int(r["org_actor_id"]))
-        if m is None or m["shape"] == "family":
-            continue
-        oid, key = int(r["org_actor_id"]), m["key"]
-        kind = (m["spec"].get("upward") or {}).get("kind")
-        amount = max(0.0, take[a] - hidden.get(a, 0.0))
-        if kind == "gift_to_elder" and r["role_key"] != "elder":
-            elders = [x for x in ros.top.get(oid, []) if x != a]
-            dst, amount = _rendezvous(seed, "gift", a, elders), gift * amount
-        elif kind == "bank_net_to_banker":
-            sup = ros.earner(r["superior_actor_id"])
-            bankers = [x for x in ros.top.get(oid, [])]
-            dst = sup if sup is not None and sup != a and ros.ranks[sup]["role_key"] == "banker" else _rendezvous(seed, "bank", a, bankers)
-            amount *= 1.0 - keep
-        elif kind == "dues" and r["role_key"] != "president":
-            dst, amount = (ros.top.get(oid) or [None])[0], dues * amount
-        else:
-            continue
-        if dst is not None and dst != a and amount >= MIN_ROW:
-            entries["kickup"].append((a, dst, amount, None))
-
-    # Apply, bottom-up, so every man holds what he passes on before he passes it.
-    flow = {"associate_earning": "wage", "assoc_kickup": "tribute", "kickup": "tribute", "executive_share": "share"}
-    out: dict[str, float] = {"take": 0.0, "associate_earning": 0.0, "kickup": 0.0, "executive_share": 0.0, "pad": 0.0}
-    rows: list[tuple] = []
-    agg: dict[tuple[str, int, int], tuple[float, int | None]] = {}
-    for phase in ("take", "associate_earning", "assoc_kickup", "kickup", "executive_share"):
-        kind = "kickup" if phase == "assoc_kickup" else phase
-        for src, dst, amount, line_id in entries[phase]:
-            if phase == "take":
-                ledger.receive(conn, ("person", dst), amount, purpose="outfit take")
-            else:
-                ledger.transfer(conn, ("person", src), ("person", dst), amount, flow_kind=flow[phase], purpose=f"outfit {kind}")
-            out[kind] += amount
-            rows.append((int(day), kind, src, dst, line_id, amount, _books_of(ros, src, dst)))
-    ctx = {"roster": ros, "entries": entries}
-    out["pad"] = float(_post_pad(conn, day, days, ctx))
-    conn.executemany("INSERT INTO org_money(day,kind,from_actor_id,to_actor_id,line_id,amount,org_actor_id) VALUES (?,?,?,?,?,?,?)", rows)
-    out["rows"] = float(len(rows))
-    return out

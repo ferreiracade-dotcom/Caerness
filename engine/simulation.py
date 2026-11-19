@@ -32,7 +32,7 @@ from .merchant import next_merchant_due_day, process_due_merchant
 from .craft import next_craft_due_day, process_due_craft
 from .growth import next_growth_due_day, process_due_growth
 from .law import next_law_due_day, process_due_law
-from .outfit_money import next_due_day as next_outfit_money_due_day, process_due as process_due_outfit_money
+from .org_money import next_due_day as next_outfit_money_due_day, process_due as process_due_outfit_money
 from .cultivation import next_cultivation_due_day, process_due_cultivation
 from .groundbinding import next_groundbinding_due_day, process_due_groundbinding
 from .tournaments import next_tournament_due_day, process_due_tournaments
@@ -297,7 +297,7 @@ def _review_actor(conn: sqlite3.Connection, profile: sqlite3.Row, day: int) -> N
     # and no self-initiated choice unless a registered reason check fires. Anything that happens TO the man
     # (wake-ups, forced tiers, agenda items) still reaches him through the profile and the checks.
     if _quiet_routine(profile):
-        from .outfits import has_reason_to_choose
+        from .orgs import has_reason_to_choose
         forced = profile["forced_tier"] == "ACTIVE" and profile["forced_until_day"] is not None and int(profile["forced_until_day"]) >= day
         q_cadence = 1 if forced else int(profile["cadence_days"])
         if not has_reason_to_choose(conn, actor_id, day):

@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tests.sj_fixture import build_saintjude, connect
-from engine import law_opening, ledger, outfit_money
+from engine import law_opening, ledger, org_money, outfit_money
 from engine.design import figure
 from engine.world_package import law_rules, outfit_rules, package_for
 
@@ -192,7 +192,7 @@ def test_connected_people_are_level_4():
             assert _is_level4(conn, aid), c
             holders.add(aid)
             if c["tied_to"]:
-                boss = law_opening.head_of(conn, c["tied_to"], outf["outfits"][c["tied_to"]])
+                boss = law_opening.outfit_head(conn, c["tied_to"], outf["outfits"][c["tied_to"]])
                 assert conn.execute("SELECT 1 FROM relationships WHERE actor_a_id=? AND actor_b_id=?", (aid, boss)).fetchone(), c
         total += c["count"]
     assert not conn.execute("SELECT 1 FROM org_seats r JOIN institution_memberships m ON m.member_actor_id=r.actor_id JOIN actors i ON i.id=m.institution_actor_id "
@@ -217,7 +217,7 @@ def test_pad_is_paid_in_the_flow():
     env = conn.execute("SELECT * FROM org_arrangements WHERE status='active'").fetchall()
     day = _day(conn) + 28
     ids = [r[0] for r in conn.execute("SELECT actor_id FROM org_seats")]
-    out = outfit_money.post_period(conn, day, 28)
+    out = org_money.post_period(conn, day, 28)
     want = sum(e["weekly_usd"] for e in env) * 4
     assert abs(out["pad"] - want) < 0.5, (out["pad"], want)
     q = ",".join("?" * len(ids))
