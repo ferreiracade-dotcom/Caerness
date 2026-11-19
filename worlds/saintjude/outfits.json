@@ -74,10 +74,6 @@
     "Brigades man": "young"
    },
    "name_group": "irish",
-   "upward": {
-    "kind": "gift_to_elder",
-    "figure": "brigades_gift_share"
-   },
    "ground": [
     "Kerrytown",
     "The Harp and Crown"
@@ -124,9 +120,6 @@
    "seed_roles": {
     "banker": "banker"
    },
-   "upward": {
-    "kind": "bank_net_to_banker"
-   },
    "ground": [
     "The Eastside",
     "Freeman Terraces"
@@ -167,10 +160,6 @@
    },
    "seed_roles": {
     "President": "president"
-   },
-   "upward": {
-    "kind": "dues",
-    "figure": "horsemen_dues_share"
    },
    "ground": [
     "Iron Horsemen Clubhouse"
@@ -283,7 +272,6 @@
   "banks": 0.99,
   "pad_officer": 0.99
  },
- "executive_share_of_boss_receipts": "executive_share",
  "induction": {
   "father_name_group": "italian",
   "vouch_required": true

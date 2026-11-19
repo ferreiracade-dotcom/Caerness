@@ -21,7 +21,7 @@ NEW_FIGURES = (
 TABLES = {"org_seats", "org_units", "org_holdings", "org_lines", "org_money", "org_agenda",
           "org_incidents", "org_arrangements", "crime_reports", "custody"}
 FIGURE_KEYS = ("figure", "made_men_figure", "associates_figure", "capacity", "integrity", "evidence_threshold",
-               "honest_homicide_figure", "executive_share_of_boss_receipts")
+               "honest_homicide_figure")
 
 
 def tables(conn):
@@ -64,7 +64,7 @@ def run():
     os.environ.pop("CAERNESS_WORLDS_DIR", None)
     from tests.sj_fixture import build_saintjude, connect
     from engine import design
-    from engine.world_package import load_package, outfit_rules, law_rules, system_enabled
+    from engine.world_package import load_package, outfit_rules, law_rules, org_rules, system_enabled
     from engine.db import SCHEMA_VERSION
 
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
@@ -122,7 +122,7 @@ def run():
 
         # figures: every reference exists, proposals are marked and sourced
         figs = design.package_figures(sj)
-        for key in referenced_figure_keys(orules, lrules):
+        for key in referenced_figure_keys(orules, lrules, org_rules(pkg)):
             assert figs.get(key) is not None, key
         for key in NEW_FIGURES:
             f = figs[key]
