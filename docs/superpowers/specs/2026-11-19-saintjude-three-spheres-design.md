@@ -71,11 +71,29 @@ Rename and generalise the outfit tables in one migration (schema 117): `outfit_*
 - **Politics** (after): offices (mayor, council, aldermen, DA, judges where elected), the Machine and wards as orgs, the election calendar from bible Part I 4.6, and votes as agenda items. Patronage jobs are income lines and campaign money is an arrangement.
 - **The links** come mostly free: shared people (a capo owns a trucking firm; an alderman's brother is a union president), shared lines (the racket that skims the contract), shared arrangements (the same official on the Pad and on a developer's retainer), and the law response sees all of it.
 
+### 5.2a No silent buckets: how deep anything is simulated (agreed 2026-11-19)
+
+The engine's job: make requests plausible (friction, never refusal unless it contradicts something), simulate the world (people with their own wants, consequences off-screen), keep memory and continuity, and keep honest numbers. The GM interprets requests and tells the story. Nothing is refused for lacking a mechanism, and nothing is accepted and then forgotten.
+
+- **B, the default for anything made in play:** a living thing through the core. It has an owner, people in seats, money in and out, an agenda, **and its drivers**: what really moves it, written down when it is made and run by shared mechanisms. So a club in B still has a rough form and results, and those set its crowd, income, press and the owner's worries.
+- **C, when the story moves toward it:** domain depth (squads and matches, tour routing, ward-by-ward canvassing). C works out **the same drivers in finer detail**. History carries over and nothing resets. C's outcomes still feed B things and the other spheres through the same links. A C is its own design-and-build project. The engine should notice where play is heading (time spent, choices made) and flag it; B and the GM carry the thing until then.
+- **The mob is the first C.** Families, rackets, the Pad and the law are the "real movers" for a B thing sitting beside them.
+
+**Shared drivers (core, built with the business layer):** a season or calendar; form or quality (drifts and swings); demand (follows reputation, results and price); capacity (seats, floor space, staff); rivals in the same market; required approvals (permit, licence, lease, vote, all handled by politics); dated outside shocks (the timeline: the 1975 recession, Pick-3, the casino referendum); seeded outcome rolls. A thing's driver list is data written when it is made. The mechanisms are generic code.
+
+**Ventures (new core object):** one-off undertakings beside ongoing income lines. Each has a backer, money committed, counterparties, a date or schedule, an outcome from its drivers, and a payoff or loss. Examples: a concert or tour stop, a fight card, a building project, a renovation, an election campaign, a takeover bid.
+
+**Property and places (new core layer, reusing Caerness's `buildings` and `civilian_projects`, with package-declared kinds instead of the fixed `building_kind` list):** anything owned that is not itself a business. It has condition, capacity, prestige, upkeep, location, and who uses it.
+- Buying a high-rise for headquarters: the company's seats get a **workplace**, so staff work there, are found there and commute there. Floor space is a capacity limit (outgrow it and you move, rent more floors or build). Renovation is a venture (cost, contractors, unions, time, mob concrete, permits) that changes condition and prestige. The building sits on someone's ground and in a precinct, so protection, the Pad and the ward alderman come with it. Spare floors can be let, which is an income line.
+- Other things that work the same way: the family home or an estate (household, servants, upkeep, standing in the Heights); a racehorse at Bayview Downs (form, races, the track's bookmakers); a yacht or car fleet; an art collection (value drifts with taste); a private club membership; a charity or foundation (an org with patronage instead of profit); a pew and gifts at the cathedral (standing with the Archdiocese); a newspaper bought for influence rather than money; a private security detail (seats, wages, loyalty).
+
+**Checked against other campaigns:** event organiser for big artists (ventures; drivers are artist demand, venues, season and rival promoters; links to stagehands and Teamsters, scalping and concessions, the arena lease and the press); property developer (ventures, zoning votes, building unions, mob concrete); running for alderman then mayor (election as a dated outcome from people); newspaper owner (circulation, advertisers, pressmen's union); the casino (bible Open: a referendum and licence fight before it is a business); shipping or trucking (freight volume, unions, theft); boxing promoter (small ventures, fixed fights). All of them fit: org core plus drivers plus ventures plus property.
+
 ### 5.3 Order of work
 
 1. **Core refactor (new task 9b):** schema 117 migration, role rules from data, rename and generalise tasks 3/7/8/9 code; all existing Saint Jude tests stay green and Caerness regression passes.
 2. **Mob tasks 10–16** on the core, as planned, with generic motive and law-response pieces.
-3. **Business layer**: its own spec and plan.
+3. **Business layer**: its own spec and plan. It starts with the shared drivers, ventures and property (§5.2a), because every later sphere and every C uses them.
 4. **Politics layer**: its own spec and plan.
 5. Football and medieval: separate designs that reuse the core.
 
