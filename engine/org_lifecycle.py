@@ -11,6 +11,7 @@ import sqlite3
 from . import orgs
 
 _DAYS_PER_YEAR = 365.0
+RISE_REASON = "rose to lead a unit"  # the history note `fill_unit_leader` leaves; readers use its day as the day the seat was filled
 
 
 def mark_for_history(conn: sqlite3.Connection, actor_id: int, reason: str, day: int | None = None) -> None:
@@ -78,5 +79,5 @@ def fill_unit_leader(conn: sqlite3.Connection, unit_id: int, day: int) -> int | 
     conn.execute("UPDATE institution_memberships SET role_text=? WHERE institution_actor_id=? AND member_actor_id=? AND membership_kind='member'",
                  (f"{label} in the {name}", org, new))
     orgs.set_level(conn, new, level, int(day), org)
-    mark_for_history(conn, new, "rose to lead a unit", int(day))
+    mark_for_history(conn, new, RISE_REASON, int(day))
     return new

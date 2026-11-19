@@ -10,7 +10,8 @@ Where the world has no record yet, the closest real state is read instead (so a 
   * a line the capo took is an incident naming the capo as offender and the man as victim with a line (Task 11 raises them).
   * "the people there" and "the businesses there": no place has a population of its own (every background person sits at the
     city root), so thin ground is measured against the other places that are worked, by lines per working place.
-  * "passed over" compares the man with his capo on years inducted and standing today (the days seats were filled are not kept).
+  * "passed over": the day a seat was filled is the day of the `history` note `fill_unit_leader` leaves for the new leader; capos of
+    the opening have no such note, so no one starts out passed over.
   * "business closed" and "a rival pushed off the ground" have no record; a line ended or its holder lost stands for them.
   * "new products and businesses" from the dated timeline are not read; demand follows the package's yearly tables.
   * debts are not modelled; need compares earnings with the living standard.
@@ -19,14 +20,16 @@ Where the world has no record yet, the closest real state is read instead (so a 
 from __future__ import annotations
 
 import datetime
+import functools
 import json
+from pathlib import Path
 import sqlite3
 
 from . import ledger, org_motives
-from .design import figure
 from .law_opening import precinct_for_location
+from .org_lifecycle import RISE_REASON
 from .orgs import clamp01, head_of, kind_rules, seat_of, seats_of, unit_leader_of
-from .world_package import org_rules, outfit_rules, package_for
+from .world_package import org_rules, package_for
 
 REMOVE = "remove_superior"
 START = "start_racket"
@@ -45,7 +48,7 @@ def _rel(conn: sqlite3.Connection, a: int | None, b: int | None):
 
 
 def _recent(conn: sqlite3.Connection) -> int:
-    return int(figure(conn, "motive_recent_days", default=90))
+    return int(org_motives._fig(conn, "motive_recent_days", default=90))
 
 
 def _period(conn: sqlite3.Connection) -> int:
@@ -58,7 +61,7 @@ def _drive(conn: sqlite3.Connection, actor_id: int, trait: str) -> float:
 
 
 def _roles(conn: sqlite3.Connection, choice: str) -> list[str]:
-    return list((outfit_rules(package_for(conn)).get("choice_roles") or {}).get(choice) or [])
+    return list((org_motives._sphere_data(conn).get("choice_roles") or {}).get(choice) or [])
 
 
 def _live(conn: sqlite3.Connection, actor_id: int | None) -> bool:
@@ -102,7 +105,7 @@ def _ladder_share(conn: sqlite3.Connection, org: int, role: str) -> float:
     for r in kind_rules(conn, org).get("rules") or []:
         if r.get("type") == "to_superior" and role in (r.get("roles") or []):
             spec = r["share"]
-            return float(figure(conn, spec["figure"], default=spec.get("default")))
+            return float(org_motives._fig(conn, spec["figure"], default=spec.get("default")))
     return 0.0
 
 
@@ -123,9 +126,10 @@ def _held(conn: sqlite3.Connection, actor_id: int, day: int) -> list:
 # ---- taking out his capo ----
 
 def grievance(conn, actor_id, day):
+    """His resentment of the capo, squared: mild resentment is not a reason to kill, a murderous one is."""
     ctx = context(conn, actor_id)
     r = _rel(conn, actor_id, ctx[2]) if ctx else None
-    return 0.0 if r is None else clamp01(float(r["resentment"]) / 100.0)
+    return 0.0 if r is None else clamp01(float(r["resentment"]) / 100.0) ** 2
 
 
 def squeezed(conn, actor_id, day):
@@ -145,14 +149,19 @@ def squeezed(conn, actor_id, day):
 
 
 def passed_over(conn, actor_id, day):
-    """He is senior to the man who leads his unit, in years inducted or standing."""
+    """The man who now leads his unit took the seat lately (the `history` note `fill_unit_leader` leaves) and is junior to
+    him in years inducted or standing."""
     ctx = context(conn, actor_id)
     if ctx is None:
         return 0.0
     org, seat, capo, _ = ctx
+    rose = conn.execute("SELECT created_day FROM org_agenda WHERE actor_id=? AND kind='history' AND json_extract(metadata_json,'$.reason')=? "
+                        "ORDER BY id DESC LIMIT 1", (int(capo), RISE_REASON)).fetchone()
+    if rose is None or int(day) - int(rose[0]) > int(org_motives._fig(conn, "motive_seat_memory_days", default=365)):
+        return 0.0
     cs = seat_of(conn, capo, org)
     ys, yc = _years(seat, day), _years(cs, day)
-    by_years = 0.0 if ys is None or yc is None else clamp01((ys - yc) / float(figure(conn, "motive_years_full", default=10)))
+    by_years = 0.0 if ys is None or yc is None else clamp01((ys - yc) / float(org_motives._fig(conn, "motive_years_full", default=10)))
     return max(by_years, clamp01(float(seat["standing"]) - float(cs["standing"])))
 
 
@@ -188,7 +197,7 @@ def fear(conn, actor_id, day):
         if r is not None and float(r["trust"]) > 0:
             out = max(out, clamp01(float(r["trust"]) / 100.0))
     if any("homicide" in str(h["charge"]).lower() for h in _held(conn, capo, day)):
-        floor = float(figure(conn, "motive_homicide_talk_floor", default=0.3))
+        floor = float(org_motives._fig(conn, "motive_homicide_talk_floor", default=0.3))
         cs = seat_of(conn, capo, ctx[0])
         out = max(out, floor + (1.0 - float(cs["reliability"])) * (1.0 - floor))
     return out
@@ -317,15 +326,20 @@ def _interp(rows: list, col: int, y: float) -> float | None:
     return pts[-1][1]
 
 
+@functools.lru_cache(maxsize=4)
+def _tables(path: str) -> dict:
+    return json.loads(Path(path).read_text(encoding="utf-8")).get("tables") or {}
+
+
 def demand(conn: sqlite3.Connection, pool: str, day: int) -> float:
     """The pool's rise over the coming year in the package's table for it (0 when it falls or has no table)."""
-    src = (outfit_rules(package_for(conn)).get("demand_sources") or {}).get(pool)
+    src = (org_motives._sphere_data(conn).get("demand_sources") or {}).get(pool)
     pkg = package_for(conn)
     path = pkg.data.get("design")
     cal = pkg.calendar
     if not src or path is None or cal.get("kind") != "gregorian":
         return 0.0
-    table = (json.loads(path.read_text(encoding="utf-8")).get("tables") or {}).get(src["table"])
+    table = _tables(str(path)).get(src["table"])
     if not table:
         return 0.0
     col = table["columns"].index(src["column"])
@@ -336,37 +350,52 @@ def demand(conn: sqlite3.Connection, pool: str, day: int) -> float:
 
 
 def _places(conn: sqlite3.Connection, seat) -> list[int]:
-    """His unit's ground and the places beside it (the same parent)."""
+    """His unit's ground first, then the places inside it and the places beside it (the same parent, when that parent is
+    not the city itself: the districts of a city are not next to one another by being in it)."""
     if not seat["unit_id"]:
         return []
     r = conn.execute("SELECT ground_location_id FROM org_units WHERE id=?", (int(seat["unit_id"]),)).fetchone()
     if r is None or r[0] is None:
         return []
     ground = int(r[0])
+    inside = [i for i in _subtree(conn, ground) if i != ground]
     p = conn.execute("SELECT parent_location_id FROM locations WHERE id=?", (ground,)).fetchone()
-    sib = [] if p is None or p[0] is None else [int(x[0]) for x in conn.execute(
-        "SELECT id FROM locations WHERE parent_location_id=? AND id<>? ORDER BY id", (int(p[0]), ground))]
-    return [ground, *sib]
+    beside: list[int] = []
+    if p is not None and p[0] is not None:
+        gp = conn.execute("SELECT parent_location_id FROM locations WHERE id=?", (int(p[0]),)).fetchone()
+        if gp is not None and gp[0] is not None:
+            beside = [int(x[0]) for x in conn.execute("SELECT id FROM locations WHERE parent_location_id=? AND id<>? ORDER BY id", (int(p[0]), ground))]
+    return [ground, *sorted(inside), *beside]
 
 
 def _pools(conn: sqlite3.Connection) -> list[str]:
-    return list(outfit_rules(package_for(conn)).get("racket_pools") or [])
+    return list(org_motives._sphere_data(conn).get("racket_pools") or [])
 
 
-def opportunity(conn: sqlite3.Connection, actor_id: int, day: int, loc: int, pool: str) -> float:
-    """How good this place and pool are for him: the place and pool motives combined at the package's weights."""
+def opportunity(conn: sqlite3.Connection, actor_id: int, day: int, loc: int, pool: str, memo: dict | None = None) -> float:
+    """How good this place and pool are for him: the place and pool motives combined at the package's weights.
+    `memo` keeps the readings and weights across calls for one man on one day."""
+    memo = {} if memo is None else memo
+
+    def got(key, fn):
+        if key not in memo:
+            memo[key] = fn()
+        return memo[key]
+
     rest = 1.0
-    for name, v in (("thin_ground", thin_ground(conn, loc)), ("unclaimed_pool", unclaimed_pool(conn, pool)),
-                    ("vacancy", vacancy(conn, loc, day, pool)), ("demand", demand(conn, pool, day))):
-        rest *= 1.0 - org_motives.weight_of(conn, actor_id, START, name) * v
+    for name, v in (("thin_ground", got(("thin", loc), lambda: thin_ground(conn, loc))),
+                    ("unclaimed_pool", got(("unc", pool), lambda: unclaimed_pool(conn, pool))),
+                    ("vacancy", got(("vac", loc, pool), lambda: vacancy(conn, loc, day, pool))),
+                    ("demand", got(("dem", pool), lambda: demand(conn, pool, day)))):
+        rest *= 1.0 - got(("w", name), lambda: org_motives.weight_of(conn, actor_id, START, name)) * v
     return 1.0 - rest
 
 
 def _best(conn: sqlite3.Connection, actor_id: int, day: int, seat) -> tuple[int, str, float] | None:
-    best = None
+    best, memo = None, {}
     for loc in _places(conn, seat):
         for pool in _pools(conn):
-            o = opportunity(conn, actor_id, day, loc, pool)
+            o = opportunity(conn, actor_id, day, loc, pool, memo)
             if best is None or o > best[2] + 1e-12:
                 best = (loc, pool, o)
     return best
@@ -420,11 +449,11 @@ def _by_role(conn: sqlite3.Connection, spec: dict, role: str) -> str:
 
 
 def start_cost(conn: sqlite3.Connection, role: str) -> float:
-    return float(figure(conn, _by_role(conn, outfit_rules(package_for(conn))["start_racket"]["cost"], role)))
+    return float(org_motives._fig(conn, _by_role(conn, org_motives._sphere_data(conn)["start_racket"]["cost"], role)))
 
 
 def line_weekly(conn: sqlite3.Connection, role: str) -> float:
-    return float(figure(conn, _by_role(conn, outfit_rules(package_for(conn))["start_racket"]["line_weekly"], role)))
+    return float(org_motives._fig(conn, _by_role(conn, org_motives._sphere_data(conn)["start_racket"]["line_weekly"], role)))
 
 
 def means(conn, actor_id, day):
@@ -433,17 +462,17 @@ def means(conn, actor_id, day):
         return 0.0
     cash = ledger.balance(conn, ("person", int(actor_id)))
     men = conn.execute("SELECT COUNT(*) FROM org_seats WHERE superior_actor_id=? AND status='active'", (int(actor_id),)).fetchone()[0]
-    needed = float(figure(conn, "motive_workers_needed", default=2))
+    needed = float(org_motives._fig(conn, "motive_workers_needed", default=2))
     return clamp01(cash / start_cost(conn, seat["role_key"])) * (0.5 + 0.5 * clamp01(men / needed))  # no cash, no means; men to work it complete it
 
 
 def need(conn, actor_id, day):
     """The shortfall of his earnings (last period, grossed up to a year; the lines he holds before any is posted) against his living standard."""
     seat = _start_seat(conn, actor_id)
-    living = (outfit_rules(package_for(conn)).get("living") or {}).get(seat["role_key"] if seat is not None else "")
+    living = (org_motives._sphere_data(conn).get("living") or {}).get(seat["role_key"] if seat is not None else "")
     if seat is None or not living:
         return 0.0
-    standard = float(figure(conn, living))
+    standard = float(org_motives._fig(conn, living))
     per = _period(conn)
     flow = _money(conn, day, _INFLOWS, to=actor_id)
     if flow > 0 or _money(conn, day, (_KICKUP,), frm=actor_id) > 0:

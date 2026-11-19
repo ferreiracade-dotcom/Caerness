@@ -37,6 +37,9 @@ def test_each_motive_reads_its_situation():
     # a seat to a junior man: his capo is far junior to him in years inducted
     c.execute("UPDATE org_seats SET inducted_day=? WHERE actor_id=? AND org_actor_id=?", (DAY - 15 * 365, w.soldier, w.org))
     c.execute("UPDATE org_seats SET inducted_day=? WHERE actor_id=? AND org_actor_id=?", (DAY - 365, w.capo, w.org))
+    assert _pressure(w)[1]["passed_over"] == 0, "no one is passed over until a seat is filled"
+    from engine.org_lifecycle import RISE_REASON, mark_for_history
+    mark_for_history(c, w.capo, RISE_REASON, DAY - 30)
     assert _pressure(w)[1]["passed_over"] > 0.5
     # an open hit naming the soldier, known to him
     orgs.add_agenda(c, w.boss, "hit", DAY + 3, subject_kind="actor", subject_id=w.soldier, metadata={"known_to": [w.soldier]})
@@ -61,7 +64,7 @@ def test_each_motive_reads_its_situation():
     assert _pressure(w)[1]["revenge"] > 0.5
     # grievance reads his resentment of the capo
     rel(c, w.soldier, w.capo, resentment=70)
-    assert 0.6 < _pressure(w)[1]["grievance"] < 0.8
+    assert 0.4 < _pressure(w)[1]["grievance"] < 0.6  # 0.7 squared
 
 
 def test_reasons_add_up():

@@ -3927,6 +3927,16 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; utility span the choice's own pressure moves it over the floor"
+  },
+  "motive_seat_memory_days": {
+   "default": 365,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how long a unit leader's rise to the seat still counts as a man having been passed over"
   }
  },
  "pools": {

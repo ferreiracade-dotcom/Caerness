@@ -19,12 +19,11 @@ import json
 import sqlite3
 
 from . import ledger, org_motives, outfit_motives as om
-from .design import figure
+from .org_motives import _fig as figure
 from .org_choices import register_agenda_action, register_choice, register_executor
 from .org_lifecycle import fill_unit_leader, mark_for_history
 from .orgs import add_agenda, clamp01, head_of, is_living, kind_rules, resolve_agenda, seat_of
 from .relationships import adjust_relationship
-from .world_package import outfit_rules, package_for
 
 FAMILY = "family"
 REMOVE, START = om.REMOVE, om.START
@@ -70,7 +69,7 @@ def remove_candidates(conn: sqlite3.Connection, actor_id: int, org: int, day: in
     tie_row = om._rel(conn, actor_id, head)
     tie = clamp01(float(tie_row["trust"]) / 100.0) if tie_row is not None else 0.0
     push = max(parts.get("fear", 0.0), parts.get("boss_wants_it", 0.0))
-    ask = clamp01(caution * (0.5 + 0.5 * tie) * (1.0 - 0.5 * push))
+    ask = clamp01((1.0 - (1.0 - caution) * (1.0 - tie)) * (1.0 - 0.5 * push))  # caution or a tie to the boss alone leads him to ask
     return [
         {"kind": "seek_permission", "utility": _utility(conn, ask), "rationale": why + " He asks the boss first.", "payload": payload,
          "target_actor_id": head, "risk": 0.2},
@@ -182,12 +181,22 @@ def execute_hit(conn, actor_id, kind, payload, day):
 
 
 def hunt_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
+    """Hunt the killer, or let it lie: the less the boss wanted the capo gone, and the more he valued the capo against the killer
+    (his respect for each), the more likely a hunt."""
     meta = json.loads(item["metadata_json"] or "{}")
+    killer = int(item["subject_id"])
     wants = float(meta.get("boss_wants") or 0.0)
-    payload = {"killer": int(item["subject_id"]), "org": meta.get("org")}
+
+    def valued(a):
+        r = om._rel(conn, actor_id, a)
+        return max(0.01, clamp01(float(r["respect"]) / 100.0)) if r is not None else 0.01
+
+    lost, kept = valued(meta.get("victim")), valued(killer)
+    hunt = (1.0 - wants) * lost / (lost + kept)
+    payload = {"killer": killer, "org": meta.get("org")}
     return [
-        {"kind": "order_hunt", "utility": _utility(conn, 1.0 - wants), "rationale": f"Has {_name(conn, item['subject_id'])} hunted.", "payload": payload},
-        {"kind": "let_it_lie", "utility": _utility(conn, wants), "rationale": f"Lets the killing by {_name(conn, item['subject_id'])} pass.", "payload": payload},
+        {"kind": "order_hunt", "utility": _utility(conn, hunt), "rationale": f"Has {_name(conn, killer)} hunted.", "payload": payload},
+        {"kind": "let_it_lie", "utility": _utility(conn, 1.0 - hunt), "rationale": f"Lets the killing by {_name(conn, killer)} pass.", "payload": payload},
     ]
 
 
@@ -237,7 +246,7 @@ def start_candidates(conn: sqlite3.Connection, actor_id: int, org: int, day: int
         return []
     loc, pool, opp = best
     p, parts = org_motives.pressure(conn, actor_id, day, START)
-    label = (outfit_rules(package_for(conn)).get("line_kinds") or {}).get(pool, pool)
+    label = (org_motives._sphere_data(conn).get("line_kinds") or {}).get(pool, pool)
     place = conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0]
     return [{"kind": START, "utility": _utility(conn, p), "cost": cost, "risk": 0.3,
              "rationale": f"Weighs starting {label} in {place} (pressure {p:.2f}).",
@@ -262,8 +271,8 @@ def execute_start_racket(conn: sqlite3.Connection, actor_id: int, kind: str, pay
     loyalty = om._drive(conn, actor_id, "loyalty")
     greed = float(seat["greed"])
     hidden = 1 if org_motives._roll(conn, actor_id, int(day), "hidden") < greed / (greed + loyalty + caution) else 0
-    holder = int(seat["superior_actor_id"]) if seat["role_key"] in (outfit_rules(package_for(conn)).get("under_patron") or ["associate"]) and seat["superior_actor_id"] else int(actor_id)
-    label = (outfit_rules(package_for(conn)).get("line_kinds") or {}).get(pool, pool)
+    holder = int(seat["superior_actor_id"]) if seat["role_key"] in (org_motives._sphere_data(conn).get("under_patron") or ["associate"]) and seat["superior_actor_id"] else int(actor_id)
+    label = (org_motives._sphere_data(conn).get("line_kinds") or {}).get(pool, pool)
     place = conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0]
     conn.execute(
         """INSERT INTO org_lines(holding_id,unit_id,holder_actor_id,description,location_id,weekly_take,hidden,started_day)

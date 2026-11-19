@@ -25,7 +25,7 @@ import sqlite3
 from typing import Callable
 
 from .design import figure, run_seed
-from .orgs import clamp01, kind_rules, seats_of
+from .orgs import clamp01, kind_rules as _kind_rules, seats_of
 from .world_package import outfit_rules, package_for
 
 Motive = Callable[[sqlite3.Connection, int, int], float]
@@ -61,8 +61,37 @@ def _value(conn: sqlite3.Connection, spec, default: float = 0.0) -> float:
     return default if v is None else float(v)
 
 
+_SNAP: dict = {"key": None, "kinds": {}, "sphere": None}
+
+
+def db_key(conn: sqlite3.Connection):
+    """Which database this connection is on (a cache key that survives a freed connection's address being reused)."""
+    return (id(conn), conn.execute("PRAGMA database_list").fetchone()[2])
+
+
+def _snap(conn: sqlite3.Connection) -> dict:
+    """Package data read once per connection and day (the weekly roll runs for every seated man on every review, and
+    reading the package's files and rules each time was the hot path of a long advance)."""
+    r = conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()
+    key = (db_key(conn), None if r is None else int(r[0]))
+    if _SNAP["key"] != key:
+        _SNAP.update(key=key, kinds={}, sphere=None)
+    return _SNAP
+
+
+def kind_rules(conn: sqlite3.Connection, org_actor_id: int) -> dict:
+    """`orgs.kind_rules`, kept for the day."""
+    kinds = _snap(conn)["kinds"]
+    if org_actor_id not in kinds:
+        kinds[org_actor_id] = _kind_rules(conn, org_actor_id)
+    return kinds[org_actor_id]
+
+
 def _sphere_data(conn: sqlite3.Connection) -> dict:
-    return outfit_rules(package_for(conn))
+    snap = _snap(conn)
+    if snap["sphere"] is None:
+        snap["sphere"] = outfit_rules(package_for(conn))
+    return snap["sphere"]
 
 
 def spec_for(conn: sqlite3.Connection, actor_id: int, choice: str) -> tuple[dict, object] | None:
@@ -166,16 +195,34 @@ def _review_scale(conn: sqlite3.Connection, actor_id: int, day: int) -> float:
     return max(1, min(7, int(day) - int(row[0]))) / 7.0
 
 
+_CEILINGS: dict = {"db": None, "by": {}}
+CEILING_DAYS = 28  # how long a man's ceiling (base rate x temperament) is reused; drives and roles move slowly
+
+
+def _ceiling(conn: sqlite3.Connection, actor_id: int, day: int, choice: str) -> float:
+    """base rate x temperament for a man, reused for CEILING_DAYS (the weekly roll runs for every seated man on every review)."""
+    dk = db_key(conn)
+    if _CEILINGS["db"] != dk:
+        _CEILINGS.update(db=dk, by={})
+    k = (int(actor_id), choice)
+    ent = _CEILINGS["by"].get(k)
+    if ent is None or not 0 <= int(day) - ent[0] < CEILING_DAYS:
+        found = spec_for(conn, actor_id, choice)
+        base = 0.0 if found is None else _base_rate(conn, found)
+        ent = (int(day), 0.0 if base <= 0.0 else base * _temperament(conn, actor_id, found))
+        _CEILINGS["by"][k] = ent
+    return ent[1]
+
+
 def should_choose(conn: sqlite3.Connection, actor_id: int, day: int, choice: str) -> bool:
     """Does he consider this choice today? One draw against the weekly chance, scaled to the days since his last review.
     The draw is compared with the ceiling (base rate x temperament) first, so most men are settled by it alone."""
-    found = spec_for(conn, actor_id, choice)
-    if found is None:
+    ceiling = _ceiling(conn, actor_id, day, choice)
+    if ceiling <= 0.0:
         return False
     scale = _review_scale(conn, actor_id, day)
     roll = _roll(conn, actor_id, day, choice)
-    base = _base_rate(conn, found)
-    temper = _temperament(conn, actor_id, found)
-    if base <= 0.0 or roll >= base * temper * scale:
+    if roll >= ceiling * scale:
         return False
-    return roll < base * pressure(conn, actor_id, day, choice)[0] * temper * scale
+    found = spec_for(conn, actor_id, choice)
+    return roll < _base_rate(conn, found) * pressure(conn, actor_id, day, choice)[0] * _temperament(conn, actor_id, found) * scale

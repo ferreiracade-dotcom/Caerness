@@ -28,13 +28,14 @@ def open_world() -> World:
     import engine.simulation  # noqa: F401  (registers the org provider and the mob's choices)
     w = World()
     w.conn = conn = connect(path)
-    row = conn.execute(
+    rows = conn.execute(
         """SELECT s.actor_id,s.superior_actor_id,s.unit_id,s.org_actor_id FROM org_seats s
            WHERE s.role_key='soldier' AND s.status='active' AND s.unit_id IN
              (SELECT unit_id FROM org_seats WHERE role_key='soldier' AND status='active' GROUP BY unit_id HAVING COUNT(*)>=3)
-           ORDER BY s.actor_id LIMIT 1""").fetchone()
+           ORDER BY s.actor_id""").fetchall()
+    from engine import orgs, outfit_motives as om
+    row = next(r for r in rows if len(om._places(conn, orgs.seat_of(conn, int(r[0]), int(r[3])))) >= 3)
     w.soldier, w.capo, w.unit, w.org = (int(row[0]), int(row[1]), int(row[2]), int(row[3]))
-    from engine import orgs
     w.boss = orgs.head_of(conn, w.org)
     w.ground = int(conn.execute("SELECT ground_location_id FROM org_units WHERE id=?", (w.unit,)).fetchone()[0])
     return w

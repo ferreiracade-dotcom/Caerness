@@ -30,9 +30,9 @@ def _effects(row):
 
 
 def _siblings(w):
-    c = w.conn
-    parent = c.execute("SELECT parent_location_id FROM locations WHERE id=?", (w.ground,)).fetchone()[0]
-    return [int(r[0]) for r in c.execute("SELECT id FROM locations WHERE parent_location_id=? AND id<>? ORDER BY id", (parent, w.ground))]
+    """The places beside his ground that he may start in (his ground is the first of his places)."""
+    from engine import orgs, outfit_motives as om
+    return om._places(w.conn, orgs.seat_of(w.conn, w.soldier, w.org))[1:]
 
 
 def _crowd(w, loc, n=300):

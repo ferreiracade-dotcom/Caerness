@@ -21,7 +21,8 @@ from typing import Any, Callable
 
 from . import org_motives
 from .decision_runtime import DecisionCandidate, register_provider
-from .orgs import is_living, kind_rules, register_reason_check, seats_of
+from .org_motives import kind_rules
+from .orgs import is_living, register_reason_check, seats_of
 
 CandidateFn = Callable[[sqlite3.Connection, int, int, int], list[dict]]
 ExecuteFn = Callable[[sqlite3.Connection, int, str, dict, int], dict]
@@ -52,8 +53,18 @@ def clear_choices() -> None:
     AGENDA_ACTIONS.clear()
 
 
-def _declared_seats(conn: sqlite3.Connection, actor_id: int) -> list[tuple[int, str]]:
-    """(organisation id, kind) of each active seat whose kind the package declares in orgs.json."""
+_DECLARED: dict = {"db": None, "by": {}}
+
+
+def _declared_seats(conn: sqlite3.Connection, actor_id: int, day: int | None = None) -> list[tuple[int, str]]:
+    """(organisation id, kind) of each active seat whose kind the package declares in orgs.json. Reused for a week on the
+    reviews that only ask for a reason (`day` given); the provider asks fresh."""
+    dk = org_motives.db_key(conn)
+    if _DECLARED["db"] != dk:
+        _DECLARED.update(db=dk, by={})
+    ent = _DECLARED["by"].get(int(actor_id))
+    if day is not None and ent is not None and 0 <= int(day) - ent[0] < 7:
+        return ent[1]
     out = []
     for s in seats_of(conn, actor_id):
         if s["status"] != "active":
@@ -62,16 +73,32 @@ def _declared_seats(conn: sqlite3.Connection, actor_id: int) -> list[tuple[int, 
         if not kind_rules(conn, org):
             continue
         out.append((org, str(conn.execute("SELECT org_kind FROM org_profiles WHERE org_actor_id=?", (org,)).fetchone()[0])))
+    if day is not None:
+        _DECLARED["by"][int(actor_id)] = (int(day), out)
     return out
+
+
+_OFFERS: dict = {"key": None, "offers": {}}
+
+
+def _offers(conn: sqlite3.Connection, fn, actor_id: int, org: int, day: int, choice: str) -> list[dict]:
+    """A choice's offers for a man today, worked out once (the reason check and the provider both ask)."""
+    key = (org_motives.db_key(conn), int(day))
+    if _OFFERS["key"] != key:
+        _OFFERS.update(key=key, offers={})
+    k = (int(actor_id), org, choice)
+    if k not in _OFFERS["offers"]:
+        _OFFERS["offers"][k] = fn(conn, int(actor_id), org, int(day))
+    return _OFFERS["offers"][k]
 
 
 def _reason(conn: sqlite3.Connection, actor_id: int, day: int) -> bool:
     """A reason to leave the quiet routine: one of his organisations' choices passes today's weekly roll."""
     if not _CHOICES:
         return False
-    for org, kind in _declared_seats(conn, actor_id):
+    for org, kind in _declared_seats(conn, actor_id, day):
         for choice, fn in _CHOICES.get(kind, {}).items():
-            if org_motives.should_choose(conn, actor_id, day, choice) and fn(conn, int(actor_id), org, int(day)):
+            if org_motives.should_choose(conn, actor_id, day, choice) and _offers(conn, fn, actor_id, org, day, choice):
                 return True  # the roll passed and there is something he could actually do
     return False
 
@@ -103,7 +130,7 @@ def org_provider(conn: sqlite3.Connection, actor_id: int, tier: str, day: int, e
         for choice, fn in sorted(_CHOICES.get(kind, {}).items()):
             if not org_motives.should_choose(conn, actor_id, day, choice):
                 continue
-            for offer in fn(conn, int(actor_id), org, int(day)):
+            for offer in _offers(conn, fn, actor_id, org, day, choice):
                 out.append(_candidate("org", org, offer, choice))
     if AGENDA_ACTIONS:
         for item in conn.execute("SELECT * FROM org_agenda WHERE actor_id=? AND status='open' AND due_day<=? ORDER BY id",
@@ -124,6 +151,7 @@ register_provider("org", org_provider)
 
 def execute(conn: sqlite3.Connection, actor_id: int, kind: str, payload: dict, day: int) -> dict:
     """Carry out a chosen action by its registered executor. Returns {"summary": ...}."""
+    _OFFERS["key"] = None  # what he can do changes with what is done
     fn = _EXECUTORS.get(str(kind))
     if fn is None:
         return {"summary": f"Nothing is registered to carry out {kind}.", "blocked": True}
