@@ -103,6 +103,10 @@ Core work, in priority order:
 
 **Real people.** Real public figures (artists, athletes, national and state politicians, celebrities) appear as fully as possible in their real public roles, and push on events. The run is an **alternate timeline**: each real figure starts from who they really were in that year (career, standing, character), then the run may diverge (an added tour date, a different political fight) when the world gives them reason to. Dated real events happen by default unless the run plausibly changes them. One limit: no invented crimes, scandals or private wrongdoing for a real person; shady acts belong to fictional characters only. Saint Jude's own local officials are fictional, as the city is.
 
+**Beyond the city: widening circles.** Saint Jude is simulated in full. The state, the nation and the world run at B depth, with the real timeline as the default track (politics, markets, real companies, events). Detail grows to C where the protagonist goes (running for the Senate makes the state race and Trenton a C; national politics makes Washington one). The circles feed each other: national shocks reach the city, and his moves outside come home (the Machine, the families, federal pressure). Real companies follow their real histories by default and may diverge from the protagonist's stakes and moves.
+
+**Hindsight within competence.** The protagonist may invest in or act on anything real that exists in that year, but only what he or the people around him (advisers, partners, his circle, the press he reads) would plausibly come across, and his judgement and nerve shape the bet. The player's knowledge of the future is never a free win.
+
 **Conscience follows the character, not the owner.** The engine models the protagonist's own beliefs and temperament. Inner costs (guilt, confession, a strained marriage, hardening over time) follow who he is, and they can change over a life.
 
 ### 5.3 Order of work
