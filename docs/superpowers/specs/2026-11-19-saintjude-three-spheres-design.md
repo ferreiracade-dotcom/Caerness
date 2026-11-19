@@ -58,7 +58,14 @@ Almost everything in this document is engine work, not Saint Jude work. The thre
 
 Checked: football is core + business + sport, with light politics and underworld; medieval is core + politics + business + war + underworld.
 
-**World-only code lives in its package.** The engine never names a world. A package may carry its own rule code (e.g. `worlds/saintjude/rules/`), listed in its manifest, plugged into points the engine offers (opening builders, choices, money flows, law kinds). Mechanisms that would serve another world stay in the engine as layers; only one world's content moves. For Saint Jude this means `outfit_opening.py`, `law_opening.py` and any other Saint-Jude-only builder move into the package, done with the org-core refactor while the branch is unshipped (the builder chooses the hook mechanism). **Caerness is shelved for now** and its world-only code (cultivation, elixir, Hollow, groundbinding) stays where it is. Caerness is the eventual final package where the layers built for the other worlds come together, so it gets moved when that work begins.
+**Packages are data and prose; the engine never names a world** (revised the same day after review). A package holds its bible, rulebook and creation sections, and JSON (organisations, roles, flows, law, timeline, real people, prices, circles). It holds no code. Builders are generic and read the package's data:
+- `outfit_opening.py` becomes a generic "organisation with units" builder: a head, executives, unit leaders on grounds, members dealt to units, hangers-on spread over members, with every role word, count figure and age band from data. The same builder makes a family, a company (CEO, vice-presidents, department heads, staff, contractors) or a duchy (duke, council, knights with manors, men-at-arms, retainers).
+- `law_opening.py` is already almost entirely generic (jurisdictions, agencies, precincts, officials, connected people from `law.json`) and stays in the engine as the "authorities" builder. Its Pad step becomes opening arrangements from data (§5.1 arrangements).
+- The officials it seats (judges, DA, police chiefs) are **offices**. The politics layer grows from that same office concept rather than adding a second one.
+- **Escape hatch:** if something truly cannot be said in data, a package may carry a small rule module listed in its manifest. Each use is a signal that the engine lacks a general piece, so that question is asked first.
+- Test of the rule: no Saint Jude word (family names, `capo`, `soldier`, `boss`, the Pad) appears in `engine/`.
+
+This is done with the org-core refactor (role rules from data), while the branch is unshipped. **Caerness is shelved for now** and is the known exception: its world-only code (cultivation, elixir, Hollow, groundbinding) stays in `engine/` until Caerness work resumes. Caerness is the eventual final package where the layers built for the other worlds come together.
 
 ### 5.1 The core (world-agnostic, `engine/orgs*.py`)
 
