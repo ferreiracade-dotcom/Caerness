@@ -17,7 +17,7 @@ class DecisionCandidate:
     action_kind: str
     utility: float
     rationale: str
-    execution_kind: str  # domain_action | interaction | underworld_action | merchant_action | growth_action | war_action | political_action | hold
+    execution_kind: str  # domain_action | interaction | underworld_action | merchant_action | org_action | growth_action | war_action | political_action | hold
     target_actor_id: int | None = None
     interaction_type: str | None = None
     payload: dict[str, Any] = field(default_factory=dict)

@@ -10,6 +10,7 @@ from typing import Iterable
 from .relationships import ensure_reciprocal_relationship
 from .db import connect, init_db
 from .decisions import decide_actor
+from . import org_choices, outfit_choices  # noqa: F401  (importing registers the `org` decision provider and the mob's choices)
 from .interactions import process_due_interactions
 from .information import register_event_information, process_information, next_information_due_day
 from .memory import process_due_memory, next_memory_due_day

@@ -3507,6 +3507,426 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; Part I 11 puts women in the connected roles around the Life (a bookkeeper, a bar owner who looks away), so the share is lower than for gangs"
+  },
+  "motive_grievance_w": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: resentment toward his capo"
+  },
+  "motive_squeezed_w": {
+   "default": 0.85,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: what he kicks up above the ladder, or his line taken"
+  },
+  "motive_passed_over_w": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: a capo seat went to a man with less standing or fewer years"
+  },
+  "motive_blocked_ambition_w": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: his ambition against his capo's age and hold on the crew"
+  },
+  "motive_fear_w": {
+   "default": 0.9,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: he believes his capo means to kill him or give him up"
+  },
+  "motive_capo_weak_w": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: his capo is held, sick, losing money or losing ground"
+  },
+  "motive_outside_push_w": {
+   "default": 0.55,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: another capo, the underboss or a man tied to him wants the capo gone"
+  },
+  "motive_revenge_w": {
+   "default": 0.9,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: his capo harmed his kin or a close friend"
+  },
+  "motive_boss_wants_it_w": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: the boss resents the capo more than he respects him"
+  },
+  "motive_thin_ground_w": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: few lines for the people on his ground"
+  },
+  "motive_unclaimed_pool_w": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: a pool share held by no family"
+  },
+  "motive_vacancy_w": {
+   "default": 0.7,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: a line on his ground lost its holder or closed in the last 90 days"
+  },
+  "motive_demand_w": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: the pool's trend"
+  },
+  "motive_low_heat_w": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: the precinct is on his family's Pad and no open case names him"
+  },
+  "motive_means_w": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: his cash against a start cost, and men to work it"
+  },
+  "motive_need_w": {
+   "default": 0.7,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: his earnings against his living standard"
+  },
+  "motive_appetite_w": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0-1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; motive weight: ambition and greed, less caution"
+  },
+  "remove_superior_base_week": {
+   "default": 0.01,
+   "range": null,
+   "unit": "chance per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; base chance a man weighs taking out his capo at full pressure"
+  },
+  "start_racket_base_week": {
+   "default": 0.01,
+   "range": null,
+   "unit": "chance per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; base chance a soldier or capo weighs starting a racket at full pressure"
+  },
+  "associate_start_base_week": {
+   "default": 0.003,
+   "range": null,
+   "unit": "chance per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; base chance an associate weighs starting a small line at full pressure"
+  },
+  "temper_remove_aggression": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; temperament: aggression raises the chance he weighs taking out his capo"
+  },
+  "temper_remove_risk": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; temperament: risk tolerance raises it"
+  },
+  "temper_remove_loyalty": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; temperament: loyalty lowers it"
+  },
+  "temper_start_ambition": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; temperament: ambition raises the chance he weighs starting a racket"
+  },
+  "temper_start_greed": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; temperament: greed raises it"
+  },
+  "temper_start_risk": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; temperament: risk tolerance raises it"
+  },
+  "temperament_factor_lo": {
+   "default": 0.25,
+   "range": null,
+   "unit": "factor",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; lower bound of a man's temperament factor on a choice's chance"
+  },
+  "temperament_factor_hi": {
+   "default": 2.0,
+   "range": null,
+   "unit": "factor",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; upper bound of a man's temperament factor on a choice's chance"
+  },
+  "motive_recent_days": {
+   "default": 90,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far back a vacancy, a closed line or a lost holder still counts"
+  },
+  "motive_years_full": {
+   "default": 10,
+   "range": null,
+   "unit": "years",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man senior to his capo by this many years is fully passed over"
+  },
+  "motive_workers_needed": {
+   "default": 2,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; associates under a man that make his means to start a racket complete"
+  },
+  "motive_homicide_talk_floor": {
+   "default": 0.3,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; least fear of a capo held on a homicide charge (who talks)"
+  },
+  "racket_start_cost": {
+   "default": 3000,
+   "range": null,
+   "unit": "USD",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; what a soldier or capo puts up to start a racket"
+  },
+  "racket_start_cost_associate": {
+   "default": 300,
+   "range": null,
+   "unit": "USD",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; what an associate puts up to start a small line"
+  },
+  "racket_line_weekly": {
+   "default": 250,
+   "range": null,
+   "unit": "USD/week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weekly take of a started line before the opportunity scales it (0.5 to 1.5 times)"
+  },
+  "racket_line_weekly_associate": {
+   "default": 40,
+   "range": null,
+   "unit": "USD/week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weekly take of an associate's started line before the opportunity scales it"
+  },
+  "seat_fill_delay_days": {
+   "default": 3,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; days from a unit leader's death to the head filling the seat; also the due time of a request to the head"
+  },
+  "warn_resentment_delta": {
+   "default": 12,
+   "range": null,
+   "unit": "relationship points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; resentment a warned capo feels toward the man who wanted him gone"
+  },
+  "refuse_resentment_delta": {
+   "default": 8,
+   "range": null,
+   "unit": "relationship points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; resentment toward the boss from a man refused leave"
+  },
+  "unasked_kill_standing": {
+   "default": 0.25,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; standing a man gains for a killing the boss wanted done without asking"
+  },
+  "org_choice_utility_base": {
+   "default": 8.0,
+   "range": null,
+   "unit": "utility",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; utility floor of an organisation choice offered after its weekly roll passed (above ordinary options)"
+  },
+  "org_choice_utility_span": {
+   "default": 10.0,
+   "range": null,
+   "unit": "utility",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; utility span the choice's own pressure moves it over the floor"
   }
  },
  "pools": {

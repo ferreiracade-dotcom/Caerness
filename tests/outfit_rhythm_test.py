@@ -47,8 +47,16 @@ def test_routine_week_writes_no_decision_rows():
     ids = _member_ids(conn)
     assert len(ids) > 1000
     before = _decision_rows(conn, ids)
+    # A routine week: no man's weekly roll for a choice (org_motives) passes, so nobody has a reason to choose. (When one
+    # does pass and he has something to do, he decides and leaves rows: tests/outfit_choices_test.py.)
+    from engine import org_motives
+    real_roll = org_motives._roll
+    org_motives._roll = lambda conn, actor_id, day, stream: 0.99
     t0 = time.time()
-    advance_connection(conn, 28)
+    try:
+        advance_connection(conn, 28)
+    finally:
+        org_motives._roll = real_roll
     conn.commit()
     print(f"28-day outfit advance: {time.time() - t0:.1f}s")
     assert _decision_rows(conn, ids) - before == 0

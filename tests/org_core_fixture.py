@@ -30,7 +30,8 @@ ORGS = {
     "arrangement_kinds": {"envelope": {"flow": "gift", "ledger_kind": "bribe", "purpose": "an envelope"}},
     "kinds": {
         "firm": {"sphere": "commerce", "head": "chair", "unit_leader": "manager", "purse_roles": ["manager"], "courtship_scan": True,
-                 "labels": {"chair": "Chair", "manager": "Manager", "clerk": "Clerk"}, "rules": []},
+                 "labels": {"chair": "Chair", "manager": "Manager", "clerk": "Clerk"}, "rules": [],
+                 "motives": {"promote": [{"name": "restless", "weight": 0.8}]}, "rates": {"promote": {"base_rate": 1.0}}},
         "solo": {"sphere": "commerce", "head": "owner", "unit_leader": None, "courtship_scan": True,
                  "labels": {"owner": "Owner", "hand": "Hand"}, "rules": []},
     },

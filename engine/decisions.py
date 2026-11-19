@@ -200,6 +200,12 @@ def candidate_to_proposal(candidate, evaluation_id: int | None = None) -> Decisi
             effects={**common, "merchant_action_kind":candidate.action_kind, "merchant_action_payload":candidate.payload},
             target_actor_id=candidate.target_actor_id, interaction_type=candidate.interaction_type,
         )
+    if candidate.execution_kind == "org_action":
+        return DecisionProposal(
+            "org_action", candidate.utility, candidate.rationale,
+            effects={**common, "org_action_kind":candidate.action_kind, "org_action_payload":candidate.payload},
+            target_actor_id=candidate.target_actor_id, interaction_type=candidate.interaction_type,
+        )
     if candidate.execution_kind == "growth_action":
         return DecisionProposal(
             "growth_action", candidate.utility, candidate.rationale,
@@ -330,6 +336,14 @@ def apply_decision(conn: sqlite3.Connection, actor_id: int, tier: str, day: int,
             effects.get("merchant_action_payload") if isinstance(effects.get("merchant_action_payload"), dict) else {}, day,
         )
         outcome_parts.append(str(mresult.get("summary") or "Merchant action resolved."))
+    elif proposal.action_type == "org_action":
+        effects = proposal.effects or {}
+        from .org_choices import execute as execute_org_action
+        oresult = execute_org_action(
+            conn, actor_id, str(effects.get("org_action_kind") or ""),
+            effects.get("org_action_payload") if isinstance(effects.get("org_action_payload"), dict) else {}, day,
+        )
+        outcome_parts.append(str(oresult.get("summary") or "Organisation action resolved."))
     elif proposal.action_type == "growth_action":
         effects = proposal.effects or {}
         from .growth import execute_growth_action

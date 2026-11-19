@@ -303,7 +303,7 @@
   "bolita_tax": "a tax on the bolita banks",
   "drugs_by_dial_and_ground": "a drug market on the family's ground"
  },
- "note": "Every count, share and cadence not printed in the bible is a Design proposal in design_figures.json, referred to here by figure key. male_share and induction values (cadence_days now lives in orgs.json) are Design proposals recorded here (Part I 12.4: women never inducted; the rest unsourced). Ground names are rows of the Saint Jude locations table, from Part III 4.0-4.4 and the gazetteer. Motives are added in Tasks 10 and 11.",
+ "note": "Every count, share and cadence not printed in the bible is a Design proposal in design_figures.json, referred to here by figure key. male_share and induction values (cadence_days now lives in orgs.json) are Design proposals recorded here (Part I 12.4: women never inducted; the rest unsourced). Ground names are rows of the Saint Jude locations table, from Part III 4.0-4.4 and the gazetteer. Motives (open sets: a reader and a weight figure each), choice rates and temperament, the roles that may weigh a choice and the racket start figures are Task 10's; cadence is in orgs.json.",
  "connected": [
   {
    "institution": "First Harbor National Bank",
@@ -467,5 +467,171 @@
    "note": "Part V 7.2"
   }
  ],
- "connected_note": "Counts are Design proposals (unsourced) except where the bible names the seat; level 4 for each (spec 6.3); the Jewish financiers and bookmakers belong to no family (Part III 5.5) and tied_to is the family they deal with. A seeded head of the named institution is used first."
+ "connected_note": "Counts are Design proposals (unsourced) except where the bible names the seat; level 4 for each (spec 6.3); the Jewish financiers and bookmakers belong to no family (Part III 5.5) and tied_to is the family they deal with. A seeded head of the named institution is used first.",
+ "motives": {
+  "remove_superior": [
+   {
+    "name": "grievance",
+    "weight": "motive_grievance_w"
+   },
+   {
+    "name": "squeezed",
+    "weight": "motive_squeezed_w"
+   },
+   {
+    "name": "passed_over",
+    "weight": "motive_passed_over_w"
+   },
+   {
+    "name": "blocked_ambition",
+    "weight": "motive_blocked_ambition_w"
+   },
+   {
+    "name": "fear",
+    "weight": "motive_fear_w"
+   },
+   {
+    "name": "capo_weak",
+    "weight": "motive_capo_weak_w"
+   },
+   {
+    "name": "outside_push",
+    "weight": "motive_outside_push_w"
+   },
+   {
+    "name": "revenge",
+    "weight": "motive_revenge_w"
+   },
+   {
+    "name": "boss_wants_it",
+    "weight": "motive_boss_wants_it_w"
+   }
+  ],
+  "start_racket": [
+   {
+    "name": "thin_ground",
+    "weight": "motive_thin_ground_w"
+   },
+   {
+    "name": "unclaimed_pool",
+    "weight": "motive_unclaimed_pool_w"
+   },
+   {
+    "name": "vacancy",
+    "weight": "motive_vacancy_w"
+   },
+   {
+    "name": "demand",
+    "weight": "motive_demand_w"
+   },
+   {
+    "name": "low_heat",
+    "weight": "motive_low_heat_w"
+   },
+   {
+    "name": "means",
+    "weight": "motive_means_w"
+   },
+   {
+    "name": "need",
+    "weight": "motive_need_w"
+   },
+   {
+    "name": "appetite",
+    "weight": "motive_appetite_w"
+   }
+  ]
+ },
+ "rates": {
+  "remove_superior": {
+   "base_rate": "remove_superior_base_week",
+   "temperament": [
+    {
+     "trait": "aggression",
+     "weight": "temper_remove_aggression"
+    },
+    {
+     "trait": "risk_tolerance",
+     "weight": "temper_remove_risk"
+    },
+    {
+     "trait": "loyalty",
+     "weight": "temper_remove_loyalty",
+     "sign": -1
+    }
+   ]
+  },
+  "start_racket": {
+   "base_rate": "start_racket_base_week",
+   "base_rate_by_role": {
+    "associate": "associate_start_base_week"
+   },
+   "temperament": [
+    {
+     "trait": "ambition",
+     "weight": "temper_start_ambition"
+    },
+    {
+     "trait": "greed",
+     "weight": "temper_start_greed"
+    },
+    {
+     "trait": "risk_tolerance",
+     "weight": "temper_start_risk"
+    }
+   ]
+  }
+ },
+ "choice_roles": {
+  "remove_superior": [
+   "soldier"
+  ],
+  "start_racket": [
+   "soldier",
+   "associate",
+   "capo"
+  ]
+ },
+ "racket_pools": [
+  "numbers_it",
+  "bookmaking",
+  "cards_dice",
+  "loansharking",
+  "protection",
+  "theft",
+  "chop_shops",
+  "untaxed_cigarettes_liquor"
+ ],
+ "start_racket": {
+  "cost": {
+   "default": "racket_start_cost",
+   "by_role": {
+    "associate": "racket_start_cost_associate"
+   }
+  },
+  "line_weekly": {
+   "default": "racket_line_weekly",
+   "by_role": {
+    "associate": "racket_line_weekly_associate"
+   }
+  }
+ },
+ "living": {
+  "soldier": "living_soldier",
+  "capo": "living_capo",
+  "associate": "living_associate"
+ },
+ "demand_sources": {
+  "numbers_it": {
+   "table": "pick3",
+   "column": "city_handle_m"
+  },
+  "theft": {
+   "table": "theft_drift",
+   "column": "crew_net_m"
+  }
+ },
+ "under_patron": [
+  "associate"
+ ]
 }

@@ -194,7 +194,8 @@ def has_reason_to_choose(conn: sqlite3.Connection, actor_id: int, day: int) -> b
 
 
 def _open_agenda_due(conn: sqlite3.Connection, actor_id: int, day: int) -> bool:
-    return conn.execute("SELECT 1 FROM org_agenda WHERE actor_id=? AND status='open' AND due_day<=? LIMIT 1",
+    # a `history` item is a note for the GM, not something he has to act on
+    return conn.execute("SELECT 1 FROM org_agenda WHERE actor_id=? AND status='open' AND due_day<=? AND kind<>'history' LIMIT 1",
                         (int(actor_id), int(day))).fetchone() is not None
 
 
