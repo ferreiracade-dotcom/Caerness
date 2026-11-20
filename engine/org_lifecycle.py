@@ -79,5 +79,9 @@ def fill_unit_leader(conn: sqlite3.Connection, unit_id: int, day: int) -> int | 
     conn.execute("UPDATE institution_memberships SET role_text=? WHERE institution_actor_id=? AND member_actor_id=? AND membership_kind='member'",
                  (f"{label} in the {name}", org, new))
     orgs.set_level(conn, new, level, int(day), org)
+    orgs.imposed(conn, new)  # he and the men who now answer to him are looked at again tomorrow
+    for (sub,) in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND superior_actor_id=? AND status='active' AND actor_id<>?",
+                               (org, new, new)).fetchall():
+        orgs.imposed(conn, int(sub))
     mark_for_history(conn, new, RISE_REASON, int(day))
     return new

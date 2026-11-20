@@ -81,7 +81,8 @@ def test_agenda_item_makes_a_weekly_man_daily_until_it_passes():
     assert seen[:6] == list(range(today + 1, today + 7)), seen
     due_plus = today + 5 + 7
     after = [d for d in seen if d > due_plus]
-    assert len(after) >= 2 and after[1] - after[0] == 7, seen
+    # the daily stretch ends, he goes back to his own day of the week (one review on the way), then weekly from there
+    assert len(after) >= 3 and after[-1] - after[-2] == 7 and after[1] - after[0] < 7, seen
     assert orgs.has_reason_to_choose(conn, soldier, today + 5)
     orgs.resolve_agenda(conn, aid, today + 6)
     assert not orgs.has_reason_to_choose(conn, soldier, today + 6)

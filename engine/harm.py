@@ -176,6 +176,10 @@ def record_harm(
         )
         conn.execute("UPDATE harm_incidents SET condition_id=? WHERE id=?", (condition_id, incident_id))
 
+    if outcome != "fatal" and intent_class != "controlled":
+        from .orgs import imposed  # a man in an organisation who was hurt is looked at again tomorrow
+        imposed(conn, actor_id)
+
     src_org = (metadata or {}).get("source_organization_id")
     if src_org is not None and outcome in ("fatal", "persistent"):
         # A rival's blow on a boss's kin or a lieutenant is remembered by the outfit that lost them.

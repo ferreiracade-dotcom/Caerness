@@ -22,7 +22,7 @@ from . import ledger, org_motives, outfit_motives as om
 from .org_motives import _fig as figure
 from .org_choices import register_agenda_action, register_choice, register_executor
 from .org_lifecycle import fill_unit_leader, mark_for_history
-from .orgs import add_agenda, clamp01, head_of, is_living, kind_rules, resolve_agenda, seat_of
+from .orgs import add_agenda, clamp01, head_of, imposed, is_living, kind_rules, resolve_agenda, seat_of
 from .relationships import adjust_relationship
 
 FAMILY = "family"
@@ -98,6 +98,9 @@ def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sancti
     record_harm(conn, int(victim), source_kind="org_action", source_ref_id=int(day) * 10_000_000 + int(killer), severity=100.0,
                 intent_class="lethal", location_id=loc[0] if loc else None, outcome_override="fatal",
                 metadata={"offender_actor_id": int(killer), "public": False})
+    for (sub,) in conn.execute("SELECT actor_id FROM org_seats WHERE superior_actor_id=? AND status='active' AND actor_id<>?",
+                               (int(victim), int(victim))).fetchall():
+        imposed(conn, int(sub))  # the men who answered to him are looked at again tomorrow
     conn.execute("UPDATE org_seats SET status='dead', left_day=? WHERE actor_id=? AND status='active'", (int(day), int(victim)))
     mark_for_history(conn, int(victim), f"killed by {_name(conn, killer)}", int(day))
     mark_for_history(conn, int(killer), f"killed {_name(conn, victim)}", int(day))

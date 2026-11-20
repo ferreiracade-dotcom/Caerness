@@ -129,6 +129,29 @@ def stand_in_for(conn: sqlite3.Connection, actor_id: int, org_actor_id: int) -> 
     return None
 
 
+_OFFSETS: dict = {"key": None, "by": {}}
+
+
+def review_offset(conn: sqlite3.Connection, actor_id: int, cadence: int) -> int:
+    """Which day of his cadence a person is reviewed on: random.Random(f"{run_seed}:review_offset:{actor_id}").randrange(cadence),
+    stable for the person, so nearly everyone seated on the opening day does not review on the same day."""
+    key = db_key(conn)
+    if _OFFSETS["key"] != key:
+        _OFFSETS.update(key=key, by={})
+    k = (int(actor_id), int(cadence))
+    if k not in _OFFSETS["by"]:
+        _OFFSETS["by"][k] = random.Random(f"{run_seed(conn)}:review_offset:{int(actor_id)}").randrange(int(cadence))
+    return _OFFSETS["by"][k]
+
+
+def next_review_day(conn: sqlite3.Connection, actor_id: int, day: int, cadence: int) -> int:
+    """The first day after `day` that falls on the person's own day of his cadence (daily people: tomorrow). A man reviewed
+    on his day is next reviewed `cadence` days later; one who was sped up for a while goes back to his own day."""
+    if int(cadence) <= 1:
+        return int(day) + 1
+    return int(day) + 1 + (review_offset(conn, actor_id, cadence) - (int(day) + 1)) % int(cadence)
+
+
 def set_level(conn: sqlite3.Connection, actor_id: int, level: int, day: int, org_actor_id: int | None = None) -> None:
     """Level 4 people are ACTIVE and reviewed daily, level 3 STRATEGIC and reviewed weekly; both run a quiet routine.
     With `org_actor_id` the level is that seat's; the person's simulation level is the highest of his active seats."""
@@ -144,7 +167,7 @@ def set_level(conn: sqlite3.Connection, actor_id: int, level: int, day: int, org
            VALUES (?,?,?,?,?,1)
            ON CONFLICT(actor_id) DO UPDATE SET tier=excluded.tier,cadence_days=excluded.cadence_days,
              last_review_day=excluded.last_review_day,next_review_day=excluded.next_review_day,quiet_routine=1""",
-        (int(actor_id), tier, cadence, int(day), int(day) + cadence),
+        (int(actor_id), tier, cadence, int(day), next_review_day(conn, actor_id, int(day), cadence)),
     )
 
 
@@ -244,6 +267,20 @@ def speed_up(conn: sqlite3.Connection, actor_id: int, until_day: int) -> None:
            WHERE actor_id=?""",
         (int(until_day), today + 1, int(actor_id)),
     )
+
+
+IMPOSED_DAYS = 3  # how long a man whose life was just disturbed is reviewed daily
+
+
+def imposed(conn: sqlite3.Connection, actor_id: int) -> None:
+    """Something was done to this man (harm, a threat, custody, his superior's death, his line taken): he is reviewed
+    tomorrow and daily for a few days. A no-op for anyone without an organisation seat, and where organisations do not exist."""
+    try:
+        seated = conn.execute("SELECT 1 FROM org_seats WHERE actor_id=? AND status='active' LIMIT 1", (int(actor_id),)).fetchone()
+    except sqlite3.OperationalError:
+        return
+    if seated is not None:
+        speed_up(conn, actor_id, _today(conn) + IMPOSED_DAYS)
 
 
 def add_agenda(conn: sqlite3.Connection, actor_id: int, kind: str, due_day: int, *, subject_kind: str | None = None,

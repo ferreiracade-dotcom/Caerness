@@ -302,8 +302,9 @@ def _review_actor(conn: sqlite3.Connection, profile: sqlite3.Row, day: int) -> N
         forced = profile["forced_tier"] == "ACTIVE" and profile["forced_until_day"] is not None and int(profile["forced_until_day"]) >= day
         q_cadence = 1 if forced else int(profile["cadence_days"])
         if not has_reason_to_choose(conn, actor_id, day):
+            from .orgs import next_review_day
             conn.execute("UPDATE simulation_profiles SET last_review_day=?, next_review_day=? WHERE actor_id=?",
-                         (day, day + q_cadence, actor_id))
+                         (day, next_review_day(conn, actor_id, day, q_cadence), actor_id))
             return
         cadence = q_cadence
 
@@ -344,6 +345,9 @@ def _review_actor(conn: sqlite3.Connection, profile: sqlite3.Row, day: int) -> N
         conn.execute("INSERT OR REPLACE INTO runtime_flags(key,value,updated_at) VALUES ('last_role_experience_error',?,CURRENT_TIMESTAMP)",(str(exc),))
 
     next_day = day + cadence
+    if cadence > 1 and _quiet_routine(profile) and cadence == int(profile["cadence_days"]):
+        from .orgs import next_review_day
+        next_day = next_review_day(conn, actor_id, day, cadence)  # a quiet-routine man keeps his own day of the week
     conn.execute(
         """UPDATE simulation_profiles
            SET last_review_day=?, next_review_day=?
