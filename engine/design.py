@@ -92,6 +92,14 @@ def _has_table(conn: sqlite3.Connection) -> bool:
     return bool(conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='design_figures'").fetchone())
 
 
+_EPOCH = [0]
+
+
+def epoch() -> int:
+    """Changes whenever a figure is drawn or moved, so a reader that keeps figures knows when to read them again."""
+    return _EPOCH[0]
+
+
 def _seed_day(conn: sqlite3.Connection) -> tuple[int, int]:
     row = conn.execute("SELECT rng_seed,current_day FROM world_state WHERE id=1").fetchone()
     return int(row[0] or 0), int(row[1] or 0)
@@ -172,6 +180,7 @@ def draw_all(conn: sqlite3.Connection) -> dict[str, int]:
                      (k, day, None, float(value), seed, cause))
         drawn += 1
     derived = _recompute_derived(conn, figs, env, day, seed, cause="opening: derived from drawn inputs")
+    _EPOCH[0] += 1
     return {"design_figures_drawn": drawn, "design_figures_derived": derived}
 
 
@@ -234,4 +243,5 @@ def set_figure(conn: sqlite3.Connection, key: str, value: float, *, cause: str, 
                  (key, day, old, v, seed, note))
     env = {r[0]: r[1] for r in conn.execute("SELECT key,value FROM design_figures WHERE value IS NOT NULL AND kind!='derived'")}
     _recompute_derived(conn, figs, env, day, seed, cause=f"derived: {key} moved ({cause})")
+    _EPOCH[0] += 1
     return v

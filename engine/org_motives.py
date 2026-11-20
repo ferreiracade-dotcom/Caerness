@@ -24,9 +24,9 @@ import random
 import sqlite3
 from typing import Callable
 
-from .design import figure, run_seed
-from .orgs import clamp01, kind_rules as _kind_rules, seats_of
-from .world_package import outfit_rules, package_for
+from .design import epoch as design_epoch, figure, run_seed
+from .orgs import clamp01, db_key, kind_rules as _kind_rules, seats_of
+from .world_package import org_rules, outfit_rules, package_for
 
 Motive = Callable[[sqlite3.Connection, int, int], float]
 _READERS: dict[tuple[str, str], Motive] = {}
@@ -41,14 +41,23 @@ def register_motive(choice: str, name: str, fn: Motive) -> None:
 
 def _fig(conn: sqlite3.Connection, key: str, default=None):
     """A design figure's run value. Read straight from the drawn figures when it is there (the weekly roll runs for every
-    seated man, and `figure` parses the package's figure file on each call); otherwise through `figure`."""
+    seated man, and `figure` parses the package's figure file on each call) and kept until a figure moves; otherwise
+    through `figure`."""
+    snap = _snap(conn)
+    if snap["epoch"] != design_epoch():
+        snap["figs"].clear()
+        snap["epoch"] = design_epoch()
+    k = str(key)
+    if k in snap["figs"]:
+        return snap["figs"][k]
     try:
-        r = conn.execute("SELECT value,text_value FROM design_figures WHERE key=?", (str(key),)).fetchone()
+        r = conn.execute("SELECT value,text_value FROM design_figures WHERE key=?", (k,)).fetchone()
     except sqlite3.OperationalError:
         r = None
     if r is not None:
-        return r[0] if r[0] is not None else json.loads(r[1])
-    return figure(conn, str(key), default=default)
+        v = snap["figs"][k] = r[0] if r[0] is not None else json.loads(r[1])
+        return v
+    return figure(conn, k, default=default)
 
 
 def _value(conn: sqlite3.Connection, spec, default: float = 0.0) -> float:
@@ -61,29 +70,35 @@ def _value(conn: sqlite3.Connection, spec, default: float = 0.0) -> float:
     return default if v is None else float(v)
 
 
-_SNAP: dict = {"key": None, "kinds": {}, "sphere": None}
-
-
-def db_key(conn: sqlite3.Connection):
-    """Which database this connection is on (a cache key that survives a freed connection's address being reused)."""
-    return (id(conn), conn.execute("PRAGMA database_list").fetchone()[2])
+_SNAP: dict = {"key": None, "kinds": {}, "sphere": None, "declared": None, "figs": {}, "epoch": -1, "seed_day": None, "seed": 0}
 
 
 def _snap(conn: sqlite3.Connection) -> dict:
-    """Package data read once per connection and day (the weekly roll runs for every seated man on every review, and
-    reading the package's files and rules each time was the hot path of a long advance)."""
-    r = conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()
-    key = (db_key(conn), None if r is None else int(r[0]))
+    """Package data read once per database (the weekly roll runs for every seated man on every review, and reading the
+    package's files and rules each time was the hot path of a long advance). The package's data does not change in a
+    run; a kind's rules are kept once found; a design figure is kept until a figure moves (design.EPOCH)."""
+    key = db_key(conn)
     if _SNAP["key"] != key:
-        _SNAP.update(key=key, kinds={}, sphere=None)
+        _SNAP.update(key=key, kinds={}, sphere=None, declared=None, figs={}, epoch=-1, seed_day=None)
     return _SNAP
+
+
+def declared_kinds(conn: sqlite3.Connection) -> frozenset:
+    """The organisation kinds the package's orgs.json declares, read once a day."""
+    snap = _snap(conn)
+    if snap.get("declared") is None:
+        snap["declared"] = frozenset(str(k) for k in (org_rules(package_for(conn)).get("kinds") or {}))
+    return snap["declared"]
 
 
 def kind_rules(conn: sqlite3.Connection, org_actor_id: int) -> dict:
     """`orgs.kind_rules`, kept for the day."""
     kinds = _snap(conn)["kinds"]
     if org_actor_id not in kinds:
-        kinds[org_actor_id] = _kind_rules(conn, org_actor_id)
+        rules = _kind_rules(conn, org_actor_id)
+        if not rules:  # an organisation that is not there yet, or whose kind the package does not declare: ask again later
+            return rules
+        kinds[org_actor_id] = rules
     return kinds[org_actor_id]
 
 
@@ -183,7 +198,10 @@ def weekly_chance(conn: sqlite3.Connection, actor_id: int, day: int, choice: str
 
 def _roll(conn: sqlite3.Connection, actor_id: int, day: int, stream: str) -> float:
     """The one point where a seeded draw is made for a man's choices (tests patch it). Same seed, actor, day, stream: same draw."""
-    return random.Random(f"{run_seed(conn)}:org:{stream}:{int(actor_id)}:{int(day)}").random()
+    snap = _snap(conn)
+    if snap.get("seed_day") != int(day):  # the seed is read once a day, not once per draw
+        snap["seed_day"], snap["seed"] = int(day), run_seed(conn)
+    return random.Random(f"{snap['seed']}:org:{stream}:{int(actor_id)}:{int(day)}").random()
 
 
 def _review_scale(conn: sqlite3.Connection, actor_id: int, day: int) -> float:
@@ -220,8 +238,10 @@ def should_choose(conn: sqlite3.Connection, actor_id: int, day: int, choice: str
     ceiling = _ceiling(conn, actor_id, day, choice)
     if ceiling <= 0.0:
         return False
-    scale = _review_scale(conn, actor_id, day)
     roll = _roll(conn, actor_id, day, choice)
+    if roll >= ceiling:  # the scale is at most 1: no need to ask when his last review was
+        return False
+    scale = _review_scale(conn, actor_id, day)
     if roll >= ceiling * scale:
         return False
     found = spec_for(conn, actor_id, choice)

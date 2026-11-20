@@ -5056,4 +5056,6 @@ CREATE INDEX IF NOT EXISTS idx_org_seats_org_role ON org_seats(org_actor_id, rol
 CREATE INDEX IF NOT EXISTS idx_org_seats_superior ON org_seats(superior_actor_id);
 CREATE INDEX IF NOT EXISTS idx_org_lines_holder ON org_lines(holder_actor_id);
 CREATE INDEX IF NOT EXISTS idx_org_agenda_actor ON org_agenda(actor_id, status, due_day);
+CREATE INDEX IF NOT EXISTS idx_org_money_day ON org_money(day, kind);
+CREATE INDEX IF NOT EXISTS idx_org_money_to ON org_money(to_actor_id, day);
 CREATE INDEX IF NOT EXISTS idx_crime_reports_status ON crime_reports(status);

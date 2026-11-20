@@ -19,8 +19,32 @@ def clamp01(v: float) -> float:
     return max(0.0, min(1.0, float(v)))
 
 
+def db_key(conn: sqlite3.Connection):
+    """Which database this connection is on (a cache key that survives a freed connection's address being reused).
+    Kept on the connection object when it can hold an attribute (the engine's own can), so the hot paths do not ask
+    SQLite each time; a plain sqlite3 connection asks every time."""
+    k = getattr(conn, "_org_db_key", None)
+    if k is None:
+        k = (id(conn), conn.execute("PRAGMA database_list").fetchone()[2])
+        try:
+            conn._org_db_key = k
+        except AttributeError:
+            pass
+    return k
+
+
+_KINDS: dict = {"key": None, "by": {}}
+
+
 def kind_rules(conn: sqlite3.Connection, org_actor_id: int) -> dict:
-    """The orgs.json entry for this organisation's kind, plus its own additions (`rules` are appended); {} when it has none."""
+    """The orgs.json entry for this organisation's kind, plus its own additions (`rules` are appended); {} when it has none.
+    Kept per database once found (the package's data does not change in a run and an organisation's kind does not either)."""
+    key = db_key(conn)
+    if _KINDS["key"] != key:
+        _KINDS.update(key=key, by={})
+    hit = _KINDS["by"].get(org_actor_id)
+    if hit is not None:
+        return hit
     row = conn.execute("SELECT org_kind,package_key FROM org_profiles WHERE org_actor_id=?", (int(org_actor_id),)).fetchone()
     if row is None:
         return {}
@@ -31,6 +55,7 @@ def kind_rules(conn: sqlite3.Connection, org_actor_id: int) -> dict:
     out = dict(kind)
     extra = (rules.get("orgs") or {}).get(row[1]) or {}
     out["rules"] = list(kind.get("rules") or []) + list(extra.get("rules") or [])
+    _KINDS["by"][int(org_actor_id)] = out
     return out
 
 
@@ -190,7 +215,10 @@ def register_reason_check(fn) -> None:
 
 
 def has_reason_to_choose(conn: sqlite3.Connection, actor_id: int, day: int) -> bool:
-    return any(check(conn, int(actor_id), int(day)) for check in _REASON_CHECKS)
+    for check in _REASON_CHECKS:
+        if check(conn, int(actor_id), int(day)):
+            return True
+    return False
 
 
 def _open_agenda_due(conn: sqlite3.Connection, actor_id: int, day: int) -> bool:

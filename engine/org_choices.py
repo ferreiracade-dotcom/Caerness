@@ -21,8 +21,7 @@ from typing import Any, Callable
 
 from . import org_motives
 from .decision_runtime import DecisionCandidate, register_provider
-from .org_motives import kind_rules
-from .orgs import is_living, register_reason_check, seats_of
+from .orgs import is_living, register_reason_check
 
 CandidateFn = Callable[[sqlite3.Connection, int, int, int], list[dict]]
 ExecuteFn = Callable[[sqlite3.Connection, int, str, dict, int], dict]
@@ -53,29 +52,13 @@ def clear_choices() -> None:
     AGENDA_ACTIONS.clear()
 
 
-_DECLARED: dict = {"db": None, "by": {}}
-
-
 def _declared_seats(conn: sqlite3.Connection, actor_id: int, day: int | None = None) -> list[tuple[int, str]]:
-    """(organisation id, kind) of each active seat whose kind the package declares in orgs.json. Reused for a week on the
-    reviews that only ask for a reason (`day` given); the provider asks fresh."""
-    dk = org_motives.db_key(conn)
-    if _DECLARED["db"] != dk:
-        _DECLARED.update(db=dk, by={})
-    ent = _DECLARED["by"].get(int(actor_id))
-    if day is not None and ent is not None and 0 <= int(day) - ent[0] < 7:
-        return ent[1]
-    out = []
-    for s in seats_of(conn, actor_id):
-        if s["status"] != "active":
-            continue
-        org = int(s["org_actor_id"])
-        if not kind_rules(conn, org):
-            continue
-        out.append((org, str(conn.execute("SELECT org_kind FROM org_profiles WHERE org_actor_id=?", (org,)).fetchone()[0])))
-    if day is not None:
-        _DECLARED["by"][int(actor_id)] = (int(day), out)
-    return out
+    """(organisation id, kind) of each active seat whose kind the package declares in orgs.json, in organisation order.
+    One query, asked fresh each time (so a seat given or lost is seen at once); the declared kinds are read once a day."""
+    kinds = org_motives.declared_kinds(conn)
+    return [(int(r[0]), str(r[1])) for r in conn.execute(
+        """SELECT s.org_actor_id,p.org_kind FROM org_seats s JOIN org_profiles p ON p.org_actor_id=s.org_actor_id
+           WHERE s.actor_id=? AND s.status='active' ORDER BY s.org_actor_id""", (int(actor_id),)) if r[1] in kinds]
 
 
 _OFFERS: dict = {"key": None, "offers": {}}
