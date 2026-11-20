@@ -98,7 +98,7 @@ def test_cautious_man_asks_first():
     from engine import org_choices, orgs
     assert orgs.is_living(c, w.capo)
     kinds = {x.action_kind for x in org_choices.org_provider(c, w.boss, "STRATEGIC", DAY + 10, {})}
-    assert {"grant_leave", "refuse_leave", "warn_capo"} <= kinds, kinds
+    assert {"grant_leave", "refuse_leave", "warn_unit_leader"} <= kinds, kinds
     # a bold man with real fear of the capo acts alone
     b = open_world()
     drives(b.conn, b.soldier, risk_tolerance=0.95, aggression=0.9)
@@ -169,10 +169,10 @@ def test_capo_killing_refills_seat_and_reparents_crew():
     ask = _open(c, w.boss, "grant_or_refuse")[0]
     org_choices.execute(c, w.boss, "grant_leave", {"agenda_id": ask["id"], "applicant": mates[0], "target": w.capo, "org": w.org}, DAY)
     org_choices.execute(c, mates[0], "hit", {"target": w.capo, "sanctioned": True, "agenda_id": _open(c, mates[0], "hit")[0]["id"]}, DAY + 1)
-    fill = _open(c, w.boss, "fill_capo_seat")
+    fill = _open(c, w.boss, "fill_unit_leader_seat")
     assert len(fill) == 1 and fill[0]["subject_id"] == w.unit
     row = run_review(c, w.boss, DAY + 10)
-    assert _effects(row)["org_action_kind"] == "fill_capo_seat", dict(row)
+    assert _effects(row)["org_action_kind"] == "fill_unit_leader_seat", dict(row)
     new = int(c.execute("SELECT leader_actor_id FROM org_units WHERE id=?", (w.unit,)).fetchone()[0])
     assert new != w.capo and orgs.is_living(c, new) and new in mates
     seat = orgs.seat_of(c, new, w.org)
@@ -182,7 +182,7 @@ def test_capo_killing_refills_seat_and_reparents_crew():
         assert orgs.superior_of(c, a, w.org) == new, a
     for line in held:
         assert c.execute("SELECT holder_actor_id,unit_id FROM org_lines WHERE id=?", (line,)).fetchone()[:] == (new, w.unit)
-    assert not _open(c, w.boss, "fill_capo_seat")
+    assert not _open(c, w.boss, "fill_unit_leader_seat")
     role = c.execute("SELECT role_text FROM institution_memberships WHERE member_actor_id=? AND institution_actor_id=?", (new, w.org)).fetchone()[0]
     assert role.startswith("Capo"), role
 

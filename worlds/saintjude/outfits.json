@@ -478,7 +478,7 @@
     "weight": "motive_fear_w"
    },
    {
-    "name": "capo_weak",
+    "name": "leader_weak",
     "weight": "motive_capo_weak_w"
    },
    {
@@ -490,7 +490,7 @@
     "weight": "motive_revenge_w"
    },
    {
-    "name": "boss_wants_it",
+    "name": "head_wants_it",
     "weight": "motive_boss_wants_it_w"
    }
   ],

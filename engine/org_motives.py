@@ -70,7 +70,8 @@ def _value(conn: sqlite3.Connection, spec, default: float = 0.0) -> float:
     return default if v is None else float(v)
 
 
-_SNAP: dict = {"key": None, "kinds": {}, "sphere": None, "declared": None, "figs": {}, "epoch": -1, "seed_day": None, "seed": 0}
+_SNAP: dict = {"key": None, "kinds": {}, "sphere": None, "declared": None, "figs": {}, "epoch": -1, "seed_day": None, "seed": 0,
+               "choices": {}, "flows": None}
 
 
 def _snap(conn: sqlite3.Connection) -> dict:
@@ -79,7 +80,7 @@ def _snap(conn: sqlite3.Connection) -> dict:
     run; a kind's rules are kept once found; a design figure is kept until a figure moves (design.EPOCH)."""
     key = db_key(conn)
     if _SNAP["key"] != key:
-        _SNAP.update(key=key, kinds={}, sphere=None, declared=None, figs={}, epoch=-1, seed_day=None)
+        _SNAP.update(key=key, kinds={}, sphere=None, declared=None, figs={}, epoch=-1, seed_day=None, choices={}, flows=None)
     return _SNAP
 
 
@@ -89,6 +90,40 @@ def declared_kinds(conn: sqlite3.Connection) -> frozenset:
     if snap.get("declared") is None:
         snap["declared"] = frozenset(str(k) for k in (org_rules(package_for(conn)).get("kinds") or {}))
     return snap["declared"]
+
+
+def kind_choices(conn: sqlite3.Connection, kind: str) -> tuple[str, ...]:
+    """The choices the package lists for an organisation kind (orgs.json `kinds[k].choices`), read once."""
+    by = _snap(conn)["choices"]
+    if kind not in by:
+        by[kind] = tuple(str(c) for c in ((org_rules(package_for(conn)).get("kinds") or {}).get(kind) or {}).get("choices") or ())
+    return by[kind]
+
+
+def _flow_sets(conn: sqlite3.Connection) -> dict[str, tuple[str, ...]]:
+    snap = _snap(conn)
+    if snap["flows"] is None:
+        data = org_rules(package_for(conn))
+        inflow = [str(f) for f in (data.get("flows") or [])[:1]]
+        up: list[str] = []
+        for k in (data.get("kinds") or {}).values():
+            for r in k.get("rules") or []:
+                if r.get("type") == "paid_by_patron" and r["flow"] not in inflow:
+                    inflow.append(str(r["flow"]))
+                if r.get("type") == "to_superior" and r["flow"] not in up:
+                    up.append(str(r["flow"]))
+        snap["flows"] = {"in": tuple(inflow), "up": tuple(up)}
+    return snap["flows"]
+
+
+def inflow_flows(conn: sqlite3.Connection) -> tuple[str, ...]:
+    """The money flows that bring a man his own earnings: the package's first flow (from outside) and what a patron pays out."""
+    return _flow_sets(conn)["in"]
+
+
+def upward_flows(conn: sqlite3.Connection) -> tuple[str, ...]:
+    """The flows a man passes up to the one over him (rules of type to_superior)."""
+    return _flow_sets(conn)["up"]
 
 
 def kind_rules(conn: sqlite3.Connection, org_actor_id: int) -> dict:

@@ -40,6 +40,24 @@ def test_undeclared_kind_offers_nothing():
         org_choices.clear_choices()
 
 
+def test_layer_choice_goes_to_the_kinds_whose_data_lists_it():
+    """register_layer_choice names no kind: the firm kind gets "promote" only when its package data lists it in `choices`."""
+    from engine import org_choices, org_motives
+    f = fx.build()
+    conn = f.conn
+    org_choices.register_layer_choice("promote", lambda c, a, o, d: [{"utility": 9.0, "payload": {"org": o}}], lambda c, a, k, p, d: {"summary": "ok"})
+    org_motives.register_motive("promote", "restless", lambda c, a, d: 1.0)
+    old = _forced()
+    try:
+        assert org_choices.org_provider(conn, f.clerks[0], "STRATEGIC", 10, {}) == []  # the kind lists no choices
+        org_motives._snap(conn)["choices"]["firm"] = ("promote",)  # as orgs.json `kinds.firm.choices` would
+        org_choices._RESOLVED["db"] = None
+        assert len(org_choices.org_provider(conn, f.clerks[0], "STRATEGIC", 10, {})) == 1
+    finally:
+        org_motives._roll = old
+        org_choices.clear_choices()
+
+
 def test_toy_kind_choice_round_trip():
     """Register a "firm" choice with one motive; a forced roll makes an org_action decision that executes it."""
     from engine import org_choices, org_motives

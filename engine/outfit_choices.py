@@ -1,17 +1,19 @@
-"""What a made man can choose (Saint Jude): start a racket, ask leave to take out his capo or do it, and the agenda a
-killing or a request puts on the boss's and others' lists.
+"""What a seated man can choose in the underworld layer: start a racket, ask leave to take out his unit leader or do it, and
+the agenda a killing or a request puts on the head's and others' lists.
 
 The generic machinery (provider, weekly roll, pressure) is `org_choices` and `org_motives`; this module registers the
-mob's choices for the family kind and the actions for the agenda items they create:
+layer's choices for every organisation kind whose package data lists them (orgs.json `kinds[k].choices`) and the actions
+for the agenda items they create. It names no role: the roles are the kind's head and unit leader (orgs.json), the roles
+that may weigh a choice and the roles whose lines pass to a patron are the sphere data's (`choice_roles`, `under_patron`).
 
-  choices:  start_racket  (soldiers, capos, associates)       remove_superior (soldiers; two paths)
+  choices:  start_racket  (roles in choice_roles)                 remove_superior (roles in choice_roles; two paths)
   offers:   start_racket | seek_permission | remove_superior
-  agenda:   grant_or_refuse (the boss: grant_leave, refuse_leave, warn_capo)   hit (carry it out)
-            discipline_hunt (the boss: order_hunt, let_it_lie)                 fill_capo_seat (the boss fills the seat)
+  agenda:   grant_or_refuse (the head: grant_leave, refuse_leave, warn_unit_leader)   hit (carry it out)
+            discipline_hunt (the head: order_hunt, let_it_lie)                        fill_unit_leader_seat (the head fills the seat)
 
-Tasks 11-13 add the rest of the agenda. A man weighs taking out his capo only after his weekly roll passed; then he
-either asks the boss (`seek_permission`, an agenda item for the boss) or acts alone (`remove_superior`), the first
-the more the more cautious and tied to the boss he is, the second the more fear or the boss's own wish pushes him.
+Tasks 11-13 add the rest of the agenda. A man weighs taking out his unit leader only after his weekly roll passed; then he
+either asks the head (`seek_permission`, an agenda item for the head) or acts alone (`remove_superior`), the first
+the more the more cautious and tied to the head he is, the second the more fear or the head's own wish pushes him.
 """
 from __future__ import annotations
 
@@ -20,12 +22,11 @@ import sqlite3
 
 from . import ledger, org_motives, outfit_motives as om
 from .org_motives import _fig as figure
-from .org_choices import register_agenda_action, register_choice, register_executor
+from .org_choices import register_agenda_action, register_executor, register_layer_choice
 from .org_lifecycle import fill_unit_leader, mark_for_history
 from .orgs import add_agenda, clamp01, head_of, imposed, is_living, kind_rules, resolve_agenda, seat_of
 from .relationships import adjust_relationship
 
-FAMILY = "family"
 REMOVE, START = om.REMOVE, om.START
 
 
@@ -35,6 +36,12 @@ def _utility(conn: sqlite3.Connection, x: float) -> float:
 
 def _delay(conn: sqlite3.Connection) -> int:
     return int(figure(conn, "seat_fill_delay_days", default=3))
+
+
+def _word(conn: sqlite3.Connection, org: int | None, which: str) -> str:
+    """What the package calls the organisation's head or unit leader, lower case ("he asks the <head> first")."""
+    rules = kind_rules(conn, int(org)) if org is not None else {}
+    return str((rules.get("labels") or {}).get(rules.get(which)) or which.replace("_", " ")).lower()
 
 
 def _name(conn: sqlite3.Connection, actor_id: int | None) -> str:
@@ -50,47 +57,47 @@ def _open_item(conn: sqlite3.Connection, actor_id: int, kind: str, subject: int 
     return conn.execute(q, a).fetchone()
 
 
-# ---- the two paths to taking out a capo ----
+# ---- the two paths to taking out a leader ----
 
 def remove_candidates(conn: sqlite3.Connection, actor_id: int, org: int, day: int) -> list[dict]:
     ctx = om.context(conn, actor_id, REMOVE)
     if ctx is None or ctx[0] != org:
         return []
-    _, seat, capo, head = ctx
-    if _open_item(conn, actor_id, "hit", capo) or (head is not None and _open_item(conn, head, "grant_or_refuse", actor_id)):
+    _, seat, leader, head = ctx
+    if _open_item(conn, actor_id, "hit", leader) or (head is not None and _open_item(conn, head, "grant_or_refuse", actor_id)):
         return []
     p, parts = org_motives.pressure(conn, actor_id, day, REMOVE)
     top = ", ".join(k for k, v in sorted(parts.items(), key=lambda kv: -kv[1]) if v > 0.2) or "no one reason"
-    payload = {"org": org, "target": capo, "unit_id": seat["unit_id"]}
-    why = f"Weighs taking out {_name(conn, capo)} (pressure {p:.2f}: {top})."
-    if head is None or head == capo:
-        return [{"kind": REMOVE, "utility": _utility(conn, 1.0), "rationale": why, "payload": {**payload, "sanctioned": False}, "target_actor_id": capo, "risk": 0.8}]
+    payload = {"org": org, "target": leader, "unit_id": seat["unit_id"]}
+    why = f"Weighs taking out {_name(conn, leader)} (pressure {p:.2f}: {top})."
+    if head is None or head == leader:
+        return [{"kind": REMOVE, "utility": _utility(conn, 1.0), "rationale": why, "payload": {**payload, "sanctioned": False}, "target_actor_id": leader, "risk": 0.8}]
     caution = 1.0 - om._drive(conn, actor_id, "risk_tolerance")
     tie_row = om._rel(conn, actor_id, head)
     tie = clamp01(float(tie_row["trust"]) / 100.0) if tie_row is not None else 0.0
-    push = max(parts.get("fear", 0.0), parts.get("boss_wants_it", 0.0))
-    ask = clamp01((1.0 - (1.0 - caution) * (1.0 - tie)) * (1.0 - 0.5 * push))  # caution or a tie to the boss alone leads him to ask
+    push = max(parts.get("fear", 0.0), parts.get("head_wants_it", 0.0))
+    ask = clamp01((1.0 - (1.0 - caution) * (1.0 - tie)) * (1.0 - 0.5 * push))  # caution or a tie to the head alone leads him to ask
     return [
-        {"kind": "seek_permission", "utility": _utility(conn, ask), "rationale": why + " He asks the boss first.", "payload": payload,
+        {"kind": "seek_permission", "utility": _utility(conn, ask), "rationale": why + f" He asks the {_word(conn, org, 'head')} first.", "payload": payload,
          "target_actor_id": head, "risk": 0.2},
         {"kind": REMOVE, "utility": _utility(conn, 1.0 - ask), "rationale": why + " He does it himself.",
-         "payload": {**payload, "sanctioned": False}, "target_actor_id": capo, "risk": 0.8},
+         "payload": {**payload, "sanctioned": False}, "target_actor_id": leader, "risk": 0.8},
     ]
 
 
 def execute_seek_permission(conn: sqlite3.Connection, actor_id: int, kind: str, payload: dict, day: int) -> dict:
-    org, capo = int(payload["org"]), int(payload["target"])
+    org, leader = int(payload["org"]), int(payload["target"])
     head = head_of(conn, org)
     if head is None or not is_living(conn, head):
         return {"summary": "There was no one to ask.", "blocked": True}
     add_agenda(conn, head, "grant_or_refuse", int(day) + _delay(conn), subject_kind="actor", subject_id=int(actor_id),
-               metadata={"target": capo, "org": org})
-    return {"summary": f"{_name(conn, actor_id)} asked {_name(conn, head)} for leave to be rid of {_name(conn, capo)}."}
+               metadata={"target": leader, "org": org})
+    return {"summary": f"{_name(conn, actor_id)} asked {_name(conn, head)} for leave to be rid of {_name(conn, leader)}."}
 
 
 def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sanctioned: bool) -> str:
     """A killing inside the organisation: the victim dies through the harm system, his seats go dead; a dead unit leader
-    puts `fill_capo_seat` on the boss's list; an unsanctioned killing puts `discipline_hunt` there unless the boss wanted
+    puts `fill_unit_leader_seat` on the head's list; an unsanctioned killing puts `discipline_hunt` there unless the head wanted
     it (then the killer gains standing). History is flagged for both."""
     from .harm import record_harm
     seats = conn.execute("SELECT org_actor_id,role_key,unit_id FROM org_seats WHERE actor_id=? AND status='active'", (int(victim),)).fetchall()
@@ -108,15 +115,15 @@ def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sancti
         org = int(s["org_actor_id"])
         head = head_of(conn, org)
         if s["role_key"] == kind_rules(conn, org).get("unit_leader") and s["unit_id"] and head is not None:
-            add_agenda(conn, head, "fill_capo_seat", int(day) + _delay(conn), subject_kind="unit", subject_id=int(s["unit_id"]), metadata={"org": org})
+            add_agenda(conn, head, "fill_unit_leader_seat", int(day) + _delay(conn), subject_kind="unit", subject_id=int(s["unit_id"]), metadata={"org": org})
         if not sanctioned and head is not None and head not in (int(killer), int(victim)):
-            wants = om.boss_wants(conn, head, int(victim))
+            wants = om.head_wants(conn, head, int(victim))
             if wants > 0.5:
                 conn.execute("UPDATE org_seats SET standing=standing+? WHERE actor_id=? AND org_actor_id=?",
                              (float(figure(conn, "unasked_kill_standing", default=0.25)), int(killer), org))
             else:
                 add_agenda(conn, head, "discipline_hunt", int(day) + _delay(conn), subject_kind="actor", subject_id=int(killer),
-                           metadata={"victim": int(victim), "org": org, "boss_wants": wants})
+                           metadata={"victim": int(victim), "org": org, "head_wants": wants})
     return f"{_name(conn, killer)} killed {_name(conn, victim)}."
 
 
@@ -127,19 +134,19 @@ def execute_remove(conn: sqlite3.Connection, actor_id: int, kind: str, payload: 
     return {"summary": kill(conn, int(actor_id), victim, int(day), sanctioned=bool(payload.get("sanctioned")))}
 
 
-# ---- agenda: the boss's and the killer's lists ----
+# ---- agenda: the head's and the killer's lists ----
 
 def grant_or_refuse_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
     meta = json.loads(item["metadata_json"] or "{}")
-    applicant, capo = int(item["subject_id"]), int(meta["target"])
-    wants = om.boss_wants(conn, actor_id, capo)
-    tie = om._rel(conn, actor_id, capo)
+    applicant, leader = int(item["subject_id"]), int(meta["target"])
+    wants = om.head_wants(conn, actor_id, leader)
+    tie = om._rel(conn, actor_id, leader)
     fond = clamp01(float(tie["trust"]) / 100.0) if tie is not None else 0.0
-    payload = {"applicant": applicant, "target": capo, "org": meta.get("org")}
+    payload = {"applicant": applicant, "target": leader, "org": meta.get("org")}
     return [
-        {"kind": "grant_leave", "utility": _utility(conn, wants), "rationale": f"Lets {_name(conn, applicant)} have {_name(conn, capo)}.", "payload": payload},
+        {"kind": "grant_leave", "utility": _utility(conn, wants), "rationale": f"Lets {_name(conn, applicant)} have {_name(conn, leader)}.", "payload": payload},
         {"kind": "refuse_leave", "utility": _utility(conn, 1.0 - wants), "rationale": f"Tells {_name(conn, applicant)} no.", "payload": payload},
-        {"kind": "warn_capo", "utility": _utility(conn, fond * (1.0 - wants)), "rationale": f"Warns {_name(conn, capo)} about {_name(conn, applicant)}.", "payload": payload},
+        {"kind": "warn_unit_leader", "utility": _utility(conn, fond * (1.0 - wants)), "rationale": f"Warns {_name(conn, leader)} about {_name(conn, applicant)}.", "payload": payload},
     ]
 
 
@@ -184,11 +191,11 @@ def execute_hit(conn, actor_id, kind, payload, day):
 
 
 def hunt_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
-    """Hunt the killer, or let it lie: the less the boss wanted the capo gone, and the more he valued the capo against the killer
+    """Hunt the killer, or let it lie: the less the head wanted the leader gone, and the more he valued the leader against the killer
     (his respect for each), the more likely a hunt."""
     meta = json.loads(item["metadata_json"] or "{}")
     killer = int(item["subject_id"])
-    wants = float(meta.get("boss_wants") or 0.0)
+    wants = float(meta.get("head_wants") or 0.0)
 
     def valued(a):
         r = om._rel(conn, actor_id, a)
@@ -225,10 +232,12 @@ def execute_let_lie(conn, actor_id, kind, payload, day):
 
 
 def fill_seat_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
-    return [{"kind": "fill_capo_seat", "utility": _utility(conn, 1.0), "rationale": "Fills the vacant capo's seat.", "payload": {"unit_id": int(item["subject_id"])}}]
+    org = json.loads(item["metadata_json"] or "{}").get("org")
+    return [{"kind": "fill_unit_leader_seat", "utility": _utility(conn, 1.0), "rationale": f"Fills the vacant {_word(conn, org, 'unit_leader')}'s seat.",
+             "payload": {"unit_id": int(item["subject_id"])}}]
 
 
-def execute_fill_capo_seat(conn, actor_id, kind, payload, day):
+def execute_fill_unit_leader_seat(conn, actor_id, kind, payload, day):
     new = fill_unit_leader(conn, int(payload["unit_id"]), int(day))
     _finish(conn, payload, day)
     return {"summary": f"{_name(conn, new)} took the seat." if new is not None else "No one was fit to take the seat."}
@@ -274,7 +283,7 @@ def execute_start_racket(conn: sqlite3.Connection, actor_id: int, kind: str, pay
     loyalty = om._drive(conn, actor_id, "loyalty")
     greed = float(seat["greed"])
     hidden = 1 if org_motives._roll(conn, actor_id, int(day), "hidden") < greed / (greed + loyalty + caution) else 0
-    holder = int(seat["superior_actor_id"]) if seat["role_key"] in (org_motives._sphere_data(conn).get("under_patron") or ["associate"]) and seat["superior_actor_id"] else int(actor_id)
+    holder = int(seat["superior_actor_id"]) if seat["role_key"] in (org_motives._sphere_data(conn).get("under_patron") or []) and seat["superior_actor_id"] else int(actor_id)
     label = (org_motives._sphere_data(conn).get("line_kinds") or {}).get(pool, pool)
     place = conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0]
     conn.execute(
@@ -284,12 +293,12 @@ def execute_start_racket(conn: sqlite3.Connection, actor_id: int, kind: str, pay
     return {"summary": f"{_name(conn, actor_id)} started {label} in {place}, about ${weekly:,.0f} a week" + (", kept from the books." if hidden else ".")}
 
 
-register_choice(FAMILY, REMOVE, remove_candidates, execute_remove)
-register_choice(FAMILY, START, start_candidates, execute_start_racket)
+register_layer_choice(REMOVE, remove_candidates, execute_remove)
+register_layer_choice(START, start_candidates, execute_start_racket)
 for _kind, _fn in (("seek_permission", execute_seek_permission), ("grant_leave", execute_grant), ("refuse_leave", execute_refuse),
-                   ("warn_capo", execute_warn), ("hit", execute_hit), ("order_hunt", execute_order_hunt), ("let_it_lie", execute_let_lie),
-                   ("fill_capo_seat", execute_fill_capo_seat)):
+                   ("warn_unit_leader", execute_warn), ("hit", execute_hit), ("order_hunt", execute_order_hunt), ("let_it_lie", execute_let_lie),
+                   ("fill_unit_leader_seat", execute_fill_unit_leader_seat)):
     register_executor(_kind, _fn)
 for _kind, _fn in (("grant_or_refuse", grant_or_refuse_offers), ("hit", hit_offers), ("discipline_hunt", hunt_offers),
-                   ("fill_capo_seat", fill_seat_offers)):
+                   ("fill_unit_leader_seat", fill_seat_offers)):
     register_agenda_action(_kind, _fn)

@@ -245,12 +245,12 @@ def _holdings(conn, me: int) -> dict:
             "SELECT MIN(capital),AVG(capital),MAX(capital) FROM civilian_enterprises WHERE status='active'").fetchone()
         scale = f"engine money units; businesses in this world hold {lo:.0f}-{hi:.0f} capital, average {mid:.0f}"
     from engine.ledger import balance, scale_word
-    boss = conn.execute(
+    top_org = conn.execute(
         "SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active' AND role_kind IN ('boss','underboss') LIMIT 1",
         (me,)).fetchone()
     spend = {"purse": scale_word(balance(conn, ("person", me)))}
-    if boss:
-        spend["outfit_treasury"] = scale_word(balance(conn, ("outfit", int(boss[0]))))
+    if top_org:
+        spend["outfit_treasury"] = scale_word(balance(conn, ("outfit", int(top_org[0]))))
     if businesses:
         spend["business_cash"] = {b["name"]: scale_word(float(b.get("cash") or 0)) for b in businesses}
     hh_more = int(conn.execute("SELECT COUNT(*) FROM households WHERE head_actor_id=? AND status='active'", (me,)).fetchone()[0]) - (1 if household else 0)

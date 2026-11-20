@@ -1,9 +1,10 @@
 """What a seated man can choose (sphere-free): the decision provider `org`, the registry of choices and agenda actions.
 
-A sphere registers, per organisation kind, the choices its men have: `register_choice(org_kind, choice, candidate_fn,
-execute_fn)`. The provider offers a seated man only the choices registered for the kinds of his seats that the package
-also declares in orgs.json `kinds` (a choice registered for a kind the package does not declare is never offered), and
-a man with seats in two organisations gets each one's choices. A choice is considered only on the days his weekly
+A layer registers, per organisation kind, the choices its men have: `register_choice(org_kind, choice, candidate_fn,
+execute_fn)`; or, with no kind named, `register_layer_choice(choice, candidate_fn, execute_fn)`, which any kind that lists
+the choice in orgs.json `kinds[k].choices` gets. The provider offers a seated man only the choices registered for the kinds
+of his seats that the package also declares in orgs.json `kinds` (a choice registered for a kind the package does not
+declare is never offered), and a man with seats in two organisations gets each one's choices. A choice is considered only on the days his weekly
 roll (`org_motives.should_choose`) says so; open agenda items due today are offered through `AGENDA_ACTIONS`.
 
 `candidate_fn(conn, actor_id, org_actor_id, day) -> list[offer]` and agenda actions `fn(conn, actor_id, agenda_row, day)
@@ -29,12 +30,37 @@ AgendaFn = Callable[[sqlite3.Connection, int, sqlite3.Row, int], list[dict]]
 
 _CHOICES: dict[str, dict[str, CandidateFn]] = {}  # org kind -> choice -> candidate fn
 _EXECUTORS: dict[str, ExecuteFn] = {}
+_LAYER: dict[str, CandidateFn] = {}  # choice -> candidate fn, for every kind whose data lists the choice
+_RESOLVED: dict = {"db": None, "by": {}}  # (org kind) -> {choice: fn}, per database
 AGENDA_ACTIONS: dict[str, AgendaFn] = {}  # agenda kind -> candidate fn; a kind with no entry (history) needs no action
 
 
 def register_choice(org_kind: str, choice: str, candidate_fn: CandidateFn, execute_fn: ExecuteFn) -> None:
     _CHOICES.setdefault(str(org_kind), {})[str(choice)] = candidate_fn
     _EXECUTORS[str(choice)] = execute_fn
+    _RESOLVED["db"] = None
+
+
+def register_layer_choice(choice: str, candidate_fn: CandidateFn, execute_fn: ExecuteFn) -> None:
+    """A choice for every organisation kind whose package data lists it (`kinds[k].choices`)."""
+    _LAYER[str(choice)] = candidate_fn
+    _EXECUTORS[str(choice)] = execute_fn
+    _RESOLVED["db"] = None
+
+
+def _choices_of(conn: sqlite3.Connection, kind: str) -> dict[str, CandidateFn]:
+    """The choices a kind has: those registered for it by name plus the layer's that the package's data lists for it."""
+    dk = org_motives.db_key(conn)
+    if _RESOLVED["db"] != dk:
+        _RESOLVED.update(db=dk, by={})
+    by = _RESOLVED["by"]
+    if kind not in by:
+        merged = dict(_CHOICES.get(kind, {}))
+        for c in org_motives.kind_choices(conn, kind):
+            if c in _LAYER:
+                merged.setdefault(c, _LAYER[c])
+        by[kind] = merged
+    return by[kind]
 
 
 def register_executor(kind: str, execute_fn: ExecuteFn) -> None:
@@ -48,6 +74,8 @@ def register_agenda_action(kind: str, fn: AgendaFn) -> None:
 def clear_choices() -> None:
     """For tests: forget every registered choice, executor and agenda action."""
     _CHOICES.clear()
+    _LAYER.clear()
+    _RESOLVED["db"] = None
     _EXECUTORS.clear()
     AGENDA_ACTIONS.clear()
 
@@ -77,10 +105,10 @@ def _offers(conn: sqlite3.Connection, fn, actor_id: int, org: int, day: int, cho
 
 def _reason(conn: sqlite3.Connection, actor_id: int, day: int) -> bool:
     """A reason to leave the quiet routine: one of his organisations' choices passes today's weekly roll."""
-    if not _CHOICES:
+    if not _CHOICES and not _LAYER:
         return False
     for org, kind in _declared_seats(conn, actor_id, day):
-        for choice, fn in _CHOICES.get(kind, {}).items():
+        for choice, fn in _choices_of(conn, kind).items():
             if org_motives.should_choose(conn, actor_id, day, choice) and _offers(conn, fn, actor_id, org, day, choice):
                 return True  # the roll passed and there is something he could actually do
     return False
@@ -113,7 +141,7 @@ def org_provider(conn: sqlite3.Connection, actor_id: int, tier: str, day: int, e
         return []
     out: list[DecisionCandidate] = []
     for org, kind in seats:
-        for choice, fn in sorted(_CHOICES.get(kind, {}).items()):
+        for choice, fn in sorted(_choices_of(conn, kind).items()):
             if not org_motives.should_choose(conn, actor_id, day, choice):
                 continue
             for offer in _offers(conn, fn, actor_id, org, day, choice):

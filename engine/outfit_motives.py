@@ -1,4 +1,4 @@
-"""The readers behind a made man's choices (Saint Jude): what in his world pushes him to take out his capo or start a racket.
+"""The readers behind a made man's choices (Saint Jude): what in his world pushes him to take out his leader or start a racket.
 
 Each reader is `fn(conn, actor_id, day) -> 0..1` over real state and is registered with `org_motives.register_motive`;
 the motive lists, weights and rates are package data (worlds/saintjude/outfits.json `motives`, `rates`, design figures).
@@ -7,7 +7,7 @@ The list is open: a new reader plus a data line adds a reason without touching `
 Where the world has no record yet, the closest real state is read instead (so a reader returns 0 rather than invent):
   * a hit or hunt "he could know of" is an open agenda item naming him that he is listed in (`known_to`) or that a man
     he trusts holds; there is no knowledge-system query yet.
-  * a line the capo took is an incident naming the capo as offender and the man as victim with a line (Task 11 raises them).
+  * a line the leader took is an incident naming the leader as offender and the man as victim with a line (Task 11 raises them).
   * "the people there" and "the businesses there": no place has a population of its own (every background person sits at the
     city root), so thin ground is measured against the other places that are worked, by lines per working place.
   * "passed over": the day a seat was filled is the day of the `history` note `fill_unit_leader` leaves for the new leader; capos of
@@ -33,8 +33,6 @@ from .world_package import org_rules, package_for
 
 REMOVE = "remove_superior"
 START = "start_racket"
-_INFLOWS = ("take", "associate_earning")  # flows that bring a man his own earnings
-_KICKUP = "kickup"
 _KIN = ("spouse", "parent_of", "grandparent_of", "sibling_of", "child_of")
 _YEAR = 365.0
 
@@ -123,28 +121,28 @@ def _held(conn: sqlite3.Connection, actor_id: int, day: int) -> list:
                         (int(actor_id), int(day), int(day))).fetchall()
 
 
-# ---- taking out his capo ----
+# ---- taking out his leader ----
 
 def grievance(conn, actor_id, day):
-    """His resentment of the capo, squared: mild resentment is not a reason to kill, a murderous one is."""
+    """His resentment of the leader, squared: mild resentment is not a reason to kill, a murderous one is."""
     ctx = context(conn, actor_id)
     r = _rel(conn, actor_id, ctx[2]) if ctx else None
     return 0.0 if r is None else clamp01(float(r["resentment"]) / 100.0) ** 2
 
 
 def squeezed(conn, actor_id, day):
-    """What he kicked up to the capo last period against the ladder share; or his line taken (incidents, as offender the capo)."""
+    """What he kicked up to the leader last period against the ladder share; or his line taken (incidents, as offender the leader)."""
     ctx = context(conn, actor_id)
     if ctx is None:
         return 0.0
-    org, seat, capo, _ = ctx
+    org, seat, leader, _ = ctx
     out = 0.0
-    earned = _money(conn, day, _INFLOWS, to=actor_id)
+    earned = _money(conn, day, org_motives.inflow_flows(conn), to=actor_id)
     ladder = _ladder_share(conn, org, seat["role_key"])
     if earned > 0 and ladder > 0:
-        out = clamp01((_money(conn, day, (_KICKUP,), frm=actor_id) / earned - ladder) / ladder)
+        out = clamp01((_money(conn, day, org_motives.upward_flows(conn), frm=actor_id) / earned - ladder) / ladder)
     n = conn.execute("SELECT COUNT(*) FROM org_incidents WHERE offender_actor_id=? AND victim_actor_id=? AND victim_line_id IS NOT NULL",
-                     (int(capo), int(actor_id))).fetchone()[0]
+                     (int(leader), int(actor_id))).fetchone()[0]
     return max(out, 1.0 - 0.5 ** n)
 
 
@@ -154,38 +152,38 @@ def passed_over(conn, actor_id, day):
     ctx = context(conn, actor_id)
     if ctx is None:
         return 0.0
-    org, seat, capo, _ = ctx
+    org, seat, leader, _ = ctx
     rose = conn.execute("SELECT created_day FROM org_agenda WHERE actor_id=? AND kind='history' AND json_extract(metadata_json,'$.reason')=? "
-                        "ORDER BY id DESC LIMIT 1", (int(capo), RISE_REASON)).fetchone()
+                        "ORDER BY id DESC LIMIT 1", (int(leader), RISE_REASON)).fetchone()
     if rose is None or int(day) - int(rose[0]) > int(org_motives._fig(conn, "motive_seat_memory_days", default=365)):
         return 0.0
-    cs = seat_of(conn, capo, org)
+    cs = seat_of(conn, leader, org)
     ys, yc = _years(seat, day), _years(cs, day)
     by_years = 0.0 if ys is None or yc is None else clamp01((ys - yc) / float(org_motives._fig(conn, "motive_years_full", default=10)))
     return max(by_years, clamp01(float(seat["standing"]) - float(cs["standing"])))
 
 
 def blocked_ambition(conn, actor_id, day):
-    """His ambition, as far as the capo is older than he and holds the unit's lines."""
+    """His ambition, as far as the leader is older than he and holds the unit's lines."""
     ctx = context(conn, actor_id)
     if ctx is None or not ctx[1]["unit_id"]:
         return 0.0
-    capo = ctx[2]
-    ac, am = _age(conn, capo, day), _age(conn, actor_id, day)
+    leader = ctx[2]
+    ac, am = _age(conn, leader, day), _age(conn, actor_id, day)
     if ac is None or am is None or ac <= 0:
         return 0.0
     rows = conn.execute("SELECT holder_actor_id,weekly_take FROM org_lines WHERE unit_id=? AND status='active'", (int(ctx[1]["unit_id"]),)).fetchall()
     total = sum(float(r["weekly_take"]) for r in rows)
-    hold = sum(float(r["weekly_take"]) for r in rows if r["holder_actor_id"] == capo) / total if total > 0 else 0.0
+    hold = sum(float(r["weekly_take"]) for r in rows if r["holder_actor_id"] == leader) / total if total > 0 else 0.0
     return clamp01(_drive(conn, actor_id, "ambition") * hold * clamp01((ac - am) / ac))
 
 
 def fear(conn, actor_id, day):
-    """An open hit or hunt naming him that he could know of; or the capo held on a homicide charge (who talks)."""
+    """An open hit or hunt naming him that he could know of; or the leader held on a homicide charge (who talks)."""
     ctx = context(conn, actor_id)
     if ctx is None:
         return 0.0
-    capo = ctx[2]
+    leader = ctx[2]
     out = 0.0
     for it in conn.execute("SELECT * FROM org_agenda WHERE kind IN ('hit','discipline_hunt') AND status='open' AND subject_kind='actor' AND subject_id=?",
                            (int(actor_id),)).fetchall():
@@ -196,25 +194,25 @@ def fear(conn, actor_id, day):
         r = _rel(conn, actor_id, it["actor_id"])
         if r is not None and float(r["trust"]) > 0:
             out = max(out, clamp01(float(r["trust"]) / 100.0))
-    if any("homicide" in str(h["charge"]).lower() for h in _held(conn, capo, day)):
+    if any("homicide" in str(h["charge"]).lower() for h in _held(conn, leader, day)):
         floor = float(org_motives._fig(conn, "motive_homicide_talk_floor", default=0.3))
-        cs = seat_of(conn, capo, ctx[0])
+        cs = seat_of(conn, leader, ctx[0])
         out = max(out, floor + (1.0 - float(cs["reliability"])) * (1.0 - floor))
     return out
 
 
-def capo_weak(conn, actor_id, day):
-    """The capo is held, sick, losing money (what the men below him kicked up fell) or losing ground (lines ended lately)."""
+def leader_weak(conn, actor_id, day):
+    """The leader is held, sick, losing money (what the men below him kicked up fell) or losing ground (lines ended lately)."""
     ctx = context(conn, actor_id)
     if ctx is None:
         return 0.0
-    org, seat, capo, _ = ctx
+    org, seat, leader, _ = ctx
     parts = []
-    cs = seat_of(conn, capo, org)
-    parts.append(1.0 if _held(conn, capo, day) or cs["status"] == "held" else 0.0)
-    sick = conn.execute("SELECT MAX(severity) FROM health_conditions WHERE actor_id=? AND status='active'", (int(capo),)).fetchone()[0]
+    cs = seat_of(conn, leader, org)
+    parts.append(1.0 if _held(conn, leader, day) or cs["status"] == "held" else 0.0)
+    sick = conn.execute("SELECT MAX(severity) FROM health_conditions WHERE actor_id=? AND status='active'", (int(leader),)).fetchone()[0]
     parts.append(clamp01(float(sick or 0.0) / 100.0))
-    now, before = _money(conn, day, (_KICKUP,), to=capo), _money(conn, day, (_KICKUP,), to=capo, back=1)
+    now, before = _money(conn, day, org_motives.upward_flows(conn), to=leader), _money(conn, day, org_motives.upward_flows(conn), to=leader, back=1)
     parts.append(clamp01(1.0 - now / before) if before > 0 else 0.0)
     if seat["unit_id"]:
         lo = int(day) - _recent(conn)
@@ -228,15 +226,15 @@ def capo_weak(conn, actor_id, day):
 
 
 def outside_push(conn, actor_id, day):
-    """A man who reports to the head, tied to him, wants the capo gone (resentment above respect)."""
+    """A man who reports to the head, tied to him, wants the leader gone (resentment above respect)."""
     ctx = context(conn, actor_id)
     if ctx is None or ctx[3] is None:
         return 0.0
-    org, _, capo, head = ctx
+    org, _, leader, head = ctx
     out = 0.0
     for x in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND superior_actor_id=? AND status='active' AND actor_id NOT IN (?,?)",
-                          (org, int(head), int(actor_id), int(capo))).fetchall():
-        tie, wants = _rel(conn, actor_id, x[0]), _rel(conn, x[0], capo)
+                          (org, int(head), int(actor_id), int(leader))).fetchall():
+        tie, wants = _rel(conn, actor_id, x[0]), _rel(conn, x[0], leader)
         if tie is None or wants is None or float(tie["trust"]) <= 0:
             continue
         out = max(out, clamp01((float(wants["resentment"]) - float(wants["respect"])) / 100.0) * clamp01(float(tie["trust"]) / 100.0))
@@ -244,7 +242,7 @@ def outside_push(conn, actor_id, day):
 
 
 def revenge(conn, actor_id, day):
-    """The capo harmed him, his kin or a close friend (harm incidents with the capo as offender)."""
+    """The leader harmed him, his kin or a close friend (harm incidents with the leader as offender)."""
     ctx = context(conn, actor_id)
     if ctx is None:
         return 0.0
@@ -261,15 +259,15 @@ def revenge(conn, actor_id, day):
     return out
 
 
-def boss_wants(conn: sqlite3.Connection, head: int | None, capo: int | None) -> float:
-    """The head's resentment of the capo above his respect, 0..1."""
-    r = _rel(conn, head, capo)
+def head_wants(conn: sqlite3.Connection, head: int | None, leader: int | None) -> float:
+    """The head's resentment of the leader above his respect, 0..1."""
+    r = _rel(conn, head, leader)
     return 0.0 if r is None else clamp01((float(r["resentment"]) - float(r["respect"])) / 100.0)
 
 
-def boss_wants_it(conn, actor_id, day):
+def head_wants_it(conn, actor_id, day):
     ctx = context(conn, actor_id)
-    return 0.0 if ctx is None else boss_wants(conn, ctx[3], ctx[2])
+    return 0.0 if ctx is None else head_wants(conn, ctx[3], ctx[2])
 
 
 # ---- starting a racket ----
@@ -474,9 +472,9 @@ def need(conn, actor_id, day):
         return 0.0
     standard = float(org_motives._fig(conn, living))
     per = _period(conn)
-    flow = _money(conn, day, _INFLOWS, to=actor_id)
-    if flow > 0 or _money(conn, day, (_KICKUP,), frm=actor_id) > 0:
-        yearly = (flow - _money(conn, day, (_KICKUP,), frm=actor_id)) * _YEAR / per
+    flow = _money(conn, day, org_motives.inflow_flows(conn), to=actor_id)
+    if flow > 0 or _money(conn, day, org_motives.upward_flows(conn), frm=actor_id) > 0:
+        yearly = (flow - _money(conn, day, org_motives.upward_flows(conn), frm=actor_id)) * _YEAR / per
     else:
         take = conn.execute("SELECT COALESCE(SUM(weekly_take),0) FROM org_lines WHERE holder_actor_id=? AND status='active'", (int(actor_id),)).fetchone()[0]
         if not take:
@@ -493,8 +491,8 @@ def appetite(conn, actor_id, day):
 
 
 for _name, _fn in (("grievance", grievance), ("squeezed", squeezed), ("passed_over", passed_over), ("blocked_ambition", blocked_ambition),
-                   ("fear", fear), ("capo_weak", capo_weak), ("outside_push", outside_push), ("revenge", revenge),
-                   ("boss_wants_it", boss_wants_it)):
+                   ("fear", fear), ("leader_weak", leader_weak), ("outside_push", outside_push), ("revenge", revenge),
+                   ("head_wants_it", head_wants_it)):
     org_motives.register_motive(REMOVE, _name, _fn)
 for _name, _fn in (("thin_ground", _read_place(_thin)), ("unclaimed_pool", _read_pool(lambda c, p, d: unclaimed_pool(c, p))),
                    ("vacancy", _read_place(_vacant)), ("demand", _read_pool(demand)), ("low_heat", low_heat),

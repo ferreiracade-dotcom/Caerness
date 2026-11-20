@@ -29,7 +29,7 @@ def test_each_motive_reads_its_situation():
     w = open_world()
     c = w.conn
     base = _pressure(w)[1]
-    assert base["squeezed"] == 0 and base["fear"] == 0 and base["boss_wants_it"] == 0, base
+    assert base["squeezed"] == 0 and base["fear"] == 0 and base["head_wants_it"] == 0, base
     # squeeze: the capo takes 30% of the soldier's net (the ladder share is 18.3%)
     _money(c, w, "take", None, w.soldier, 1000.0)
     _money(c, w, "kickup", w.soldier, w.capo, 300.0)
@@ -47,13 +47,13 @@ def test_each_motive_reads_its_situation():
     # the capo held on a homicide charge: fear (who talks) and a weak capo
     w2 = open_world()
     p0 = _pressure(w2)[1]
-    assert p0["fear"] == 0 and p0["capo_weak"] == 0, p0
+    assert p0["fear"] == 0 and p0["leader_weak"] == 0, p0
     w2.conn.execute("INSERT INTO custody(actor_id,kind,charge,since_day) VALUES (?,?,?,?)", (w2.capo, "held", "homicide", DAY - 1))
     parts = _pressure(w2)[1]
-    assert parts["fear"] > 0 and parts["capo_weak"] > 0, parts
+    assert parts["fear"] > 0 and parts["leader_weak"] > 0, parts
     # the boss's resentment of the capo far above his respect
     rel(c, w.boss, w.capo, resentment=80, respect=10)
-    assert _pressure(w)[1]["boss_wants_it"] > 0.5
+    assert _pressure(w)[1]["head_wants_it"] > 0.5
     # revenge: the capo harmed a close friend of his
     friend = int(c.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key='associate' AND actor_id<>? LIMIT 1",
                            (w.org, w.soldier)).fetchone()[0])
