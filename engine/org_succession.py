@@ -233,14 +233,16 @@ def _under(conn: sqlite3.Connection, org: int, man: int) -> list[int]:
     return sorted(seen)
 
 
-def weigh(conn: sqlite3.Connection, org: int, chooser: int, cand: int, day: int, blk: dict, ctx: dict | None = None) -> float:
+def weigh(conn: sqlite3.Connection, org: int, chooser: int, cand: int, day: int, blk: dict, ctx: dict | None = None, *, detail: bool = False):
     """How much the chooser is drawn to the candidate, 0..1: the weighted mean of the block's `weights` terms (each a design
     figure or number), less the block's `against` terms. The chooser's temperament bends each term's weight: `temperament`
-    maps a term to a trait (a drive, or the seat's greed or reliability); the bend is `temperament.weight` x (trait - 0.5) x 2."""
+    maps a term to a trait (a drive, or the seat's greed or reliability); the bend is `temperament.weight` x (trait - 0.5) x 2.
+    With `detail`, returns (score, {term: its weighted contribution}) for the rationale."""
     ctx = ctx or {}
     temper = blk.get("temperament") or {}
     bend = v(conn, temper.get("weight"), 0.0)
     num = den = 0.0
+    parts: dict[str, float] = {}
     for key, spec in (blk.get("weights") or {}).items():
         w = v(conn, spec)
         fn = TERMS.get(key)
@@ -248,24 +250,21 @@ def weigh(conn: sqlite3.Connection, org: int, chooser: int, cand: int, day: int,
             continue
         if bend and temper.get(key):
             w *= max(0.1, 1.0 + bend * (drive(conn, int(chooser), temper[key], org) - 0.5) * 2.0)
-        num += w * clamp01(fn(conn, org, int(chooser), int(cand), int(day), ctx, blk))
+        m = w * clamp01(fn(conn, org, int(chooser), int(cand), int(day), ctx, blk))
+        parts[key] = m
+        num += m
         den += w
     neg = 0.0
     for key, spec in (blk.get("against") or {}).items():
         fn = TERMS.get(key)
         if fn is not None and v(conn, spec) > 0.0:
             neg += v(conn, spec) * clamp01(fn(conn, org, int(chooser), int(cand), int(day), ctx, blk))
-    return clamp01(num / den - neg) if den else 0.0
+    score = clamp01(num / den - neg) if den else 0.0
+    return (score, parts) if detail else score
 
 
-def terms_of(conn: sqlite3.Connection, org: int, chooser: int, cand: int, day: int, blk: dict, ctx: dict | None = None) -> dict[str, float]:
-    """Each term's weighted share of the total pull (for the rationale and the outcome's label)."""
-    out = {}
-    for key, spec in (blk.get("weights") or {}).items():
-        fn = TERMS.get(key)
-        if fn is not None and v(conn, spec) > 0.0:
-            out[key] = v(conn, spec) * clamp01(fn(conn, org, int(chooser), int(cand), int(day), ctx or {}, blk))
-    return out
+def lead_terms(parts: dict[str, float], n: int = 2) -> str:
+    return ", ".join(k for k, x in sorted(parts.items(), key=lambda kv: -kv[1])[:n] if x > 0)
 
 
 # ---- appointments ----
@@ -313,12 +312,11 @@ def appointment_offers(conn: sqlite3.Connection, head: int, item, day: int) -> l
     pool = unit_pool(conn, unit, int(day))
     if not pool:
         return [{"kind": "fill_unit_leader_seat", "utility": _utility(conn, 1.0), "rationale": "No one in the unit is fit; the seat is filled as it can be.", "payload": {"unit_id": unit}}]
-    scores = {int(r["actor_id"]): weigh(conn, org, int(head), int(r["actor_id"]), int(day), blk) for r in pool}
-    top = max(scores.values())
     out = []
-    for a, sc in scores.items():
-        t = terms_of(conn, org, int(head), a, int(day), blk)
-        lead = ", ".join(k for k, x in sorted(t.items(), key=lambda kv: -kv[1])[:2] if x > 0)
+    for r in pool:
+        a = int(r["actor_id"])
+        sc, parts = weigh(conn, org, int(head), a, int(day), blk, detail=True)
+        lead = lead_terms(parts)
         out.append({"kind": "fill_unit_leader_seat", "utility": _utility(conn, sc), "target_actor_id": a,
                     "rationale": f"Names {name_of(conn, a)} to lead the unit ({sc:.2f}{', mostly ' + lead if lead else ''}).", "payload": {"unit_id": unit, "candidate": a, "org": org}})
     return out
@@ -731,13 +729,14 @@ def _lean(conn: sqlite3.Connection, org: int, meta: dict, blk: dict, share: dict
     relationships the next week's weighing reads (fear, obligation)."""
     ranked = sorted(share.items(), key=lambda kv: (-kv[1], kv[0]))[:2]
     for c, _s in ranked:
-        swing = [int(b) for b, p in meta["picks"].items() if int(p) != c]
+        swing = [int(b) for b, p in meta["picks"].items() if int(p) != c and int(b) != c]
         if not swing:
             continue
         b = swing[int(roll(conn, c, int(day), f"lean_who:{cid}") * len(swing)) % len(swing)]
         if roll(conn, c, int(day), f"force:{cid}") < v(conn, blk.get("force_week"), 0.0) * drive(conn, c, "aggression"):
             adjust_relationship(conn, b, c, int(day), fear_delta=v(conn, blk.get("force_fear"), 0.0), resentment_delta=v(conn, blk.get("force_resentment"), 0.0))
             meta["forced"] += 1
+            meta.setdefault("forced_by", []).append(c)
             imposed(conn, b)
         if roll(conn, c, int(day), f"bribe:{cid}") < v(conn, blk.get("bribe_week"), 0.0) * drive(conn, c, "ambition"):
             pay = ledger.balance(conn, ("person", c)) * v(conn, blk.get("bribe_share"), 0.0)
@@ -748,6 +747,7 @@ def _lean(conn: sqlite3.Connection, org: int, meta: dict, blk: dict, share: dict
                 if got > 0.0:
                     adjust_relationship(conn, b, c, int(day), obligation_delta=v(conn, blk.get("bribe_obligation"), 0.0))
                     meta["bought"] += 1
+                    meta.setdefault("bought_by", []).append(c)
                     imposed(conn, b)
 
 
@@ -785,9 +785,8 @@ def tick_contest(conn: sqlite3.Connection, row, day: int) -> str | None:
     war_after = int(v(conn, blk.get("war_after_weeks"), 4.0))
     out = None
     if weeks >= min_weeks and s1 >= need and s1 - s2 >= v(conn, blk.get("agree_margin"), 0.1):
-        out = "forced" if meta["forced"] and not meta["bought"] else "bought" if meta["bought"] and not meta["forced"] else "forced" if meta["forced"] else "agreed"
-        if meta["killed"] and not meta["forced"] and not meta["bought"]:
-            out = "killing"
+        # the label names how the winner got there: leaning on men, paying them, a killing on the way, or plain agreement
+        out = "forced" if lead in meta.get("forced_by", []) else "bought" if lead in meta.get("bought_by", []) else "killing" if meta["killed"] else "agreed"
         _finish_contest(conn, row, meta, lead, out, day)
         return out
     for c in sorted(cands):  # a candidate losing ground may have the man in front killed

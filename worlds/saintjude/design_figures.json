@@ -379,7 +379,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...and his ambition at least this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; An inducted man outside the customary roles may stand for the head's seat only if his ambition is at least this (and his standing at least succ_ambitious_standing): only a man who wants it and has the weight to hold it. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "succ_ambitious_stand": {
     "default": 0.3,
@@ -609,7 +609,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; A contest can turn into a civil war only after this long... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A contest turns into a civil war only after this many weeks: the first weeks are for sounding each other out and agreeing, not for fighting. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "contest_war_share": {
     "default": 0.3,
@@ -619,7 +619,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...and only when the runner-up holds at least this share of the backing. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A contest can turn into a civil war only when the runner-up holds at least this share of the backing (and contest_war_after_weeks have passed): a war needs two real sides. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "contest_war_week": {
     "default": 0.15,
@@ -652,7 +652,7 @@
     "note": "unsourced; Weekly chance, x the candidate's aggression and ambition and his gap to the leader, that a candidate who is losing has the leader killed. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "contest_force_week": {
-    "default": 0.15,
+    "default": 0.06,
     "range": null,
     "unit": "per week",
     "tag": "Design",
@@ -682,7 +682,7 @@
     "note": "unsourced; The resentment a threat adds. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "contest_bribe_week": {
-    "default": 0.1,
+    "default": 0.04,
     "range": null,
     "unit": "per week",
     "tag": "Design",
@@ -749,7 +749,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...if his liking (trust, respect less resentment) reaches this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; An outside organisation's head weighs in for a candidate only if his liking (trust and respect less resentment, 0 to 1) reaches this: a head with no feeling about the candidates stays out. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "coup_share": {
     "default": 0.55,
@@ -819,7 +819,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; A loyalist accepts the new head: base. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A loyalist accepts the new head: the floor weight of simple acceptance. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "coup_accept_trust": {
     "default": 0.4,
@@ -829,7 +829,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus this x his trust in the killer. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A loyalist accepts the man who killed his head: the weight added per unit of his trust in the killer (accept_base is the floor): a man he already trusts is easy to accept. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "coup_accept_fear": {
     "default": 0.5,
@@ -839,7 +839,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus this x his fear of him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A loyalist accepts the new head: the weight added per unit of his fear of the killer: fear is a reason to submit. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "coup_buy_base": {
     "default": 0.5,
@@ -849,7 +849,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; A loyalist is bought: base x the killer's purse against coup_buy_scale x (0.5 + the loyalist's greed). (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A loyalist is bought by the new head: the weight is this x the killer's purse (against coup_buy_scale) x (0.5 + the loyalist's greed). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "coup_buy_share": {
     "default": 0.15,
@@ -909,7 +909,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...and resents him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A loyalist who accepts the killer still resents him: the resentment points added (he accepts, he does not forgive). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_start_week": {
     "default": 0.002,
@@ -949,7 +949,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...and of at least this ambition. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; Only inducted men of at least this ambition plot against a living head or heir (and of at least plot_min_standing): a plot needs a man who wants more and counts for something. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_w_resentment": {
     "default": 0.7,
@@ -1039,7 +1039,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; A man sounded joins: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A man sounded out joins the plot: the floor weight even with no trust or fear. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_respond_trust": {
     "default": 0.5,
@@ -1049,7 +1049,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus trust in the plotter... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A man sounded out joins the plot: the weight added per unit of his trust in the plotter (plot_respond_join_base is the floor). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_respond_fear": {
     "default": 0.3,
@@ -1059,7 +1059,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus fear of him... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A man sounded out joins the plot: the weight added per unit of his fear of the plotter. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_respond_favour": {
     "default": 0.3,
@@ -1069,7 +1069,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus a favour owed... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A man sounded out joins the plot: the weight added per unit of obligation he owes the plotter (debts are called in). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_respond_ambition": {
     "default": 0.4,
@@ -1079,7 +1079,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus his own ambition x (1 - his loyalty to the target). (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A man sounded out joins the plot: the weight added per unit of his own ambition x (1 - his loyalty to the target). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_respond_tell_base": {
     "default": 0.1,
@@ -1089,7 +1089,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; He goes to the head: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A man sounded out goes to the head: the floor weight even with no loyalty (a man may tell for his own safety). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_respond_loyalty": {
     "default": 0.9,
@@ -1099,7 +1099,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus his loyalty to the target x his reliability x (1 - fear of the plotter). (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A man sounded out goes to the head (betrays the plot): the weight added per unit of his loyalty to the target x his reliability x (1 - his fear of the plotter). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_respond_refuse_base": {
     "default": 0.3,
@@ -1109,7 +1109,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; He refuses and keeps quiet. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A man sounded out refuses and keeps quiet: the weight of simply declining, the commonest answer of a cautious man. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_respond_temp": {
     "default": 0.1,
@@ -1139,7 +1139,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; The head has the plotter killed: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs having a plotter killed: the floor weight (low: killing a made man has a cost). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_kill_aggression": {
     "default": 0.5,
@@ -1149,7 +1149,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus the head's aggression... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs having a plotter killed: the weight added per unit of his own aggression. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_kill_joined": {
     "default": 0.3,
@@ -1159,7 +1159,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus how many joined... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs having a plotter killed: the weight added per unit of how many joined the plot (against plot_found_joined_scale): a plot with many in it is a danger to end. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_kill_low_standing": {
     "default": 0.2,
@@ -1169,7 +1169,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus (1 - the plotter's standing). (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs having a plotter killed: the weight added per unit of (1 - the plotter's standing): a man of little standing is cheap to kill. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_exile_base": {
     "default": 0.35,
@@ -1179,7 +1179,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; The head puts the plotter out: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs putting a plotter out of the life: the floor weight. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_exile_caution": {
     "default": 0.3,
@@ -1189,7 +1189,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus (1 - his aggression)... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs putting a plotter out of the life: the weight added per unit of (1 - his aggression): a cautious head prefers it to a killing. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_exile_joined": {
     "default": 0.1,
@@ -1199,7 +1199,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus how many joined. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs putting a plotter out of the life: the weight added per unit of how many joined. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_pardon_base": {
     "default": 0.3,
@@ -1209,7 +1209,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; The head lets it pass: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs letting a plot pass: the floor weight. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_pardon_fond": {
     "default": 0.4,
@@ -1219,7 +1219,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus his fondness for the plotter... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs letting a plot pass: the weight added per unit of his fondness for the plotter (trust and affection). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_pardon_standing": {
     "default": 0.2,
@@ -1229,7 +1229,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus the plotter's standing. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The head weighs letting a plot pass: the weight added per unit of the plotter's standing: a man of standing is costly to touch. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "plot_found_fear": {
     "default": 10.0,
@@ -1259,7 +1259,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...and resents him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A pardoned plotter resents the head: the resentment points added. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_min_weeks": {
     "default": 2,
@@ -1459,7 +1459,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...and at least this many inducted men. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The weaker side of a civil war can split off as a new organisation only with at least this many inducted men: a splinter needs a core. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_max_weeks": {
     "default": 40,
@@ -1509,7 +1509,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; A made man on the losing side is killed: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A made man on the losing side is killed: the floor weight (0: nobody is killed for being on the losing side alone; it takes the winner's temper and the man's weight). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_kill_aggression": {
     "default": 0.9,
@@ -1519,7 +1519,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus the winner's aggression x the man's weight (unit leaders 1, others half his standing) x (1 - his fear of the winner). (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A made man on the losing side of a civil war is killed: the weight added per unit of the winner's aggression x the man's weight (unit leaders 1, others half his standing) x (1 - his fear of the winner). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_demote_base": {
     "default": 0.25,
@@ -1529,7 +1529,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; Demoted (lines taken, command lost): base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A made man on the losing side is demoted: the floor weight. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_demote_weight": {
     "default": 0.5,
@@ -1539,7 +1539,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus this x the man's weight. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A made man on the losing side is demoted (lines and command taken): the weight added per unit of the man's weight (a unit leader is worth taking down). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_absorb_base": {
     "default": 0.25,
@@ -1549,7 +1549,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; Absorbed (he stays): base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A made man on the losing side is absorbed (he stays, afraid): the floor weight. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_absorb_fear": {
     "default": 0.5,
@@ -1559,7 +1559,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus his fear of the winner... (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A made man on the losing side is absorbed (he stays): the weight added per unit of his fear of the winner. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_absorb_trust": {
     "default": 0.5,
@@ -1569,7 +1569,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; ...plus his trust in him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; A made man on the losing side is absorbed (he stays): the weight added per unit of his trust in the winner. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_temp": {
     "default": 0.1,

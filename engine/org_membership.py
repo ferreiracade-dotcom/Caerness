@@ -331,11 +331,11 @@ def proposal_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> 
         return [{"kind": "propose_member", "utility": _utility(conn, 0.5 + 0.5 * clamp01(sc)), "target_actor_id": best,
                  "rationale": f"Puts forward {_name(conn, best)}, the best name in his crew ({sc:.2f}).", "payload": {"org": org, "candidate": best}}]
     names = dict((a, s) for s, a in pool)  # a leader weighs every man of his unit, not only the best name: trust, kin, favours, money, fear, merit
+    ctx = {"merit": lambda c, _n=names: clamp01(_n.get(int(c), 0.0))}
     out = []
-    for a, nom in names.items():
-        sc = org_succession.weigh(conn, org, int(actor_id), a, int(day), blk, {"merit": lambda c, _n=names: clamp01(_n.get(int(c), 0.0))})
-        t = org_succession.terms_of(conn, org, int(actor_id), a, int(day), blk, {"merit": lambda c, _n=names: clamp01(_n.get(int(c), 0.0))})
-        lead = ", ".join(k for k, x in sorted(t.items(), key=lambda kv: -kv[1])[:2] if x > 0)
+    for a in names:
+        sc, parts = org_succession.weigh(conn, org, int(actor_id), a, int(day), blk, ctx, detail=True)
+        lead = org_succession.lead_terms(parts)
         out.append({"kind": "propose_member", "utility": _utility(conn, sc), "target_actor_id": a,
                     "rationale": f"Puts forward {_name(conn, a)} ({sc:.2f}{', mostly ' + lead if lead else ''}).", "payload": {"org": org, "candidate": a}})
     return out
