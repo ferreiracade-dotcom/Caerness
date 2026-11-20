@@ -315,7 +315,12 @@ def _newborn_name(conn: sqlite3.Connection, father: int, mother: int, sex: str, 
         name = f"{given} {family}" if family else given
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
             return name
-    return f"{pool[start]} {family or ''} {key.rsplit(':', 3)[-3]}".replace("  ", " ").strip()
+    base = f"{pool[start]} {family or ''} {key.rsplit(':', 3)[-3]}".replace("  ", " ").strip()
+    name, n = base, 1
+    while conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():  # every given name of the family is taken, and so is this one
+        n += 1
+        name = f"{base} {n}"
+    return name
 
 
 def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str | None = None,

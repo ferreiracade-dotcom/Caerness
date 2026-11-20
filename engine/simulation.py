@@ -34,6 +34,7 @@ from .craft import next_craft_due_day, process_due_craft
 from .growth import next_growth_due_day, process_due_growth
 from .law import next_law_due_day, process_due_law
 from .org_money import next_due_day as next_outfit_money_due_day, process_due as process_due_outfit_money
+from .org_happenings import next_due_day as next_outfit_incidents_due_day, process_due as process_due_outfit_incidents
 from .cultivation import next_cultivation_due_day, process_due_cultivation
 from .groundbinding import next_groundbinding_due_day, process_due_groundbinding
 from .tournaments import next_tournament_due_day, process_due_tournaments
@@ -581,6 +582,7 @@ def build_default_process_registry(*, eager_requery: bool = True, disabled: froz
     reg.register(ProcessSpec("underworld_medicine", next_underworld_medicine_due_day, process_due_underworld_medicine))
     reg.register(ProcessSpec("law", next_law_due_day, process_due_law))
     reg.register(ProcessSpec("outfit_money", next_outfit_money_due_day, process_due_outfit_money))
+    reg.register(ProcessSpec("outfit_incidents", next_outfit_incidents_due_day, process_due_outfit_incidents))
     reg.register(ProcessSpec("war", next_war_due_day, process_due_war))
     reg.register(ProcessSpec("groundbinding", next_groundbinding_due_day, process_due_groundbinding))
     reg.register(ProcessSpec("health", next_health_due_day, process_due_health))
@@ -605,7 +607,7 @@ def build_default_process_registry(*, eager_requery: bool = True, disabled: froz
 
 _REGISTRY_BLOCK_A = (
     "resolution", "world", "ecology", "agriculture", "logistics", "merchant", "craft", "civilian", "profession", "service_fulfillment", "growth",
-    "underworld", "underworld_medicine", "law", "outfit_money", "war", "groundbinding", "health", "psychology", "hollow",
+    "underworld", "underworld_medicine", "law", "outfit_money", "outfit_incidents", "war", "groundbinding", "health", "psychology", "hollow",
 )
 _REGISTRY_BLOCK_B = ("religion", "patronage", "politics", "conflict", "organization_lifecycle", "seeking", "attention", "education", "cultivation", "tournament", "spectacle", "information", "memory")
 

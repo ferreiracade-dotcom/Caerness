@@ -1,6 +1,876 @@
 {
  "about": "Design and derived figures the engine draws once per run (kind draw), derives (kind derived, formula over other figure defaults) or holds (kind fixed), from Saint Jude Setting Bible Part VI and the Parts it cites. Dollars are 1975 dollars; *_m keys are USD millions. pools is the Part VI 9.3A allocation table (family shares sum to 100). Checked by tools/check_saintjude_pools.py.",
  "figures": {
+  "hap_standing_good": {
+   "default": 0.08,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_score_lo": {
+   "default": 300,
+   "range": null,
+   "unit": "USD (1975)",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_score_hi": {
+   "default": 2500,
+   "range": null,
+   "unit": "USD (1975)",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_score_up_share": {
+   "default": 0.3,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_score": {
+   "default": 0.22,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_score_ambition": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_score_need": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_score_ground": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_score_low_heat": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_bring_weekly": {
+   "default": 90,
+   "range": null,
+   "unit": "USD (1975) a week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_bring_earner": {
+   "default": 0.14,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_bring_earner_ambition": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_bring_earner_appetite": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_bring_earner_ground": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_bring_earner_low_heat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_trust_gain": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_proves_himself": {
+   "default": 0.12,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_proves_himself_loyal": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_proves_himself_ambition": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_proves_himself_reliable": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_recruits": {
+   "default": 0.06,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_recruits_unit_short": {
+   "default": 0.6,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_recruits_ambition": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_standing_small": {
+   "default": 0.03,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_favour": {
+   "default": 0.06,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_favour_ambition": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_favour_loyal": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_standing_loss": {
+   "default": 0.05,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_drifts": {
+   "default": 0.1,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_drifts_lazy": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_drifts_resentful": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_goes_straight": {
+   "default": 0.06,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_goes_straight_age_late": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_goes_straight_kin_tie": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_goes_straight_arrested": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_switch_resentment": {
+   "default": 15,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_switches": {
+   "default": 0.08,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_switches_resentful": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_switches_better_offer": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_switches_ambition": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_v_other_line": {
+   "default": 0.3,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_v_member": {
+   "default": 0.08,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_v_officer": {
+   "default": 0.07,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_v_big_earner": {
+   "default": 0.1,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_v_civilian": {
+   "default": 0.45,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_harm_lo": {
+   "default": 3,
+   "range": null,
+   "unit": "severity",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_harm_hi": {
+   "default": 18,
+   "range": null,
+   "unit": "severity",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_big_weekly": {
+   "default": 800,
+   "range": null,
+   "unit": "USD (1975) a week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_respond_delay": {
+   "default": 2,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_incident": {
+   "default": 0.12,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_incident_temper": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_incident_boldness": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_incident_need": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_holdout_lo": {
+   "default": 150,
+   "range": null,
+   "unit": "USD (1975)",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_holdout_hi": {
+   "default": 1200,
+   "range": null,
+   "unit": "USD (1975)",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_notice_week": {
+   "default": 0.15,
+   "range": null,
+   "unit": "chance per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_holdout_resentment": {
+   "default": 20,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_holds_out": {
+   "default": 0.05,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_holds_out_greed": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_holds_out_need": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_holds_out_disloyal": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_busted_days_lo": {
+   "default": 3,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_busted_days_hi": {
+   "default": 45,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_busted": {
+   "default": 0.045,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_busted_boldness": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_busted_no_cover": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_busted_ground": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_report_days": {
+   "default": 180,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_discover_week": {
+   "default": 0.05,
+   "range": null,
+   "unit": "chance per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_w_informs": {
+   "default": 0.5,
+   "range": null,
+   "unit": "relative weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_informs_open_case": {
+   "default": 0.6,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_informs_disloyal": {
+   "default": 0.6,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_m_informs_arrested": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_resp_sit": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_resp_kill": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_resp_let": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_resp_sit_respect": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_resp_kill_resentment": {
+   "default": 25,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_resp_let_respect": {
+   "default": 8,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_pay_weeks_lo": {
+   "default": 4,
+   "range": null,
+   "unit": "weeks",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_pay_weeks_hi": {
+   "default": 12,
+   "range": null,
+   "unit": "weeks",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_pay_w": {
+   "default": 0.7,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_refuse_w": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_pay_default_weekly": {
+   "default": 300,
+   "range": null,
+   "unit": "USD (1975) a week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_age_from": {
+   "default": 35,
+   "range": null,
+   "unit": "years",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "hap_age_span": {
+   "default": 25,
+   "range": null,
+   "unit": "years",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
+  "associate_happening_week": {
+   "default": 0.05,
+   "range": null,
+   "unit": "chance per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+  },
   "population_city_1975_m": {
    "default": 1.1,
    "range": null,

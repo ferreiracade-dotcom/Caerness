@@ -456,6 +456,170 @@
  ],
  "connected_note": "Counts are Design proposals (unsourced) except where the bible names the seat; level 4 for each (spec 6.3); the Jewish financiers and bookmakers belong to no family (Part III 5.5) and tied_to is the family they deal with. A seeded head of the named institution is used first.",
  "motives": {
+  "hap_score": [
+   {
+    "name": "ambition",
+    "weight": "hap_m_score_ambition"
+   },
+   {
+    "name": "need",
+    "weight": "hap_m_score_need"
+   },
+   {
+    "name": "ground",
+    "weight": "hap_m_score_ground"
+   },
+   {
+    "name": "low_heat",
+    "weight": "hap_m_score_low_heat"
+   }
+  ],
+  "hap_bring_earner": [
+   {
+    "name": "ambition",
+    "weight": "hap_m_bring_earner_ambition"
+   },
+   {
+    "name": "appetite",
+    "weight": "hap_m_bring_earner_appetite"
+   },
+   {
+    "name": "ground",
+    "weight": "hap_m_bring_earner_ground"
+   },
+   {
+    "name": "low_heat",
+    "weight": "hap_m_bring_earner_low_heat"
+   }
+  ],
+  "hap_proves_himself": [
+   {
+    "name": "loyal",
+    "weight": "hap_m_proves_himself_loyal"
+   },
+   {
+    "name": "ambition",
+    "weight": "hap_m_proves_himself_ambition"
+   },
+   {
+    "name": "reliable",
+    "weight": "hap_m_proves_himself_reliable"
+   }
+  ],
+  "hap_recruits": [
+   {
+    "name": "unit_short",
+    "weight": "hap_m_recruits_unit_short"
+   },
+   {
+    "name": "ambition",
+    "weight": "hap_m_recruits_ambition"
+   }
+  ],
+  "hap_favour": [
+   {
+    "name": "ambition",
+    "weight": "hap_m_favour_ambition"
+   },
+   {
+    "name": "loyal",
+    "weight": "hap_m_favour_loyal"
+   }
+  ],
+  "hap_drifts": [
+   {
+    "name": "lazy",
+    "weight": "hap_m_drifts_lazy"
+   },
+   {
+    "name": "resentful",
+    "weight": "hap_m_drifts_resentful"
+   }
+  ],
+  "hap_goes_straight": [
+   {
+    "name": "age_late",
+    "weight": "hap_m_goes_straight_age_late"
+   },
+   {
+    "name": "kin_tie",
+    "weight": "hap_m_goes_straight_kin_tie"
+   },
+   {
+    "name": "arrested",
+    "weight": "hap_m_goes_straight_arrested"
+   }
+  ],
+  "hap_switches": [
+   {
+    "name": "resentful",
+    "weight": "hap_m_switches_resentful"
+   },
+   {
+    "name": "better_offer",
+    "weight": "hap_m_switches_better_offer"
+   },
+   {
+    "name": "ambition",
+    "weight": "hap_m_switches_ambition"
+   }
+  ],
+  "hap_incident": [
+   {
+    "name": "temper",
+    "weight": "hap_m_incident_temper"
+   },
+   {
+    "name": "boldness",
+    "weight": "hap_m_incident_boldness"
+   },
+   {
+    "name": "need",
+    "weight": "hap_m_incident_need"
+   }
+  ],
+  "hap_holds_out": [
+   {
+    "name": "greed",
+    "weight": "hap_m_holds_out_greed"
+   },
+   {
+    "name": "need",
+    "weight": "hap_m_holds_out_need"
+   },
+   {
+    "name": "disloyal",
+    "weight": "hap_m_holds_out_disloyal"
+   }
+  ],
+  "hap_busted": [
+   {
+    "name": "boldness",
+    "weight": "hap_m_busted_boldness"
+   },
+   {
+    "name": "no_cover",
+    "weight": "hap_m_busted_no_cover"
+   },
+   {
+    "name": "ground",
+    "weight": "hap_m_busted_ground"
+   }
+  ],
+  "hap_informs": [
+   {
+    "name": "open_case",
+    "weight": "hap_m_informs_open_case"
+   },
+   {
+    "name": "disloyal",
+    "weight": "hap_m_informs_disloyal"
+   },
+   {
+    "name": "arrested",
+    "weight": "hap_m_informs_arrested"
+   }
+  ],
   "remove_superior": [
    {
     "name": "grievance",
@@ -616,6 +780,150 @@
   "theft": {
    "table": "theft_drift",
    "column": "crew_net_m"
+  }
+ },
+ "happenings": {
+  "week_rate": "associate_happening_week",
+  "kinds": {
+   "score": {
+    "group": "good",
+    "weight": "hap_w_score",
+    "pools": [
+     "theft",
+     "chop_shops",
+     "untaxed_cigarettes_liquor"
+    ],
+    "take": [
+     "hap_score_lo",
+     "hap_score_hi"
+    ],
+    "up_share": "hap_score_up_share",
+    "standing": "hap_standing_good"
+   },
+   "bring_earner": {
+    "group": "good",
+    "weight": "hap_w_bring_earner",
+    "pools": [
+     "bookmaking",
+     "loansharking",
+     "protection",
+     "cards_dice",
+     "numbers_it"
+    ],
+    "counterpart_subtype": "Small businessman",
+    "counterpart_ages": [
+     25,
+     60
+    ],
+    "weekly": "hap_bring_weekly",
+    "standing": "hap_standing_good"
+   },
+   "proves_himself": {
+    "group": "good",
+    "weight": "hap_w_proves_himself",
+    "standing": "hap_standing_good",
+    "trust": "hap_trust_gain"
+   },
+   "recruits": {
+    "group": "good",
+    "weight": "hap_w_recruits",
+    "requires": [
+     "unit_short"
+    ],
+    "ages": [
+     17,
+     30
+    ],
+    "standing": "hap_standing_good"
+   },
+   "favour": {
+    "group": "good",
+    "weight": "hap_w_favour",
+    "requires": [
+     "other_member"
+    ],
+    "trust": "hap_trust_gain",
+    "standing": "hap_standing_small"
+   },
+   "drifts": {
+    "group": "neutral",
+    "weight": "hap_w_drifts",
+    "standing": "hap_standing_loss"
+   },
+   "goes_straight": {
+    "group": "neutral",
+    "weight": "hap_w_goes_straight",
+    "floor": 0.0
+   },
+   "switches": {
+    "group": "neutral",
+    "weight": "hap_w_switches",
+    "floor": 0.0,
+    "requires": [
+     "better_offer"
+    ],
+    "resentment": "hap_switch_resentment"
+   },
+   "incident": {
+    "group": "wrong",
+    "weight": "hap_w_incident",
+    "victims": {
+     "other_line": "hap_v_other_line",
+     "member": "hap_v_member",
+     "officer": "hap_v_officer",
+     "big_earner": "hap_v_big_earner",
+     "civilian": "hap_v_civilian"
+    },
+    "harm": [
+     "hap_harm_lo",
+     "hap_harm_hi"
+    ],
+    "big_weekly": "hap_big_weekly",
+    "respond_delay": "hap_respond_delay"
+   },
+   "holds_out": {
+    "group": "wrong",
+    "weight": "hap_w_holds_out",
+    "take": [
+     "hap_holdout_lo",
+     "hap_holdout_hi"
+    ],
+    "notice_week": "hap_notice_week",
+    "standing": "hap_standing_loss",
+    "resentment": "hap_holdout_resentment"
+   },
+   "busted": {
+    "group": "wrong",
+    "weight": "hap_w_busted",
+    "pools": [
+     "theft",
+     "bookmaking",
+     "loansharking",
+     "cards_dice"
+    ],
+    "charge": "a racket arrest",
+    "crime_kind": "racket",
+    "days": [
+     "hap_busted_days_lo",
+     "hap_busted_days_hi"
+    ]
+   },
+   "informs": {
+    "group": "wrong",
+    "weight": "hap_w_informs",
+    "floor": 0.0,
+    "requires": [
+     "open_case"
+    ],
+    "crime_kind": "racket",
+    "report_days": "hap_report_days",
+    "discover_week": "hap_discover_week",
+    "respond_delay": "hap_respond_delay",
+    "responses": [
+     "kill_offender",
+     "let_it_go"
+    ]
+   }
   }
  },
  "under_patron": [
