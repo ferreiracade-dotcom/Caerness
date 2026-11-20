@@ -32,6 +32,7 @@ ORGS = {
         "firm": {"sphere": "commerce", "head": "chair", "unit_leader": "manager", "purse_roles": ["manager"], "courtship_scan": True,
                  "labels": {"chair": "Chair", "manager": "Manager", "clerk": "Clerk"}, "rules": [],
                  "lifecycle": {"held_level_days": 30, "held_seat_days": 365, "left_cadence_days": 180, "returns_as": "clerk",
+                               "held_decision": {"level_week": 1.0, "seat_week": 0.5, "loyalty_weight": 0.0, "acting_share": 1.0},
                                "role_levels": {"chair": 4, "manager": 4, "clerk": 3}, "succession": {"chair": ["manager"]}},
                  "motives": {"promote": [{"name": "restless", "weight": 0.8}]}, "rates": {"promote": {"base_rate": 1.0}}},
         "solo": {"sphere": "commerce", "head": "owner", "unit_leader": None, "courtship_scan": True,

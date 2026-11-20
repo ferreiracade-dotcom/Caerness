@@ -82,23 +82,94 @@ def test_the_head_is_succeeded_by_data():
     assert all(r[0] is not None and orgs.is_living(conn, int(r[0])) for r in unit_row)
 
 
-def test_held_man_drops_a_level_after_30_days_and_returns():
+import contextlib
+
+
+@contextlib.contextmanager
+def _rolls(*streams):
+    """The named streams draw 0.0 (the weighed decision goes through); every other draws 0.99."""
+    from engine import org_motives
+    old = org_motives._roll
+    org_motives._roll = lambda conn, actor, day, stream: 0.0 if stream in streams else 0.99
+    try:
+        yield
+    finally:
+        org_motives._roll = old
+
+
+def test_held_man_loses_his_daily_review_by_his_superiors_weighed_decision_and_gets_it_back():
     from engine import org_lifecycle, orgs
     f = fx.build()
     conn = f.conn
     m = f.managers[1]
     _hold(conn, m, 0, 40)
-    org_lifecycle.process_due(conn, 14)
-    assert orgs.seat_of(conn, m, f.firm)["level"] == 4  # not yet 30 days
-    org_lifecycle.process_due(conn, 35)
-    assert orgs.seat_of(conn, m, f.firm)["level"] == 3
+    with _rolls():  # the superior does not take it away: no timer does it for him
+        org_lifecycle.process_due(conn, 35)
+    assert orgs.seat_of(conn, m, f.firm)["level"] == 4
+    with _rolls("held_level"):
+        org_lifecycle.process_due(conn, 14)
+        assert orgs.seat_of(conn, m, f.firm)["level"] == 3  # the decision can come early (less likely), the typical 30 days only sets the weight
     prof = conn.execute("SELECT tier,cadence_days FROM simulation_profiles WHERE actor_id=?", (m,)).fetchone()
     assert prof["tier"] == "STRATEGIC" and prof["cadence_days"] == 7
+    with _rolls():
+        org_lifecycle.process_due(conn, 35)
+    assert orgs.seat_of(conn, m, f.firm)["level"] == 3  # still held: it stays
     _release(conn, m)
     org_lifecycle.process_due(conn, 42)
     assert orgs.seat_of(conn, m, f.firm)["level"] == 4
     prof = conn.execute("SELECT tier,cadence_days FROM simulation_profiles WHERE actor_id=?", (m,)).fetchone()
     assert prof["tier"] == "ACTIVE" and prof["cadence_days"] == 1
+
+
+def test_a_man_held_over_a_year_may_lose_his_seat_and_is_replaced_and_returns_lower():
+    from engine import org_lifecycle, orgs
+    f = fx.build()
+    conn = f.conn
+    m = f.managers[0]
+    unit = int(orgs.seat_of(conn, m, f.firm)["unit_id"])
+    _hold(conn, m, 0, None)
+    with _rolls("held_level"):
+        org_lifecycle.process_due(conn, 371)
+    assert orgs.seat_of(conn, m, f.firm)["status"] == "active"  # no timer: nobody gave the seat away
+    with _rolls("held_seat"):
+        org_lifecycle.process_due(conn, 378)
+    assert orgs.seat_of(conn, m, f.firm)["status"] == "held"
+    org_lifecycle.process_due(conn, 385)
+    new = conn.execute("SELECT leader_actor_id FROM org_units WHERE id=?", (unit,)).fetchone()[0]
+    assert new != m and orgs.seat_of(conn, new, f.firm)["role_key"] == "manager"
+    _release(conn, m)
+    org_lifecycle.process_due(conn, 392)
+    back = orgs.seat_of(conn, m, f.firm)
+    assert back["status"] == "active" and back["role_key"] == "clerk" and back["superior_actor_id"] in (new, f.chair), dict(back)
+
+
+def test_an_acting_man_holds_the_seat_for_a_held_leader_who_takes_it_back():
+    from engine import org_lifecycle, orgs
+    f = fx.build()
+    conn = f.conn
+    m = f.managers[0]
+    unit = int(orgs.seat_of(conn, m, f.firm)["unit_id"])
+    _hold(conn, m, 0, None)
+    with _rolls("held_seat", "held_acting"):
+        org_lifecycle.process_due(conn, 371)
+    org_lifecycle.process_due(conn, 378)
+    acting = conn.execute("SELECT leader_actor_id FROM org_units WHERE id=?", (unit,)).fetchone()[0]
+    assert acting != m
+    mk = conn.execute("SELECT * FROM org_agenda WHERE kind='acting' AND actor_id=?", (m,)).fetchone()
+    assert mk is not None and mk["status"] == "open"
+    _release(conn, m)
+    org_lifecycle.process_due(conn, 385)
+    assert orgs.seat_of(conn, m, f.firm)["role_key"] == "manager" and conn.execute("SELECT leader_actor_id FROM org_units WHERE id=?", (unit,)).fetchone()[0] == m
+    assert orgs.seat_of(conn, acting, f.firm)["role_key"] == "clerk" and orgs.superior_of(conn, acting, f.firm) == m
+
+
+def test_the_levels_come_from_the_packages_cadence_data():
+    from engine import org_lifecycle
+    f = fx.build()
+    assert org_lifecycle._levels_pair(f.conn) == (4, 3)  # cadence_days {"4": 1, "3": 7}
+    src = (ROOT / "engine" / "org_lifecycle.py").read_text(encoding="utf-8")
+    import re
+    assert not re.findall(r"level\W*(?:==|=|IN)\W*[34]\b|\(3,\s*4\)|, [34], int\(day\)", src), "a literal level in org_lifecycle"
 
 
 def test_a_step_back_agenda_keeps_a_head_at_level_3():
@@ -108,23 +179,6 @@ def test_a_step_back_agenda_keeps_a_head_at_level_3():
     orgs.set_level(conn, f.chair, 3, 0, f.firm)  # he has stepped back (the data names the agenda kinds in the real package)
     org_lifecycle.process_due(conn, 7)
     assert orgs.seat_of(conn, f.chair, f.firm)["level"] == 4  # no step-back data in this package: the role's level is 4
-
-
-def test_a_man_held_over_a_year_loses_his_seat_and_is_replaced_and_returns_lower():
-    from engine import org_lifecycle, orgs
-    f = fx.build()
-    conn = f.conn
-    m = f.managers[0]
-    unit = int(orgs.seat_of(conn, m, f.firm)["unit_id"])
-    _hold(conn, m, 0, None)
-    org_lifecycle.process_due(conn, 371)
-    assert orgs.seat_of(conn, m, f.firm)["status"] == "held"
-    new = conn.execute("SELECT leader_actor_id FROM org_units WHERE id=?", (unit,)).fetchone()[0]
-    assert new != m and orgs.seat_of(conn, new, f.firm)["role_key"] == "manager"
-    _release(conn, m)
-    org_lifecycle.process_due(conn, 378)
-    back = orgs.seat_of(conn, m, f.firm)
-    assert back["status"] == "active" and back["role_key"] == "clerk" and back["superior_actor_id"] in (new, f.chair), dict(back)
 
 
 def test_leaving_the_life_keeps_the_record():

@@ -261,10 +261,18 @@
  },
  "induction": {
   "father_name_group": "italian",
-  "vouch_required": true
+  "vouch_required": true,
+  "name_weight": "induct_name_weight",
+  "age_weight": "induct_age_weight",
+  "veto": false,
+  "canon": "Bible Part I 12.4 / Part III (Fixed): a made man is Italian by his father's blood as the usual rule (some families insist on both parents), individual exceptions are Open by family. A strong nomination weight, not a refusal; set veto true only if canon makes it absolute."
  },
  "membership": {
-  "books": {"delay_days": "seat_fill_delay_days", "retry_days": "books_retry_days"},
+  "books": {"delay_days": "seat_fill_delay_days", "retry_days": "books_retry_days",
+            "weigh": {"rate_week": "books_rate_week", "short_span": "books_short_span", "w_short": "books_w_short", "w_waiting": "books_w_waiting", "waiting_scale": "books_waiting_scale",
+                      "waiting_standing": "books_waiting_standing", "w_money": "books_w_money", "money_scale": "books_money_scale", "w_war": "books_w_war", "war_scale": "books_war_scale",
+                      "w_ambition": "books_w_ambition", "w_heat": "books_w_heat", "heat_scale": "books_heat_scale"},
+            "make": {"w_short": "make_w_short", "w_standing": "make_w_standing", "w_ambition": "make_w_ambition", "w_pressure": "make_w_pressure", "threshold": "make_threshold"}},
   "replacement": {"chance_week": "dependant_replace_week", "ages": [17, 30]},
   "standing_growth": "dependant_standing_growth_week",
   "standing": {"years_cap": "standing_years_cap", "w_years": "standing_w_years", "w_role": "standing_w_role", "w_earn": "standing_w_earn", "earn_scale": "standing_earn_scale",
@@ -274,11 +282,23 @@
   "hidden": {"discovery_period": "hidden_line_discovery_period", "fine_share": ["ladder_soldier_to_capo", "ladder_capo_to_boss"],
              "fine_multiple": "disc_fine_multiple", "fine_flow": "kickup"},
   "discipline": {
+   "talk": {"loyalty": "disc_talk_loyalty", "reliability": "disc_talk_reliability", "police": "disc_talk_police"},
+   "watch": {"base": "disc_watch_base"},
+   "unprotected": {
+    "earning_flow": "associate_earning",
+    "pay_back": {"base": "du_pay_back_base", "small": "du_pay_back_small", "standing": "du_pay_back_standing", "interest": "du_pay_back_interest", "beating": "du_pay_back_beating",
+                 "standing_loss": "du_pay_back_loss", "resentment": "du_pay_back_resentment", "fear": "du_pay_back_fear", "loyalty": "du_pay_back_loyalty"},
+    "cut_off": {"base": "du_cut_off_base", "unreliable": "du_cut_off_unreliable", "repeat": "du_cut_off_repeat", "rehome": "du_cut_off_rehome"},
+    "kill": {"base": "du_kill_base", "size": "du_kill_size", "duration": "du_kill_duration", "hit_head": "du_kill_hit_head", "face": "du_kill_face", "aggression": "du_kill_aggression",
+             "low_standing": "du_kill_low_standing", "repeat": "du_kill_repeat", "talk": "du_kill_talk", "size_scale": "du_kill_size_scale", "duration_weeks": "du_kill_duration_weeks",
+             "face_men": "du_kill_face_men", "normal_floor": "du_kill_normal_floor"}
+   },
    "fine": {"base": "disc_fine_base", "standing": "disc_fine_standing", "standing_loss": "disc_fine_loss", "resentment": "disc_fine_resentment", "fear": "disc_fine_fear"},
    "demote": {"base": "disc_demote_base", "greed": "disc_demote_greed", "standing_loss": "disc_demote_loss", "resentment": "disc_demote_resentment", "respect": "disc_demote_respect"},
    "kill": {"base": "disc_kill_base", "size": "disc_kill_size", "duration": "disc_kill_duration", "hit_head": "disc_kill_hit_head", "face": "disc_kill_face",
             "aggression": "disc_kill_aggression", "low_standing": "disc_kill_low_standing", "repeat": "disc_kill_repeat", "size_scale": "disc_kill_size_scale",
-            "duration_weeks": "disc_kill_duration_weeks", "face_men": "disc_kill_face_men", "normal_floor": "disc_kill_normal_floor"}
+            "duration_weeks": "disc_kill_duration_weeks", "face_men": "disc_kill_face_men", "normal_floor": "disc_kill_normal_floor",
+            "talk": "disc_kill_talk", "left": "disc_kill_left"}
   }
  },
  "line_kinds": {

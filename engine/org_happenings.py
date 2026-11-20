@@ -685,6 +685,9 @@ def notice_holdouts(conn: sqlite3.Connection, day: int) -> int:
             adjust_relationship(conn, int(sup), a, int(day), resentment_delta=float(figure(conn, spec["resentment"])), trust_delta=-float(figure(conn, spec["resentment"])))
         conn.execute("UPDATE org_incidents SET status='noticed' WHERE id=?", (r["id"],))
         imposed(conn, a)  # his patron has found out: he is looked at tomorrow
+        if c is not None:  # and the man who decides about him (his patron) gets `discipline` about him
+            from .org_membership import discipline_for_holdout
+            discipline_for_holdout(conn, a, int(c[0]["org_actor_id"]), amt, int(r["day"]), int(r["id"]), int(day))
         n += 1
     return n
 

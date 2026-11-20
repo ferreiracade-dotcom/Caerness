@@ -9,6 +9,7 @@ import json
 import sqlite3
 
 from . import orgs
+from .world_package import org_rules, package_for
 
 _DAYS_PER_YEAR = 365.0
 RISE_REASON = "rose to lead a unit"  # the history note `fill_unit_leader` leaves; readers use its day as the day the seat was filled
@@ -244,6 +245,9 @@ def _vacate(conn: sqlite3.Connection, seat, why: str, day: int) -> None:
     successor = None
     if seat["role_key"] == rules.get("unit_leader") and seat["unit_id"]:
         successor = fill_unit_leader(conn, int(seat["unit_id"]), int(day))
+        mk = conn.execute("SELECT id FROM org_agenda WHERE kind='acting' AND status='open' AND actor_id=? AND subject_id=?", (gone, org)).fetchone()
+        if mk is not None:
+            conn.execute("UPDATE org_agenda SET metadata_json=? WHERE id=?", (json.dumps({"unit": int(seat["unit_id"]), "acting": successor, "prior": _lc(conn, org).get("returns_as")}), int(mk["id"])))
     elif seat["role_key"] in (_lc(conn, org).get("succession") or {}):
         successor = _promote(conn, org, seat["role_key"], int(day))
     target = successor if successor is not None else _live_superior(conn, org, seat)
@@ -277,15 +281,55 @@ def _custody_held(conn: sqlite3.Connection) -> dict[int, int]:
     return {int(a): int(s) for a, s in conn.execute("SELECT actor_id,MIN(since_day) FROM custody WHERE kind='held' GROUP BY actor_id")}
 
 
-def _held_and_released(conn: sqlite3.Connection, day: int) -> int:
-    held = _custody_held(conn)
+def _levels_pair(conn: sqlite3.Connection) -> tuple[int, int]:
+    """(the level reviewed most often, the next one) from the package's cadence_days (level -> days between reviews)."""
+    cad = sorted(((int(v), int(k)) for k, v in (org_rules(package_for(conn)).get("cadence_days") or {}).items()))
+    return (cad[0][1], cad[1][1]) if len(cad) > 1 else (cad[0][1], cad[0][1])
+
+
+def _held_decisions(conn: sqlite3.Connection, held: dict[int, int], day: int) -> int:
+    """Each week, for every active seat whose man is held, the man's superior (the head when he has none) weighs two things.
+    Whether to take his daily review away: the longer he has been held, the likelier, less if his sentence is nearly served or
+    he is loyal to the head. Whether to give the seat away: the same against the kind's typical seat-keeping time; a unit
+    leader may instead be given an acting man (his seat is filled, and he takes it back when he is released). The figures
+    `held_level_days` and `held_seat_days` are the typical durations that set these pressures, not timers."""
+    from . import org_motives
+    high, low = _levels_pair(conn)
+    until = {int(a): u for a, u in conn.execute("SELECT actor_id,MAX(until_day) FROM custody WHERE kind='held' GROUP BY actor_id")}
     n = 0
-    if held:
-        for s in conn.execute("SELECT * FROM org_seats WHERE status='active' AND actor_id IN (%s)" % ",".join("?" * len(held)), list(held)).fetchall():
-            days = _num(conn, _lc(conn, int(s["org_actor_id"])), "held_seat_days")
-            if days is not None and int(day) - held[int(s["actor_id"])] >= days:
+    for s in conn.execute("SELECT * FROM org_seats WHERE status='active' AND actor_id IN (%s)" % ",".join("?" * len(held)), list(held)).fetchall() if held else []:
+        a, org = int(s["actor_id"]), int(s["org_actor_id"])
+        lc = _lc(conn, org)
+        dec = lc.get("held_decision")
+        if not dec:
+            continue
+        d = int(day) - held[a]
+        left = None if until.get(a) is None else max(0, int(until[a]) - int(day))
+        head = orgs.head_of(conn, org)
+        loyal = _head_loyalty(conn, a, head)
+        lw = _num(conn, dec, "loyalty_weight", 0.0)
+        lvl_days, seat_days = _num(conn, lc, "held_level_days"), _num(conn, lc, "held_seat_days")
+        if lvl_days and int(s["level"]) == high and role_level(conn, org, s["role_key"]) == high:
+            soon = 1.0 if left is None else min(1.0, left / lvl_days)
+            p = _num(conn, dec, "level_week", 0.0) * min(1.0, d / lvl_days) * soon * (1.0 - lw * loyal)
+            if p > 0 and org_motives._roll(conn, a, int(day), "held_level") < p:
+                orgs.set_level(conn, a, low, int(day), org)
+                n += 1
+        if seat_days:
+            p = _num(conn, dec, "seat_week", 0.0) * min(1.0, d / seat_days) * (1.0 - lw * loyal)
+            if p > 0 and org_motives._roll(conn, a, int(day), "held_seat") < p:
+                rules = orgs.kind_rules(conn, org)
+                if s["role_key"] == rules.get("unit_leader") and s["unit_id"] and org_motives._roll(conn, a, int(day), "held_acting") < _num(conn, dec, "acting_share", 0.0) * loyal:
+                    conn.execute("INSERT INTO org_agenda(actor_id,kind,due_day,subject_kind,subject_id,created_day,metadata_json) VALUES (?,?,?,?,?,?,?)",
+                                 (a, "acting", int(day), "org", org, int(day), json.dumps({"unit": int(s["unit_id"])})))
                 conn.execute("UPDATE org_seats SET status='held', left_day=? WHERE id=?", (int(day), int(s["id"])))
                 n += 1
+    return n
+
+
+def _held_and_released(conn: sqlite3.Connection, day: int) -> int:
+    held = _custody_held(conn)
+    n = _held_decisions(conn, held, int(day))
     for s in conn.execute("SELECT * FROM org_seats WHERE status='held'").fetchall():
         a = int(s["actor_id"])
         if a in held or not orgs.is_living(conn, a):
@@ -308,6 +352,24 @@ def _return(conn: sqlite3.Connection, seat, day: int) -> None:
         h = orgs.head_of(conn, org)
         taken = h is not None and h != a
     conn.execute("DELETE FROM org_agenda WHERE kind='vacancy' AND actor_id=? AND subject_id=?", (a, org))
+    mk = conn.execute("SELECT * FROM org_agenda WHERE kind='acting' AND status='open' AND actor_id=? AND subject_id=?", (a, org)).fetchone()
+    if mk is not None:
+        conn.execute("UPDATE org_agenda SET status='resolved', resolved_day=? WHERE id=?", (int(day), int(mk["id"])))
+        meta = json.loads(mk["metadata_json"] or "{}")
+        acting = meta.get("acting")
+        if taken and acting is not None and seat["unit_id"]:
+            cur = conn.execute("SELECT leader_actor_id FROM org_units WHERE id=?", (int(seat["unit_id"]),)).fetchone()
+            if cur is not None and cur[0] is not None and int(cur[0]) == int(acting):
+                prior = meta.get("prior") or _lc(conn, org).get("returns_as")
+                if prior:  # the acting man steps back; the men who answered to him answer to the man who is back
+                    conn.execute("UPDATE org_seats SET role_key=?, superior_actor_id=? WHERE actor_id=? AND org_actor_id=?", (prior, a, int(acting), org))
+                    membership_text(conn, org, int(acting), prior)
+                    conn.execute("UPDATE org_seats SET superior_actor_id=? WHERE org_actor_id=? AND superior_actor_id=? AND status='active' AND actor_id NOT IN (?,?)",
+                                 (a, org, int(acting), a, int(acting)))
+                    conn.execute("UPDATE org_units SET leader_actor_id=? WHERE id=?", (a, int(seat["unit_id"])))
+                    conn.execute("UPDATE org_lines SET holder_actor_id=? WHERE holder_actor_id=? AND unit_id=? AND status='active'", (a, int(acting), int(seat["unit_id"])))
+                    taken = False
+                    orgs.imposed(conn, int(acting))
     if taken:
         back = _lc(conn, org).get("returns_as")
         if not back:
@@ -332,6 +394,7 @@ def _levels(conn: sqlite3.Connection, day: int) -> int:
     """Men whose role is played at level 4 drop to 3 when held over `held_level_days` or when a man in a step-back role has
     an open step-back agenda, and go back to 4 when neither holds."""
     held = _custody_held(conn)
+    high, low = _levels_pair(conn)
     n = 0
     for (org,) in conn.execute("SELECT org_actor_id FROM org_profiles").fetchall():
         lc = _lc(conn, int(org))
@@ -343,17 +406,16 @@ def _levels(conn: sqlite3.Connection, day: int) -> int:
         if back_roles and back_kinds:
             stepped = {int(r[0]) for r in conn.execute(
                 "SELECT DISTINCT actor_id FROM org_agenda WHERE status='open' AND kind IN (%s)" % ",".join("?" * len(back_kinds)), back_kinds)}
-        days = _num(conn, lc, "held_level_days")
-        for s in conn.execute("SELECT * FROM org_seats WHERE org_actor_id=? AND status='active' AND level IN (3,4)", (int(org),)).fetchall():
+        for s in conn.execute("SELECT * FROM org_seats WHERE org_actor_id=? AND status='active' AND level IN (?,?)", (int(org), high, low)).fetchall():
             a = int(s["actor_id"])
-            if role_level(conn, int(org), s["role_key"]) != 4:
+            if role_level(conn, int(org), s["role_key"]) != high:
                 continue
-            down = (days is not None and a in held and int(day) - held[a] >= days) or (s["role_key"] in back_roles and a in stepped)
-            if down and int(s["level"]) == 4:
-                orgs.set_level(conn, a, 3, int(day), int(org))
+            down = (a in held and int(s["level"]) == low) or (s["role_key"] in back_roles and a in stepped)  # a held man's drop is his superior's weighed decision
+            if down and int(s["level"]) == high:
+                orgs.set_level(conn, a, low, int(day), int(org))
                 n += 1
-            elif not down and int(s["level"]) == 3:
-                orgs.set_level(conn, a, 4, int(day), int(org))
+            elif not down and int(s["level"]) == low:
+                orgs.set_level(conn, a, high, int(day), int(org))
                 n += 1
     return n
 

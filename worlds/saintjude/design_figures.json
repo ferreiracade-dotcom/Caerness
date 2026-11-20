@@ -1461,6 +1461,566 @@
    "source": "unsourced",
    "note": "unsourced; floor on a man's normal weekly kick-up, so a man who passes nothing up does not divide by zero (and any skim is then large)"
   },
+  "books_rate_week": {
+   "default": 0.2,
+   "range": null,
+   "unit": "chance per week at full pressure",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the chance a head opens the books in a week when everything pushes him to (a man short, earners waiting, money, a war): about every five weeks; at ordinary pressure (0.3-0.4) about every three to four months even at the figure"
+  },
+  "books_short_span": {
+   "default": 0.1,
+   "range": null,
+   "unit": "fraction of the figure",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a family this far under its figure (10%: five men of fifty) is as short as it feels; at or over the figure it feels no shortage"
+  },
+  "books_w_short": {
+   "default": 0.7,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight of 'men short of the figure' in the head's pressure to open the books"
+  },
+  "books_w_waiting": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight of earners waiting (dependants of standing at least books_waiting_standing)"
+  },
+  "books_waiting_scale": {
+   "default": 10,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; ten earners of standing waiting is as many as a family has waiting"
+  },
+  "books_waiting_standing": {
+   "default": 0.5,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a dependant of this standing or better counts as waiting to be made"
+  },
+  "books_w_money": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a head with money is likelier to make men (a made man must be given a place to earn)"
+  },
+  "books_money_scale": {
+   "default": 50000.0,
+   "range": null,
+   "unit": "dollars",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a head's purse this big is as flush as he gets"
+  },
+  "books_w_war": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a war (killings across families reaching him in the last half year) pushes a head to make men"
+  },
+  "books_war_scale": {
+   "default": 3,
+   "range": null,
+   "unit": "killings",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; three killings across families in 180 days is as hot as it gets"
+  },
+  "books_w_ambition": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; an ambitious head wants a bigger family"
+  },
+  "books_w_heat": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; law heat (open cases against the family's made men) holds a head back: at books_heat_scale cases the pressure is cut by this share"
+  },
+  "books_heat_scale": {
+   "default": 6,
+   "range": null,
+   "unit": "open cases",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; six open cases against a family's made men is as hot as it gets"
+  },
+  "make_w_short": {
+   "default": 1.0,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight of 'men short of the figure' in the head's wish to make the man put to him: a family a man or two short does not rush, three or four short does"
+  },
+  "make_w_standing": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight of the man's name (standing less the age and family-name weights); on its own a very good name never reaches the threshold (0.3), so a family above its figure needs more than one good name"
+  },
+  "make_w_ambition": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; an ambitious head takes a good name a little more readily"
+  },
+  "make_threshold": {
+   "default": 0.75,
+   "range": null,
+   "unit": "utility 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the head's pull to turn the man down (utility 0..1) against his pull to make him; decisions are weighed with the engine's usual temperature, so at the figure (pull about 0.4) he makes about 1 name in 40, one short about 1 in 13, two short about 1 in 7, a family four short nearly every name (and each of the six unit leaders puts a name, so per cycle about 14%, 37%, 57% and nearly all)"
+  },
+  "induct_name_weight": {
+   "default": 0.6,
+   "range": null,
+   "unit": "nomination weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; canon (bible Part I 12.4 / Part III: Italian by his father's blood is the usual rule, individual exceptions Open by family): a family name outside the induction group costs a name this much, so such a man is put forward only when no one of the right name is nearly as good; it is not a refusal"
+  },
+  "induct_age_weight": {
+   "default": 0.5,
+   "range": null,
+   "unit": "nomination weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a dependant under the kind's usual induction age (inducted_after_age) costs his name this much: rare, not impossible"
+  },
+  "held_level_week": {
+   "default": 0.6,
+   "range": null,
+   "unit": "chance per week at full pressure",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the chance a week that a held man's superior takes his daily review away once he has been held the typical time (held_level_days) and is not about to be freed"
+  },
+  "held_seat_week": {
+   "default": 0.35,
+   "range": null,
+   "unit": "chance per week at full pressure",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the chance a week that a held man's seat is given away once he has been held the typical time (held_seat_days)"
+  },
+  "held_loyalty_weight": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; loyalty to the head (0..1) cuts the chance of losing the daily review or the seat by this share: a loyal man inside is kept longer"
+  },
+  "held_acting_share": {
+   "default": 0.7,
+   "range": null,
+   "unit": "chance x loyalty",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a held capo given up may instead have an acting man (the seat is filled, and he takes it back when released), with this chance times his loyalty"
+  },
+  "disc_talk_loyalty": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight of low loyalty in the risk that a man talks"
+  },
+  "disc_talk_reliability": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight of low reliability in the risk that a man talks"
+  },
+  "disc_talk_police": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight of police contact (held in the last year or an open case naming him) in the risk that a man talks"
+  },
+  "disc_watch_base": {
+   "default": 0.5,
+   "range": null,
+   "unit": "utility 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the head's pull to let a man who left go and keep an eye on him; killing him must beat this (his talk risk, the head's temper, his low standing and the leaving itself)"
+  },
+  "disc_kill_talk": {
+   "default": 0.25,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; for a made man who walked away: weight of the risk that he talks"
+  },
+  "disc_kill_left": {
+   "default": 0.15,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a made man leaving is not a clean exit: this much pull toward killing him on top of his talk risk"
+  },
+  "du_pay_back_base": {
+   "default": 0.6,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the usual answer to a dependant caught skimming: he pays it back with interest and is beaten"
+  },
+  "du_pay_back_small": {
+   "default": 0.2,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a small skim is likelier to end in a beating and repayment (weight on 1 - the skim's size)"
+  },
+  "du_pay_back_standing": {
+   "default": 0.15,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a dependant of standing is worth keeping"
+  },
+  "du_pay_back_interest": {
+   "default": 0.5,
+   "range": null,
+   "unit": "fraction",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; he pays back what he took plus half again"
+  },
+  "du_pay_back_beating": {
+   "default": 35.0,
+   "range": null,
+   "unit": "harm severity 0..100",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the beating, a non-fatal harm through the harm system (hostile intent), enough to hurt and to be remembered; a bad roll can still kill"
+  },
+  "du_pay_back_loss": {
+   "default": 0.12,
+   "range": null,
+   "unit": "standing lost",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; standing lost by the dependant who was made to pay back"
+  },
+  "du_pay_back_resentment": {
+   "default": 12.0,
+   "range": null,
+   "unit": "relationship points toward the patron",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; resentment after the beating"
+  },
+  "du_pay_back_fear": {
+   "default": 10.0,
+   "range": null,
+   "unit": "relationship points toward the patron",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; fear after the beating"
+  },
+  "du_pay_back_loyalty": {
+   "default": 8.0,
+   "range": null,
+   "unit": "relationship points toward the patron",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; loyalty lost after the beating"
+  },
+  "du_cut_off_base": {
+   "default": 0.45,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; dropping a dependant is the less usual answer"
+  },
+  "du_cut_off_unreliable": {
+   "default": 0.25,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on 1 - his reliability: an unreliable man is not worth the trouble"
+  },
+  "du_cut_off_repeat": {
+   "default": 0.2,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man caught again after being made to pay is likelier to be dropped"
+  },
+  "du_cut_off_rehome": {
+   "default": 0.25,
+   "range": null,
+   "unit": "chance",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the chance a man who is cut off is taken on by another crew of the organisation (at the bottom) rather than put out of the life"
+  },
+  "du_kill_base": {
+   "default": 0.05,
+   "range": null,
+   "unit": "utility weight (a cost)",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; killing an unprotected dependant needs no sit-down and costs the family little, so the cost is a small fraction of a made man's (disc_kill_base -0.18, plus a standing of 0.6 and the head's sanction); calibrated so that about 10-20% of dependants caught are killed (first run at -0.05 gave 7%)"
+  },
+  "du_kill_size": {
+   "default": 0.35,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on the size of the skim against what he normally earns in a year"
+  },
+  "du_kill_duration": {
+   "default": 0.15,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on how long it ran (against du_kill_duration_weeks)"
+  },
+  "du_kill_hit_head": {
+   "default": 0.1,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on whose money it was: all of it the patron's own when he answers directly to him, half otherwise"
+  },
+  "du_kill_face": {
+   "default": 0.1,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on how many in the crew know (against du_kill_face_men)"
+  },
+  "du_kill_aggression": {
+   "default": 0.35,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on the deciding man's aggression"
+  },
+  "du_kill_low_standing": {
+   "default": 0.15,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on 1 - the dependant's standing"
+  },
+  "du_kill_repeat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a repeat offence, one input among the others"
+  },
+  "du_kill_talk": {
+   "default": 0.3,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on the risk that he talks (low loyalty, low reliability, police contact)"
+  },
+  "du_kill_size_scale": {
+   "default": 1.0,
+   "range": null,
+   "unit": "ratio",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a skim equal to a year of what he earns counts as the largest"
+  },
+  "du_kill_duration_weeks": {
+   "default": 26,
+   "range": null,
+   "unit": "weeks",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a skim that ran half a year counts as the longest for a dependant"
+  },
+  "du_kill_face_men": {
+   "default": 8,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; eight men under the same patron is all the face there is to lose"
+  },
+  "du_kill_normal_floor": {
+   "default": 50.0,
+   "range": null,
+   "unit": "dollars a week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; floor on a dependant's normal weekly earnings, so a man who earns nothing does not divide by zero"
+  },
+  "make_w_pressure": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight of the books pressure (earners waiting, money, a war, ambition, less law heat) in the wish to make the man: in a rich, hot, ambitious year a head can take a good name even at the figure, so the count drifts above it"
+  },
   "associate_happening_week": {
    "default": 0.0206,
    "range": null,
