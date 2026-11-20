@@ -50,12 +50,15 @@ def forced(seeds: int, causes: list[str]) -> None:
     from engine import org_lifecycle, orgs, org_succession as su, outfit_choices
     tally: Counter = Counter()
     heir_named = Counter()
+    by_role: Counter = Counter()
+    contested_n: Counter = Counter()
     for cause in causes:
         for seed in range(seeds):
             conn = _open(5000 + seed)
             day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]) + 5
             for org in _families(conn):
                 head = orgs.head_of(conn, org)
+                roles_before = {int(r["actor_id"]): r["role_key"] for r in orgs.members(conn, org)}
                 name = conn.execute("SELECT name FROM actors WHERE id=?", (org,)).fetchone()[0]
                 # the head's own succession preference, as the weekly pass would have formed it by now (forced draw)
                 from engine import org_motives
@@ -92,16 +95,21 @@ def forced(seeds: int, causes: list[str]) -> None:
                     detail = f" war:{wm.get('how', 'open')}" + (f" split->{wm.get('new_org')}" if wm.get("new_org") else "")
                     outcome = f"{outcome}>{wm.get('how', 'open')}"
                 new = orgs.head_of(conn, org)
-                role_before = conn.execute("SELECT role_key FROM org_seats WHERE actor_id=? AND org_actor_id=?", (new, org)).fetchone()
+                role_before = roles_before.get(new)
                 won_heir = heir is not None and m.get("winner") == heir
                 tally[(cause, outcome)] += 1
                 heir_named[(cause, heir is not None, won_heir)] += 1
-                print(f"{cause:9} seed {seed} {name:20} heir={'yes' if heir else 'no '} weeks={m.get('weeks', '-'):>3} outcome={outcome:22}{detail} new head role={role_before[0] if role_before else None} won_by_heir={won_heir}")
+                by_role[(cause, role_before if not won_heir else "heir")] += 1
+                contested = outcome not in ("agreed", "coup") or int(m.get("weeks") or 0) > 3
+                contested_n[(cause, contested)] += 1
+                print(f"{cause:9} seed {seed} {name:20} heir={'yes' if heir else 'no '} weeks={m.get('weeks', '-'):>3} outcome={outcome:22}{detail} winner was {role_before} won_by_heir={won_heir}")
             conn.close()
     print("\nSUMMARY by cause and outcome")
     for (cause, out), n in sorted(tally.items()):
         print(f"  {cause:9} {out:24} {n}")
     print("heir named / heir won (cause, named, heir_won): ", dict(heir_named))
+    print("winner by role before (heir counted apart): ", dict(by_role))
+    print("contested (more than three weeks, or anything but agreed): ", dict(contested_n))
 
 
 def five(days: int, seed: int | None) -> None:
