@@ -27,6 +27,7 @@ import sqlite3
 from . import ledger, org_motives, outfit_motives as om
 from .design import run_seed
 from .org_choices import register_agenda_action, register_executor
+from .law_opening import agency_for
 from .org_lifecycle import mark_for_history
 from .org_motives import _fig as figure
 from .orgs import add_agenda, clamp01, head_of, imposed, is_living, kind_rules, resolve_agenda, seat_of
@@ -134,28 +135,36 @@ def _unit_short(conn, a, day, seat, org):
     return 0.0 if want <= 0 else 1.0 - deps / want
 
 
-def _other_members(conn, seat, org) -> list[int]:
-    return [int(r[0]) for r in conn.execute(
-        "SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' AND inducted_day IS NOT NULL AND COALESCE(unit_id,0)<>COALESCE(?,0) ORDER BY actor_id",
-        (org, seat["unit_id"])) if is_living(conn, int(r[0]))]
+def _other_members(conn, seat, org, day: int | None = None) -> list[int]:
+    st = _day_state(conn, day)["readings"] if day is not None else {}
+    k = ("others", org, seat["unit_id"])
+    if k not in st:
+        st[k] = [int(r[0]) for r in conn.execute(
+            "SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' AND inducted_day IS NOT NULL AND COALESCE(unit_id,0)<>COALESCE(?,0) ORDER BY actor_id",
+            (org, seat["unit_id"])) if is_living(conn, int(r[0]))]
+    return st[k]
 
 
-def _take_per_man(conn, patron: int, org: int) -> float:
-    take = conn.execute("SELECT COALESCE(SUM(weekly_take),0) FROM org_lines WHERE holder_actor_id=? AND status='active'", (int(patron),)).fetchone()[0]
-    deps = conn.execute("SELECT COUNT(*) FROM org_seats WHERE superior_actor_id=? AND org_actor_id=? AND status='active'", (int(patron), org)).fetchone()[0]
-    return float(take) / (deps + 1)
+def _take_per_man(conn, patron: int, org: int, day: int | None = None) -> float:
+    st = _day_state(conn, day)["readings"] if day is not None else {}
+    k = ("take", int(patron), org)
+    if k not in st:
+        take = conn.execute("SELECT COALESCE(SUM(weekly_take),0) FROM org_lines WHERE holder_actor_id=? AND status='active'", (int(patron),)).fetchone()[0]
+        deps = conn.execute("SELECT COUNT(*) FROM org_seats WHERE superior_actor_id=? AND org_actor_id=? AND status='active'", (int(patron), org)).fetchone()[0]
+        st[k] = float(take) / (deps + 1)
+    return st[k]
 
 
-def _better_patron(conn, a, seat, org) -> tuple[int | None, float]:
+def _better_patron(conn, a, seat, org, day: int | None = None) -> tuple[int | None, float]:
     """The man of his patron's own role who offers more per man, and how much more (0..1)."""
     cur = seat["superior_actor_id"]
     if cur is None:
         return None, 0.0
     role = seat_of(conn, int(cur), org)["role_key"]
-    own = _take_per_man(conn, int(cur), org)
+    own = _take_per_man(conn, int(cur), org, day)
     best, gap = None, 0.0
     for r in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active' AND actor_id<>? ORDER BY actor_id", (org, role, int(cur))).fetchall():
-        t = _take_per_man(conn, int(r[0]), org)
+        t = _take_per_man(conn, int(r[0]), org, day)
         g = (t - own) / t if t > 0 else 0.0
         if g > gap + 1e-12 and is_living(conn, int(r[0])):
             best, gap = int(r[0]), g
@@ -207,10 +216,25 @@ def _ground(kind: str):
         c = _ctx(conn, actor)
         if c is None:
             return 0.0
-        pools = (_kinds(conn).get(kind) or {}).get("pools") or []
-        memo = _day_state(conn, day)["memo"]
-        return max((om.opportunity(conn, actor, day, loc, p, memo) for loc in om._places(conn, c[0]) for p in pools), default=0.0)
+        st = _day_state(conn, day)
+        k = ("ground", kind, c[0]["unit_id"], c[1])  # the same for every man of a unit: the places, pools and weights are his unit's
+        if k not in st["readings"]:
+            pools = (_kinds(conn).get(kind) or {}).get("pools") or []
+            st["readings"][k] = max((om.opportunity(conn, actor, day, loc, p, st["memo"]) for loc in om._places(conn, c[0]) for p in pools), default=0.0)
+        return st["readings"][k]
     return reader
+
+
+def _low_heat(conn, a, day, seat, org) -> float:
+    """`outfit_motives.low_heat` (his precinct is paid and no open case names him), the precinct part worked out once per unit."""
+    st = _day_state(conn, day)
+    k = ("paid", org, seat["unit_id"])
+    if k not in st["readings"]:
+        places = om._places(conn, seat)
+        precinct = om.precinct_for_location(conn, places[0]) if places else None
+        st["readings"][k] = precinct is not None and conn.execute(
+            "SELECT 1 FROM org_arrangements WHERE payer_kind='org' AND payer_id=? AND status='active' AND position_key LIKE ? LIMIT 1", (org, f"{precinct}:%")).fetchone() is not None
+    return 1.0 if st["readings"][k] and not _open_case(conn, a, day) else 0.0
 
 
 def _simple(fn):
@@ -228,8 +252,8 @@ _READER_FACTORIES = {
     "reliable": lambda k: _r_ctx(lambda c, a, d, s, o: float(s["reliability"])),
     "need": lambda k: om.need,
     "appetite": lambda k: om.appetite,
-    "low_heat": lambda k: om.low_heat,
-    "no_cover": lambda k: _r_ctx(lambda c, a, d, s, o: 1.0 - om.low_heat(c, a, d)),
+    "low_heat": lambda k: _r_ctx(lambda c, a, d, s, o: _low_heat(c, a, d, s, o)),
+    "no_cover": lambda k: _r_ctx(lambda c, a, d, s, o: 1.0 - _low_heat(c, a, d, s, o)),
     "ground": _ground,
     "age_late": lambda k: _simple(_age_late),
     "kin_tie": lambda k: _simple(_kin_tie),
@@ -237,8 +261,8 @@ _READER_FACTORIES = {
     "open_case": lambda k: _simple(_open_case),
     "resentful": lambda k: _r_ctx(_resentment),
     "unit_short": lambda k: _r_ctx(_unit_short),
-    "other_member": lambda k: _r_ctx(lambda c, a, d, s, o: 1.0 if _other_members(c, s, o) else 0.0),
-    "better_offer": lambda k: _r_ctx(lambda c, a, d, s, o: _better_patron(c, a, s, o)[1]),
+    "other_member": lambda k: _r_ctx(lambda c, a, d, s, o: 1.0 if _other_members(c, s, o, d) else 0.0),
+    "better_offer": lambda k: _r_ctx(lambda c, a, d, s, o: _better_patron(c, a, s, o, d)[1]),
 }
 _REGISTERED: set = set()
 
@@ -346,14 +370,14 @@ def _small_line(conn, a, seat, org, day, pool, weekly, counterpart, loc) -> int:
 
 def _do_bring_earner(conn, a, seat, org, day, rng, spec, **o):
     pool = rng.choice(list(spec["pools"]))
-    got = _taken(conn, a, "bring_earner", seat, org, day, spec, o)
+    got, new_person = _taken(conn, a, "bring_earner", seat, org, day, spec, o)
     cp = got[0] if got else None
     weekly = float(figure(conn, spec["weekly"])) * (0.5 + rng.random())
     line = _small_line(conn, a, seat, org, day, pool, weekly, cp, _ground_of(conn, seat))
     if cp is not None and seat["superior_actor_id"] is not None:
         adjust_relationship(conn, int(seat["superior_actor_id"]), cp, int(day), familiarity_delta=10.0, trust_delta=5.0)
     _gain(conn, seat, float(figure(conn, spec["standing"])))
-    return {"counterpart": cp, "line_id": line, "pool": pool, "weekly": weekly,
+    return {"counterpart": cp, "line_id": line, "pool": pool, "weekly": weekly, "meta": {"counterpart": cp, "new_person": bool(new_person and cp is not None)},
             "summary": f"{_name(conn, a)} brought a new line ({pool}) under {_name(conn, seat['superior_actor_id'])}."}
 
 
@@ -393,12 +417,38 @@ def _pull(conn, req: tuple, n: int, stream: str) -> list[int]:
     return pull_up(conn, n, stream=stream, name_group=group, sex=sex, ages=ages, subtype=subtype, criminal_weight=cw)
 
 
-def _taken(conn, a, kind, seat, org, day, spec, o) -> list[int]:
-    """Who was pulled up for this man: in the weekly batch when there is one, otherwise one on its own."""
+def _counterparts_used(conn: sqlite3.Connection) -> set[int]:
+    return {int(r[0]) for r in conn.execute("SELECT json_extract(metadata_json,'$.counterpart') FROM org_incidents WHERE kind='bring_earner'") if r[0] is not None}
+
+
+def _nearby(conn, a, seat, day, spec, rng, used: set[int]) -> int | None:
+    """An existing person who fits the counterpart (living, in the age band, not seated anywhere, not already a line's
+    counterpart) in his unit's places or the city itself, or None."""
+    from .outfit_opening import city_location
+    places = list(dict.fromkeys([*om._places(conn, seat), city_location(conn)]))
+    lo, hi = (int(x) for x in spec["counterpart_ages"])
+    rows = conn.execute(
+        "SELECT a.id,lp.birth_day FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.actor_type='character' AND a.status='active' "
+        "AND COALESCE(lp.life_status,'living')='living' AND a.current_location_id IN (%s) AND lp.birth_day BETWEEN ? AND ? "
+        "AND a.id NOT IN (SELECT actor_id FROM org_seats) ORDER BY a.id" % ",".join("?" * len(places)),
+        (*places, int(day) - hi * 365, int(day) - lo * 365)).fetchall()
+    fit = [int(r[0]) for r in rows if int(r[0]) not in used and not conn.execute(
+        "SELECT 1 FROM typed_relationship_facts WHERE status='active' AND relation_type IN ('spouse','parent_of','child_of','sibling_of') AND (actor_a_id=? OR actor_b_id=?) "
+        "AND (actor_a_id=? OR actor_b_id=?) LIMIT 1", (int(r[0]), int(r[0]), int(a), int(a))).fetchone()]
+    return fit[rng.randrange(len(fit))] if fit else None
+
+
+def _taken(conn, a, kind, seat, org, day, spec, o) -> tuple[list[int], bool]:
+    """(who was brought for this man, whether he is a new person): from the weekly batch when there is one, otherwise
+    an existing counterpart where one fits (bring_earner), otherwise one pulled up on its own."""
     batch = o.get("pulled")
     if batch is not None and a in batch:
         return batch[a]
-    return _pull(conn, _REQUESTS[kind](conn, a, seat, org, day, spec), 1, f"happening:{kind}:{a}:{day}")
+    if kind == "bring_earner":
+        near = _nearby(conn, a, seat, day, spec, _rng(conn, "nearby", a, day), _counterparts_used(conn))
+        if near is not None:
+            return [near], False
+    return _pull(conn, _REQUESTS[kind](conn, a, seat, org, day, spec), 1, f"happening:{kind}:{a}:{day}"), True
 
 
 def _do_recruits(conn, a, seat, org, day, rng, spec, **o):
@@ -406,7 +456,7 @@ def _do_recruits(conn, a, seat, org, day, rng, spec, **o):
     from .outfit_opening import feelings_toward
     op = _opening(conn, org)
     spec_o = (op.get("roles") or {}).get(seat["role_key"]) or {}
-    got = _taken(conn, a, "recruits", seat, org, day, spec, o)
+    got, _new = _taken(conn, a, "recruits", seat, org, day, spec, o)
     if not got:
         return {"summary": "There was no one to pull up.", "skipped": True}
     new = got[0]
@@ -417,7 +467,7 @@ def _do_recruits(conn, a, seat, org, day, rng, spec, **o):
         feelings_toward(conn, new, int(seat["superior_actor_id"]), int(day), rng)
     adjust_relationship(conn, new, a, int(day), familiarity_delta=10.0, trust_delta=8.0)
     _gain(conn, seat, float(figure(conn, spec["standing"])))
-    return {"recruit": new, "summary": f"{_name(conn, a)} brought in {_name(conn, new)}."}
+    return {"recruit": new, "meta": {"recruit": new, "new_person": True}, "summary": f"{_name(conn, a)} brought in {_name(conn, new)}."}
 
 
 def _do_favour(conn, a, seat, org, day, rng, spec, **o):
@@ -569,8 +619,8 @@ def _do_busted(conn, a, seat, org, day, rng, spec, **o):
     days = int(round(_span(conn, spec["days"][0], spec["days"][1], rng)))
     conn.execute("INSERT INTO custody(actor_id,kind,charge,since_day,until_day) VALUES (?,'held',?,?,?)", (a, spec["charge"], int(day), int(day) + days))
     loc = _ground_of(conn, seat)
-    conn.execute("INSERT INTO crime_reports(day,crime_kind,location_id,offender_actor_id,public,status,metadata_json) VALUES (?,?,?,?,0,'open',?)",
-                 (int(day), spec["crime_kind"], loc, a, json.dumps({"source": "org_happening", "close_day": int(day) + days})))
+    conn.execute("INSERT INTO crime_reports(day,crime_kind,location_id,offender_actor_id,public,agency_profile_id,status,metadata_json) VALUES (?,?,?,?,0,?,'open',?)",
+                 (int(day), spec["crime_kind"], loc, a, agency_for(conn, loc, spec["crime_kind"]), json.dumps({"source": "org_happening", "close_day": int(day) + days})))
     imposed(conn, a)
     return {"status": "done", "loc": loc, "summary": f"{_name(conn, a)} was picked up."}
 
@@ -580,8 +630,8 @@ def _do_informs(conn, a, seat, org, day, rng, spec, **o):
     if sup is None:
         return {"summary": "He had no one to inform on.", "skipped": True}
     loc = _ground_of(conn, seat)
-    conn.execute("INSERT INTO crime_reports(day,crime_kind,location_id,offender_actor_id,public,status,metadata_json) VALUES (?,?,?,?,0,'open',?)",
-                 (int(day), spec["crime_kind"], loc, int(sup),
+    conn.execute("INSERT INTO crime_reports(day,crime_kind,location_id,offender_actor_id,public,agency_profile_id,status,metadata_json) VALUES (?,?,?,?,0,?,'open',?)",
+                 (int(day), spec["crime_kind"], loc, int(sup), agency_for(conn, loc, spec["crime_kind"]),
                   json.dumps({"source": "org_happening", "informant": a, "discovered": 0, "close_day": int(day) + int(figure(conn, spec["report_days"]))})))
     return {"status": "open", "victim": int(sup), "loc": loc, "summary": f"{_name(conn, a)} gave the police evidence on {_name(conn, sup)}."}
 
@@ -698,21 +748,29 @@ def _roster(conn: sqlite3.Connection) -> list[int]:
     return sorted(set(out))
 
 
-def _pull_batches(conn: sqlite3.Connection, plan: list[tuple[int, str]], day: int) -> dict[str, dict[int, list[int]]]:
+def _pull_batches(conn: sqlite3.Connection, plan: list[tuple[int, str]], day: int) -> dict[str, dict[int, tuple[list[int], bool]]]:
     """The people this week's happenings pull up, one batch per kind of request (each pull-up scans the city's
     candidates once however many it is asked for): {kind: {man: [pulled ids]}}."""
     out: dict = {}
     for kind, fn in _REQUESTS.items():
         spec = _kinds(conn).get(kind)
         groups: dict[tuple, list[int]] = {}
+        used = _counterparts_used(conn) if kind == "bring_earner" else set()
         for a, k in plan:
             c = _ctx(conn, a) if k == kind else None
-            if c is not None:
-                groups.setdefault(fn(conn, a, c[0], c[1], day, spec), []).append(a)
+            if c is None:
+                continue
+            if kind == "bring_earner":  # an existing person where one fits; a new one only when none does
+                near = _nearby(conn, a, c[0], day, spec, _rng(conn, "nearby", a, day), used)
+                if near is not None:
+                    used.add(near)
+                    out.setdefault(kind, {})[a] = ([near], False)
+                    continue
+            groups.setdefault(fn(conn, a, c[0], c[1], day, spec), []).append(a)
         for i, (req, men) in enumerate(sorted(groups.items(), key=lambda kv: repr(kv[0]))):
             ids = _pull(conn, req, len(men), f"happening:{kind}:{day}:{i}")
             for j, m in enumerate(men):
-                out.setdefault(kind, {})[m] = [ids[j]] if j < len(ids) else []
+                out.setdefault(kind, {})[m] = ([ids[j]] if j < len(ids) else [], True)
     return out
 
 
@@ -729,7 +787,7 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None, only_c
     rate = _v(conn, data["week_rate"])
     plan: list[tuple[int, str]] = []
     for a in _roster(conn):
-        if org_motives._roll(conn, a, int(day), "happening") >= rate:
+        if org_motives._roll(conn, a, int(day), "happening") >= rate:  # the one point where a man's seeded draw is made (tests patch it)
             continue
         kind = draw_kind(conn, a, int(day))
         if kind is not None:
@@ -746,6 +804,11 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None, only_c
 
 def _utility(conn: sqlite3.Connection, x: float) -> float:
     return float(figure(conn, "org_choice_utility_base", default=8.0)) + float(figure(conn, "org_choice_utility_span", default=10.0)) * clamp01(x)
+
+
+def _carry(payload: dict) -> dict:
+    """What a new agenda item takes over from the one just answered: not its agenda id (the provider sets the new item's own)."""
+    return {k: v for k, v in payload.items() if k != "agenda_id"}
 
 
 def _finish(conn, payload, day, status: str | None = None) -> None:
@@ -782,7 +845,7 @@ def execute_sit_down(conn, actor_id, kind, payload, day):
     spec = _kinds(conn).get("incident") or {}
     weeks = int(round(_span(conn, "hap_pay_weeks_lo", "hap_pay_weeks_hi", _rng(conn, "weeks", payload["incident_id"], day))))
     add_agenda(conn, ohead, "pay_or_refuse", int(day) + int(figure(conn, spec.get("respond_delay", "hap_respond_delay"))), subject_kind="incident",
-               subject_id=int(payload["incident_id"]), metadata={**payload, "from": int(actor_id), "weeks": weeks})
+               subject_id=int(payload["incident_id"]), metadata={**_carry(payload), "from": int(actor_id), "weeks": weeks})
     imposed(conn, ohead)  # the demand lands on him
     adjust_relationship(conn, int(actor_id), ohead, int(day), familiarity_delta=5.0, respect_delta=float(figure(conn, "hap_resp_sit_respect")))
     return {"summary": f"{_name(conn, actor_id)} asked {_name(conn, ohead)} to sit down."}
@@ -840,8 +903,124 @@ def execute_refuse(conn, actor_id, kind, payload, day):
     return {"summary": f"{_name(conn, actor_id)} refused {_name(conn, vh)}."}
 
 
+# ---- a killing across organisations: the dead man's head answers ----
+
+def _killing(conn: sqlite3.Connection) -> dict:
+    return _data(conn).get("killing") or {}
+
+
+def killed_across(conn: sqlite3.Connection, killer: int, victim: int, seats, day: int) -> None:
+    """The victim held seats; for each organisation the killer holds no seat in, its head (when it has one) gets a
+    `respond_killing` item, a `killing` incident is recorded, and the head and the dead man's superior are imposed on."""
+    data = _killing(conn)
+    if not data:
+        return
+    mine = {int(r[0]) for r in conn.execute("SELECT org_actor_id FROM org_seats WHERE actor_id=? AND status='active'", (int(killer),))}
+    if not mine:
+        return
+    for s in seats:
+        org = int(s["org_actor_id"])
+        if org in mine:
+            continue
+        head = head_of(conn, org)
+        sup = s["superior_actor_id"]
+        if sup is not None:
+            imposed(conn, int(sup))
+        if head is None or head == int(killer):
+            continue
+        iid = _record(conn, day, "killing", killer, victim=int(victim), matters=1, raised=org, status="open",
+                      killer_org=min(mine), role=s["role_key"])
+        imposed(conn, head)
+        add_agenda(conn, head, "respond_killing", int(day) + int(figure(conn, data["delay"])), subject_kind="actor", subject_id=int(victim),
+                   metadata={"incident": iid, "killer": int(killer), "killer_org": min(mine), "org": org, "victim": int(victim), "role": s["role_key"]})
+
+
+def _size(conn, org: int) -> int:
+    return int(conn.execute("SELECT COUNT(*) FROM org_seats WHERE org_actor_id=? AND status='active'", (org,)).fetchone()[0])
+
+
+def _had_sit_down(conn, victim: int) -> bool:
+    return conn.execute("SELECT 1 FROM org_incidents WHERE offender_actor_id=? AND status IN ('sat_down','paid','refused') LIMIT 1", (int(victim),)).fetchone() is not None
+
+
+def _killing_factors(conn, head: int, meta: dict) -> dict[str, float]:
+    victim, killer = int(meta["victim"]), int(meta["killer"])
+    org, korg = int(meta["org"]), int(meta["killer_org"])
+    rank = _v(conn, (_killing(conn).get("role_rank") or {}).get(meta.get("role")), 0.5)
+    wrong = conn.execute("SELECT status FROM org_incidents WHERE offender_actor_id=? AND kind<>'killing' AND matters=1 AND status<>'done'", (victim,)).fetchall()
+    khead = head_of(conn, korg)
+    r = om._rel(conn, head, khead)
+    mine, theirs = _size(conn, org), _size(conn, korg)
+    return {"always": 1.0, "victim_wrong": 1.0 if wrong else 0.0, "low_role": 1.0 - rank, "high_role": rank,
+            "refused_sit": 1.0 if any(w[0] == "refused" for w in wrong) else 0.0,
+            "no_sit_down": 0.0 if _had_sit_down(conn, victim) else 1.0,
+            "weaker": clamp01(1.0 - mine / theirs) if theirs and mine < theirs else 0.0,
+            "stronger": clamp01(1.0 - theirs / mine) if mine and theirs < mine else 0.0,
+            "friendly": 0.0 if r is None else clamp01((float(r["respect"]) + float(r["trust"])) / 200.0),
+            "resentful": 0.0 if r is None else clamp01(float(r["resentment"]) / 100.0),
+            "temper": om._drive(conn, head, "aggression")}
+
+
+def _blend(conn, items, factors: dict[str, float]) -> float:
+    rest = 1.0
+    for m in items:
+        rest *= 1.0 - clamp01(_v(conn, m["weight"])) * clamp01(factors.get(m["name"], 0.0))
+    return 1.0 - rest
+
+
+def killing_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
+    meta = json.loads(item["metadata_json"] or "{}")
+    f = _killing_factors(conn, actor_id, meta)
+    why = {"accept_killing": f"Lets the killing of {_name(conn, meta['victim'])} stand.",
+           "demand_redress": f"Demands redress from {_name(conn, head_of(conn, int(meta['killer_org'])))} for {_name(conn, meta['victim'])}.",
+           "retaliate": f"Has {_name(conn, meta['killer'])} answered for {_name(conn, meta['victim'])}."}
+    return [{"kind": k, "utility": _utility(conn, _blend(conn, _killing(conn)[k], f)), "rationale": why[k], "payload": {**meta, "incident_id": int(meta["incident"])}}
+            for k in ("accept_killing", "demand_redress", "retaliate") if _killing(conn).get(k)]
+
+
+def _heads(conn, actor_id, payload):
+    return int(actor_id), head_of(conn, int(payload["killer_org"]))
+
+
+def execute_accept_killing(conn, actor_id, kind, payload, day):
+    _finish(conn, payload, day, "accepted")
+    me, other = _heads(conn, actor_id, payload)
+    pts = float(figure(conn, _killing(conn)["relation_points"]))
+    if other is not None:
+        adjust_relationship(conn, other, me, int(day), respect_delta=-pts)  # he let it go: he is thought weaker
+        adjust_relationship(conn, me, other, int(day), resentment_delta=pts / 2.0)
+    return {"summary": f"{_name(conn, me)} let the killing of {_name(conn, payload['victim'])} stand."}
+
+
+def execute_demand_redress(conn, actor_id, kind, payload, day):
+    me, other = _heads(conn, actor_id, payload)
+    _finish(conn, payload, day, "redress_asked")
+    if other is None:
+        return {"summary": "There was no one to ask.", "blocked": True}
+    weeks = int(round(_span(conn, "hap_pay_weeks_lo", "hap_pay_weeks_hi", _rng(conn, "weeks", payload["incident_id"], day))))
+    add_agenda(conn, other, "pay_or_refuse", int(day) + int(figure(conn, _killing(conn)["delay"])), subject_kind="incident", subject_id=int(payload["incident_id"]),
+               metadata={**_carry(payload), "incident": int(payload["incident_id"]), "from": me, "weeks": weeks, "offender": int(payload["killer"]), "offender_org": int(payload["killer_org"])})
+    imposed(conn, other)
+    adjust_relationship(conn, me, other, int(day), resentment_delta=float(figure(conn, _killing(conn)["relation_points"])))
+    return {"summary": f"{_name(conn, me)} asked {_name(conn, other)} to make good the killing of {_name(conn, payload['victim'])}."}
+
+
+def execute_retaliate(conn, actor_id, kind, payload, day):
+    from .outfit_choices import execute_order_hunt
+    me, other = _heads(conn, actor_id, payload)
+    _finish(conn, payload, day, "retaliated")
+    if other is not None:
+        pts = float(figure(conn, _killing(conn)["retaliate_points"]))
+        adjust_relationship(conn, me, other, int(day), resentment_delta=pts)
+        adjust_relationship(conn, other, me, int(day), fear_delta=pts / 2.0, resentment_delta=pts / 2.0)
+    res = execute_order_hunt(conn, me, "order_hunt", {"org": int(payload["org"]), "killer": int(payload["killer"])}, int(day))
+    return {"summary": f"{_name(conn, me)} had the killing of {_name(conn, payload['victim'])} answered: {res.get('summary', '')}"}
+
+
 for _kind, _fn in (("sit_down", execute_sit_down), ("kill_offender", execute_kill_offender), ("let_it_go", execute_let_go),
-                   ("pay", execute_pay), ("refuse", execute_refuse)):
+                   ("pay", execute_pay), ("refuse", execute_refuse), ("accept_killing", execute_accept_killing),
+                   ("demand_redress", execute_demand_redress), ("retaliate", execute_retaliate)):
     register_executor(_kind, _fn)
+register_agenda_action("respond_killing", killing_offers)
 register_agenda_action("respond_incident", respond_offers)
 register_agenda_action("pay_or_refuse", pay_offers)

@@ -1,6 +1,226 @@
 {
  "about": "Design and derived figures the engine draws once per run (kind draw), derives (kind derived, formula over other figure defaults) or holds (kind fixed), from Saint Jude Setting Bible Part VI and the Parts it cites. Dollars are 1975 dollars; *_m keys are USD millions. pools is the Part VI 9.3A allocation table (family shares sum to 100). Checked by tools/check_saintjude_pools.py.",
  "figures": {
+  "hap_k_delay": {
+   "default": 2,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_rank_associate": {
+   "default": 0.1,
+   "range": null,
+   "unit": "rank weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_rank_soldier": {
+   "default": 0.4,
+   "range": null,
+   "unit": "rank weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_rank_capo": {
+   "default": 0.7,
+   "range": null,
+   "unit": "rank weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_rank_underboss": {
+   "default": 0.9,
+   "range": null,
+   "unit": "rank weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_rank_consigliere": {
+   "default": 0.9,
+   "range": null,
+   "unit": "rank weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_rank_boss": {
+   "default": 1.0,
+   "range": null,
+   "unit": "rank weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_accept_victim_wrong": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_accept_low_role": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_accept_refused_sit": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_accept_weaker": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_accept_friendly": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_demand_always": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_demand_victim_wrong": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_demand_no_sit_down": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_high_role": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_no_sit_down": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_stronger": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_temper": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_resentful": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_rel_points": {
+   "default": 10,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_points": {
+   "default": 30,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
   "hap_standing_good": {
    "default": 0.08,
    "range": null,
@@ -39,17 +259,17 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; chance per week that one of the men who depend on a patron has a notable week (engine/org_happenings.py); 0.025 is about 1.3 notable weeks a man a year"
   },
   "hap_w_score": {
-   "default": 0.22,
+   "default": 0.25,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; a hijacked load, a tip or a good collection worth a record: one every four years for a working associate"
   },
   "hap_m_score_ambition": {
    "default": 0.5,
@@ -102,14 +322,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_bring_earner": {
-   "default": 0.14,
+   "default": 0.1,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; a bookmaker, bar owner or borrower who becomes a new small line: about one man in ten a year"
   },
   "hap_m_bring_earner_ambition": {
    "default": 0.4,
@@ -162,14 +382,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_proves_himself": {
-   "default": 0.12,
+   "default": 0.15,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; a job done cleanly and noticed by the man over him: one in seven a year"
   },
   "hap_m_proves_himself_loyal": {
    "default": 0.5,
@@ -202,14 +422,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_recruits": {
-   "default": 0.06,
+   "default": 0.04,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; a young man pulled up under the same soldier, only while the unit is short of its associate ratio: rare"
   },
   "hap_m_recruits_unit_short": {
    "default": 0.6,
@@ -242,14 +462,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_favour": {
-   "default": 0.06,
+   "default": 0.08,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; a favour for a made man of another unit that is worth remembering: one in twelve a year"
   },
   "hap_m_favour_ambition": {
    "default": 0.3,
@@ -282,14 +502,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_drifts": {
-   "default": 0.1,
+   "default": 0.2,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; earning less and slipping: one in five a year; men go slack more often than they rise"
   },
   "hap_m_drifts_lazy": {
    "default": 0.5,
@@ -312,14 +532,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_goes_straight": {
-   "default": 0.06,
+   "default": 0.04,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; leaving the life for age, a marriage, a job or fear after an arrest: about 4 in 100 a year"
   },
   "hap_m_goes_straight_age_late": {
    "default": 0.5,
@@ -362,14 +582,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_switches": {
-   "default": 0.08,
+   "default": 0.03,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; moving to another soldier who offers more: rare, men stay with the man who vouched for them"
   },
   "hap_m_switches_resentful": {
    "default": 0.5,
@@ -492,14 +712,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_incident": {
-   "default": 0.12,
+   "default": 0.08,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; a robbery or fight with the wrong man; about half of them touch another family or a cop, so about 4 in 100 a year matter"
   },
   "hap_m_incident_temper": {
    "default": 0.5,
@@ -572,14 +792,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_holds_out": {
-   "default": 0.05,
+   "default": 0.04,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; money kept back from the man over him: a few in a hundred a year"
   },
   "hap_m_holds_out_greed": {
    "default": 0.5,
@@ -632,14 +852,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "hap_w_busted": {
-   "default": 0.045,
+   "default": 0.06,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; a small arrest: about one man in sixteen a year in a city that polices the rackets and is paid not to"
   },
   "hap_m_busted_boldness": {
    "default": 0.3,
@@ -694,12 +914,12 @@
   "hap_w_informs": {
    "default": 0.5,
    "range": null,
-   "unit": "relative weight",
+   "unit": "happenings per man per year",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; weight among a man's possible happenings once a case names him and he is disloyal; it is 0 without a case"
   },
   "hap_m_informs_open_case": {
    "default": 0.6,
@@ -862,14 +1082,14 @@
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
   "associate_happening_week": {
-   "default": 0.05,
+   "default": 0.0206,
    "range": null,
    "unit": "chance per week",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
+   "note": "unsourced; chance a week that a man who depends on a patron has a notable week = the sum of the kinds' yearly figures (1.07 a man a year) over 52; the kinds' figures are relative weights among his happenings (engine/org_happenings.py)"
   },
   "population_city_1975_m": {
    "default": 1.1,

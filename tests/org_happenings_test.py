@@ -115,7 +115,7 @@ def test_mix_is_mostly_not_trouble():
     wrong = sum(n for k, n in kinds.items() if groups.get(k) == "wrong")
     assert tot > 50, kinds
     assert (tot - wrong) > wrong, kinds
-    missing = [k for k in groups if k != "informs" and k not in kinds]
+    missing = [k for k in groups if k not in ("informs", "recruits") and k not in kinds]  # informs needs an open case; recruits a unit short of its ratio (both have their own tests)
     assert not missing, (missing, kinds)
 
 
@@ -215,17 +215,19 @@ def test_response_moves_the_relationship():
     ohead = w.boss
     r0 = c.execute("SELECT respect,resentment FROM relationships WHERE actor_a_id=? AND actor_b_id=?", (ohead, vhead)).fetchone()
     p = next(o["payload"] for o in offers if o["kind"] == "sit_down")
-    org_choices.execute(c, vhead, "sit_down", p, DAY + 2)
+    org_choices.execute(c, vhead, "sit_down", {**p, "agenda_id": item["id"]}, DAY + 2)
     pay = c.execute("SELECT * FROM org_agenda WHERE kind='pay_or_refuse' AND actor_id=? AND status='open'", (ohead,)).fetchone()
-    assert pay is not None
+    assert pay is not None and "agenda_id" not in json.loads(pay["metadata_json"]), "a new item does not carry the old item's id"
     assert _forced(c, ohead)
     offs = org_choices.AGENDA_ACTIONS["pay_or_refuse"](c, ohead, pay, DAY + 5)
     assert {o["kind"] for o in offs} == {"pay", "refuse"}
     ledger.receive(c, ("person", ohead), 500000.0, purpose="test purse")
     bal_v = ledger.balance(c, ("person", vhead))
     pp = next(o["payload"] for o in offs if o["kind"] == "pay")
-    org_choices.execute(c, ohead, "pay", pp, DAY + 5)
+    org_choices.execute(c, ohead, "pay", {**pp, "agenda_id": pay["id"]}, DAY + 5)
     assert ledger.balance(c, ("person", vhead)) > bal_v, "the victim's boss was paid"
+    assert c.execute("SELECT status FROM org_agenda WHERE id=?", (pay["id"],)).fetchone()[0] == "resolved", "the demand is answered once"
+    assert c.execute("SELECT 1 FROM org_agenda WHERE kind='pay_or_refuse' AND actor_id=? AND status='open'", (ohead,)).fetchone() is None
     r1 = c.execute("SELECT respect,resentment FROM relationships WHERE actor_a_id=? AND actor_b_id=?", (vhead, ohead)).fetchone()
     assert r1 is not None
     # refusing sours it
@@ -308,6 +310,117 @@ def test_same_seed_same_weeks():
     k2 = oh.kind_weights(c, _dependent(w), DAY)
     assert k1 == k2 and snap
     assert oh.draw_kind(c, _dependent(w), DAY) == oh.draw_kind(c, _dependent(w), DAY)
+
+
+def test_bring_earner_uses_an_existing_person_where_one_fits():
+    from engine import org_happenings as oh, orgs
+    w = open_world()
+    c = w.conn
+    a = _dependent(w)
+    seat = orgs.seat_of(c, a, w.org)
+    spec = oh._kinds(c)["bring_earner"]
+    import random
+    near = oh._nearby(c, a, seat, DAY, spec, random.Random(1), oh._counterparts_used(c))
+    assert near is not None, "an unseated person of the right age lives in the city"
+    before = c.execute("SELECT COUNT(*) FROM actors").fetchone()[0]
+    res = oh.happen(c, a, "bring_earner", DAY)
+    assert c.execute("SELECT COUNT(*) FROM actors").fetchone()[0] == before, "no one new was pulled up"
+    assert not c.execute("SELECT 1 FROM org_seats WHERE actor_id=?", (res["counterpart"],)).fetchone()
+    assert json.loads(c.execute("SELECT metadata_json FROM org_incidents WHERE id=?", (res["incident_id"],)).fetchone()[0])["new_person"] is False
+    # a counterpart is not used twice
+    assert res["counterpart"] not in {oh._nearby(c, a, seat, DAY, spec, random.Random(k), oh._counterparts_used(c)) for k in range(20)}
+
+
+def _two_heads(w):
+    c = w.conn
+    other = _other_org(w)
+    vic = int(c.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key='soldier' AND status='active' ORDER BY actor_id LIMIT 1", (other,)).fetchone()[0])
+    vhead = int(c.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key='boss'", (other,)).fetchone()[0])
+    return other, vic, vhead
+
+
+def test_cross_family_killing_goes_to_the_dead_mans_head():
+    from engine import org_choices, orgs
+    from engine.outfit_choices import kill
+    w = open_world()
+    c = w.conn
+    other, vic, vhead = _two_heads(w)
+    sup = c.execute("SELECT superior_actor_id FROM org_seats WHERE actor_id=?", (vic,)).fetchone()[0]
+    kill(c, w.soldier, vic, DAY, sanctioned=True)
+    item = c.execute("SELECT * FROM org_agenda WHERE kind='respond_killing' AND actor_id=? AND status='open'", (vhead,)).fetchone()
+    assert item is not None, "the dead man's head has to answer"
+    assert c.execute("SELECT 1 FROM org_incidents WHERE kind='killing' AND offender_actor_id=? AND victim_actor_id=?", (w.soldier, vic)).fetchone()
+    assert _forced(c, vhead) and _forced(c, sup), "his head and the dead man's superior are looked at tomorrow"
+    offers = org_choices.AGENDA_ACTIONS["respond_killing"](c, vhead, item, DAY + 2)
+    assert {o["kind"] for o in offers} == {"accept_killing", "demand_redress", "retaliate"}
+
+
+def test_killing_inside_one_organisation_asks_no_one():
+    from engine.outfit_choices import kill
+    w = open_world()
+    c = w.conn
+    mate = int(c.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key='soldier' AND actor_id<>? AND status='active' ORDER BY actor_id LIMIT 1", (w.org, w.soldier)).fetchone()[0])
+    kill(c, w.soldier, mate, DAY, sanctioned=True)
+    assert c.execute("SELECT COUNT(*) FROM org_agenda WHERE kind='respond_killing'").fetchone()[0] == 0
+
+
+def _answers(w, **kw):
+    from engine import org_choices
+    from engine.outfit_choices import kill
+    c = w.conn
+    other, vic, vhead = _two_heads(w)
+    if kw.get("refused"):
+        c.execute("INSERT INTO org_incidents(day,kind,offender_actor_id,matters,status) VALUES (?,?,?,1,'refused')", (DAY - 5, "incident", vic))
+    kill(c, w.soldier, vic, DAY, sanctioned=True)
+    item = c.execute("SELECT * FROM org_agenda WHERE kind='respond_killing' AND actor_id=?", (vhead,)).fetchone()
+    return {o["kind"]: o for o in org_choices.AGENDA_ACTIONS["respond_killing"](c, vhead, item, DAY + 2)}, vhead, vic
+
+
+def test_a_man_in_the_wrong_makes_acceptance_likelier_and_retaliation_less():
+    a1, _, _ = _answers(open_world())
+    a2, _, _ = _answers(open_world(), refused=True)
+    assert a2["accept_killing"]["utility"] > a1["accept_killing"]["utility"]
+    assert a2["retaliate"]["utility"] < a1["retaliate"]["utility"], "a prior sit-down held (a refused one) lowers 'no sit-down'"
+
+
+def test_each_answer_moves_the_heads_relationship_and_works():
+    from engine import org_choices
+    for choice in ("accept_killing", "demand_redress", "retaliate"):
+        w = open_world()
+        c = w.conn
+        offers, vhead, vic = _answers(w)
+        killer_head = w.boss
+        before = c.execute("SELECT respect,resentment,fear FROM relationships WHERE actor_a_id=? AND actor_b_id=?", (vhead, killer_head)).fetchone()
+        b = tuple(before) if before else (0, 0, 0)
+        org_choices.execute(c, vhead, choice, offers[choice]["payload"], DAY + 2)
+        if choice == "demand_redress":
+            assert c.execute("SELECT 1 FROM org_agenda WHERE kind='pay_or_refuse' AND actor_id=? AND status='open'", (killer_head,)).fetchone()
+        if choice == "retaliate":
+            assert c.execute("SELECT 1 FROM org_agenda WHERE kind='hit' AND subject_id=? AND status='open'", (w.soldier,)).fetchone()
+        a = c.execute("SELECT respect,resentment,fear FROM relationships WHERE actor_a_id=? AND actor_b_id=?", (vhead, killer_head)).fetchone()
+        a2 = c.execute("SELECT respect,resentment,fear FROM relationships WHERE actor_a_id=? AND actor_b_id=?", (killer_head, vhead)).fetchone()
+        assert (a is not None and tuple(a) != b) or a2 is not None, choice
+
+
+def test_informing_can_run_through_the_real_tables():
+    """Open cases name every associate, loyalty is low: the gate passes through the real crime_reports and drives."""
+    from engine import org_happenings as oh
+    w = open_world()
+    c = w.conn
+    men = oh._roster(c)
+    for m in men:
+        c.execute("INSERT INTO crime_reports(day,crime_kind,offender_actor_id,status) VALUES (?,?,?,'open')", (DAY - 3, "racket", m))
+        c.execute("UPDATE actor_drives SET loyalty=0.05 WHERE actor_id=?", (m,))
+    for k in range(40):
+        oh.process_due(c, DAY + 7 * k)
+    inf = c.execute("SELECT * FROM org_incidents WHERE kind='informs'").fetchall()
+    assert inf, "informing happened"
+    rep = c.execute("SELECT * FROM crime_reports WHERE json_extract(metadata_json,'$.informant') IS NOT NULL").fetchone()
+    assert rep is not None and rep["agency_profile_id"] is not None, "the agency was given the evidence"
+    done = c.execute("SELECT * FROM crime_reports WHERE json_extract(metadata_json,'$.discovered')=1").fetchall()
+    assert done, "some of it was found out in time"
+    inc = c.execute("SELECT * FROM org_incidents WHERE kind='informs' AND matters=1").fetchone()
+    assert inc is not None and c.execute("SELECT 1 FROM org_agenda WHERE kind='respond_incident' AND json_extract(metadata_json,'$.kind')='informs'").fetchone()
 
 
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_")]

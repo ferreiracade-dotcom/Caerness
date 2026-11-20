@@ -784,6 +784,77 @@
  },
  "happenings": {
   "week_rate": "associate_happening_week",
+   "killing": {
+    "delay": "hap_k_delay",
+    "role_rank": {
+     "associate": "hap_rank_associate",
+     "soldier": "hap_rank_soldier",
+     "capo": "hap_rank_capo",
+     "underboss": "hap_rank_underboss",
+     "consigliere": "hap_rank_consigliere",
+     "boss": "hap_rank_boss"
+    },
+    "accept_killing": [
+     {
+      "name": "victim_wrong",
+      "weight": "hap_k_accept_victim_wrong"
+     },
+     {
+      "name": "low_role",
+      "weight": "hap_k_accept_low_role"
+     },
+     {
+      "name": "refused_sit",
+      "weight": "hap_k_accept_refused_sit"
+     },
+     {
+      "name": "weaker",
+      "weight": "hap_k_accept_weaker"
+     },
+     {
+      "name": "friendly",
+      "weight": "hap_k_accept_friendly"
+     }
+    ],
+    "demand_redress": [
+     {
+      "name": "always",
+      "weight": "hap_k_demand_always"
+     },
+     {
+      "name": "victim_wrong",
+      "weight": "hap_k_demand_victim_wrong"
+     },
+     {
+      "name": "no_sit_down",
+      "weight": "hap_k_demand_no_sit_down"
+     }
+    ],
+    "retaliate": [
+     {
+      "name": "high_role",
+      "weight": "hap_k_retaliate_high_role"
+     },
+     {
+      "name": "no_sit_down",
+      "weight": "hap_k_retaliate_no_sit_down"
+     },
+     {
+      "name": "stronger",
+      "weight": "hap_k_retaliate_stronger"
+     },
+     {
+      "name": "temper",
+      "weight": "hap_k_retaliate_temper"
+     },
+     {
+      "name": "resentful",
+      "weight": "hap_k_retaliate_resentful"
+     }
+    ],
+    "relation_points": "hap_k_rel_points",
+    "retaliate_points": "hap_k_retaliate_points"
+   },
   "kinds": {
    "score": {
     "group": "good",

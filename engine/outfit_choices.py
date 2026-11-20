@@ -100,7 +100,7 @@ def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sancti
     puts `fill_unit_leader_seat` on the head's list; an unsanctioned killing puts `discipline_hunt` there unless the head wanted
     it (then the killer gains standing). History is flagged for both."""
     from .harm import record_harm
-    seats = conn.execute("SELECT org_actor_id,role_key,unit_id FROM org_seats WHERE actor_id=? AND status='active'", (int(victim),)).fetchall()
+    seats = conn.execute("SELECT org_actor_id,role_key,unit_id,superior_actor_id FROM org_seats WHERE actor_id=? AND status='active'", (int(victim),)).fetchall()
     loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (int(victim),)).fetchone()
     record_harm(conn, int(victim), source_kind="org_action", source_ref_id=int(day) * 10_000_000 + int(killer), severity=100.0,
                 intent_class="lethal", location_id=loc[0] if loc else None, outcome_override="fatal",
@@ -109,6 +109,8 @@ def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sancti
                                (int(victim), int(victim))).fetchall():
         imposed(conn, int(sub))  # the men who answered to him are looked at again tomorrow
     conn.execute("UPDATE org_seats SET status='dead', left_day=? WHERE actor_id=? AND status='active'", (int(day), int(victim)))
+    from .org_happenings import killed_across  # a man of one organisation killed by a man of another: his head answers
+    killed_across(conn, int(killer), int(victim), seats, int(day))
     mark_for_history(conn, int(victim), f"killed by {_name(conn, killer)}", int(day))
     mark_for_history(conn, int(killer), f"killed {_name(conn, victim)}", int(day))
     for s in seats:
