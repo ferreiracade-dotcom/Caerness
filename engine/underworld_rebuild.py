@@ -2054,7 +2054,8 @@ def _targeted_hit(conn: sqlite3.Connection, organization_id: int, rng: random.Ra
                   target: int | None=None, hired: bool=False) -> bool:
     """A killing attempt on one of a rival's leaders. Anyone in command can be chosen, the protagonist included (his attempt is a
     pending incident to play, never resolved unseen). The odds weigh the two sides' fighters, the Stage of the man aimed at, and
-    his guard; the outcome is a band (failed, wounded, maimed, killed) that leans toward survival. Returns True when it landed."""
+    his guard; the outcome is a band (failed, wounded, maimed, killed) from the package's lethality data: a planned hit that lands kills
+    at the method's rate, less for a guarded target. Returns True when it landed."""
     from . import temperament as _tp
     from .underworld_aggression import attempt_on
     if target is None:
@@ -2074,7 +2075,8 @@ def _targeted_hit(conn: sqlite3.Connection, organization_id: int, rng: random.Ra
     stage_term=-6.0*math.log(max(vs,.5)/max(ts,.5))
     # A hired killer is a specialist's weapon: its skill does not depend on the buyer's own fighters.
     chance=_clamp(22+(38 if hired else float(att[0])*.42)+float(att[1])*.12-float(targ[0])*.22-float(targ[1])*.08+(0 if hired else edge)+stage_term+rng.uniform(-12,12),5,88)/100
-    r=attempt_on(conn,int(victim["actor_id"]),organization_id,chance,rng,style="hired_killing" if hired else "assault",lethal=True,severity=100)
+    r=attempt_on(conn,int(victim["actor_id"]),organization_id,chance,rng,style="hired_killing" if hired else "assault",lethal=True,severity=100,
+                 guard=_clamp(float(targ[0]),0,100)/100.0)
     band=r["band"]
     if band=="killed":
         conn.execute("UPDATE underworld_personnel SET status='dead' WHERE actor_id=?",(int(victim["actor_id"]),))

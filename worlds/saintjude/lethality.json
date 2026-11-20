@@ -1,0 +1,59 @@
+{
+ "_about": "Saint Jude's lethality figures (task B12c). Each is a Design proposal with its reasoning in `why`. They lay over engine/lethality_default.json; a null removes a ceiling. Case-fatality rates quoted in `why` (from memory, US, approximate, to be checked) are calibration targets reported after a run, never caps: no figure here clamps a share.",
+ "why": {
+  "owner_rule": "Lean toward life governs uncertain survival only, never what violent people choose. When someone means to kill and can, a killing that lands kills.",
+  "ceilings": "The old 0.82 (lethal) and 0.22 (hostile) fatal ceilings are removed (null cap). Severity curves still rise with the wound; they are no longer clamped.",
+  "methods": "Target range of fatal fraction once a blow lands (US, approximate, unverified): beating 1-2%, knife 3-5%, firearm injury overall 15-30%, point-blank shot to head or torso above 70%, execution-style shot near-certain. Floors carry the method's own base lethality because resolved severity (resisted by the victim's resilience) does not describe where the blow fell.",
+  "hit": "A planned hit is a different intent from a beating. Landed at point-blank it kills about 90-95%; the share falls with a low chance of success (a glancing or interrupted blow) and with a guarded target. The chance that it lands at all is the odds the caller computes (strength, stage, guard).",
+  "nonlethal": "A beating-style attack that lands kills rarely (street gangs, which fight with whatever is to hand, more than durable outfits, which send men who know how far to go).",
+  "internal": "A killing decided inside an outfit (a discipline kill, a coup, a contest, a war) stays certain: the code that follows each (succession, books, counts) assumes the man is dead and B12b calibrated on it (audit 7: kill() itself is always fatal, which is right). A package may set `internal.land` to let those be botched too. A reply to a killing across outfits goes against a man who expects it, so each man sent lands 0.7 of the time and then kills at the planned-hit rate; the reply is a team, so one failure does not end it.",
+  "untreated": "A serious wound with no care can worsen (infection, bleeding) and kill weeks later; treatment cuts the worsening. Firearm wounds start worsening at a lower severity than blows."
+ },
+ "fatal": {
+  "hostile": {"offset": 60.0, "scale": 100.0, "floor": 0.002, "cap": null},
+  "lethal": {"offset": 30.0, "scale": 55.0, "floor": 0.02, "cap": null}
+ },
+ "methods": {
+  "fists": {"fatal": {"offset": 50.0, "scale": 200.0, "floor": 0.004, "cap": null}, "kill_max": 0.15},
+  "blunt": {"fatal": {"offset": 40.0, "scale": 130.0, "floor": 0.01, "cap": null}, "kill_max": 0.5},
+  "blade": {"fatal": {"offset": 35.0, "scale": 110.0, "floor": 0.03, "cap": null}, "kill_max": 0.62, "untreated": {"start": 38.0}},
+  "handgun_range": {"fatal": {"offset": 30.0, "scale": 140.0, "floor": 0.12, "cap": null}, "kill_max": 0.74, "untreated": {"start": 30.0}},
+  "handgun_point_blank": {"fatal": {"offset": 30.0, "scale": 70.0, "floor": 0.7, "cap": 0.97}, "kill_max": 0.93, "untreated": {"start": 30.0}},
+  "execution": {"fatal": {"offset": 0.0, "scale": 100.0, "floor": 0.92, "cap": 0.99}, "kill_max": 0.97, "untreated": {"start": 30.0}}
+ },
+ "untreated": {"start": 45.0, "mul": 1.2, "progression_mul": 0.25, "fatal_at": 60.0, "mortality_cap": 99.0},
+ "hit": {
+  "floor": 0.05, "knee": 0.45, "exp": 0.6, "kill_max": 0.9,
+  "nonlethal_scale": 0.04, "maim_base": 0.35, "maim_slope": 0.3,
+  "guard_weight": 0.25,
+  "styles": {
+   "hired_killing": {"methods": {"handgun_point_blank": 0.55, "handgun_range": 0.25, "execution": 0.12, "blade": 0.05, "blunt": 0.03}},
+   "assault": {"methods": {"handgun_point_blank": 0.5, "handgun_range": 0.3, "execution": 0.1, "blade": 0.06, "blunt": 0.04}},
+   "public_example": {"methods": {"execution": 0.5, "blunt": 0.25, "handgun_point_blank": 0.25}},
+   "internal": {"methods": {"handgun_point_blank": 0.6, "execution": 0.2, "blade": 0.1, "blunt": 0.1}},
+   "beating": {"methods": {"fists": 0.55, "blunt": 0.35, "blade": 0.1}},
+   "hired_beating": {"methods": {"blunt": 0.5, "fists": 0.3, "blade": 0.2}},
+   "abduction": {"methods": {"fists": 0.6, "blunt": 0.3, "blade": 0.1}},
+   "duel": {"methods": {"blade": 0.35, "handgun_range": 0.35, "fists": 0.2, "blunt": 0.1}}
+  },
+  "by_class": {
+   "street": {
+    "nonlethal_scale": 0.06,
+    "styles": {"assault": {"methods": {"handgun_range": 0.4, "handgun_point_blank": 0.3, "blade": 0.15, "blunt": 0.1, "execution": 0.05}}}
+   },
+   "durable": {
+    "nonlethal_scale": 0.03,
+    "styles": {"assault": {"methods": {"handgun_point_blank": 0.6, "execution": 0.2, "handgun_range": 0.15, "blade": 0.03, "blunt": 0.02}}}
+   }
+  }
+ },
+ "internal": {"retaliation_land": 0.7},
+ "incident": {
+  "why": "A weekly beating mostly stays a beating, but a share go too far (a weapon, a bad fall, a bystander). The tail share and its severity are proposals; the deaths are reported by the run, never clamped.",
+  "tail_share": 0.06, "tail_lo": 40.0, "tail_hi": 100.0,
+  "methods": {"fists": 0.55, "blunt": 0.25, "blade": 0.12, "handgun_range": 0.08},
+  "tail_methods": {"blunt": 0.3, "blade": 0.3, "handgun_range": 0.25, "handgun_point_blank": 0.15},
+  "by_outfit": {},
+  "bystander_methods": ["handgun_range"], "bystander_share": 0.3, "bystander_lo": 20.0, "bystander_hi": 80.0
+ }
+}

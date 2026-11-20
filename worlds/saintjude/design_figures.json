@@ -2651,6 +2651,66 @@
    "source": "unsourced",
    "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
   },
+  "hap_k_retaliate_unsanctioned": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a killing the killer's own head had not sanctioned is an outrage the dead man's head cannot treat as business; the commission's own leave is not modelled, so the killer's head stands for it (B12c: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_kin": {
+   "default": 0.45,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the dead man's living close kin (parents, children, siblings, spouse) press for an answer; two or more count in full (B12c: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_humiliation": {
+   "default": 0.35,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man killed on the ground of his own unit is an insult as well as a loss (B12c: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_style": {
+   "default": 1.0,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the dead man's outfit's own lean toward violence (outfits data violence_bias) carried into the answer; only outfits with an entry have one (B12c: engine/org_happenings.py)"
+  },
+  "hap_k_team_base": {
+   "default": 1,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how many men a head sends after a killer at the least; a reply is a team, not one man (B12c: engine/org_happenings.py)"
+  },
+  "hap_k_team_rank": {
+   "default": 4,
+   "range": null,
+   "unit": "men at rank 1.0",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; more men for a higher-ranked victim (rank 0..1 from hap_rank_*): a capo's death sends about three or four, a boss's five (B12c: engine/org_happenings.py)"
+  },
   "hap_k_rel_points": {
    "default": 10,
    "range": null,

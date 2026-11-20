@@ -18,6 +18,7 @@ the more the more cautious and tied to the head he is, the second the more fear 
 from __future__ import annotations
 
 import json
+import random
 import sqlite3
 
 from . import ledger, org_motives, outfit_motives as om
@@ -95,16 +96,44 @@ def execute_seek_permission(conn: sqlite3.Connection, actor_id: int, kind: str, 
     return {"summary": f"{_name(conn, actor_id)} asked {_name(conn, head)} for leave to be rid of {_name(conn, leader)}."}
 
 
-def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sanctioned: bool) -> str:
-    """A killing inside the organisation: the victim dies through the harm system, his seats go dead; a dead unit leader
-    puts `fill_unit_leader_seat` on the head's list; an unsanctioned killing puts `discipline_hunt` there unless the head wanted
-    it (then the killer gains standing). History is flagged for both."""
+def _attempt_band(conn: sqlite3.Connection, killer: int, victim: int, day: int, land: float | None, retaliation: bool) -> tuple[str, str | None]:
+    """How a planned killing by one man of another goes: the same planned-hit lethality as a hit across outfits. A package that gives
+    no landing chance (`internal.land`) keeps the old rule, a killing that always kills."""
+    from . import lethality
+    from .design import run_seed
+    from .underworld_aggression import hit_band
+    cfg = lethality.config(conn).get("internal") or {}
+    p = land if land is not None else (cfg.get("retaliation_land") if retaliation and cfg.get("retaliation_land") is not None else cfg.get("land"))
+    if p is None:
+        return "killed", None
+    picked: list = []
+    band = hit_band(float(p), random.Random(f"{run_seed(conn)}:kill:{int(killer)}:{int(victim)}:{int(day)}"), True, conn, style="internal", picked=picked)
+    return band, (picked[0] if picked else None)
+
+
+def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sanctioned: bool, land: float | None = None, retaliation: bool = False) -> str:
+    """A killing by one man of another. A decided killing inside an outfit always kills unless the package gives it a landing chance
+    (`internal.land`); a reply across outfits (`retaliation`) lands at the package's `internal.retaliation_land` and then kills at the
+    planned-hit rate, so it can fail. A dead victim dies through the harm system, his seats go dead; a dead unit
+    leader puts `fill_unit_leader_seat` on the head's list; an unsanctioned killing puts `discipline_hunt` there unless the head
+    wanted it (then the killer gains standing). History is flagged for both. A botched attempt leaves the victim alive, hurt or not,
+    knowing who tried."""
     from .harm import record_harm
     seats = conn.execute("SELECT org_actor_id,role_key,unit_id,superior_actor_id FROM org_seats WHERE actor_id=? AND status='active'", (int(victim),)).fetchall()
     loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (int(victim),)).fetchone()
-    record_harm(conn, int(victim), source_kind="org_action", source_ref_id=int(day) * 10_000_000 + int(killer), severity=100.0,
-                intent_class="lethal", location_id=loc[0] if loc else None, outcome_override="fatal",
-                metadata={"offender_actor_id": int(killer), "public": False})
+    band, method = _attempt_band(conn, killer, victim, day, land, retaliation)
+    outcome = {"killed": "fatal", "maimed": "persistent", "wounded": "transient"}.get(band)
+    if outcome is not None:
+        record_harm(conn, int(victim), source_kind="org_action", source_ref_id=int(day) * 10_000_000 + int(killer), severity=100.0,
+                    intent_class="lethal", method=method, location_id=loc[0] if loc else None, outcome_override=outcome,
+                    metadata={"offender_actor_id": int(killer), "public": False})
+    if band != "killed":
+        imposed(conn, int(killer))
+        imposed(conn, int(victim))
+        adjust_relationship(conn, int(victim), int(killer), int(day), resentment_delta=float(figure(conn, "botched_kill_resentment", default=40)))
+        mark_for_history(conn, int(victim), f"survived an attempt by {_name(conn, killer)}", int(day))
+        mark_for_history(conn, int(killer), f"failed to kill {_name(conn, victim)}", int(day))
+        return f"{_name(conn, killer)} tried to kill {_name(conn, victim)} and failed."
     for (sub,) in conn.execute("SELECT actor_id FROM org_seats WHERE superior_actor_id=? AND status='active' AND actor_id<>?",
                                (int(victim), int(victim))).fetchall():
         imposed(conn, int(sub))  # the men who answered to him are looked at again tomorrow
@@ -112,7 +141,7 @@ def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sancti
     conn.execute("INSERT INTO org_agenda(actor_id,kind,due_day,subject_kind,subject_id,created_day,status,resolved_day,metadata_json) VALUES (?,?,?,?,?,?,'resolved',?,?)",
                  (int(victim), "killed_by", int(day), "actor", int(killer), int(day), int(day), json.dumps({"sanctioned": bool(sanctioned)})))  # who did it: the succession reads it
     from .org_happenings import killed_across  # a man of one organisation killed by a man of another: his head answers
-    killed_across(conn, int(killer), int(victim), seats, int(day))
+    killed_across(conn, int(killer), int(victim), seats, int(day), sanctioned=bool(sanctioned))
     mark_for_history(conn, int(victim), f"killed by {_name(conn, killer)}", int(day))
     mark_for_history(conn, int(killer), f"killed {_name(conn, victim)}", int(day))
     for s in seats:
@@ -183,7 +212,8 @@ def execute_warn(conn, actor_id, kind, payload, day):
 def hit_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
     meta = json.loads(item["metadata_json"] or "{}")
     return [{"kind": "hit", "utility": _utility(conn, 1.0), "rationale": f"Carries out the hit on {_name(conn, item['subject_id'])}.",
-             "payload": {"target": int(item["subject_id"]), "sanctioned": bool(meta.get("sanctioned"))}, "target_actor_id": int(item["subject_id"])}]
+             "payload": {"target": int(item["subject_id"]), "sanctioned": bool(meta.get("sanctioned")), "retaliation": bool(meta.get("retaliation"))},
+             "target_actor_id": int(item["subject_id"])}]
 
 
 def execute_hit(conn, actor_id, kind, payload, day):
@@ -191,7 +221,7 @@ def execute_hit(conn, actor_id, kind, payload, day):
     victim = int(payload["target"])
     if not is_living(conn, victim):
         return {"summary": "The man was already dead."}
-    return {"summary": kill(conn, int(actor_id), victim, int(day), sanctioned=bool(payload.get("sanctioned")))}
+    return {"summary": kill(conn, int(actor_id), victim, int(day), sanctioned=bool(payload.get("sanctioned")), retaliation=bool(payload.get("retaliation")))}
 
 
 def hunt_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
@@ -217,17 +247,18 @@ def hunt_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list
 def execute_order_hunt(conn, actor_id, kind, payload, day):
     _finish(conn, payload, day)
     org, killer = int(payload["org"]), int(payload["killer"])
-    best, best_l = None, -1.0
+    ranked = []
     for r in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' AND inducted_day IS NOT NULL AND actor_id NOT IN (?,?) ORDER BY actor_id",
                           (org, int(actor_id), killer)).fetchall():
         rel = om._rel(conn, r[0], actor_id)
-        loyal = float(rel["loyalty"]) if rel is not None else 0.0
-        if loyal > best_l:
-            best, best_l = int(r[0]), loyal
-    if best is None:
+        ranked.append((float(rel["loyalty"]) if rel is not None else 0.0, -int(r[0]), int(r[0])))
+    team = [a for _l, _n, a in sorted(ranked, reverse=True)[:max(1, int(payload.get("team") or 1))]]
+    if not team:
         return {"summary": "There was no one to send."}
-    add_agenda(conn, best, "hit", int(day) + 1, subject_kind="actor", subject_id=killer, metadata={"sanctioned": True, "ordered_by": int(actor_id), "org": org})
-    return {"summary": f"{_name(conn, actor_id)} sent {_name(conn, best)} after {_name(conn, killer)}."}
+    for a in team:
+        add_agenda(conn, a, "hit", int(day) + 1, subject_kind="actor", subject_id=killer,
+                   metadata={"sanctioned": True, "ordered_by": int(actor_id), "org": org, "retaliation": bool(payload.get("retaliation"))})
+    return {"summary": f"{_name(conn, actor_id)} sent {', '.join(_name(conn, a) for a in team)} after {_name(conn, killer)}."}
 
 
 def execute_let_lie(conn, actor_id, kind, payload, day):

@@ -33,7 +33,8 @@
   "gazetteer": "gazetteer.json",
   "outfits": "outfits.json",
   "orgs": "orgs.json",
-  "law": "law.json"
+  "law": "law.json",
+  "lethality": "lethality.json"
  },
  "name_pools": {
   "male": {

@@ -593,18 +593,39 @@ def _do_incident(conn, a, seat, org, day, rng, spec, victim_kind=None, **o):
     raised = hit["org"] if matters and hit["org"] is not None else None
     iid = _record(conn, day, "incident", a, victim=v, line=hit["line"], loc=hit["loc"], matters=matters, raised=raised,
                   status="open" if raised is not None else "done", victim_kind=chosen, offender_org=org)
+    from . import lethality
     from .harm import record_harm
-    record_harm(conn, v, source_kind="org_incident", source_ref_id=iid, severity=round(_span(conn, spec["harm"][0], spec["harm"][1], rng), 2),
-                intent_class="hostile", location_id=hit["loc"], metadata={"offender_actor_id": a, "public": chosen == "officer"})
+    vseats = conn.execute("SELECT org_actor_id,role_key,unit_id,superior_actor_id FROM org_seats WHERE actor_id=? AND status='active'", (v,)).fetchall()
+    key = conn.execute("SELECT package_key FROM org_profiles WHERE org_actor_id=?", (org,)).fetchone()
+    key = key[0] if key else None
+    sev, method, too_far = lethality.incident_roll(conn, key, _span(conn, spec["harm"][0], spec["harm"][1], rng), rng)
+    harm = record_harm(conn, v, source_kind="org_incident", source_ref_id=iid, severity=round(sev, 2), intent_class="hostile", method=method,
+                       location_id=hit["loc"], metadata={"offender_actor_id": a, "public": chosen == "officer", "went_too_far": too_far})
+    by_sev = lethality.bystander_hurt(conn, key, method, rng) if too_far else None
+    bystander = None
+    if by_sev is not None:
+        near = [int(r[0]) for r in conn.execute("SELECT id FROM actors WHERE actor_type='character' AND status='active' AND current_location_id IS ? AND id NOT IN (?,?) ORDER BY id",
+                                                 (hit["loc"], a, v)) if is_living(conn, int(r[0]))]
+        if near:
+            bystander = near[rng.randrange(len(near))]
+            record_harm(conn, bystander, source_kind="org_incident_bystander", source_ref_id=iid, severity=round(by_sev, 2), intent_class="accidental",
+                        method=method, location_id=hit["loc"], metadata={"offender_actor_id": a, "public": True})
+            imposed(conn, bystander)
     imposed(conn, a)
-    imposed(conn, v)
-    if raised is not None:
+    if harm["outcome"] != "fatal":
+        imposed(conn, v)
+    if harm["outcome"] == "fatal" and matters:
+        # a beating that went too far is a killing: the dead man's head answers a killing, not an incident
+        conn.execute("UPDATE org_incidents SET status='done' WHERE id=?", (iid,))
+        killed_across(conn, a, v, vseats, int(day))
+    elif raised is not None:
         head = head_of(conn, raised)
         if head is not None and head != a:
             add_agenda(conn, head, "respond_incident", int(day) + int(figure(conn, spec["respond_delay"])), subject_kind="incident", subject_id=iid,
                        metadata={"incident": iid, "offender": a, "offender_org": org, "victim": v, "org": raised, "kind": "incident"})
-    return {"incident_id": iid, "victim": v, "victim_kind": chosen, "matters": matters,
-            "summary": f"{_name(conn, a)} hit {_name(conn, v)} ({chosen})."}
+    out = {"incident_id": iid, "victim": v, "victim_kind": chosen, "matters": matters, "harm": harm["outcome"], "bystander": bystander,
+           "summary": f"{_name(conn, a)} hit {_name(conn, v)} ({chosen}){' and killed him' if harm['outcome'] == 'fatal' else ''}."}
+    return out
 
 
 def _do_holds_out(conn, a, seat, org, day, rng, spec, **o):
@@ -912,7 +933,7 @@ def _killing(conn: sqlite3.Connection) -> dict:
     return _data(conn).get("killing") or {}
 
 
-def killed_across(conn: sqlite3.Connection, killer: int, victim: int, seats, day: int) -> None:
+def killed_across(conn: sqlite3.Connection, killer: int, victim: int, seats, day: int, sanctioned: bool = True) -> None:
     """The victim held seats; for each organisation the killer holds no seat in, its head (when it has one) gets a
     `respond_killing` item, a `killing` incident is recorded, and the head and the dead man's superior are imposed on."""
     data = _killing(conn)
@@ -935,7 +956,8 @@ def killed_across(conn: sqlite3.Connection, killer: int, victim: int, seats, day
                       killer_org=min(mine), role=s["role_key"])
         imposed(conn, head)
         add_agenda(conn, head, "respond_killing", int(day) + int(figure(conn, data["delay"])), subject_kind="actor", subject_id=int(victim),
-                   metadata={"incident": iid, "killer": int(killer), "killer_org": min(mine), "org": org, "victim": int(victim), "role": s["role_key"]})
+                   metadata={"incident": iid, "killer": int(killer), "killer_org": min(mine), "org": org, "victim": int(victim), "role": s["role_key"],
+                             "sanctioned": bool(sanctioned)})
 
 
 def _size(conn, org: int) -> int:
@@ -944,6 +966,28 @@ def _size(conn, org: int) -> int:
 
 def _had_sit_down(conn, victim: int) -> bool:
     return conn.execute("SELECT 1 FROM org_incidents WHERE offender_actor_id=? AND status IN ('sat_down','paid','refused') LIMIT 1", (int(victim),)).fetchone() is not None
+
+
+def _kin_wanting(conn, victim: int) -> float:
+    """Living close kin of the dead man (parents, children, siblings, spouse), 0..1 with two or more counting full."""
+    kin = {int(r[0]) for r in conn.execute(
+        """SELECT CASE WHEN actor_a_id=? THEN actor_b_id ELSE actor_a_id END FROM kinship_links
+           WHERE (actor_a_id=? OR actor_b_id=?) AND legal_status='recognized' AND ended_day IS NULL AND kin_kind IN ('parent','child','sibling','spouse')""",
+        (victim, victim, victim))}
+    return clamp01(sum(1 for k in kin if is_living(conn, k)) / 2.0)
+
+
+def _on_own_ground(conn, victim: int, org: int) -> float:
+    """1 when the man was killed on the ground of his own unit: an insult as well as a loss."""
+    r = conn.execute("""SELECT 1 FROM org_seats s JOIN org_units u ON u.id=s.unit_id JOIN actors a ON a.id=s.actor_id
+                        WHERE s.actor_id=? AND s.org_actor_id=? AND a.current_location_id IS NOT NULL AND u.ground_location_id=a.current_location_id LIMIT 1""", (victim, org)).fetchone()
+    return 1.0 if r else 0.0
+
+
+def _style(conn, org: int) -> float:
+    """The outfit's own lean toward violence (outfits data `violence_bias`), 0 where it has none."""
+    from .org_coup import violence_bias
+    return clamp01(violence_bias(conn, org))
 
 
 def _killing_factors(conn, head: int, meta: dict) -> dict[str, float]:
@@ -955,6 +999,8 @@ def _killing_factors(conn, head: int, meta: dict) -> dict[str, float]:
     r = om._rel(conn, head, khead)
     mine, theirs = _size(conn, org), _size(conn, korg)
     return {"always": 1.0, "victim_wrong": 1.0 if wrong else 0.0, "low_role": 1.0 - rank, "high_role": rank,
+            "unsanctioned": 0.0 if meta.get("sanctioned", True) else 1.0, "kin": _kin_wanting(conn, victim),
+            "humiliation": _on_own_ground(conn, victim, org), "style": _style(conn, org),
             "refused_sit": 1.0 if any(w[0] == "refused" for w in wrong) else 0.0,
             "no_sit_down": 0.0 if _had_sit_down(conn, victim) else 1.0,
             "weaker": clamp01(1.0 - mine / theirs) if theirs and mine < theirs else 0.0,
@@ -1008,15 +1054,23 @@ def execute_demand_redress(conn, actor_id, kind, payload, day):
     return {"summary": f"{_name(conn, me)} asked {_name(conn, other)} to make good the killing of {_name(conn, payload['victim'])}."}
 
 
+def _team_size(conn, payload: dict) -> int:
+    """How many men go after the killer: a base and more for the victim's rank (data `killing.team`). No cap on how often."""
+    t = _killing(conn).get("team") or {}
+    rank = _v(conn, (_killing(conn).get("role_rank") or {}).get(payload.get("role")), 0.5)
+    return max(1, int(round(_v(conn, t.get("base"), 1.0) + _v(conn, t.get("rank"), 0.0) * rank)))
+
+
 def execute_retaliate(conn, actor_id, kind, payload, day):
     from .outfit_choices import execute_order_hunt
     me, other = _heads(conn, actor_id, payload)
     _finish(conn, payload, day, "retaliated")
+    team = _team_size(conn, payload)
     if other is not None:
         pts = float(figure(conn, _killing(conn)["retaliate_points"]))
         adjust_relationship(conn, me, other, int(day), resentment_delta=pts)
         adjust_relationship(conn, other, me, int(day), fear_delta=pts / 2.0, resentment_delta=pts / 2.0)
-    res = execute_order_hunt(conn, me, "order_hunt", {"org": int(payload["org"]), "killer": int(payload["killer"])}, int(day))
+    res = execute_order_hunt(conn, me, "order_hunt", {"org": int(payload["org"]), "killer": int(payload["killer"]), "team": team, "retaliation": True}, int(day))
     return {"summary": f"{_name(conn, me)} had the killing of {_name(conn, payload['victim'])} answered: {res.get('summary', '')}"}
 
 

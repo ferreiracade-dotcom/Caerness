@@ -195,15 +195,26 @@ def _client(conn: sqlite3.Connection, t: int, zid: int | None) -> sqlite3.Row | 
            ORDER BY (p.zone_id=?) DESC,e.cash DESC,e.id LIMIT 1""", (t, zid if zid is not None else -1)).fetchone()
 
 
-def hit_band(p: float, rng: random.Random, lethal: bool) -> str:
-    """Outcome of a blow whose odds of landing are p: failed / wounded / maimed / killed. It leans toward survival: death needs
-    a killing intent and odds that are close to overwhelming; most blows that land wound or maim."""
+def hit_band(p: float, rng: random.Random, lethal: bool, conn: sqlite3.Connection | None = None, *, style: str | None = None,
+             org: int | None = None, guard: float = 0.0, method: str | None = None, picked: list | None = None) -> str:
+    """Outcome of a blow whose odds of landing are p: failed / wounded / maimed / killed. Every figure comes from the package's
+    lethality data (engine defaults when `conn` is None). A planned hit (`lethal`) that lands kills at the method's kill rate,
+    lower for a low chance of success and for a guarded target; a beating kills rarely (the outfit class's own scale). When the
+    package gives the style a method mix, the method is drawn from it (and appended to `picked` for the caller's record)."""
+    from . import lethality as lt
+    cls = tp.outfit_class(conn, org) if conn is not None and org is not None else None
+    cfg = lt.config(conn)
+    h = lt.hit_cfg(conn, cls)
     if rng.random() >= max(0.0, min(1.0, p)):
         return "failed"
-    pk = (max(0.0, p - 0.3) / 0.7) ** 1.3 * (1.0 if lethal else 0.15)
+    if method is None:
+        method = lt.pick_method(conn, style, cls, rng)
+    if picked is not None:
+        picked.append(method)
+    pk = lt.kill_chance(h, p, lethal, method, cfg, guard)
     if rng.random() < pk:
         return "killed"
-    return "maimed" if rng.random() < 0.35 + 0.3 * p else "wounded"
+    return "maimed" if rng.random() < float(h["maim_base"]) + float(h["maim_slope"]) * p else "wounded"
 
 
 _BAND_OUTCOME = {"wounded": "transient", "maimed": "persistent", "killed": "fatal"}
@@ -245,22 +256,24 @@ def pending_attempt(conn: sqlite3.Connection, player: int, src_org: int, p: floa
 
 
 def _apply_band(conn: sqlite3.Connection, victim: int, src_org: int, band: str, rng: random.Random, *, style: str, severity: float, lethal: bool,
-                ref: int | None = None) -> dict[str, Any] | None:
+                ref: int | None = None, method: str | None = None) -> dict[str, Any] | None:
     from .harm import record_harm
     outcome = _BAND_OUTCOME.get(band)
     if outcome is None:
         return None
     return record_harm(conn, victim, source_kind=f"underworld_{style}", source_ref_id=ref if ref is not None else rng.randrange(1, 10**9), severity=severity,
-                       intent_class="lethal" if lethal else "hostile", metadata={"source_organization_id": src_org, "style": style, "band": band},
-                       outcome_override=outcome)
+                       intent_class="lethal" if lethal else "hostile", method=method,
+                       metadata={"source_organization_id": src_org, "style": style, "band": band}, outcome_override=outcome)
 
 
-def attempt_on(conn: sqlite3.Connection, victim: int, src_org: int, p: float, rng: random.Random, *, style: str, lethal: bool, severity: float) -> dict[str, Any]:
+def attempt_on(conn: sqlite3.Connection, victim: int, src_org: int, p: float, rng: random.Random, *, style: str, lethal: bool, severity: float,
+               guard: float = 0.0) -> dict[str, Any]:
     """A blow aimed at one person, whoever he is. The protagonist's becomes a pending incident; anyone else's resolves in bands."""
     if victim == _player_actor(conn):
         return {"band": "pending", "interaction_id": pending_attempt(conn, victim, src_org, p, style=style, lethal=lethal, day=_day(conn))}
-    band = hit_band(p, rng, lethal)
-    _apply_band(conn, victim, src_org, band, rng, style=style, severity=severity, lethal=lethal)
+    picked: list = []
+    band = hit_band(p, rng, lethal, conn, style=style, org=src_org, guard=guard, picked=picked)
+    _apply_band(conn, victim, src_org, band, rng, style=style, severity=severity, lethal=lethal, method=picked[0] if picked else None)
     return {"band": band}
 
 
@@ -281,8 +294,10 @@ def resolve_attempt(conn: sqlite3.Connection, interaction: sqlite3.Row, choice: 
         summary = f"He yields to {org}, pays them off and walks away whole."
     else:
         pe = p if choice == "reject" else p * 0.45  # running cuts the odds of being caught
-        band = hit_band(pe, rng, lethal)
-        _apply_band(conn, me, src, band, rng, style=style, severity=70 if lethal else 40, lethal=lethal, ref=int(interaction["id"]))
+        picked: list = []
+        band = hit_band(pe, rng, lethal, conn, style=style, org=src, picked=picked)
+        _apply_band(conn, me, src, band, rng, style=style, severity=70 if lethal else 40, lethal=lethal, ref=int(interaction["id"]),
+                    method=picked[0] if picked else None)
         verb = "stands" if choice == "reject" else "runs"
         tail = {"failed": f"and {org}'s attempt comes to nothing.", "wounded": f"and {org}'s men leave him hurt.",
                 "maimed": f"and {org}'s men leave him badly hurt, for good.", "killed": f"and {org}'s men kill him."}[band]
@@ -317,11 +332,14 @@ def _harm(conn: sqlite3.Connection, victim: int, source_org: int, rng: random.Ra
         pending_attempt(conn, victim, source_org, odds, style=kind, lethal=lethal, day=_day(conn))
         return "pending"
     if lethal:
-        band = hit_band(max(odds, 0.05), rng, True)
-        _apply_band(conn, victim, source_org, band, rng, style=kind, severity=severity, lethal=True)
+        picked: list = []
+        band = hit_band(max(odds, 0.05), rng, True, conn, style=kind, org=source_org, picked=picked)
+        _apply_band(conn, victim, source_org, band, rng, style=kind, severity=severity, lethal=True, method=picked[0] if picked else None)
         return {"failed": "transient", "wounded": "transient", "maimed": "persistent", "killed": "fatal"}[band]
+    from . import lethality as lt
+    method = lt.pick_method(conn, kind, tp.outfit_class(conn, source_org), rng)
     r = record_harm(conn, victim, source_kind=f"underworld_{kind}", source_ref_id=rng.randrange(1, 10**9), severity=severity, intent_class=intent,
-                    metadata={"source_organization_id": source_org, "style": kind})
+                    method=method, metadata={"source_organization_id": source_org, "style": kind})
     return str(r["outcome"])
 
 

@@ -6,6 +6,8 @@ import random
 import sqlite3
 from typing import Any, Callable
 
+from . import lethality
+
 # Tonal longevity anchors (World Bible: "demographic/tonal curves", never guaranteed dates).
 # Sixth is fitted to the canon census (all ~40 living Sixths: median age 88, p90 108, oldest 118,
 # described as "old" at 87-97, "ancient" at 104-110, "very old" at 118).  Fifth follows the canon text
@@ -507,7 +509,7 @@ def _resolve_condition(conn: sqlite3.Connection, cond: sqlite3.Row, day: int,
                       f"{cond['label']} {'improved' if new<old else 'worsened'}.",{'severity':round(new,2)},day)
     # Fatality is driven by actual severe pathology, not merely age or a narrative desire for adversity.
     fatal_pressure=max(0.0,float(cond['fatality_pressure']))*(new/100.0)
-    if new>=85 and fatal_pressure>0:
+    if new>=float(lethality.config(conn)["untreated"]["fatal_at"]) and fatal_pressure>0:
         rng=random.Random(_seed(conn,int(cond['id'])*100003+day))
         annual=min(0.98,fatal_pressure/100.0)
         interval_prob=1.0-(1.0-annual)**(max(1,elapsed)/365.0)
@@ -552,7 +554,7 @@ def _recalculate_profile(conn: sqlite3.Connection, actor_id: int, day: int) -> N
         mid=LONGEVITY_MIDPOINT[lc]
         mortality=max(0.0,min(95.0, 2.0 + 93.0/(1.0+math.exp(-(age-mid)/7.5)) - 7.0))
     mortality=max(mortality,float(meta.get('mortality_pressure_floor',0.0)))
-    mortality=max(mortality,min(95.0,sum(float(c['fatality_pressure'])*(float(c['severity'])/100.0) for c in conds)))
+    mortality=max(mortality,min(float(lethality.config(conn)["untreated"]["mortality_cap"]),sum(float(c['fatality_pressure'])*(float(c['severity'])/100.0) for c in conds)))
     # Conditions retain monthly review. Stable late decline is a slower physiological clock:
     # mortality uses elapsed-time hazard, so quarterly review preserves cumulative risk while
     # avoiding a century-scale monthly wakeup for every elderly named character.

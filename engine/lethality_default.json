@@ -1,0 +1,32 @@
+{
+ "_about": "Engine defaults for how lethal a blow is. They reproduce what the code held before task B12c, so a package with no lethality data (Caerness, shelved) behaves exactly as it did. A package overrides any key with its own lethality file (data key 'lethality'); null removes a key (a null cap is no cap). Every figure is a Design proposal; real-world rates are calibration targets reported after a run, never limits.",
+ "resolve": {
+  "vuln_base": 1.08, "vuln_div": 230.0, "vuln_lo": 0.55, "vuln_hi": 1.15,
+  "exposure_base": 0.78, "exposure_div": 220.0,
+  "intent_mult": {"controlled": 0.62, "accidental": 0.82, "hostile": 1.0, "lethal": 1.18},
+  "auto_fatal": {"lethal": 99.0}
+ },
+ "persistent": {
+  "controlled": {"offset": 18.0, "scale": 180.0, "floor": 0.0, "cap": 0.18},
+  "accidental": {"offset": 12.0, "scale": 105.0, "floor": 0.01, "cap": 0.45},
+  "hostile": {"offset": 10.0, "scale": 85.0, "floor": 0.03, "cap": 0.70},
+  "lethal": {"offset": 6.0, "scale": 70.0, "floor": 0.18, "cap": 0.95}
+ },
+ "fatal": {
+  "controlled": null,
+  "accidental": {"offset": 86.0, "scale": 110.0, "floor": 0.0, "cap": 0.12},
+  "hostile": {"offset": 82.0, "scale": 80.0, "floor": 0.0, "cap": 0.22},
+  "lethal": {"offset": 62.0, "scale": 46.0, "floor": 0.0, "cap": 0.82}
+ },
+ "methods": {},
+ "untreated": {"start": 72.0, "mul": 0.55, "mortality_cap": 95.0, "progression_mul": 0.0, "fatal_at": 85.0},
+ "hit": {
+  "floor": 0.3, "knee": 1.0, "exp": 1.3, "kill_max": 1.0,
+  "nonlethal_scale": 0.15, "maim_base": 0.35, "maim_slope": 0.3,
+  "guard_weight": 0.0,
+  "styles": {},
+  "by_class": {}
+ },
+ "internal": {"land": null},
+ "incident": {}
+}

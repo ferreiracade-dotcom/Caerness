@@ -5,6 +5,8 @@ import random
 import sqlite3
 from typing import Any, Callable
 
+from . import lethality
+
 
 _VALID_INTENTS = {"controlled", "hostile", "lethal", "accidental"}
 _VALID_OUTCOMES = {"transient", "persistent", "fatal"}
@@ -30,28 +32,18 @@ def _living(conn: sqlite3.Connection, actor_id: int) -> bool:
     return bool(row and str(row["status"]) != "deceased" and (row["life_status"] is None or str(row["life_status"]) == "living"))
 
 
-def _intent_multiplier(intent_class: str) -> float:
-    return {"controlled": 0.62, "accidental": 0.82, "hostile": 1.0, "lethal": 1.18}[intent_class]
+def _intent_multiplier(conn, intent_class: str) -> float:
+    return float(lethality.config(conn)["resolve"]["intent_mult"][intent_class])
 
 
-def _persistent_probability(intent_class: str, severity: float) -> float:
-    if intent_class == "controlled":
-        return max(0.0, min(0.18, (severity - 18.0) / 180.0))
-    if intent_class == "accidental":
-        return max(0.01, min(0.45, (severity - 12.0) / 105.0))
-    if intent_class == "hostile":
-        return max(0.03, min(0.70, (severity - 10.0) / 85.0))
-    return max(0.18, min(0.95, (severity - 6.0) / 70.0))
+def _persistent_probability(conn, intent_class: str, severity: float, method: str | None = None) -> float:
+    return lethality.persistent_probability(lethality.config(conn), intent_class, severity, method)
 
 
-def _fatal_probability(intent_class: str, severity: float) -> float:
-    if intent_class == "controlled":
-        return 0.0
-    if intent_class == "accidental":
-        return max(0.0, min(0.12, (severity - 86.0) / 110.0))
-    if intent_class == "hostile":
-        return max(0.0, min(0.22, (severity - 82.0) / 80.0))
-    return max(0.0, min(0.82, (severity - 62.0) / 46.0))
+def _fatal_probability(conn, intent_class: str, severity: float, method: str | None = None) -> float:
+    """The chance a wound of this resolved severity is fatal: the package's curve for the intent, or for the method when one is
+    given. The engine holds no ceiling; a package that wants one writes a `cap`."""
+    return lethality.fatal_probability(lethality.config(conn), intent_class, severity, method)
 
 
 def record_harm(
@@ -62,6 +54,7 @@ def record_harm(
     source_ref_id: int,
     severity: float,
     intent_class: str = "hostile",
+    method: str | None = None,
     harm_kind: str = "physical",
     exposure: float = 50.0,
     body_system: str | None = None,
@@ -107,20 +100,22 @@ def record_harm(
     exposure = max(0.0, min(100.0, float(exposure)))
     # Prime healthy bodies are more resilient, but never immune.  Exposure is a modest multiplier,
     # not a second severity score; this keeps controlled sport distinct from lethal intent.
-    vulnerability = max(0.55, min(1.15, 1.08 - resilience / 230.0))
-    exposure_factor = 0.78 + exposure / 220.0
-    resolved = max(0.0, min(100.0, raw * _intent_multiplier(intent_class) * vulnerability * exposure_factor))
+    cfg = lethality.config(conn)
+    rs = cfg["resolve"]
+    vulnerability = max(float(rs["vuln_lo"]), min(float(rs["vuln_hi"]), float(rs["vuln_base"]) - resilience / float(rs["vuln_div"])))
+    exposure_factor = float(rs["exposure_base"]) + exposure / float(rs["exposure_div"])
+    resolved = max(0.0, min(100.0, raw * _intent_multiplier(conn, intent_class) * vulnerability * exposure_factor))
 
     rng = random.Random(_seed(conn, actor_id, source_kind, int(source_ref_id), intent_class))
     fatal_roll = rng.random()
     persistent_roll = rng.random()
     if outcome_override is not None:
         outcome = outcome_override
-    elif intent_class == "lethal" and resolved >= 99.0:
+    elif (rs.get("auto_fatal") or {}).get(intent_class) is not None and resolved >= float(rs["auto_fatal"][intent_class]):
         outcome = "fatal"
-    elif fatal_roll < _fatal_probability(intent_class, resolved):
+    elif fatal_roll < _fatal_probability(conn, intent_class, resolved, method):
         outcome = "fatal"
-    elif persistent_roll < _persistent_probability(intent_class, resolved):
+    elif persistent_roll < _persistent_probability(conn, intent_class, resolved, method):
         outcome = "persistent"
     else:
         outcome = "transient"
@@ -133,6 +128,8 @@ def record_harm(
         "injury_resilience": round(resilience, 3),
         "exposure": round(exposure, 3),
     })
+    if method is not None:
+        meta["method"] = method
     cur = conn.execute(
         """INSERT INTO harm_incidents(day,actor_id,source_kind,source_ref_id,harm_kind,intent_class,location_id,
                     exposure,raw_severity,resolved_severity,outcome,metadata_json)
@@ -161,8 +158,8 @@ def record_harm(
             capacity_impact=min(75.0, condition_severity * 0.62),
             pain_impact=min(85.0, condition_severity * 0.76),
             recovery_rate_per_30=11.0 if condition_severity < 55 else 7.0,
-            progression_rate_per_30=0.0,
-            fatality_pressure=(max(0.0, condition_severity - 72.0) * 0.55 if intent_class != "controlled" else 0.0),
+            progression_rate_per_30=(lethality.untreated_progression(cfg, condition_severity, method) if intent_class != "controlled" else 0.0),
+            fatality_pressure=(lethality.untreated_pressure(cfg, condition_severity, method) if intent_class != "controlled" else 0.0),
             specialist_requirement="physician" if condition_severity >= 60 else "none",
             next_review_days=7 if condition_severity >= 60 else 14,
             metadata={

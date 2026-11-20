@@ -889,8 +889,28 @@
      {
       "name": "resentful",
       "weight": "hap_k_retaliate_resentful"
+     },
+     {
+      "name": "unsanctioned",
+      "weight": "hap_k_retaliate_unsanctioned"
+     },
+     {
+      "name": "kin",
+      "weight": "hap_k_retaliate_kin"
+     },
+     {
+      "name": "humiliation",
+      "weight": "hap_k_retaliate_humiliation"
+     },
+     {
+      "name": "style",
+      "weight": "hap_k_retaliate_style"
      }
     ],
+    "team": {
+     "base": "hap_k_team_base",
+     "rank": "hap_k_team_rank"
+    },
     "relation_points": "hap_k_rel_points",
     "retaliate_points": "hap_k_retaliate_points"
    },
