@@ -3,8 +3,8 @@
   "sabatini": {
    "institution": "Sabatini Family",
    "shape": "family",
-   "made_men_figure": "made_men_sabatini",
-   "associates_figure": "associates_per_man_sabatini",
+   "members_figure": "made_men_sabatini",
+   "dependents_figure": "associates_per_man_sabatini",
    "name_group": "italian",
    "ground": [
     "Crown Harbor",
@@ -15,8 +15,8 @@
   "pellegrino": {
    "institution": "Pellegrino Family",
    "shape": "family",
-   "made_men_figure": "made_men_pellegrino",
-   "associates_figure": "associates_per_man_pellegrino",
+   "members_figure": "made_men_pellegrino",
+   "dependents_figure": "associates_per_man_pellegrino",
    "name_group": "italian",
    "ground": [
     "The North Piers",
@@ -28,8 +28,8 @@
   "ferrante": {
    "institution": "Ferrante Family",
    "shape": "family",
-   "made_men_figure": "made_men_ferrante",
-   "associates_figure": "associates_per_man_ferrante",
+   "members_figure": "made_men_ferrante",
+   "dependents_figure": "associates_per_man_ferrante",
    "name_group": "italian",
    "ground": [
     "The Racks",
@@ -41,8 +41,8 @@
   "vannucci": {
    "institution": "Vannucci Family",
    "shape": "family",
-   "made_men_figure": "made_men_vannucci",
-   "associates_figure": "associates_per_man_vannucci",
+   "members_figure": "made_men_vannucci",
+   "dependents_figure": "associates_per_man_vannucci",
    "name_group": "italian",
    "ground": [
     "Mercer Avenue (the Strip)",
@@ -242,19 +242,6 @@
    }
   }
  },
- "family_ranks": [
-  "boss",
-  "underboss",
-  "consigliere",
-  "capo",
-  "soldier",
-  "associate"
- ],
- "executive_ranks": [
-  "boss",
-  "underboss",
-  "consigliere"
- ],
  "seed_role_to_rank": {
   "Boss": "boss",
   "Underboss": "underboss",

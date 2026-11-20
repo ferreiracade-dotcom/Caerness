@@ -20,7 +20,7 @@ NEW_FIGURES = (
 ).split()
 TABLES = {"org_seats", "org_units", "org_holdings", "org_lines", "org_money", "org_agenda",
           "org_incidents", "org_arrangements", "crime_reports", "custody"}
-FIGURE_KEYS = ("figure", "made_men_figure", "associates_figure", "capacity", "integrity", "evidence_threshold",
+FIGURE_KEYS = ("figure", "members_figure", "dependents_figure", "capacity", "integrity", "evidence_threshold",
                "honest_homicide_figure")
 
 
@@ -114,11 +114,11 @@ def run():
                 assert sj.execute("SELECT 1 FROM actors WHERE actor_type='institution' AND name=?", (a["institution"],)).fetchone(), a
             assert a["jurisdiction"] in lrules["jurisdictions"]
             if a["jurisdiction"] in ("state", "federal"):
-                assert a["pad_reaches"] is False
+                assert a["arrangements_reach"] is False
         pools = json.loads((ROOT / "worlds/saintjude/design_figures.json").read_text(encoding="utf-8"))["pools"]
         assert set(orules["line_kinds"]) == {k for k in pools if k != "pad"}
         for need in ("sabatini", "pellegrino", "ferrante", "vannucci"):
-            assert orules["outfits"][need]["made_men_figure"].endswith(need)
+            assert orules["outfits"][need]["members_figure"].endswith(need)
 
         # figures: every reference exists, proposals are marked and sourced
         figs = design.package_figures(sj)

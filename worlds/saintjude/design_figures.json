@@ -4494,6 +4494,7 @@
     "ferrante": 0.18
    },
    "computed_by": "drug dial x ground (allocation.drugs_1975)",
+   "allocation_key": "drugs_1975",
    "note": "Part VI 9.3A prints dollars in the family columns of this row"
   },
   "pad": {

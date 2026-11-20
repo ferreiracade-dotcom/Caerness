@@ -65,10 +65,10 @@ def test_jurisdictions_and_agencies_loaded():
     assert {"city", "killbuck_county", "marsh_county", "state", "federal"} <= keys, keys
     assert conn.execute("SELECT COUNT(*) FROM law_rules").fetchone()[0] >= 4
     prof = conn.execute("SELECT * FROM law_enforcement_profiles WHERE name='FBI Saint Jude Field Office'").fetchone()
-    assert prof is not None and json.loads(prof["metadata_json"])["pad_reaches"] is False
+    assert prof is not None and json.loads(prof["metadata_json"])["arrangements_reach"] is False
     assert conn.execute("SELECT COUNT(*) FROM law_enforcement_profiles").fetchone()[0] == len(law["agencies"])
     sjpd = conn.execute("SELECT * FROM law_enforcement_profiles WHERE profile_key='sjpd'").fetchone()
-    assert json.loads(sjpd["metadata_json"])["pad_reaches"] is True
+    assert json.loads(sjpd["metadata_json"])["arrangements_reach"] is True
     # one agency row per agency with an institution; the State AG has none
     ag = conn.execute("SELECT * FROM law_enforcement_profiles WHERE profile_key='state_ag'").fetchone()
     assert ag is not None and ag["institution_actor_id"] is None

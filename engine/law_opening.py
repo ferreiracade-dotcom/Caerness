@@ -1,9 +1,10 @@
-"""Law, officials, connected people and the Pad at the opening (mob minimum, task 8).
+"""The authorities builder: law, officials, connected people and opening arrangements with officials.
 
-Everything is read from the package's law data (`law_rules`) and outfit data (`outfit_rules`): jurisdictions, rules,
+Everything is read from the package's law data (`law_rules`) and organisation data (`outfit_rules`): jurisdictions, rules,
 agencies (one `law_enforcement_profiles` row each, plus a `law_offices` row), the level-4 seats the underworld must deal
-with, the connected people the setting ties to the outfits, and the Pad: an envelope for each of `pad_officers`
-officers, paid from the families' purses through a bagman (the money moves in `org_money.post_period`).
+with, the connected people the setting ties to the organisations, and the opening arrangements (`law.json` `arrangements`):
+one arrangement for each officer a payer organisation keeps sweet, paid through a go-between (the money moves in
+`org_money.post_arrangements`).
 
 Every person is pulled up from the city's background population (never a new actor row). Level 4 people are
 reviewed daily, level 3 weekly, both on a quiet routine (`orgs.set_level`). Open seats are filled with
@@ -20,6 +21,7 @@ from collections import Counter, defaultdict
 from . import facts
 from .design import figure, run_seed
 from .law import add_rule, create_jurisdiction, create_office
+from .org_money import add_arrangement
 from .outfit_opening import city_location, feelings_toward, outfit_actor, pull_up
 from .orgs import give_personality, head_of, set_level
 from .world_package import law_rules, outfit_rules, package_for, system_enabled
@@ -169,7 +171,7 @@ def _load_agencies(conn: sqlite3.Connection, rules: dict, jur: dict[str, int], d
         capacity = 100.0 * float(figure(conn, a["capacity"]))
         integrity = 100.0 * float(figure(conn, a["integrity"]))
         corruption = 100.0 - integrity  # the pressure on a seat is the room its integrity leaves
-        meta = {"agency_key": key, "pad_reaches": bool(a["pad_reaches"]), "kind": a.get("kind", "agency"),
+        meta = {"agency_key": key, "arrangements_reach": bool(a["arrangements_reach"]), "kind": a.get("kind", "agency"),
                 "jurisdiction": a["jurisdiction"], "authority_kind": rules["jurisdictions"][a["jurisdiction"]]["authority_kind"]}
         if a.get("note"):
             meta["note"] = a["note"]
@@ -284,12 +286,13 @@ def _fill_officials(conn: sqlite3.Connection, rules: dict, day: int, used: set[i
     """The level-4 seats: each Open office in `level4_offices` and each of `level4_roles`, seeded holders first, the rest
     pulled up in one batch (age 40-65; sex by `male_share` for police, `male_share_law_official` otherwise)."""
     domains = rules.get("office_domains") or {}
-    share_police = float(outfit_rules(package_for(conn))["male_share"]["pad_officer"])
+    sworn = rules.get("sworn_domain")
+    share_police = float(outfit_rules(package_for(conn))["male_share"][rules["sworn_male_share_key"]])
     share_other = float(figure(conn, "male_share_law_official"))
     rng = _rng(conn, "offices:sex")
 
     def slot(domain: str, *barred: str) -> dict:
-        share = share_police if domain == "soldier" else share_other
+        share = share_police if domain == sworn else share_other
         woman = rng.random() >= share and not _woman_barred(rules, *barred)
         return {"group": None, "sex": "female" if woman else "male", "domain": domain}
 
@@ -358,19 +361,19 @@ def _fill_connected(conn: sqlite3.Connection, oc: dict, day: int, used: set[int]
         c, a = p["c"], p["aid"]
         _seat(conn, a, p["inst"], c["role_text"], "connected", day)
         if c.get("tied_to"):
-            boss = outfit_head(conn, c["tied_to"], oc["outfits"][c["tied_to"]])
-            if boss is not None and boss != a:
-                feelings_toward(conn, a, boss, day, _rng(conn, f"connected:tie:{a}"))
+            head = outfit_head(conn, c["tied_to"], oc["outfits"][c["tied_to"]])
+            if head is not None and head != a:
+                feelings_toward(conn, a, head, day, _rng(conn, f"connected:tie:{a}"))
     return {"connected": len(plan)}
 
 
-# ---- the Pad ----
+# ---- opening arrangements ----
 
-def _family_precincts(conn: sqlite3.Connection, oc: dict, precincts) -> dict[str, Counter]:
-    """Per family: how many of its crews work each precinct's ground."""
+def _payer_precincts(conn: sqlite3.Connection, oc: dict, precincts, payer_kind: str) -> dict[str, Counter]:
+    """Per payer organisation (of the kind the arrangements name): how many of its units work each precinct's ground."""
     out: dict[str, Counter] = {}
     for key, spec in oc["outfits"].items():
-        if spec.get("shape") != "family":
+        if spec.get("shape") != payer_kind:
             continue
         oid = outfit_actor(conn, spec["institution"])
         cnt: Counter = Counter()
@@ -386,55 +389,56 @@ def _captain_of(conn: sqlite3.Connection, precinct_id: int, heads: dict[int, int
     return heads.get(int(precinct_id))
 
 
-def _build_pad(conn: sqlite3.Connection, rules: dict, oc: dict, day: int, heads: dict[int, int]) -> dict[str, int]:
+def _build_arrangements(conn: sqlite3.Connection, rules: dict, oc: dict, day: int, heads: dict[int, int]) -> dict[str, int]:
     from . import outfit_money  # the design allocation lives with the money (outfit_money imports outfit_opening)
-    pad = rules["pad"]
+    arr = rules["arrangements"]
+    stream = arr["stream"]
     precincts = _precincts(conn)
-    fam_prec = _family_precincts(conn, oc, precincts)
+    fam_prec = _payer_precincts(conn, oc, precincts, arr["payer_org_kind"])
     prec_name = {p[0]: str(conn.execute("SELECT name FROM actors WHERE id=?", (p[0],)).fetchone()[0]) for p in precincts}
     fams = [f for f in sorted(fam_prec) if fam_prec[f]]
     if not fams:
-        return {"pad_officers": 0}
-    # the precinct captain is paid by the family with most crews on the precinct's ground
+        return {f"{stream}_officers": 0}
+    # the precinct's top-tier official is paid by the payer with most units on the precinct's ground
     primary: dict[int, str] = {}
     for pid in sorted({p for f in fams for p in fam_prec[f]}):
         primary[pid] = max(fams, key=lambda f: (fam_prec[f].get(pid, 0), -fams.index(f)))
-    n_total = int(round(figure(conn, pad["officers_figure"])))
-    tiers = pad["tiers"]
+    n_total = int(round(figure(conn, arr["officers_figure"])))
+    tiers = arr["tiers"]
     count = {t["key"]: int(round(figure(conn, t["officers_figure"]))) for t in tiers[:-1]}
     count[tiers[-1]["key"]] = n_total - sum(count.values())
     weekly = {t["key"]: float(figure(conn, t["weekly_figure"])) for t in tiers}
     items_total = sum(count[k] * weekly[k] for k in count)
-    split = outfit_money.design_allocation(conn)[pad["family_split"]]
+    split = outfit_money.design_allocation(conn)[arr["payer_split"]]
     weight_sum = sum(float(split[f]) for f in fams)
     remaining = {f: items_total * float(split[f]) / weight_sum for f in fams}
     first = tiers[0]["key"]
-    # (family, precinct, tier) slots; the captains' seats first, then the dollars go to whoever is furthest below target
+    # (payer, precinct, tier) slots; the captains' seats first, then the dollars go to whoever is furthest below target
     slots: list[dict] = []
     for pid, f in sorted(primary.items()):
-        slots.append({"family": f, "precinct": pid, "tier": first, "captain": True})
+        slots.append({"payer": f, "precinct": pid, "tier": first, "captain": True})
         remaining[f] -= weekly[first]
         count[first] -= 1
     if count[first] < 0:
-        raise RuntimeError("more precincts on family ground than seats in the Pad's top tier")
+        raise RuntimeError("more precincts on a payer's ground than seats in the arrangements' top tier")
     tally = {f: {t["key"]: 0 for t in tiers} for f in fams}
     for t in tiers:
         for _ in range(count[t["key"]]):
             f = max(fams, key=lambda x: (remaining[x], -fams.index(x)))
             remaining[f] -= weekly[t["key"]]
             tally[f][t["key"]] += 1
-    # each family's seats in a tier go round its precincts, the ones with more crews more often
+    # each payer's seats in a tier go round its precincts, the ones with more crews more often
     nxt: dict[tuple, int] = defaultdict(int)
     for f in fams:
         cycle = [p for p, c in sorted(fam_prec[f].items(), key=lambda kv: (-kv[1], kv[0])) for _ in range(c)]
         for t in tiers:
             for _ in range(tally[f][t["key"]]):
-                slots.append({"family": f, "precinct": cycle[nxt[(f, t["key"])] % len(cycle)], "tier": t["key"], "captain": False})
+                slots.append({"payer": f, "precinct": cycle[nxt[(f, t["key"])] % len(cycle)], "tier": t["key"], "captain": False})
                 nxt[(f, t["key"])] += 1
     # people: captains are the level-4 holders; everyone else is pulled up
-    groups = pad["officer_name_groups"]
-    share = float(outfit_rules(package_for(conn))["male_share"]["pad_officer"])
-    rng = _rng(conn, "pad:sex")
+    groups = arr["officer_name_groups"]
+    share = float(outfit_rules(package_for(conn))["male_share"][arr["sex_share_key"]])
+    rng = _rng(conn, f"{stream}:sex")
     women = int(n_total * (1.0 - share) + rng.random())  # stratified: 99 percent of 300 is 3 or 4 women
     last = tiers[-1]["key"]
     pat = [s for s in slots if s["tier"] == last]
@@ -444,13 +448,13 @@ def _build_pad(conn: sqlite3.Connection, rules: dict, oc: dict, day: int, heads:
     todo: list[dict] = []
     for ti, t in enumerate(tiers):
         mine = [s for s in slots if s["tier"] == t["key"] and not s["captain"]]
-        for s, g in zip(mine, _name_group_picks(conn, f"pad:{t['key']}", groups, len(mine))):
-            s.update(group=g, domain="soldier", rank=ti)
+        for s, g in zip(mine, _name_group_picks(conn, f"{stream}:{t['key']}", groups, len(mine))):
+            s.update(group=g, domain=arr["officer_domain"], rank=ti)
             s.setdefault("sex", "male")
         todo += mine
     lo = min(int(t["ages"][0]) for t in tiers)
     hi = max(int(t["ages"][1]) for t in tiers)
-    for s, a in zip(todo, _pull_slots(conn, "law:pad", todo, (lo, hi))):  # one wide band; the higher the tier, the older the man
+    for s, a in zip(todo, _pull_slots(conn, f"law:{stream}", todo, (lo, hi))):  # one wide band; the higher the tier, the older the man
         s["officer"] = a
     for s in slots:
         if s["captain"]:
@@ -460,20 +464,20 @@ def _build_pad(conn: sqlite3.Connection, rules: dict, oc: dict, day: int, heads:
             s["officer"] = cap
     title = {t["key"]: t["title"] for t in tiers}
     n_key: Counter = Counter()
-    for s in sorted(slots, key=lambda x: (x["precinct"], tiers.index(next(t for t in tiers if t["key"] == x["tier"])), not x["captain"], x["family"])):
+    for s in sorted(slots, key=lambda x: (x["precinct"], tiers.index(next(t for t in tiers if t["key"] == x["tier"])), not x["captain"], x["payer"])):
         n_key[(s["precinct"], s["tier"])] += 1
         s["n"] = n_key[(s["precinct"], s["tier"])]
         if not s["captain"]:
             text = f"{title[s['tier']]}, {prec_name[s['precinct']]}"
             conn.execute("UPDATE actors SET subtype=? WHERE id=?", (text, s["officer"]))
             _seat(conn, s["officer"], s["precinct"], text, "member", day, level=3)
-    # bagmen: sergeants of the paying family; the group is the family's seats in the precinct
-    bag_max = max(1, int(round(figure(conn, pad["bagmen_figure"]))))
+    # go-betweens: officials of the second tier of the paying organisation; the group is its seats in the precinct
+    bag_max = max(1, int(round(figure(conn, arr["bagmen_figure"]))))
     sergeant = tiers[1]["key"]
-    by_family: dict[str, list[dict]] = defaultdict(list)
+    by_payer: dict[str, list[dict]] = defaultdict(list)
     for s in slots:
-        by_family[s["family"]].append(s)
-    for f, group in by_family.items():
+        by_payer[s["payer"]].append(s)
+    for f, group in by_payer.items():
         anyone = [s for s in group if s["tier"] == sergeant]
         for pid in sorted({s["precinct"] for s in group}):
             there = [s for s in group if s["precinct"] == pid]
@@ -486,18 +490,18 @@ def _build_pad(conn: sqlite3.Connection, rules: dict, oc: dict, day: int, heads:
                 else:
                     s["bagman"] = None
     payer = {f: outfit_actor(conn, oc["outfits"][f]["institution"]) for f in fams}
-    conn.executemany(
-        "INSERT INTO org_arrangements(kind,official_actor_id,payer_kind,payer_id,position_key,weekly_usd,go_between_actor_id,status,started_day) VALUES (?,?,'org',?,?,?,?,'active',?)",
-        [(pad["arrangement_kind"], s["officer"], payer[s["family"]], f"{s['precinct']}:{s['tier']}:{s['n']}", weekly[s["tier"]], s.get("bagman"), day)
-         for s in sorted(slots, key=lambda x: (x["precinct"], x["tier"], x["n"]))])
-    return {"pad_officers": len(slots), "pad_precincts": len(primary),
-            "pad_bagmen": len({s["bagman"] for s in slots if s.get("bagman") is not None})}
+    for s in sorted(slots, key=lambda x: (x["precinct"], x["tier"], x["n"])):
+        add_arrangement(conn, kind=arr["arrangement_kind"], payer_kind="org", payer_id=payer[s["payer"]], official_actor_id=s["officer"],
+                        weekly_usd=weekly[s["tier"]], day=day, go_between_actor_id=s.get("bagman"),
+                        position_key=f"{s['precinct']}:{s['tier']}:{s['n']}")
+    return {f"{stream}_officers": len(slots), f"{stream}_precincts": len(primary),
+            f"{stream}_bagmen": len({s["bagman"] for s in slots if s.get("bagman") is not None})}
 
 
 # ---- the opening ----
 
 def build(conn: sqlite3.Connection, day: int | None = None) -> dict[str, int]:
-    """Jurisdictions, agencies, level-4 officials, connected people and the Pad; counts by name."""
+    """Jurisdictions, agencies, level-4 officials, connected people and opening arrangements; counts by name."""
     if not system_enabled(conn, "outfits"):
         return {}
     pkg = package_for(conn)
@@ -517,5 +521,5 @@ def build(conn: sqlite3.Connection, day: int | None = None) -> dict[str, int]:
     for pid, head in heads.items():  # an office's presiding person is whoever heads its institution
         conn.execute("UPDATE law_offices SET presiding_actor_id=? WHERE institution_actor_id=?", (head, pid))
     counts.update(_fill_connected(conn, oc, day, used))
-    counts.update(_build_pad(conn, rules, oc, day, heads))
+    counts.update(_build_arrangements(conn, rules, oc, day, heads))
     return counts

@@ -33,14 +33,14 @@
   "sjpd": {
    "institution": "Saint Jude Police Department",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_high",
    "integrity": "agency_integrity_padded"
   },
   "occd": {
    "institution": "Organized Crime Control Division",
    "jurisdiction": "city",
-   "pad_reaches": false,
+   "arrangements_reach": false,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_clean",
    "note": "police intelligence unit; Part II 3.4 puts IAD and the honest Homicide men out of reach, this unit is treated alike (unsourced)"
@@ -48,7 +48,7 @@
   "precinct_2": {
    "institution": "2nd Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -56,7 +56,7 @@
   "precinct_3": {
    "institution": "3rd Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -64,7 +64,7 @@
   "precinct_4": {
    "institution": "4th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -72,7 +72,7 @@
   "precinct_6": {
    "institution": "6th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -80,7 +80,7 @@
   "precinct_8": {
    "institution": "8th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -88,7 +88,7 @@
   "precinct_9": {
    "institution": "9th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -96,7 +96,7 @@
   "precinct_11": {
    "institution": "11th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -104,7 +104,7 @@
   "precinct_14": {
    "institution": "14th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -112,7 +112,7 @@
   "precinct_15": {
    "institution": "15th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -120,7 +120,7 @@
   "precinct_17": {
    "institution": "17th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -128,7 +128,7 @@
   "precinct_19": {
    "institution": "19th Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -136,7 +136,7 @@
   "precinct_21": {
    "institution": "21st Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -144,7 +144,7 @@
   "precinct_23": {
    "institution": "23rd Precinct",
    "jurisdiction": "city",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded",
    "kind": "precinct"
@@ -152,14 +152,14 @@
   "killbuck_prosecutor": {
    "institution": "Killbuck County Prosecutor's Office",
    "jurisdiction": "killbuck_county",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_padded"
   },
   "marsh_prosecutor": {
    "institution": "Marsh County Prosecutor's Office",
    "jurisdiction": "marsh_county",
-   "pad_reaches": true,
+   "arrangements_reach": true,
    "capacity": "agency_capacity_low",
    "integrity": "agency_integrity_padded"
   },
@@ -167,7 +167,7 @@
    "institution": null,
    "office": "office:state:state-attorney-general",
    "jurisdiction": "state",
-   "pad_reaches": false,
+   "arrangements_reach": false,
    "capacity": "agency_capacity_mid",
    "integrity": "agency_integrity_clean",
    "note": "no institution row in the opening; the office slot exists (level4_offices)"
@@ -175,21 +175,21 @@
   "fbi": {
    "institution": "FBI Saint Jude Field Office",
    "jurisdiction": "federal",
-   "pad_reaches": false,
+   "arrangements_reach": false,
    "capacity": "agency_capacity_high",
    "integrity": "agency_integrity_clean"
   },
   "strike_force": {
    "institution": "Organized Crime and Racketeering Strike Force",
    "jurisdiction": "federal",
-   "pad_reaches": false,
+   "arrangements_reach": false,
    "capacity": "agency_capacity_high",
    "integrity": "agency_integrity_clean"
   },
   "us_attorney": {
    "institution": "U.S. Attorney's Office",
    "jurisdiction": "federal",
-   "pad_reaches": false,
+   "arrangements_reach": false,
    "capacity": "agency_capacity_high",
    "integrity": "agency_integrity_clean"
   }
@@ -399,11 +399,17 @@
   "President of Teamsters Local 814"
  ],
  "no_woman_note": "Part I 11: no woman has been mayor, police commissioner, County Prosecutor or union president on the docks; the Teamsters seat is added by analogy (unsourced)",
- "pad": {
+ "sworn_domain": "soldier",
+ "sworn_male_share_key": "pad_officer",
+ "arrangements": {
+  "stream": "pad",
+  "payer_org_kind": "family",
+  "officer_domain": "soldier",
+  "sex_share_key": "pad_officer",
   "arrangement_kind": "envelope",
   "officers_figure": "pad_officers",
   "total_figure": "pad_total_m",
-  "family_split": "pad_by_family_m",
+  "payer_split": "pad_by_family_m",
   "bagmen_figure": "pad_bagmen_per_precinct",
   "tiers": [
    {

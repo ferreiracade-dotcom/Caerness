@@ -1,8 +1,13 @@
-"""Build the outfits as people at the opening (Saint Jude mob minimum): the four families first.
+"""Build organisations as people at the opening: one data-driven builder for any organisation with roles.
 
 Everyone is a real person pulled up from the city's background population (never a new actor row), placed under a
-rank with a superior, feelings toward that superior, a personality and a simulation level. Seeded Example persons
-keep their seats and count toward the drawn figures instead of adding to them."""
+role with a superior, feelings toward that superior, a personality and a simulation level. Seeded Example persons
+keep their seats and count toward the drawn figures instead of adding to them.
+
+The package says what shape each kind of organisation has (orgs.json `kinds.<kind>.opening`): a `units` layout is a head,
+executives, unit leaders each on a ground of the organisation, members dealt to the units and dependants spread over the
+members (a family, a company with departments, a duchy with manors); a `ranks` layout is a list of roles each filled to a
+figure with a superior rule (a bank, a club, a handful). Every role word, count figure, age band and share is data."""
 from __future__ import annotations
 
 import math
@@ -15,20 +20,7 @@ from . import orgs
 from .orgs import clamp01
 from .person_ecology import resolve_background_people
 from .relationships import ensure_relationship
-from .world_package import outfit_rules, package_for, system_enabled
-
-EXEC_AGES = (50, 75)
-CAPO_AGES = (38, 65)
-SOLDIER_AGES = (25, 65)
-ASSOCIATE_AGES = (17, 45)
-# Other outfits, by rank key: elders and the men who run things are older, the youngest rung is 18-30.
-GANG_AGES = {
-    "elder": (45, 75), "middle": (30, 55), "young": (18, 30),
-    "banker": (40, 70), "controller": (25, 55), "runner": (18, 35),
-    "president": (35, 60), "officer": (28, 55), "member": (22, 50), "prospect": (18, 30),
-    "senior": (50, 75), "man": (22, 55),
-}
-OWN_GROUP_SHARE = 0.80  # associates: share from the outfit's own name group, the rest from the city's other groups
+from .world_package import org_rules, outfit_rules, package_for, system_enabled
 
 
 def _day(conn: sqlite3.Connection) -> int:
@@ -54,23 +46,30 @@ def _seat(conn: sqlite3.Connection, actor_id: int, org_actor_id: int, role_key: 
     return orgs.seat(conn, actor_id, org_actor_id, role_key, provenance="outfit opening", **kw)
 
 
-def write_profile(conn: sqlite3.Connection, key: str, spec: dict, outfit_id: int) -> None:
-    """What kind of organisation this institution is: its shape from outfits.json, the underworld sphere, its package key."""
-    conn.execute("INSERT OR IGNORE INTO org_profiles(org_actor_id,org_kind,sphere,package_key) VALUES (?,?,'underworld',?)",
-                 (int(outfit_id), spec["shape"], key))
+def kind_data(rules_org: dict, spec: dict) -> dict:
+    """The orgs.json entry for the organisation's kind (its shape): head, unit leader, labels and `opening`."""
+    return dict((rules_org.get("kinds") or {}).get(spec["shape"]) or {})
 
 
-def seat_subtype(rank_key: str, institution: str) -> str:
-    """The subtype a seated person carries, worded like the seeded ones ("Soldier in the <Name> Family").
+def write_profile(conn: sqlite3.Connection, key: str, spec: dict, outfit_id: int, kind: dict | None = None) -> None:
+    """What kind of organisation this institution is: its shape from outfits.json, the kind's sphere, its package key."""
+    sphere = (kind or {}).get("sphere") or "underworld"
+    conn.execute("INSERT OR IGNORE INTO org_profiles(org_actor_id,org_kind,sphere,package_key) VALUES (?,?,?,?)",
+                 (int(outfit_id), spec["shape"], sphere, key))
+
+
+def seat_subtype(role_key: str, institution: str, in_roles=()) -> str:
+    """The subtype a seated person carries, worded like the seeded ones ("<Role> in the <Org>" for the roles the data
+    lists in `in_roles`, "<Role> of the <Org>" for the rest).
 
     It must not be the pull-up default ("resolved_<occupation>"): the role-kind readers match words in the subtype,
-    and an ordinary soldier-by-trade would be handed a Caerness household-retainer career."""
-    return f"{rank_key.capitalize()} {'in' if rank_key in ('capo', 'soldier') else 'of'} the {institution}"
+    and an ordinary tradesman would be handed a Caerness household-retainer career."""
+    return f"{role_key.capitalize()} {'in' if role_key in in_roles else 'of'} the {institution}"
 
 
 def pull_up(conn: sqlite3.Connection, n: int, *, stream: str, name_group: str | None, sex: str | None,
             ages: tuple[int, int], subtype: str | None = None, criminal_weight: float = 1.0) -> list[int]:
-    """A batch pull-up for one outfit role. The run seed is part of the pick seed, so a redraw is a different crowd."""
+    """A batch pull-up for one organisation role. The run seed is part of the pick seed, so a redraw is a different crowd."""
     return resolve_background_people(
         conn, n, reason="outfit_opening", demand_kind="outfit_member", subtype=subtype, location_id=city_location(conn),
         min_age=ages[0], max_age=ages[1], demographic_sex=sex, name_group=name_group, criminal_weight=criminal_weight,
@@ -79,8 +78,8 @@ def pull_up(conn: sqlite3.Connection, n: int, *, stream: str, name_group: str | 
 
 
 def seeded_by_rank(conn: sqlite3.Connection, outfit_id: int, rules: dict, spec: dict | None = None) -> tuple[dict[str, list[int]], list[tuple[int, str]]]:
-    """Seeded members of an outfit by rank, plus the ones left out. A family reads the first word of the role text
-    through seed_role_to_rank; an outfit with `seed_roles` (phrase in the role text -> rank, first match wins) reads those."""
+    """Seeded members of an organisation by role, plus the ones left out. An outfit with `seed_roles` (phrase in the role
+    text -> role, first match wins) reads those; otherwise the first word of the role text goes through `seed_role_to_rank`."""
     mapping = rules.get("seed_role_to_rank", {})
     phrases = list((spec or {}).get("seed_roles", {}).items())
     out: dict[str, list[int]] = {}
@@ -115,196 +114,222 @@ def _age(conn: sqlite3.Connection, actor_id: int, day: int) -> int:
     return max(0, (day - int(r[0])) // 365) if r else 40
 
 
-def made_day_for(conn: sqlite3.Connection, actor_id: int, day: int, rng: random.Random) -> int:
-    """Made a seeded 0 to (age - 25) years before the opening."""
-    return day - int(rng.uniform(0, max(0, _age(conn, actor_id, day) - 25)) * 365)
+def inducted_day_for(conn: sqlite3.Connection, actor_id: int, day: int, rng: random.Random, min_age: int) -> int:
+    """Inducted a seeded 0 to (age - min_age) years before the opening."""
+    return day - int(rng.uniform(0, max(0, _age(conn, actor_id, day) - min_age)) * 365)
 
 
-def _fill_open_seat(conn: sqlite3.Connection, institution: str, rank: str, actor_id: int) -> None:
+def _fill_open_seat(conn: sqlite3.Connection, institution: str, role: str, actor_id: int) -> None:
     """A seat the setting records as an Open slot is filled by whoever sits in it."""
-    subject = f"{rank.capitalize()} of the {institution}".lower()
+    subject = f"{role.capitalize()} of the {institution}".lower()
     for r in conn.execute("SELECT key,subject FROM world_facts WHERE tag='Open' AND holder_actor_id IS NULL").fetchall():
         if str(r["subject"]).lower() == subject:
             facts.fill_open(conn, r["key"], actor_id, "seated at the opening")
 
 
-def _associate_groups(conn: sqlite3.Connection, rules: dict, own_group: str, n: int, rng: random.Random) -> list[tuple[str, str]]:
-    """One (name group, sex) per associate: 80% the outfit's own group, the rest by the city's group weights."""
+def _dependent_groups(conn: sqlite3.Connection, male_share: float, own_share: float, own_group: str, n: int,
+                      rng: random.Random) -> list[tuple[str, str]]:
+    """One (name group, sex) per dependant: `own_share` from the organisation's own group, the rest by the city's group weights."""
     groups = package_for(conn).name_groups or {}
     others = sorted((g, float(v.get("weight", 0))) for g, v in groups.items() if g != own_group and float(v.get("weight", 0)) > 0)
-    male_share = float(rules["male_share"]["associate"])
     out: list[tuple[str, str]] = []
     for _ in range(n):
-        group = own_group if rng.random() < OWN_GROUP_SHARE else rng.choices([g for g, _ in others], weights=[w for _, w in others])[0]
+        group = own_group if rng.random() < own_share else rng.choices([g for g, _ in others], weights=[w for _, w in others])[0]
         out.append((group, "male" if rng.random() < male_share else "female"))
     return out
 
 
-def build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, day: int) -> dict:
+def _band(roles: dict, role: str) -> tuple[int, int]:
+    return int(roles[role]["ages"][0]), int(roles[role]["ages"][1])
+
+
+def _build_units(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, kind: dict, day: int) -> dict:
+    """A head, executives, unit leaders each leading a unit on a ground, members dealt to the units, dependants over the members."""
+    op = kind["opening"]
+    roles = op["roles"]
     inst = spec["institution"]
     outfit_id = outfit_actor(conn, inst)
-    write_profile(conn, key, spec, outfit_id)
+    write_profile(conn, key, spec, outfit_id, kind)
     group = spec["name_group"]
+    head_role, leader_role = kind["head"], kind["unit_leader"]
+    member_role, dep_role = op["member_role"], op["dependent_role"]
+    in_roles = op.get("in_roles") or ()
     rng = random.Random(f"{run_seed(conn)}:outfit:{key}:structure")
-    seeded, unplaced = seeded_by_rank(conn, outfit_id, rules)
-    made_total = int(round(figure(conn, spec["made_men_figure"])))
-    per_man = float(figure(conn, spec["associates_figure"]))
-    execs = list(rules["executive_ranks"])
-    capos_wanted = max(int(figure(conn, "capo_minimum_per_family")), math.ceil(made_total / float(figure(conn, "capo_one_per_men"))))
-    capos_wanted = max(capos_wanted, len(seeded.get("capo", [])))
-    soldiers_wanted = max(len(seeded.get("soldier", [])), made_total - len(execs) - capos_wanted)
-    associates_wanted = int(round(made_total * per_man))
+    seeded, unplaced = seeded_by_rank(conn, outfit_id, rules, spec)
+    members_total = int(round(figure(conn, spec["members_figure"])))
+    per_member = float(figure(conn, spec["dependents_figure"]))
+    execs = list(op["executives"])
+    leaders_wanted = max(int(figure(conn, op["leader_minimum_figure"])),
+                         math.ceil(members_total / float(figure(conn, op["members_per_leader_figure"]))))
+    leaders_wanted = max(leaders_wanted, len(seeded.get(leader_role, [])))
+    members_wanted = max(len(seeded.get(member_role, [])), members_total - len(execs) - leaders_wanted)
+    dependents_wanted = int(round(members_total * per_member))
+    inducted_age = int(op["inducted_after_age"])
 
-    def settle(rank: str, ids: list[int], wanted: int) -> list[int]:
+    def settle(role: str, ids: list[int], wanted: int) -> list[int]:
         """Seeded people first; a seeded surplus beyond an executive seat is left out."""
         keep = ids[:wanted]
-        unplaced.extend((i, f"surplus {rank}") for i in ids[wanted:])
+        unplaced.extend((i, f"surplus {role}") for i in ids[wanted:])
         return keep
 
     # Executives: one seat each, seeded or pulled.
     seat: dict[str, int] = {}
-    for rank in execs:
-        got = settle(rank, seeded.get(rank, []), 1)
+    for role in execs:
+        got = settle(role, seeded.get(role, []), 1)
         if not got:
-            got = pull_up(conn, 1, stream=f"{key}:{rank}", name_group=group, sex="male", ages=EXEC_AGES, subtype=seat_subtype(rank, inst))
-        seat[rank] = got[0]
-    boss = seat["boss"]
-    for rank in execs:
-        _seat(conn, seat[rank], outfit_id, rank, unit_id=None, superior_actor_id=None if rank == "boss" else boss, level=4,
-              day=day, inducted_day=made_day_for(conn, seat[rank], day, rng))
-        if rank != "boss":
-            feelings_toward(conn, seat[rank], boss, day, rng)
-        _fill_open_seat(conn, inst, rank, seat[rank])
+            got = pull_up(conn, 1, stream=f"{key}:{role}", name_group=group, sex=roles[role].get("sex"), ages=_band(roles, role),
+                          subtype=seat_subtype(role, inst, in_roles))
+        seat[role] = got[0]
+    head = seat[head_role]
+    for role in execs:
+        _seat(conn, seat[role], outfit_id, role, unit_id=None, superior_actor_id=None if role == head_role else head,
+              level=int(roles[role]["level"]), day=day, inducted_day=inducted_day_for(conn, seat[role], day, rng, inducted_age))
+        if role != head_role:
+            feelings_toward(conn, seat[role], head, day, rng)
+        _fill_open_seat(conn, inst, role, seat[role])
 
-    # Capos, each leading a crew on a ground of the family.
-    capos = list(seeded.get("capo", []))
-    capos += pull_up(conn, capos_wanted - len(capos), stream=f"{key}:capo", name_group=group, sex="male", ages=CAPO_AGES, subtype=seat_subtype("capo", inst))
+    # Unit leaders, each leading a unit on a ground of the organisation.
+    leaders = list(seeded.get(leader_role, []))
+    leaders += pull_up(conn, leaders_wanted - len(leaders), stream=f"{key}:{leader_role}", name_group=group,
+                       sex=roles[leader_role].get("sex"), ages=_band(roles, leader_role), subtype=seat_subtype(leader_role, inst, in_roles))
     grounds = [int(r[0]) for name in spec["ground"] for r in conn.execute("SELECT id FROM locations WHERE name=?", (name,)).fetchall()]
     rng.shuffle(grounds)
-    crews: list[int] = []
-    for i, capo in enumerate(capos):
-        surname = str(conn.execute("SELECT name FROM actors WHERE id=?", (capo,)).fetchone()[0]).split()[-1]
-        crew = int(conn.execute(
+    units: list[int] = []
+    for i, leader in enumerate(leaders):
+        surname = str(conn.execute("SELECT name FROM actors WHERE id=?", (leader,)).fetchone()[0]).split()[-1]
+        unit = int(conn.execute(
             "INSERT INTO org_units(org_actor_id,leader_actor_id,label,ground_location_id,created_day) VALUES (?,?,?,?,?)",
-            (outfit_id, capo, f"{surname} crew", grounds[i % len(grounds)] if grounds else None, day)).lastrowid)
-        crews.append(crew)
-        _seat(conn, capo, outfit_id, "capo", unit_id=crew, superior_actor_id=boss, level=4, day=day,
-              inducted_day=made_day_for(conn, capo, day, rng))
-        feelings_toward(conn, capo, boss, day, rng)
+            (outfit_id, leader, op["unit_label"].format(surname=surname), grounds[i % len(grounds)] if grounds else None, day)).lastrowid)
+        units.append(unit)
+        _seat(conn, leader, outfit_id, leader_role, unit_id=unit, superior_actor_id=head, level=int(roles[leader_role]["level"]), day=day,
+              inducted_day=inducted_day_for(conn, leader, day, rng, inducted_age))
+        feelings_toward(conn, leader, head, day, rng)
 
-    # Soldiers dealt to the crews round-robin in a seeded order.
-    soldiers = list(seeded.get("soldier", []))
-    soldiers += pull_up(conn, soldiers_wanted - len(soldiers), stream=f"{key}:soldier", name_group=group, sex="male", ages=SOLDIER_AGES, subtype=seat_subtype("soldier", inst))
-    rng.shuffle(soldiers)
-    made_men: list[tuple[int, int]] = [(c, cr) for c, cr in zip(capos, crews)]
-    for i, s in enumerate(soldiers):
-        capo, crew = capos[i % len(capos)], crews[i % len(crews)]
-        _seat(conn, s, outfit_id, "soldier", unit_id=crew, superior_actor_id=capo, level=3, day=day,
-              inducted_day=made_day_for(conn, s, day, rng))
-        feelings_toward(conn, s, capo, day, rng)
-        made_men.append((s, crew))
+    # Members dealt to the units round-robin in a seeded order.
+    members = list(seeded.get(member_role, []))
+    members += pull_up(conn, members_wanted - len(members), stream=f"{key}:{member_role}", name_group=group,
+                       sex=roles[member_role].get("sex"), ages=_band(roles, member_role), subtype=seat_subtype(member_role, inst, in_roles))
+    rng.shuffle(members)
+    patrons_of: list[tuple[int, int]] = list(zip(leaders, units))
+    for i, s in enumerate(members):
+        leader, unit = leaders[i % len(leaders)], units[i % len(units)]
+        _seat(conn, s, outfit_id, member_role, unit_id=unit, superior_actor_id=leader, level=int(roles[member_role]["level"]), day=day,
+              inducted_day=inducted_day_for(conn, s, day, rng, inducted_age))
+        feelings_toward(conn, s, leader, day, rng)
+        patrons_of.append((s, unit))
 
-    # Associates, spread over the crew's made men (capos and soldiers) round-robin in a seeded order.
-    assoc = list(seeded.get("associate", []))
-    need = max(0, associates_wanted - len(assoc))
-    plan = _associate_groups(conn, rules, group, need, rng)
+    # Dependants, spread over the unit leaders and members round-robin in a seeded order.
+    dr = roles[dep_role]
+    deps = list(seeded.get(dep_role, []))
+    need = max(0, dependents_wanted - len(deps))
+    plan = _dependent_groups(conn, float(rules["male_share"][dr["male_share_key"]]), float(op["own_group_share"]), group, need, rng)
     for (g, sex) in sorted(set(plan)):
         n = plan.count((g, sex))
-        assoc += pull_up(conn, n, stream=f"{key}:associate:{g}:{sex}", name_group=g, sex=sex, ages=ASSOCIATE_AGES,
-                         subtype=seat_subtype("associate", inst), criminal_weight=0.5)
-    rng.shuffle(assoc)
-    patrons = list(made_men)
+        deps += pull_up(conn, n, stream=f"{key}:{dep_role}:{g}:{sex}", name_group=g, sex=sex, ages=_band(roles, dep_role),
+                        subtype=seat_subtype(dep_role, inst, in_roles), criminal_weight=float(dr.get("criminal_weight", 1.0)))
+    rng.shuffle(deps)
+    patrons = list(patrons_of)
     rng.shuffle(patrons)
-    for i, a in enumerate(assoc):
-        sup, crew = patrons[i % len(patrons)]
-        _seat(conn, a, outfit_id, "associate", unit_id=crew, superior_actor_id=sup, level=3, day=day,
-              standing=clamp01(rng.gauss(0.3, 0.2)))
+    st = dr["standing"]
+    for i, a in enumerate(deps):
+        sup, unit = patrons[i % len(patrons)]
+        _seat(conn, a, outfit_id, dep_role, unit_id=unit, superior_actor_id=sup, level=int(dr["level"]), day=day,
+              standing=clamp01(rng.gauss(float(st["mean"]), float(st["sd"]))))
         feelings_toward(conn, a, sup, day, rng)
 
-    return {"counts": {"boss": 1, "underboss": 1, "consigliere": 1, "capo": len(capos), "soldier": len(soldiers), "associate": len(assoc)},
-            "crews": len(crews), "unplaced": unplaced}
+    counts = {role: 1 for role in execs}
+    counts.update({leader_role: len(leaders), member_role: len(members), dep_role: len(deps)})
+    return {"counts": counts, "units": len(units), "unplaced": unplaced}
 
 
-def build_families(conn: sqlite3.Connection, day: int) -> dict:
-    rules = outfit_rules(package_for(conn))
-    out: dict = {}
-    for key, spec in rules.get("outfits", {}).items():
-        if spec.get("shape") == "family":
-            out[key] = build_family(conn, key, spec, rules, day)
-    return out
-
-
-def build_outfit(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, day: int) -> dict:
-    """A non-family outfit (loyalties, banks, club, handful): each rank filled to its figure, seeded people first."""
+def _build_ranks(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, kind: dict, day: int) -> dict:
+    """Each role filled to its figure, seeded people first; who answers to whom comes from the kind's `superior` rules."""
+    op = kind["opening"]
+    roles = op["roles"]
     inst = spec["institution"]
-    shape = spec["shape"]
     outfit_id = outfit_actor(conn, inst)
-    write_profile(conn, key, spec, outfit_id)
-    group = spec.get("name_group")  # None (the club has no group of its own): the city's group weights
-    male_share = float(rules["male_share"][shape])
+    write_profile(conn, key, spec, outfit_id, kind)
+    group = spec.get("name_group")  # None (an organisation with no group of its own): the city's group weights
+    male_share = float(rules["male_share"][op["male_share_key"]])
     rng = random.Random(f"{run_seed(conn)}:outfit:{key}:structure")
     seeded, unplaced = seeded_by_rank(conn, outfit_id, rules, spec)
     ranks = spec["ranks"]
     members: dict[str, list[int]] = {}
-    for rank, r in ranks.items():
+    for role, r in ranks.items():
         wanted = int(r["count"]) if r.get("count") else int(round(figure(conn, r["figure"])))
-        got = list(seeded.get(rank, []))[:wanted]
-        unplaced.extend((i, f"surplus {rank}") for i in seeded.get(rank, [])[wanted:])
+        got = list(seeded.get(role, []))[:wanted]
+        unplaced.extend((i, f"surplus {role}") for i in seeded.get(role, [])[wanted:])
         plan = ["male" if rng.random() < male_share else "female" for _ in range(wanted - len(got))]
         for sex in sorted(set(plan)):
-            got += pull_up(conn, plan.count(sex), stream=f"{key}:{rank}:{sex}", name_group=group, sex=sex, ages=GANG_AGES[rank],
-                           subtype=seat_subtype(rank, inst), criminal_weight=1.0)
+            got += pull_up(conn, plan.count(sex), stream=f"{key}:{role}:{sex}", name_group=group, sex=sex, ages=_band(roles, role),
+                           subtype=seat_subtype(role, inst, op.get("in_roles") or ()), criminal_weight=1.0)
         rng.shuffle(got)
-        members[rank] = got
-    top = next(iter(ranks))
-    for rank, r in ranks.items():
-        for i, a in enumerate(members[rank]):
+        members[role] = got
+    for role, r in ranks.items():
+        rule = roles[role].get("superior")
+        for i, a in enumerate(members[role]):
             sup = None
-            if shape == "banks" and rank != top and members[top]:
-                sup = members[top][i % len(members[top])]
-            elif shape == "club" and rank == "officer" and members.get("president"):
-                sup = members["president"][0]
-            elif shape == "club" and rank in ("member", "prospect") and members.get("officer"):
-                sup = members["officer"][i % len(members["officer"])]
-            elif shape == "handful" and rank != top and members[top]:
-                sup = members[top][0]
-            _seat(conn, a, outfit_id, rank, unit_id=None, superior_actor_id=sup, level=int(r["level"]), day=day)
+            if rule and members.get(rule["role"]):
+                above = members[rule["role"]]
+                sup = above[0] if rule["pick"] == "first" else above[i % len(above)]
+            _seat(conn, a, outfit_id, role, unit_id=None, superior_actor_id=sup, level=int(r["level"]), day=day)
             if sup is not None:
                 feelings_toward(conn, a, sup, day, rng)
-            elif shape == "loyalties" and rank == "young":  # no chain of command: an older man got him the job
-                patrons = members["elder"] + members["middle"]
+            else:  # no chain of command: an older man got him the job
+                patrons = [m for pr in (op.get("feelings_toward") or {}).get(role, []) for m in members.get(pr, [])]
                 if patrons:
                     feelings_toward(conn, a, patrons[i % len(patrons)], day, rng)
             if r.get("count") == 1:
-                _fill_open_seat(conn, inst, rank, a)
-    return {"counts": {rank: len(m) for rank, m in members.items()}, "unplaced": unplaced}
+                _fill_open_seat(conn, inst, role, a)
+    return {"counts": {role: len(m) for role, m in members.items()}, "units": None, "unplaced": unplaced}
 
 
-def build_other_outfits(conn: sqlite3.Connection, day: int) -> dict:
-    rules = outfit_rules(package_for(conn))
-    return {key: build_outfit(conn, key, spec, rules, day) for key, spec in rules.get("outfits", {}).items()
-            if spec.get("shape") != "family"}
+def build_org(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, day: int, kind: dict | None = None) -> dict:
+    """One organisation as people, in the layout its kind's `opening` data names ("units" or "ranks"). `kind` defaults to
+    the package's orgs.json entry for the spec's shape. Returns {"counts": {role: n}, "units": n | None, "unplaced": [...]}."""
+    if kind is None:
+        kind = kind_data(org_rules(package_for(conn)), spec)
+    layout = (kind.get("opening") or {}).get("layout")
+    if layout == "units":
+        return _build_units(conn, key, spec, rules, kind, day)
+    if layout == "ranks":
+        return _build_ranks(conn, key, spec, rules, kind, day)
+    raise RuntimeError(f"organisation kind {spec['shape']!r} has no opening layout in the package's orgs data")
+
+
+def build_all(conn: sqlite3.Connection, day: int) -> dict[str, dict]:
+    """Every organisation of the package's outfits data: unit-based ones first, then the rest, in the data's order."""
+    pkg = package_for(conn)
+    rules, rorg = outfit_rules(pkg), org_rules(pkg)
+    outfits = rules.get("outfits", {})
+
+    def is_units(spec: dict) -> bool:
+        return (kind_data(rorg, spec).get("opening") or {}).get("layout") == "units"
+
+    out: dict[str, dict] = {}
+    for want in (True, False):
+        for key, spec in outfits.items():
+            if is_units(spec) == want:
+                out[key] = build_org(conn, key, spec, rules, day)
+    return out
 
 
 def build(conn: sqlite3.Connection) -> dict[str, int]:
-    """Everything outfit-shaped at the opening; counts by outfit and rank ("sabatini:capo": 8)."""
+    """Every organisation at the opening; counts by organisation and role ("<key>:<role>": 8)."""
     if not system_enabled(conn, "outfits"):
         return {}
     day = _day(conn)
     counts: dict[str, int] = {}
-    for key, res in build_families(conn, day).items():
-        for rank, n in res["counts"].items():
-            counts[f"{key}:{rank}"] = n
-        counts[f"{key}:crews"] = res["crews"]
+    for key, res in build_all(conn, day).items():
+        for role, n in res["counts"].items():
+            counts[f"{key}:{role}"] = n
+        if res["units"] is not None:
+            counts[f"{key}:units"] = res["units"]
         counts[f"{key}:unplaced_seeded"] = len(res["unplaced"])
-    for key, res in build_other_outfits(conn, day).items():
-        for rank, n in res["counts"].items():
-            counts[f"{key}:{rank}"] = n
-        counts[f"{key}:unplaced_seeded"] = len(res["unplaced"])
-    from . import law_opening  # after the outfits: the Pad is paid by the families' crews, and the law's people pull up from the same city
+    from . import law_opening  # after the organisations: arrangements are paid by their units' earners, and the law's people pull up from the same city
     for name, n in law_opening.build(conn, day).items():
         counts[f"law:{name}"] = n
-    from . import outfit_money  # after the people: holdings need the crews and men (outfit_money imports this module)
+    from . import outfit_money  # after the people: holdings need the units and men (outfit_money imports this module)
     for key, gross in outfit_money.build_holdings(conn, day).items():
         counts[f"{key}:gross_yearly"] = int(round(gross))
     return counts

@@ -1,11 +1,12 @@
-"""Rackets as money in the outfits (Saint Jude mob minimum, task 7): holdings, crew slices, lines and the monthly flow.
+"""Income of organisations at the opening: holdings, unit slices and lines (underworld layer).
 
-Opening: every outfit pool in design_figures.json becomes a holding (family share of the pool, or the outfit's own
-pool); a family's holdings are split over its crews, and each crew's slices over its capo and soldiers as lines.
-Every line has a holder, a description and a place. Other outfits hold one line per working man.
+Opening: every pool in the package's design figures becomes a holding (an organisation's share of the pool, or its
+own pool); an organisation with units has its holdings split over its units, and each unit's slices over the roles the
+data names (`opening.line_roles`) as lines. Every line has a holder, a description and a place. Other organisations
+hold one line per working man.
 
-The periodic posting (take in from outside, then up the Ladder) lives in `org_money.post_period`, driven by the
-package's orgs.json, and the envelopes of the Pad by `org_money.post_arrangements`; this module keeps the opening
+The periodic posting (take in from outside, then up the chain) lives in `org_money.post_period`, driven by the
+package's orgs.json, and arrangements with officials by `org_money.post_arrangements`; this module keeps the opening
 builders and the design figures.
 """
 from __future__ import annotations
@@ -17,7 +18,7 @@ from collections import defaultdict
 
 from .design import figure, run_seed
 from .outfit_opening import outfit_actor
-from .world_package import outfit_rules, package_for, system_enabled
+from .world_package import org_rules, outfit_rules, package_for, system_enabled
 
 # ---- data ----
 
@@ -37,7 +38,7 @@ def _day(conn: sqlite3.Connection) -> int:
 
 # ---- holdings, crews, lines (opening) ----
 
-def _gross_by_family(conn: sqlite3.Connection, day: int) -> dict[str, float]:
+def _gross_by_org(conn: sqlite3.Connection, day: int) -> dict[str, float]:
     return {r[0]: float(r[1]) for r in conn.execute(
         """SELECT a.name,SUM(h.yearly_take) FROM org_holdings h JOIN actors a ON a.id=h.org_actor_id
            WHERE h.source='opening' GROUP BY a.name""")}
@@ -54,7 +55,7 @@ def _describe(kind: str, place: str | None) -> str:
     return f"{kind} in {place}" if place else kind
 
 
-def _build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, pools: dict, day: int, seed: int) -> float:
+def _build_units(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, pools: dict, day: int, seed: int, line_roles: list[str]) -> float:
     oid = outfit_actor(conn, spec["institution"])
     kinds = rules["line_kinds"]
     split_low = float(figure(conn, "line_split_low", default=0.3))
@@ -66,8 +67,8 @@ def _build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, p
             continue
         if p.get("tie"):
             yearly = float(figure(conn, p["tie"]["figure"], default=p["default_m"])) * 1e6 * share / 100.0
-        else:  # a pool computed elsewhere (drugs, by dial and ground): the allocation's expected take for the family
-            expected = (design_allocation(conn).get("drugs_1975", {}).get("expected_take_m") or {}).get(key)
+        else:  # a pool computed elsewhere (drugs, by dial and ground): the allocation's expected take for the organisation
+            expected = (design_allocation(conn).get(p.get("allocation_key"), {}).get("expected_take_m") or {}).get(key)
             yearly = float(expected if expected is not None else p["default_m"] * share / 100.0) * 1e6
         hid = int(conn.execute(
             "INSERT INTO org_holdings(org_actor_id,pool_key,share_pct,yearly_take,status,source,started_day) VALUES (?,?,?,?, 'active','opening',?)",
@@ -86,7 +87,7 @@ def _build_family(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, p
     totals = {pool: sum(weights[int(c["id"])][pool] for c in crews) for pool, _, _ in held}
     men_by_crew: dict[int, list[int]] = defaultdict(list)
     for r in conn.execute("SELECT actor_id,unit_id,role_key FROM org_seats WHERE org_actor_id=? AND status='active' "
-                          "AND role_key IN ('capo','soldier') AND unit_id IS NOT NULL ORDER BY actor_id", (oid,)):
+                          f"AND role_key IN ({','.join('?' * len(line_roles))}) AND unit_id IS NOT NULL ORDER BY actor_id", (oid, *line_roles)):
         men_by_crew[int(r["unit_id"])].append(int(r["actor_id"]))
     rows: list[tuple] = []
     for c in crews:
@@ -163,7 +164,7 @@ def _build_other(conn: sqlite3.Connection, key: str, spec: dict, day: int, seed:
 
 
 def build_holdings(conn: sqlite3.Connection, day: int | None = None) -> dict[str, float]:
-    """Holdings, crew slices and lines for every outfit; returns the yearly gross by outfit key."""
+    """Holdings, unit slices and lines for every organisation; returns the yearly gross by organisation key."""
     if not system_enabled(conn, "outfits"):
         return {}
     if conn.execute("SELECT 1 FROM org_holdings WHERE source='opening' LIMIT 1").fetchone():
@@ -172,11 +173,16 @@ def build_holdings(conn: sqlite3.Connection, day: int | None = None) -> dict[str
     rules = outfit_rules(package_for(conn))
     pools = design_pools(conn)
     seed = run_seed(conn)
+    kinds = org_rules(package_for(conn)).get("kinds") or {}
     out: dict[str, float] = {}
+
+    def opening(spec: dict) -> dict:
+        return (kinds.get(spec["shape"]) or {}).get("opening") or {}
+
     for key, spec in rules.get("outfits", {}).items():
-        if spec["shape"] == "family":
-            out[key] = _build_family(conn, key, spec, rules, pools, day, seed)
+        if opening(spec).get("layout") == "units":
+            out[key] = _build_units(conn, key, spec, rules, pools, day, seed, list(opening(spec)["line_roles"]))
     for key, spec in rules.get("outfits", {}).items():
-        if spec["shape"] != "family":
+        if opening(spec).get("layout") != "units":
             out[key] = _build_other(conn, key, spec, day, seed)
     return out
