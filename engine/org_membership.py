@@ -838,7 +838,7 @@ def _after_vacancy(conn: sqlite3.Connection, org: int, seat, day: int, why: str)
     if seat["inducted_day"] is None or _spec(conn, org) is None:
         return
     after_gone(conn, org, int(day))
-    if why == "out" and _data(conn).get("discipline"):
+    if why == "out" and _data(conn).get("discipline") and not conn.execute("SELECT 1 FROM org_agenda WHERE kind='exiled' AND actor_id=? AND subject_id=?", (int(seat["actor_id"]), int(org))).fetchone():
         open_discipline(conn, org, int(seat["actor_id"]), int(day), {"reason": "left"})
 
 

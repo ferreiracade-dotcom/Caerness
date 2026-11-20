@@ -826,12 +826,12 @@ def pressure(conn: sqlite3.Connection, org: int, press: dict, *, opened: int, da
     w = press["weights"]
     weeks = (int(day) - int(opened)) / WEEK
     heads = outside_heads(conn, org)
-    liked = [h for h in heads if leaders and max(outside_liking(conn, h, c) for c in leaders) > v(conn, press["outside_min"])]
+    base = v(conn, press["outside_base"])  # the neighbours' own interest in a settled house, whoever they like
     parts = {"weary": 1.0 - math.exp(-weeks / v(conn, typical)),
              "money": clamp01(float(spent) / v(conn, press["money_scale"])),
              "men": clamp01(men_lost(conn, org, opened) / v(conn, press["men_scale"])),
              "law": clamp01(law_heat(conn, org) / v(conn, press["heat_scale"])),
-             "outside": len(liked) / len(heads) if heads else 0.0,
+             "outside": (sum(clamp01(base + max(outside_liking(conn, h, c) for c in leaders)) for h in heads) / len(heads)) if heads and leaders else 0.0,
              "temper": 1.0 - (sum(drive(conn, c, "aggression") for c in leaders) / len(leaders) if leaders else 0.0)}
     den = sum(v(conn, w[k]) for k in parts)
     return sum(v(conn, w[k]) * x for k, x in parts.items()) / den
@@ -909,7 +909,7 @@ def _finish_contest(conn: sqlite3.Connection, row, meta: dict, winner: int | Non
         rv = lifecycle(conn, org).get("rivals")
         for rival in meta.get("stood", []):
             if int(rival) != int(winner) and rv and active_seat(conn, int(rival), org) is not None:
-                add_agenda(conn, int(winner), "rival", int(day) + int(v(conn, rv["delay_days"])), subject_kind="actor", subject_id=int(rival), metadata={"org": org, "rival": int(rival)})
+                add_agenda(conn, int(winner), "rival", int(day) + int(v(conn, rv["delay_days"])), subject_kind="actor", subject_id=int(rival), metadata={"org": org, "rival": int(rival), "how": outcome})
     close_row(conn, int(row["id"]), int(day), **{**meta, "outcome": outcome, "winner": winner, "closed": int(day), "weeks": (int(day) - int(meta["opened"])) // WEEK})
 
 

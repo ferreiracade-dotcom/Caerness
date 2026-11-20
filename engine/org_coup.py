@@ -41,6 +41,19 @@ def _pay(conn: sqlite3.Connection, src: int, dst: int, amount: float, flow: str 
     return ledger.transfer(conn, ("person", int(src)), ("person", int(dst)), amount, flow_kind=lk, purpose=purpose, allow_partial=True)
 
 
+def violence_bias(conn: sqlite3.Connection, org: int) -> float:
+    """An outfit's own lean toward violence (outfits data `violence_bias`, a number or a figure): canon makes some outfits quicker to
+    it than others. An outfit with no entry has none (an optional key, not a default)."""
+    key = conn.execute("SELECT package_key FROM org_profiles WHERE org_actor_id=?", (int(org),)).fetchone()[0]
+    spec = ((org_motives._sphere_data(conn).get("outfits") or {}).get(str(key).split("~")[0]) or {}).get("violence_bias")
+    return 0.0 if spec is None else v(conn, spec)
+
+
+def temper(conn: sqlite3.Connection, org: int, actor: int) -> float:
+    """A man's aggression with his outfit's lean toward violence added, 0..1."""
+    return clamp01(drive(conn, int(actor), "aggression") + violence_bias(conn, org))
+
+
 def _kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, sanctioned: bool = True) -> None:
     from .outfit_choices import kill
     if is_living(conn, victim):
@@ -341,13 +354,16 @@ def _take_over(conn, org, killer, late, loyal, day, blk, cblk) -> None:
         purse = clamp01(ledger.balance(conn, ("person", int(killer))) * v(conn, w.get("buy_share")) / max(1e-9, v(conn, w.get("buy_scale"))))
         opts = [("accept", v(conn, w.get("accept_base")) + v(conn, w.get("accept_trust")) * trust + v(conn, w.get("accept_fear")) * fear),
                 ("bought", v(conn, w.get("buy_base")) * purse * lean(conn, org, drive(conn, b, "greed", org))),
-                ("removed", v(conn, w.get("remove_base")) * drive(conn, killer, "aggression") * loyal_late * (1.0 - fear))]
+                ("removed", v(conn, w["remove_base"]) * temper(conn, org, killer) * loyal_late * (1.0 - fear)),
+                ("exile", v(conn, w["exile_base"]) + v(conn, w["exile_loyalty"]) * loyal_late * (1.0 - fear))]
         how = pick(conn, b, int(day), f"loyalist:{late}", opts, v(conn, w.get("temp")))
         if how == "bought":
             paid = _pay(conn, killer, b, ledger.balance(conn, ("person", int(killer))) * v(conn, w.get("buy_share")), w.get("flow"), "what he paid a loyalist")
             adjust_relationship(conn, b, killer, int(day), obligation_delta=v(conn, w.get("buy_obligation")))
         elif how == "removed":
             _kill(conn, killer, b, int(day), sanctioned=True)
+        elif how == "exile":
+            exile_man(conn, org, b, killer, int(day))
         else:
             adjust_relationship(conn, b, killer, int(day), fear_delta=v(conn, w.get("accept_fear_gain")), resentment_delta=v(conn, w.get("accept_resentment")))
         imposed(conn, b)
@@ -534,9 +550,12 @@ def _end_war(conn, row, meta, side, blk, how: str, winner: int, day: int) -> Non
                     adjust_relationship(conn, a, b, int(day), resentment_delta=-min(float(r["resentment"]), v(conn, blk.get("settle_thaw"))), trust_delta=v(conn, blk.get("settle_trust")))
         for a in losers:
             imposed(conn, a)
+        if ll != wl and active_seat(conn, ll, org) is not None:
+            add_agenda(conn, wl, "rival", int(day) + int(v(conn, orgs.kind_rules(conn, org)["lifecycle"]["rivals"]["delay_days"])), subject_kind="actor", subject_id=int(ll),
+                       metadata={"org": int(org), "rival": int(ll), "how": "settle"})
     else:
         install_head(conn, org, wl, int(day), "civil_war")
-        out["dealt"] = _deal_with_losers(conn, org, wl, losers, blk, int(day))
+        out["dealt"] = _deal_with_losers(conn, org, wl, losers, blk, int(day), leaders=(ll,))
     for a in side:
         imposed(conn, a)
     mark_for_history(conn, wl, f"won the war over the {name_of(conn, org)}" if how == "win" else f"ended the war over the {name_of(conn, org)} ({how})", int(day))
@@ -566,25 +585,30 @@ def demote_man(conn: sqlite3.Connection, org: int, man: int, by: int, day: int) 
     imposed(conn, int(by))
 
 
-def _deal_with_losers(conn, org, winner: int, losers: list[int], blk: dict, day: int) -> dict:
-    """Each made man on the losing side is killed (the winner's temper, the man's weight, his lack of fear), demoted (his lines and
-    command taken) or absorbed (he stays, afraid)."""
-    w = blk.get("losers") or {}
-    counts = {"killed": 0, "demoted": 0, "absorbed": 0}
+def _deal_with_losers(conn, org, winner: int, losers: list[int], blk: dict, day: int, leaders: tuple = ()) -> dict:
+    """What the winner does with each made man on the losing side. A side's leader and the unit leaders are weighed like any rival of
+    a head (`rival_weights` for a war: killed, exiled, sidelined or kept; the data makes killing common here). The rest are killed
+    (the winner's temper, the man's weight, his lack of fear), demoted, exiled or absorbed (he stays, afraid)."""
+    w = blk["losers"]
+    counts = {"killed": 0, "demoted": 0, "exiled": 0, "absorbed": 0}
     unit_role = kind_rules(conn, org).get("unit_leader")
-    back = (orgs.kind_rules(conn, org).get("lifecycle") or {}).get("returns_as")
     for a in losers:
         s = seat_of(conn, a, org)
         if s is None or s["status"] != "active" or s["inducted_day"] is None or not is_living(conn, a):
             continue
-        r = rel(conn, a, winner)
-        fear = 0.0 if r is None else clamp01(float(r["fear"]) / 100.0)
-        trust = 0.0 if r is None else clamp01((float(r["trust"]) + float(r["loyalty"])) / 200.0)
-        weight = 1.0 if s["role_key"] == unit_role else v(conn, w["standing_weight"]) * float(s["standing"])
-        opts = [("kill", v(conn, w.get("kill_base")) + v(conn, w.get("kill_aggression")) * drive(conn, winner, "aggression") * weight * (1.0 - fear)),
-                ("demote", v(conn, w.get("demote_base")) + v(conn, w.get("demote_weight")) * weight),
-                ("absorb", v(conn, w.get("absorb_base")) + v(conn, w.get("absorb_fear")) * fear + v(conn, w.get("absorb_trust")) * trust)]
-        how = pick(conn, a, int(day), "loser", opts, v(conn, w.get("temp")))
+        if int(a) in leaders or s["role_key"] == unit_role:
+            xs = rival_weights(conn, org, winner, a, "civil_war")
+            how = {"keep": "absorb", "sideline": "demote", "exile": "exile", "remove": "kill"}[pick(conn, a, int(day), "loser_leader", list(xs.items()), v(conn, orgs.kind_rules(conn, org)["lifecycle"]["rivals"]["temp"]))]
+        else:
+            r = rel(conn, a, winner)
+            fear = 0.0 if r is None else clamp01(float(r["fear"]) / 100.0)
+            trust = 0.0 if r is None else clamp01((float(r["trust"]) + float(r["loyalty"])) / 200.0)
+            weight = v(conn, w["standing_weight"]) * float(s["standing"])
+            opts = [("kill", v(conn, w["kill_base"]) + v(conn, w["kill_aggression"]) * temper(conn, org, winner) * weight * (1.0 - fear)),
+                    ("demote", v(conn, w["demote_base"]) + v(conn, w["demote_weight"]) * weight),
+                    ("exile", v(conn, w["exile_base"]) + v(conn, w["exile_weight"]) * weight * (1.0 - fear)),
+                    ("absorb", v(conn, w["absorb_base"]) + v(conn, w["absorb_fear"]) * fear + v(conn, w["absorb_trust"]) * trust)]
+            how = pick(conn, a, int(day), "loser", opts, v(conn, w["temp"]))
         if how == "kill":
             _kill(conn, winner, a, int(day), sanctioned=True)
             counts["killed"] += 1
@@ -592,11 +616,27 @@ def _deal_with_losers(conn, org, winner: int, losers: list[int], blk: dict, day:
             demote_man(conn, org, a, winner, int(day))
             adjust_relationship(conn, a, winner, int(day), resentment_delta=v(conn, w["demote_resentment"]))
             counts["demoted"] += 1
+        elif how == "exile":
+            exile_man(conn, org, a, winner, int(day))
+            counts["exiled"] += 1
         else:
-            adjust_relationship(conn, a, winner, int(day), fear_delta=v(conn, w.get("absorb_fear_gain")))
+            adjust_relationship(conn, a, winner, int(day), fear_delta=v(conn, w["absorb_fear_gain"]))
             counts["absorbed"] += 1
         imposed(conn, a)
     return counts
+
+
+def exile_man(conn: sqlite3.Connection, org: int, man: int, by: int, day: int) -> None:
+    """Sent away (to another city or territory), retired off, told never to come back: his lines pass to the man who decided, his seat
+    is out with the record kept (an `exiled` marker, so he is not a man who walked away) and he leaves the living organisation."""
+    d = orgs.kind_rules(conn, org)["lifecycle"]["rivals"]["exile"]
+    imposed(conn, int(man))
+    conn.execute("UPDATE org_lines SET holder_actor_id=? WHERE holder_actor_id=? AND status='active'", (int(by), int(man)))
+    put_row(conn, int(man), "exiled", int(day), int(org), {"org": int(org), "by": int(by)}, "org")
+    leave_life(conn, int(man), int(org), int(day))
+    adjust_relationship(conn, int(man), int(by), int(day), resentment_delta=v(conn, d["resentment_gain"]), fear_delta=v(conn, d["fear_gain"]))
+    mark_for_history(conn, int(man), f"was sent away from the {name_of(conn, org)}", int(day))
+    imposed(conn, int(by))
 
 
 # ---- a split: the losing side becomes a new organisation of the same kind ----
@@ -665,30 +705,48 @@ def split_org(conn: sqlite3.Connection, org: int, men: list[int], leader: int, d
 
 # ---- the new head and the men who stood against him ----
 
-def rival_offers(conn: sqlite3.Connection, head: int, item, day: int) -> list[dict]:
-    """The new head weighs what to do about a man who stood against him: keep him (trust, fear), sideline or demote him (his
-    resentment, his ambition, the men behind him), or, rarely, remove him (the head's temper against the rival's resentment and
-    his lack of fear). Weights are the data's (`rivals`)."""
-    meta = meta_of(item)
-    org, rv = int(meta["org"]), int(item["subject_id"])
-    d = (orgs.kind_rules(conn, org).get("lifecycle") or {})["rivals"]
-    payload = {"org": org, "rival": rv}
-    s = seat_of(conn, rv, org)
-    if s is None or s["status"] != "active" or not is_living(conn, rv):
-        return [{"kind": "rival_keep", "utility": _utility(conn, 1.0), "rationale": "The man is gone.", "payload": payload}]
+def rival_weights(conn: sqlite3.Connection, org: int, head: int, rv: int, how: str) -> dict[str, float]:
+    """The head's pull toward each answer to a man who stood against him: keep, sideline, exile, remove. Each answer starts from the
+    base the data gives for how the matter ended (`rivals.how[how]`: an agreed contest keeps its losers more often; a forced or bought
+    one, a killing, a coup or a war removes them more often) and adds the rival's trust and fear, his resentment and ambition, his
+    strength, and the head's own temper (his aggression and the outfit's lean toward violence). A missing outcome fails loudly."""
+    d = orgs.kind_rules(conn, org)["lifecycle"]["rivals"]
+    base = d["how"][how]
     r = rel(conn, rv, head)
     trust = 0.0 if r is None else clamp01((float(r["trust"]) + float(r["loyalty"])) / 200.0)
     fear = 0.0 if r is None else clamp01(float(r["fear"]) / 100.0)
     resent = 0.0 if r is None else clamp01(float(r["resentment"]) / 100.0)
     from .org_succession import _under
     strength = clamp01(len(_under(conn, org, rv)) / v(conn, d["strength_scale"]))
-    k, sd, rm = d["keep"], d["sideline"], d["remove"]
-    xs = {"rival_keep": v(conn, k["base"]) + v(conn, k["trust"]) * trust + v(conn, k["fear"]) * fear + v(conn, k["strength"]) * strength,
-          "rival_sideline": v(conn, sd["base"]) + v(conn, sd["resentment"]) * resent + v(conn, sd["ambition"]) * drive(conn, rv, "ambition") * (1.0 - fear),
-          "rival_remove": v(conn, rm["base"]) + v(conn, rm["aggression"]) * drive(conn, head, "aggression") * resent * (1.0 - fear) * (1.0 - v(conn, rm["strength"]) * strength)}
-    why = {"rival_keep": f"Keeps {name_of(conn, rv)}, who stood against him.", "rival_sideline": f"Sidelines {name_of(conn, rv)}, who stood against him.",
-           "rival_remove": f"Has {name_of(conn, rv)} removed, for standing against him."}
-    return [{"kind": k2, "utility": _utility(conn, x), "rationale": why[k2], "payload": payload, **({"target_actor_id": rv, "risk": 0.8} if k2 == "rival_remove" else {})} for k2, x in xs.items()]
+    k, sd, ex, rm = d["keep"], d["sideline"], d["exile"], d["remove"]
+    return {"keep": v(conn, base["keep"]) + v(conn, k["trust"]) * trust + v(conn, k["fear"]) * fear + v(conn, k["strength"]) * strength,
+            "sideline": v(conn, base["sideline"]) + v(conn, sd["resentment"]) * resent + v(conn, sd["ambition"]) * drive(conn, rv, "ambition") * (1.0 - fear),
+            "exile": v(conn, base["exile"]) + v(conn, ex["resentment"]) * resent + v(conn, ex["strength"]) * strength + v(conn, ex["caution"]) * (1.0 - temper(conn, org, head)),
+            "remove": v(conn, base["remove"]) + v(conn, rm["aggression"]) * temper(conn, org, head) * resent * (1.0 - fear) * (1.0 - v(conn, rm["strength"]) * strength)}
+
+
+def rival_offers(conn: sqlite3.Connection, head: int, item, day: int) -> list[dict]:
+    """The new head weighs what to do about a man who stood against him (`rival_weights`), by how the matter ended."""
+    meta = meta_of(item)
+    org, rv = int(meta["org"]), int(item["subject_id"])
+    payload = {"org": org, "rival": rv}
+    s = seat_of(conn, rv, org)
+    if s is None or s["status"] != "active" or not is_living(conn, rv):
+        return [{"kind": "rival_keep", "utility": _utility(conn, 1.0), "rationale": "The man is gone.", "payload": payload}]
+    xs = rival_weights(conn, org, head, rv, meta["how"])
+    why = {"keep": f"Keeps {name_of(conn, rv)}, who stood against him.", "sideline": f"Sidelines {name_of(conn, rv)}, who stood against him.",
+           "exile": f"Sends {name_of(conn, rv)} away, for standing against him.", "remove": f"Has {name_of(conn, rv)} removed, for standing against him."}
+    return [{"kind": "rival_" + k2, "utility": _utility(conn, x), "rationale": why[k2], "payload": payload, **({"target_actor_id": rv, "risk": 0.8} if k2 == "remove" else {})} for k2, x in xs.items()]
+
+
+def execute_rival_exile(conn, actor_id, kind, payload, day):
+    _finish(conn, payload, day)
+    org, rv = int(payload["org"]), int(payload["rival"])
+    s = seat_of(conn, rv, org)
+    if s is None or s["status"] != "active":
+        return {"summary": "There was no one to send away.", "blocked": True}
+    exile_man(conn, org, rv, int(actor_id), int(day))
+    return {"summary": f"{name_of(conn, actor_id)} sent {name_of(conn, rv)} away."}
 
 
 def execute_rival_keep(conn, actor_id, kind, payload, day):
@@ -743,6 +801,6 @@ def weekly(conn: sqlite3.Connection, day: int) -> dict:
 for _kind, _fn in (("plot_kill", execute_plot_kill), ("plot_exile", execute_plot_exile), ("plot_pardon", execute_plot_pardon)):
     register_executor(_kind, _fn)
 register_agenda_action("plot_found", plot_found_offers)
-for _kind, _fn in (("rival_keep", execute_rival_keep), ("rival_sideline", execute_rival_sideline), ("rival_remove", execute_rival_remove)):
+for _kind, _fn in (("rival_keep", execute_rival_keep), ("rival_sideline", execute_rival_sideline), ("rival_exile", execute_rival_exile), ("rival_remove", execute_rival_remove)):
     register_executor(_kind, _fn)
 register_agenda_action("rival", rival_offers)

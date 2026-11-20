@@ -621,7 +621,7 @@ def test_a_post_below_the_head_is_the_heads_choice_not_a_formula():
 
 
 def test_the_new_head_weighs_what_to_do_about_the_men_who_stood_against_him():
-    from engine import orgs, org_coup, org_succession as su
+    from engine import orgs, org_coup
     w = open_world()
     k = cast(w)
     c = k.conn
@@ -634,22 +634,65 @@ def test_the_new_head_weighs_what_to_do_about_the_men_who_stood_against_him():
     items = [r for r in _rows(c, "rival", "open") if r["actor_id"] == winner]
     stood = [x for x in m["stood"] if x != winner]
     assert stood and {int(r["subject_id"]) for r in items} == set(stood)
+    assert all(_meta(r)["how"] == m["outcome"] for r in items)  # the item carries how the matter ended
     item = items[0]
     rv = int(item["subject_id"])
     rel(c, rv, winner, resentment=95, fear=0, trust=-50, loyalty=-50)
     drives(c, rv, ambition=0.95)
     offers = {o["kind"]: o for o in org_coup.rival_offers(c, winner, item, k.day + 10)}
-    assert set(offers) == {"rival_keep", "rival_sideline", "rival_remove"}
-    assert offers["rival_sideline"]["utility"] > offers["rival_keep"]["utility"] > offers["rival_remove"]["utility"]  # removal is the rarest answer
+    assert set(offers) == {"rival_keep", "rival_sideline", "rival_exile", "rival_remove"}
+    # the same bitter rival is weighed differently by how it ended: an agreed contest keeps him, a civil war removes him
+    def by(how):
+        return org_coup.rival_weights(c, k.org, winner, rv, how)
+    agreed, war = by("agreed"), by("civil_war")
+    assert max(agreed, key=agreed.get) in ("keep", "sideline"), agreed
+    assert max(war, key=war.get) == "remove", war  # losing leaders of a war are usually killed
+    assert war["remove"] > agreed["remove"] and war["keep"] < agreed["keep"]
+    for how in ("agreed", "forced", "bought", "killing", "settle", "civil_war"):
+        assert set(by(how)) == {"keep", "sideline", "exile", "remove"}
+    # an outcome the data does not give fails loudly
+    try:
+        by("no_such_ending")
+    except KeyError:
+        pass
+    else:
+        raise AssertionError("an unknown ending must fail loudly")
     before = orgs.seat_of(c, rv, k.org)["role_key"]
     org_coup.execute_rival_sideline(c, winner, "rival_sideline", {"org": k.org, "rival": rv, "agenda_id": item["id"]}, k.day + 10)
     after = orgs.seat_of(c, rv, k.org)
     assert after["role_key"] != before and after["superior_actor_id"] == winner and float(after["standing"]) == 0.0
     other = [r for r in items if int(r["subject_id"]) != rv]
-    if other:
-        r2 = int(other[0]["subject_id"])
+    if len(other) >= 2:
+        r2, r3 = int(other[0]["subject_id"]), int(other[1]["subject_id"])
         org_coup.execute_rival_remove(c, winner, "rival_remove", {"org": k.org, "rival": r2, "agenda_id": other[0]["id"]}, k.day + 10)
         assert not orgs.is_living(c, r2)
+        org_coup.execute_rival_exile(c, winner, "rival_exile", {"org": k.org, "rival": r3, "agenda_id": other[1]["id"]}, k.day + 10)
+        seat = orgs.seat_of(c, r3, k.org)
+        assert seat["status"] == "out" and orgs.is_living(c, r3)  # sent away: out of the organisation, alive, the record kept
+        assert c.execute("SELECT 1 FROM org_agenda WHERE kind='exiled' AND actor_id=?", (r3,)).fetchone()
+        org_lifecycle_pass = __import__("engine.org_lifecycle", fromlist=["process_due"]).process_due
+        org_lifecycle_pass(c, k.day + 14)
+        assert not [r for r in _rows(c, "discipline", "open") if r["subject_id"] == r3]  # not a man who walked away
+
+
+def test_the_losing_leaders_of_a_civil_war_are_usually_killed_and_others_sent_away_or_absorbed():
+    from engine import orgs, org_coup
+    w = open_world()
+    k = cast(w)
+    c = k.conn
+    _slay(c, k.boss)
+    row, a, b = _war(k, size_a=999)
+    meta = _meta(row)
+    side = org_coup._factions(c, k.org, meta)
+    losers = [x for x, i in side.items() if i == 1]
+    blk = org_coup.block(c, k.org, "civil_war")
+    with rolls(_quiet):  # the last answer in the data's order is the heaviest draw: removal for a leader
+        counts = org_coup._deal_with_losers(c, k.org, a, losers, blk, k.day, leaders=(b,))
+    assert set(counts) == {"killed", "demoted", "exiled", "absorbed"} and counts["killed"] >= 1
+    assert not orgs.is_living(c, b)
+    # the weights themselves: a leader of the losing side is far likelier killed than kept, a rank-and-file man the reverse
+    xs = org_coup.rival_weights(c, k.org, a, k.capos[0], "civil_war")
+    assert xs["remove"] > xs["keep"]
 
 
 # ---- the held head, the generic fixture, the data ----
@@ -688,7 +731,7 @@ def _generic_firm():
     f = fx.build()
     conn = f.conn
     rules = orgs.kind_rules(conn, f.firm)
-    press = {"weights": {"weary": 1, "money": 0, "men": 0, "law": 0, "outside": 0, "temper": 0}, "outside_min": 0.2, "money_scale": 1000, "men_scale": 3, "heat_scale": 3}
+    press = {"weights": {"weary": 1, "money": 0, "men": 0, "law": 0, "outside": 0, "temper": 0}, "outside_base": 0.3, "money_scale": 1000, "men_scale": 3, "heat_scale": 3}
     rules["lifecycle"] = {**rules["lifecycle"], "trait_floor": 0.5, "civil_war": {"tension_bitter": 0.5}, "contest": {
         "muscle_crew": 0.5, "muscle_scale": 4,
         "customary": {"manager": 1.0}, "backer_roles": [], "stand_week": 1.0, "acting_standing": 0.5, "crew_weight": 0, "crew_scale": 1, "stick": 0.0, "pick_temp": 0.1,

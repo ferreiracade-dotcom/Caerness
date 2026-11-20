@@ -40,6 +40,7 @@
   },
   "vannucci": {
    "institution": "Vannucci Family",
+   "violence_bias": "violence_bias_vannucci",
    "shape": "family",
    "members_figure": "made_men_vannucci",
    "dependents_figure": "associates_per_man_vannucci",

@@ -1,6 +1,376 @@
 {
  "about": "Design and derived figures the engine draws once per run (kind draw), derives (kind derived, formula over other figure defaults) or holds (kind fixed), from Saint Jude Setting Bible Part VI and the Parts it cites. Dollars are 1975 dollars; *_m keys are USD millions. pools is the Part VI 9.3A allocation table (family shares sum to 100). Checked by tools/check_saintjude_pools.py.",
  "figures": {
+ "rival_agreed_keep": {
+    "default": 0.45,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to keep him on a man who stood against him, after an agreed contest. Historical anchor: after the agreed succession in the Gambino family in 1976 the new boss kept the rival Dellacroce as underboss; keeping the losers of an agreed contest is common, sidelining the next most common. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_agreed_sideline": {
+    "default": 0.40,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to sideline or demote him (lines taken, command lost) a man who stood against him, after an agreed contest. Historical anchor: after the agreed succession in the Gambino family in 1976 the new boss kept the rival Dellacroce as underboss; keeping the losers of an agreed contest is common, sidelining the next most common. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_agreed_exile": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to send him away (another city or territory, retired off, told never to come back) a man who stood against him, after an agreed contest. Historical anchor: after the agreed succession in the Gambino family in 1976 the new boss kept the rival Dellacroce as underboss; keeping the losers of an agreed contest is common, sidelining the next most common. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_agreed_remove": {
+    "default": 0.02,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to have him killed a man who stood against him, after an agreed contest. Historical anchor: after the agreed succession in the Gambino family in 1976 the new boss kept the rival Dellacroce as underboss; keeping the losers of an agreed contest is common, sidelining the next most common. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_forced_keep": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to keep him on a man who stood against him, after a contest won by leaning on the backers. Forcing or buying the backers leaves bitterness the winner cannot ignore: keeping, sidelining and exile are all common, killing is real. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_forced_sideline": {
+    "default": 0.35,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to sideline or demote him (lines taken, command lost) a man who stood against him, after a contest won by leaning on the backers. Forcing or buying the backers leaves bitterness the winner cannot ignore: keeping, sidelining and exile are all common, killing is real. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_forced_exile": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to send him away (another city or territory, retired off, told never to come back) a man who stood against him, after a contest won by leaning on the backers. Forcing or buying the backers leaves bitterness the winner cannot ignore: keeping, sidelining and exile are all common, killing is real. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_forced_remove": {
+    "default": 0.25,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to have him killed a man who stood against him, after a contest won by leaning on the backers. Forcing or buying the backers leaves bitterness the winner cannot ignore: keeping, sidelining and exile are all common, killing is real. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_bought_keep": {
+    "default": 0.32,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to keep him on a man who stood against him, after a contest won by paying the backers. Forcing or buying the backers leaves bitterness the winner cannot ignore: keeping, sidelining and exile are all common, killing is real. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_bought_sideline": {
+    "default": 0.35,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to sideline or demote him (lines taken, command lost) a man who stood against him, after a contest won by paying the backers. Forcing or buying the backers leaves bitterness the winner cannot ignore: keeping, sidelining and exile are all common, killing is real. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_bought_exile": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to send him away (another city or territory, retired off, told never to come back) a man who stood against him, after a contest won by paying the backers. Forcing or buying the backers leaves bitterness the winner cannot ignore: keeping, sidelining and exile are all common, killing is real. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_bought_remove": {
+    "default": 0.22,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to have him killed a man who stood against him, after a contest won by paying the backers. Forcing or buying the backers leaves bitterness the winner cannot ignore: keeping, sidelining and exile are all common, killing is real. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_killing_keep": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to keep him on a man who stood against him, after a contest in which a candidate had a rival killed, or one that followed a plot. A contest with a killing in it (or after a plot) has shown what these men will do: sidelining, exile and killing are all common. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_killing_sideline": {
+    "default": 0.30,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to sideline or demote him (lines taken, command lost) a man who stood against him, after a contest in which a candidate had a rival killed, or one that followed a plot. A contest with a killing in it (or after a plot) has shown what these men will do: sidelining, exile and killing are all common. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_killing_exile": {
+    "default": 0.20,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to send him away (another city or territory, retired off, told never to come back) a man who stood against him, after a contest in which a candidate had a rival killed, or one that followed a plot. A contest with a killing in it (or after a plot) has shown what these men will do: sidelining, exile and killing are all common. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_killing_remove": {
+    "default": 0.40,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to have him killed a man who stood against him, after a contest in which a candidate had a rival killed, or one that followed a plot. A contest with a killing in it (or after a plot) has shown what these men will do: sidelining, exile and killing are all common. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_settle_keep": {
+    "default": 0.45,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to keep him on a man who stood against him, after a civil war ended by a settlement. A settlement brokered by the other families usually spares the loser's leader, who is watched and sidelined. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_settle_sideline": {
+    "default": 0.35,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to sideline or demote him (lines taken, command lost) a man who stood against him, after a civil war ended by a settlement. A settlement brokered by the other families usually spares the loser's leader, who is watched and sidelined. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_settle_exile": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to send him away (another city or territory, retired off, told never to come back) a man who stood against him, after a civil war ended by a settlement. A settlement brokered by the other families usually spares the loser's leader, who is watched and sidelined. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_settle_remove": {
+    "default": 0.05,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to have him killed a man who stood against him, after a civil war ended by a settlement. A settlement brokered by the other families usually spares the loser's leader, who is watched and sidelined. Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_civil_war_keep": {
+    "default": 0.08,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to keep him on a man who stood against him, after the leaders of the losing side of a civil war. After a civil war or a coup the losing leaders were usually killed (the Castellammarese War, Maranzano himself afterwards, Castellano and Bilotti in 1985); the data makes killing the commonest answer here, with exile the next. Saint Jude is more violent than the historical average (the owner's word: hectic). Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_civil_war_sideline": {
+    "default": 0.12,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to sideline or demote him (lines taken, command lost) a man who stood against him, after the leaders of the losing side of a civil war. After a civil war or a coup the losing leaders were usually killed (the Castellammarese War, Maranzano himself afterwards, Castellano and Bilotti in 1985); the data makes killing the commonest answer here, with exile the next. Saint Jude is more violent than the historical average (the owner's word: hectic). Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_civil_war_exile": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to send him away (another city or territory, retired off, told never to come back) a man who stood against him, after the leaders of the losing side of a civil war. After a civil war or a coup the losing leaders were usually killed (the Castellammarese War, Maranzano himself afterwards, Castellano and Bilotti in 1985); the data makes killing the commonest answer here, with exile the next. Saint Jude is more violent than the historical average (the owner's word: hectic). Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_civil_war_remove": {
+    "default": 0.55,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Base weight of the new head choosing to have him killed a man who stood against him, after the leaders of the losing side of a civil war. After a civil war or a coup the losing leaders were usually killed (the Castellammarese War, Maranzano himself afterwards, Castellano and Bilotti in 1985); the data makes killing the commonest answer here, with exile the next. Saint Jude is more violent than the historical average (the owner's word: hectic). Relative to the other answers, plus the terms of rival_weights. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_exile_resentment": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Exile (sending a rival away) is likelier the more he resents the head: a bitter man is better out of the city than kept. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_exile_strength": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Exile is likelier the stronger the rival (the men behind him make killing him costly): sent away rather than killed. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_exile_caution": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Exile is likelier the cooler the head (1 - his aggression and his outfit's lean toward violence): canon has a boss who loves the offender exile him instead. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_exile_resentment_gain": {
+    "default": 12.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; An exiled man resents the man who sent him this much more. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_exile_fear_gain": {
+    "default": 6.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and fears him this much more. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "rival_temp": {
+    "default": 0.1,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply a head follows these weights when he deals with the losers of a war at once (the usual softmax, on the weight scale). (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "war_loser_exile_base": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A made man of the losing side who led nothing is sent away: the floor weight (rank-and-file losers are more often absorbed, sometimes demoted or sent off). (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "war_loser_exile_weight": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus this x the man's weight x (1 - his fear of the winner). (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "coup_exile_base": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A loyalist of the dead head is sent away by the man who killed him: the floor weight. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "coup_exile_loyalty": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus this x his loyalty to the dead head x (1 - his fear of the killer): a loyalist who is too loyal to keep and too useful to kill. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "press_outside_base": {
+    "default": 0.3,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Each other outfit's head presses for a quick end to a succession fight or war with at least this weight whoever he likes (a neighbour's war is bad for business and brings the police), plus his liking for a front-runner, up to 1. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "war_press_w_outside": {
+    "default": 0.35,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; In a civil war the other outfits' heads weigh in toward a settlement more heavily than in a contest: settlements were usually brokered by the other families (a commission or a sit-down). (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
+ "violence_bias_vannucci": {
+    "default": 0.15,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The Vannucci outfit's lean toward violence, added to its men's aggression where the engine weighs a killing of a rival or a loser: canon calls the family 'quicker to violence than to talk'. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
+ },
  "press_w_weary": {
     "default": 0.35,
     "range": null,
@@ -60,16 +430,6 @@
     "mark": "Design proposal",
     "source": "unsourced",
     "note": "unsourced; Weight of the leaders' even tempers (1 - their mean aggression) in the pressure to end the matter: hot men go on. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
- },
- "press_outside_min": {
-    "default": 0.2,
-    "range": null,
-    "unit": "score",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; An outside head counts as pressing for a front-runner when his liking (trust and respect less resentment, 0 to 1) reaches this. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
  "press_money_scale": {
     "default": 20000.0,
@@ -392,24 +752,24 @@
     "note": "unsourced; ...and the men who fear him: weight of their fear. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_typical_weeks": {
-    "default": 52.0,
+    "default": 78,
     "range": null,
     "unit": "weeks",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; The typical length of a civil war: shapes the weariness curve and ends nothing. Mob wars lasted years; most of ours are over within one. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The typical length of a civil war in weeks: shapes the weariness curve and ends nothing. Real mob wars ran about one to five years (Castellammarese about 1.5, the Banana War about 5, the Colombo wars 1 to 2). (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
  },
  "war_early_weeks": {
-    "default": 4,
+    "default": 8,
     "range": null,
     "unit": "weeks",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; Time scale of a young war: the early factor for a win, settlement or split is floor + (1 - floor)(1 - exp(-weeks / this)). Replaces the two-week minimum. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; Time scale of a young war: the early factor for a win, settlement or split is floor + (1 - floor)(1 - exp(-weeks / this)). A war does not end in its first weeks. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
  },
  "war_early_floor": {
     "default": 0.1,
@@ -422,14 +782,14 @@
     "note": "unsourced; The early factor on the first day of a war. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_win_week": {
-    "default": 0.05,
+    "default": 0.01,
     "range": null,
     "unit": "per week",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; The most a war's weekly chance of a win can be, reached when one side holds war_win_share of the strength. A side with no leader left has lost outright. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The most a war's weekly chance of an outright win can be (reached when one side holds war_win_share of the strength): a side wins slowly, by attrition; a side with no leader left has lost outright. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
  },
  "war_win_share": {
     "default": 0.8,
@@ -521,16 +881,6 @@
     "source": "unsourced",
     "note": "unsourced; The men under a rival at which he counts as fully strong when the new head weighs what to do about him. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
- "rival_keep_base": {
-    "default": 0.4,
-    "range": null,
-    "unit": "weight",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; The new head keeps a man who stood against him: base weight (the commonest answer: he needs his men). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
- },
  "rival_keep_trust": {
     "default": 0.3,
     "range": null,
@@ -581,18 +931,8 @@
     "source": "unsourced",
     "note": "unsourced; ...and trusts him this much more. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
- "rival_sideline_base": {
-    "default": 0.15,
-    "range": null,
-    "unit": "weight",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; The new head sidelines a rival (lines taken, command lost, the returning role): base weight. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
- },
  "rival_sideline_resentment": {
-    "default": 0.5,
+    "default": 0.25,
     "range": null,
     "unit": "weight",
     "tag": "Design",
@@ -602,7 +942,7 @@
     "note": "unsourced; ...plus the rival's resentment of the head. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
  "rival_sideline_ambition": {
-    "default": 0.3,
+    "default": 0.15,
     "range": null,
     "unit": "weight",
     "tag": "Design",
@@ -621,18 +961,8 @@
     "source": "unsourced",
     "note": "unsourced; A sidelined rival resents the head this much more. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
- "rival_remove_base": {
-    "default": 0.0,
-    "range": null,
-    "unit": "weight",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; The new head has a rival removed (killed): base weight (none: removing a made man is a cost to be earned). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
- },
  "rival_remove_aggression": {
-    "default": 0.5,
+    "default": 0.8,
     "range": null,
     "unit": "weight",
     "tag": "Design",
@@ -1212,14 +1542,14 @@
     "note": "unsourced; How sharply a backer follows his weights. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "contest_war_week": {
-    "default": 0.15,
+    "default": 0.04,
     "range": null,
     "unit": "per week",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; The most a contest's weekly chance of civil war can be: at full tension between the two leading claimants, a runner-up at contest_war_ref_share and a contest that is no longer young. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The most a contest's weekly chance of civil war can be (at full tension, a runner-up at contest_war_ref_share, a contest no longer young): a war after a succession dispute is the exception. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
  },
  "contest_kill_week": {
     "default": 0.01,
@@ -1842,14 +2172,14 @@
     "note": "unsourced; One side holding this share of the strength wins (or the other side has no leader). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_kill_week": {
-    "default": 0.15,
+    "default": 0.05,
     "range": null,
     "unit": "per week",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; Weekly chance at full intensity that one side kills a man of the other. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The most a war's weekly chance of a killing can be (at full intensity): wars are mostly lulls, hiding and sporadic hits, not a weekly bloodbath; the Castellammarese War ran about a year and a half, the Banana War about five, with a few dozen deaths in all. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
  },
  "war_start_intensity": {
     "default": 0.3,
@@ -1972,24 +2302,24 @@
     "note": "unsourced; What a side's leader pays each week per man on his side (paying a war). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_settle_week": {
-    "default": 0.2,
+    "default": 0.06,
     "range": null,
     "unit": "per week",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; The most a war's weekly chance of a settlement can be: x the early factor x the pressure to end it x how even the sides are x (1 - the leaders' average aggression). Nothing forces a settlement. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The most a war's weekly chance of a settlement can be: x the early factor x the pressure to end it (weariness, money, men lost, law heat, and the other families' heads pressing) x how even the sides are x (1 - the leaders' average aggression). Settlements were often brokered by the other families. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
  },
  "war_split_week": {
-    "default": 0.1,
+    "default": 0.02,
     "range": null,
     "unit": "per week",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; The most a war's weekly chance of a split can be: x the early factor x the weaker leader's ambition x (floor + the bitterness between the leaders) x the weaker side's share and made men against war_split_ref_share and war_split_ref_men. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The most a war's weekly chance of a split can be: a family splitting into two lasting outfits is rare, most wars end in a win or a settlement. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
  },
  "war_settle_thaw": {
     "default": 25.0,
@@ -2022,7 +2352,7 @@
     "note": "unsourced; Each man's resentment of the other side's leader at the start. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_kill_base": {
-    "default": 0.0,
+    "default": 0.03,
     "range": null,
     "unit": "weight",
     "tag": "Design",
@@ -2042,7 +2372,7 @@
     "note": "unsourced; A made man on the losing side of a civil war is killed: the weight added per unit of the winner's aggression x the man's weight (unit leaders 1, others half his standing) x (1 - his fear of the winner). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_demote_base": {
-    "default": 0.25,
+    "default": 0.10,
     "range": null,
     "unit": "weight",
     "tag": "Design",
@@ -2062,7 +2392,7 @@
     "note": "unsourced; A made man on the losing side is demoted (lines and command taken): the weight added per unit of the man's weight (a unit leader is worth taking down). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_loser_absorb_base": {
-    "default": 0.25,
+    "default": 0.30,
     "range": null,
     "unit": "weight",
     "tag": "Design",
