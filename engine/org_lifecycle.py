@@ -116,6 +116,7 @@ _VACANCY: list = []  # (org kind or None, fn(conn, org_actor_id, seat_row, day, 
 _UNIT_VACANCY: list = []
 _HEAD_VACANCY: list = []
 _RETURNS: list = []
+_POST_VACANCY: list = []
 _WEEKLY: list = []  # (None, fn(conn, day) -> dict), run after the lifecycle's own steps
 
 
@@ -144,6 +145,12 @@ def on_head_vacancy(fn) -> None:
     """Register fn(conn, org_actor_id, seat_row, day, why) -> bool for a vacated head seat. True: it took the matter up (a
     contest) and the data's succession ladder does not run."""
     _register(_HEAD_VACANCY, None, fn)
+
+
+def on_post_vacancy(fn) -> None:
+    """Register fn(conn, org_actor_id, role, day) -> bool for a vacant post the kind's data gives a succession: True when it took
+    the matter up (the head chooses) and the formula does not run."""
+    _register(_POST_VACANCY, None, fn)
 
 
 def on_return(fn) -> None:
@@ -237,9 +244,20 @@ def _best(conn: sqlite3.Connection, rows, head: int | None, day: int):
     return max(rows, key=lambda r: (float(r["standing"]) + years(r) / top + _head_loyalty(conn, int(r["actor_id"]), head), -int(r["actor_id"])))
 
 
-def _promote(conn: sqlite3.Connection, org: int, role: str, day: int, depth: int = 0) -> int | None:
-    """Fill a vacant post from the roles the kind's `succession` names for it: the best man of the first role that has
-    one takes it (his own unit first gets a new leader), and the post he leaves is filled the same way."""
+def fill_post(conn: sqlite3.Connection, org: int, role: str, day: int, depth: int = 0) -> int | None:
+    """A post the kind's `succession` names fell vacant: a registered hook may put the choice on the head's list (returns None
+    for now); otherwise the data's formula (`_promote`) fills it at once."""
+    if conn.execute("SELECT 1 FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active' LIMIT 1", (int(org), role)).fetchone():
+        return None
+    if any(fn(conn, int(org), role, int(day)) for _k, fn in list(_POST_VACANCY)):
+        return None
+    return _promote(conn, org, role, day, depth)
+
+
+def _promote(conn: sqlite3.Connection, org: int, role: str, day: int, depth: int = 0, chosen: int | None = None) -> int | None:
+    """Fill a vacant post from the roles the kind's `succession` names for it: the man the head chose (`chosen`, one of those
+    roles) or else the best man of the first role that has one takes it (his own unit first gets a new leader), and the post he
+    leaves is filled the same way."""
     prefs = (_lc(conn, org).get("succession") or {}).get(role)
     if not prefs or depth > 4:
         return None
@@ -249,6 +267,12 @@ def _promote(conn: sqlite3.Connection, org: int, role: str, day: int, depth: int
     pick = None
     for pref in prefs:
         pool = [r for r in orgs.members(conn, org, pref) if orgs.is_living(conn, int(r["actor_id"]))]
+        named = [r for r in pool if chosen is not None and int(r["actor_id"]) == int(chosen)]
+        if named:
+            pick = named[0]
+            break
+    for pref in prefs if pick is None else ():
+        pool = [r for r in orgs.members(conn, org, pref) if orgs.is_living(conn, int(r["actor_id"]))]
         if pool:
             pick = _best(conn, pool, head, day)
             break
@@ -257,8 +281,9 @@ def _promote(conn: sqlite3.Connection, org: int, role: str, day: int, depth: int
     new, left_role = int(pick["actor_id"]), pick["role_key"]
     rules = orgs.kind_rules(conn, org)
     if left_role == rules.get("unit_leader") and pick["unit_id"]:
-        fill_unit_leader(conn, int(pick["unit_id"]), int(day), force=True)
-        conn.execute("UPDATE org_units SET leader_actor_id=NULL WHERE id=? AND leader_actor_id=?", (int(pick["unit_id"]), new))
+        if not any(fn(conn, org, pick, int(day), "promoted") for _k, fn in list(_UNIT_VACANCY)):  # the head names the new leader, else the formula does
+            fill_unit_leader(conn, int(pick["unit_id"]), int(day), force=True)
+            conn.execute("UPDATE org_units SET leader_actor_id=NULL WHERE id=? AND leader_actor_id=?", (int(pick["unit_id"]), new))
     is_head = role == rules.get("head")
     conn.execute("UPDATE org_seats SET role_key=?, unit_id=NULL, superior_actor_id=? WHERE id=?",
                  (role, None if is_head or head is None or head == new else head, int(pick["id"])))
@@ -268,7 +293,7 @@ def _promote(conn: sqlite3.Connection, org: int, role: str, day: int, depth: int
         orgs.set_level(conn, new, lv, int(day), org)
     orgs.imposed(conn, new)
     mark_for_history(conn, new, f"rose to {_label(conn, org, role)}", int(day))
-    _promote(conn, org, left_role, int(day), depth + 1)
+    fill_post(conn, org, left_role, int(day), depth + 1)
     return new
 
 
@@ -287,7 +312,7 @@ def _vacate(conn: sqlite3.Connection, seat, why: str, day: int) -> None:
     elif seat["role_key"] == rules.get("head") and any(fn(conn, org, seat, int(day), why) for _k, fn in list(_HEAD_VACANCY)):
         successor = None  # a contest (or a coup) decides it, over weeks
     elif seat["role_key"] in (_lc(conn, org).get("succession") or {}):
-        successor = _promote(conn, org, seat["role_key"], int(day))
+        successor = fill_post(conn, org, seat["role_key"], int(day))
     target = successor if successor is not None else _live_superior(conn, org, seat)
     if target is not None:
         conn.execute("UPDATE org_seats SET superior_actor_id=? WHERE org_actor_id=? AND superior_actor_id=? AND status='active' AND actor_id<>?",

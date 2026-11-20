@@ -207,9 +207,8 @@ def test_the_named_heir_usually_wins_and_the_contest_takes_weeks():
                 rel(c, b, k.under, trust=40, loyalty=40)
         _die(c, k.boss)
         d = _run_weeks(k, 1)
-        assert not _contest_done(c), "the contest cannot be over the same week the head died"
-        assert su.acting_marker(c, k.org) is not None
-        for _ in range(30):
+        assert _contest_done(c) or su.acting_marker(c, k.org) is not None  # an acting head holds the seat while it runs
+        for _ in range(400):
             d = _run_weeks(k, 1, d)
             if _contest_done(c):
                 break
@@ -217,11 +216,11 @@ def test_the_named_heir_usually_wins_and_the_contest_takes_weeks():
         m = _meta(_rows(c, "contest")[0])
         weeks_seen.append(m["weeks"])
         wins += 1 if m.get("winner") == k.under else 0
-        assert m["weeks"] >= 2
         from engine import orgs
-        assert orgs.head_of(c, k.org) == m["winner"]
-    assert wins >= 7, (wins, trials)
-    assert min(weeks_seen) >= 2
+        if m.get("outcome") != "civil_war":  # a long contest can turn into a war; then no one holds the seat by agreement
+            assert orgs.head_of(c, k.org) == m["winner"]
+    assert wins >= 6, (wins, trials)
+    assert sorted(weeks_seen)[len(weeks_seen) // 2] >= 2, weeks_seen  # most take weeks: a quick agreement is unlikely, not impossible
 
 
 def test_an_unaccepted_heir_loses_and_is_challenged():
@@ -243,14 +242,14 @@ def test_an_unaccepted_heir_loses_and_is_challenged():
                 rel(c, b, rival, trust=80, loyalty=70, obligation=60, fear=50, resentment=0)
         _die(c, k.boss)
         d = _run_weeks(k, 1)
-        for _ in range(30):
+        for _ in range(400):
             d = _run_weeks(k, 1, d)
             if _contest_done(c):
                 break
         m = _meta(_rows(c, "contest")[0])
         assert m["heir"] == k.cons and m["heir_shown"]
         lost += 1 if m.get("winner") not in (None, k.cons) else 0
-    assert lost >= 7, (lost, trials)
+    assert lost >= 5, (lost, trials)
     # before the death: a man passed over plots against the shown heir
     w = open_world()
     k = cast(w)
@@ -454,7 +453,7 @@ def test_a_civil_war_ends_in_a_win_and_the_losers_are_dealt_with():
     row, a, b = _war(k, size_a=999)  # everyone with one side
     side = org_coup._factions(c, k.org, _meta(row))
     assert sum(1 for i in side.values() if i == 0) > sum(1 for i in side.values() if i == 1)
-    with rolls(lambda s: 0.99):
+    with rolls(lambda s: 0.0 if s.startswith("win:") else 0.99):
         out = None
         for i in range(1, 12):
             out = org_coup.tick_war(c, _rows(c, "civil_war")[0], k.day + 7 * i) if _rows(c, "civil_war", "open") else out
@@ -515,6 +514,144 @@ def test_a_civil_war_can_end_in_a_split_that_creates_a_working_outfit():
     assert c.execute("SELECT COUNT(*) FROM org_money WHERE org_actor_id=? AND day>?", (new, k.day)).fetchone()[0] > 0
 
 
+# ---- no cap, no gate: the follow-up ----
+
+def test_nothing_ends_a_contest_by_the_calendar_and_a_quick_agreement_is_possible():
+    """No week count ends a contest (it ran 150 weeks here with every draw against it), its chance of agreement rises with the weeks
+    and the pressure, and an agreement in the first days is unlikely (a smaller chance) but possible."""
+    from engine import org_succession as su
+    w = open_world()
+    k = cast(w)
+    c = k.conn
+    _die(c, k.boss)
+    with rolls(_quiet):
+        d = _run_weeks(k, 150)
+    row = _rows(c, "contest")[0]
+    assert row["status"] == "open", "no calendar ending"
+    meta = _meta(row)
+    blk = su.block(c, k.org, "contest")
+    ranked = [(k.under, 0.5), (k.cons, 0.3)]
+    chances = [su.agree_chance(c, k.org, {**meta, "opened": k.day}, blk, ranked, k.day + 7 * wk) for wk in (0, 1, 4, 12, 40, 150)]
+    assert 0 < chances[0] < chances[2] < chances[4], chances
+    assert chances == sorted(chances)
+    # a draw that passes at once ends it: fast is possible
+    w2 = open_world()
+    k2 = cast(w2)
+    _die(k2.conn, k2.boss)
+    with rolls(lambda s: 0.0 if s.startswith("agree:") else 0.99):
+        _run_weeks(k2, 1)
+    assert _contest_done(k2.conn)
+
+
+def test_a_missing_figure_fails_loudly_and_no_default_hides_in_code():
+    from engine import org_succession as su
+    w = open_world()
+    c = w.conn
+    for bad in (None, "no_such_figure_anywhere"):
+        try:
+            su.v(c, bad)
+        except KeyError:
+            pass
+        else:
+            raise AssertionError(f"{bad!r} did not fail")
+    for name in ("org_succession.py", "org_coup.py"):  # no `v(conn, x, <number>)`: a missing figure is never papered over
+        text = (ROOT / "engine" / name).read_text(encoding="utf-8")
+        import re
+        assert not re.search(r"\bv\(conn, (?:[^()]|\((?:[^()]|\([^()]*\))*\))+?, -?[0-9]+(?:\.[0-9]+)?\)", text), name
+
+
+def test_a_plot_is_never_ended_by_the_calendar():
+    from engine import org_coup
+    w = open_world()
+    k = cast(w)
+    c = k.conn
+    org_coup.start_plot(c, k.org, k.capos[0], k.boss, k.day)
+    with rolls(_quiet):
+        for i in range(1, 200):  # nearly four years of weeks
+            org_coup._advance_plot(c, _rows(c, "plot", "open")[0], k.day + 7 * i)
+    assert _rows(c, "plot", "open"), "no calendar ending"
+    with rolls(lambda s: 0.0 if s.startswith("drop:") else 0.99):
+        assert org_coup._advance_plot(c, _rows(c, "plot", "open")[0], k.day + 7 * 200) == "dropped"
+
+
+def test_a_civil_war_has_no_forced_end_and_the_split_is_weighed_not_gated():
+    from engine import orgs, org_coup
+    w = open_world()
+    k = cast(w)
+    c = k.conn
+    _slay(c, k.boss)
+    row, a, b = _war(k, size_a=999)  # the weaker side is one man
+    with rolls(_quiet):
+        for i in range(1, 300):  # years of war with nothing going the sides' way
+            assert org_coup.tick_war(c, _rows(c, "civil_war", "open")[0], k.day + 7 * i) is None
+    assert _rows(c, "civil_war", "open")
+    side = org_coup._factions(c, k.org, _meta(_rows(c, "civil_war", "open")[0]))
+    weak = [x for x, i in side.items() if i == 1]
+    assert len(weak) < 4  # fewer than the old gate of four made men, and a share well under a quarter
+    with rolls(lambda s: 0.0 if s.startswith("split:") else 0.99):
+        out = org_coup.tick_war(c, _rows(c, "civil_war", "open")[0], k.day + 7 * 400)
+    assert out == "split"
+    assert orgs.head_of(c, _meta(_rows(c, "civil_war")[0])["new_org"]) == b
+
+
+def test_a_post_below_the_head_is_the_heads_choice_not_a_formula():
+    from engine import orgs, outfit_choices, org_succession as su
+    w = open_world()
+    k = cast(w)
+    c = k.conn
+    outfit_choices.kill(c, k.boss, k.under, k.day, sanctioned=True)  # the head has the underboss killed: the post falls vacant
+    from engine import org_lifecycle
+    org_lifecycle.process_due(c, k.day + 7)
+    item = _rows(c, "fill_post", "open")
+    assert item and item[0]["actor_id"] == k.boss
+    assert not [r for r in orgs.members(c, k.org, "underboss")], "nobody was promoted by formula"
+    offers = su.post_offers(c, k.boss, item[0], k.day + 10)
+    men = {o["target_actor_id"] for o in offers}
+    assert set(k.capos) <= men, "every capo the data lists as a successor is offered"
+    favourite, senior = k.capos[-1], k.capos[0]
+    c.execute("UPDATE org_seats SET standing=0.95 WHERE actor_id=?", (senior,))
+    c.execute("UPDATE org_seats SET standing=0.2 WHERE actor_id=?", (favourite,))
+    rel(c, k.boss, favourite, trust=95, loyalty=95, obligation=80)
+    rel(c, k.boss, senior, trust=0, loyalty=0, obligation=0, resentment=30)
+    offers = {o["target_actor_id"]: o for o in su.post_offers(c, k.boss, item[0], k.day + 10)}
+    assert offers[favourite]["utility"] > offers[senior]["utility"]  # a favourite can beat the proven man
+    su.execute_fill_post(c, k.boss, "fill_post", {**offers[favourite]["payload"], "agenda_id": item[0]["id"]}, k.day + 10)
+    assert orgs.seat_of(c, favourite, k.org)["role_key"] == "underboss"
+    assert orgs.superior_of(c, favourite, k.org) == k.boss
+
+
+def test_the_new_head_weighs_what_to_do_about_the_men_who_stood_against_him():
+    from engine import orgs, org_coup, org_succession as su
+    w = open_world()
+    k = cast(w)
+    c = k.conn
+    _die(c, k.boss)
+    with rolls(lambda s: 0.0 if s.startswith("agree:") or s.startswith("stand:") else 0.99):
+        _run_weeks(k, 1)
+    m = _meta(_rows(c, "contest")[0])
+    assert m["outcome"] in ("agreed", "forced", "bought", "killing")
+    winner = m["winner"]
+    items = [r for r in _rows(c, "rival", "open") if r["actor_id"] == winner]
+    stood = [x for x in m["stood"] if x != winner]
+    assert stood and {int(r["subject_id"]) for r in items} == set(stood)
+    item = items[0]
+    rv = int(item["subject_id"])
+    rel(c, rv, winner, resentment=95, fear=0, trust=-50, loyalty=-50)
+    drives(c, rv, ambition=0.95)
+    offers = {o["kind"]: o for o in org_coup.rival_offers(c, winner, item, k.day + 10)}
+    assert set(offers) == {"rival_keep", "rival_sideline", "rival_remove"}
+    assert offers["rival_sideline"]["utility"] > offers["rival_keep"]["utility"] > offers["rival_remove"]["utility"]  # removal is the rarest answer
+    before = orgs.seat_of(c, rv, k.org)["role_key"]
+    org_coup.execute_rival_sideline(c, winner, "rival_sideline", {"org": k.org, "rival": rv, "agenda_id": item["id"]}, k.day + 10)
+    after = orgs.seat_of(c, rv, k.org)
+    assert after["role_key"] != before and after["superior_actor_id"] == winner and float(after["standing"]) == 0.0
+    other = [r for r in items if int(r["subject_id"]) != rv]
+    if other:
+        r2 = int(other[0]["subject_id"])
+        org_coup.execute_rival_remove(c, winner, "rival_remove", {"org": k.org, "rival": r2, "agenda_id": other[0]["id"]}, k.day + 10)
+        assert not orgs.is_living(c, r2)
+
+
 # ---- the held head, the generic fixture, the data ----
 
 def test_a_held_head_returns_to_his_seat_while_the_contest_runs():
@@ -551,15 +688,20 @@ def _generic_firm():
     f = fx.build()
     conn = f.conn
     rules = orgs.kind_rules(conn, f.firm)
-    rules["lifecycle"] = {**rules["lifecycle"], "contest": {
-        "customary": {"manager": 1.0}, "backer_roles": [], "stand_week": 1.0, "min_weeks": 1, "agree_share": 0.5, "agree_margin": 0.0, "max_weeks": 8,
-        "weights": {"own": 1.0, "trust": 0.5}, "pick_temp": 0.1}}
+    press = {"weights": {"weary": 1, "money": 0, "men": 0, "law": 0, "outside": 0, "temper": 0}, "outside_min": 0.2, "money_scale": 1000, "men_scale": 3, "heat_scale": 3}
+    rules["lifecycle"] = {**rules["lifecycle"], "trait_floor": 0.5, "civil_war": {"tension_bitter": 0.5}, "contest": {
+        "muscle_crew": 0.5, "muscle_scale": 4,
+        "customary": {"manager": 1.0}, "backer_roles": [], "stand_week": 1.0, "acting_standing": 0.5, "crew_weight": 0, "crew_scale": 1, "stick": 0.0, "pick_temp": 0.1,
+        "weights": {"own": 1.0, "trust": 0.5}, "kill_week": 0, "force_week": 0, "force_fear": 0, "force_resentment": 0, "bribe_week": 0, "bribe_share": 0, "bribe_obligation": 0,
+        "bribe_flow": "salary", "lose_resentment": 0, "win_loyalty": 0, "outside": {"weight": 0, "min": 1},
+        "agree": {"week": 1.0, "w_share": 0.5, "lead_scale": 0.5, "w_clear": 1.0, "w_press": 1.0, "early_weeks": 1.0, "early_floor": 0.5, "typical_weeks": 2.0, "press": press},
+        "war": {"week": 0, "early_weeks": 1, "early_floor": 0.5, "ref_share": 0.3}}}
     fx.kill(conn, f.chair)
     org_lifecycle.process_due(conn, 7)
     assert orgs.head_of(conn, f.firm) in f.managers  # an acting chair holds the seat meanwhile
     cont = conn.execute("SELECT * FROM org_agenda WHERE kind='contest'").fetchone()
     assert cont["status"] == "open"
-    for i in range(2, 8):
+    for i in range(2, 80):
         org_lifecycle.process_due(conn, 7 * i)
         if conn.execute("SELECT status FROM org_agenda WHERE kind='contest'").fetchone()[0] == "resolved":
             break
@@ -586,9 +728,9 @@ def test_every_rate_is_a_design_figure_with_its_reasoning():
         elif isinstance(x, list):
             for v in x:
                 walk(v)
-        elif isinstance(x, str) and x.split("_")[0] in ("appoint", "heir", "succ", "contest", "coup", "plot", "war"):
+        elif isinstance(x, str) and x.split("_")[0] in ("appoint", "heir", "succ", "contest", "coup", "plot", "war", "press", "rival"):
             keys.add(x)
-    for name in ("appoint", "heir", "contest", "coup", "plot", "civil_war"):
+    for name in ("appoint", "heir", "contest", "coup", "plot", "civil_war", "rivals"):
         walk(lc[name])
     assert len(keys) > 100
     for key in keys:

@@ -1,6 +1,656 @@
 {
  "about": "Design and derived figures the engine draws once per run (kind draw), derives (kind derived, formula over other figure defaults) or holds (kind fixed), from Saint Jude Setting Bible Part VI and the Parts it cites. Dollars are 1975 dollars; *_m keys are USD millions. pools is the Part VI 9.3A allocation table (family shares sum to 100). Checked by tools/check_saintjude_pools.py.",
  "figures": {
+ "press_w_weary": {
+    "default": 0.35,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of weariness (1 - exp(-weeks / the matter's typical duration)) in the pressure that ends a succession contest or a civil war. Nothing ends either by the calendar: this pressure raises the weekly chance of an agreement or a settlement. Relative weights. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_w_money": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of money spent (bribes in a contest, the cost of a war) in the pressure to end the matter. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_w_men": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of men lost (killings among the organisation's men since the matter began) in the pressure to end it. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_w_law": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of law heat (open cases against the organisation's inducted men) in the pressure to end it: a family under the law's eye cannot afford a long fight. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_w_outside": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of outside pressure in the pressure to end the matter: the share of the other outfits' heads who like one of the two front-runners and want it settled. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_w_temper": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the leaders' even tempers (1 - their mean aggression) in the pressure to end the matter: hot men go on. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_outside_min": {
+    "default": 0.2,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; An outside head counts as pressing for a front-runner when his liking (trust and respect less resentment, 0 to 1) reaches this. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_money_scale": {
+    "default": 20000.0,
+    "range": null,
+    "unit": "USD",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Money spent in a contest that counts as full money pressure (1975 dollars; about one made man's year). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_men_scale": {
+    "default": 5.0,
+    "range": null,
+    "unit": "men",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Men of the organisation killed since a contest began that count as full pressure from losses. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "press_heat_scale": {
+    "default": 6.0,
+    "range": null,
+    "unit": "cases",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Open cases against the organisation's inducted men that count as full law heat (the same scale the books use). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_press_money_scale": {
+    "default": 150000.0,
+    "range": null,
+    "unit": "USD",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Money the two sides of a civil war have spent that counts as full money pressure: a war costs far more than a contest. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_press_men_scale": {
+    "default": 8.0,
+    "range": null,
+    "unit": "men",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Men of the organisation killed since a civil war began that count as full pressure from losses. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_agree_week": {
+    "default": 0.3,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The most a contest's weekly chance of ending in agreement can be (before the early factor and the clarity and pressure mix): a clear front-runner under full pressure agrees within a couple of weeks once the matter is not young. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_agree_w_share": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Clarity of a contest = this x the front-runner's share of the backing + (1 - this) x his lead over the next (against contest_agree_lead_scale). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_agree_lead_scale": {
+    "default": 0.5,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A lead over the runner-up of this much counts as a fully clear lead. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_agree_w_clear": {
+    "default": 0.7,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The weekly chance of agreement follows (this x clarity + contest_agree_w_press x pressure), capped at 1: a clear front-runner is enough alone. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_agree_w_press": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and pressure (weariness, money, men lost, law heat, outside pressure, even tempers) can bring agreement even with no clear front-runner, so no contest goes on for ever. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_early_weeks": {
+    "default": 2.0,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Time scale of a young contest: the early factor is floor + (1 - floor)(1 - exp(-weeks / this)). A fast agreement is unlikely in the first days but not impossible (replaces the old two-week minimum). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_early_floor": {
+    "default": 0.1,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The early factor at the first day of a contest: an agreement the same week the head fell is possible at a tenth of its later chance. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_typical_weeks": {
+    "default": 12.0,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The typical length of a contest: it shapes the weariness curve (1 - exp(-weeks / this)) and ends nothing. Contests of years are possible; most settle in a season. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_war_early_weeks": {
+    "default": 4.0,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Time scale of a young contest for the chance of civil war (replaces the four-week gate): war in the first days is unlikely, not impossible. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_war_early_floor": {
+    "default": 0.05,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The early factor for civil war at the start of a contest. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_war_ref_share": {
+    "default": 0.3,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The runner-up's share of the backing at which the chance of civil war is at full strength; a smaller side makes it proportionally less likely (replaces the 0.3 gate). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_acting_standing": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; When no heir is shown, the acting head is the man with the highest customary weight + this x his standing. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_muscle_crew": {
+    "default": 0.5,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; In a war's contest a candidate's muscle = this x (men under him / men of the organisation x contest_muscle_scale) + (1 - this) x his aggression. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_muscle_scale": {
+    "default": 4.0,
+    "range": null,
+    "unit": "factor",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Scales the men-under-him share in the muscle term (a man with a quarter of the organisation behind him counts fully). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "succ_trait_floor": {
+    "default": 0.5,
+    "range": null,
+    "unit": "factor",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A trait bends a rate or a weight around this floor: floor + trait (ambition, loyalty, greed, risk tolerance), so a man with none still acts and one with all acts half as much again. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_age_floor": {
+    "default": 0.25,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A head's weekly pull to settle and show his heir is the rate x (this + (1 - this) x his age factor): a young head still sometimes settles. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_w_customary": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the data's custom (the order of the roles that succeed to a post) in the head's choice of a man for a post below his own. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_post_order_decay": {
+    "default": 0.6,
+    "range": null,
+    "unit": "factor",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A man of the second role the data lists for a post counts this x as a man of the first, the third this squared: custom is a weight, not a ladder. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_drop_week": {
+    "default": 0.08,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The most a plot's weekly chance of being dropped can be: rises with weariness, a cooled grudge and the target's temper. Nothing ends a plot by the calendar. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_drop_typical_weeks": {
+    "default": 26.0,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The typical life of a plot: shapes the weariness curve and ends nothing; a patient man can plot for years. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_drop_w_weary": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of weariness in the chance a plot is dropped. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_drop_w_cool": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of a cooled grudge (1 - the plotter's resentment of his target) in the chance a plot is dropped. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_drop_w_fear": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the target's aggression (fear of being found out) in the chance a plot is dropped. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_sound_temp": {
+    "default": 0.15,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply a plotter follows his weights when choosing whom to sound out next. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_sound_w_trust": {
+    "default": 1.0,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A plotter sounds out first the men he trusts: weight of trust. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_sound_w_favour": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and the men who owe him: weight of favours owed. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_sound_w_cowed": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and the men who fear him: weight of their fear. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_typical_weeks": {
+    "default": 52.0,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The typical length of a civil war: shapes the weariness curve and ends nothing. Mob wars lasted years; most of ours are over within one. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_early_weeks": {
+    "default": 4,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Time scale of a young war: the early factor for a win, settlement or split is floor + (1 - floor)(1 - exp(-weeks / this)). Replaces the two-week minimum. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_early_floor": {
+    "default": 0.1,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The early factor on the first day of a war. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_win_week": {
+    "default": 0.05,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The most a war's weekly chance of a win can be, reached when one side holds war_win_share of the strength. A side with no leader left has lost outright. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_win_share": {
+    "default": 0.8,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The strength share at which the chance of a win is at full weight (a reference scale, not a gate: the chance runs from half the strength up to this). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_split_ref_share": {
+    "default": 0.25,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The weaker side's share of the strength at which the chance of a split is at full strength; a smaller side splits proportionally less often (replaces a 25% gate). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_split_ref_men": {
+    "default": 4.0,
+    "range": null,
+    "unit": "men",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The weaker side's made men at which the chance of a split is at full strength; fewer men make it proportionally less likely (replaces a gate of four). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_money_men": {
+    "default": 5.0,
+    "range": null,
+    "unit": "men",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A side's leader's full purse counts as this many men in its strength. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_side_temp": {
+    "default": 0.05,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply a backer follows his weights when he picks a side at the start of a war. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_target_temp": {
+    "default": 0.2,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply a side follows its weights when it picks who strikes and whom. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_tension_bitter": {
+    "default": 0.5,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The share of the tension between two claimants that comes from their resentment of each other; the rest is their tempers. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_standing_weight": {
+    "default": 0.5,
+    "range": null,
+    "unit": "factor",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A made man who is not a unit leader weighs this x his standing as a loser of a civil war (a unit leader weighs 1). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_strength_scale": {
+    "default": 10.0,
+    "range": null,
+    "unit": "men",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The men under a rival at which he counts as fully strong when the new head weighs what to do about him. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_keep_base": {
+    "default": 0.4,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The new head keeps a man who stood against him: base weight (the commonest answer: he needs his men). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_keep_trust": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the rival's trust in him. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_keep_fear": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the rival's fear of him. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_keep_strength": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the rival's strength (a strong man is better kept). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_keep_thaw": {
+    "default": 15.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A rival who is kept on resents the head this much less. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_keep_trust_gain": {
+    "default": 5.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and trusts him this much more. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_sideline_base": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The new head sidelines a rival (lines taken, command lost, the returning role): base weight. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_sideline_resentment": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the rival's resentment of the head. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_sideline_ambition": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the rival's ambition x (1 - his fear of the head): a man who still wants the seat and does not fear him is a danger to move aside. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_sideline_resentment_gain": {
+    "default": 10.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A sidelined rival resents the head this much more. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_remove_base": {
+    "default": 0.0,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The new head has a rival removed (killed): base weight (none: removing a made man is a cost to be earned). (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_remove_aggression": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the head's aggression x the rival's resentment x (1 - his fear of the head) x (1 - strength x the next weight): a hot head with a bitter, unafraid, weak rival. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "rival_remove_strength": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A strong rival is harder to remove: the removal weight falls by this x his strength. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
+ },
  "appoint_w_trust": {
     "default": 0.3,
     "range": null,
@@ -561,66 +1211,6 @@
     "source": "unsourced",
     "note": "unsourced; How sharply a backer follows his weights. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
- "contest_agree_share": {
-    "default": 0.6,
-    "range": null,
-    "unit": "share",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; A candidate is agreed when he holds this share of the backing and leads the next by contest_agree_margin; the share needed falls by contest_agree_decay each week after the minimum, so contests end. (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "contest_agree_margin": {
-    "default": 0.15,
-    "range": null,
-    "unit": "share",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; The lead over the runner-up needed to be agreed. (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "contest_agree_decay": {
-    "default": 0.02,
-    "range": null,
-    "unit": "per week",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; How much the needed share falls each week after contest_min_weeks (weariness). (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "contest_min_weeks": {
-    "default": 2,
-    "range": null,
-    "unit": "weeks",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; A contest runs at least this long before it can be agreed: it plays out over weeks, not the same day. (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "contest_war_after_weeks": {
-    "default": 4,
-    "range": null,
-    "unit": "weeks",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; A contest turns into a civil war only after this many weeks: the first weeks are for sounding each other out and agreeing, not for fighting. (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "contest_war_share": {
-    "default": 0.3,
-    "range": null,
-    "unit": "share",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; A contest can turn into a civil war only when the runner-up holds at least this share of the backing (and contest_war_after_weeks have passed): a war needs two real sides. (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
  "contest_war_week": {
     "default": 0.15,
     "range": null,
@@ -629,17 +1219,7 @@
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; Weekly chance of civil war at full tension between the two leading claimants (their resentment and tempers). (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "contest_max_weeks": {
-    "default": 26,
-    "range": null,
-    "unit": "weeks",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; A contest unresolved after half a year ends with the leader holding the seat. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The most a contest's weekly chance of civil war can be: at full tension between the two leading claimants, a runner-up at contest_war_ref_share and a contest that is no longer young. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
  "contest_kill_week": {
     "default": 0.01,
@@ -1011,16 +1591,6 @@
     "source": "unsourced",
     "note": "unsourced; Weekly chance (x aggression) he strikes once ready. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
- "plot_max_weeks": {
-    "default": 26,
-    "range": null,
-    "unit": "weeks",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; A plot that has not struck after half a year fizzles. (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
  "plot_join_obligation": {
     "default": 10.0,
     "range": null,
@@ -1261,16 +1831,6 @@
     "source": "unsourced",
     "note": "unsourced; A pardoned plotter resents the head: the resentment points added. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
- "war_min_weeks": {
-    "default": 2,
-    "range": null,
-    "unit": "weeks",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; A civil war can end by a win share or a settlement only after this long. (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
  "war_win_share": {
     "default": 0.8,
     "range": null,
@@ -1282,7 +1842,7 @@
     "note": "unsourced; One side holding this share of the strength wins (or the other side has no leader). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_kill_week": {
-    "default": 0.45,
+    "default": 0.15,
     "range": null,
     "unit": "per week",
     "tag": "Design",
@@ -1342,7 +1902,7 @@
     "note": "unsourced; The purse that counts as 1.0. (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_leader_target": {
-    "default": 0.4,
+    "default": 0.1,
     "range": null,
     "unit": "weight",
     "tag": "Design",
@@ -1411,65 +1971,25 @@
     "source": "unsourced",
     "note": "unsourced; What a side's leader pays each week per man on his side (paying a war). (B12b: engine/org_succession.py, engine/org_coup.py)"
  },
- "war_tired_weeks": {
-    "default": 12,
-    "range": null,
-    "unit": "weeks",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; Weeks at which weariness is full (settlements and splits get likelier). (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
  "war_settle_week": {
-    "default": 0.25,
+    "default": 0.2,
     "range": null,
     "unit": "per week",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; Weekly chance of a settlement at full weariness, x how even the sides are x (1 - the leaders' average aggression). (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The most a war's weekly chance of a settlement can be: x the early factor x the pressure to end it x how even the sides are x (1 - the leaders' average aggression). Nothing forces a settlement. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_split_week": {
-    "default": 0.12,
+    "default": 0.1,
     "range": null,
     "unit": "per week",
     "tag": "Design",
     "kind": "fixed",
     "mark": "Design proposal",
     "source": "unsourced",
-    "note": "unsourced; Weekly chance the weaker side leaves as a new organisation (x weariness, its leader's ambition, the bitterness between leaders). (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "war_split_min_share": {
-    "default": 0.25,
-    "range": null,
-    "unit": "share",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; The weaker side must hold at least this share of the strength to split off... (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "war_split_min_men": {
-    "default": 4,
-    "range": null,
-    "unit": "men",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; The weaker side of a civil war can split off as a new organisation only with at least this many inducted men: a splinter needs a core. (B12b: engine/org_succession.py, engine/org_coup.py)"
- },
- "war_max_weeks": {
-    "default": 40,
-    "range": null,
-    "unit": "weeks",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; A war that has run this long ends in a settlement. (B12b: engine/org_succession.py, engine/org_coup.py)"
+    "note": "unsourced; The most a war's weekly chance of a split can be: x the early factor x the weaker leader's ambition x (floor + the bitterness between the leaders) x the weaker side's share and made men against war_split_ref_share and war_split_ref_men. (B12b follow-up: engine/org_succession.py, engine/org_coup.py)"
  },
  "war_settle_thaw": {
     "default": 25.0,

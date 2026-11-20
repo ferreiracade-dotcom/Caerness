@@ -25,6 +25,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 
+SAFETY_WEEKS = 3000  # only the tool stops here (about 57 years); nothing in the engine does
+
+
 def _open(seed: int | None):
     from tests.sj_fixture import build_saintjude, connect
     tmp = Path(tempfile.mkdtemp())
@@ -79,7 +82,7 @@ def forced(seeds: int, causes: list[str]) -> None:
                     other = next(o for o in _families(conn) if o != org)
                     outfit_choices.kill(conn, orgs.head_of(conn, other), head, day, sanctioned=False)
                 d, out = day, None
-                for week in range(1, 80):
+                for week in range(1, SAFETY_WEEKS):
                     org_lifecycle.process_due(conn, d)
                     d += 7
                     open_rows = conn.execute("SELECT 1 FROM org_agenda WHERE kind IN ('contest','civil_war') AND status='open' AND (actor_id=?)", (org,)).fetchone()
@@ -112,6 +115,70 @@ def forced(seeds: int, causes: list[str]) -> None:
     print("contested (more than three weeks, or anything but agreed): ", dict(contested_n))
 
 
+def lengths(seeds: int) -> None:
+    """Contest and civil-war lengths with no ceiling: a natural death in every family for each seed (the contest runs until it ends),
+    and a civil war between the two best-placed claimants in every family (it runs until it ends)."""
+    from engine import org_coup, org_lifecycle, orgs, org_succession as su
+    contest_weeks, war_weeks, outcomes = [], [], Counter()
+    capped = 0
+    for seed in range(seeds):
+        conn = _open(9000 + seed)
+        day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]) + 5
+        for org in _families(conn):
+            head = orgs.head_of(conn, org)
+            conn.execute("UPDATE actors SET status='dead' WHERE id=?", (head,))
+            d = day
+            for _ in range(SAFETY_WEEKS):
+                org_lifecycle.process_due(conn, d)
+                d += 7
+                if not conn.execute("SELECT 1 FROM org_agenda WHERE kind IN ('contest','civil_war') AND status='open' AND actor_id=?", (org,)).fetchone():
+                    break
+            else:
+                capped += 1
+            c = conn.execute("SELECT * FROM org_agenda WHERE kind='contest' AND actor_id=? ORDER BY id DESC LIMIT 1", (org,)).fetchone()
+            if c is not None and _meta(c).get("weeks") is not None:
+                contest_weeks.append(int(_meta(c)["weeks"]))
+                outcomes[("contest", _meta(c).get("outcome"))] += 1
+        conn.close()
+        # wars: a fresh opening, each head dead, the two men the contest would have fielded go to war
+        conn = _open(9500 + seed)
+        for org in _families(conn):
+            head = orgs.head_of(conn, org)
+            conn.execute("UPDATE actors SET status='dead' WHERE id=?", (head,))
+            conn.execute("UPDATE org_seats SET status='dead' WHERE actor_id=?", (head,))
+            cust = sorted(su.candidates(conn, org, exclude=(head,)).items(), key=lambda kv: (-kv[1], kv[0]))
+            if len(cust) < 2:
+                continue
+            org_coup.start_civil_war(conn, org, [cust[0][0], cust[1][0]], day, cause="measured")
+            d = day
+            row = conn.execute("SELECT * FROM org_agenda WHERE kind='civil_war' AND actor_id=? ORDER BY id DESC LIMIT 1", (org,)).fetchone()
+            for _ in range(SAFETY_WEEKS):
+                d += 7
+                row = conn.execute("SELECT * FROM org_agenda WHERE id=?", (row["id"],)).fetchone()
+                if row["status"] != "open":
+                    break
+                org_coup.tick_war(conn, row, d)
+            else:
+                capped += 1
+            row = conn.execute("SELECT * FROM org_agenda WHERE id=?", (row["id"],)).fetchone()
+            if row["status"] != "open":
+                war_weeks.append(int(_meta(row).get("weeks") or 0))
+                outcomes[("war", _meta(row).get("how"))] += 1
+        conn.close()
+
+    def dist(name, xs):
+        xs = sorted(xs)
+        if not xs:
+            print(f"{name}: none")
+            return
+        q = lambda f: xs[min(len(xs) - 1, int(f * len(xs)))]  # noqa: E731
+        print(f"{name}: n={len(xs)} min={xs[0]} p25={q(.25)} median={q(.5)} p75={q(.75)} p90={q(.9)} max={xs[-1]} weeks")
+        print("   sorted:", xs)
+    dist("contests (natural death)", contest_weeks)
+    dist("civil wars", war_weeks)
+    print("outcomes:", dict(outcomes), "| runs that hit the tool's own safety stop:", capped)
+
+
 def five(days: int, seed: int | None) -> None:
     from engine.simulation import advance_connection
     conn = _open(seed)
@@ -135,13 +202,15 @@ def five(days: int, seed: int | None) -> None:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["forced", "five"])
+    ap.add_argument("mode", choices=["forced", "five", "lengths"])
     ap.add_argument("--seeds", type=int, default=6)
     ap.add_argument("--cause", default="all")
     ap.add_argument("--days", type=int, default=1825)
     ap.add_argument("--seed", type=int, default=None)
     a = ap.parse_args()
-    if a.mode == "forced":
+    if a.mode == "lengths":
+        lengths(a.seeds)
+    elif a.mode == "forced":
         forced(a.seeds, ["natural", "insider", "outsider"] if a.cause == "all" else [a.cause])
     else:
         five(a.days, a.seed)

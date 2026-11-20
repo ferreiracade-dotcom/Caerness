@@ -25,7 +25,7 @@ import sqlite3
 
 from . import ledger, org_motives, orgs
 from .org_choices import register_agenda_action, register_executor
-from .org_lifecycle import mark_for_history, membership_text, on_unit_vacancy, on_head_vacancy, on_return, on_week, role_level, unit_pool
+from .org_lifecycle import fill_post, mark_for_history, membership_text, on_head_vacancy, on_post_vacancy, on_return, on_unit_vacancy, on_week, role_level, unit_pool
 from .orgs import add_agenda, clamp01, head_of, imposed, is_living, kind_rules, seat_of
 from .relationships import adjust_relationship
 
@@ -43,8 +43,22 @@ def block(conn: sqlite3.Connection, org: int, name: str) -> dict:
     return lifecycle(conn, org).get(name) or {}
 
 
-def v(conn: sqlite3.Connection, spec, default: float = 0.0) -> float:
-    return org_motives._value(conn, spec, default)
+def v(conn: sqlite3.Connection, spec) -> float:
+    """A number as written, or the run's value of the design figure it names. A figure the data does not give fails loudly:
+    no number is hidden in code."""
+    if spec is None:
+        raise KeyError("a figure this layer needs is missing from the package's lifecycle data")
+    if isinstance(spec, (int, float)) and not isinstance(spec, bool):
+        return float(spec)
+    x = org_motives._fig(conn, str(spec))
+    if x is None:
+        raise KeyError(f"design figure {spec!r} is not in the package's figures")
+    return float(x)
+
+
+def lean(conn: sqlite3.Connection, org: int, x: float) -> float:
+    """A trait bends a rate or a weight around a floor: floor + trait (the floor is the kind's lifecycle `trait_floor`)."""
+    return v(conn, lifecycle(conn, org)["trait_floor"]) + x
 
 
 def name_of(conn: sqlite3.Connection, actor_id: int | None) -> str:
@@ -57,12 +71,12 @@ def roll(conn: sqlite3.Connection, actor: int, day: int, stream: str) -> float:
     return org_motives._roll(conn, int(actor), int(day), stream)
 
 
-def pick(conn: sqlite3.Connection, actor: int, day: int, stream: str, items: list[tuple], temp: float = 0.15):
+def pick(conn: sqlite3.Connection, actor: int, day: int, stream: str, items: list[tuple], temp: float):
     """One of (item, score) drawn with weight exp(score / temp) from one seeded draw; None for an empty list."""
     if not items:
         return None
     top = max(s for _i, s in items)
-    ws = [math.exp((s - top) / max(0.02, temp)) for _i, s in items]
+    ws = [math.exp((s - top) / max(1e-6, temp)) for _i, s in items]
     x = roll(conn, actor, day, stream) * sum(ws)
     for (item, _s), w in zip(items, ws):
         x -= w
@@ -156,7 +170,7 @@ def _t_favour(conn, org, a, c, day, ctx, blk):
 def _t_money(conn, org, a, c, day, ctx, blk):
     """What the man could put up: his purse x the share he would offer x his ambition, against the scale."""
     m = blk.get("money") or {}
-    return clamp01(ledger.balance(conn, ("person", int(c))) * v(conn, m.get("share"), 0.0) * drive(conn, int(c), "ambition") / max(1e-9, v(conn, m.get("scale"), 1.0)))
+    return clamp01(ledger.balance(conn, ("person", int(c))) * v(conn, m.get("share")) * drive(conn, int(c), "ambition") / max(1e-9, v(conn, m.get("scale"))))
 
 
 @term("merit")
@@ -167,8 +181,8 @@ def _t_merit(conn, org, a, c, day, ctx, blk):
     if s is None:
         return 0.0
     m = blk.get("merit") or {}
-    ws, wy = v(conn, m.get("w_standing"), 1.0), v(conn, m.get("w_years"), 0.0)
-    yrs = 0.0 if s["inducted_day"] is None else min(1.0, max(0.0, (int(day) - int(s["inducted_day"])) / 365.0) / max(1e-9, v(conn, m.get("years_cap"), 25.0)))
+    ws, wy = v(conn, m.get("w_standing")), v(conn, m.get("w_years"))
+    yrs = 0.0 if s["inducted_day"] is None else min(1.0, max(0.0, (int(day) - int(s["inducted_day"])) / 365.0) / max(1e-9, v(conn, m.get("years_cap"))))
     return (ws * float(s["standing"]) + wy * yrs) / max(1e-9, ws + wy)
 
 
@@ -206,7 +220,8 @@ def _t_muscle(conn, org, a, c, day, ctx, blk):
         return 0.0
     total = conn.execute("SELECT COUNT(*) FROM org_seats WHERE org_actor_id=? AND status='active'", (int(org),)).fetchone()[0] or 1
     under = len(_under(conn, org, int(c)))
-    return clamp01(0.5 * under / total * 4.0 + 0.5 * drive(conn, int(c), "aggression"))
+    crew = v(conn, blk["muscle_crew"])
+    return clamp01(crew * under / total * v(conn, blk["muscle_scale"]) + (1.0 - crew) * drive(conn, int(c), "aggression"))
 
 
 @term("resentment")
@@ -240,7 +255,7 @@ def weigh(conn: sqlite3.Connection, org: int, chooser: int, cand: int, day: int,
     With `detail`, returns (score, {term: its weighted contribution}) for the rationale."""
     ctx = ctx or {}
     temper = blk.get("temperament") or {}
-    bend = v(conn, temper.get("weight"), 0.0)
+    bend = v(conn, temper["weight"]) if temper else 0.0
     num = den = 0.0
     parts: dict[str, float] = {}
     for key, spec in (blk.get("weights") or {}).items():
@@ -275,12 +290,12 @@ def paid_for(conn: sqlite3.Connection, org: int, chooser: int, cand: int, day: i
     m = blk.get("money") or {}
     if not m:
         return 0.0
-    offer = ledger.balance(conn, ("person", int(cand))) * v(conn, m.get("share"), 0.0) * drive(conn, int(cand), "ambition")
+    offer = ledger.balance(conn, ("person", int(cand))) * v(conn, m.get("share")) * drive(conn, int(cand), "ambition")
     if offer <= 0.0 or not m.get("flow"):
         return 0.0
     kinds = org_motives._sphere_data(conn)  # ledger kinds come from the package's organisation data
     from .world_package import org_rules, package_for
-    lk = (org_rules(package_for(conn)).get("ledger_kinds") or {}).get(m["flow"], "tribute")
+    lk = org_rules(package_for(conn))["ledger_kinds"][m["flow"]]
     paid = ledger.transfer(conn, ("person", int(cand)), ("person", int(chooser)), offer, flow_kind=lk, purpose="what he paid for the post", allow_partial=True)
     if paid > 0.0:
         conn.execute("INSERT INTO org_money(day,kind,from_actor_id,to_actor_id,line_id,amount,org_actor_id) VALUES (?,?,?,?,?,?,?)",
@@ -291,12 +306,12 @@ def paid_for(conn: sqlite3.Connection, org: int, chooser: int, cand: int, day: i
 def after_choice(conn: sqlite3.Connection, org: int, chooser: int, chosen: int, passed: list[int], day: int, blk: dict) -> None:
     """The man chosen trusts and owes the chooser; the men passed over resent him (more if they stood higher in the weighing)."""
     if int(chosen) != int(chooser):  # a head who names himself has no one to thank
-        adjust_relationship(conn, chosen, chooser, int(day), trust_delta=v(conn, blk.get("chosen_trust"), 0.0), loyalty_delta=v(conn, blk.get("chosen_loyalty"), 0.0),
-                            obligation_delta=v(conn, blk.get("chosen_obligation"), 0.0))
+        adjust_relationship(conn, chosen, chooser, int(day), trust_delta=v(conn, blk.get("chosen_trust")), loyalty_delta=v(conn, blk.get("chosen_loyalty")),
+                            obligation_delta=v(conn, blk.get("chosen_obligation")))
     for p in passed:
         if int(p) == int(chooser):
             continue
-        adjust_relationship(conn, int(p), chooser, int(day), resentment_delta=v(conn, blk.get("passed_resentment"), 0.0))
+        adjust_relationship(conn, int(p), chooser, int(day), resentment_delta=v(conn, blk.get("passed_resentment")))
         imposed(conn, int(p))
     imposed(conn, int(chosen))
 
@@ -338,7 +353,7 @@ def seat_the_unit(conn: sqlite3.Connection, org: int, unit: int, day: int, *, de
         return False
     if conn.execute("SELECT 1 FROM org_agenda WHERE kind='fill_unit_leader_seat' AND status='open' AND subject_id=? AND json_extract(metadata_json,'$.org')=? LIMIT 1", (int(unit), int(org))).fetchone():
         return True
-    delay = int(v(conn, block(conn, org, "appoint").get("delay_days"), 3.0))
+    delay = int(v(conn, block(conn, org, "appoint").get("delay_days")))
     add_agenda(conn, head, "fill_unit_leader_seat", int(day) + delay, subject_kind="unit", subject_id=int(unit), metadata={"org": int(org)})
     return True
 
@@ -367,7 +382,7 @@ def stuck_units(conn: sqlite3.Connection, day: int) -> int:
         role = kind_rules(conn, int(org)).get("unit_leader")
         if not blk or not role:
             continue
-        fall = int(v(conn, blk.get("fallback_days"), 56.0))
+        fall = int(v(conn, blk.get("fallback_days")))
         for u in conn.execute("SELECT id,leader_actor_id FROM org_units WHERE org_actor_id=? AND status='active'", (int(org),)).fetchall():
             s = active_seat(conn, u["leader_actor_id"], int(org)) if u["leader_actor_id"] is not None else None
             if s is not None and s["role_key"] == role:
@@ -384,6 +399,83 @@ def stuck_units(conn: sqlite3.Connection, day: int) -> int:
             if item is not None:
                 close_row(conn, int(item["id"]), int(day))
             n += 1 if fill_unit_leader(conn, int(u["id"]), int(day), force=True) is not None else 0
+    return n
+
+
+# ---- posts below the head: the head chooses among the men the data names ----
+
+def _post_vacancy(conn: sqlite3.Connection, org: int, role: str, day: int) -> bool:
+    """A post with a succession in the data fell vacant: put the choice on the head's list (the acting head's while a contest runs).
+    False when the package gives no `appoint` data, there is no head to choose, or the head is not living."""
+    prefs = (lifecycle(conn, org).get("succession") or {}).get(role)
+    head = head_of(conn, org)
+    blk = block(conn, org, "appoint")
+    if not prefs or not blk or head is None or not is_living(conn, head):
+        return False
+    if any(meta_of(r).get("role") == role for r in conn.execute("SELECT * FROM org_agenda WHERE kind='fill_post' AND status='open' AND subject_id=?", (int(org),))):
+        return True
+    add_agenda(conn, head, "fill_post", int(day) + int(v(conn, blk["delay_days"])), subject_kind="org", subject_id=int(org), metadata={"org": int(org), "role": role})
+    return True
+
+
+def post_offers(conn: sqlite3.Connection, head: int, item, day: int) -> list[dict]:
+    """One offer for each man of the roles the data lists as successors to the vacant post, weighed on the `appoint` terms and
+    on how far down the data's list his role is (`post_order_decay` per place)."""
+    meta = meta_of(item)
+    org, role = int(meta["org"]), str(meta["role"])
+    blk = block(conn, org, "appoint")
+    prefs = (lifecycle(conn, org).get("succession") or {}).get(role) or []
+    decay = v(conn, blk["post_order_decay"])
+    cust: dict[int, float] = {}
+    for i, pref in enumerate(prefs):
+        for r in orgs.members(conn, org, pref):
+            if is_living(conn, int(r["actor_id"])) and int(r["actor_id"]) != int(head):
+                cust.setdefault(int(r["actor_id"]), decay ** i)
+    payload = {"org": org, "role": role}
+    if not cust:
+        return [{"kind": "fill_post", "utility": _utility(conn, 1.0), "rationale": f"No one is fit for the vacant {_label(conn, org, role)}'s post.", "payload": payload}]
+    out = []
+    for a in sorted(cust):
+        sc, parts = weigh(conn, org, int(head), a, int(day), blk, {"customary": cust}, detail=True)
+        lead = lead_terms(parts)
+        out.append({"kind": "fill_post", "utility": _utility(conn, sc), "target_actor_id": a,
+                    "rationale": f"Names {name_of(conn, a)} {_label(conn, org, role)} ({sc:.2f}{', mostly ' + lead if lead else ''}).", "payload": {**payload, "candidate": a}})
+    return out
+
+
+def execute_fill_post(conn: sqlite3.Connection, actor_id: int, kind: str, payload: dict, day: int) -> dict:
+    from .org_lifecycle import _promote
+    org, role = int(payload["org"]), str(payload["role"])
+    if payload.get("agenda_id") is not None:
+        orgs.resolve_agenda(conn, int(payload["agenda_id"]), int(day))
+    cand = payload.get("candidate")
+    new = _promote(conn, org, role, int(day), chosen=cand)
+    if new is None:
+        return {"summary": "No one could take the post.", "blocked": True}
+    blk = block(conn, org, "appoint")
+    if cand is not None and blk:
+        prefs = (lifecycle(conn, org).get("succession") or {}).get(role) or []
+        passed = [int(r["actor_id"]) for pref in prefs for r in orgs.members(conn, org, pref) if int(r["actor_id"]) not in (int(new), int(actor_id))]
+        paid_for(conn, org, int(actor_id), int(new), int(day), blk)
+        after_choice(conn, org, int(actor_id), int(new), passed, int(day), blk)
+    return {"summary": f"{name_of(conn, actor_id)} named {name_of(conn, new)} {_label(conn, org, role)}."}
+
+
+def stuck_posts(conn: sqlite3.Connection, day: int) -> int:
+    """A vacant post nobody put on a head's list, or whose item sat unanswered past the fallback time (no head, or one who never
+    answers), is filled by the data's formula so no post stays empty for ever."""
+    from .org_lifecycle import _promote
+    n = 0
+    for (org,) in conn.execute("SELECT org_actor_id FROM org_profiles ORDER BY org_actor_id").fetchall():
+        blk = block(conn, int(org), "appoint")
+        succ = lifecycle(conn, int(org)).get("succession") or {}
+        if not blk or not succ:
+            continue
+        fall = int(v(conn, blk["fallback_days"]))
+        for item in conn.execute("SELECT * FROM org_agenda WHERE kind='fill_post' AND status='open' AND subject_id=?", (int(org),)).fetchall():
+            if int(day) - int(item["due_day"]) >= fall:
+                close_row(conn, int(item["id"]), int(day))
+                n += 1 if _promote(conn, int(org), str(meta_of(item)["role"]), int(day)) is not None else 0
     return n
 
 
@@ -419,7 +511,7 @@ def ambitious(conn: sqlite3.Connection, org: int, exclude: tuple = ()) -> list[i
         return []
     return [int(r[0]) for r in conn.execute(
         """SELECT s.actor_id FROM org_seats s JOIN actor_drives d ON d.actor_id=s.actor_id WHERE s.org_actor_id=? AND s.status='active' AND s.inducted_day IS NOT NULL
-             AND s.standing>=? AND d.ambition>=? ORDER BY s.actor_id""", (int(org), v(conn, a.get("standing"), 0.5), v(conn, a.get("ambition"), 0.7))).fetchall()
+             AND s.standing>=? AND d.ambition>=? ORDER BY s.actor_id""", (int(org), v(conn, a.get("standing")), v(conn, a.get("ambition")))).fetchall()
             if int(r[0]) not in exclude and is_living(conn, int(r[0]))]
 
 
@@ -436,7 +528,7 @@ def _age_factor(conn: sqlite3.Connection, head: int, blk: dict, day: int) -> flo
     if r is None or r[0] is None:
         return 0.5
     age = (int(day) - int(r[0])) / 365.0
-    return clamp01((age - v(conn, blk.get("age_from"), 50.0)) / max(1e-9, v(conn, blk.get("age_span"), 25.0)))
+    return clamp01((age - v(conn, blk.get("age_from"))) / max(1e-9, v(conn, blk.get("age_span"))))
 
 
 def form_heir(conn: sqlite3.Connection, org: int, head: int, day: int, *, force: bool = False) -> int | None:
@@ -448,8 +540,8 @@ def form_heir(conn: sqlite3.Connection, org: int, head: int, day: int, *, force:
     old = heir_row(conn, head)
     if old is not None:
         close_row(conn, int(old["id"]), int(day))
-    scores = [(c, s) for c, s in scores if s >= v(conn, blk.get("min_score"), 0.0)]
-    chosen = pick(conn, head, int(day), "heir_pick", scores, v(conn, blk.get("pick_temp"), 0.15))
+    scores = [(c, s) for c, s in scores if s >= v(conn, blk.get("min_score"))]
+    chosen = pick(conn, head, int(day), "heir_pick", scores, v(conn, blk.get("pick_temp")))
     if chosen is None:
         return None
     shown = bool(old is not None and int(old["subject_id"]) == chosen and meta_of(old).get("shown"))
@@ -470,10 +562,10 @@ def show_heir(conn: sqlite3.Connection, org: int, head: int, day: int) -> None:
     for b in backers(conn, org):
         if b in (heir, head):
             continue
-        adjust_relationship(conn, b, heir, int(day), trust_delta=v(conn, blk.get("show_trust"), 0.0) * (0.5 + drive(conn, b, "loyalty")),
-                            respect_delta=v(conn, blk.get("show_respect"), 0.0))
+        adjust_relationship(conn, b, heir, int(day), trust_delta=v(conn, blk.get("show_trust")) * lean(conn, org, drive(conn, b, "loyalty")),
+                            respect_delta=v(conn, blk.get("show_respect")))
         if b in cust:
-            adjust_relationship(conn, b, heir, int(day), resentment_delta=v(conn, blk.get("show_resentment"), 0.0) * (0.5 + drive(conn, b, "ambition")))
+            adjust_relationship(conn, b, heir, int(day), resentment_delta=v(conn, blk.get("show_resentment")) * lean(conn, org, drive(conn, b, "ambition")))
             imposed(conn, b)
     imposed(conn, heir)
     mark_for_history(conn, head, f"showed {name_of(conn, heir)} as his heir", int(day))
@@ -490,21 +582,22 @@ def _heirs(conn: sqlite3.Connection, day: int) -> dict:
         if row is not None and active_seat(conn, int(row["subject_id"]), org) is None:
             close_row(conn, int(row["id"]), int(day), why="gone")
             row = None
-        age = 0.25 + 0.75 * _age_factor(conn, head, blk, day)
+        floor = v(conn, blk.get("age_floor"))
+        age = floor + (1.0 - floor) * _age_factor(conn, head, blk, day)
         if row is None:
-            if roll(conn, head, int(day), "heir_form") < v(conn, blk.get("form_week"), 0.0) * age and form_heir(conn, org, head, int(day)) is not None:
+            if roll(conn, head, int(day), "heir_form") < v(conn, blk.get("form_week")) * age and form_heir(conn, org, head, int(day)) is not None:
                 formed += 1
             row = heir_row(conn, head)
             if row is None:
                 continue
-        if roll(conn, head, int(day), "heir_revise") < v(conn, blk.get("revise_week"), 0.0):
+        if roll(conn, head, int(day), "heir_revise") < v(conn, blk.get("revise_week")):
             before = int(row["subject_id"])
             if form_heir(conn, org, head, int(day)) not in (None, before):
                 formed += 1
             row = heir_row(conn, head)
             if row is None:
                 continue
-        if not meta_of(row).get("shown") and roll(conn, head, int(day), "heir_show") < v(conn, blk.get("show_week"), 0.0) * age:
+        if not meta_of(row).get("shown") and roll(conn, head, int(day), "heir_show") < v(conn, blk.get("show_week")) * age:
             show_heir(conn, org, head, int(day))
             shown += 1
     return {"heirs": formed, "heirs_shown": shown}
@@ -521,7 +614,7 @@ def backers(conn: sqlite3.Connection, org: int) -> list[int]:
 
 def backer_weight(conn: sqlite3.Connection, org: int, b: int, blk: dict) -> float:
     """A backer counts for more the more men stand behind him (his crew), up to the data's cap."""
-    return 1.0 + v(conn, blk.get("crew_weight"), 0.0) * min(1.0, len(_under(conn, org, b)) / max(1e-9, v(conn, blk.get("crew_scale"), 10.0)))
+    return 1.0 + v(conn, blk.get("crew_weight")) * min(1.0, len(_under(conn, org, b)) / max(1e-9, v(conn, blk.get("crew_scale"))))
 
 
 def _label(conn: sqlite3.Connection, org: int, role: str) -> str:
@@ -583,7 +676,6 @@ def step_back(conn: sqlite3.Connection, org: int, marker, new_head: int | None, 
 def install_head(conn: sqlite3.Connection, org: int, man: int, day: int, how: str) -> int:
     """The man holds the head's seat: any acting man steps back, the men who answered to the late head and the acting man answer
     to him; if he led a unit it is put to him to name its leader, and the post he left is filled as the data says."""
-    from .org_lifecycle import _promote
     rules = kind_rules(conn, org)
     head_role, unit_role = rules["head"], rules.get("unit_leader")
     seat = seat_of(conn, man, org)
@@ -617,12 +709,18 @@ def install_head(conn: sqlite3.Connection, org: int, man: int, day: int, how: st
         imposed(conn, int(sub))
     mark_for_history(conn, man, f"rose to {_label(conn, org, head_role)}", int(day))
     if prior_role and prior_role != head_role:
-        _promote(conn, org, prior_role, int(day))
+        fill_post(conn, org, prior_role, int(day))
     for late in late_ids:
         r = heir_row(conn, late)
         if r is not None:
             close_row(conn, int(r["id"]), int(day), succeeded_by=int(man), how=how)
     return int(man)
+
+
+def _acting_choice(conn: sqlite3.Connection, org: int, cust: dict[int, float], blk: dict) -> int:
+    """Who holds the seat meanwhile when no heir is shown: the man with the heaviest custom, then standing (`acting_standing`)."""
+    w = v(conn, blk.get("acting_standing"))
+    return int(sorted(cust.items(), key=lambda kv: (-(kv[1] + w * float(seat_of(conn, kv[0], org)["standing"])), kv[0]))[0][0])
 
 
 def open_contest(conn: sqlite3.Connection, org: int, seat, day: int, why: str) -> bool:
@@ -640,8 +738,7 @@ def open_contest(conn: sqlite3.Connection, org: int, seat, day: int, why: str) -
         mk = acting_marker(conn, org)
         if mk is not None and int(mk["actor_id"]) == late:
             close_row(conn, int(mk["id"]), int(day))
-        top = sorted(cust.items(), key=lambda kv: (-(kv[1] + 0.5 * float(seat_of(conn, kv[0], org)["standing"])), kv[0]))
-        set_acting(conn, org, int(top[0][0]), late, int(day), int(live["id"]))
+        set_acting(conn, org, _acting_choice(conn, org, cust, blk), late, int(day), int(live["id"]))
         return True
     cause = _cause(conn, late, org, why)
     heir = heir_of(conn, org, late)
@@ -654,8 +751,7 @@ def open_contest(conn: sqlite3.Connection, org: int, seat, day: int, why: str) -
         from . import org_coup
         if org_coup.coup(conn, org, late, int(cause["killer"]), cid, int(day)):
             return True
-    top = sorted(cust.items(), key=lambda kv: (-(kv[1] + 0.5 * float(seat_of(conn, kv[0], org)["standing"])), kv[0]))
-    acting = heir if heir is not None and shown else top[0][0]
+    acting = heir if heir is not None and shown else _acting_choice(conn, org, cust, blk)
     set_acting(conn, org, int(acting), late, int(day), cid)
     for a in {int(acting)} | ({heir} if heir is not None and shown else set()):
         imposed(conn, a)
@@ -679,8 +775,8 @@ def _stand(conn: sqlite3.Connection, org: int, meta: dict, blk: dict, day: int, 
         if a in stood:
             continue
         amb = drive(conn, a, "ambition")
-        want = (w if w > 0.0 else v(conn, blk.get("ambitious", {}).get("stand"), 0.5)) * (0.5 + amb)
-        if roll(conn, a, int(day), f"stand:{cid}") < v(conn, blk.get("stand_week"), 0.5) * want:
+        want = (w if w > 0.0 else v(conn, blk["ambitious"]["stand"])) * lean(conn, org, amb)
+        if roll(conn, a, int(day), f"stand:{cid}") < v(conn, blk.get("stand_week")) * want:
             stood.add(a)
     meta["stood"] = sorted(stood)
     return {a: cust.get(a, 0.0) for a in stood}
@@ -690,6 +786,57 @@ def _ctx(meta: dict, cust: dict[int, float], tainted: int | None = None) -> dict
     return {"heir": meta.get("heir"), "customary": cust, "war": bool(meta.get("war")), "tainted": tainted}
 
 
+def outside_heads(conn: sqlite3.Connection, org: int) -> list[int]:
+    """The heads of the other organisations of the same kind."""
+    kind = conn.execute("SELECT org_kind FROM org_profiles WHERE org_actor_id=?", (int(org),)).fetchone()[0]
+    return [int(r[0]) for r in conn.execute(
+        "SELECT s.actor_id FROM org_seats s JOIN org_profiles p ON p.org_actor_id=s.org_actor_id WHERE s.org_actor_id<>? AND p.org_kind=? AND s.role_key=? AND s.status='active' ORDER BY s.actor_id",
+        (int(org), kind, kind_rules(conn, org)["head"]))]
+
+
+def outside_liking(conn: sqlite3.Connection, head: int, cand: int) -> float:
+    """How much another outfit's head likes a man: trust and respect less resentment, 0..1."""
+    r = rel(conn, int(head), int(cand))
+    return 0.0 if r is None else clamp01((float(r["trust"]) + float(r["respect"])) / 200.0 - float(r["resentment"]) / 200.0)
+
+
+def early(conn: sqlite3.Connection, weeks: float, scale, floor) -> float:
+    """How far a young matter has got: `floor` at its start, rising to 1 as the weeks pass (1 - exp(-weeks / scale)). A quick
+    agreement, war or settlement is unlikely in the first days but never impossible."""
+    f = v(conn, floor)
+    return f + (1.0 - f) * (1.0 - math.exp(-max(0.0, weeks) / v(conn, scale)))
+
+
+def men_lost(conn: sqlite3.Connection, org: int, since: int) -> int:
+    """Men of the organisation killed since a day (the `killed_by` rows)."""
+    return int(conn.execute("SELECT COUNT(*) FROM org_agenda a WHERE a.kind='killed_by' AND a.created_day>=? AND EXISTS "
+                            "(SELECT 1 FROM org_seats s WHERE s.actor_id=a.actor_id AND s.org_actor_id=?)", (int(since), int(org))).fetchone()[0])
+
+
+def law_heat(conn: sqlite3.Connection, org: int) -> int:
+    """Open cases against the organisation's inducted men."""
+    return int(conn.execute("SELECT COUNT(*) FROM crime_reports r JOIN org_seats s ON s.actor_id=r.offender_actor_id WHERE r.status='open' AND s.org_actor_id=? AND s.inducted_day IS NOT NULL",
+                            (int(org),)).fetchone()[0])
+
+
+def pressure(conn: sqlite3.Connection, org: int, press: dict, *, opened: int, day: int, typical, spent: float, leaders: list[int]) -> float:
+    """The weighted mean (0..1) of what presses a matter to an end: weariness (1 - exp(-weeks / typical): the typical duration only
+    shapes the curve and ends nothing), the money spent, the men lost since it began, law heat, the other outfits' heads who like a
+    front-runner (they want it settled), and the leaders' even tempers. Each weight and scale is the data's."""
+    w = press["weights"]
+    weeks = (int(day) - int(opened)) / WEEK
+    heads = outside_heads(conn, org)
+    liked = [h for h in heads if leaders and max(outside_liking(conn, h, c) for c in leaders) > v(conn, press["outside_min"])]
+    parts = {"weary": 1.0 - math.exp(-weeks / v(conn, typical)),
+             "money": clamp01(float(spent) / v(conn, press["money_scale"])),
+             "men": clamp01(men_lost(conn, org, opened) / v(conn, press["men_scale"])),
+             "law": clamp01(law_heat(conn, org) / v(conn, press["heat_scale"])),
+             "outside": len(liked) / len(heads) if heads else 0.0,
+             "temper": 1.0 - (sum(drive(conn, c, "aggression") for c in leaders) / len(leaders) if leaders else 0.0)}
+    den = sum(v(conn, w[k]) for k in parts)
+    return sum(v(conn, w[k]) * x for k, x in parts.items()) / den
+
+
 def tally(conn: sqlite3.Connection, org: int, meta: dict, blk: dict, cands: dict[int, float], day: int, cid: int) -> dict[int, float]:
     """Each backer backs one candidate (weighed; the one he backed last week is favoured by `stick`); the heads of other
     organisations add a voice for the man they like. Returns each candidate's share of the backing, 0..1."""
@@ -697,23 +844,17 @@ def tally(conn: sqlite3.Connection, org: int, meta: dict, blk: dict, cands: dict
     picks, weight = {}, {}
     for b in backers(conn, org):
         w = backer_weight(conn, org, b, blk)
-        sc = [(c, weigh(conn, org, b, c, int(day), blk, ctx) + (v(conn, blk.get("stick"), 0.0) if meta["picks"].get(str(b)) == c else 0.0)) for c in sorted(cands)]
-        got = pick(conn, b, int(day), f"back:{cid}", sc, v(conn, blk.get("pick_temp"), 0.1))
+        sc = [(c, weigh(conn, org, b, c, int(day), blk, ctx) + (v(conn, blk.get("stick")) if meta["picks"].get(str(b)) == c else 0.0)) for c in sorted(cands)]
+        got = pick(conn, b, int(day), f"back:{cid}", sc, v(conn, blk.get("pick_temp")))
         if got is not None:
             picks[str(b)], weight[b] = got, w
-    out_w = v(conn, (blk.get("outside") or {}).get("weight"), 0.0)
-    voice = None
-    if out_w > 0.0:
-        best, bs = None, v(conn, (blk.get("outside") or {}).get("min"), 0.2)
-        kind = conn.execute("SELECT org_kind FROM org_profiles WHERE org_actor_id=?", (int(org),)).fetchone()[0]
-        for (oh,) in conn.execute("SELECT s.actor_id FROM org_seats s JOIN org_profiles p ON p.org_actor_id=s.org_actor_id WHERE s.org_actor_id<>? AND p.org_kind=? AND s.role_key=? AND s.status='active'",
-                                  (int(org), kind, kind_rules(conn, org)["head"])).fetchall():
-            for c in cands:
-                r = rel(conn, int(oh), c)
-                x = 0.0 if r is None else clamp01((float(r["trust"]) + float(r["respect"])) / 200.0 - float(r["resentment"]) / 200.0)
-                if x > bs:
-                    best, bs = c, x
-        voice = best
+    out_w = v(conn, blk["outside"]["weight"])
+    voice, bs = None, v(conn, blk["outside"]["min"])
+    for oh in outside_heads(conn, org):
+        for c in cands:
+            x = outside_liking(conn, oh, c)
+            if x > bs:
+                voice, bs = c, x
     total = sum(weight.values()) + (out_w if voice is not None else 0.0)
     meta["picks"] = picks
     share = {c: 0.0 for c in cands}
@@ -733,20 +874,21 @@ def _lean(conn: sqlite3.Connection, org: int, meta: dict, blk: dict, share: dict
         if not swing:
             continue
         b = swing[int(roll(conn, c, int(day), f"lean_who:{cid}") * len(swing)) % len(swing)]
-        if roll(conn, c, int(day), f"force:{cid}") < v(conn, blk.get("force_week"), 0.0) * drive(conn, c, "aggression"):
-            adjust_relationship(conn, b, c, int(day), fear_delta=v(conn, blk.get("force_fear"), 0.0), resentment_delta=v(conn, blk.get("force_resentment"), 0.0))
+        if roll(conn, c, int(day), f"force:{cid}") < v(conn, blk.get("force_week")) * drive(conn, c, "aggression"):
+            adjust_relationship(conn, b, c, int(day), fear_delta=v(conn, blk.get("force_fear")), resentment_delta=v(conn, blk.get("force_resentment")))
             meta["forced"] += 1
             meta.setdefault("forced_by", []).append(c)
             imposed(conn, b)
-        if roll(conn, c, int(day), f"bribe:{cid}") < v(conn, blk.get("bribe_week"), 0.0) * drive(conn, c, "ambition"):
-            pay = ledger.balance(conn, ("person", c)) * v(conn, blk.get("bribe_share"), 0.0)
+        if roll(conn, c, int(day), f"bribe:{cid}") < v(conn, blk.get("bribe_week")) * drive(conn, c, "ambition"):
+            pay = ledger.balance(conn, ("person", c)) * v(conn, blk.get("bribe_share"))
             if pay > 0.0:
                 from .world_package import org_rules, package_for
-                lk = (org_rules(package_for(conn)).get("ledger_kinds") or {}).get(blk.get("bribe_flow"), "tribute")
+                lk = org_rules(package_for(conn))["ledger_kinds"][blk["bribe_flow"]]
                 got = ledger.transfer(conn, ("person", c), ("person", b), pay, flow_kind=lk, purpose="what he paid for a man's backing", allow_partial=True)
                 if got > 0.0:
-                    adjust_relationship(conn, b, c, int(day), obligation_delta=v(conn, blk.get("bribe_obligation"), 0.0))
+                    adjust_relationship(conn, b, c, int(day), obligation_delta=v(conn, blk.get("bribe_obligation")))
                     meta["bought"] += 1
+                    meta["spent"] = float(meta.get("spent", 0.0)) + got
                     meta.setdefault("bought_by", []).append(c)
                     imposed(conn, b)
 
@@ -758,21 +900,40 @@ def _finish_contest(conn: sqlite3.Connection, row, meta: dict, winner: int | Non
         blk = block(conn, org, "contest")
         for b in loser_backers:
             if b != winner:
-                adjust_relationship(conn, b, winner, int(day), resentment_delta=v(conn, blk.get("lose_resentment"), 0.0))
+                adjust_relationship(conn, b, winner, int(day), resentment_delta=v(conn, blk.get("lose_resentment")))
         for b in [int(b) for b, p in meta["picks"].items() if int(p) == winner and int(b) != winner]:
-            adjust_relationship(conn, b, winner, int(day), loyalty_delta=v(conn, blk.get("win_loyalty"), 0.0))
+            adjust_relationship(conn, b, winner, int(day), loyalty_delta=v(conn, blk.get("win_loyalty")))
         install_head(conn, org, winner, int(day), outcome)
         for b in meta["picks"]:
             imposed(conn, int(b))  # backers of the winner and of the men who lost: all looked at again
+        rv = lifecycle(conn, org).get("rivals")
+        for rival in meta.get("stood", []):
+            if int(rival) != int(winner) and rv and active_seat(conn, int(rival), org) is not None:
+                add_agenda(conn, int(winner), "rival", int(day) + int(v(conn, rv["delay_days"])), subject_kind="actor", subject_id=int(rival), metadata={"org": org, "rival": int(rival)})
     close_row(conn, int(row["id"]), int(day), **{**meta, "outcome": outcome, "winner": winner, "closed": int(day), "weeks": (int(day) - int(meta["opened"])) // WEEK})
 
 
+def agree_chance(conn: sqlite3.Connection, org: int, meta: dict, blk: dict, ranked: list, day: int) -> float:
+    """The chance that the contest ends in agreement this week: the weekly figure x the early factor (thin while the matter is
+    young) x the front-runner's clarity (his share and his lead) mixed with the pressure to end it (weariness, money, men lost, law
+    heat, outside pressure, even tempers). Never zero for long: weariness only rises."""
+    ag = blk["agree"]
+    s1 = ranked[0][1]
+    s2 = ranked[1][1] if len(ranked) > 1 else 0.0
+    clear = v(conn, ag["w_share"]) * s1 + (1.0 - v(conn, ag["w_share"])) * clamp01((s1 - s2) / v(conn, ag["lead_scale"]))
+    press = pressure(conn, org, ag["press"], opened=meta["opened"], day=day, typical=ag["typical_weeks"], spent=float(meta.get("spent", 0.0)), leaders=[c for c, _s in ranked[:2]])
+    weeks = (int(day) - int(meta["opened"])) / WEEK
+    return v(conn, ag["week"]) * early(conn, weeks, ag["early_weeks"], ag["early_floor"]) * clamp01(v(conn, ag["w_clear"]) * clear + v(conn, ag["w_press"]) * press)
+
+
 def tick_contest(conn: sqlite3.Connection, row, day: int) -> str | None:
-    """One week of one contest. Returns its outcome when it ends (agreed, forced, bought, killing, civil_war, exhausted)."""
+    """One week of one contest. Returns its outcome when it ends (agreed, forced, bought, killing, civil_war, no_one). Nothing ends
+    it by the calendar: each week an agreement has a chance (the front-runner's clarity and the pressure to end it, thinned while the
+    matter is young), and so has a war (two real sides, bitter claimants, thinned while it is young)."""
     meta = meta_of(row)
     org, cid = int(meta["org"]), int(row["id"])
     blk = block(conn, org, "contest")
-    weeks = (int(day) - int(meta["opened"])) // WEEK
+    weeks = (int(day) - int(meta["opened"])) / WEEK
     cands = _stand(conn, org, meta, blk, day, cid)
     if not cands:
         _finish_contest(conn, row, meta, None, "no_one", day)
@@ -782,31 +943,27 @@ def tick_contest(conn: sqlite3.Connection, row, day: int) -> str | None:
     lead, s1 = ranked[0]
     s2 = ranked[1][1] if len(ranked) > 1 else 0.0
     _lean(conn, org, meta, blk, share, day, cid)
-    min_weeks = int(v(conn, blk.get("min_weeks"), 2.0))
-    need = v(conn, blk.get("agree_share"), 0.6) - v(conn, blk.get("agree_decay"), 0.0) * max(0, weeks - min_weeks)
-    war_after = int(v(conn, blk.get("war_after_weeks"), 4.0))
-    out = None
-    if weeks >= min_weeks and s1 >= need and s1 - s2 >= v(conn, blk.get("agree_margin"), 0.1):
+    chance = agree_chance(conn, org, meta, blk, ranked, int(day))
+    if roll(conn, org, int(day), f"agree:{cid}") < chance:
         # the label names how the winner got there: leaning on men, paying them, a killing on the way, or plain agreement
         out = "forced" if lead in meta.get("forced_by", []) else "bought" if lead in meta.get("bought_by", []) else "killing" if meta["killed"] else "agreed"
         _finish_contest(conn, row, meta, lead, out, day)
         return out
     for c in sorted(cands):  # a candidate losing ground may have the man in front killed
-        if c != lead and share.get(c, 0.0) < s1 and roll(conn, c, int(day), f"cut:{cid}") < v(conn, blk.get("kill_week"), 0.0) * drive(conn, c, "aggression") * drive(conn, c, "ambition") * (s1 - share.get(c, 0.0)):
+        if c != lead and share.get(c, 0.0) < s1 and roll(conn, c, int(day), f"cut:{cid}") < v(conn, blk["kill_week"]) * drive(conn, c, "aggression") * drive(conn, c, "ambition") * (s1 - share.get(c, 0.0)):
             from .outfit_choices import kill
             kill(conn, c, lead, int(day), sanctioned=False)
             meta["killed"] += 1
             break
-    if weeks >= war_after and len(ranked) > 1 and s2 >= v(conn, blk.get("war_share"), 0.3):
+    if len(ranked) > 1:
         from . import org_coup
-        tension = org_coup.tension(conn, org, [lead, ranked[1][0]], meta)
-        if roll(conn, org, int(day), f"war:{cid}") < v(conn, blk.get("war_week"), 0.0) * tension:
+        wr = blk["war"]
+        tension = org_coup.tension(conn, org, [lead, ranked[1][0]])
+        p_war = v(conn, wr["week"]) * early(conn, weeks, wr["early_weeks"], wr["early_floor"]) * tension * clamp01(s2 / v(conn, wr["ref_share"]))
+        if roll(conn, org, int(day), f"war:{cid}") < p_war:
             _finish_contest(conn, row, meta, None, "civil_war", day)
             org_coup.start_civil_war(conn, org, [lead, ranked[1][0]], int(day), cause="contest", late=int(meta["late"]))
             return "civil_war"
-    if weeks >= int(v(conn, blk.get("max_weeks"), 26.0)):
-        _finish_contest(conn, row, meta, lead, "exhausted", day)
-        return "exhausted"
     save_meta(conn, cid, meta)
     return None
 
@@ -834,7 +991,7 @@ def _returned(conn: sqlite3.Connection, org: int, man: int, day: int) -> bool:
 def _weekly(conn: sqlite3.Connection, day: int) -> dict:
     if not contest_orgs(conn) and not any(block(conn, int(r[0]), "appoint") for r in conn.execute("SELECT org_actor_id FROM org_profiles")):
         return {}
-    out = {"stuck": stuck_units(conn, int(day))}
+    out = {"stuck": stuck_units(conn, int(day)) + stuck_posts(conn, int(day))}
     out.update(_heirs(conn, int(day)))
     out.update(_contests(conn, int(day)))
     from . import org_coup
@@ -850,6 +1007,9 @@ def _name(conn, a):
 
 
 on_unit_vacancy(_unit_vacancy)
+on_post_vacancy(_post_vacancy)
+register_executor("fill_post", execute_fill_post)
+register_agenda_action("fill_post", post_offers)
 on_head_vacancy(lambda conn, org, seat, day, why: open_contest(conn, org, seat, day, why))
 on_return(_returned)
 on_week(_weekly)
