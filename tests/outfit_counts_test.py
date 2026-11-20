@@ -200,21 +200,78 @@ def _discipline_case(w, holder_standing, aggression, repeat=False):
     return line, aid, offers
 
 
+def _kill_raw(w, standing, aggression, repeat=False, take=500.0, weeks=10):
+    """The head's raw pull toward killing (unclamped), for a line of `take` a week hidden `weeks` weeks."""
+    from engine import org_membership
+    line, aid, _ = _discipline_case(w, standing, aggression, repeat)
+    c = w.conn
+    c.execute("UPDATE org_lines SET weekly_take=?, started_day=? WHERE id=?", (take, DAY - 7 * weeks, line))
+    item = c.execute("SELECT * FROM org_agenda WHERE id=?", (aid,)).fetchone()
+    return org_membership.kill_weight(c, item, w.org, w.soldier, _seat(c, w.soldier), w.boss, DAY)
+
+
 def test_discipline_follows_temperament():
     w = open_world()
     best = lambda offers: max(offers, key=lambda o: o["utility"])["kind"]  # noqa: E731
     _, _, calm = _discipline_case(w, 0.8, 0.2)
     assert {o["kind"] for o in calm} == {"discipline_fine", "discipline_demote", "discipline_kill"}
-    assert best(calm) == "discipline_fine"
+    assert best(calm) == "discipline_fine"  # the ordinary answer: fined
+    # every driver moves the pull the way the data says; no one of them is a gate
+    base = _kill_raw(open_world(), 0.5, 0.5)
+    assert _kill_raw(open_world(), 0.5, 0.9) > base                       # a hotter head
+    assert _kill_raw(open_world(), 0.1, 0.5) > base                       # a man of less standing
+    assert _kill_raw(open_world(), 0.5, 0.5, take=5000.0) > base          # a bigger skim
+    assert _kill_raw(open_world(), 0.5, 0.5, weeks=90) > base             # one that ran longer
+    assert _kill_raw(open_world(), 0.5, 0.5, repeat=True) > base          # a repeat offence
+    # a first offence can end in death, but only when much adds up: a big, long skim, a nobody, a hot head
     w2 = open_world()
-    _, _, first = _discipline_case(w2, 0.0, 0.97)
-    assert best(first) != "discipline_kill"  # a first offence is never answered by killing, however violent the head
-    w3 = open_world()
-    _, _, again = _discipline_case(w3, 0.0, 0.8, repeat=True)
-    assert best(again) == "discipline_kill"
-    w4 = open_world()
-    _, _, mild = _discipline_case(w4, 0.0, 0.2, repeat=True)
-    assert best(mild) != "discipline_kill"  # a calm head fines him again
+    _kill_raw(w2, 0.0, 0.97, take=5000.0, weeks=100)
+    _, _, hot = _discipline_case(w2, 0.0, 0.97)
+    c2 = w2.conn
+    c2.execute("UPDATE org_lines SET weekly_take=5000, started_day=? WHERE id=(SELECT MAX(id) FROM org_lines)", (DAY - 700,))
+    item = c2.execute("SELECT * FROM org_agenda WHERE kind='discipline' ORDER BY id DESC LIMIT 1").fetchone()
+    from engine import org_choices
+    assert best(org_choices.AGENDA_ACTIONS["discipline"](c2, w2.boss, item, DAY)) == "discipline_kill"
+    # an ordinary first offence under the same hot head is a fine
+    assert best(_discipline_case(open_world(), 0.6, 0.97)[2]) != "discipline_kill"
+    # and a repeat offence is likelier to end in death than the same first offence
+    assert _kill_raw(open_world(), 0.5, 0.8, repeat=True) - _kill_raw(open_world(), 0.5, 0.8) >= 0.25
+
+
+def test_inducted_men_have_standing_from_years_role_and_earnings():
+    w = open_world()
+    c = w.conn
+    rows = {r[0]: r[1] for r in c.execute("SELECT role_key,AVG(standing) FROM org_seats WHERE inducted_day IS NOT NULL GROUP BY 1")}
+    assert all(v > 0.2 for v in rows.values()), rows
+    assert rows["boss"] > rows["soldier"] and rows["capo"] > rows["soldier"], rows
+    assert not [r for r in c.execute("SELECT 1 FROM org_seats WHERE inducted_day IS NOT NULL AND standing=0")]
+
+
+def test_inducted_standing_moves_weekly():
+    from engine import org_membership
+    w = open_world()
+    c = w.conn
+    s0 = float(_seat(c, w.soldier)["standing"])
+    c.execute("INSERT INTO org_money(day,kind,from_actor_id,to_actor_id,amount,org_actor_id) VALUES (?,?,?,?,?,?)", (DAY - 3, "kickup", w.soldier, w.capo, 100.0, w.org))
+    org_membership.move_standing(c, DAY)
+    s1 = float(_seat(c, w.soldier)["standing"])
+    assert s1 > s0 and s1 - s0 < 0.01, (s0, s1)  # passing money up on time raises it, slowly
+    c.execute("INSERT INTO custody(actor_id,kind,charge,since_day,until_day) VALUES (?,'held','test',?,?)", (w.soldier, DAY - 2, DAY + 20))
+    org_membership.move_standing(c, DAY + 1)
+    s2 = float(_seat(c, w.soldier)["standing"])
+    assert s2 < s1 - 0.05, (s1, s2)  # an arrest lowers it
+
+
+def test_being_caught_lowers_standing():
+    from engine import org_membership
+    w = open_world()
+    c = w.conn
+    holding = int(c.execute("SELECT id FROM org_holdings WHERE org_actor_id=? LIMIT 1", (w.org,)).fetchone()[0])
+    c.execute("INSERT INTO org_lines(holding_id,unit_id,holder_actor_id,description,weekly_take,hidden,started_day) VALUES (?,?,?,?,?,1,?)", (holding, w.unit, w.soldier, "x", 600.0, DAY - 140))
+    s0 = float(_seat(c, w.soldier)["standing"])
+    with forced_roll("hidden_discovery"):
+        org_membership.discover_hidden(c, DAY)
+    assert float(_seat(c, w.soldier)["standing"]) < s0
 
 
 def test_the_fine_is_the_kick_up_back_and_the_line_is_taken_or_the_man_killed():

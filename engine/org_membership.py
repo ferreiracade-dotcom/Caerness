@@ -377,6 +377,52 @@ def _replace_one(conn: sqlite3.Connection, org: int, sp: dict, unit: int, leader
     return new
 
 
+def _standing_data(conn: sqlite3.Connection) -> dict:
+    return _data(conn).get("standing") or {}
+
+
+def seed_standing(conn: sqlite3.Connection, day: int) -> int:
+    """At the opening, an inducted man's standing from his years inducted, the weight of his role and what his lines bring in a
+    week (each weight and scale a design figure named in `membership.standing`); dependants keep what the opening gave them."""
+    d = _standing_data(conn)
+    if not d:
+        return 0
+    n = 0
+    for org, sp in _orgs(conn):
+        for s in conn.execute("SELECT id,actor_id,role_key,inducted_day FROM org_seats WHERE org_actor_id=? AND status='active' AND inducted_day IS NOT NULL", (org,)).fetchall():
+            years = max(0.0, (int(day) - int(s["inducted_day"])) / 365.0)
+            take = conn.execute("SELECT COALESCE(SUM(weekly_take),0) FROM org_lines WHERE holder_actor_id=? AND status='active'", (int(s["actor_id"]),)).fetchone()[0]
+            v = (_v(conn, d.get("w_years")) * min(1.0, years / max(1e-9, _v(conn, d.get("years_cap"), 25.0)))
+                 + _v(conn, d.get("w_role")) * _v(conn, (d.get("role_weight") or {}).get(s["role_key"]), 0.0)
+                 + _v(conn, d.get("w_earn")) * min(1.0, float(take) / max(1e-9, _v(conn, d.get("earn_scale"), 1.0))))
+            conn.execute("UPDATE org_seats SET standing=? WHERE id=?", (clamp01(v), int(s["id"])))
+            n += 1
+    return n
+
+
+def move_standing(conn: sqlite3.Connection, day: int) -> int:
+    """Every inducted man's standing moves weekly: a man who earned or passed money up in the last period gains
+    `growth` x what is left to gain; a man taken into custody this week loses `arrest_loss`."""
+    d = _standing_data(conn)
+    if not d:
+        return 0
+    period, n = _cache(conn)["period"], 0
+    flows = list(d.get("earning_flows") or [])
+    g = _v(conn, d.get("growth"))
+    if flows and g > 0.0:
+        q = ",".join("?" * len(flows))
+        n += conn.execute(
+            """UPDATE org_seats SET standing=MIN(1.0, standing + ? * (1.0 - standing)) WHERE status='active' AND inducted_day IS NOT NULL AND actor_id IN
+               (SELECT from_actor_id FROM org_money WHERE kind IN (%s) AND day>? AND day<=? UNION SELECT to_actor_id FROM org_money WHERE kind IN (%s) AND day>? AND day<=?)""" % (q, q),
+            (g, *flows, int(day) - period, int(day), *flows, int(day) - period, int(day))).rowcount
+    loss = _v(conn, d.get("arrest_loss"))
+    if loss > 0.0:
+        n += conn.execute(
+            "UPDATE org_seats SET standing=MAX(0.0, standing - ?) WHERE status='active' AND actor_id IN (SELECT actor_id FROM custody WHERE kind='held' AND since_day>? AND since_day<=?)",
+            (loss, int(day) - WEEK, int(day))).rowcount
+    return n
+
+
 def grow_standing(conn: sqlite3.Connection, day: int) -> int:
     """Dependants who earned in the last period gain standing: `standing_growth * (reliability + ambition)` of what is still
     to gain (a reputation grows fast at first and slowly after)."""
@@ -425,12 +471,53 @@ def discover_hidden(conn: sqlite3.Connection, day: int) -> int:
         add_agenda(conn, head, "discipline", int(day), subject_kind="actor", subject_id=int(holder),
                    metadata={"org": org, "line": int(ln["id"]), "holder": int(holder), "found": int(day)})
         imposed(conn, int(holder))
+        _lose_standing(conn, s, _v(conn, _standing_data(conn).get("caught_loss")))  # being caught costs him face
         n += 1
     return n
 
 
 def _disc(conn: sqlite3.Connection, which: str, key: str, default: float = 0.0) -> float:
     return _v(conn, ((_data(conn).get("discipline") or {}).get(which) or {}).get(key), default)
+
+
+def _kept_back(conn: sqlite3.Connection, ln, day: int) -> tuple[float, float]:
+    """(what the line kept back from the men above, weeks it has been hidden): weekly take x weeks x the ladder shares."""
+    h = _data(conn).get("hidden") or {}
+    weeks = max(0.0, (int(day) - int(ln["started_day"])) / WEEK)
+    return float(ln["weekly_take"]) * weeks * sum(_v(conn, k) for k in (h.get("fine_share") or [])), weeks
+
+
+def _normal_kickup_week(conn: sqlite3.Connection, holder: int, day: int) -> float:
+    """What he normally passes up in a week (the kickup flow over the last four periods), never below the floor figure."""
+    h = _data(conn).get("hidden") or {}
+    span = 4 * _cache(conn)["period"]
+    got = conn.execute("SELECT COALESCE(SUM(amount),0) FROM org_money WHERE from_actor_id=? AND kind=? AND day>? AND day<=?",
+                       (int(holder), h.get("fine_flow"), int(day) - span, int(day))).fetchone()[0]
+    return max(float(got) / (span / WEEK), _disc(conn, "kill", "normal_floor", 1.0))
+
+
+def kill_weight(conn: sqlite3.Connection, item, org: int, holder: int, seat, head: int, day: int) -> float:
+    """How strongly the head is drawn to killing the man he caught: the size of the skim against his normal kick-up, how long it
+    ran, whose money it hit (all of it the head's own when the man answers to him, else the head's share of the ladder), how
+    many know of it (the men under him: face), his standing, the head's aggression, and a repeat offence, each with its
+    weight from the package; the base is negative: the cost of killing an inducted man."""
+    meta = _meta(item)
+    ln = conn.execute("SELECT * FROM org_lines WHERE id=?", (int(meta["line"]),)).fetchone()
+    if ln is None:
+        return 0.0
+    kept, weeks = _kept_back(conn, ln, day)
+    size = clamp01(kept / (_normal_kickup_week(conn, holder, day) * 52.0) / _disc(conn, "kill", "size_scale", 1.0))
+    dur = clamp01(weeks / _disc(conn, "kill", "duration_weeks", 104.0))
+    shares = [_v(conn, k) for k in ((_data(conn).get("hidden") or {}).get("fine_share") or [])]
+    direct = seat["superior_actor_id"] is not None and int(seat["superior_actor_id"]) == int(head)
+    hit_head = 1.0 if direct or not shares or sum(shares) <= 0 else shares[-1] / sum(shares)
+    under = conn.execute("SELECT COUNT(*) FROM org_seats WHERE superior_actor_id=? AND org_actor_id=? AND status='active'", (int(holder), int(org))).fetchone()[0]
+    face = clamp01(under / _disc(conn, "kill", "face_men", 5.0))
+    repeat = 1.0 if conn.execute("SELECT 1 FROM org_agenda WHERE kind='discipline' AND subject_id=? AND status='resolved' AND id<? "
+                                 "AND json_extract(metadata_json,'$.org')=? LIMIT 1", (int(holder), int(item["id"]), int(org))).fetchone() else 0.0
+    return (_disc(conn, "kill", "base") + _disc(conn, "kill", "size") * size + _disc(conn, "kill", "duration") * dur + _disc(conn, "kill", "hit_head") * hit_head
+            + _disc(conn, "kill", "face") * face + _disc(conn, "kill", "aggression") * _drive(conn, int(head), "aggression")
+            + _disc(conn, "kill", "low_standing") * (1.0 - float(seat["standing"])) + _disc(conn, "kill", "repeat") * repeat)
 
 
 def discipline_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
@@ -443,9 +530,7 @@ def discipline_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -
     standing, greed, aggr = float(s["standing"]), float(s["greed"]), _drive(conn, int(actor_id), "aggression")
     xs = {"discipline_fine": _disc(conn, "fine", "base") + _disc(conn, "fine", "standing") * standing,
           "discipline_demote": _disc(conn, "demote", "base") + _disc(conn, "demote", "greed") * greed,
-          "discipline_kill": _disc(conn, "kill", "base") + _disc(conn, "kill", "aggression") * aggr + _disc(conn, "kill", "low_standing") * (1.0 - standing)
-          + _disc(conn, "kill", "repeat") * (1.0 if conn.execute("SELECT 1 FROM org_agenda WHERE kind='discipline' AND subject_id=? AND status='resolved' AND id<? "
-                                                               "AND json_extract(metadata_json,'$.org')=? LIMIT 1", (holder, int(item["id"]), org)).fetchone() else 0.0)}
+          "discipline_kill": kill_weight(conn, item, org, holder, s, int(actor_id), int(day))}
     why = {"discipline_fine": f"Fines {_name(conn, holder)} the kick-up he kept back.", "discipline_demote": f"Takes the line from {_name(conn, holder)}.",
            "discipline_kill": f"Has {_name(conn, holder)} killed for holding out."}
     return [{"kind": k, "utility": _utility(conn, x), "rationale": why[k], "payload": payload, **({"target_actor_id": holder} if k == "discipline_kill" else {}),
@@ -519,7 +604,7 @@ def _after_vacancy(conn: sqlite3.Connection, org: int, seat, day: int, why: str)
 def _weekly(conn: sqlite3.Connection, day: int) -> dict:
     if not _data(conn):
         return {}
-    out = {"expired": expire_stale(conn, day), "caught": discover_hidden(conn, day), "standing": grow_standing(conn, day), "replaced": replace_dependants(conn, day)}
+    out = {"expired": expire_stale(conn, day), "caught": discover_hidden(conn, day), "standing": grow_standing(conn, day), "moved": move_standing(conn, day), "replaced": replace_dependants(conn, day)}
     out["books"] = sum(1 for org, _sp in _orgs(conn) if after_gone(conn, org, day, immediate=False))
     return out
 

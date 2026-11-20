@@ -332,4 +332,6 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
     from . import outfit_money  # after the people: holdings need the units and men (outfit_money imports this module)
     for key, gross in outfit_money.build_holdings(conn, day).items():
         counts[f"{key}:gross_yearly"] = int(round(gross))
+    from . import org_membership  # the men's standing from their years, role and what their lines bring in
+    org_membership.seed_standing(conn, day)
     return counts

@@ -1262,36 +1262,16 @@
    "note": "unsourced; respect lost for the man who took his line"
   },
   "disc_kill_base": {
-   "default": -0.2,
+   "default": -0.18,
    "range": null,
    "unit": "utility weight (a cost)",
    "tag": "Design",
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; killing a made man is never the first answer: this cost keeps it below the fine for a first offence whatever the head's temper (a made man's standing is 0, so only the repeat weight can lift it)"
+   "note": "unsourced; the cost of killing an inducted man: the sum of the drivers (skim size, how long it ran, whose money, face, the head's temper, how little he is worth, a repeat offence) must clear it, and a fine is worth about 0.6-0.8, so a first-offence kill is rare (calibrated to about 1-3% of first offences on the opening's hidden lines) and concentrated in big, long skims against the head's own money under a hot-tempered head"
   },
   "disc_kill_aggression": {
-   "default": 0.45,
-   "range": null,
-   "unit": "utility weight 0..1",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; weight on the head's aggression: a violent head is likelier to kill a man he has already fined or demoted once"
-  },
-  "disc_kill_low_standing": {
-   "default": 0.15,
-   "range": null,
-   "unit": "utility weight 0..1",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; weight on 1 - the man's standing: a nobody is easier to give up than a valued man"
-  },
-  "disc_kill_repeat": {
    "default": 0.35,
    "range": null,
    "unit": "utility weight 0..1",
@@ -1299,7 +1279,187 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; a man caught holding out again after being fined or demoted: with a head of aggression above about 0.6 the answer becomes killing him, a calm head still fines him; a first offence is never answered by killing"
+   "note": "unsourced; weight on the head's aggression"
+  },
+  "disc_kill_low_standing": {
+   "default": 0.2,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on 1 - the man's standing (inducted men have real standing now): a man of little standing is easier to give up"
+  },
+  "disc_kill_repeat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; one input among the others, not a gate: a man caught again after being fined or demoted is likelier to die, a first offence is not safe"
+  },
+  "standing_years_cap": {
+   "default": 25,
+   "range": null,
+   "unit": "years",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; years inducted after which more years add no standing (the opening's made men are 25-75; a man with a quarter century in has all there is to have from tenure)"
+  },
+  "standing_w_years": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; share of an inducted man's opening standing that comes from years inducted"
+  },
+  "standing_w_role": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; share that comes from the weight of his role (the rank weights hap_rank_*: soldier 0.4, capo 0.7, boss 1.0)"
+  },
+  "standing_w_earn": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; share that comes from what his lines bring in (against standing_earn_scale)"
+  },
+  "standing_earn_scale": {
+   "default": 1500.0,
+   "range": null,
+   "unit": "dollars a week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weekly take of the lines a man holds that earns him all of the earnings share (about a busy capo's own lines)"
+  },
+  "standing_growth": {
+   "default": 0.004,
+   "range": null,
+   "unit": "fraction of what is left, per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; an inducted man who earned or passed money up on time in the last period gains this share of the standing he still lacks each week (about 0.2 of the gap a year, as for dependants)"
+  },
+  "standing_arrest_loss": {
+   "default": 0.08,
+   "range": null,
+   "unit": "standing lost",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man taken into custody loses this at once (an arrest is bad for his name even when he is quickly out)"
+  },
+  "standing_caught_loss": {
+   "default": 0.1,
+   "range": null,
+   "unit": "standing lost",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man caught with a hidden line loses this face at once, before the head decides anything"
+  },
+  "disc_kill_size": {
+   "default": 0.3,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on the size of the skim (what the line kept back from the men above, against what he normally passes up in a year)"
+  },
+  "disc_kill_duration": {
+   "default": 0.15,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on how long the line ran hidden (against disc_kill_duration_weeks)"
+  },
+  "disc_kill_hit_head": {
+   "default": 0.1,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on whose money it was: all of it the head's own when the man answers to him, otherwise the head's share of the ladder (0.117 of 0.30)"
+  },
+  "disc_kill_face": {
+   "default": 0.1,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on how many know (the men under him, against disc_kill_face_men): a man who is known to have cheated the head cannot be seen to be let off"
+  },
+  "disc_kill_size_scale": {
+   "default": 1.0,
+   "range": null,
+   "unit": "ratio",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a skim equal to a year of his normal kick-up counts as the largest"
+  },
+  "disc_kill_duration_weeks": {
+   "default": 104,
+   "range": null,
+   "unit": "weeks",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a line hidden for two years counts as the longest"
+  },
+  "disc_kill_face_men": {
+   "default": 5,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; five men under him is all the face there is to lose"
+  },
+  "disc_kill_normal_floor": {
+   "default": 100.0,
+   "range": null,
+   "unit": "dollars a week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; floor on a man's normal weekly kick-up, so a man who passes nothing up does not divide by zero (and any skim is then large)"
   },
   "associate_happening_week": {
    "default": 0.0206,
