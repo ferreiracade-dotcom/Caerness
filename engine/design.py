@@ -76,12 +76,21 @@ def _num(x) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool)
 
 
+_PARSED: dict = {"key": None, "figures": {}}
+
+
 def package_figures(conn: sqlite3.Connection) -> dict[str, dict]:
+    """The package's figure definitions. The file is parsed again only when it changes (the callers ask on every figure read, and
+    a package with a few hundred figures made each parse a visible share of a long advance)."""
     from .world_package import package_for
     path = package_for(conn).data.get("design")
     if path is None:
         return {}
-    return dict(json.loads(path.read_text(encoding="utf-8")).get("figures") or {})
+    st = path.stat()
+    key = (str(path), st.st_mtime_ns, st.st_size)
+    if _PARSED["key"] != key:
+        _PARSED.update(key=key, figures=json.loads(path.read_text(encoding="utf-8")).get("figures") or {})
+    return dict(_PARSED["figures"])
 
 
 def _ensure(conn: sqlite3.Connection) -> None:

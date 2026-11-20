@@ -762,6 +762,8 @@ def _finish_contest(conn: sqlite3.Connection, row, meta: dict, winner: int | Non
         for b in [int(b) for b, p in meta["picks"].items() if int(p) == winner and int(b) != winner]:
             adjust_relationship(conn, b, winner, int(day), loyalty_delta=v(conn, blk.get("win_loyalty"), 0.0))
         install_head(conn, org, winner, int(day), outcome)
+        for b in meta["picks"]:
+            imposed(conn, int(b))  # backers of the winner and of the men who lost: all looked at again
     close_row(conn, int(row["id"]), int(day), **{**meta, "outcome": outcome, "winner": winner, "closed": int(day), "weeks": (int(day) - int(meta["opened"])) // WEEK})
 
 
