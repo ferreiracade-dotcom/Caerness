@@ -37,6 +37,7 @@ from .org_money import next_due_day as next_outfit_money_due_day, process_due as
 from .org_happenings import next_due_day as next_outfit_incidents_due_day, process_due as process_due_outfit_incidents
 from .org_lifecycle import next_due_day as next_org_lifecycle_due_day, process_due as process_due_org_lifecycle
 from . import org_membership  # noqa: F401  (registers the lifecycle hooks and the books and discipline agenda)
+from . import org_succession, org_coup  # noqa: F401  (heir, contest, appointments, plots, coups, civil war: lifecycle hooks and agenda)
 from .cultivation import next_cultivation_due_day, process_due_cultivation
 from .groundbinding import next_groundbinding_due_day, process_due_groundbinding
 from .tournaments import next_tournament_due_day, process_due_tournaments

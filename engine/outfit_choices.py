@@ -109,6 +109,8 @@ def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sancti
                                (int(victim), int(victim))).fetchall():
         imposed(conn, int(sub))  # the men who answered to him are looked at again tomorrow
     conn.execute("UPDATE org_seats SET status='dead', left_day=? WHERE actor_id=? AND status='active'", (int(day), int(victim)))
+    conn.execute("INSERT INTO org_agenda(actor_id,kind,due_day,subject_kind,subject_id,created_day,status,resolved_day,metadata_json) VALUES (?,?,?,?,?,?,'resolved',?,?)",
+                 (int(victim), "killed_by", int(day), "actor", int(killer), int(day), int(day), json.dumps({"sanctioned": bool(sanctioned)})))  # who did it: the succession reads it
     from .org_happenings import killed_across  # a man of one organisation killed by a man of another: his head answers
     killed_across(conn, int(killer), int(victim), seats, int(day))
     mark_for_history(conn, int(victim), f"killed by {_name(conn, killer)}", int(day))
@@ -235,12 +237,22 @@ def execute_let_lie(conn, actor_id, kind, payload, day):
 
 def fill_seat_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
     org = json.loads(item["metadata_json"] or "{}").get("org")
+    from .org_succession import appointment_offers  # the head weighs each man of the unit when the package gives the data
+    weighed = appointment_offers(conn, actor_id, item, int(day))
+    if weighed is not None:
+        return weighed
     return [{"kind": "fill_unit_leader_seat", "utility": _utility(conn, 1.0), "rationale": f"Fills the vacant {_word(conn, org, 'unit_leader')}'s seat.",
              "payload": {"unit_id": int(item["subject_id"])}}]
 
 
 def execute_fill_unit_leader_seat(conn, actor_id, kind, payload, day):
-    new = fill_unit_leader(conn, int(payload["unit_id"]), int(day))
+    unit = int(payload["unit_id"])
+    org = conn.execute("SELECT org_actor_id FROM org_units WHERE id=?", (unit,)).fetchone()[0]
+    head = head_of(conn, int(org))
+    new = fill_unit_leader(conn, unit, int(day), chosen=payload.get("candidate"), superior=head if head != payload.get("candidate") else None)
+    if new is not None and payload.get("candidate") is not None:
+        from .org_succession import after_appointment
+        after_appointment(conn, int(org), int(actor_id), int(new), unit, int(day))
     _finish(conn, payload, day)
     return {"summary": f"{_name(conn, new)} took the seat." if new is not None else "No one was fit to take the seat."}
 

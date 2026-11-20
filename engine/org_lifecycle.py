@@ -35,10 +35,24 @@ def _head_loyalty(conn: sqlite3.Connection, actor_id: int, head: int | None) -> 
     return float(d[0]) if d is not None else 0.5
 
 
-def fill_unit_leader(conn: sqlite3.Connection, unit_id: int, day: int, force: bool = False) -> int | None:
-    """Give a unit whose leader is gone a new one. The unit member with the best standing, years inducted and loyalty to
-    the head (inducted members first; any member when no one is inducted) takes the unit-leader role, under the old
-    leader's superior; the men who answered to the old leader now answer to him; the lines the old leader held and the
+def unit_pool(conn: sqlite3.Connection, unit_id: int, day: int, exclude: int | None = None) -> list:
+    """The men of a unit who could lead it: living, in a seat that is not the unit leader's; the inducted ones when there are any."""
+    unit = conn.execute("SELECT * FROM org_units WHERE id=?", (int(unit_id),)).fetchone()
+    if unit is None:
+        return []
+    org = int(unit["org_actor_id"])
+    role = orgs.kind_rules(conn, org).get("unit_leader")
+    old = unit["leader_actor_id"]
+    members = [r for r in orgs.members(conn, org) if r["unit_id"] == int(unit_id) and r["role_key"] != role
+               and (old is None or int(r["actor_id"]) != int(old)) and (exclude is None or int(r["actor_id"]) != int(exclude)) and orgs.is_living(conn, int(r["actor_id"]))]
+    return [r for r in members if r["inducted_day"] is not None] or members
+
+
+def fill_unit_leader(conn: sqlite3.Connection, unit_id: int, day: int, force: bool = False, chosen: int | None = None,
+                     superior: int | None = None) -> int | None:
+    """Give a unit whose leader is gone a new one. `chosen` is the man the deciding head named (when he is of the unit); else the
+    unit member with the best standing, years inducted and loyalty to the head (inducted members first; any member when no
+    one is inducted) takes the unit-leader role, under the old leader's superior (or `superior`); the men who answered to the old leader now answer to him; the lines the old leader held and the
     unit's lines stay with the unit under him. Returns the new leader's actor id; None when the unit's leader is alive,
     the kind has no unit leaders, or there is no one to take the place."""
     unit = conn.execute("SELECT * FROM org_units WHERE id=?", (int(unit_id),)).fetchone()
@@ -51,13 +65,11 @@ def fill_unit_leader(conn: sqlite3.Connection, unit_id: int, day: int, force: bo
         return None
     if old is not None and not force and orgs.is_living(conn, int(old)):
         seat = orgs.seat_of(conn, int(old), org)
-        if seat is not None and seat["status"] == "active":
+        if seat is not None and seat["status"] == "active" and seat["role_key"] == role:
             return None
     old_seat = orgs.seat_of(conn, int(old), org) if old is not None else None
     head = orgs.head_of(conn, org)
-    members = [r for r in orgs.members(conn, org) if r["unit_id"] == int(unit_id) and r["role_key"] != role
-               and (old is None or int(r["actor_id"]) != int(old)) and orgs.is_living(conn, int(r["actor_id"]))]
-    pool = [r for r in members if r["inducted_day"] is not None] or members
+    pool = unit_pool(conn, unit_id, day)
     if not pool:
         return None
 
@@ -66,9 +78,12 @@ def fill_unit_leader(conn: sqlite3.Connection, unit_id: int, day: int, force: bo
 
     top = max((years(r) for r in pool), default=0.0) or 1.0
     best = max(pool, key=lambda r: (float(r["standing"]) + years(r) / top + _head_loyalty(conn, int(r["actor_id"]), head), -int(r["actor_id"])))
+    named = [r for r in pool if chosen is not None and int(r["actor_id"]) == int(chosen)]
+    best = named[0] if named else best
     new = int(best["actor_id"])
-    superior = old_seat["superior_actor_id"] if old_seat is not None else head
-    level = int(old_seat["level"]) if old_seat is not None else int(best["level"])
+    if superior is None:
+        superior = old_seat["superior_actor_id"] if old_seat is not None and old_seat["role_key"] == role else head
+    level = int(old_seat["level"]) if old_seat is not None and old_seat["role_key"] == role else (role_level(conn, org, role) or int(best["level"]))
     conn.execute("UPDATE org_seats SET role_key=?, superior_actor_id=? WHERE actor_id=? AND org_actor_id=?", (role, superior, new, org))
     if old is not None:
         conn.execute("UPDATE org_seats SET superior_actor_id=? WHERE org_actor_id=? AND superior_actor_id=? AND actor_id<>?",
@@ -98,6 +113,9 @@ def fill_unit_leader(conn: sqlite3.Connection, unit_id: int, day: int, force: bo
 WEEK = 7
 DUE_OFFSET = 3  # a day of the week of its own, so the lifecycle does not run on the day the dependants' weeks do
 _VACANCY: list = []  # (org kind or None, fn(conn, org_actor_id, seat_row, day, why))
+_UNIT_VACANCY: list = []
+_HEAD_VACANCY: list = []
+_RETURNS: list = []
 _WEEKLY: list = []  # (None, fn(conn, day) -> dict), run after the lifecycle's own steps
 
 
@@ -114,6 +132,23 @@ def on_vacancy(org_kind: str | None, fn) -> None:
     """Register fn(conn, org_actor_id, seat_row, day, why) to run once for each seat that falls vacant (why: dead, out or
     held) in organisations of `org_kind` (None: every kind). The hook decides from the package's data whether it applies."""
     _register(_VACANCY, org_kind, fn)
+
+
+def on_unit_vacancy(fn) -> None:
+    """Register fn(conn, org_actor_id, seat_row, day, why) -> bool for a vacated unit-leader seat. True: it took the matter up (the
+    head is asked to name the leader) and the best-man rule does not run."""
+    _register(_UNIT_VACANCY, None, fn)
+
+
+def on_head_vacancy(fn) -> None:
+    """Register fn(conn, org_actor_id, seat_row, day, why) -> bool for a vacated head seat. True: it took the matter up (a
+    contest) and the data's succession ladder does not run."""
+    _register(_HEAD_VACANCY, None, fn)
+
+
+def on_return(fn) -> None:
+    """Register fn(conn, org_actor_id, actor_id, day) -> bool for a released head: True when he takes his seat back."""
+    _register(_RETURNS, None, fn)
 
 
 def on_week(fn) -> None:
@@ -244,10 +279,13 @@ def _vacate(conn: sqlite3.Connection, seat, why: str, day: int) -> None:
     rules = orgs.kind_rules(conn, org)
     successor = None
     if seat["role_key"] == rules.get("unit_leader") and seat["unit_id"]:
-        successor = fill_unit_leader(conn, int(seat["unit_id"]), int(day))
+        if not any(fn(conn, org, seat, int(day), why) for _k, fn in list(_UNIT_VACANCY)):
+            successor = fill_unit_leader(conn, int(seat["unit_id"]), int(day))
         mk = conn.execute("SELECT id FROM org_agenda WHERE kind='acting' AND status='open' AND actor_id=? AND subject_id=?", (gone, org)).fetchone()
         if mk is not None:
             conn.execute("UPDATE org_agenda SET metadata_json=? WHERE id=?", (json.dumps({"unit": int(seat["unit_id"]), "acting": successor, "prior": _lc(conn, org).get("returns_as")}), int(mk["id"])))
+    elif seat["role_key"] == rules.get("head") and any(fn(conn, org, seat, int(day), why) for _k, fn in list(_HEAD_VACANCY)):
+        successor = None  # a contest (or a coup) decides it, over weeks
     elif seat["role_key"] in (_lc(conn, org).get("succession") or {}):
         successor = _promote(conn, org, seat["role_key"], int(day))
     target = successor if successor is not None else _live_superior(conn, org, seat)
@@ -351,6 +389,8 @@ def _return(conn: sqlite3.Connection, seat, day: int) -> None:
     elif role == rules.get("head"):
         h = orgs.head_of(conn, org)
         taken = h is not None and h != a
+        if taken and any(fn(conn, org, a, int(day)) for _k, fn in list(_RETURNS)):
+            taken = False
     conn.execute("DELETE FROM org_agenda WHERE kind='vacancy' AND actor_id=? AND subject_id=?", (a, org))
     mk = conn.execute("SELECT * FROM org_agenda WHERE kind='acting' AND status='open' AND actor_id=? AND subject_id=?", (a, org)).fetchone()
     if mk is not None:

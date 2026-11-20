@@ -1,6 +1,1606 @@
 {
  "about": "Design and derived figures the engine draws once per run (kind draw), derives (kind derived, formula over other figure defaults) or holds (kind fixed), from Saint Jude Setting Bible Part VI and the Parts it cites. Dollars are 1975 dollars; *_m keys are USD millions. pools is the Part VI 9.3A allocation table (family shares sum to 100). Checked by tools/check_saintjude_pools.py.",
  "figures": {
+ "appoint_w_trust": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of trust (trust + loyalty toward the man) in a head's or leader's choice of a man for a post. The heaviest single pull with merit: such posts go to men the chooser can rely on. Weights are relative (a weighted mean). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_w_kin": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of kin (spouse, parent, child, sibling) in an appointment: blood is a strong reason in a crime family and a smaller one than trust, because a kinsman is not always a reliable man. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_w_favour": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of favours owed by the chooser to the man (relationship obligation) in an appointment: debts are repaid in posts. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_w_money": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the money a man could put up for the post (his purse x the share he would offer x his ambition, against appoint_money_scale): a post can be bought but money is a light reason. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_w_merit": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of merit (standing, which already blends years, role and earnings, and years inducted) in an appointment: the same as trust, so a trusted man and a proven man pull equally and the chooser's temperament decides which. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_w_cowed": {
+    "default": 0.05,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the man's fear of the chooser in an appointment: a man who fears him is easy to control; the lightest reason, raised by an aggressive chooser. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_temper": {
+    "default": 0.6,
+    "range": null,
+    "unit": "factor",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How much temperament bends the appointment weights: weight x (1 + this x (trait - 0.5) x 2) with trust and favour bent by the chooser's loyalty, money by his greed, merit by his pragmatism, fear by his aggression. A pragmatic head names the senior man, a loyal one his friend, a greedy one the man who pays. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_merit_standing": {
+    "default": 0.7,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Merit = (this x standing + appoint_merit_years x years inducted) / (sum). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_merit_years": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Seniority's share of merit (years inducted over standing_years_cap). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_money_share": {
+    "default": 0.3,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The share of his purse a man offers for a post (paid to the chooser through the ledger and an org_money row when he is chosen), scaled by his ambition. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_money_scale": {
+    "default": 20000.0,
+    "range": null,
+    "unit": "USD",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The offer that counts as 1.0 on the money term: about a made man's yearly purse in 1975 dollars. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_fallback_days": {
+    "default": 56,
+    "range": null,
+    "unit": "days",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A unit that has no leader and whose head has not decided after this long past due takes the best-man rule so no unit is leaderless for ever (a stuck state: no head, or one who never answers). Two money periods. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_chosen_trust": {
+    "default": 5.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Relationship points: the man chosen trusts the chooser more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_chosen_loyalty": {
+    "default": 5.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Relationship points: the man chosen is more loyal to the chooser. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_chosen_obligation": {
+    "default": 10.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Relationship points: the man chosen owes the chooser a favour. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "appoint_passed_resentment": {
+    "default": 4.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Relationship points: each man passed over resents the chooser. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_w_trust": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the head's trust in a man when he settles on an heir: the head names a man he trusts. Relative weights. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_w_kin": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of kin in the head's heir: a son, brother or nephew is the natural heir in the stories this world lives on. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_w_favour": {
+    "default": 0.05,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of favours the head owes the man in his heir. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_w_merit": {
+    "default": 0.25,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of merit (standing, years) in the head's heir. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_w_customary": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the customary role (succ_customary_*) in the head's heir: the usual successors are favoured but not fixed. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_w_cowed": {
+    "default": 0.05,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the man's fear of the head: an heir who is afraid of him is safe to name. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_temper": {
+    "default": 0.6,
+    "range": null,
+    "unit": "factor",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Temperament bend on the heir weights (trust by loyalty, merit by pragmatism, fear by aggression). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_min_score": {
+    "default": 0.2,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A head names nobody when no candidate scores this much: the contest is then left open (a head who cannot decide, or who will not). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_pick_temp": {
+    "default": 0.08,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply the head's pick follows the scores (the engine's usual softmax): a gap of 0.1 makes the better man about 3.5 times likelier. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_form_week": {
+    "default": 0.02,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance that a head with no preference forms one (x 0.25 to 1 by his age): about one head in three settles in the first year, almost all in a few years, none ever need to. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_revise_week": {
+    "default": 0.01,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance that a head reconsiders: about every two years, so the preference moves with the relationships. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_show_week": {
+    "default": 0.01,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance (x 0.25 to 1 by age) that the head makes his preference visible by telling the unit leaders: a man shows it after a few years, and some die first. Many heads never do, by design: the usual outcome is then a contested succession. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_age_from": {
+    "default": 50,
+    "range": null,
+    "unit": "years",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The age at which a head's pull to settle his succession starts to rise. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_age_span": {
+    "default": 25,
+    "range": null,
+    "unit": "years",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The span over which it rises to its full value (50 to 75, the opening heads' ages). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_show_trust": {
+    "default": 8.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; When the heir is shown, every other backer's trust in him moves by this (x 0.5 to 1.5 by the backer's loyalty). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_show_respect": {
+    "default": 6.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; When the heir is shown, every other backer's respect for him rises by this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "heir_show_resentment": {
+    "default": 8.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; When the heir is shown, the men who would have wanted the seat resent him (x 0.5 to 1.5 by their ambition) and are looked at again. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "succ_customary_underboss": {
+    "default": 1.0,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Custom: the head's deputy is the usual successor. Weight of the role in the candidate set and in the contest (the bible does not fix an order). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "succ_customary_consigliere": {
+    "default": 0.6,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Custom: the head's adviser is the next usual successor, less often than the deputy. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "succ_customary_capo": {
+    "default": 0.4,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Custom: a unit leader can rise to the head's seat; less than the two above. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "succ_ambitious_standing": {
+    "default": 0.7,
+    "range": null,
+    "unit": "standing",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; An inducted man outside the customary roles may stand for the head's seat if his standing is at least this... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "succ_ambitious_ambition": {
+    "default": 0.8,
+    "range": null,
+    "unit": "drive",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and his ambition at least this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "succ_ambitious_stand": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The weight of an ambitious man outside the customary roles standing in a given week (x 0.5 to 1.5 by his ambition). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_stand_week": {
+    "default": 0.6,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance that a man with a customary weight w stands: this x w x (0.5 + his ambition). The acting head and a shown heir always stand. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_trust": {
+    "default": 0.25,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of a backer's trust in a candidate when he picks whom to back in a succession contest. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_kin": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of kin in backing. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_favour": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of favours owed to the candidate (debts). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_money": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the money the candidate could put up. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_fear": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the backer's fear of the candidate. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_merit": {
+    "default": 0.15,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of merit. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_heir": {
+    "default": 0.35,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of being the late head's named heir: heavy, not final. Even a shown heir loses to a rival the leaders trust and fear more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_own": {
+    "default": 0.25,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of a backer backing himself when he stands. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_customary": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the customary role in backing. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_w_muscle": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight of the candidate's muscle (the men under him and his temper), counted only in a war (the head was killed by another organisation): a wartime choice weighs muscle more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_against_resentment": {
+    "default": 0.25,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight against a candidate of the backer's resentment of him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_against_tainted": {
+    "default": 0.35,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weight against a candidate who killed the head and was not backed: the stain on him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_crew_weight": {
+    "default": 1.0,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A backer counts for 1 + this x (men under him / contest_crew_scale, capped at 1): a unit leader with a large crew carries more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_crew_scale": {
+    "default": 10,
+    "range": null,
+    "unit": "men",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The crew size at which a backer's extra weight is full. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_stick": {
+    "default": 0.05,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A backer keeps last week's candidate with this much extra weight, so backing does not flip each week. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_pick_temp": {
+    "default": 0.08,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply a backer follows his weights. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_agree_share": {
+    "default": 0.6,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A candidate is agreed when he holds this share of the backing and leads the next by contest_agree_margin; the share needed falls by contest_agree_decay each week after the minimum, so contests end. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_agree_margin": {
+    "default": 0.15,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The lead over the runner-up needed to be agreed. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_agree_decay": {
+    "default": 0.02,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How much the needed share falls each week after contest_min_weeks (weariness). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_min_weeks": {
+    "default": 2,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A contest runs at least this long before it can be agreed: it plays out over weeks, not the same day. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_war_after_weeks": {
+    "default": 4,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A contest can turn into a civil war only after this long... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_war_share": {
+    "default": 0.3,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and only when the runner-up holds at least this share of the backing. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_war_week": {
+    "default": 0.15,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance of civil war at full tension between the two leading claimants (their resentment and tempers). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_max_weeks": {
+    "default": 26,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A contest unresolved after half a year ends with the leader holding the seat. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_kill_week": {
+    "default": 0.01,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance, x the candidate's aggression and ambition and his gap to the leader, that a candidate who is losing has the leader killed. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_force_week": {
+    "default": 0.15,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance (x aggression) that a leading candidate leans on a man backing another: fear on that man's relationship, so the next week's weighing moves; an outcome reached after this is called forced. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_force_fear": {
+    "default": 10.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The fear a threat adds. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_force_resentment": {
+    "default": 6.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The resentment a threat adds. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_bribe_week": {
+    "default": 0.1,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance (x ambition) that a leading candidate pays a man backing another; an outcome reached after this is called bought. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_bribe_share": {
+    "default": 0.15,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The share of his purse he pays. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_bribe_obligation": {
+    "default": 12.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The obligation the payment creates. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_lose_resentment": {
+    "default": 6.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The resentment of the winner among those who backed another. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_win_loyalty": {
+    "default": 4.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The loyalty of his backers to the winner. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_outside_weight": {
+    "default": 1.0,
+    "range": null,
+    "unit": "voice",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; An outside organisation's head weighs in for the candidate he likes best (as one backer of this weight). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "contest_outside_min": {
+    "default": 0.2,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...if his liking (trust, respect less resentment) reaches this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_share": {
+    "default": 0.55,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A man who kills the head is backed when this share of the backers (those who joined his plot, plus those who would have backed him by the contest weights) stand with him: he then takes the seat. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_backed_war": {
+    "default": 0.25,
+    "range": null,
+    "unit": "chance",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Even a backed coup can meet a loyalist war: this x the loyalists' share. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_unbacked_war": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Unbacked killer: weight of the factions going to war, x how even the sides are. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_unbacked_loyalists_kill": {
+    "default": 0.8,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Unbacked killer: weight of the loyalists killing him quickly, x the loyalists' share and temper. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_unbacked_contest": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Unbacked killer: weight of the ordinary contest running with the stain on him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_temp": {
+    "default": 0.15,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply these weights are followed. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_accept_base": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A loyalist accepts the new head: base. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_accept_trust": {
+    "default": 0.4,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus this x his trust in the killer. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_accept_fear": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus this x his fear of him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_buy_base": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A loyalist is bought: base x the killer's purse against coup_buy_scale x (0.5 + the loyalist's greed). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_buy_share": {
+    "default": 0.15,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The share of his purse the new head pays a bought loyalist. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_buy_scale": {
+    "default": 5000.0,
+    "range": null,
+    "unit": "USD",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The purse share that counts as 1.0 for buying. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_buy_obligation": {
+    "default": 12.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A bought loyalist owes the new head this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_remove_base": {
+    "default": 0.9,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A loyalist is removed (killed): base x the killer's aggression x the loyalist's loyalty to the late head x (1 - his fear of the killer). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_accept_fear_gain": {
+    "default": 8.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A loyalist who accepts fears the new head more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "coup_accept_resentment": {
+    "default": 6.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and resents him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_start_week": {
+    "default": 0.002,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance, before x ambition x (1 - loyalty to the head) x push x (0.5 + risk tolerance), that an ambitious, backed man starts a plot against a living head. A rare, temperament-driven thing, never scheduled; most plots leak or fizzle. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_heir_rate": {
+    "default": 0.003,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The same against a head's shown heir by a man who was passed over. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_min_standing": {
+    "default": 0.5,
+    "range": null,
+    "unit": "standing",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Only inducted men of at least this standing plot. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_min_ambition": {
+    "default": 0.7,
+    "range": null,
+    "unit": "drive",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and of at least this ambition. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_w_resentment": {
+    "default": 0.7,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Push from his resentment of the target. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_w_blocked": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Push from the head's having shown another man as his heir (the plotter is passed over). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_sound_week": {
+    "default": 0.35,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance the plotter sounds out one more backer. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_leak_week": {
+    "default": 0.06,
+    "range": null,
+    "unit": "per man",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance, per man sounded, that the plot reaches the head. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_ready_share": {
+    "default": 0.5,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The share of the backers joined at which the plotter can strike. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_strike_week": {
+    "default": 0.2,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance (x aggression) he strikes once ready. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_max_weeks": {
+    "default": 26,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A plot that has not struck after half a year fizzles. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_join_obligation": {
+    "default": 10.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A man who joins is owed by the plotter. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_join_base": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A man sounded joins: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_trust": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus trust in the plotter... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_fear": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus fear of him... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_favour": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus a favour owed... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_ambition": {
+    "default": 0.4,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus his own ambition x (1 - his loyalty to the target). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_tell_base": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; He goes to the head: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_loyalty": {
+    "default": 0.9,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus his loyalty to the target x his reliability x (1 - fear of the plotter). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_refuse_base": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; He refuses and keeps quiet. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_respond_temp": {
+    "default": 0.1,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply these are followed. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_joined_scale": {
+    "default": 3.0,
+    "range": null,
+    "unit": "men",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Backers joined that count as 1.0 when the head weighs a plot found. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_kill_base": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The head has the plotter killed: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_kill_aggression": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the head's aggression... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_kill_joined": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus how many joined... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_kill_low_standing": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus (1 - the plotter's standing). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_exile_base": {
+    "default": 0.35,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The head puts the plotter out: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_exile_caution": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus (1 - his aggression)... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_exile_joined": {
+    "default": 0.1,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus how many joined. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_pardon_base": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The head lets it pass: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_pardon_fond": {
+    "default": 0.4,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus his fondness for the plotter... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_pardon_standing": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the plotter's standing. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_fear": {
+    "default": 10.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The men who joined a plot that is put down fear the head more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_pardon_fear": {
+    "default": 12.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A pardoned plotter fears the head more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "plot_found_pardon_resentment": {
+    "default": 8.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and resents him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_min_weeks": {
+    "default": 2,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A civil war can end by a win share or a settlement only after this long. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_win_share": {
+    "default": 0.8,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; One side holding this share of the strength wins (or the other side has no leader). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_kill_week": {
+    "default": 0.45,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance at full intensity that one side kills a man of the other. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_start_intensity": {
+    "default": 0.3,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Intensity in the first week. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_ramp_weeks": {
+    "default": 6,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weeks to full intensity. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_dependant_weight": {
+    "default": 0.3,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A man not inducted counts this much against an inducted man in a side's strength. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_money_weight": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A side's leader's purse adds to its strength by this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_money_scale": {
+    "default": 50000.0,
+    "range": null,
+    "unit": "USD",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The purse that counts as 1.0. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_leader_target": {
+    "default": 0.4,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A side's leader and its unit leaders are likelier targets by this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_men_target": {
+    "default": 0.2,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; An inducted man is likelier a target by this. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_kill_resentment": {
+    "default": 10.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The resentment between leaders after each killing. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_defect_week": {
+    "default": 0.1,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance a backer weighs changing sides. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_defect_margin": {
+    "default": 0.1,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; He changes when the other leader weighs this much more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_defect_loyalty": {
+    "default": 6.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Loyalty lost to the leader he left. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_cost_week": {
+    "default": 120.0,
+    "range": null,
+    "unit": "USD",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; What a side's leader pays each week per man on his side (paying a war). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_tired_weeks": {
+    "default": 12,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weeks at which weariness is full (settlements and splits get likelier). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_settle_week": {
+    "default": 0.25,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance of a settlement at full weariness, x how even the sides are x (1 - the leaders' average aggression). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_split_week": {
+    "default": 0.12,
+    "range": null,
+    "unit": "per week",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Weekly chance the weaker side leaves as a new organisation (x weariness, its leader's ambition, the bitterness between leaders). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_split_min_share": {
+    "default": 0.25,
+    "range": null,
+    "unit": "share",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; The weaker side must hold at least this share of the strength to split off... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_split_min_men": {
+    "default": 4,
+    "range": null,
+    "unit": "men",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...and at least this many inducted men. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_max_weeks": {
+    "default": 40,
+    "range": null,
+    "unit": "weeks",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A war that has run this long ends in a settlement. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_settle_thaw": {
+    "default": 25.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Resentment between the leaders falls by up to this at a settlement. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_settle_trust": {
+    "default": 5.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Trust between them rises. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_start_resentment": {
+    "default": 6.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Each man's resentment of the other side's leader at the start. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_kill_base": {
+    "default": 0.0,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A made man on the losing side is killed: base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_kill_aggression": {
+    "default": 0.9,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus the winner's aggression x the man's weight (unit leaders 1, others half his standing) x (1 - his fear of the winner). (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_demote_base": {
+    "default": 0.25,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Demoted (lines taken, command lost): base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_demote_weight": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus this x the man's weight. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_absorb_base": {
+    "default": 0.25,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; Absorbed (he stays): base... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_absorb_fear": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus his fear of the winner... (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_absorb_trust": {
+    "default": 0.5,
+    "range": null,
+    "unit": "weight",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; ...plus his trust in him. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_temp": {
+    "default": 0.1,
+    "range": null,
+    "unit": "score",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; How sharply these are followed. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_demote_resentment": {
+    "default": 10.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; A demoted man resents the winner. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
+ "war_loser_absorb_fear_gain": {
+    "default": 10.0,
+    "range": null,
+    "unit": "points",
+    "tag": "Design",
+    "kind": "fixed",
+    "mark": "Design proposal",
+    "source": "unsourced",
+    "note": "unsourced; An absorbed man fears the winner more. (B12b: engine/org_succession.py, engine/org_coup.py)"
+ },
   "hap_k_delay": {
    "default": 2,
    "range": null,

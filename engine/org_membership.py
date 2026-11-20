@@ -68,10 +68,14 @@ def _spec(conn: sqlite3.Connection, org: int) -> dict | None:
     figure, a member role and a dependent role."""
     if not _data(conn):
         return None
-    row = conn.execute("SELECT package_key FROM org_profiles WHERE org_actor_id=?", (int(org),)).fetchone()
+    row = conn.execute("SELECT package_key,metadata_json FROM org_profiles WHERE org_actor_id=?", (int(org),)).fetchone()
     if row is None:
         return None
-    outfit = (org_motives._sphere_data(conn).get("outfits") or {}).get(row[0]) or {}
+    outfits = org_motives._sphere_data(conn).get("outfits") or {}
+    outfit = outfits.get(row[0])
+    if outfit is None and "~" in str(row[0]):  # an organisation split off another: its parent's entry with figures of its own (numbers)
+        outfit = {**(outfits.get(str(row[0]).split("~")[0]) or {}), **(json.loads(row[1] or "{}").get("spec") or {})}
+    outfit = outfit or {}
     opening = kind_rules(conn, org).get("opening") or {}
     if not (outfit.get("members_figure") and opening.get("member_role") and opening.get("dependent_role")):
         return None
@@ -88,6 +92,11 @@ def _orgs(conn: sqlite3.Connection) -> list[tuple[int, dict]]:
     return out
 
 
+def _num(conn: sqlite3.Connection, x) -> float:
+    """A figure's run value, or the number itself (an organisation that split off carries plain numbers)."""
+    return float(x) if isinstance(x, (int, float)) else float(figure(conn, x))
+
+
 def made_count(conn: sqlite3.Connection, org: int) -> int:
     """Inducted men in active seats."""
     return int(conn.execute("SELECT COUNT(*) FROM org_seats WHERE org_actor_id=? AND inducted_day IS NOT NULL AND status='active'", (int(org),)).fetchone()[0])
@@ -97,7 +106,7 @@ def preferred(conn: sqlite3.Connection, org: int) -> int:
     """The head's preferred number of inducted men: the organisation's figure. It is not a cap: the count drifts above and
     below it with the head's decisions (`after_gone`, `make_offers`)."""
     sp = _spec(conn, org)
-    return 0 if sp is None else int(round(float(figure(conn, sp["figure"]))))
+    return 0 if sp is None else int(round(_num(conn, sp["figure"])))
 
 
 def flag_unusual(conn: sqlite3.Connection, day: int) -> int:
@@ -113,7 +122,7 @@ def flag_unusual(conn: sqlite3.Connection, day: int) -> int:
         if last is not None and int(last[0]) == count:
             continue
         conn.execute("INSERT INTO design_figure_log(key,day,old_value,new_value,seed,cause) VALUES (?,?,?,?,?,?)",
-                     (sp["figure"], int(day), float(figure(conn, sp["figure"])), float(count), run_seed(conn),
+                     (sp["figure"], int(day), _num(conn, sp["figure"]), float(count), run_seed(conn),
                       f"unusual: {_name(conn, org)} has {count} inducted men, outside the figure's range {rng[0]} to {rng[1]}; needs a cause"))
         n += 1
     return n
@@ -315,9 +324,21 @@ def proposal_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> 
         pool += [(nomination_score(conn, org, a, int(day)), a) for a in eligible(conn, org, int(unit), int(day))]
     if not pool:
         return [{"kind": "no_name", "utility": _utility(conn, 1.0), "rationale": "He has no one fit to put forward.", "payload": {"org": org}}]
-    sc, best = max(pool, key=lambda t: (t[0], -t[1]))
-    return [{"kind": "propose_member", "utility": _utility(conn, 0.5 + 0.5 * clamp01(sc)), "target_actor_id": best,
-             "rationale": f"Puts forward {_name(conn, best)}, the best name in his crew ({sc:.2f}).", "payload": {"org": org, "candidate": best}}]
+    from . import org_succession
+    blk = org_succession.block(conn, org, "appoint")
+    if not blk:
+        sc, best = max(pool, key=lambda t: (t[0], -t[1]))
+        return [{"kind": "propose_member", "utility": _utility(conn, 0.5 + 0.5 * clamp01(sc)), "target_actor_id": best,
+                 "rationale": f"Puts forward {_name(conn, best)}, the best name in his crew ({sc:.2f}).", "payload": {"org": org, "candidate": best}}]
+    names = dict((a, s) for s, a in pool)  # a leader weighs every man of his unit, not only the best name: trust, kin, favours, money, fear, merit
+    out = []
+    for a, nom in names.items():
+        sc = org_succession.weigh(conn, org, int(actor_id), a, int(day), blk, {"merit": lambda c, _n=names: clamp01(_n.get(int(c), 0.0))})
+        t = org_succession.terms_of(conn, org, int(actor_id), a, int(day), blk, {"merit": lambda c, _n=names: clamp01(_n.get(int(c), 0.0))})
+        lead = ", ".join(k for k, x in sorted(t.items(), key=lambda kv: -kv[1])[:2] if x > 0)
+        out.append({"kind": "propose_member", "utility": _utility(conn, sc), "target_actor_id": a,
+                    "rationale": f"Puts forward {_name(conn, a)} ({sc:.2f}{', mostly ' + lead if lead else ''}).", "payload": {"org": org, "candidate": a}})
+    return out
 
 
 def execute_no_name(conn, actor_id, kind, payload, day):
@@ -332,6 +353,12 @@ def execute_propose_member(conn, actor_id, kind, payload, day):
     if head is None:
         return {"summary": "There was no one to put the name to.", "blocked": True}
     add_agenda(conn, head, "make_member", int(day) + 1, subject_kind="actor", subject_id=cand, metadata={"org": org, "proposer": int(actor_id)})
+    from . import org_succession
+    blk = org_succession.block(conn, org, "appoint")
+    if blk:
+        passed = [a for a in eligible(conn, org, int(seat_of(conn, int(actor_id), org)["unit_id"] or 0), int(day)) if a != cand] if seat_of(conn, int(actor_id), org) is not None else []
+        org_succession.paid_for(conn, org, int(actor_id), cand, int(day), blk)
+        org_succession.after_choice(conn, org, int(actor_id), cand, passed, int(day), blk)
     return {"summary": f"{_name(conn, actor_id)} put {_name(conn, cand)} forward."}
 
 
@@ -390,7 +417,7 @@ def replace_dependants(conn: sqlite3.Connection, day: int) -> int:
         return 0
     made = 0
     for org, sp in _orgs(conn):
-        ratio = float(figure(conn, sp["outfit"]["dependents_figure"])) if sp["outfit"].get("dependents_figure") else 0.0
+        ratio = _num(conn, sp["outfit"]["dependents_figure"]) if sp["outfit"].get("dependents_figure") else 0.0
         for unit in conn.execute("SELECT id,leader_actor_id FROM org_units WHERE org_actor_id=? AND leader_actor_id IS NOT NULL ORDER BY id", (org,)).fetchall():
             leader, uid = int(unit["leader_actor_id"]), int(unit["id"])
             men = conn.execute("SELECT COUNT(*) FROM org_seats WHERE unit_id=? AND status='active' AND inducted_day IS NOT NULL", (uid,)).fetchone()[0]
