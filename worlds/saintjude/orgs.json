@@ -16,6 +16,9 @@
   "family": {
    "sphere": "underworld", "head": "boss", "unit_leader": "capo", "purse_roles": ["capo"], "inducted_label": "made", "courtship_scan": false,
    "choices": ["remove_superior", "start_racket"],
+   "lifecycle": {"held_level_days": "lifecycle_held_level_days", "held_seat_days": "lifecycle_held_seat_days", "left_cadence_days": "lifecycle_left_cadence_days",
+                 "returns_as": "soldier", "step_back_roles": ["boss", "underboss"], "step_back_agendas": ["retired", "delegating"],
+                 "succession": {"boss": ["underboss", "consigliere"], "underboss": ["capo"], "consigliere": ["capo"]}},
    "labels": {"boss": "Boss", "underboss": "Underboss", "consigliere": "Consigliere", "capo": "Capo", "soldier": "Soldier", "associate": "Associate"},
    "opening": {
     "layout": "units", "executives": ["boss", "underboss", "consigliere"], "member_role": "soldier", "dependent_role": "associate",

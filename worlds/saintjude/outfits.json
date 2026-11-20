@@ -263,6 +263,18 @@
   "father_name_group": "italian",
   "vouch_required": true
  },
+ "membership": {
+  "books": {"delay_days": "seat_fill_delay_days", "retry_days": "books_retry_days"},
+  "replacement": {"chance_week": "dependant_replace_week", "ages": [17, 30]},
+  "standing_growth": "dependant_standing_growth_week",
+  "hidden": {"discovery_period": "hidden_line_discovery_period", "fine_share": ["ladder_soldier_to_capo", "ladder_capo_to_boss"],
+             "fine_multiple": "disc_fine_multiple", "fine_flow": "kickup"},
+  "discipline": {
+   "fine": {"base": "disc_fine_base", "standing": "disc_fine_standing", "standing_loss": "disc_fine_loss", "resentment": "disc_fine_resentment", "fear": "disc_fine_fear"},
+   "demote": {"base": "disc_demote_base", "greed": "disc_demote_greed", "standing_loss": "disc_demote_loss", "resentment": "disc_demote_resentment", "respect": "disc_demote_respect"},
+   "kill": {"base": "disc_kill_base", "aggression": "disc_kill_aggression", "low_standing": "disc_kill_low_standing", "repeat": "disc_kill_repeat"}
+  }
+ },
  "line_kinds": {
   "numbers_it": "a numbers route",
   "bookmaking": "a book",

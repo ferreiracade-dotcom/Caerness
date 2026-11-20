@@ -28,7 +28,7 @@ from . import ledger, org_motives, outfit_motives as om
 from .design import run_seed
 from .org_choices import register_agenda_action, register_executor
 from .law_opening import agency_for
-from .org_lifecycle import mark_for_history
+from .org_lifecycle import leave_life, mark_for_history
 from .org_motives import _fig as figure
 from .orgs import add_agenda, clamp01, head_of, imposed, is_living, kind_rules, resolve_agenda, seat_of
 from .relationships import adjust_relationship
@@ -489,8 +489,7 @@ def _do_drifts(conn, a, seat, org, day, rng, spec, **o):
 
 
 def _do_goes_straight(conn, a, seat, org, day, rng, spec, **o):
-    conn.execute("UPDATE org_seats SET status='out', left_day=? WHERE id=?", (int(day), int(seat["id"])))
-    mark_for_history(conn, a, "left the life", int(day))
+    leave_life(conn, a, org, int(day))  # the seat goes `out` with the day, his profile DORMANT; the weekly lifecycle notes the history
     return {"summary": f"{_name(conn, a)} went straight."}
 
 
@@ -622,6 +621,7 @@ def _do_busted(conn, a, seat, org, day, rng, spec, **o):
     conn.execute("INSERT INTO crime_reports(day,crime_kind,location_id,offender_actor_id,public,agency_profile_id,status,metadata_json) VALUES (?,?,?,?,0,?,'open',?)",
                  (int(day), spec["crime_kind"], loc, a, agency_for(conn, loc, spec["crime_kind"]), json.dumps({"source": "org_happening", "close_day": int(day) + days})))
     imposed(conn, a)
+    mark_for_history(conn, a, "was arrested", int(day))
     return {"status": "done", "loc": loc, "summary": f"{_name(conn, a)} was picked up."}
 
 

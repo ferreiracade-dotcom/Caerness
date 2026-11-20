@@ -1081,6 +1081,226 @@
    "source": "unsourced",
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
+  "lifecycle_held_level_days": {
+   "default": 30,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; spec section 5 (Moving down): a level-4 man held this many days is reviewed weekly until released; the brief's figure, unsourced in the bible"
+  },
+  "lifecycle_held_seat_days": {
+   "default": 365,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man held this long loses his seat to the organisation's needs (his line passes to a stand-in and a unit leader's unit gets a new one); the brief's figure"
+  },
+  "lifecycle_left_cadence_days": {
+   "default": 180,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man who has left the life is looked at about twice a year (the brief's figure; the simulation's DORMANT cadence)"
+  },
+  "books_retry_days": {
+   "default": 28,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; one money period (orgs.json period_days): a count still short with nothing open reopens the books once a period at most, so a head with too few names does not ask every week"
+  },
+  "dependant_replace_week": {
+   "default": 0.12,
+   "range": null,
+   "unit": "chance per week per short crew",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a crew short of its dependants takes one new one about every eight weeks (a young man is vouched for, tried and kept on in about two months); with ~20 dependants lost a year citywide, ~1 in 150 stays short at any time"
+  },
+  "dependant_standing_growth_week": {
+   "default": 0.004,
+   "range": null,
+   "unit": "standing per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the brief said 0.01*(reliability+ambition) a week, which saturates standing within a year; this is 0.004*(reliability+ambition)*(1-standing): a dependant of average temperament who keeps earning rises from 0.30 to about 0.43 in a year and 0.75 in five, so best standing still separates men after years"
+  },
+  "hidden_line_discovery_period": {
+   "default": 0.05,
+   "range": null,
+   "unit": "chance per 28 days at zero caution",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a hidden line is found over a money period with this chance times (1 - the holder's caution): a bold man keeps one hidden about 1 in 20 periods, a cautious one almost never; the brief's figure"
+  },
+  "disc_fine_multiple": {
+   "default": 2.0,
+   "range": null,
+   "unit": "times the kick-up kept back",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the fine is the kick-up kept back (the ladder shares x weeks hidden x the line's weekly take) plus the same again as the penalty"
+  },
+  "disc_fine_base": {
+   "default": 0.55,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the usual answer to a hidden line: take the money back and keep the man earning"
+  },
+  "disc_fine_standing": {
+   "default": 0.25,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man of standing is more worth keeping, so more likely only fined"
+  },
+  "disc_fine_loss": {
+   "default": 0.15,
+   "range": null,
+   "unit": "standing lost",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a fine costs a man some of his standing"
+  },
+  "disc_fine_resentment": {
+   "default": 10.0,
+   "range": null,
+   "unit": "relationship points toward the head",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; resentment he now has toward the man who fined him"
+  },
+  "disc_fine_fear": {
+   "default": 5.0,
+   "range": null,
+   "unit": "relationship points toward the head",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; fear of the man who fined him"
+  },
+  "disc_demote_base": {
+   "default": 0.35,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; taking the line is the harsher usual answer"
+  },
+  "disc_demote_greed": {
+   "default": 0.3,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a greedy man's line is taken more often than he is only fined"
+  },
+  "disc_demote_loss": {
+   "default": 0.3,
+   "range": null,
+   "unit": "standing lost",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; losing a line costs twice what a fine does"
+  },
+  "disc_demote_resentment": {
+   "default": 15.0,
+   "range": null,
+   "unit": "relationship points toward the head",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; resentment of the man who took his line"
+  },
+  "disc_demote_respect": {
+   "default": 5.0,
+   "range": null,
+   "unit": "relationship points toward the head",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; respect lost for the man who took his line"
+  },
+  "disc_kill_base": {
+   "default": -0.2,
+   "range": null,
+   "unit": "utility weight (a cost)",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; killing a made man is never the first answer: this cost keeps it below the fine for a first offence whatever the head's temper (a made man's standing is 0, so only the repeat weight can lift it)"
+  },
+  "disc_kill_aggression": {
+   "default": 0.45,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on the head's aggression: a violent head is likelier to kill a man he has already fined or demoted once"
+  },
+  "disc_kill_low_standing": {
+   "default": 0.15,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weight on 1 - the man's standing: a nobody is easier to give up than a valued man"
+  },
+  "disc_kill_repeat": {
+   "default": 0.35,
+   "range": null,
+   "unit": "utility weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a man caught holding out again after being fined or demoted: with a head of aggression above about 0.6 the answer becomes killing him, a calm head still fines him; a first offence is never answered by killing"
+  },
   "associate_happening_week": {
    "default": 0.0206,
    "range": null,
