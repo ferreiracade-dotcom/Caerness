@@ -28,6 +28,9 @@ INSTRUCTIONS = INSTRUCTIONS_TEMPLATE.format(name="Caerness")
 
 def make_mcp(**kwargs) -> MCPServer:
     """A fresh MCPServer (the HTTP deployment passes auth settings); call register_tools on it."""
+    from connector import apps_probe
+    if apps_probe.enabled():  # opt-in test card; the game tools are unchanged
+        kwargs.setdefault("extensions", [apps_probe.make_apps()])
     return MCPServer("narrative-engine", instructions=INSTRUCTIONS_TEMPLATE.format(name=_world_names()), **kwargs)
 
 
