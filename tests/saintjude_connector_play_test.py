@@ -2,7 +2,7 @@
 
 Calls the connector's server-module functions directly (never the MCP tools), against a temp campaign dir and a
 Saint Jude opening built into a temp file (data/saintjude.db is not shipped). Every check is independent and prints
-PASS/FAIL with detail; the test fails at the end if any check failed. Case C is REPORT-ONLY (E-014 is not built).
+PASS/FAIL with detail; the test fails at the end if any check failed.
 """
 from __future__ import annotations
 
@@ -268,14 +268,27 @@ def case_b():
     return detail
 
 
-@check("C (REPORT-ONLY, E-014 not built) Pad-paying family commits a public killing")
+@check("C a public killing on Pad-paid ground brings an arrest")
 def case_c():
     from connector import server
-    out = server.act(cid(), "operation",
-                     "A made man of a family that pays the Pad shoots a rival dead in broad daylight on a crowded Kerrytown street; "
-                     "see whether the police make an arrest")
-    print("REPORT-ONLY: " + dump(out)[:1500])
-    return "REPORT-ONLY (not asserted): " + dump(out)[:1500]
+    import sqlite3
+    with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:
+        row = c.execute(
+            """SELECT a.id,a.name FROM org_seats s JOIN actors a ON a.id=s.actor_id WHERE s.status='active' AND s.role_key='soldier' AND a.actor_type='character'
+               ORDER BY a.id LIMIT 1""").fetchone()
+    assert row is not None, "no living rival to shoot"
+    me = int(STATE["protagonist"]["actor_id"])
+    with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:  # the rival is on the street where the shooting happens
+        c.execute("UPDATE actors SET current_location_id=(SELECT current_location_id FROM actors WHERE id=?) WHERE id=?", (me, int(row[0])))
+        c.commit()
+    out = server.act(cid(), "operation", f"I shoot {row[1]} dead in broad daylight on a crowded Kerrytown street", target_actor_id=int(row[0]))
+    print("act: " + dump(out)[:600])
+    server.advance(cid(), 2, "lie low")
+    with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:
+        held = c.execute("SELECT * FROM custody WHERE actor_id=? AND kind='held'", (me,)).fetchone()
+        rep = c.execute("SELECT id,status,crime_kind FROM crime_reports WHERE offender_actor_id=?", (me,)).fetchall()
+    assert held is not None, f"no custody row for the protagonist; reports={[tuple(r) for r in rep]}; act={dump(out)[:400]}"
+    return f"held; reports={[tuple(r) for r in rep]}"
 
 
 def run():

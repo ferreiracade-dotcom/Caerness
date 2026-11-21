@@ -1129,9 +1129,14 @@ def _attack(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
             continue
         spot = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (aid,)).fetchone()[0]
         # The blow carries the outfit it came from, so a boss whose kin or lieutenant it fell on remembers who did it.
+        on_my_side = aid == me or aid in {i for i, _ in attackers}
+        # What he did to the other side is a crime someone could report (crime_response reads the offender and how public it was); a
+        # blow his own side took is not.
+        hit_meta: dict = {"offender_actor_id": me, "public": bool(d.get("public"))} if not on_my_side else {"crime": False}
+        if my_org is not None and not on_my_side:
+            hit_meta["source_organization_id"] = my_org
         inc = harm.record_harm(conn, aid, source_kind="player_operation", source_ref_id=event_id, severity=sev,
-                               intent_class="hostile", location_id=spot,
-                               metadata={"source_organization_id": my_org} if (my_org is not None and aid != me and aid not in {i for i, _ in attackers}) else None)
+                               intent_class="hostile", location_id=spot, metadata=hit_meta)
         hurt.append({"name": _name(conn, aid), "how": inc["outcome"]})
 
     if men_lost:

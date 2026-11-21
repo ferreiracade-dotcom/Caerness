@@ -206,6 +206,30 @@
   },
   "racket": {
    "evidence_threshold": "evidence_threshold_racket"
+  },
+  "bribery": {
+   "evidence_threshold": {
+    "value": 0.55,
+    "mark": "Design proposal",
+    "why": "A bribe needs a payer, a taker and proof of the payment; harder to prove than a street assault, so above it (unsourced)"
+   },
+   "review_days": {
+    "value": 30,
+    "mark": "Design proposal",
+    "why": "Commission and bureau inquiries move in months, not weeks (unsourced)"
+   }
+  },
+  "fraud": {
+   "evidence_threshold": {
+    "value": 0.55,
+    "mark": "Design proposal",
+    "why": "Paper crimes need records pulled and an accountant's reading (unsourced)"
+   },
+   "review_days": {
+    "value": 30,
+    "mark": "Design proposal",
+    "why": "as bribery (unsourced)"
+   }
   }
  },
  "pad_limits": {
@@ -371,7 +395,9 @@
   "city": {
    "default": "precinct",
    "fallback": "sjpd",
-   "racket": "occd"
+   "racket": "occd",
+   "bribery": "state_ag",
+   "fraud": "fbi"
   },
   "county": {
    "marsh_county": "marsh_prosecutor",
@@ -379,9 +405,12 @@
   },
   "federal": {
    "default": "fbi",
-   "racket": "strike_force"
+   "racket": "strike_force",
+   "bribery": "strike_force",
+   "fraud": "fbi"
   },
-  "note": "A street matter goes to the precinct that covers the place (the SJPD where none does); an organized-crime matter to the OCCD; a place inside a county jurisdiction's own location to that county's prosecutor; a federal matter to the FBI, a racket to the Strike Force. Unsourced routing."
+  "note": "A street matter goes to the precinct that covers the place (the SJPD where none does); an organized-crime matter to the OCCD; a place inside a county jurisdiction's own location to that county's prosecutor; a federal matter to the FBI, a racket to the Strike Force. Unsourced routing.",
+  "bribery_fraud_note": "Part II 4.5 and 5: the State Commission of Investigation (the state_ag profile stands for it: it can subpoena and hold hearings but cannot prosecute) takes bribery inside the city; fraud goes to the FBI; a federal bribery matter to the Strike Force. Unsourced beyond the agencies' names."
  },
  "office_domains": {
   "office:local-402:president-of-local-402": "labor",
@@ -451,5 +480,391 @@
    "old_protestant"
   ],
   "note": "Part II 2.1: the SJPD is overwhelmingly white, male and Catholic, so officers are drawn from the city's white ethnic groups at their weights; the captain tier's first seat in each precinct is the precinct captain, the rest are lieutenants and detective heads. Ages and tier titles are unsourced."
+ },
+ "response": {
+  "mark": "Design proposal",
+  "about": "How a crime becomes a report, a case, an arrest, a disposition and a sentence (task B13). Every figure is a Design proposal with its reasoning; none is a cap, a quota or a fixed share. Real-world rates are calibration targets reported after a run: most cases end in a plea or are dropped, mob cases went to trial more often (bible Part II 6.5: most cases end in a plea; a made man typically refuses to plead if it requires naming others). A logistic term is a weighed pressure (z = bias + sum of coefficient x input), never a threshold.",
+  "harm": {
+   "intents": [
+    "hostile",
+    "lethal"
+   ],
+   "bystander_intents": [
+    "accidental"
+   ],
+   "fatal_kind": "homicide",
+   "other_kind": "assault",
+   "why": "A harm row whose intent is hostile or lethal, and an accidental one that names an offender (a bystander hit), is a crime someone could report. Controlled harm (sport) and plain accidents are not."
+  },
+  "publicity": {
+   "why": "Publicity is 0..100 = 100 * (1 - product(1 - weight_i * x_i)) over the drivers, so each adds and none can exceed the whole. It is the starting value of a report's public attention; the information layer later makes it grow or fade. Part II 3.4 (the Pad cannot make a public killing go away) is why a public killing, a bystander hit or a killed officer scores high; the weights are proposals.",
+   "weights": {
+    "declared_public": 0.55,
+    "witnesses": 0.45,
+    "place": 0.3,
+    "time_of_day": 0.2,
+    "bystander": 0.7,
+    "notable_victim": 0.6,
+    "method": 0.25,
+    "victims": 0.4
+   },
+   "witness_scale": 3.0,
+   "victims_scale": 2.0,
+   "place_crowd": {
+    "street": 9.0,
+    "avenue": 9.0,
+    "neighborhood": 3.0,
+    "city district": 3.0,
+    "club": 10.0,
+    "supper club": 10.0,
+    "pub": 7.0,
+    "cafe": 6.0,
+    "diner": 6.0,
+    "restaurant": 8.0,
+    "market": 10.0,
+    "wholesale market": 4.0,
+    "arena": 14.0,
+    "racetrack": 14.0,
+    "church": 6.0,
+    "hospital": 8.0,
+    "bridge": 4.0,
+    "public housing": 5.0,
+    "freight yard": 1.5,
+    "scrapyard": 0.8,
+    "port terminal": 2.0,
+    "port area": 2.0,
+    "plant": 3.0,
+    "boxing gym": 4.0,
+    "funeral home": 3.0,
+    "compound": 0.8,
+    "default": 2.0
+   },
+   "place_crowd_why": "Expected people within sight at the busiest hour (unsourced).",
+   "place_exposure": {
+    "street": 0.9,
+    "avenue": 0.9,
+    "neighborhood": 0.6,
+    "city district": 0.6,
+    "club": 0.5,
+    "supper club": 0.55,
+    "pub": 0.5,
+    "cafe": 0.6,
+    "diner": 0.6,
+    "restaurant": 0.6,
+    "market": 0.85,
+    "arena": 0.9,
+    "racetrack": 0.85,
+    "church": 0.5,
+    "hospital": 0.5,
+    "bridge": 0.6,
+    "public housing": 0.55,
+    "freight yard": 0.15,
+    "scrapyard": 0.1,
+    "port terminal": 0.25,
+    "port area": 0.3,
+    "plant": 0.3,
+    "compound": 0.05,
+    "default": 0.4
+   },
+   "place_exposure_why": "How open the place is to the street's eyes, 0..1 (unsourced).",
+   "hour_weights": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    3,
+    4,
+    4,
+    4,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    6,
+    6,
+    6,
+    6,
+    5,
+    3,
+    2
+   ],
+   "hour_weights_why": "Relative chance a crime is committed in each hour, 0 to 23 (more by day and early evening; unsourced).",
+   "hour_exposure": [
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.1,
+    0.3,
+    0.6,
+    0.8,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    0.9,
+    0.9,
+    0.9,
+    0.95,
+    1.0,
+    0.95,
+    0.9,
+    0.8,
+    0.6,
+    0.35,
+    0.15
+   ],
+   "hour_exposure_why": "How many people are about in each hour, 0..1: a dark small hour against a lunchtime street (unsourced).",
+   "method": {
+    "execution": 0.15,
+    "handgun_point_blank": 0.4,
+    "handgun_range": 0.85,
+    "blade": 0.4,
+    "blunt": 0.3,
+    "fists": 0.3,
+    "default": 0.4
+   },
+   "method_why": "How loud the method is, 0..1: a shot at range is heard and seen, a quiet disappearance is neither (unsourced).",
+   "notable": {
+    "officer": {
+     "x": 1.0,
+     "why": "A killed or hurt officer is the department's own and every agency answers it."
+    },
+    "reporter": {
+     "x": 0.85,
+     "institutions": [
+      "The Courier"
+     ],
+     "why": "The press covers its own."
+    },
+    "office_holder": {
+     "x": 0.8,
+     "fact_prefix": "office:",
+     "why": "A man who holds a public office or a seat the world tracks as an office."
+    },
+    "inducted": {
+     "x": 0.45,
+     "why": "A made man's killing is news to the families and the Organized Crime unit even when the street is quiet."
+    }
+   }
+  },
+  "arrest": {
+   "evidence": {
+    "base": 0.3,
+    "publicity": 0.4,
+    "offender_known": 0.2,
+    "effort": 0.1,
+    "noise": 0.1,
+    "why": "Part 2's formula 0.3 + 0.4*public + 0.2*known, with public now the weighed publicity share (0..1), plus the effort the agency puts in; seeded noise of +-noise. Unsourced.",
+    "default_threshold": {
+     "value": 0.5,
+     "why": "The threshold for a crime kind the rules above do not list (unsourced)."
+    }
+   },
+   "effort": {
+    "base": 0.35,
+    "publicity": 0.5,
+    "officer_victim": 0.7,
+    "why": "How hard an agency works a case, 0..1 = capacity * (1 - product(1 - weight*x)): a front-page story and a killed officer bring every agency (a weight on effort and reach). Unsourced."
+   },
+   "officer_victim_federal": true,
+   "arrangements": {
+    "publicity_resistance": 0.985,
+    "officer_victim_resistance": 0.995,
+    "why": "The chance the Pad buries a case it reaches is (1 - resist), resist = 1 - (1 - publicity_resistance*publicity)(1 - officer_victim_resistance*officer). At full publicity the Pad all but cannot bury it (Part II 3.4: it cannot make a public killing go away) but the weight stays below 1: the evidence still has to exist. Unsourced values."
+   },
+   "officer_roles": [
+    {
+     "prefix": "Lieutenant",
+     "weight": 3.0
+    },
+    {
+     "prefix": "Sergeant",
+     "weight": 4.0
+    },
+    {
+     "prefix": "Captain",
+     "weight": 1.0
+    },
+    {
+     "prefix": "Patrolman",
+     "weight": 1.0
+    },
+    {
+     "prefix": "Chief of Detectives",
+     "weight": 2.0
+    }
+   ],
+   "officer_roles_why": "Who is likely to catch a case in a precinct (the opening has no detectives, so the supervising ranks and the patrol stand in; unsourced).",
+   "commander_role_prefix": "Captain",
+   "commander_tier": "captain",
+   "review": {
+    "gain": 0.12,
+    "noise": 0.04,
+    "why": "What a review of an open case adds to its evidence, scaled by effort (unsourced)."
+   },
+   "bail": {
+    "bailable": {
+     "homicide": false,
+     "default": true
+    },
+    "why": "A charge of murder is held without bail until the case is disposed of; the rest are bailed after bail_days (Part 2 step 5)."
+   },
+   "respond_delay_days": 1,
+   "heat": {
+    "investigative_share": 0.12,
+    "public_share": 0.08,
+    "why": "An arrest of a man writes investigative and public heat on his organisations, as a share of the package's own_full and city_full heat figures, the public part scaled by the report's publicity (unsourced)."
+   }
+  },
+  "disposition": {
+   "why": "A case that ends in an arrest runs on to a disposition weighed from the evidence, a lawyer, money, witness pressure and the Pad. B13 keeps a minimal version; prison phase 1 replaces it with a package-defined stage graph.",
+   "days": {
+    "homicide": {
+     "median": 240,
+     "sigma": 0.45
+    },
+    "assault": {
+     "median": 90,
+     "sigma": 0.5
+    },
+    "robbery": {
+     "median": 150,
+     "sigma": 0.5
+    },
+    "racket": {
+     "median": 200,
+     "sigma": 0.5
+    },
+    "bribery": {
+     "median": 240,
+     "sigma": 0.5
+    },
+    "fraud": {
+     "median": 240,
+     "sigma": 0.5
+    },
+    "default": {
+     "median": 120,
+     "sigma": 0.5
+    }
+   },
+   "days_why": "Days from arrest to disposition: murder cases take most of a year, street assaults a season (unsourced).",
+   "dismiss": {
+    "bias": 0.5,
+    "strength": -3.0,
+    "lawyer": 2.0,
+    "arrangements": 2.0,
+    "witness_pressure": 2.5,
+    "publicity": -1.0,
+    "why": "z of a charge dropped or dismissed: a weak case, a good lawyer, a bought officer and frightened witnesses push it up; a loud case pushes it down. Calibrate to the real rate (many felony arrests are dropped) after a run."
+   },
+   "trial": {
+    "bias": -1.2,
+    "strength": -1.5,
+    "lawyer": 1.0,
+    "publicity": 1.0,
+    "inducted": 1.6,
+    "why": "z of going to trial rather than pleading: a strong case pleads, a loud case and a good lawyer go to trial, and a made man typically refuses to plead if it means naming others (Part II 6.5)."
+   },
+   "conviction": {
+    "bias": -0.2,
+    "strength": 3.0,
+    "lawyer": -1.5,
+    "witness_pressure": -2.0,
+    "arrangements": -1.0,
+    "why": "z of a guilty verdict at trial (unsourced)."
+   },
+   "witness_pressure_why": "Witness pressure = the share of witnesses (the witness driver) times the offender's organisations' violence and investigative heat against the package's own_full."
+  },
+  "sentence": {
+   "term_days": {
+    "homicide": {
+     "median": 7300,
+     "sigma": 0.45
+    },
+    "assault": {
+     "median": 540,
+     "sigma": 0.6
+    },
+    "robbery": {
+     "median": 1460,
+     "sigma": 0.5
+    },
+    "racket": {
+     "median": 1095,
+     "sigma": 0.5
+    },
+    "bribery": {
+     "median": 730,
+     "sigma": 0.5
+    },
+    "fraud": {
+     "median": 548,
+     "sigma": 0.5
+    },
+    "default": {
+     "median": 730,
+     "sigma": 0.5
+    }
+   },
+   "term_days_why": "Median term imposed, in days (20 years for murder, 18 months for an assault; unsourced), spread lognormally. Not caps.",
+   "plea_factor": 0.6,
+   "publicity_factor": 0.4,
+   "officer_victim_factor": 0.5,
+   "factors_why": "A plea earns 0.6 of the term; publicity adds up to 0.4 of it and a killed officer 0.5 (unsourced).",
+   "parole_share": 0.34,
+   "parole_why": "The earliest release day is start + term * parole_share: eligibility after about a third of the term (New Jersey practice, from memory, to be checked). A man is returned on that day.",
+   "facilities": {
+    "municipal": {
+     "short": "the county jail",
+     "long": "Ironhaven",
+     "short_max_days": 365
+    },
+    "county": {
+     "short": "the county jail",
+     "long": "Ironhaven",
+     "short_max_days": 365
+    },
+    "state": {
+     "short": "the county jail",
+     "long": "Ironhaven",
+     "short_max_days": 365
+    },
+    "federal": {
+     "short": "the federal detention center",
+     "long": "a federal penitentiary",
+     "short_max_days": 365
+    },
+    "why": "Part II 8: the county jail holds the unsentenced and short sentences; Ironhaven the state felons for long terms; federal prisoners go to penitentiaries in other states. Which penitentiary is Open (the bible); free text here."
+   }
+  },
+  "backing": {
+   "why": "A head or unit leader of a man who is arrested weighs sending a lawyer or waiting (Part 2 step 7).",
+   "lawyer_fee": {
+    "low": 1500,
+    "high": 9000,
+    "why": "A defence lawyer's retainer for a felony in 1975 dollars (unsourced)."
+   },
+   "lawyer_half_fee": 4000,
+   "lawyer_half_fee_why": "The fee at which the lawyer is half as good as the best (fee/(fee+half)); unsourced.",
+   "send_base": 0.15,
+   "send_loyalty": 0.5,
+   "send_standing": 0.2,
+   "send_cost": 0.4,
+   "wait_base": 0.3,
+   "bail_after_lawyer_share": 0.5,
+   "homicide_trust_drop": [
+    0,
+    10
+   ],
+   "trust_why": "The head's trust in a man held on a homicide charge falls by a seeded 0 to 10 (a worry about who talks; Part 2 step 7)."
+  }
  }
 }

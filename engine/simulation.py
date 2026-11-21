@@ -35,6 +35,7 @@ from .growth import next_growth_due_day, process_due_growth
 from .law import next_law_due_day, process_due_law
 from .org_money import next_due_day as next_outfit_money_due_day, process_due as process_due_outfit_money
 from .org_happenings import next_due_day as next_outfit_incidents_due_day, process_due as process_due_outfit_incidents
+from .crime_response import next_due_day as next_crime_response_due_day, process_due as process_due_crime_response
 from .org_lifecycle import next_due_day as next_org_lifecycle_due_day, process_due as process_due_org_lifecycle
 from . import org_membership  # noqa: F401  (registers the lifecycle hooks and the books and discipline agenda)
 from . import org_succession, org_coup  # noqa: F401  (heir, contest, appointments, plots, coups, civil war: lifecycle hooks and agenda)
@@ -586,6 +587,7 @@ def build_default_process_registry(*, eager_requery: bool = True, disabled: froz
     reg.register(ProcessSpec("law", next_law_due_day, process_due_law))
     reg.register(ProcessSpec("outfit_money", next_outfit_money_due_day, process_due_outfit_money))
     reg.register(ProcessSpec("outfit_incidents", next_outfit_incidents_due_day, process_due_outfit_incidents))
+    reg.register(ProcessSpec("crime_response", next_crime_response_due_day, process_due_crime_response))
     reg.register(ProcessSpec("org_lifecycle", next_org_lifecycle_due_day, process_due_org_lifecycle))
     reg.register(ProcessSpec("war", next_war_due_day, process_due_war))
     reg.register(ProcessSpec("groundbinding", next_groundbinding_due_day, process_due_groundbinding))
@@ -611,7 +613,7 @@ def build_default_process_registry(*, eager_requery: bool = True, disabled: froz
 
 _REGISTRY_BLOCK_A = (
     "resolution", "world", "ecology", "agriculture", "logistics", "merchant", "craft", "civilian", "profession", "service_fulfillment", "growth",
-    "underworld", "underworld_medicine", "law", "outfit_money", "outfit_incidents", "org_lifecycle", "war", "groundbinding", "health", "psychology", "hollow",
+    "underworld", "underworld_medicine", "law", "outfit_money", "outfit_incidents", "crime_response", "org_lifecycle", "war", "groundbinding", "health", "psychology", "hollow",
 )
 _REGISTRY_BLOCK_B = ("religion", "patronage", "politics", "conflict", "organization_lifecycle", "seeking", "attention", "education", "cultivation", "tournament", "spectacle", "information", "memory")
 

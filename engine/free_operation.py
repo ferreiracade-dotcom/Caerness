@@ -27,7 +27,7 @@ _KINDS = (  # first match wins; the GM's own `kind` hint beats all of them
     ("train", r"\b(train|study|learn|practi[sc]e|drill|apprentice|spar|master the)\b"),
     ("craft", r"\b(craft|forge|brew|manufacture|produce|smith|weave|tan|bake)\b"),
     ("project", r"\b(build|construct|repair|fortify|rebuild|raise a (?:wall|tower|bridge|granary|market)|garrison|pave)\b"),
-    ("attack", r"\b(attack|assault|raid|rob|ambush|burn|arson|set fire|kidnap|abduct|capture|kill|murder|assassinate|beat|thrash|drive off|loot|sack)\b"),
+    ("attack", r"\b(attack|assault|raid|rob|ambush|burn|arson|set fire|kidnap|abduct|capture|kill|murder|assassinate|shoot|gun down|beat|thrash|drive off|loot|sack)\b"),
     ("trade", r"\b(buy|sell|purchase)\b.*\b(business|shop|stall|house of|inn|mill|forge)\b"),
     ("demand", r"\b(demand|extort|threaten|tribute|truce|alliance|ally|treaty|ultimatum|expel|force .* to|make .* stop|make .* tell)\b"),
     ("lend", r"\b(lend|loan)\b"),
@@ -141,7 +141,7 @@ def _money(f: dict, res: dict):
     return f.get("amount")
 
 
-_INTENT_KIND = (("kill", r"kill|murder|assassinate|slay|burn|arson|set fire"), ("drive_off", r"drive off|scare|chase|frighten|warn|run (?:him|them) out"))
+_INTENT_KIND = (("kill", r"kill|murder|assassinate|slay|shoot|gun down|dead|burn|arson|set fire"), ("drive_off", r"drive off|scare|chase|frighten|warn|run (?:him|them) out"))
 _DEMAND_WHAT = (("information", r"tell|inform|confess|reveal|talk"), ("stop", r"\bstop|cease|desist|leave|quit|keep away|no more"), ("tribute", r"tribute"),
                 ("truce", r"truce|peace"), ("alliance", r"allian|ally|treaty"), ("split", r"split|divide|share the"), ("debt", r"\bdebt|owes|owed|repay"),
                 ("payment", r"pay|hand over|give|money|cash"))
@@ -265,6 +265,8 @@ def _operation(conn, me, kind, intent, f, res, targets, committed, days, call_id
         return po.execute(conn, me, "demand", target_actor_id=actor, details=d, intent=intent)
     if kind == "attack":
         d["intent_kind"] = d.get("intent_kind") or _first(_INTENT_KIND, low, "beat")
+        if re.search(r"broad daylight|in public|publicly|in front of|crowded|witness|on the street", low):
+            d["public"] = True  # one of the drivers of how loud the crime is (crime_response weighs it)
         biz = next((i for k, i, _ in targets if k == "business"), None)
         if biz is not None:
             d["business"] = f"business:{biz}"

@@ -137,6 +137,15 @@ def agency_for(conn: sqlite3.Connection, location_id: int | None, matter_kind: s
 
 # ---- jurisdictions, rules, agencies ----
 
+def _threshold(conn: sqlite3.Connection, spec) -> float:
+    """A rule's evidence threshold: a design figure's key, a number, or {"value": n, ...} written in the data with its reasoning."""
+    if isinstance(spec, dict):
+        return float(spec["value"])
+    if isinstance(spec, (int, float)):
+        return float(spec)
+    return float(figure(conn, spec))
+
+
 def _load_jurisdictions(conn: sqlite3.Connection, rules: dict) -> dict[str, int]:
     js = rules["jurisdictions"]
     top = max(int(j["priority"]) for j in js.values())
@@ -149,7 +158,7 @@ def _load_jurisdictions(conn: sqlite3.Connection, rules: dict) -> dict[str, int]
             metadata={"authority_kind": j["authority_kind"], "data_priority": int(j["priority"])})
         for rk, r in (rules.get("rules") or {}).items():
             add_rule(conn, ids[key], f"{key}:{rk}", rk.replace("_", " ").title(), "criminal",
-                     evidence_threshold=100.0 * float(figure(conn, r["evidence_threshold"])),
+                     evidence_threshold=100.0 * _threshold(conn, r["evidence_threshold"]),
                      metadata={"matter": rk, "jurisdiction": key})
     return ids
 
