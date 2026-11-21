@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PKG = ROOT / "worlds" / "saintjude"
-DEFAULT_SRC = Path(r"C:\Users\NozzE\Downloads")
+DEFAULT_SRC = ROOT / "docs" / "superpowers" / "plans" / "saintjude-bible-reload" / "bible_v2"  # the repo copy is the source of truth
 FILES = (
     "Saint_Jude_Bible_Index.md",
     "Saint_Jude_Bible_Part_I_The_City.md",
