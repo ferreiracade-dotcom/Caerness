@@ -6,7 +6,7 @@
   "methods": "Target range of fatal fraction once a blow lands (US, approximate, unverified): beating 1-2%, knife 3-5%, firearm injury overall 15-30%, point-blank shot to head or torso above 70%, execution-style shot near-certain. Floors carry the method's own base lethality because resolved severity (resisted by the victim's resilience) does not describe where the blow fell.",
   "hit": "A planned hit is a different intent from a beating. Landed at point-blank it kills about 90-95%; the share falls with a low chance of success (a glancing or interrupted blow) and with a guarded target. The chance that it lands at all is the odds the caller computes (strength, stage, guard).",
   "nonlethal": "A beating-style attack that lands kills rarely (street gangs, which fight with whatever is to hand, more than durable outfits, which send men who know how far to go).",
-  "internal": "A killing decided inside an outfit (a discipline kill, a coup, a contest, a war) stays certain: the code that follows each (succession, books, counts) assumes the man is dead and B12b calibrated on it (audit 7: kill() itself is always fatal, which is right). A package may set `internal.land` to let those be botched too. A reply to a killing across outfits goes against a man who expects it, so each man sent lands 0.7 of the time and then kills at the planned-hit rate; the reply is a team, so one failure does not end it.",
+  "internal": "A killing the head or a man decides on one of his own through the agenda (an ordered hit, a discipline or held-man killing, killing an offender) lands at `internal.land` and then kills at the planned-hit rate, so the man can survive, hurt or not, knowing who tried (Joe Gallo, Carmine Persico and others survived attempts; an ambush by a trusted man lands more often than a hit on a guarded stranger). The state-changing killings of a coup, contest or war (org_coup, org_succession) stay certain: the code that follows each (succession, books, counts) assumes the man is dead. A reply to a killing across outfits goes against a man who expects it, so each man sent lands 0.7 of the time and then kills at the planned-hit rate; the reply is a team, so one failure does not end it.",
   "untreated": "A serious wound with no care can worsen (infection, bleeding) and kill weeks later; treatment cuts the worsening. Firearm wounds start worsening at a lower severity than blows."
  },
  "fatal": {
@@ -47,7 +47,7 @@
    }
   }
  },
- "internal": {"retaliation_land": 0.7},
+ "internal": {"retaliation_land": 0.7, "land": 0.92},
  "incident": {
   "why": "A weekly beating mostly stays a beating, but a share go too far (a weapon, a bad fall, a bystander). The tail share and its severity are proposals; the deaths are reported by the run, never clamped.",
   "tail_share": 0.06, "tail_lo": 40.0, "tail_hi": 100.0,

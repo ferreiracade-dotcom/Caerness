@@ -886,7 +886,7 @@ def execute_kill_offender(conn, actor_id, kind, payload, day):
     if ohead is not None and ohead != int(actor_id):
         adjust_relationship(conn, ohead, int(actor_id), int(day), resentment_delta=float(figure(conn, "hap_resp_kill_resentment")),
                             fear_delta=float(figure(conn, "hap_resp_kill_resentment")) / 2.0)
-    return {"summary": kill(conn, int(actor_id), off, int(day), sanctioned=True)}
+    return {"summary": kill(conn, int(actor_id), off, int(day), sanctioned=True, fallible=True)}
 
 
 def execute_let_go(conn, actor_id, kind, payload, day):
@@ -924,6 +924,8 @@ def execute_refuse(conn, actor_id, kind, payload, day):
     adjust_relationship(conn, vh, int(actor_id), int(day), resentment_delta=float(figure(conn, "hap_resp_kill_resentment")),
                         respect_delta=-float(figure(conn, "hap_resp_let_respect")))
     imposed(conn, vh)  # the refusal lands on the man who asked
+    if payload.get("killer_org") is not None and payload.get("victim") is not None:
+        _again(conn, vh, payload, day, redress_refused=True, peace_refused=bool(payload.get("peace_refused")))  # redress for a killing was refused: it is his to answer again
     return {"summary": f"{_name(conn, actor_id)} refused {_name(conn, vh)}."}
 
 
@@ -990,7 +992,93 @@ def _style(conn, org: int) -> float:
     return clamp01(violence_bias(conn, org))
 
 
-def _killing_factors(conn, head: int, meta: dict) -> dict[str, float]:
+def _cost(conn: sqlite3.Connection) -> dict:
+    """The package's cost figures for answering a killing (outfits data `happenings.killing.cost`); every key is required."""
+    return _killing(conn)["cost"]
+
+
+def _need(conn, key: str) -> float:
+    return _v(conn, _cost(conn)[key])
+
+
+def _recent_killings(conn, day: int, *, org: int | None = None, killer_org: int | None = None, either: int | None = None) -> list:
+    """The killings across outfits recorded within the lookback (data `cost.lookback_days`): a weight over memory, not a gate. `org` is the
+    outfit that lost the man, `killer_org` the one that did it, `either` an outfit on either side."""
+    since = int(day) - int(_need(conn, "lookback_days"))
+    sql = "SELECT day,raised_to_org_actor_id,json_extract(metadata_json,'$.killer_org'),victim_actor_id FROM org_incidents WHERE kind='killing' AND day>=?"
+    args: list = [since]
+    if org is not None:
+        sql += " AND raised_to_org_actor_id=?"
+        args.append(int(org))
+    if killer_org is not None:
+        sql += " AND json_extract(metadata_json,'$.killer_org')=?"
+        args.append(int(killer_org))
+    if either is not None:
+        sql += " AND (raised_to_org_actor_id=? OR json_extract(metadata_json,'$.killer_org')=?)"
+        args += [int(either), int(either)]
+    return conn.execute(sql, args).fetchall()
+
+
+def _sees(conn, a: int | None, b: int | None) -> float:
+    """How well one head thinks of another, 0..1 (respect and trust)."""
+    r = om._rel(conn, a, b)
+    return 0.0 if r is None else clamp01((float(r["respect"]) + float(r["trust"])) / 200.0)
+
+
+def _third_heads(conn, org: int, other: int) -> list[tuple[int, int]]:
+    """(head, size) of every other outfit of the same kind, from the data."""
+    out = []
+    for (o,) in conn.execute("SELECT org_actor_id FROM org_profiles WHERE org_actor_id NOT IN (?,?) AND org_kind=(SELECT org_kind FROM org_profiles WHERE org_actor_id=?) ORDER BY org_actor_id",
+                             (int(org), int(other), int(org))).fetchall():
+        h = head_of(conn, int(o))
+        if h is not None:
+            out.append((int(h), _size(conn, int(o))))
+    return out
+
+
+def _cost_factors(conn, head: int, org: int, other: int, day: int, team: int) -> dict[str, float]:
+    """What carrying on a feud would cost the head of `org` against `other`: men and earnings lost to them, both sides' losses, being the
+    weaker side by men and by allies, law heat after recent killings, a thin purse (what has come to him within the lookback against what a team costs), his caution, his standing, and a third head both
+    would hear out. Each is 0..1 against a data figure (`cost.*_full`); none is a ceiling on anything."""
+    mine, theirs = _size(conn, org), _size(conn, other)
+    taken_rows = _recent_killings(conn, day, org=org, killer_org=other)
+    lost = len(taken_rows)
+    their_lost = len(_recent_killings(conn, day, org=other, killer_org=org))
+    ohead = head_of(conn, other)
+    taken = [int(r[3]) for r in taken_rows if r[3] is not None]
+    earn = 0.0
+    if taken:
+        q = ",".join("?" * len(taken))
+        earn = float(conn.execute(f"SELECT COALESCE(SUM(weekly_take),0) FROM org_lines WHERE holder_actor_id IN ({q})", taken).fetchone()[0])
+    total = float(conn.execute("SELECT COALESCE(SUM(l.weekly_take),0) FROM org_lines l JOIN org_holdings h ON h.id=l.holding_id WHERE h.org_actor_id=? AND l.status='active'", (org,)).fetchone()[0])
+    allies_theirs = 0.0
+    broker = 0.0
+    for t, tsize in _third_heads(conn, org, other):
+        clout = clamp01(tsize / max(1, mine, theirs))
+        allies_theirs += max(0.0, _sees(conn, t, ohead) - _sees(conn, t, head)) * clout
+        broker = max(broker, min(_sees(conn, head, t), _sees(conn, ohead, t)) * clout)
+    seat = conn.execute("SELECT standing FROM org_seats WHERE actor_id=? AND org_actor_id=? AND status='active'", (int(head), int(org))).fetchone()
+    price = _need(conn, "price_per_man") * max(1, int(team))
+    since = int(day) - int(_need(conn, "lookback_days"))
+    settled = conn.execute(
+        """SELECT 1 FROM org_incidents WHERE kind='killing' AND day>=? AND status IN ('settled','paid')
+           AND ((raised_to_org_actor_id=? AND json_extract(metadata_json,'$.killer_org')=?) OR (raised_to_org_actor_id=? AND json_extract(metadata_json,'$.killer_org')=?)) LIMIT 1""",
+        (since, int(org), int(other), int(other), int(org))).fetchone()
+    return {"lost": clamp01(lost / max(1, mine) / _need(conn, "lost_share_full")),
+            "both_lost": clamp01((lost + their_lost) / max(1, mine + theirs) / _need(conn, "both_share_full")),
+            "lost_earnings": clamp01(earn / total / _need(conn, "earn_full")) if total > 0 else 0.0,
+            "weaker": clamp01(1.0 - mine / theirs) if theirs and mine < theirs else 0.0,
+            "allies_theirs": clamp01(allies_theirs / _need(conn, "allies_full")),
+            "heat_own": clamp01(len(_recent_killings(conn, day, either=org)) / _need(conn, "heat_own_full")),
+            "heat_city": clamp01(len(_recent_killings(conn, day)) / _need(conn, "heat_city_full")),
+            "cash_thin": clamp01(1.0 - float(conn.execute("SELECT COALESCE(SUM(amount),0) FROM org_money WHERE to_actor_id=? AND day>=?", (int(head), since)).fetchone()[0]) / price) if price > 0 else 0.0,
+            "cautious": 1.0 - om._drive(conn, head, "aggression"),
+            "secure": clamp01(float(seat["standing"]) / _need(conn, "standing_full")) if seat is not None else 0.0,
+            "broker": broker,
+            "broken_peace": 1.0 if settled else 0.0}
+
+
+def _killing_factors(conn, head: int, meta: dict, day: int) -> dict[str, float]:
     victim, killer = int(meta["victim"]), int(meta["killer"])
     org, korg = int(meta["org"]), int(meta["killer_org"])
     rank = _v(conn, (_killing(conn).get("role_rank") or {}).get(meta.get("role")), 0.5)
@@ -998,33 +1086,42 @@ def _killing_factors(conn, head: int, meta: dict) -> dict[str, float]:
     khead = head_of(conn, korg)
     r = om._rel(conn, head, khead)
     mine, theirs = _size(conn, org), _size(conn, korg)
-    return {"always": 1.0, "victim_wrong": 1.0 if wrong else 0.0, "low_role": 1.0 - rank, "high_role": rank,
-            "unsanctioned": 0.0 if meta.get("sanctioned", True) else 1.0, "kin": _kin_wanting(conn, victim),
-            "humiliation": _on_own_ground(conn, victim, org), "style": _style(conn, org),
-            "refused_sit": 1.0 if any(w[0] == "refused" for w in wrong) else 0.0,
-            "no_sit_down": 0.0 if _had_sit_down(conn, victim) else 1.0,
-            "weaker": clamp01(1.0 - mine / theirs) if theirs and mine < theirs else 0.0,
-            "stronger": clamp01(1.0 - theirs / mine) if mine and theirs < mine else 0.0,
-            "friendly": 0.0 if r is None else clamp01((float(r["respect"]) + float(r["trust"])) / 200.0),
-            "resentful": 0.0 if r is None else clamp01(float(r["resentment"]) / 100.0),
-            "temper": om._drive(conn, head, "aggression")}
+    f = {"always": 1.0, "victim_wrong": 1.0 if wrong else 0.0, "low_role": 1.0 - rank, "high_role": rank,
+         "unsanctioned": 0.0 if meta.get("sanctioned", True) else 1.0, "kin": _kin_wanting(conn, victim),
+         "humiliation": _on_own_ground(conn, victim, org), "style": _style(conn, org),
+         "refused_sit": 1.0 if any(w[0] == "refused" for w in wrong) else 0.0,
+         "no_sit_down": 0.0 if _had_sit_down(conn, victim) else 1.0,
+         "stronger": clamp01(1.0 - theirs / mine) if mine and theirs < mine else 0.0,
+         "friendly": 0.0 if r is None else clamp01((float(r["respect"]) + float(r["trust"])) / 200.0),
+         "resentful": 0.0 if r is None else clamp01(float(r["resentment"]) / 100.0),
+         "temper": om._drive(conn, head, "aggression"),
+         "redress_refused": 1.0 if meta.get("redress_refused") else 0.0, "peace_refused": 1.0 if meta.get("peace_refused") else 0.0}
+    f.update(_cost_factors(conn, head, org, korg, day, _team_size(conn, meta)))
+    return f
 
 
 def _blend(conn, items, factors: dict[str, float]) -> float:
-    rest = 1.0
+    """1 - prod(1 - weight x factor) over an answer's terms, scaled by (1 - the same blend over the terms marked `against`): a weighed
+    counter-term takes a share off the answer, never down to a fixed ceiling and never to a fixed count."""
+    rest = against = 1.0
     for m in items:
-        rest *= 1.0 - clamp01(_v(conn, m["weight"])) * clamp01(factors.get(m["name"], 0.0))
-    return 1.0 - rest
+        t = clamp01(_v(conn, m["weight"])) * clamp01(factors.get(m["name"], 0.0))
+        if m.get("against"):
+            against *= 1.0 - t
+        else:
+            rest *= 1.0 - t
+    return (1.0 - rest) * against
 
 
 def killing_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:
     meta = json.loads(item["metadata_json"] or "{}")
-    f = _killing_factors(conn, actor_id, meta)
+    f = _killing_factors(conn, actor_id, meta, int(day))
     why = {"accept_killing": f"Lets the killing of {_name(conn, meta['victim'])} stand.",
            "demand_redress": f"Demands redress from {_name(conn, head_of(conn, int(meta['killer_org'])))} for {_name(conn, meta['victim'])}.",
+           "sit_down_peace": f"Asks for a sit-down with {_name(conn, head_of(conn, int(meta['killer_org'])))} to end it over {_name(conn, meta['victim'])}.",
            "retaliate": f"Has {_name(conn, meta['killer'])} answered for {_name(conn, meta['victim'])}."}
     return [{"kind": k, "utility": _utility(conn, _blend(conn, _killing(conn)[k], f)), "rationale": why[k], "payload": {**meta, "incident_id": int(meta["incident"])}}
-            for k in ("accept_killing", "demand_redress", "retaliate") if _killing(conn).get(k)]
+            for k in ("accept_killing", "demand_redress", "sit_down_peace", "retaliate") if _killing(conn).get(k)]
 
 
 def _heads(conn, actor_id, payload):
@@ -1054,6 +1151,42 @@ def execute_demand_redress(conn, actor_id, kind, payload, day):
     return {"summary": f"{_name(conn, me)} asked {_name(conn, other)} to make good the killing of {_name(conn, payload['victim'])}."}
 
 
+_KILLING_KEYS = ("incident", "killer", "killer_org", "org", "victim", "role", "sanctioned")
+
+
+def _again(conn, head: int, payload: dict, day: int, **flag) -> None:
+    """Put the killing back on the dead man's head's list after the other side said no, with what was refused marked in it."""
+    meta = {k: payload[k] for k in _KILLING_KEYS if k in payload}
+    meta.update(flag)
+    add_agenda(conn, int(head), "respond_killing", int(day) + int(figure(conn, _killing(conn)["delay"])), subject_kind="actor", subject_id=int(payload["victim"]), metadata=meta)
+    imposed(conn, int(head))
+
+
+def execute_sit_down_peace(conn, actor_id, kind, payload, day):
+    """The head asks the other head to sit down over the killing (through a third head both hear out where there is one). The other
+    head weighs it with his own costs (data `killing.settle_accept`) against a draw from the run's seed; peace settles the matter
+    and eases both, a refusal puts the matter back on the first head's list marked as refused."""
+    me, other = _heads(conn, actor_id, payload)
+    if other is None:
+        _finish(conn, payload, day, "sat_down")
+        return {"summary": "There was no one to sit down with.", "blocked": True}
+    org, korg = int(payload["org"]), int(payload["killer_org"])
+    f = _cost_factors(conn, other, korg, org, int(day), 1)
+    f.update({"always": 1.0, "temper": om._drive(conn, other, "aggression")})
+    p = _blend(conn, _killing(conn)["settle_accept"], f)
+    pts = float(figure(conn, _killing(conn)["relation_points"]))
+    imposed(conn, other)
+    if _rng(conn, "peace", int(payload["incident_id"]), day).random() < p:
+        _finish(conn, payload, day, "settled")
+        adjust_relationship(conn, me, other, int(day), respect_delta=pts, resentment_delta=-pts, trust_delta=pts / 2.0)
+        adjust_relationship(conn, other, me, int(day), respect_delta=pts, resentment_delta=-pts, trust_delta=pts / 2.0)
+        return {"summary": f"{_name(conn, me)} and {_name(conn, other)} sat down and settled the killing of {_name(conn, payload['victim'])}."}
+    _finish(conn, payload, day, "peace_refused")
+    adjust_relationship(conn, me, other, int(day), resentment_delta=pts, respect_delta=-pts / 2.0)
+    _again(conn, me, payload, day, redress_refused=bool(payload.get("redress_refused")), peace_refused=True)
+    return {"summary": f"{_name(conn, other)} would not sit down with {_name(conn, me)} over {_name(conn, payload['victim'])}."}
+
+
 def _team_size(conn, payload: dict) -> int:
     """How many men go after the killer: a base and more for the victim's rank (data `killing.team`). No cap on how often."""
     t = _killing(conn).get("team") or {}
@@ -1076,7 +1209,7 @@ def execute_retaliate(conn, actor_id, kind, payload, day):
 
 for _kind, _fn in (("sit_down", execute_sit_down), ("kill_offender", execute_kill_offender), ("let_it_go", execute_let_go),
                    ("pay", execute_pay), ("refuse", execute_refuse), ("accept_killing", execute_accept_killing),
-                   ("demand_redress", execute_demand_redress), ("retaliate", execute_retaliate)):
+                   ("demand_redress", execute_demand_redress), ("sit_down_peace", execute_sit_down_peace), ("retaliate", execute_retaliate)):
     register_executor(_kind, _fn)
 register_agenda_action("respond_killing", killing_offers)
 register_agenda_action("respond_incident", respond_offers)

@@ -96,14 +96,14 @@ def execute_seek_permission(conn: sqlite3.Connection, actor_id: int, kind: str, 
     return {"summary": f"{_name(conn, actor_id)} asked {_name(conn, head)} for leave to be rid of {_name(conn, leader)}."}
 
 
-def _attempt_band(conn: sqlite3.Connection, killer: int, victim: int, day: int, land: float | None, retaliation: bool) -> tuple[str, str | None]:
+def _attempt_band(conn: sqlite3.Connection, killer: int, victim: int, day: int, land: float | None, retaliation: bool, fallible: bool = False) -> tuple[str, str | None]:
     """How a planned killing by one man of another goes: the same planned-hit lethality as a hit across outfits. A package that gives
     no landing chance (`internal.land`) keeps the old rule, a killing that always kills."""
     from . import lethality
     from .design import run_seed
     from .underworld_aggression import hit_band
     cfg = lethality.config(conn).get("internal") or {}
-    p = land if land is not None else (cfg.get("retaliation_land") if retaliation and cfg.get("retaliation_land") is not None else cfg.get("land"))
+    p = land if land is not None else (cfg.get("retaliation_land") if retaliation and cfg.get("retaliation_land") is not None else (cfg.get("land") if fallible else None))
     if p is None:
         return "killed", None
     picked: list = []
@@ -111,9 +111,9 @@ def _attempt_band(conn: sqlite3.Connection, killer: int, victim: int, day: int, 
     return band, (picked[0] if picked else None)
 
 
-def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sanctioned: bool, land: float | None = None, retaliation: bool = False) -> str:
-    """A killing by one man of another. A decided killing inside an outfit always kills unless the package gives it a landing chance
-    (`internal.land`); a reply across outfits (`retaliation`) lands at the package's `internal.retaliation_land` and then kills at the
+def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sanctioned: bool, land: float | None = None, retaliation: bool = False, fallible: bool = False) -> str:
+    """A killing by one man of another. A killing decided through the agenda (`fallible`: an ordered hit, a discipline or held-man killing) lands at the package's
+    `internal.land` when it gives one, otherwise it always kills; the state-changing killings of a coup, contest or war stay certain; a reply across outfits (`retaliation`) lands at the package's `internal.retaliation_land` and then kills at the
     planned-hit rate, so it can fail. A dead victim dies through the harm system, his seats go dead; a dead unit
     leader puts `fill_unit_leader_seat` on the head's list; an unsanctioned killing puts `discipline_hunt` there unless the head
     wanted it (then the killer gains standing). History is flagged for both. A botched attempt leaves the victim alive, hurt or not,
@@ -121,7 +121,7 @@ def kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, *, sancti
     from .harm import record_harm
     seats = conn.execute("SELECT org_actor_id,role_key,unit_id,superior_actor_id FROM org_seats WHERE actor_id=? AND status='active'", (int(victim),)).fetchall()
     loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (int(victim),)).fetchone()
-    band, method = _attempt_band(conn, killer, victim, day, land, retaliation)
+    band, method = _attempt_band(conn, killer, victim, day, land, retaliation, fallible)
     outcome = {"killed": "fatal", "maimed": "persistent", "wounded": "transient"}.get(band)
     if outcome is not None:
         record_harm(conn, int(victim), source_kind="org_action", source_ref_id=int(day) * 10_000_000 + int(killer), severity=100.0,
@@ -164,7 +164,7 @@ def execute_remove(conn: sqlite3.Connection, actor_id: int, kind: str, payload: 
     victim = int(payload["target"])
     if not is_living(conn, victim):
         return {"summary": "His target was already dead.", "blocked": True}
-    return {"summary": kill(conn, int(actor_id), victim, int(day), sanctioned=bool(payload.get("sanctioned")))}
+    return {"summary": kill(conn, int(actor_id), victim, int(day), sanctioned=bool(payload.get("sanctioned")), fallible=True)}
 
 
 # ---- agenda: the head's and the killer's lists ----
@@ -221,7 +221,7 @@ def execute_hit(conn, actor_id, kind, payload, day):
     victim = int(payload["target"])
     if not is_living(conn, victim):
         return {"summary": "The man was already dead."}
-    return {"summary": kill(conn, int(actor_id), victim, int(day), sanctioned=bool(payload.get("sanctioned")), retaliation=bool(payload.get("retaliation")))}
+    return {"summary": kill(conn, int(actor_id), victim, int(day), sanctioned=bool(payload.get("sanctioned")), retaliation=bool(payload.get("retaliation")), fallible=True)}
 
 
 def hunt_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list[dict]:

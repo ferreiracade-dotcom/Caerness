@@ -853,7 +853,17 @@
      {
       "name": "friendly",
       "weight": "hap_k_accept_friendly"
-     }
+     },
+     {"name": "lost", "weight": "hap_k_accept_killing_lost"},
+     {"name": "both_lost", "weight": "hap_k_accept_killing_both_lost"},
+     {"name": "heat_own", "weight": "hap_k_accept_killing_heat_own"},
+     {"name": "heat_city", "weight": "hap_k_accept_killing_heat_city"},
+     {"name": "cautious", "weight": "hap_k_accept_killing_cautious"},
+     {"name": "secure", "weight": "hap_k_accept_killing_secure"},
+     {"name": "cash_thin", "weight": "hap_k_accept_killing_cash_thin"},
+     {"name": "allies_theirs", "weight": "hap_k_accept_killing_allies_theirs"},
+     {"name": "broker", "weight": "hap_k_accept_killing_broker"},
+     {"name": "lost_earnings", "weight": "hap_k_accept_killing_lost_earnings"}
     ],
     "demand_redress": [
      {
@@ -867,7 +877,14 @@
      {
       "name": "no_sit_down",
       "weight": "hap_k_demand_no_sit_down"
-     }
+     },
+     {"name": "lost", "weight": "hap_k_demand_redress_lost"},
+     {"name": "both_lost", "weight": "hap_k_demand_redress_both_lost"},
+     {"name": "heat_own", "weight": "hap_k_demand_redress_heat_own"},
+     {"name": "cautious", "weight": "hap_k_demand_redress_cautious"},
+     {"name": "cash_thin", "weight": "hap_k_demand_redress_cash_thin"},
+     {"name": "broker", "weight": "hap_k_demand_redress_broker"},
+     {"name": "redress_refused", "weight": "hap_k_demand_redress_redress_refused", "against": true}
     ],
     "retaliate": [
      {
@@ -905,8 +922,64 @@
      {
       "name": "style",
       "weight": "hap_k_retaliate_style"
-     }
+     },
+     {"name": "redress_refused", "weight": "hap_k_retaliate_redress_refused"},
+     {"name": "peace_refused", "weight": "hap_k_retaliate_peace_refused"},
+     {"name": "broken_peace", "weight": "hap_k_retaliate_broken_peace"},
+     {"name": "lost", "weight": "hap_k_retaliate_lost", "against": true},
+     {"name": "both_lost", "weight": "hap_k_retaliate_both_lost", "against": true},
+     {"name": "lost_earnings", "weight": "hap_k_retaliate_lost_earnings", "against": true},
+     {"name": "weaker", "weight": "hap_k_retaliate_weaker", "against": true},
+     {"name": "allies_theirs", "weight": "hap_k_retaliate_allies_theirs", "against": true},
+     {"name": "heat_own", "weight": "hap_k_retaliate_heat_own", "against": true},
+     {"name": "heat_city", "weight": "hap_k_retaliate_heat_city", "against": true},
+     {"name": "cash_thin", "weight": "hap_k_retaliate_cash_thin", "against": true},
+     {"name": "cautious", "weight": "hap_k_retaliate_cautious", "against": true},
+     {"name": "broker", "weight": "hap_k_retaliate_broker", "against": true}
     ],
+    "sit_down_peace": [
+     {"name": "always", "weight": "hap_k_sit_down_peace_always"},
+     {"name": "broker", "weight": "hap_k_sit_down_peace_broker"},
+     {"name": "lost", "weight": "hap_k_sit_down_peace_lost"},
+     {"name": "both_lost", "weight": "hap_k_sit_down_peace_both_lost"},
+     {"name": "heat_own", "weight": "hap_k_sit_down_peace_heat_own"},
+     {"name": "heat_city", "weight": "hap_k_sit_down_peace_heat_city"},
+     {"name": "cautious", "weight": "hap_k_sit_down_peace_cautious"},
+     {"name": "secure", "weight": "hap_k_sit_down_peace_secure"},
+     {"name": "allies_theirs", "weight": "hap_k_sit_down_peace_allies_theirs"},
+     {"name": "weaker", "weight": "hap_k_sit_down_peace_weaker"},
+     {"name": "lost_earnings", "weight": "hap_k_sit_down_peace_lost_earnings"},
+     {"name": "cash_thin", "weight": "hap_k_sit_down_peace_cash_thin"},
+     {"name": "peace_refused", "weight": "hap_k_sit_down_peace_peace_refused", "against": true},
+     {"name": "broken_peace", "weight": "hap_k_sit_down_peace_broken_peace", "against": true}
+    ],
+    "settle_accept": [
+     {"name": "always", "weight": "hap_k_settle_accept_always"},
+     {"name": "broker", "weight": "hap_k_settle_accept_broker"},
+     {"name": "lost", "weight": "hap_k_settle_accept_lost"},
+     {"name": "both_lost", "weight": "hap_k_settle_accept_both_lost"},
+     {"name": "heat_own", "weight": "hap_k_settle_accept_heat_own"},
+     {"name": "heat_city", "weight": "hap_k_settle_accept_heat_city"},
+     {"name": "cautious", "weight": "hap_k_settle_accept_cautious"},
+     {"name": "secure", "weight": "hap_k_settle_accept_secure"},
+     {"name": "weaker", "weight": "hap_k_settle_accept_weaker"},
+     {"name": "allies_theirs", "weight": "hap_k_settle_accept_allies_theirs"},
+     {"name": "cash_thin", "weight": "hap_k_settle_accept_cash_thin"},
+     {"name": "lost_earnings", "weight": "hap_k_settle_accept_lost_earnings"},
+     {"name": "temper", "weight": "hap_k_settle_accept_temper", "against": true},
+     {"name": "broken_peace", "weight": "hap_k_settle_accept_broken_peace", "against": true}
+    ],
+    "cost": {
+     "lookback_days": "hap_k_cost_lookback_days",
+     "lost_share_full": "hap_k_cost_lost_share_full",
+     "both_share_full": "hap_k_cost_both_share_full",
+     "earn_full": "hap_k_cost_earn_full",
+     "allies_full": "hap_k_cost_allies_full",
+     "heat_own_full": "hap_k_cost_heat_own_full",
+     "heat_city_full": "hap_k_cost_heat_city_full",
+     "standing_full": "hap_k_cost_standing_full",
+     "price_per_man": "hap_k_cost_price_per_man"
+    },
     "team": {
      "base": "hap_k_team_base",
      "rank": "hap_k_team_rank"

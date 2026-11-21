@@ -105,15 +105,18 @@ def test_cautious_man_asks_first():
     rel(b.conn, b.soldier, b.capo, resentment=90)
     from engine import orgs as o2
     o2.add_agenda(b.conn, b.boss, "hit", DAY + 3, subject_kind="actor", subject_id=b.soldier, metadata={"known_to": [b.soldier]})
-    with forced_roll("remove_superior"):
+    from tests.outfit_choice_fixture import certain_kills
+    with forced_roll("remove_superior"), certain_kills():
         row = run_review(b.conn, b.soldier)
     assert _effects(row)["org_action_kind"] == "remove_superior" and not o2.is_living(b.conn, b.capo), dict(row)
 
 
 def _kill_alone(w):
     from engine import org_choices
-    return org_choices.execute(w.conn, w.soldier, "remove_superior",
-                               {"org": w.org, "target": w.capo, "unit_id": w.unit, "sanctioned": False}, DAY)
+    from tests.outfit_choice_fixture import certain_kills
+    with certain_kills():
+        return org_choices.execute(w.conn, w.soldier, "remove_superior",
+                                   {"org": w.org, "target": w.capo, "unit_id": w.unit, "sanctioned": False}, DAY)
 
 
 def _open(c, actor, kind):
@@ -150,7 +153,9 @@ def test_unsanctioned_killing_brings_a_hunt_sanctioned_does_not():
     assert hit["subject_id"] == s.capo and json.loads(hit["metadata_json"])["sanctioned"] is True
     offers = [x for x in org_choices.org_provider(k, s.soldier, "STRATEGIC", DAY + 5, {}) if x.action_kind == "hit"]
     assert offers
-    org_choices.execute(k, s.soldier, "hit", {"agenda_id": hit["id"], "target": s.capo, "sanctioned": True}, DAY + 5)
+    from tests.outfit_choice_fixture import certain_kills
+    with certain_kills():
+        org_choices.execute(k, s.soldier, "hit", {"agenda_id": hit["id"], "target": s.capo, "sanctioned": True}, DAY + 5)
     assert not orgs.is_living(k, s.capo) and not _open(k, s.boss, "discipline_hunt")
 
 

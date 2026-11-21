@@ -65,6 +65,18 @@ def forced_roll(*streams: str):
         org_motives._roll = old
 
 
+@contextlib.contextmanager
+def certain_kills():
+    """A planned killing that is attempted lands and kills (an internal killing can be botched, B12d; these tests are about what follows a death)."""
+    from engine import underworld_aggression as ag
+    old = ag.hit_band
+    ag.hit_band = lambda *a, **k: "killed"
+    try:
+        yield
+    finally:
+        ag.hit_band = old
+
+
 def run_review(conn, actor: int, day: int = DAY):
     from engine.decisions import decide_actor
     did = decide_actor(conn, actor, "STRATEGIC", day)

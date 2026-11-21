@@ -254,7 +254,9 @@ def test_kill_offender_goes_through_the_killing_path():
     item = c.execute("SELECT * FROM org_agenda WHERE kind='respond_incident' AND actor_id=?", (vhead,)).fetchone()
     offers = org_choices.AGENDA_ACTIONS["respond_incident"](c, vhead, item, DAY + 2)
     p = next(o["payload"] for o in offers if o["kind"] == "kill_offender")
-    org_choices.execute(c, vhead, "kill_offender", p, DAY + 2)
+    from tests.outfit_choice_fixture import certain_kills
+    with certain_kills():
+        org_choices.execute(c, vhead, "kill_offender", p, DAY + 2)
     assert not orgs.is_living(c, a)
 
 
@@ -352,7 +354,7 @@ def test_cross_family_killing_goes_to_the_dead_mans_head():
     assert c.execute("SELECT 1 FROM org_incidents WHERE kind='killing' AND offender_actor_id=? AND victim_actor_id=?", (w.soldier, vic)).fetchone()
     assert _forced(c, vhead) and _forced(c, sup), "his head and the dead man's superior are looked at tomorrow"
     offers = org_choices.AGENDA_ACTIONS["respond_killing"](c, vhead, item, DAY + 2)
-    assert {o["kind"] for o in offers} == {"accept_killing", "demand_redress", "retaliate"}
+    assert {o["kind"] for o in offers} == {"accept_killing", "demand_redress", "sit_down_peace", "retaliate"}
 
 
 def test_killing_inside_one_organisation_asks_no_one():

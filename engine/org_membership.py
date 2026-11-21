@@ -822,7 +822,7 @@ def execute_discipline_kill(conn, actor_id, kind, payload, day):
     if not is_living(conn, holder):
         return {"summary": "The man was already dead.", "blocked": True}
     imposed(conn, int(actor_id))
-    return {"summary": kill(conn, int(actor_id), holder, int(day), sanctioned=True)}
+    return {"summary": kill(conn, int(actor_id), holder, int(day), sanctioned=True, fallible=True)}
 
 
 def execute_drop_discipline(conn, actor_id, kind, payload, day):

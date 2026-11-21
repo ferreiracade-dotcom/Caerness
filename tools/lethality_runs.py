@@ -140,6 +140,22 @@ def years(days: int, seed: int | None, timing_only: bool) -> None:
         print("KILLED_BY rows:", conn.execute("SELECT COUNT(*) FROM org_agenda WHERE kind='killed_by'").fetchone()[0])
         print("INCIDENTS by kind:", dict(conn.execute("SELECT kind,COUNT(*) FROM org_incidents GROUP BY 1").fetchall()))
         print("  incidents that went too far:", conn.execute("SELECT COUNT(*) FROM harm_incidents WHERE source_kind='org_incident' AND json_extract(metadata_json,'$.went_too_far')=1").fetchone()[0])
+        pair = {}
+        for r in conn.execute("SELECT day,raised_to_org_actor_id,json_extract(metadata_json,'$.killer_org') FROM org_incidents WHERE kind='killing' ORDER BY day"):
+            pair.setdefault(tuple(sorted((int(r[1]), int(r[2] if r[2] is not None else -1)))), []).append(int(r[0]))
+        feuds = sorted(((len(v), min(v), max(v)) for v in pair.values()), reverse=True)
+        print("  FEUDS (killings, first day, last day), longest first:", feuds[:6])
+        print("  answers to a killing (incident status):", dict(conn.execute("SELECT status,COUNT(*) FROM org_incidents WHERE kind='killing' GROUP BY 1").fetchall()))
+        inner = Counter()
+        for r in conn.execute("""SELECT h.outcome FROM harm_incidents h WHERE h.source_kind='org_action' AND h.intent_class='lethal'
+              AND EXISTS (SELECT 1 FROM org_seats a JOIN org_seats b ON a.org_actor_id=b.org_actor_id WHERE a.actor_id=json_extract(h.metadata_json,'$.offender_actor_id') AND b.actor_id=h.actor_id)"""):
+            inner[r[0]] += 1
+        print("  INTERNAL planned killings (lethal intent; offender and victim share an outfit), by outcome:", dict(inner))
+        total = conn.execute("SELECT COUNT(*) FROM org_incidents WHERE kind='killing'").fetchone()[0]
+        reply = conn.execute("""SELECT COUNT(*) FROM org_incidents i WHERE i.kind='killing' AND EXISTS (SELECT 1 FROM org_agenda a WHERE a.kind='hit'
+              AND a.actor_id=i.offender_actor_id AND a.subject_id=i.victim_actor_id AND json_extract(a.metadata_json,'$.retaliation')=1)""").fetchone()[0]
+        print(f"  FIRST STRIKES vs REPLIES: killings across outfits {total}, replies to an earlier killing {reply}, first strikes {total - reply}")
+        print("  org_money to heads, total:", conn.execute("SELECT COALESCE(SUM(amount),0) FROM org_money").fetchone()[0])
     except Exception as e:  # noqa: BLE001  (BASE has no retaliation metadata)
         print("  (agenda summary unavailable:", repr(e)[:120], ")")
 

@@ -2572,7 +2572,7 @@
    "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
   },
   "hap_k_demand_always": {
-   "default": 0.3,
+   "default": 0.2,
    "range": null,
    "unit": "motive weight",
    "tag": "Design",
@@ -2642,7 +2642,7 @@
    "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
   },
   "hap_k_retaliate_resentful": {
-   "default": 0.2,
+   "default": 0.35,
    "range": null,
    "unit": "motive weight",
    "tag": "Design",
@@ -2730,6 +2730,676 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; how a head answers a killing of his man by another organisation (engine/org_happenings.py)"
+  },
+  "hap_k_cost_lookback_days": {
+   "default": 180,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far back a head's memory of killings between the outfits reaches when he weighs a feud; a weight over memory (older killings simply count for nothing), not a gate on anything. Half a year: the Castellammarese and Banana wars were remembered in terms of seasons, not decades (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_cost_lost_share_full": {
+   "default": 0.12,
+   "range": null,
+   "unit": "share of members",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; men lost to the other outfit within the lookback, as a share of his own membership, at which war weariness is at full weight: a crew that loses one man in twelve in half a year is bleeding (approximate; real families answered a first killing, rarely the fifth) (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_cost_both_share_full": {
+   "default": 0.18,
+   "range": null,
+   "unit": "share of members",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; killings both ways within the lookback, as a share of both outfits' membership, at which the cost of the feud to both is at full weight: the Five Families and the Commission ended open wars because both sides were losing men and attention (approximate) (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_cost_earn_full": {
+   "default": 0.25,
+   "range": null,
+   "unit": "share of weekly take",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; weekly take of lines held by men lost to the other outfit, as a share of his outfit's take, at which lost earnings are at full weight: a quarter of the money walking out with the dead is a war the books cannot carry (approximate) (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_cost_allies_full": {
+   "default": 0.8,
+   "range": null,
+   "unit": "allied heads",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how much better the other side is liked by third heads (weighted by their size) at which being outnumbered by allies is at full weight: outfits looked to who else would stand with them before a war (approximate) (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_cost_heat_own_full": {
+   "default": 6,
+   "range": null,
+   "unit": "killings",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; killings in the lookback with this outfit on either side at which the law's and the press's attention to it is at full weight: each one brought detectives, grand juries and, in the 1970s, federal organised-crime task forces (approximate) (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_cost_heat_city_full": {
+   "default": 12,
+   "range": null,
+   "unit": "killings",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; killings across outfits in the whole city in the lookback at which public and law pressure on every outfit is at full weight: the Commission shut down open killing when the city's heat threatened the money (approximate) (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_cost_standing_full": {
+   "default": 1.0,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; a head's standing in his own outfit at which he is fully secure and can afford to let an affront pass without being thought weak (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_cost_price_per_man": {
+   "default": 2000,
+   "range": null,
+   "unit": "1975 dollars",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; what it costs a head to send one man after another (the men's keep, a car, a gun, cover, the fee to an outside hand where he is not family); a team the purse cannot cover weighs on the answer (unsourced; the going rate for a contract hit in the 1970s was in the low thousands) (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_lost": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far men already lost to that outfit: war weariness, a head who has buried his men weighs what the next round costs adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_both_lost": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far killings both ways: a feud that is costing both sides men and attention pushes both toward ending it adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_heat_own": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law heat on his own outfit after recent killings: detectives and grand juries cost the money adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_heat_city": {
+   "default": 0.1,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law and press heat across the whole city after recent killings adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_cautious": {
+   "default": 0.1,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far the head's temperament: a cautious man (low aggression) weighs cost more, a hot one less adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_secure": {
+   "default": 0.08,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far the head's standing: a secure head can let an affront pass without being thought weak adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_cash_thin": {
+   "default": 0.08,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a thin purse: a team costs money the head may not have adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_allies_theirs": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far being outnumbered by allies: other heads who think better of the other side than of him adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_broker": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a third head both sides respect, with the weight to broker a sit-down (the Commission's role where one exists in data: other outfits of the same kind; absent, it is zero) adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_accept_killing_lost_earnings": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far earnings walking out with the dead: lines that go unattended while a man is dead or hiding adds to the head's answer 'accept_killing' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_demand_redress_lost": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far men already lost to that outfit: war weariness, a head who has buried his men weighs what the next round costs adds to the head's answer 'demand_redress' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_demand_redress_both_lost": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far killings both ways: a feud that is costing both sides men and attention pushes both toward ending it adds to the head's answer 'demand_redress' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_demand_redress_heat_own": {
+   "default": 0.12,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law heat on his own outfit after recent killings: detectives and grand juries cost the money adds to the head's answer 'demand_redress' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_demand_redress_cautious": {
+   "default": 0.1,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far the head's temperament: a cautious man (low aggression) weighs cost more, a hot one less adds to the head's answer 'demand_redress' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_demand_redress_cash_thin": {
+   "default": 0.08,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a thin purse: a team costs money the head may not have adds to the head's answer 'demand_redress' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_demand_redress_broker": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a third head both sides respect, with the weight to broker a sit-down (the Commission's role where one exists in data: other outfits of the same kind; absent, it is zero) adds to the head's answer 'demand_redress' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_demand_redress_redress_refused": {
+   "default": 0.9,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far redress was asked and refused: a head who has been turned down once answers with force takes away from the head's answer 'demand_redress' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_always": {
+   "default": 0.05,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a base willingness to talk over fighting adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_broker": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a third head both sides respect, with the weight to broker a sit-down (the Commission's role where one exists in data: other outfits of the same kind; absent, it is zero) adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_lost": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far men already lost to that outfit: war weariness, a head who has buried his men weighs what the next round costs adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_both_lost": {
+   "default": 0.35,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far killings both ways: a feud that is costing both sides men and attention pushes both toward ending it adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_heat_own": {
+   "default": 0.25,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law heat on his own outfit after recent killings: detectives and grand juries cost the money adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_heat_city": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law and press heat across the whole city after recent killings adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_cautious": {
+   "default": 0.12,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far the head's temperament: a cautious man (low aggression) weighs cost more, a hot one less adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_secure": {
+   "default": 0.1,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far the head's standing: a secure head can let an affront pass without being thought weak adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_allies_theirs": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far being outnumbered by allies: other heads who think better of the other side than of him adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_weaker": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far being the smaller outfit by men: a head with fewer men than the other pays more for a war adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_lost_earnings": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far earnings walking out with the dead: lines that go unattended while a man is dead or hiding adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_cash_thin": {
+   "default": 0.08,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a thin purse: a team costs money the head may not have adds to the head's answer 'sit_down_peace' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_peace_refused": {
+   "default": 0.9,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a sit-down was asked and refused: a head who has been turned down once answers with force takes away from the head's answer 'sit_down_peace' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_sit_down_peace_broken_peace": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a peace settled or paid for within the lookback that has since been broken by another killing: trust is gone takes away from the head's answer 'sit_down_peace' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_redress_refused": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far redress was asked and refused: a head who has been turned down once answers with force adds to the head's answer 'retaliate' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_peace_refused": {
+   "default": 0.25,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a sit-down was asked and refused: a head who has been turned down once answers with force adds to the head's answer 'retaliate' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_broken_peace": {
+   "default": 0.35,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a peace settled or paid for within the lookback that has since been broken by another killing: trust is gone adds to the head's answer 'retaliate' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_lost": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far men already lost to that outfit: war weariness, a head who has buried his men weighs what the next round costs takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_both_lost": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far killings both ways: a feud that is costing both sides men and attention pushes both toward ending it takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_lost_earnings": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far earnings walking out with the dead: lines that go unattended while a man is dead or hiding takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_weaker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far being the smaller outfit by men: a head with fewer men than the other pays more for a war takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_allies_theirs": {
+   "default": 0.25,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far being outnumbered by allies: other heads who think better of the other side than of him takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_heat_own": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law heat on his own outfit after recent killings: detectives and grand juries cost the money takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_heat_city": {
+   "default": 0.12,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law and press heat across the whole city after recent killings takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_cash_thin": {
+   "default": 0.1,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a thin purse: a team costs money the head may not have takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_cautious": {
+   "default": 0.15,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far the head's temperament: a cautious man (low aggression) weighs cost more, a hot one less takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_retaliate_broker": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a third head both sides respect, with the weight to broker a sit-down (the Commission's role where one exists in data: other outfits of the same kind; absent, it is zero) takes away from the head's answer 'retaliate' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_always": {
+   "default": 0.1,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a base willingness to talk over fighting adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_broker": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a third head both sides respect, with the weight to broker a sit-down (the Commission's role where one exists in data: other outfits of the same kind; absent, it is zero) adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_lost": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far men already lost to that outfit: war weariness, a head who has buried his men weighs what the next round costs adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_both_lost": {
+   "default": 0.5,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far killings both ways: a feud that is costing both sides men and attention pushes both toward ending it adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_heat_own": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law heat on his own outfit after recent killings: detectives and grand juries cost the money adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_heat_city": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far law and press heat across the whole city after recent killings adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_cautious": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far the head's temperament: a cautious man (low aggression) weighs cost more, a hot one less adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_secure": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far the head's standing: a secure head can let an affront pass without being thought weak adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_weaker": {
+   "default": 0.35,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far being the smaller outfit by men: a head with fewer men than the other pays more for a war adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_allies_theirs": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far being outnumbered by allies: other heads who think better of the other side than of him adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_cash_thin": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a thin purse: a team costs money the head may not have adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_lost_earnings": {
+   "default": 0.2,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far earnings walking out with the dead: lines that go unattended while a man is dead or hiding adds to the head's answer 'settle_accept' (a motive for it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_temper": {
+   "default": 0.4,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far his own temper: the hotter the head, the less he sits down takes away from the head's answer 'settle_accept' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
+  },
+  "hap_k_settle_accept_broken_peace": {
+   "default": 0.3,
+   "range": null,
+   "unit": "motive weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; how far a peace settled or paid for within the lookback that has since been broken by another killing: trust is gone takes away from the head's answer 'settle_accept' (a counter-term: the answer is scaled by one minus it); weights are Design proposals, relative to the other terms of the answer (B12d: engine/org_happenings.py)"
   },
   "hap_standing_good": {
    "default": 0.08,
