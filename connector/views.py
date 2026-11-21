@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 
-from connector import store
+from connector import org_views, store
 
 _LIMITS = {"present": 5, "news": 5, "competence": 6, "notes": 6, "underworld": 2}
 
@@ -279,7 +279,8 @@ def compact_scene(conn) -> dict:
     for a in sampled:
         who, member = _who(conn, a), "; ".join(_member_of(conn, a["id"])) or None
         present.append(_drop_none({"id": a["id"], "name": a["name"], "sex": _sex(conn, a["id"], day), "who": who,
-                                   "member_of": member, **_words(conn, int(me["actor_id"]), a["id"], here, f"{who} {member or ''}")}))
+                                   "member_of": member, "organisations": org_views.record_view(conn, a["id"], int(me["actor_id"])) or None,
+                                   **_words(conn, int(me["actor_id"]), a["id"], here, f"{who} {member or ''}")}))
     from engine.manners_canon import manners_for
     you_here = _words(conn, None, int(me["actor_id"]), here)
     you_here.pop("age", None)
@@ -321,6 +322,7 @@ def compact_scene(conn) -> dict:
         "protagonist": _drop_none({"id": me["actor_id"], "name": me["name"], "age": _age(conn, me["actor_id"], day),
                                    "role": _clip(me.get("subtype") or me.get("actor_type"), 100)}),
         "present": present,
+        "in_the_air": org_views.in_the_air(conn, int(me["actor_id"])) or None,
         "manners": manners_for(conn, here),
         "you_here": you_here or None,
         "institutions_here": institutions,
@@ -522,6 +524,18 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
             if cm:
                 out["commitments"] = [{"what": _clip(c["what"], 140), "kind": c["kind"], "due_day": c["due_day"]} for c in cm]
     if kind == "actor":
+        recs = org_views.record_view(conn, out["id"], me)
+        if recs:
+            out["organisations"] = recs
+        temper = org_views.temperament_words(conn, out["id"], me)
+        if temper:
+            out["temperament"] = temper
+        cust = org_views.custody_view(conn, out["id"], me)
+        if cust:
+            out["custody"] = cust
+        dealings = org_views.org_view(conn, out["id"], me)
+        if dealings:
+            out["dealings"] = dealings
         office = facts.office_of(conn, out["id"])
         if office:
             out["office"] = office

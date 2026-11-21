@@ -1,0 +1,50 @@
+{
+  "what": "Period wording for what the GM is shown about the life (connector/org_views.py reads this; a number never reaches the GM, only these words). Each band list is [upper bound, words], read in order; empty words are left out. A package without this file shows the facts without the colour.",
+  "temperament": {
+    "aggression": [[0.3, "quiet, not a man who reaches for it"], [0.55, ""], [0.75, "short-tempered, quick to take offence"], [99, "hot-headed, the kind who hits first"]],
+    "risk": [[0.3, "careful, takes his time"], [0.65, ""], [99, "takes chances other men won't"]]
+  },
+  "standing": [[0.2, "far from being proposed"], [0.5, "coming along, but not yet"], [0.8, "close, men say his name"], [99, "as good as made, waiting on the day"]],
+  "tension": {
+    "bands": [[0.12, ""], [0.3, "wary of"], [0.5, "sore feelings toward"], [0.7, "bad blood with"], [99, "on the edge of open trouble with"]],
+    "back_days": 400,
+    "street_acts": {
+      "line_opened": "a new racket opened on ground they thought theirs",
+      "incident": "a man of theirs was roughed up",
+      "killing": "a killing between them",
+      "unsanctioned": "a killing nobody had cleared",
+      "attempt": "an attempt on a man",
+      "slight": "a slight that was not forgotten",
+      "press_ground": "they're pressing on his ground",
+      "squeeze": "they're squeezing his ground",
+      "levy_refused": "a payment that was refused",
+      "funeral_attended": "the funeral",
+      "wake": "the funeral",
+      "refused_redress": "a wrong he would not make good",
+      "refused_peace": "a peace he would not take"
+    },
+    "none": "nothing in particular is said between them"
+  },
+  "heat": {"public": [[0.25, ""], [0.55, "the police have been round more than usual"], [0.85, "the law is leaning on them"], [99, "everyone says the law is after them"]]},
+  "losses": {"recent_days": 180, "title": "{name}, a {role}, was put in the ground {when}"},
+  "when": [[10, "this week"], [45, "a few weeks back"], [200, "some months back"], [9999, "a year or more ago"]],
+  "custody": {
+    "held": "locked up, waiting on the court",
+    "bailed": "out on bail, the case still hanging over him",
+    "walked": "the case against him was thrown out",
+    "acquitted": "he was tried and walked",
+    "serving": "doing {term} at {facility}, out in about {out}",
+    "home": "did {term} at {facility}, home since {when}",
+    "charge": "charged with {charge}",
+    "term_units": {"year": 365, "month": 30}
+  },
+  "air": {
+    "war": [[0.7, ""], [99, "there is trouble between the families that men talk about"]],
+    "police": [[0.35, ""], [0.7, "the police are busier than usual"], [99, "the law is all over the city"]],
+    "trial": "a big trial is being talked about",
+    "killing": "a killing everybody has heard of {when}",
+    "recent_days": 21,
+    "killing_kinds": ["homicide"],
+    "trial_publicity": 60
+  }
+}
