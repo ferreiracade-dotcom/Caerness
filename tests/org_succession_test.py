@@ -17,6 +17,16 @@ if str(ROOT) not in sys.path:
 from tests.outfit_choice_fixture import DAY, drives, forced_roll, open_world, rel
 
 
+def certain_kill(fn):
+    """A coup, contest or war killing can fail (B12e: it goes through the planned-hit chance); these tests are about what follows a death, so the shot lands."""
+    def run(*a, **k):
+        from tests.outfit_choice_fixture import certain_kills
+        with certain_kills():
+            return fn(*a, **k)
+    run.__name__ = fn.__name__
+    return run
+
+
 @contextlib.contextmanager
 def rolls(fn):
     """fn(stream) -> the draw for that stream (0..1); every draw in the weighed decisions goes through it."""
@@ -318,6 +328,7 @@ def test_an_insider_without_backing_starts_a_civil_war():
     assert orgs.head_of(c, k.org) is not None  # someone holds the seat meanwhile
 
 
+@certain_kill
 def test_loyalists_can_kill_an_unbacked_killer_quickly():
     from engine import orgs, outfit_choices
     w = open_world()
@@ -337,6 +348,7 @@ def test_loyalists_can_kill_an_unbacked_killer_quickly():
     assert m.get("avenged_by") is not None
 
 
+@certain_kill
 def test_a_plot_against_a_living_head_is_sounded_and_struck():
     """Ambition before any vacancy: an ambitious, passed-over man sounds out the backers one by one, and with enough of them
     behind him strikes; the coup follows at once."""
@@ -620,6 +632,7 @@ def test_a_post_below_the_head_is_the_heads_choice_not_a_formula():
     assert orgs.superior_of(c, favourite, k.org) == k.boss
 
 
+@certain_kill
 def test_the_new_head_weighs_what_to_do_about_the_men_who_stood_against_him():
     from engine import orgs, org_coup
     w = open_world()

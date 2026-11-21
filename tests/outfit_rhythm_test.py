@@ -52,11 +52,14 @@ def test_routine_week_writes_no_decision_rows():
     from engine import org_motives
     real_roll = org_motives._roll
     org_motives._roll = lambda conn, actor_id, day, stream: 0.99
+    from engine import org_tension  # the Balance's weekly pass is the one thing that puts items on a head's list in a routine week; tests/iron_balance_b12e_test.py
+    real_tension, org_tension.process_due = org_tension.process_due, lambda conn, day: {}
     t0 = time.time()
     try:
         advance_connection(conn, 28)
     finally:
         org_motives._roll = real_roll
+        org_tension.process_due = real_tension
     conn.commit()
     print(f"28-day outfit advance: {time.time() - t0:.1f}s")
     assert _decision_rows(conn, ids) - before == 0

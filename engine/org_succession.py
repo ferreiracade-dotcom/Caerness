@@ -952,8 +952,9 @@ def tick_contest(conn: sqlite3.Connection, row, day: int) -> str | None:
     for c in sorted(cands):  # a candidate losing ground may have the man in front killed
         if c != lead and share.get(c, 0.0) < s1 and roll(conn, c, int(day), f"cut:{cid}") < v(conn, blk["kill_week"]) * drive(conn, c, "aggression") * drive(conn, c, "ambition") * (s1 - share.get(c, 0.0)):
             from .outfit_choices import kill
-            kill(conn, c, lead, int(day), sanctioned=False)
-            meta["killed"] += 1
+            kill(conn, c, lead, int(day), sanctioned=False, fallible=True)
+            if not is_living(conn, lead):  # a man who lives is still the man in front: the contest is undecided and goes on next week
+                meta["killed"] += 1
             break
     if len(ranked) > 1:
         from . import org_coup

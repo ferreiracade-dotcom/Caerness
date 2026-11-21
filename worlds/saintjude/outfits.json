@@ -40,7 +40,6 @@
   },
   "vannucci": {
    "institution": "Vannucci Family",
-   "violence_bias": "violence_bias_vannucci",
    "shape": "family",
    "members_figure": "made_men_vannucci",
    "dependents_figure": "associates_per_man_vannucci",
@@ -241,6 +240,447 @@
      "runner"
     ]
    }
+  },
+  "decavalcante": {
+   "institution": "The DeCavalcante Family (Elizabeth)",
+   "shape": "family",
+   "members_figure": "made_men_decavalcante",
+   "dependents_figure": "associates_per_man_decavalcante",
+   "name_group": "italian",
+   "ground": [
+    "Marsh County",
+    "Point Pleasant"
+   ],
+   "found": {
+    "subtype": "outer ring family",
+    "note": "An outside family on the Iron Balance's outer ring (bible Part III 6.2): real head, invented men below. [verified/memory marks on each seat]"
+   },
+   "named": [
+    {
+     "role": "boss",
+     "name": "Sam DeCavalcante",
+     "age": 62,
+     "health": 68,
+     "held_until_day": 600,
+     "why": "Nominal boss from 1964, jailed in 1969 and released in the mid 1970s [verified, bible Part III 6.2]; the release day is a [memory] estimate, to verify. He sits in custody at the opening so his family runs on its acting head."
+    },
+    {
+     "role": "underboss",
+     "name": "John Riggi",
+     "age": 50,
+     "why": "Appointed acting boss on Sam's release [verified]; age from a birth year of 1925 [memory]."
+    }
+   ]
+  },
+  "genovesenj": {
+   "institution": "The Genovese New Jersey Faction",
+   "shape": "family",
+   "members_figure": "made_men_genovesenj",
+   "dependents_figure": "associates_per_man_genovesenj",
+   "name_group": "italian",
+   "ground": [
+    "Marsh County",
+    "The Pines"
+   ],
+   "found": {
+    "subtype": "outer ring family",
+    "note": "An outside family on the Iron Balance's outer ring (bible Part III 6.2): real head, invented men below. [verified/memory marks on each seat]"
+   },
+   "named": [
+    {
+     "role": "boss",
+     "name": "Frank Tieri",
+     "age": 71,
+     "health": 66,
+     "why": "Acting leader of the Genovese family exposed by the 1972 State Commission of Investigation hearing [verified, bible 6.2]; born 1904 [memory]; in poor health by the late 1970s [memory]."
+    },
+    {
+     "role": "capo",
+     "index": 0,
+     "name": "Anthony Provenzano",
+     "age": 57,
+     "why": "A powerful Genovese capo through the Teamsters [verified]; born 1917 [memory]."
+    },
+    {
+     "role": "consigliere",
+     "name": "Gerardo Catena",
+     "age": 72,
+     "health": 62,
+     "why": "Long the New Jersey boss; in prison from 1970, released in 1975, then retired to Florida [verified, with conflicting dates]; born 1902 [memory]."
+    }
+   ]
+  },
+  "lucchesenj": {
+   "institution": "The Lucchese New Jersey Crew",
+   "shape": "family",
+   "members_figure": "made_men_lucchesenj",
+   "dependents_figure": "associates_per_man_lucchesenj",
+   "name_group": "italian",
+   "ground": [
+    "The Pines",
+    "Point Pleasant"
+   ],
+   "found": {
+    "subtype": "outer ring family",
+    "note": "An outside family on the Iron Balance's outer ring (bible Part III 6.2): real head, invented men below. [verified/memory marks on each seat]"
+   },
+   "named": [
+    {
+     "role": "boss",
+     "name": "Joseph Abate",
+     "age": 66,
+     "why": "Formal boss of the Lucchese New Jersey crew from 1964 [verified]; age is a [memory] estimate, to verify."
+    },
+    {
+     "role": "capo",
+     "index": 0,
+     "name": "Anthony Accetturo",
+     "age": 36,
+     "why": "Rising in the Lucchese New Jersey crew [verified]; born 1938 [memory]."
+    }
+   ]
+  },
+  "philadelphia": {
+   "institution": "The Philadelphia Family",
+   "shape": "family",
+   "members_figure": "made_men_philadelphia",
+   "dependents_figure": "associates_per_man_philadelphia",
+   "name_group": "italian",
+   "ground": [
+    "The Pines"
+   ],
+   "found": {
+    "subtype": "outer ring family",
+    "note": "An outside family on the Iron Balance's outer ring (bible Part III 6.2): real head, invented men below. [verified/memory marks on each seat]"
+   },
+   "named": [
+    {
+     "role": "boss",
+     "name": "Angelo Bruno",
+     "age": 64,
+     "why": "Boss of the Philadelphia family from 1959, holding South Jersey and Atlantic City as its fief [verified]; born 1910 [memory]. His real death in 1980 is calibration only."
+    }
+   ]
+  },
+  "gambino": {
+   "institution": "The Gambino Presence",
+   "shape": "family",
+   "members_figure": "made_men_gambino",
+   "dependents_figure": "associates_per_man_gambino",
+   "name_group": "italian",
+   "ground": [
+    "Marsh County",
+    "Point Pleasant"
+   ],
+   "found": {
+    "subtype": "outer ring family",
+    "note": "An outside family on the Iron Balance's outer ring (bible Part III 6.2): real head, invented men below. [verified/memory marks on each seat]"
+   },
+   "named": [
+    {
+     "role": "boss",
+     "name": "Carlo Gambino",
+     "age": 72,
+     "health": 52,
+     "why": "The Gambino family's boss, present across the State [verified]; born 1902 and in poor heart health by 1975 [memory]. His real death in October 1976 is calibration only, never a schedule."
+    },
+    {
+     "role": "underboss",
+     "name": "Aniello Dellacroce",
+     "age": 61,
+     "why": "Gambino underboss [memory]; the bible notes the 1976 succession kept Dellacroce as underboss."
+    },
+    {
+     "role": "capo",
+     "index": 0,
+     "name": "Paul Castellano",
+     "age": 60,
+     "why": "Carlo Gambino's relative and a capo [memory]; born 1915."
+    }
+   ]
+  },
+  "huntsrow_fence": {
+   "institution": "The Hunts Row Master Fence",
+   "shape": "independent",
+   "ranks": {
+    "principal": {
+     "count": 1,
+     "level": 4
+    },
+    "hand": {
+     "figure": "huntsrow_fence_hands",
+    "level": 3
+    }
+   },
+   "seed_roles": {
+    "Principal": "principal"
+   },
+   "ground": [
+    "Hunts Row Textile and Diamond Exchange"
+   ],
+   "found": {
+    "subtype": "independent",
+    "note": "A man or small crew in no Family (bible Part III 5.7): The master fence buys, stores, repackages and resells; the best are patient, polite and rich; the exchange works on Ferrante ground, which protects and taxes it (bible 4.3, Part III 7)."
+   },
+   "money": {
+    "pools": [
+     {
+      "key": "fence_trade",
+      "figure": "huntsrow_fence_m",
+      "line_kind": "a fence's trade"
+     }
+    ],
+    "holder_ranks": [
+     "principal",
+     "hand"
+    ],
+    "rank_weight": {
+     "principal": 3.0
+    }
+   },
+   "name_group": "jewish"
+  },
+  "hijackers": {
+   "institution": "The Independent Hijackers",
+   "shape": "independent",
+   "ranks": {
+    "principal": {
+     "count": 1,
+     "level": 4
+    },
+    "hand": {
+     "figure": "hijackers_hands",
+    "level": 3
+    }
+   },
+   "seed_roles": {
+    "Principal": "principal"
+   },
+   "ground": [
+    "The I-95 Freight Corridor"
+   ],
+   "found": {
+    "subtype": "independent",
+    "note": "A man or small crew in no Family (bible Part III 5.7): Independent hijackers (bible 5.7) work the freight corridor the Ferrante hold; they sell to the fence and pay for peace."
+   },
+   "money": {
+    "pools": [
+     {
+      "key": "hijack_loads",
+      "figure": "hijackers_m",
+      "line_kind": "a hijacking crew"
+     }
+    ],
+    "holder_ranks": [
+     "principal",
+     "hand"
+    ],
+    "rank_weight": {
+     "principal": 3.0
+    }
+   }
+  },
+  "burglars": {
+   "institution": "The Independent Burglars",
+   "shape": "independent",
+   "ranks": {
+    "principal": {
+     "count": 1,
+     "level": 4
+    },
+    "hand": {
+     "figure": "burglars_hands",
+    "level": 3
+    }
+   },
+   "seed_roles": {
+    "Principal": "principal"
+   },
+   "ground": [
+    "The Racks"
+   ],
+   "found": {
+    "subtype": "independent",
+    "note": "A man or small crew in no Family (bible Part III 5.7): Independent burglars (bible 5.7); the 15th precinct's loft burglaries in the Racks (bible Part II)."
+   },
+   "money": {
+    "pools": [
+     {
+      "key": "burglary_ring",
+      "figure": "burglars_m",
+      "line_kind": "a burglary ring"
+     }
+    ],
+    "holder_ranks": [
+     "principal",
+     "hand"
+    ],
+    "rank_weight": {
+     "principal": 3.0
+    }
+   }
+  },
+  "hired_men": {
+   "institution": "The Contract Men",
+   "shape": "independent",
+   "ranks": {
+    "principal": {
+     "count": 1,
+     "level": 4
+    },
+    "hand": {
+     "figure": "hired_men_hands",
+    "level": 3
+    }
+   },
+   "seed_roles": {
+    "Principal": "principal"
+   },
+   "ground": [
+    "The Sixth Ward"
+   ],
+   "found": {
+    "subtype": "independent",
+    "note": "A man or small crew in no Family (bible Part III 5.7): Professional criminals who work for hire without a Family (bible 5.7); the men a head hires at one remove."
+   },
+   "money": {
+    "pools": [
+     {
+      "key": "contract_work",
+      "figure": "hired_men_m",
+      "line_kind": "a contract man's work"
+     }
+    ],
+    "holder_ranks": [
+     "principal",
+     "hand"
+    ],
+    "rank_weight": {
+     "principal": 3.0
+    }
+   }
+  },
+  "greek_merchants": {
+   "institution": "The Greek Merchants",
+   "shape": "independent",
+   "ranks": {
+    "principal": {
+     "count": 1,
+     "level": 4
+    },
+    "hand": {
+     "figure": "greek_merchants_hands",
+    "level": 3
+    }
+   },
+   "seed_roles": {
+    "Principal": "principal"
+   },
+   "ground": [
+    "Supper Club Row"
+   ],
+   "found": {
+    "subtype": "independent",
+    "note": "A man or small crew in no Family (bible Part III 5.7): Greek merchants with their own lines (bible 5.7): restaurants, tobacco and liquor trade."
+   },
+   "money": {
+    "pools": [
+     {
+      "key": "merchant_lines",
+      "figure": "greek_merchants_m",
+      "line_kind": "a merchant's untaxed trade"
+     }
+    ],
+    "holder_ranks": [
+     "principal",
+     "hand"
+    ],
+    "rank_weight": {
+     "principal": 3.0
+    }
+   },
+   "name_group": "greek_lebanese_armenian"
+  },
+  "lebanese_merchants": {
+   "institution": "The Lebanese Merchants",
+   "shape": "independent",
+   "ranks": {
+    "principal": {
+     "count": 1,
+     "level": 4
+    },
+    "hand": {
+     "figure": "lebanese_merchants_hands",
+    "level": 3
+    }
+   },
+   "seed_roles": {
+    "Principal": "principal"
+   },
+   "ground": [
+    "Hunts Row"
+   ],
+   "found": {
+    "subtype": "independent",
+    "note": "A man or small crew in no Family (bible Part III 5.7): Lebanese merchants with their own lines (bible 5.7): import and export on the edge of Hunts Row."
+   },
+   "money": {
+    "pools": [
+     {
+      "key": "import_lines",
+      "figure": "lebanese_merchants_m",
+      "line_kind": "an importer's side trade"
+     }
+    ],
+    "holder_ranks": [
+     "principal",
+     "hand"
+    ],
+    "rank_weight": {
+     "principal": 3.0
+    }
+   },
+   "name_group": "greek_lebanese_armenian"
+  },
+  "gun_dealer": {
+   "institution": "The Gun Dealer",
+   "shape": "independent",
+   "ranks": {
+    "principal": {
+     "count": 1,
+     "level": 4
+    },
+    "hand": {
+     "figure": "gun_dealer_hands",
+    "level": 3
+    }
+   },
+   "seed_roles": {
+    "Principal": "principal"
+   },
+   "ground": [
+    "Killbuck Flats"
+   ],
+   "found": {
+    "subtype": "independent",
+    "note": "A man or small crew in no Family (bible Part III 5.7): A weapons dealer who sells to everyone (bible 5.4: guns come through the southern highways; the Horsemen move them). Plausible, unsourced."
+   },
+   "money": {
+    "pools": [
+     {
+      "key": "gun_trade",
+      "figure": "gun_dealer_m",
+      "line_kind": "a gun trade"
+     }
+    ],
+    "holder_ranks": [
+     "principal",
+     "hand"
+    ],
+    "rank_weight": {
+     "principal": 3.0
+    }
+   }
   }
  },
  "seed_role_to_rank": {
@@ -258,7 +698,8 @@
   "handful": 1.0,
   "associate": 0.995,
   "banks": 0.99,
-  "pad_officer": 0.99
+  "pad_officer": 0.99,
+  "independent": 0.97
  },
  "induction": {
   "father_name_group": "italian",
@@ -327,7 +768,14 @@
   "tristate_freight": "a freight account",
   "the_strip": "a club on the Strip",
   "bolita_tax": "a tax on the bolita banks",
-  "drugs_by_dial_and_ground": "a drug market on the family's ground"
+  "drugs_by_dial_and_ground": "a drug market on the family's ground",
+  "fence_trade": "a fence's trade",
+  "hijack_loads": "a hijacking crew",
+  "burglary_ring": "a burglary ring",
+  "contract_work": "a contract man's work",
+  "merchant_lines": "a merchant's untaxed trade",
+  "import_lines": "an importer's side trade",
+  "gun_trade": "a gun trade"
  },
  "note": "Every count, share and cadence not printed in the bible is a Design proposal in design_figures.json, referred to here by figure key. male_share and induction values (cadence_days now lives in orgs.json) are Design proposals recorded here (Part I 12.4: women never inducted; the rest unsourced). Ground names are rows of the Saint Jude locations table, from Part III 4.0-4.4 and the gazetteer. Motives (open sets: a reader and a weight figure each), choice rates and temperament, the roles that may weigh a choice and the racket start figures are Task 10's; cadence is in orgs.json.",
  "connected": [
@@ -919,10 +1367,6 @@
       "name": "humiliation",
       "weight": "hap_k_retaliate_humiliation"
      },
-     {
-      "name": "style",
-      "weight": "hap_k_retaliate_style"
-     },
      {"name": "redress_refused", "weight": "hap_k_retaliate_redress_refused"},
      {"name": "peace_refused", "weight": "hap_k_retaliate_peace_refused"},
      {"name": "broken_peace", "weight": "hap_k_retaliate_broken_peace"},
@@ -969,14 +1413,13 @@
      {"name": "temper", "weight": "hap_k_settle_accept_temper", "against": true},
      {"name": "broken_peace", "weight": "hap_k_settle_accept_broken_peace", "against": true}
     ],
+    "hunt": {"against": [{"name": "heat_own", "weight": "ib_hunt_heat_own", "against": true}, {"name": "heat_city", "weight": "ib_hunt_heat_city", "against": true}, {"name": "cautious", "weight": "ib_hunt_cautious", "against": true}, {"name": "valued", "weight": "ib_hunt_valued", "against": true}]},
     "cost": {
      "lookback_days": "hap_k_cost_lookback_days",
      "lost_share_full": "hap_k_cost_lost_share_full",
      "both_share_full": "hap_k_cost_both_share_full",
      "earn_full": "hap_k_cost_earn_full",
      "allies_full": "hap_k_cost_allies_full",
-     "heat_own_full": "hap_k_cost_heat_own_full",
-     "heat_city_full": "hap_k_cost_heat_city_full",
      "standing_full": "hap_k_cost_standing_full",
      "price_per_man": "hap_k_cost_price_per_man"
     },
@@ -1071,10 +1514,7 @@
     "group": "wrong",
     "weight": "hap_w_incident",
     "victims": {
-     "other_line": "hap_v_other_line",
-     "member": "hap_v_member",
      "officer": "hap_v_officer",
-     "big_earner": "hap_v_big_earner",
      "civilian": "hap_v_civilian"
     },
     "harm": [
@@ -1131,5 +1571,1460 @@
  },
  "under_patron": [
   "associate"
- ]
+ ],
+ "tension": {
+  "half_life_days": "ib_half_life_days",
+  "scale": "ib_scale",
+  "beta": "ib_beta",
+  "pair": {
+   "base": "ib_pair_base",
+   "per_heat": "ib_pair_per_heat",
+   "per_heat_back": "ib_pair_per_heat_back"
+  },
+  "weak": {
+   "age_from": "ib_weak_age_from",
+   "age_span": "ib_weak_age_span"
+  },
+  "voice": {
+   "aggression_floor": "ib_voice_aggr_floor",
+   "role_weight": {
+    "boss": "ib_voice_boss",
+    "underboss": "ib_voice_underboss",
+    "consigliere": "ib_voice_consigliere",
+    "capo": "ib_voice_capo",
+    "soldier": "ib_voice_soldier",
+    "elder": "ib_voice_elder",
+    "middle": "ib_voice_middle",
+    "young": "ib_voice_young",
+    "banker": "ib_voice_banker",
+    "controller": "ib_voice_controller",
+    "runner": "ib_voice_runner",
+    "president": "ib_voice_president",
+    "officer": "ib_voice_officer",
+    "member": "ib_voice_member",
+    "senior": "ib_voice_senior",
+    "man": "ib_voice_man",
+    "principal": "ib_voice_principal",
+    "hand": "ib_voice_hand"
+   }
+  },
+  "team_roles": [
+   "soldier",
+   "capo",
+   "underboss",
+   "member",
+   "officer",
+   "prospect",
+   "young",
+   "middle",
+   "man",
+   "runner",
+   "hand",
+   "controller",
+   "principal"
+  ],
+  "raise": {
+   "line_opened": "ib_raise_line_opened",
+   "incident": "ib_raise_incident",
+   "killing": "ib_raise_killing",
+   "unsanctioned": "ib_raise_unsanctioned",
+   "attempt": "ib_raise_attempt",
+   "refused_redress": "ib_raise_refused_redress",
+   "refused_peace": "ib_raise_refused_peace",
+   "settled": "ib_raise_settled",
+   "paid": "ib_raise_paid",
+   "accepted": "ib_raise_accepted"
+  },
+  "rank_scale": {
+   "base": "ib_rank_base",
+   "rank": "ib_rank_rank"
+  },
+  "acts": {
+   "none": {
+    "do": "none",
+    "terms": [
+     {
+      "name": "always",
+      "weight": "ib_none_always"
+     },
+     {
+      "name": "calm",
+      "weight": "ib_none_calm"
+     }
+    ]
+   },
+   "message": {
+    "do": "ease",
+    "delta": "ib_d_message",
+    "reciprocal": "ib_message_recip",
+    "relation": "ib_message_rel",
+    "terms": [
+     {
+      "name": "always",
+      "weight": "ib_message_always"
+     },
+     {
+      "name": "calm",
+      "weight": "ib_message_calm"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_message_friendly"
+     },
+     {
+      "name": "patience",
+      "weight": "ib_message_patience"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "ib_message_pragmatism"
+     },
+     {
+      "name": "caution",
+      "weight": "ib_message_caution"
+     },
+     {
+      "name": "heat",
+      "weight": "ib_message_heat"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_message_not_aggression",
+      "against": true
+     }
+    ]
+   },
+   "meeting": {
+    "do": "ease",
+    "delta": "ib_d_meeting",
+    "reciprocal": "ib_meeting_recip",
+    "relation": "ib_meeting_rel",
+    "terms": [
+     {
+      "name": "heat",
+      "weight": "ib_meeting_heat"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_meeting_friendly"
+     },
+     {
+      "name": "patience",
+      "weight": "ib_meeting_patience"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "ib_meeting_pragmatism"
+     },
+     {
+      "name": "both_lost",
+      "weight": "ib_meeting_both_lost"
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_meeting_heat_city"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_meeting_not_aggression",
+      "against": true
+     }
+    ]
+   },
+   "sit_down": {
+    "do": "sit_down",
+    "delta": "ib_d_sit_down",
+    "mediator_weight": "ib_sit_mediator_w",
+    "refused_delta": "ib_sit_refused_delta",
+    "relation": "ib_sit_rel",
+    "terms": [
+     {
+      "name": "heat",
+      "weight": "ib_sit_down_heat"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "ib_sit_down_pragmatism"
+     },
+     {
+      "name": "patience",
+      "weight": "ib_sit_down_patience"
+     },
+     {
+      "name": "caution",
+      "weight": "ib_sit_down_caution"
+     },
+     {
+      "name": "both_lost",
+      "weight": "ib_sit_down_both_lost"
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_sit_down_heat_city"
+     },
+     {
+      "name": "broker",
+      "weight": "ib_sit_down_broker"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_sit_down_not_aggression",
+      "against": true
+     }
+    ],
+    "accept": [
+     {
+      "name": "always",
+      "weight": "ib_sit_accept_always"
+     },
+     {
+      "name": "broker",
+      "weight": "ib_sit_accept_broker"
+     },
+     {
+      "name": "mediator",
+      "weight": "ib_sit_accept_mediator"
+     },
+     {
+      "name": "heat",
+      "weight": "ib_sit_accept_heat"
+     },
+     {
+      "name": "lost",
+      "weight": "ib_sit_accept_lost"
+     },
+     {
+      "name": "both_lost",
+      "weight": "ib_sit_accept_both_lost"
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_sit_accept_heat_city"
+     },
+     {
+      "name": "cautious",
+      "weight": "ib_sit_accept_cautious"
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_sit_accept_weaker"
+     },
+     {
+      "name": "allies_theirs",
+      "weight": "ib_sit_accept_allies_theirs"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_sit_accept_not_aggression",
+      "against": true
+     }
+    ]
+   },
+   "slight": {
+    "do": "slight",
+    "delta": "ib_d_slight",
+    "own_share": "ib_slight_own",
+    "relation": "ib_slight_rel",
+    "terms": [
+     {
+      "name": "heat",
+      "weight": "ib_slight_heat"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_slight_aggression"
+     },
+     {
+      "name": "ambition",
+      "weight": "ib_slight_ambition"
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_slight_their_head_weak"
+     },
+     {
+      "name": "stronger",
+      "weight": "ib_slight_stronger"
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_slight_grievance"
+     },
+     {
+      "name": "caution",
+      "weight": "ib_slight_not_caution",
+      "against": true
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_slight_not_friendly",
+      "against": true
+     },
+     {
+      "name": "broker",
+      "weight": "ib_slight_not_broker",
+      "against": true
+     }
+    ]
+   },
+   "press_ground": {
+    "do": "press_ground",
+    "terms": [
+     {
+      "name": "ambition",
+      "weight": "ib_press_ground_ambition"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_press_ground_aggression"
+     },
+     {
+      "name": "stronger",
+      "weight": "ib_press_ground_stronger"
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_press_ground_their_head_weak"
+     },
+     {
+      "name": "shared_ground",
+      "weight": "ib_press_ground_shared_ground"
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_press_ground_grievance"
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_press_ground_not_heat_city",
+      "against": true
+     },
+     {
+      "name": "caution",
+      "weight": "ib_press_ground_not_caution",
+      "against": true
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_press_ground_not_friendly",
+      "against": true
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_press_ground_not_weaker",
+      "against": true
+     },
+     {
+      "name": "heat_own",
+      "weight": "ib_press_ground_not_heat_own",
+      "against": true
+     }
+    ]
+   },
+   "squeeze": {
+    "do": "squeeze",
+    "terms": [
+     {
+      "name": "heat",
+      "weight": "ib_squeeze_heat"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_squeeze_aggression"
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_squeeze_grievance"
+     },
+     {
+      "name": "stronger",
+      "weight": "ib_squeeze_stronger"
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_squeeze_their_head_weak"
+     },
+     {
+      "name": "ambition",
+      "weight": "ib_squeeze_ambition"
+     },
+     {
+      "name": "caution",
+      "weight": "ib_squeeze_not_caution",
+      "against": true
+     },
+     {
+      "name": "heat_own",
+      "weight": "ib_squeeze_not_heat_own",
+      "against": true
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_squeeze_not_heat_city",
+      "against": true
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_squeeze_not_friendly",
+      "against": true
+     },
+     {
+      "name": "broker",
+      "weight": "ib_squeeze_not_broker",
+      "against": true
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_squeeze_not_weaker",
+      "against": true
+     }
+    ]
+   },
+   "strike": {
+    "do": "strike",
+    "terms": [
+     {
+      "name": "heat",
+      "weight": "ib_strike_heat"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_strike_aggression"
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_strike_grievance"
+     },
+     {
+      "name": "ambition_open",
+      "weight": "ib_strike_ambition_open"
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_strike_their_head_weak"
+     },
+     {
+      "name": "lost",
+      "weight": "ib_strike_lost"
+     },
+     {
+      "name": "stronger",
+      "weight": "ib_strike_stronger"
+     },
+     {
+      "name": "war_near",
+      "weight": "ib_strike_war_near"
+     },
+     {
+      "name": "heat_own",
+      "weight": "ib_strike_not_heat_own",
+      "against": true
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_strike_not_heat_city",
+      "against": true
+     },
+     {
+      "name": "caution",
+      "weight": "ib_strike_not_caution",
+      "against": true
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_strike_not_weaker",
+      "against": true
+     },
+     {
+      "name": "allies_theirs",
+      "weight": "ib_strike_not_allies_theirs",
+      "against": true
+     },
+     {
+      "name": "broker",
+      "weight": "ib_strike_not_broker",
+      "against": true
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_strike_not_friendly",
+      "against": true
+     },
+     {
+      "name": "cautious",
+      "weight": "ib_strike_not_cautious",
+      "against": true
+     }
+    ]
+   },
+   "levy": {
+    "do": "levy",
+    "share": "ib_levy_share",
+    "weeks": "ib_levy_weeks",
+    "terms": [
+     {
+      "name": "ambition",
+      "weight": "ib_levy_ambition"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_levy_aggression"
+     },
+     {
+      "name": "stronger",
+      "weight": "ib_levy_stronger"
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_levy_their_head_weak"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_levy_not_friendly",
+      "against": true
+     },
+     {
+      "name": "caution",
+      "weight": "ib_levy_not_caution",
+      "against": true
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_levy_not_heat_city",
+      "against": true
+     }
+    ],
+    "pay": [
+     {
+      "name": "weaker",
+      "weight": "ib_levy_pay_weaker"
+     },
+     {
+      "name": "cautious",
+      "weight": "ib_levy_pay_cautious"
+     },
+     {
+      "name": "heat",
+      "weight": "ib_levy_pay_heat"
+     },
+     {
+      "name": "allies_theirs",
+      "weight": "ib_levy_pay_allies_theirs"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_levy_pay_not_aggression",
+      "against": true
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_levy_pay_not_friendly",
+      "against": true
+     }
+    ],
+    "ease": "ib_levy_ease",
+    "refuse": "ib_levy_refuse"
+   }
+  },
+  "ladders": {
+   "targets": [
+    {
+     "name": "guilty",
+     "terms": [
+      {
+       "name": "always",
+       "weight": "ib_tg_guilty_always"
+      },
+      {
+       "name": "calm",
+       "weight": "ib_tg_guilty_calm"
+      }
+     ]
+    },
+    {
+     "name": "orderer",
+     "terms": [
+      {
+       "name": "heat",
+       "weight": "ib_tg_orderer_heat"
+      },
+      {
+       "name": "aggression",
+       "weight": "ib_tg_orderer_aggression"
+      },
+      {
+       "name": "ambition",
+       "weight": "ib_tg_orderer_ambition"
+      },
+      {
+       "name": "their_head_weak",
+       "weight": "ib_tg_orderer_their_head_weak"
+      }
+     ]
+    },
+    {
+     "name": "crew",
+     "terms": [
+      {
+       "name": "heat",
+       "weight": "ib_tg_crew_heat"
+      },
+      {
+       "name": "lost",
+       "weight": "ib_tg_crew_lost"
+      },
+      {
+       "name": "aggression",
+       "weight": "ib_tg_crew_aggression"
+      }
+     ]
+    },
+    {
+     "name": "earners_kin",
+     "terms": [
+      {
+       "name": "heat",
+       "weight": "ib_tg_earners_heat"
+      },
+      {
+       "name": "lost",
+       "weight": "ib_tg_earners_lost"
+      },
+      {
+       "name": "aggression",
+       "weight": "ib_tg_earners_aggression"
+      },
+      {
+       "name": "stronger",
+       "weight": "ib_tg_earners_stronger"
+      },
+      {
+       "name": "caution",
+       "weight": "ib_tg_earners_not_caution",
+       "against": true
+      },
+      {
+       "name": "heat_city",
+       "weight": "ib_tg_earners_not_heat_city",
+       "against": true
+      }
+     ]
+    },
+    {
+     "name": "anyone",
+     "terms": [
+      {
+       "name": "heat",
+       "weight": "ib_tg_anyone_heat"
+      },
+      {
+       "name": "lost",
+       "weight": "ib_tg_anyone_lost"
+      },
+      {
+       "name": "aggression",
+       "weight": "ib_tg_anyone_aggression"
+      },
+      {
+       "name": "war_near",
+       "weight": "ib_tg_anyone_war_near"
+      },
+      {
+       "name": "caution",
+       "weight": "ib_tg_anyone_not_caution",
+       "against": true
+      },
+      {
+       "name": "heat_city",
+       "weight": "ib_tg_anyone_not_heat_city",
+       "against": true
+      },
+      {
+       "name": "heat_own",
+       "weight": "ib_tg_anyone_not_heat_own",
+       "against": true
+      },
+      {
+       "name": "broker",
+       "weight": "ib_tg_anyone_not_broker",
+       "against": true
+      }
+     ]
+    }
+   ],
+   "methods": [
+    {
+     "name": "quiet",
+     "terms": [
+      {
+       "name": "always",
+       "weight": "ib_md_quiet_always"
+      },
+      {
+       "name": "caution",
+       "weight": "ib_md_quiet_caution"
+      },
+      {
+       "name": "calm",
+       "weight": "ib_md_quiet_calm"
+      },
+      {
+       "name": "pragmatism",
+       "weight": "ib_md_quiet_pragmatism"
+      }
+     ]
+    },
+    {
+     "name": "found",
+     "terms": [
+      {
+       "name": "heat",
+       "weight": "ib_md_found_heat"
+      },
+      {
+       "name": "aggression",
+       "weight": "ib_md_found_aggression"
+      },
+      {
+       "name": "lost",
+       "weight": "ib_md_found_lost"
+      },
+      {
+       "name": "caution",
+       "weight": "ib_md_found_not_caution",
+       "against": true
+      }
+     ]
+    },
+    {
+     "name": "gathering",
+     "terms": [
+      {
+       "name": "heat",
+       "weight": "ib_md_gathering_heat"
+      },
+      {
+       "name": "lost",
+       "weight": "ib_md_gathering_lost"
+      },
+      {
+       "name": "aggression",
+       "weight": "ib_md_gathering_aggression"
+      },
+      {
+       "name": "war_near",
+       "weight": "ib_md_gathering_war_near"
+      },
+      {
+       "name": "heat_city",
+       "weight": "ib_md_gathering_not_heat_city",
+       "against": true
+      },
+      {
+       "name": "heat_own",
+       "weight": "ib_md_gathering_not_heat_own",
+       "against": true
+      },
+      {
+       "name": "caution",
+       "weight": "ib_md_gathering_not_caution",
+       "against": true
+      },
+      {
+       "name": "broker",
+       "weight": "ib_md_gathering_not_broker",
+       "against": true
+      }
+     ]
+    },
+    {
+     "name": "hired",
+     "terms": [
+      {
+       "name": "always",
+       "weight": "ib_md_hired_always"
+      },
+      {
+       "name": "caution",
+       "weight": "ib_md_hired_caution"
+      },
+      {
+       "name": "pragmatism",
+       "weight": "ib_md_hired_pragmatism"
+      },
+      {
+       "name": "heat",
+       "weight": "ib_md_hired_heat"
+      },
+      {
+       "name": "aggression",
+       "weight": "ib_md_hired_not_aggression",
+       "against": true
+      }
+     ]
+    }
+   ]
+  },
+  "methods": {
+   "quiet": {
+    "team": "ib_m_quiet_team",
+    "delay_days": "ib_m_quiet_delay"
+   },
+   "found": {
+    "team": "ib_m_found_team",
+    "land": "ib_m_found_land",
+    "style": "assault"
+   },
+   "gathering": {
+    "team": "ib_m_gather_team",
+    "land": "ib_m_gather_land",
+    "style": "gathering"
+   },
+   "hired": {
+    "fee": "ib_m_hired_fee",
+    "delay_days": "ib_m_hired_delay",
+    "style": "hired_killing"
+   }
+  },
+  "gathering": {
+   "min_present": "ib_gather_min",
+   "shots": "ib_gather_shots",
+   "w_target": "ib_gather_w_target",
+   "w_other": "ib_gather_w_other"
+  },
+  "sanction": {
+   "delay_days": "ib_sanction_delay",
+   "fear_share": "ib_sanction_fear",
+   "refuse_resentment": "ib_sanction_refuse_res",
+   "approve": [
+    {
+     "name": "heat",
+     "weight": "ib_approve_heat"
+    },
+    {
+     "name": "aggression",
+     "weight": "ib_approve_aggression"
+    },
+    {
+     "name": "grievance",
+     "weight": "ib_approve_grievance"
+    },
+    {
+     "name": "their_head_weak",
+     "weight": "ib_approve_their_head_weak"
+    },
+    {
+     "name": "lost",
+     "weight": "ib_approve_lost"
+    },
+    {
+     "name": "stronger",
+     "weight": "ib_approve_stronger"
+    },
+    {
+     "name": "own_voice",
+     "weight": "ib_approve_own_voice"
+    },
+    {
+     "name": "heat_own",
+     "weight": "ib_approve_not_heat_own",
+     "against": true
+    },
+    {
+     "name": "heat_city",
+     "weight": "ib_approve_not_heat_city",
+     "against": true
+    },
+    {
+     "name": "caution",
+     "weight": "ib_approve_not_caution",
+     "against": true
+    },
+    {
+     "name": "weaker",
+     "weight": "ib_approve_not_weaker",
+     "against": true
+    },
+    {
+     "name": "allies_theirs",
+     "weight": "ib_approve_not_allies_theirs",
+     "against": true
+    },
+    {
+     "name": "broker",
+     "weight": "ib_approve_not_broker",
+     "against": true
+    },
+    {
+     "name": "friendly",
+     "weight": "ib_approve_not_friendly",
+     "against": true
+    }
+   ]
+  },
+  "answer": {
+   "back_points": "ib_ans_back_pts",
+   "make_good_delta": "ib_ans_make_good",
+   "give_up_delta": "ib_ans_give_up",
+   "team": "ib_ans_team",
+   "relation": "ib_ans_rel",
+   "back_him": [
+    {
+     "name": "fond",
+     "weight": "ib_ans_back_fond"
+    },
+    {
+     "name": "aggression",
+     "weight": "ib_ans_back_aggression"
+    },
+    {
+     "name": "standing",
+     "weight": "ib_ans_back_standing"
+    },
+    {
+     "name": "stronger",
+     "weight": "ib_ans_back_stronger"
+    },
+    {
+     "name": "heat",
+     "weight": "ib_ans_back_heat"
+    }
+   ],
+   "make_good": [
+    {
+     "name": "friendly",
+     "weight": "ib_ans_good_friendly"
+    },
+    {
+     "name": "pragmatism",
+     "weight": "ib_ans_good_pragmatism"
+    },
+    {
+     "name": "caution",
+     "weight": "ib_ans_good_caution"
+    },
+    {
+     "name": "weaker",
+     "weight": "ib_ans_good_weaker"
+    },
+    {
+     "name": "broker",
+     "weight": "ib_ans_good_broker"
+    },
+    {
+     "name": "heat_city",
+     "weight": "ib_ans_good_heat_city"
+    }
+   ],
+   "give_him_up": [
+    {
+     "name": "caution",
+     "weight": "ib_ans_up_caution"
+    },
+    {
+     "name": "weaker",
+     "weight": "ib_ans_up_weaker"
+    },
+    {
+     "name": "allies_theirs",
+     "weight": "ib_ans_up_allies_theirs"
+    },
+    {
+     "name": "heat_own",
+     "weight": "ib_ans_up_heat_own"
+    },
+    {
+     "name": "heat_city",
+     "weight": "ib_ans_up_heat_city"
+    },
+    {
+     "name": "broker",
+     "weight": "ib_ans_up_broker"
+    },
+    {
+     "name": "pragmatism",
+     "weight": "ib_ans_up_pragmatism"
+    },
+    {
+     "name": "friendly",
+     "weight": "ib_ans_up_friendly"
+    },
+    {
+     "name": "fond",
+     "weight": "ib_ans_up_not_fond",
+     "against": true
+    },
+    {
+     "name": "aggression",
+     "weight": "ib_ans_up_not_aggression",
+     "against": true
+    }
+   ]
+  },
+  "funeral": {
+   "delta": "ib_fun_delta",
+   "missed_delta": "ib_fun_missed",
+   "relation": "ib_fun_rel",
+   "attend": [
+    {
+     "name": "friendly",
+     "weight": "ib_funeral_friendly"
+    },
+    {
+     "name": "rank",
+     "weight": "ib_funeral_rank"
+    },
+    {
+     "name": "calm",
+     "weight": "ib_funeral_calm"
+    },
+    {
+     "name": "pragmatism",
+     "weight": "ib_funeral_pragmatism"
+    },
+    {
+     "name": "always",
+     "weight": "ib_funeral_always"
+    },
+    {
+     "name": "aggression",
+     "weight": "ib_funeral_not_aggression",
+     "against": true
+    },
+    {
+     "name": "heat",
+     "weight": "ib_funeral_not_heat",
+     "against": true
+    }
+   ]
+  },
+  "heat": {
+   "half_life_days": "ib_heat_half",
+   "own_full": "ib_heat_own_full",
+   "city_full": "ib_heat_city_full",
+   "kill": {
+    "base": "ib_heat_kill_base",
+    "rank": "ib_heat_kill_rank",
+    "public": "ib_heat_kill_public",
+    "investigative": "ib_heat_kill_inv",
+    "violence": "ib_heat_kill_vio",
+    "hidden_share": "ib_heat_hidden",
+    "victim_share": "ib_heat_victim",
+    "civilian_public": "ib_heat_civilian"
+   }
+  },
+  "relations": {
+   "respect": {
+    "mean": "ib_rel_respect_mean",
+    "sd": "ib_rel_respect_sd"
+   },
+   "trust": {
+    "mean": "ib_rel_trust_mean",
+    "sd": "ib_rel_trust_sd"
+   },
+   "familiarity": {
+    "mean": "ib_rel_familiarity_mean",
+    "sd": "ib_rel_familiarity_sd"
+   },
+   "resentment": {
+    "base": "ib_rel_resentment_base",
+    "per_tension": "ib_rel_resentment_per_tension",
+    "sd": "ib_rel_resentment_sd"
+   }
+  },
+  "contacts": [
+   [
+    "decavalcante",
+    "sabatini"
+   ],
+   [
+    "decavalcante",
+    "pellegrino"
+   ],
+   [
+    "decavalcante",
+    "ferrante"
+   ],
+   [
+    "decavalcante",
+    "vannucci"
+   ],
+   [
+    "genovesenj",
+    "sabatini"
+   ],
+   [
+    "genovesenj",
+    "pellegrino"
+   ],
+   [
+    "genovesenj",
+    "ferrante"
+   ],
+   [
+    "genovesenj",
+    "vannucci"
+   ],
+   [
+    "lucchesenj",
+    "sabatini"
+   ],
+   [
+    "lucchesenj",
+    "pellegrino"
+   ],
+   [
+    "lucchesenj",
+    "ferrante"
+   ],
+   [
+    "lucchesenj",
+    "vannucci"
+   ],
+   [
+    "philadelphia",
+    "sabatini"
+   ],
+   [
+    "philadelphia",
+    "pellegrino"
+   ],
+   [
+    "philadelphia",
+    "ferrante"
+   ],
+   [
+    "philadelphia",
+    "vannucci"
+   ],
+   [
+    "gambino",
+    "sabatini"
+   ],
+   [
+    "gambino",
+    "pellegrino"
+   ],
+   [
+    "gambino",
+    "ferrante"
+   ],
+   [
+    "gambino",
+    "vannucci"
+   ],
+   [
+    "decavalcante",
+    "genovesenj"
+   ],
+   [
+    "genovesenj",
+    "lucchesenj"
+   ],
+   [
+    "gambino",
+    "genovesenj"
+   ],
+   [
+    "gambino",
+    "lucchesenj"
+   ],
+   [
+    "philadelphia",
+    "decavalcante"
+   ],
+   [
+    "huntsrow_fence",
+    "ferrante"
+   ],
+   [
+    "huntsrow_fence",
+    "sabatini"
+   ],
+   [
+    "hijackers",
+    "ferrante"
+   ],
+   [
+    "hijackers",
+    "pellegrino"
+   ],
+   [
+    "burglars",
+    "ferrante"
+   ],
+   [
+    "burglars",
+    "sabatini"
+   ],
+   [
+    "hired_men",
+    "vannucci"
+   ],
+   [
+    "hired_men",
+    "ferrante"
+   ],
+   [
+    "hired_men",
+    "pellegrino"
+   ],
+   [
+    "hired_men",
+    "sabatini"
+   ],
+   [
+    "greek_merchants",
+    "sabatini"
+   ],
+   [
+    "greek_merchants",
+    "pellegrino"
+   ],
+   [
+    "lebanese_merchants",
+    "ferrante"
+   ],
+   [
+    "lebanese_merchants",
+    "vannucci"
+   ],
+   [
+    "gun_dealer",
+    "horsemen"
+   ],
+   [
+    "gun_dealer",
+    "ferrante"
+   ],
+   [
+    "gun_dealer",
+    "vannucci"
+   ],
+   [
+    "brigades",
+    "pellegrino"
+   ],
+   [
+    "brigades",
+    "vannucci"
+   ],
+   [
+    "combine",
+    "vannucci"
+   ],
+   [
+    "combine",
+    "sabatini"
+   ],
+   [
+    "bolita",
+    "combine"
+   ],
+   [
+    "bolita",
+    "ferrante"
+   ],
+   [
+    "russians",
+    "vannucci"
+   ],
+   [
+    "russians",
+    "ferrante"
+   ]
+  ],
+  "initial": [
+   {
+    "from": "ferrante",
+    "to": "sabatini",
+    "level": "ib_init_ferrante_sabatini",
+    "why": "The Ferrante Schism of 1958 (bible Part III 4.3-4.5): they hold that the Sabatini stole the Racks and that they took it back."
+   },
+   {
+    "from": "sabatini",
+    "to": "ferrante",
+    "level": "ib_init_sabatini_ferrante",
+    "why": "The same quarrel from the Sabatini side: the diplomats resent the independents less, and think them rough."
+   },
+   {
+    "from": "vannucci",
+    "to": "pellegrino",
+    "level": "ib_init_vannucci_pellegrino",
+    "why": "The Vannucci Split of 1967: they split from the Pellegrinos and 'have not forgiven or been forgiven' (bible 4.4)."
+   },
+   {
+    "from": "pellegrino",
+    "to": "vannucci",
+    "level": "ib_init_pellegrino_vannucci",
+    "why": "The Pellegrino side of the 1967 split."
+   },
+   {
+    "from": "pellegrino",
+    "to": "brigades",
+    "level": "ib_init_pellegrino_brigades",
+    "why": "A long, bitter, partly cooperative history with the Irish on the South Piers (bible 4.2)."
+   },
+   {
+    "from": "brigades",
+    "to": "pellegrino",
+    "level": "ib_init_brigades_pellegrino",
+    "why": "The 1973 massacre of the independent strikers left a lasting hatred in Kerrytown (bible 4.2)."
+   },
+   {
+    "from": "horsemen",
+    "to": "vannucci",
+    "level": "ib_init_horsemen_vannucci",
+    "why": "Used as muscle and disposable: they hate being treated that way (bible 5.4)."
+   },
+   {
+    "from": "combine",
+    "to": "vannucci",
+    "level": "ib_init_combine_vannucci",
+    "why": "The Strip is Vannucci ground and customer ground for the combine; the arrangement is resented (bible 5.2)."
+   }
+  ],
+  "hire": {
+   "orgs": [
+    "hired_men"
+   ]
+  }
+ },
+ "temperament": {
+  "opening": {
+   "sd": "ib_temp_sd",
+   "risk_follows_aggression": "ib_temp_risk_corr",
+   "role_shift": {
+    "boss": "ib_temp_shift_boss",
+    "underboss": "ib_temp_shift_underboss",
+    "consigliere": "ib_temp_shift_consigliere",
+    "capo": "ib_temp_shift_capo",
+    "soldier": "ib_temp_shift_soldier",
+    "associate": "ib_temp_shift_associate",
+    "elder": "ib_temp_shift_elder",
+    "young": "ib_temp_shift_young",
+    "banker": "ib_temp_shift_banker",
+    "runner": "ib_temp_shift_runner",
+    "president": "ib_temp_shift_president",
+    "prospect": "ib_temp_shift_prospect"
+   },
+   "outfits": {
+    "sabatini": {
+     "mean": "ib_temp_sabatini",
+     "why": "Bible 4.1: the 'diplomats'; 'they like business and avoid war'; the young think the family fat and slow."
+    },
+    "pellegrino": {
+     "mean": "ib_temp_pellegrino",
+     "why": "Bible 4.2: 'the fist and the favor'; working-class, visible, the most street presence."
+    },
+    "ferrante": {
+     "mean": "ib_temp_ferrante",
+     "why": "Bible 4.3: born of a war, 'a surplus of gunmen who have to earn something', 'a habit of provoking, a temper for border disputes'."
+    },
+    "vannucci": {
+     "mean": "ib_temp_vannucci",
+     "why": "Bible 4.4: 'secretive, watchful, and quicker to violence than to talk'; 'harder in the way men fear'."
+    },
+    "brigades": {
+     "mean": "ib_temp_brigades",
+     "why": "Bible 5.1: 'a different relation to violence': the family is the neighborhood, loyalties older, the cause real; 'not a single mind': some want blood for 1973, some the cause, some the quiet life. Mean at the middle, the widest spread."
+    },
+    "combine": {
+     "mean": "ib_temp_combine",
+     "why": "Bible 5.2 and 3524: the older bankers use violence sparingly and through intermediaries; the young faster and more publicly."
+    },
+    "horsemen": {
+     "mean": "ib_temp_horsemen",
+     "why": "Bible 5.4: outlaw bikers, used as muscle and disposable, resentful."
+    },
+    "russians": {
+     "mean": "ib_temp_russians",
+     "why": "Bible 5.3: extortion of their own community; prey on those with no reason to trust the police."
+    },
+    "bolita": {
+     "mean": "ib_temp_bolita",
+     "why": "Bible 5.7: numbers men; a business run on trust and arrangement."
+    },
+    "decavalcante": {
+     "mean": "ib_temp_decavalcante",
+     "why": "Elizabeth family [memory]: a smaller, steadier family with a long-lived boss."
+    },
+    "genovesenj": {
+     "mean": "ib_temp_genovesenj",
+     "why": "The Genovese faction [memory]: the largest family's New Jersey arm, labor and loansharking."
+    },
+    "lucchesenj": {
+     "mean": "ib_temp_lucchesenj",
+     "why": "The Lucchese New Jersey crew [memory]: Newark-based, with rising younger men."
+    },
+    "philadelphia": {
+     "mean": "ib_temp_philadelphia",
+     "why": "Angelo Bruno's family [memory]: known as the 'docile don', who held the peace and the fief; the family turned violent after him."
+    },
+    "gambino": {
+     "mean": "ib_temp_gambino",
+     "why": "The Gambino presence [memory]: Carlo Gambino was a business-first boss who avoided open war."
+    },
+    "huntsrow_fence": {
+     "mean": "ib_temp_huntsrow_fence",
+     "why": "Bible 3 (fencing): 'The best fences are patient, polite, and rich.'"
+    },
+    "hijackers": {
+     "mean": "ib_temp_hijackers",
+     "why": "Independent hijackers: armed, with a living made on freight."
+    },
+    "burglars": {
+     "mean": "ib_temp_burglars",
+     "why": "Independent burglars: prefer empty rooms."
+    },
+    "hired_men": {
+     "mean": "ib_temp_hired_men",
+     "why": "Professionals who work for hire without a Family (bible 5.7)."
+    },
+    "greek_merchants": {
+     "mean": "ib_temp_greek_merchants",
+     "why": "Merchants with their own lines (bible 5.7): a business people."
+    },
+    "lebanese_merchants": {
+     "mean": "ib_temp_lebanese_merchants",
+     "why": "Merchants with their own lines (bible 5.7)."
+    },
+    "gun_dealer": {
+     "mean": "ib_temp_gun_dealer",
+     "why": "A weapons dealer sells to everyone and trusts few."
+    }
+   }
+  },
+  "drift": {
+   "unit_loss": {
+    "aggression": "ib_drift_unit_loss_aggression",
+    "patience": "ib_drift_unit_loss_patience"
+   },
+   "kin_killed": {
+    "aggression": "ib_drift_kin_killed_aggression",
+    "patience": "ib_drift_kin_killed_patience",
+    "pragmatism": "ib_drift_kin_killed_pragmatism",
+    "close_scale": "ib_drift_kin_killed_close_scale"
+   },
+   "strike": {
+    "aggression": "ib_drift_strike_aggression",
+    "risk_tolerance": "ib_drift_strike_risk_tolerance"
+   },
+   "prison": {
+    "aggression": "ib_drift_prison_aggression",
+    "patience": "ib_drift_prison_patience",
+    "risk_tolerance": "ib_drift_prison_risk_tolerance"
+   },
+   "age_year": {
+    "aggression": "ib_drift_age_year_aggression",
+    "risk_tolerance": "ib_drift_age_year_risk_tolerance",
+    "patience": "ib_drift_age_year_patience"
+   },
+   "rising": {
+    "ambition": "ib_drift_rising_ambition",
+    "pragmatism": "ib_drift_rising_pragmatism",
+    "aggression": "ib_drift_rising_aggression"
+   }
+  }
+ }
 }

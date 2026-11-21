@@ -79,6 +79,39 @@
    "labels": {"senior": "Senior", "man": "Man"}, "rules": [],
    "opening": {"layout": "ranks", "male_share_key": "handful",
     "roles": {"senior": {"ages": [50, 75]}, "man": {"ages": [22, 55], "superior": {"role": "senior", "pick": "first"}}}}
+  },
+  "independent": {
+   "sphere": "underworld",
+   "head": "principal",
+   "unit_leader": null,
+   "courtship_scan": false,
+   "labels": {
+    "principal": "Principal",
+    "hand": "Hand"
+   },
+   "rules": [],
+   "opening": {
+    "layout": "ranks",
+    "male_share_key": "independent",
+    "roles": {
+     "principal": {
+      "ages": [
+       30,
+       65
+      ]
+     },
+     "hand": {
+      "ages": [
+       20,
+       50
+      ],
+      "superior": {
+       "role": "principal",
+       "pick": "first"
+      }
+     }
+    }
+   }
   }
  },
  "orgs": {

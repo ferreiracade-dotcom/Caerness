@@ -46,9 +46,10 @@ def test_law_heat_in_the_city_weighs_against_retaliating():
     a, b = open_world(), open_world()
     ia, ha, _, oa = _killing(a)
     ib, hb, _, ob = _killing(b)
-    from engine import org_happenings as oh
-    for i in range(8):  # killings elsewhere in the city, between other men
-        oh._record(b.conn, DAY - 3, "killing", b.soldier, victim=int(ib["subject_id"]), matters=1, raised=-1 - i, status="done", killer_org=-99)
+    from engine import org_heat
+    others = [int(r[0]) for r in b.conn.execute("SELECT org_actor_id FROM org_profiles WHERE org_actor_id NOT IN (?,?) ORDER BY org_actor_id LIMIT 4", (b.org, int(ib["metadata_json"] and __import__("json").loads(ib["metadata_json"])["killer_org"])))]
+    for o in others:  # attention on other outfits' killings elsewhere in the city (heat on the organisation layer, B12e)
+        org_heat.add(b.conn, o, DAY - 3, public=30.0, investigative=10.0, violence=20.0)
     ua, ub = _offers(a, ha, ia), _offers(b, hb, ib)
     assert ub["retaliate"]["utility"] < ua["retaliate"]["utility"]
 

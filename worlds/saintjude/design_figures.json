@@ -361,16 +361,6 @@
     "source": "unsourced",
     "note": "unsourced; In a civil war the other outfits' heads weigh in toward a settlement more heavily than in a contest: settlements were usually brokered by the other families (a commission or a sit-down). (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
  },
- "violence_bias_vannucci": {
-    "default": 0.15,
-    "range": null,
-    "unit": "points",
-    "tag": "Design",
-    "kind": "fixed",
-    "mark": "Design proposal",
-    "source": "unsourced",
-    "note": "unsourced; The Vannucci outfit's lean toward violence, added to its men's aggression where the engine weighs a killing of a rival or a loser: canon calls the family 'quicker to violence than to talk'. (B12b follow-up 2: engine/org_coup.py, engine/org_succession.py)"
- },
  "press_w_weary": {
     "default": 0.35,
     "range": null,
@@ -2681,16 +2671,6 @@
    "source": "unsourced",
    "note": "unsourced; a man killed on the ground of his own unit is an insult as well as a loss (B12c: engine/org_happenings.py)"
   },
-  "hap_k_retaliate_style": {
-   "default": 1.0,
-   "range": null,
-   "unit": "motive weight",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; the dead man's outfit's own lean toward violence (outfits data violence_bias) carried into the answer; only outfits with an entry have one (B12c: engine/org_happenings.py)"
-  },
   "hap_k_team_base": {
    "default": 1,
    "range": null,
@@ -2780,26 +2760,6 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; how much better the other side is liked by third heads (weighted by their size) at which being outnumbered by allies is at full weight: outfits looked to who else would stand with them before a war (approximate) (B12d: engine/org_happenings.py)"
-  },
-  "hap_k_cost_heat_own_full": {
-   "default": 6,
-   "range": null,
-   "unit": "killings",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; killings in the lookback with this outfit on either side at which the law's and the press's attention to it is at full weight: each one brought detectives, grand juries and, in the 1970s, federal organised-crime task forces (approximate) (B12d: engine/org_happenings.py)"
-  },
-  "hap_k_cost_heat_city_full": {
-   "default": 12,
-   "range": null,
-   "unit": "killings",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; killings across outfits in the whole city in the lookback at which public and law pressure on every outfit is at full weight: the Commission shut down open killing when the city's heat threatened the money (approximate) (B12d: engine/org_happenings.py)"
   },
   "hap_k_cost_standing_full": {
    "default": 1.0,
@@ -3801,38 +3761,8 @@
    "source": "unsourced",
    "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
   },
-  "hap_v_other_line": {
-   "default": 0.3,
-   "range": null,
-   "unit": "relative weight",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
-  },
-  "hap_v_member": {
-   "default": 0.08,
-   "range": null,
-   "unit": "relative weight",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
-  },
   "hap_v_officer": {
    "default": 0.07,
-   "range": null,
-   "unit": "relative weight",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; a weekly happening of the men who depend on a patron (engine/org_happenings.py)"
-  },
-  "hap_v_big_earner": {
-   "default": 0.1,
    "range": null,
    "unit": "relative weight",
    "tag": "Design",
@@ -9147,6 +9077,3706 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; how long a unit leader's rise to the seat still counts as a man having been passed over"
+  },
+  "ib_half_life_days": {
+   "default": 150,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How long a grievance between two organisations takes to halve. Bible Part III 6.1: the Balance rests on the memory of earlier wars (1929-31, 1946, 1958) and is kept up by many small acts, so old quarrels fade over seasons, not weeks, and the splits of 1958 and 1967 are still felt in 1975 through the initial levels below. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_scale": {
+   "default": 18,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The tension level at which a pair's heat reads 0.5 (heat = level/(level+scale)). One killing of a soldier is worth about 12 points, so one such killing takes a calm pair to a heat of about 0.5, a second to 0.7. A reading scale only: the level has no top. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_beta": {
+   "default": 6,
+   "range": null,
+   "unit": "sharpness",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How sharply a voice's weighing favours the act it scores highest (softmax exp(beta x score)). 6 makes an act scoring 0.2 higher about 3.3 times as likely: people mostly do the likeliest thing and sometimes surprise. Design proposal; calibration only. (B12e: engine/org_tension.py)"
+  },
+  "ib_pair_base": {
+   "default": 0.05,
+   "range": null,
+   "unit": "per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The week's chance that someone on one side of a pair in contact does something about the other, with the pair at rest. About one act in twenty weeks per direction: the Balance is kept up by small acts (bible 6.1) but not weekly ones. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_pair_per_heat": {
+   "default": 0.55,
+   "range": null,
+   "unit": "per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Extra weekly chance per unit of the side's own heat toward the other: a hot pair weighs something most weeks. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_pair_per_heat_back": {
+   "default": 0.2,
+   "range": null,
+   "unit": "per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Extra weekly chance per unit of the other side's heat toward this one: a side that knows the other is aggrieved watches and acts. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_weak_age_from": {
+   "default": 68,
+   "range": null,
+   "unit": "years",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Age at which a head begins to read as old to the other side (bible 6.1: a sick boss frays the Balance; Carlo Gambino was 73 and ill in 1975 [memory]). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_weak_age_span": {
+   "default": 20,
+   "range": null,
+   "unit": "years",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Years over which age fully counts as weakness. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_aggr_floor": {
+   "default": 0.25,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A man's own aggression is added to this floor when drawing who speaks for his side: a calm man is rarely the voice of a quarrel but sometimes is. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_boss": {
+   "default": 1.0,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a boss as the voice of his side in a quarrel. The head sets the tone and is a voice of every quarrel. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_underboss": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a underboss as the voice of his side in a quarrel. Often has the family's violence at his disposal (bible Part III 3, Underboss). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_consigliere": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a consigliere as the voice of his side in a quarrel. The counsellor: speaks for talk more than for acts. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_capo": {
+   "default": 0.55,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a capo as the voice of his side in a quarrel. Runs a crew and its ground, where quarrels start. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_soldier": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a soldier as the voice of his side in a quarrel. A made man with a grievance is a rare voice. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_elder": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a elder as the voice of his side in a quarrel. Brigades: the old men lead. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_middle": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a middle as the voice of his side in a quarrel. Brigades: crew bosses. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_young": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a young as the voice of his side in a quarrel. Brigades: the young want blood for 1973 (bible 5.1). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_banker": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a banker as the voice of his side in a quarrel. Combine: the old bankers. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_controller": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a controller as the voice of his side in a quarrel. Combine: controllers. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_runner": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a runner as the voice of his side in a quarrel. Bolita runners. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_president": {
+   "default": 1.0,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a president as the voice of his side in a quarrel. Iron Horsemen: the president. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_officer": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a officer as the voice of his side in a quarrel. Iron Horsemen: officers. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_member": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a member as the voice of his side in a quarrel. Iron Horsemen: patched members. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_senior": {
+   "default": 1.0,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a senior as the voice of his side in a quarrel. The Russians' senior man. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_man": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a man as the voice of his side in a quarrel. The Russians' men. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_principal": {
+   "default": 1.0,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a principal as the voice of his side in a quarrel. An independent's principal speaks for himself. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_voice_hand": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of a hand as the voice of his side in a quarrel. An independent's hands. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_line_opened": {
+   "default": 4.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A line or book opened on another organisation's ground (bible 6.2: a crew that opens a book in the city without leave is an invasion). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_incident": {
+   "default": 3.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; One of its men beaten or hurt by a man of the other side. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_killing": {
+   "default": 11,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A killing across (bible Part III 8 / 2054: killing a made man of another family is war, a sit-down, a payment or the killer's surrender). The largest single raise; scaled by the dead man's rank and by whether his own head sanctioned it. One soldier's killing alone moves a pair to a heat of about 0.5. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_unsanctioned": {
+   "default": 0.5,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Extra share of a killing's raise when the killer's own head had not sanctioned it: the other side cannot tell a rogue from a policy. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_attempt": {
+   "default": 3.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A strike that failed (or a gathering hit that killed no one) still tells the other side what was meant. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_refused_redress": {
+   "default": 5.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Redress asked for a killing and refused (B12d marker): the insult is added to the injury. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_refused_peace": {
+   "default": 5.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A sit-down asked for and refused. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_settled": {
+   "default": -10.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A killing settled at a sit-down: the largest ease. Bible 6.3 step 4, a ruling. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_paid": {
+   "default": -8.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Redress paid. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_accepted": {
+   "default": -3.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A head lets a killing of his man stand: the quarrel on his side cools, at a cost to his standing (B12d). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rank_base": {
+   "default": 0.5,
+   "range": null,
+   "unit": "multiplier",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A killing's raise is multiplied by base + rank x the dead man's rank (rank 0..1 from the package's role ranks): an associate's killing counts for about 0.6 of a soldier's, a boss's for about 1.6. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rank_rank": {
+   "default": 1.0,
+   "range": null,
+   "unit": "multiplier",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; See ib_rank_base. (B12e: engine/org_tension.py)"
+  },
+  "ib_none_always": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs doing nothing this week (a pair weighed is not a pair acted on). Term `always`: idleness is always an option (B12e: engine/org_tension.py)"
+  },
+  "ib_none_calm": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs doing nothing this week (a pair weighed is not a pair acted on). Term `calm`: the calmer the pair, the likelier nothing is done (B12e: engine/org_tension.py)"
+  },
+  "ib_d_message": {
+   "default": 1.5,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a message carried by a friend of both (bible 6.3 step 1) takes off a pair's tension, each way. Small acts keep the Balance; this is the smallest. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_message_recip": {
+   "default": 1.0,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much of a message's ease the receiving side feels. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_message_rel": {
+   "default": 2.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Respect and trust gained between the two men by a message. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_message_always": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs sending word to the other side. Term `always`: courtesy costs little (B12e: engine/org_tension.py)"
+  },
+  "ib_message_calm": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs sending word to the other side. Term `calm`: a message is what calm men send (B12e: engine/org_tension.py)"
+  },
+  "ib_message_friendly": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs sending word to the other side. Term `friendly`: men who think well of each other keep in touch (B12e: engine/org_tension.py)"
+  },
+  "ib_message_patience": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs sending word to the other side. Term `patience`: a patient man talks first (B12e: engine/org_tension.py)"
+  },
+  "ib_message_pragmatism": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs sending word to the other side. Term `pragmatism`: talk is cheaper than a war (B12e: engine/org_tension.py)"
+  },
+  "ib_message_caution": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs sending word to the other side. Term `caution`: a cautious man keeps the channel open (B12e: engine/org_tension.py)"
+  },
+  "ib_message_heat": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs sending word to the other side. Term `heat`: tension prompts a word (B12e: engine/org_tension.py)"
+  },
+  "ib_message_not_aggression": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs sending word to the other side. Counter-term `aggression` (takes a share off): a hot man does not send word (B12e: engine/org_tension.py)"
+  },
+  "ib_d_meeting": {
+   "default": 3.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a meeting of the two men who have the quarrel (bible 6.3 step 2) takes off. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_recip": {
+   "default": 1.0,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much of a meeting's ease the other side feels. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_rel": {
+   "default": 4.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Respect and trust gained by a meeting. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_heat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking to meet the other side's man. Term `heat`: a quarrel that is growing wants a meeting (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_friendly": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking to meet the other side's man. Term `friendly`: men who respect each other meet (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_patience": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking to meet the other side's man. Term `patience`: patience (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking to meet the other side's man. Term `pragmatism`: pragmatism (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_both_lost": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking to meet the other side's man. Term `both_lost`: both sides' losses make talk attractive (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_heat_city": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking to meet the other side's man. Term `heat_city`: the law's attention does too (B12e: engine/org_tension.py)"
+  },
+  "ib_meeting_not_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking to meet the other side's man. Counter-term `aggression` (takes a share off): a hot man does not ask (B12e: engine/org_tension.py)"
+  },
+  "ib_d_sit_down": {
+   "default": 9.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a sit-down with a mediator (bible 6.3 step 3-4) takes off a pair's tension, each way, before the mediator's weight. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_mediator_w": {
+   "default": 0.8,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Extra ease in proportion to how well both sides hear the mediator out: a ruling by a man both respect holds. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_refused_delta": {
+   "default": 4.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension added when a sit-down is asked and refused. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_rel": {
+   "default": 5.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Respect and trust between the men (and the mediator) after a sit-down. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_down_heat": {
+   "default": 0.45,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking for a sit-down. Term `heat`: a quarrel that is growing needs one (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_down_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking for a sit-down. Term `pragmatism`: pragmatism (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_down_patience": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking for a sit-down. Term `patience`: patience (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_down_caution": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking for a sit-down. Term `caution`: caution (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_down_both_lost": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking for a sit-down. Term `both_lost`: both sides' losses (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_down_heat_city": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking for a sit-down. Term `heat_city`: the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_down_broker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking for a sit-down. Term `broker`: a third head both hear out makes it possible (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_down_not_aggression": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking for a sit-down. Counter-term `aggression` (takes a share off): a hot man does not ask (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_always": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `always`: a sit-down is the custom (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_broker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `broker`: the mediator (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_mediator": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `mediator`: how well he hears the mediator out (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_heat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `heat`: a hot pair needs one (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_lost": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `lost`: his losses (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_both_lost": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `both_lost`: both sides' losses (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_heat_city": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `heat_city`: the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_cautious": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `cautious`: caution (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_weaker": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `weaker`: being the weaker side (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_allies_theirs": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Term `allies_theirs`: allies on the other side (B12e: engine/org_tension.py)"
+  },
+  "ib_sit_accept_not_aggression": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the other head weighs coming to a sit-down. Counter-term `aggression` (takes a share off): a hot head does not come (B12e: engine/org_tension.py)"
+  },
+  "ib_d_slight": {
+   "default": 3.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a slight (an insult, a snub, a word at a wake) adds to the other side's tension toward this one (bible 6.5: the Life communicates in hints). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_own": {
+   "default": 0.3,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much of a slight's raise the one who gave it also feels (he is surer of his case). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_rel": {
+   "default": 3.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Resentment added in the other head toward the man. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_heat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Term `heat`: a pair already hot trades insults (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_ambition": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Term `ambition`: ambition (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_their_head_weak": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Term `their_head_weak`: a weak head invites it (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_stronger": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Term `stronger`: the stronger side can afford it (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_grievance": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Term `grievance`: a man with a grievance (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_not_friendly": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Counter-term `friendly` (takes a share off): men who respect each other do not (B12e: engine/org_tension.py)"
+  },
+  "ib_slight_not_broker": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs slighting the other side. Counter-term `broker` (takes a share off): a mediator is watching (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_ambition": {
+   "default": 0.45,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Term `ambition`: ambition (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_aggression": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_stronger": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Term `stronger`: the stronger side presses (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_their_head_weak": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Term `their_head_weak`: a weak or old head's ground is open (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_shared_ground": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Term `shared_ground`: ground that already overlaps (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_grievance": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Term `grievance`: a grievance (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_not_heat_city": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Counter-term `heat_city` (takes a share off): the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_not_caution": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_not_friendly": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Counter-term `friendly` (takes a share off): respect (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_not_weaker": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Counter-term `weaker` (takes a share off): being the weaker side (B12e: engine/org_tension.py)"
+  },
+  "ib_press_ground_not_heat_own": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs opening a book or line on the other side's ground (an invasion, bible 6.2). Counter-term `heat_own` (takes a share off): own heat (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_heat": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Term `heat`: the pair's heat (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_aggression": {
+   "default": 0.45,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_grievance": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Term `grievance`: a grievance (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_stronger": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Term `stronger`: the stronger side (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_their_head_weak": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Term `their_head_weak`: a weak head (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_ambition": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Term `ambition`: ambition (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_not_caution": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_not_heat_own": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Counter-term `heat_own` (takes a share off): own heat (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_not_heat_city": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Counter-term `heat_city` (takes a share off): the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_not_friendly": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Counter-term `friendly` (takes a share off): respect (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_not_broker": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Counter-term `broker` (takes a share off): a mediator is watching (B12e: engine/org_tension.py)"
+  },
+  "ib_squeeze_not_weaker": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs having one of the other side's earners or men beaten. Counter-term `weaker` (takes a share off): being the weaker side (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_heat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `heat`: the pair's heat (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_aggression": {
+   "default": 0.28,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_grievance": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `grievance`: a grievance (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_ambition_open": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `ambition_open`: an ambitious underboss under a sick head sees an opening (bible 6.1) (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_their_head_weak": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `their_head_weak`: a weak head on the other side (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_lost": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `lost`: his own side's losses to them: vengeance (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_stronger": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `stronger`: the stronger side (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_war_near": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `war_near`: a war nearby frays the Balance (bible 6.1) (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_not_heat_own": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Counter-term `heat_own` (takes a share off): heat already on his own outfit (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_not_heat_city": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Counter-term `heat_city` (takes a share off): the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_not_weaker": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Counter-term `weaker` (takes a share off): being the weaker side (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_not_allies_theirs": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Counter-term `allies_theirs` (takes a share off): allies on the other side (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_not_broker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Counter-term `broker` (takes a share off): a mediator both hear out (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_not_friendly": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Counter-term `friendly` (takes a share off): respect (B12e: engine/org_tension.py)"
+  },
+  "ib_strike_not_cautious": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Counter-term `cautious` (takes a share off): a man who weighs the cost (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_share": {
+   "default": 0.15,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a protector asks of a weaker organisation's head: this share of what has come to him over the weeks in the ask. Design proposal; the same order as the kick-up shares on the Ladder (Part III 7.1). (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_weeks": {
+   "default": 8,
+   "range": null,
+   "unit": "weeks",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weeks of the other head's income a levy is reckoned on. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_ambition": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking a weaker organisation for payment against trouble (protection). Term `ambition`: ambition (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_aggression": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking a weaker organisation for payment against trouble (protection). Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_stronger": {
+   "default": 0.55,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking a weaker organisation for payment against trouble (protection). Term `stronger`: only the stronger levy (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_their_head_weak": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking a weaker organisation for payment against trouble (protection). Term `their_head_weak`: a weak head pays (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_not_friendly": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking a weaker organisation for payment against trouble (protection). Counter-term `friendly` (takes a share off): respect (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_not_caution": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking a weaker organisation for payment against trouble (protection). Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_not_heat_city": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a voice weighs asking a weaker organisation for payment against trouble (protection). Counter-term `heat_city` (takes a share off): the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_pay_weaker": {
+   "default": 0.75,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head asked weighs paying. Term `weaker`: the weaker pay (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_pay_cautious": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head asked weighs paying. Term `cautious`: caution (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_pay_heat": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head asked weighs paying. Term `heat`: trouble ahead (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_pay_allies_theirs": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head asked weighs paying. Term `allies_theirs`: the other side has allies (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_pay_not_aggression": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head asked weighs paying. Counter-term `aggression` (takes a share off): a hot man refuses (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_pay_not_friendly": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head asked weighs paying. Counter-term `friendly` (takes a share off): a friend would not ask (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_ease": {
+   "default": 4.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension taken off the payer's side toward the protector when he pays (he buys quiet). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_levy_refuse": {
+   "default": 4.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension added on the payer's side when he refuses (and the protector remembers). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_guilty_always": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The target ladder, rung 1: the man who did it (the man who last wronged this side). Term `always`: an eye for an eye is the first thought (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_guilty_calm": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The target ladder, rung 1: the man who did it (the man who last wronged this side). Term `calm`: a calm head keeps it narrow (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_orderer_heat": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2: whoever ordered it (the other side's head). Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_orderer_aggression": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2: whoever ordered it (the other side's head). Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_orderer_ambition": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2: whoever ordered it (the other side's head). Term `ambition`: ambition (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_orderer_their_head_weak": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2: whoever ordered it (the other side's head). Term `their_head_weak`: a weak head is within reach (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_crew_heat": {
+   "default": 0.45,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: his crew (the men who work beside him). Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_crew_lost": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: his crew (the men who work beside him). Term `lost`: losses (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_crew_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: his crew (the men who work beside him). Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_earners_heat": {
+   "default": 0.55,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4: his earners and kin in the life. Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_earners_lost": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4: his earners and kin in the life. Term `lost`: losses (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_earners_aggression": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4: his earners and kin in the life. Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_earners_stronger": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4: his earners and kin in the life. Term `stronger`: the stronger side (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_earners_not_caution": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4: his earners and kin in the life. Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_earners_not_heat_city": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4: his earners and kin in the life. Counter-term `heat_city` (takes a share off): the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_anyone_heat": {
+   "default": 0.75,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 5: anyone of that family who can be found. Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_anyone_lost": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 5: anyone of that family who can be found. Term `lost`: losses (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_anyone_aggression": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 5: anyone of that family who can be found. Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_anyone_war_near": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 5: anyone of that family who can be found. Term `war_near`: war around (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_anyone_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 5: anyone of that family who can be found. Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_anyone_not_heat_city": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 5: anyone of that family who can be found. Counter-term `heat_city` (takes a share off): the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_anyone_not_heat_own": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 5: anyone of that family who can be found. Counter-term `heat_own` (takes a share off): own heat (B12e: engine/org_tension.py)"
+  },
+  "ib_tg_anyone_not_broker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 5: anyone of that family who can be found. Counter-term `broker` (takes a share off): a mediator (B12e: engine/org_tension.py)"
+  },
+  "ib_md_quiet_always": {
+   "default": 0.55,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The method ladder, rung 1: a quiet hit, the men given the job and doing it when they can. Term `always`: the usual way (B12e: engine/org_tension.py)"
+  },
+  "ib_md_quiet_caution": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The method ladder, rung 1: a quiet hit, the men given the job and doing it when they can. Term `caution`: caution prefers it (B12e: engine/org_tension.py)"
+  },
+  "ib_md_quiet_calm": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The method ladder, rung 1: a quiet hit, the men given the job and doing it when they can. Term `calm`: calm (B12e: engine/org_tension.py)"
+  },
+  "ib_md_quiet_pragmatism": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The method ladder, rung 1: a quiet hit, the men given the job and doing it when they can. Term `pragmatism`: pragmatism (B12e: engine/org_tension.py)"
+  },
+  "ib_md_found_heat": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2: a hit wherever he is found, now. Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_md_found_aggression": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2: a hit wherever he is found, now. Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_md_found_lost": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2: a hit wherever he is found, now. Term `lost`: losses (B12e: engine/org_tension.py)"
+  },
+  "ib_md_found_not_caution": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2: a hit wherever he is found, now. Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_md_gathering_heat": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: a team hitting a gathering (a bar, a club, a card game) where several of his men are together. Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_md_gathering_lost": {
+   "default": 0.65,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: a team hitting a gathering (a bar, a club, a card game) where several of his men are together. Term `lost`: losses (B12e: engine/org_tension.py)"
+  },
+  "ib_md_gathering_aggression": {
+   "default": 0.55,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: a team hitting a gathering (a bar, a club, a card game) where several of his men are together. Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_md_gathering_war_near": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: a team hitting a gathering (a bar, a club, a card game) where several of his men are together. Term `war_near`: war around (B12e: engine/org_tension.py)"
+  },
+  "ib_md_gathering_not_heat_city": {
+   "default": 0.45,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: a team hitting a gathering (a bar, a club, a card game) where several of his men are together. Counter-term `heat_city` (takes a share off): the law's attention (B12e: engine/org_tension.py)"
+  },
+  "ib_md_gathering_not_heat_own": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: a team hitting a gathering (a bar, a club, a card game) where several of his men are together. Counter-term `heat_own` (takes a share off): own heat (B12e: engine/org_tension.py)"
+  },
+  "ib_md_gathering_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: a team hitting a gathering (a bar, a club, a card game) where several of his men are together. Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_md_gathering_not_broker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 3: a team hitting a gathering (a bar, a club, a card game) where several of his men are together. Counter-term `broker` (takes a share off): a mediator (B12e: engine/org_tension.py)"
+  },
+  "ib_m_quiet_team": {
+   "default": 1,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men put on a quiet hit. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_m_quiet_delay": {
+   "default": 2,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Days before the men carry out a quiet hit. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_m_found_team": {
+   "default": 2,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men sent after a man wherever he is found. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_m_found_land": {
+   "default": 0.55,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Each man's chance to reach him, then through the planned-hit lethality (lethality.json style `assault`). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_m_gather_team": {
+   "default": 4,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men in a team hitting a gathering. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_m_gather_land": {
+   "default": 0.35,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Chance that one shot at someone in the room lands, then through the planned-hit lethality (style `gathering`): a crowded room is hard to shoot well in. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_gather_min": {
+   "default": 2,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Fewest of the target's men together in one place for it to count as a gathering. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_gather_shots": {
+   "default": 3,
+   "range": null,
+   "unit": "shots",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shots each man of the team fires. Design proposal; a handgun's magazine, with no one reloading. (B12e: engine/org_tension.py)"
+  },
+  "ib_gather_w_target": {
+   "default": 3.0,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much likelier a shot picks one of the target outfit's men than anyone else present. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_gather_w_other": {
+   "default": 1.0,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Weight of everyone else present (bystanders). Design proposal: they are at risk. (B12e: engine/org_tension.py)"
+  },
+  "ib_sanction_delay": {
+   "default": 1,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Days before a head answers a man's request to strike or a man's unsanctioned strike. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_sanction_fear": {
+   "default": 0.3,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a hot man's aggression cuts his chance of asking leave first (the more he burns, the more he goes alone). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_sanction_refuse_res": {
+   "default": 6.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Resentment a man feels when his head refuses leave. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_heat": {
+   "default": 0.55,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_aggression": {
+   "default": 0.45,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_grievance": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Term `grievance`: grievance (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_their_head_weak": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Term `their_head_weak`: weak head (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_lost": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Term `lost`: losses (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_stronger": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Term `stronger`: stronger side (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_own_voice": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Term `own_voice`: trust in the man asking (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_not_heat_own": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Counter-term `heat_own` (takes a share off): own heat (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_not_heat_city": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Counter-term `heat_city` (takes a share off): the law (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Counter-term `caution` (takes a share off): caution (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_not_weaker": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Counter-term `weaker` (takes a share off): weaker side (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_not_allies_theirs": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Counter-term `allies_theirs` (takes a share off): allies (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_not_broker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Counter-term `broker` (takes a share off): mediator (B12e: engine/org_tension.py)"
+  },
+  "ib_approve_not_friendly": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving a man leave to strike. Counter-term `friendly` (takes a share off): respect (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_back_pts": {
+   "default": 5.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Respect and loyalty the man gains from a head who stands behind him. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_make_good": {
+   "default": 6.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension taken off the injured side by a head who makes it good (money, an apology). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_give_up": {
+   "default": 12.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension taken off the injured side when a head gives up his own man: the largest ease short of a ruling. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_team": {
+   "default": 2,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men sent after the man a head gives up. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_rel": {
+   "default": 4.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Respect gained by the other head when it is made good. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_back_fond": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs standing behind a man who struck without leave. Term `fond`: what he thinks of the man (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_back_aggression": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs standing behind a man who struck without leave. Term `aggression`: temper (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_back_standing": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs standing behind a man who struck without leave. Term `standing`: the man's standing (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_back_stronger": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs standing behind a man who struck without leave. Term `stronger`: the stronger side (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_back_heat": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs standing behind a man who struck without leave. Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_good_friendly": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs making it good with the other side. Term `friendly`: respect (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_good_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs making it good with the other side. Term `pragmatism`: pragmatism (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_good_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs making it good with the other side. Term `caution`: caution (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_good_weaker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs making it good with the other side. Term `weaker`: weaker side (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_good_broker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs making it good with the other side. Term `broker`: a mediator (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_good_heat_city": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs making it good with the other side. Term `heat_city`: the law (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Term `caution`: caution (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_weaker": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Term `weaker`: weaker side (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_allies_theirs": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Term `allies_theirs`: allies (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_heat_own": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Term `heat_own`: own heat (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_heat_city": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Term `heat_city`: the law (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_broker": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Term `broker`: a mediator (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_pragmatism": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Term `pragmatism`: pragmatism (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_friendly": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Term `friendly`: respect (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_not_fond": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Counter-term `fond` (takes a share off): what he thinks of the man (B12e: engine/org_tension.py)"
+  },
+  "ib_ans_up_not_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs giving up his own man to the other side. Counter-term `aggression` (takes a share off): temper (B12e: engine/org_tension.py)"
+  },
+  "ib_fun_delta": {
+   "default": 1.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension taken off between the host and a guest head who goes to a wake (bible 6.1: a funeral attended; 6.4: a wake is the safest meeting in the city), times (0.5 + the dead man's rank). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_fun_missed": {
+   "default": 3.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension a friend's staying away adds to the host's side, times how well he thought of the host and the dead man's rank. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_fun_rel": {
+   "default": 3.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Respect and trust the host gains for a guest. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_funeral_friendly": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs going to another family's wake. Term `friendly`: friends go (B12e: engine/org_tension.py)"
+  },
+  "ib_funeral_rank": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs going to another family's wake. Term `rank`: the higher the dead man, the likelier (B12e: engine/org_tension.py)"
+  },
+  "ib_funeral_calm": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs going to another family's wake. Term `calm`: calm (B12e: engine/org_tension.py)"
+  },
+  "ib_funeral_pragmatism": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs going to another family's wake. Term `pragmatism`: pragmatism (B12e: engine/org_tension.py)"
+  },
+  "ib_funeral_always": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs going to another family's wake. Term `always`: custom (B12e: engine/org_tension.py)"
+  },
+  "ib_funeral_not_aggression": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs going to another family's wake. Counter-term `aggression` (takes a share off): a hot head does not go (B12e: engine/org_tension.py)"
+  },
+  "ib_funeral_not_heat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a head weighs going to another family's wake. Counter-term `heat` (takes a share off): a pair in a quarrel does not go (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_half": {
+   "default": 150,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How fast the law's and press's attention fades after a killing. Apalachin (1957) and the task forces of the 1960s-70s kept heat on families for years, but the attention to one killing fades over months [memory]. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_own_full": {
+   "default": 40,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Own violence-and-investigation heat at which a head reads his outfit as fully under pressure. About three soldier killings in a season. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_city_full": {
+   "default": 60,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Total public heat on all outfits at which the city reads as fully watched. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_kill_base": {
+   "default": 0.5,
+   "range": null,
+   "unit": "multiplier",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Heat a killing writes is multiplied by base + rank x the dead man's rank. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_kill_rank": {
+   "default": 1.0,
+   "range": null,
+   "unit": "multiplier",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; See ib_heat_kill_base. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_kill_public": {
+   "default": 6.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Public heat of a killing across outfits for a rank-0.5 man (x1 at multiplier 1). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_kill_inv": {
+   "default": 5.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Investigative heat of the same. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_kill_vio": {
+   "default": 8.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Violence heat: how violent the outfit looks. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_hidden": {
+   "default": 0.15,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Share of the public and investigative heat an internal killing (one outfit's own business, hidden) writes. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_victim": {
+   "default": 0.5,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Share of a killing's heat that lands on the dead man's outfit as well (it was killed on its ground). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_heat_civilian": {
+   "default": 10.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Extra public heat for each bystander who dies: the press and the police care about the dead who were not in the life, which is why a massacre brings heavy heat (bible Part III 8.6). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_init_ferrante_sabatini": {
+   "default": 14,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension at the opening, ferrante toward sabatini. The Ferrante Schism of 1958 (bible Part III 4.3-4.5): they hold that the Sabatini stole the Racks and that they took it back. Design proposal (the level is an unsourced scale). (B12e: engine/org_tension.py)"
+  },
+  "ib_init_sabatini_ferrante": {
+   "default": 8,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension at the opening, sabatini toward ferrante. The same quarrel from the Sabatini side: the diplomats resent the independents less, and think them rough. Design proposal (the level is an unsourced scale). (B12e: engine/org_tension.py)"
+  },
+  "ib_init_vannucci_pellegrino": {
+   "default": 16,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension at the opening, vannucci toward pellegrino. The Vannucci Split of 1967: they split from the Pellegrinos and 'have not forgiven or been forgiven' (bible 4.4). Design proposal (the level is an unsourced scale). (B12e: engine/org_tension.py)"
+  },
+  "ib_init_pellegrino_vannucci": {
+   "default": 12,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension at the opening, pellegrino toward vannucci. The Pellegrino side of the 1967 split. Design proposal (the level is an unsourced scale). (B12e: engine/org_tension.py)"
+  },
+  "ib_init_pellegrino_brigades": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension at the opening, pellegrino toward brigades. A long, bitter, partly cooperative history with the Irish on the South Piers (bible 4.2). Design proposal (the level is an unsourced scale). (B12e: engine/org_tension.py)"
+  },
+  "ib_init_brigades_pellegrino": {
+   "default": 10,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension at the opening, brigades toward pellegrino. The 1973 massacre of the independent strikers left a lasting hatred in Kerrytown (bible 4.2). Design proposal (the level is an unsourced scale). (B12e: engine/org_tension.py)"
+  },
+  "ib_init_horsemen_vannucci": {
+   "default": 5,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension at the opening, horsemen toward vannucci. Used as muscle and disposable: they hate being treated that way (bible 5.4). Design proposal (the level is an unsourced scale). (B12e: engine/org_tension.py)"
+  },
+  "ib_init_combine_vannucci": {
+   "default": 4,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Tension at the opening, combine toward vannucci. The Strip is Vannucci ground and customer ground for the combine; the arrangement is resented (bible 5.2). Design proposal (the level is an unsourced scale). (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_sd": {
+   "default": 0.2,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Spread of men's starting aggression around the guideline for their organisation. Wide on purpose: every family has men from calm to killer (the owner's rule), and a guideline is a mean, never a value. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_risk_corr": {
+   "default": 0.5,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How far a man's tolerance of risk follows his aggression (hot men take more risk). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_boss": {
+   "default": -0.05,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a boss's starting aggression. Heads who got there stayed alive by weighing costs. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_underboss": {
+   "default": 0.03,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a underboss's starting aggression. Has the family's violence at his disposal. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_consigliere": {
+   "default": -0.12,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a consigliere's starting aggression. The counsellor, the talker. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_capo": {
+   "default": 0.04,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a capo's starting aggression. Runs crews and their quarrels. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_soldier": {
+   "default": 0.05,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a soldier's starting aggression. The made men who do the work. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_associate": {
+   "default": 0.0,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a associate's starting aggression. No shift. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_elder": {
+   "default": -0.08,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a elder's starting aggression. Brigades: the older men. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_young": {
+   "default": 0.1,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a young's starting aggression. Brigades: the young want blood for 1973. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_banker": {
+   "default": -0.1,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a banker's starting aggression. Combine: older bankers use violence sparingly (bible 5.2). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_runner": {
+   "default": 0.1,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a runner's starting aggression. Combine/Blocks: young men use it faster and more publicly. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_president": {
+   "default": 0.0,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a president's starting aggression. Club president. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_shift_prospect": {
+   "default": 0.1,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Shift of a prospect's starting aggression. A prospect proves himself. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_sabatini": {
+   "default": 0.36,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of sabatini. Bible 4.1: the 'diplomats'; 'they like business and avoid war'; the young think the family fat and slow. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_pellegrino": {
+   "default": 0.55,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of pellegrino. Bible 4.2: 'the fist and the favor'; working-class, visible, the most street presence. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_ferrante": {
+   "default": 0.62,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of ferrante. Bible 4.3: born of a war, 'a surplus of gunmen who have to earn something', 'a habit of provoking, a temper for border disputes'. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_vannucci": {
+   "default": 0.66,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of vannucci. Bible 4.4: 'secretive, watchful, and quicker to violence than to talk'; 'harder in the way men fear'. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_brigades": {
+   "default": 0.5,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of brigades. Bible 5.1: 'a different relation to violence': the family is the neighborhood, loyalties older, the cause real; 'not a single mind': some want blood for 1973, some the cause, some the quiet life. Mean at the middle, the widest spread. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_combine": {
+   "default": 0.4,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of combine. Bible 5.2 and 3524: the older bankers use violence sparingly and through intermediaries; the young faster and more publicly. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_horsemen": {
+   "default": 0.62,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of horsemen. Bible 5.4: outlaw bikers, used as muscle and disposable, resentful. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_russians": {
+   "default": 0.55,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of russians. Bible 5.3: extortion of their own community; prey on those with no reason to trust the police. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_bolita": {
+   "default": 0.35,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of bolita. Bible 5.7: numbers men; a business run on trust and arrangement. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_decavalcante": {
+   "default": 0.45,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of decavalcante. Elizabeth family [memory]: a smaller, steadier family with a long-lived boss. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_genovesenj": {
+   "default": 0.52,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of genovesenj. The Genovese faction [memory]: the largest family's New Jersey arm, labor and loansharking. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_lucchesenj": {
+   "default": 0.55,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of lucchesenj. The Lucchese New Jersey crew [memory]: Newark-based, with rising younger men. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_philadelphia": {
+   "default": 0.3,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of philadelphia. Angelo Bruno's family [memory]: known as the 'docile don', who held the peace and the fief; the family turned violent after him. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_gambino": {
+   "default": 0.34,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of gambino. The Gambino presence [memory]: Carlo Gambino was a business-first boss who avoided open war. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_huntsrow_fence": {
+   "default": 0.22,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of huntsrow_fence. Bible 3 (fencing): 'The best fences are patient, polite, and rich.' A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_hijackers": {
+   "default": 0.62,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of hijackers. Independent hijackers: armed, with a living made on freight. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_burglars": {
+   "default": 0.4,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of burglars. Independent burglars: prefer empty rooms. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_hired_men": {
+   "default": 0.6,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of hired_men. Professionals who work for hire without a Family (bible 5.7). A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_greek_merchants": {
+   "default": 0.3,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of greek_merchants. Merchants with their own lines (bible 5.7): a business people. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_lebanese_merchants": {
+   "default": 0.32,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of lebanese_merchants. Merchants with their own lines (bible 5.7). A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_temp_gun_dealer": {
+   "default": 0.45,
+   "range": null,
+   "unit": "0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Guideline mean of starting aggression for the men of gun_dealer. A weapons dealer sells to everyone and trusts few. A mean to draw around, never a value; the spread is ib_temp_sd (wider for the Brigades). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_unit_loss_aggression": {
+   "default": 0.04,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in aggression on `unit_loss`. A man of his unit killed hardens those who worked beside him. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_unit_loss_patience": {
+   "default": -0.03,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in patience on `unit_loss`. A man of his unit killed hardens those who worked beside him. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_kin_killed_aggression": {
+   "default": 0.12,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in aggression on `kin_killed`. His kin killed (a son, a brother) is the strongest drift: it is how feuds outlive their causes. `close_scale` doubles it for a parent or child. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_kin_killed_patience": {
+   "default": -0.1,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in patience on `kin_killed`. His kin killed (a son, a brother) is the strongest drift: it is how feuds outlive their causes. `close_scale` doubles it for a parent or child. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_kin_killed_pragmatism": {
+   "default": -0.06,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in pragmatism on `kin_killed`. His kin killed (a son, a brother) is the strongest drift: it is how feuds outlive their causes. `close_scale` doubles it for a parent or child. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_kin_killed_close_scale": {
+   "default": 2.0,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in close_scale on `kin_killed`. His kin killed (a son, a brother) is the strongest drift: it is how feuds outlive their causes. `close_scale` doubles it for a parent or child. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_strike_aggression": {
+   "default": 0.03,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in aggression on `strike`. A man who has struck finds the next strike easier. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_strike_risk_tolerance": {
+   "default": 0.03,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in risk_tolerance on `strike`. A man who has struck finds the next strike easier. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_prison_aggression": {
+   "default": 0.04,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in aggression on `prison`. Time inside teaches patience and caution and hardens a man a little. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_prison_patience": {
+   "default": 0.05,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in patience on `prison`. Time inside teaches patience and caution and hardens a man a little. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_prison_risk_tolerance": {
+   "default": -0.06,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in risk_tolerance on `prison`. Time inside teaches patience and caution and hardens a man a little. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_age_year_aggression": {
+   "default": -0.015,
+   "range": null,
+   "unit": "per year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in aggression on `age_year`. Each year of age settles a man a little: old men outlive their tempers. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_age_year_risk_tolerance": {
+   "default": -0.01,
+   "range": null,
+   "unit": "per year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in risk_tolerance on `age_year`. Each year of age settles a man a little: old men outlive their tempers. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_age_year_patience": {
+   "default": 0.01,
+   "range": null,
+   "unit": "per year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in patience on `age_year`. Each year of age settles a man a little: old men outlive their tempers. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_rising_ambition": {
+   "default": -0.03,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in ambition on `rising`. A step up the ladder turns a man's mind to what he has to lose. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_rising_pragmatism": {
+   "default": 0.03,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in pragmatism on `rising`. A step up the ladder turns a man's mind to what he has to lose. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_drift_rising_aggression": {
+   "default": -0.02,
+   "range": null,
+   "unit": "per event",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Change in aggression on `rising`. A step up the ladder turns a man's mind to what he has to lose. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_md_hired_always": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4 of the method ladder: a man hired from outside (the professionals who work for hire without a Family, bible 5.7): the killing is the hirer's to answer for, but it is at one remove. Term `always`: a hired man is always at hand (B12e: engine/org_tension.py)"
+  },
+  "ib_md_hired_caution": {
+   "default": 0.45,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4 of the method ladder: a man hired from outside (the professionals who work for hire without a Family, bible 5.7): the killing is the hirer's to answer for, but it is at one remove. Term `caution`: distance is what caution buys (B12e: engine/org_tension.py)"
+  },
+  "ib_md_hired_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4 of the method ladder: a man hired from outside (the professionals who work for hire without a Family, bible 5.7): the killing is the hirer's to answer for, but it is at one remove. Term `pragmatism`: pragmatism (B12e: engine/org_tension.py)"
+  },
+  "ib_md_hired_heat": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4 of the method ladder: a man hired from outside (the professionals who work for hire without a Family, bible 5.7): the killing is the hirer's to answer for, but it is at one remove. Term `heat`: heat (B12e: engine/org_tension.py)"
+  },
+  "ib_md_hired_not_aggression": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 4 of the method ladder: a man hired from outside (the professionals who work for hire without a Family, bible 5.7): the killing is the hirer's to answer for, but it is at one remove. Counter-term `aggression` (takes a share off): a hot man does it with his own hand (B12e: engine/org_tension.py)"
+  },
+  "ib_m_hired_fee": {
+   "default": 6000,
+   "range": null,
+   "unit": "dollars",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a hired man is paid for a job, 1975 dollars: a contract killing was a few thousand to tens of thousands [memory, approximate]. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_m_hired_delay": {
+   "default": 3,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Days before the hired man does it. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "made_men_decavalcante": {
+   "default": 20,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Made men simulated for The DeCavalcante Family (Elizabeth), a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+  },
+  "associates_per_man_decavalcante": {
+   "default": 0.5,
+   "range": null,
+   "unit": "associates per man",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Associates per made man for The DeCavalcante Family (Elizabeth), reduced with the rest (B depth). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "made_men_genovesenj": {
+   "default": 24,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Made men simulated for The Genovese New Jersey Faction, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+  },
+  "associates_per_man_genovesenj": {
+   "default": 0.5,
+   "range": null,
+   "unit": "associates per man",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Associates per made man for The Genovese New Jersey Faction, reduced with the rest (B depth). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "made_men_lucchesenj": {
+   "default": 20,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Made men simulated for The Lucchese New Jersey Crew, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+  },
+  "associates_per_man_lucchesenj": {
+   "default": 0.5,
+   "range": null,
+   "unit": "associates per man",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Associates per made man for The Lucchese New Jersey Crew, reduced with the rest (B depth). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "made_men_philadelphia": {
+   "default": 26,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Made men simulated for The Philadelphia Family, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+  },
+  "associates_per_man_philadelphia": {
+   "default": 0.5,
+   "range": null,
+   "unit": "associates per man",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Associates per made man for The Philadelphia Family, reduced with the rest (B depth). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "made_men_gambino": {
+   "default": 22,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Made men simulated for The Gambino Presence, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+  },
+  "associates_per_man_gambino": {
+   "default": 0.5,
+   "range": null,
+   "unit": "associates per man",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Associates per made man for The Gambino Presence, reduced with the rest (B depth). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "huntsrow_fence_hands": {
+   "default": 4,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men working for the principal of The Hunts Row Master Fence besides him. The master fence buys, stores, repackages and resells; the best are patient, polite and rich; the exchange works on Ferrante ground, which protects and taxes it (bible 4.3, Part III 7). Design proposal; B depth. (B12e: engine/org_tension.py)"
+  },
+  "huntsrow_fence_m": {
+   "default": 0.9,
+   "range": null,
+   "unit": "$M a year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Yearly take of The Hunts Row Master Fence in 1975 dollars. The master fence buys, stores, repackages and resells; the best are patient, polite and rich; the exchange works on Ferrante ground, which protects and taxes it (bible 4.3, Part III 7). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "hijackers_hands": {
+   "default": 4,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men working for the principal of The Independent Hijackers besides him. Independent hijackers (bible 5.7) work the freight corridor the Ferrante hold; they sell to the fence and pay for peace. Design proposal; B depth. (B12e: engine/org_tension.py)"
+  },
+  "hijackers_m": {
+   "default": 0.5,
+   "range": null,
+   "unit": "$M a year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Yearly take of The Independent Hijackers in 1975 dollars. Independent hijackers (bible 5.7) work the freight corridor the Ferrante hold; they sell to the fence and pay for peace. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "burglars_hands": {
+   "default": 3,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men working for the principal of The Independent Burglars besides him. Independent burglars (bible 5.7); the 15th precinct's loft burglaries in the Racks (bible Part II). Design proposal; B depth. (B12e: engine/org_tension.py)"
+  },
+  "burglars_m": {
+   "default": 0.35,
+   "range": null,
+   "unit": "$M a year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Yearly take of The Independent Burglars in 1975 dollars. Independent burglars (bible 5.7); the 15th precinct's loft burglaries in the Racks (bible Part II). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "hired_men_hands": {
+   "default": 2,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men working for the principal of The Contract Men besides him. Professional criminals who work for hire without a Family (bible 5.7); the men a head hires at one remove. Design proposal; B depth. (B12e: engine/org_tension.py)"
+  },
+  "hired_men_m": {
+   "default": 0.15,
+   "range": null,
+   "unit": "$M a year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Yearly take of The Contract Men in 1975 dollars. Professional criminals who work for hire without a Family (bible 5.7); the men a head hires at one remove. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "greek_merchants_hands": {
+   "default": 3,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men working for the principal of The Greek Merchants besides him. Greek merchants with their own lines (bible 5.7): restaurants, tobacco and liquor trade. Design proposal; B depth. (B12e: engine/org_tension.py)"
+  },
+  "greek_merchants_m": {
+   "default": 0.4,
+   "range": null,
+   "unit": "$M a year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Yearly take of The Greek Merchants in 1975 dollars. Greek merchants with their own lines (bible 5.7): restaurants, tobacco and liquor trade. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "lebanese_merchants_hands": {
+   "default": 3,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men working for the principal of The Lebanese Merchants besides him. Lebanese merchants with their own lines (bible 5.7): import and export on the edge of Hunts Row. Design proposal; B depth. (B12e: engine/org_tension.py)"
+  },
+  "lebanese_merchants_m": {
+   "default": 0.35,
+   "range": null,
+   "unit": "$M a year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Yearly take of The Lebanese Merchants in 1975 dollars. Lebanese merchants with their own lines (bible 5.7): import and export on the edge of Hunts Row. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "gun_dealer_hands": {
+   "default": 1,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Men working for the principal of The Gun Dealer besides him. A weapons dealer who sells to everyone (bible 5.4: guns come through the southern highways; the Horsemen move them). Plausible, unsourced. Design proposal; B depth. (B12e: engine/org_tension.py)"
+  },
+  "gun_dealer_m": {
+   "default": 0.25,
+   "range": null,
+   "unit": "$M a year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Yearly take of The Gun Dealer in 1975 dollars. A weapons dealer who sells to everyone (bible 5.4: guns come through the southern highways; the Horsemen move them). Plausible, unsourced. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_hunt_heat_own": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: heat already on his own outfit counts against a head hunting a killer in his own outfit (B12e: hunt_offers gets cost terms). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_hunt_heat_city": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: the law's attention to the city counts against going after a man of his own. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_hunt_cautious": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: a cautious head leaves it. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_hunt_valued": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: the more he values the man who did it against the man who was lost, the less he hunts. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_respect_mean": {
+   "default": 35,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Mean respect one family head has for another at the opening. They regard each other as usurpers (bible Part III 4.5) but are men of the same life who know each other's weight; respect is for power. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_respect_sd": {
+   "default": 20,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Spread of respect between heads. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_trust_mean": {
+   "default": 10,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Mean trust between heads: low (a standing mutual fear, bible 4.5) but not nothing: they have dealt before. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_trust_sd": {
+   "default": 20,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Spread of trust between heads. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_familiarity_mean": {
+   "default": 55,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Mean familiarity between heads in a city this size. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_familiarity_sd": {
+   "default": 15,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Spread of familiarity. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_resentment_base": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Resentment between heads with no quarrel on record. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_resentment_per_tension": {
+   "default": 2.5,
+   "range": null,
+   "unit": "points per point",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Resentment a head starts with toward another, per point of the opening tension between their organisations: the splits of 1958 and 1967 are not forgiven (bible 4.4, 4.5). Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_rel_resentment_sd": {
+   "default": 8,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Spread of resentment. Design proposal. (B12e: engine/org_tension.py)"
   }
  },
  "pools": {

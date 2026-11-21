@@ -41,23 +41,18 @@ def _pay(conn: sqlite3.Connection, src: int, dst: int, amount: float, flow: str 
     return ledger.transfer(conn, ("person", int(src)), ("person", int(dst)), amount, flow_kind=lk, purpose=purpose, allow_partial=True)
 
 
-def violence_bias(conn: sqlite3.Connection, org: int) -> float:
-    """An outfit's own lean toward violence (outfits data `violence_bias`, a number or a figure): canon makes some outfits quicker to
-    it than others. An outfit with no entry has none (an optional key, not a default)."""
-    key = conn.execute("SELECT package_key FROM org_profiles WHERE org_actor_id=?", (int(org),)).fetchone()[0]
-    spec = ((org_motives._sphere_data(conn).get("outfits") or {}).get(str(key).split("~")[0]) or {}).get("violence_bias")
-    return 0.0 if spec is None else v(conn, spec)
-
-
 def temper(conn: sqlite3.Connection, org: int, actor: int) -> float:
-    """A man's aggression with his outfit's lean toward violence added, 0..1."""
-    return clamp01(drive(conn, int(actor), "aggression") + violence_bias(conn, org))
+    """A man's own aggression, 0..1 (his outfit has no number of its own: the men differ, and the heads' drives are drawn around the package's guideline)."""
+    return clamp01(drive(conn, int(actor), "aggression"))
 
 
-def _kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, sanctioned: bool = True) -> None:
+def _kill(conn: sqlite3.Connection, killer: int, victim: int, day: int, sanctioned: bool = True) -> bool:
+    """A killing the coup and contest code carries out. It can fail (the package's `internal.land` and the planned-hit rate decide), and the
+    caller handles a survivor: he lives, hurt or not, knowing who tried. True when the man is dead."""
     from .outfit_choices import kill
     if is_living(conn, victim):
-        kill(conn, int(killer), int(victim), int(day), sanctioned=sanctioned)
+        kill(conn, int(killer), int(victim), int(day), sanctioned=sanctioned, fallible=True)
+    return not is_living(conn, victim)
 
 
 def tension(conn: sqlite3.Connection, org: int, leaders: list[int]) -> float:
@@ -175,7 +170,9 @@ def _advance_plot(conn: sqlite3.Connection, row, day: int) -> str | None:
             imposed(conn, s)
     share = _plot_share(conn, org, meta, p, target, cblk)
     if meta["joined"] and share >= v(conn, blk.get("ready_share")) and roll(conn, p, int(day), f"strike:{row['id']}") < v(conn, blk.get("strike_week")) * drive(conn, p, "aggression"):
-        _kill(conn, p, target, int(day), sanctioned=False)
+        if not _kill(conn, p, target, int(day), sanctioned=False):  # the man lived: the plot is out, and the head deals with the plotter
+            _found(conn, org, row, meta, "failed", int(day))
+            return "found"
         from .org_lifecycle import _process_vacancies
         _process_vacancies(conn, int(day))  # the coup follows at once, not a week later (it reads and closes this plot)
         if conn.execute("SELECT status FROM org_agenda WHERE id=?", (int(row["id"]),)).fetchone()[0] == "open":
@@ -240,7 +237,8 @@ def execute_plot_kill(conn, actor_id, kind, payload, day):
     for j in payload.get("joined") or []:
         adjust_relationship(conn, int(j), int(actor_id), int(day), fear_delta=v(conn, block(conn, int(payload["org"]), "plot").get("found", {}).get("fear")))
         imposed(conn, int(j))
-    _kill(conn, int(actor_id), p, int(day), sanctioned=True)
+    if not _kill(conn, int(actor_id), p, int(day), sanctioned=True):
+        return {"summary": f"{name_of(conn, actor_id)} tried to have {name_of(conn, p)} killed for plotting and failed."}
     return {"summary": f"{name_of(conn, actor_id)} had {name_of(conn, p)} killed for plotting."}
 
 
@@ -318,11 +316,12 @@ def coup(conn: sqlite3.Connection, org: int, late: int, killer: int, cid: int, d
             return True
     if how == "loyalists_kill" and loyal:
         avenger = max(loyal, key=lambda b: (drive(conn, b, "aggression"), -b))
-        _kill(conn, avenger, killer, int(day), sanctioned=True)
+        dead = _kill(conn, avenger, killer, int(day), sanctioned=True)
         adjust_relationship(conn, avenger, late, int(day), loyalty_delta=0.0)
-        cmeta.update(avenged_by=avenger)
-        cmeta["killed"] = int(cmeta.get("killed", 0)) + 1
-        cmeta.pop("tainted", None)
+        if dead:  # a coup leader who lives goes on as he was: the contest stays his to win or lose
+            cmeta.update(avenged_by=avenger)
+            cmeta["killed"] = int(cmeta.get("killed", 0)) + 1
+            cmeta.pop("tainted", None)
         save_meta(conn, int(cid), cmeta)
     return False
 
@@ -457,10 +456,11 @@ def _war_killing(conn, org, meta, side, blk, day, rid, strength) -> None:
     victim = pick(conn, org, int(day), f"warvictim:{rid}", theirs, v(conn, blk["target_temp"]))
     if victim is None:
         return
-    _kill(conn, int(killer), int(victim), int(day), sanctioned=True)
-    meta["killed"][1 - atk] += 1
+    dead = _kill(conn, int(killer), int(victim), int(day), sanctioned=True)
+    if dead:
+        meta["killed"][1 - atk] += 1
     adjust_relationship(conn, leaders[1 - atk], leaders[atk], int(day), resentment_delta=v(conn, blk.get("kill_resentment")))
-    if int(victim) == leaders[1 - atk]:  # his side's strongest man takes his place
+    if dead and int(victim) == leaders[1 - atk]:  # his side's strongest man takes his place
         rest = [a for a, i in side.items() if i == 1 - atk and a != int(victim) and active_seat(conn, a, org) is not None]
         if rest:
             meta["factions"][1 - atk]["leader"] = max(rest, key=lambda a: (float(seat_of(conn, a, org)["standing"]), -a))
@@ -610,8 +610,8 @@ def _deal_with_losers(conn, org, winner: int, losers: list[int], blk: dict, day:
                     ("absorb", v(conn, w["absorb_base"]) + v(conn, w["absorb_fear"]) * fear + v(conn, w["absorb_trust"]) * trust)]
             how = pick(conn, a, int(day), "loser", opts, v(conn, w["temp"]))
         if how == "kill":
-            _kill(conn, winner, a, int(day), sanctioned=True)
-            counts["killed"] += 1
+            if _kill(conn, winner, a, int(day), sanctioned=True):
+                counts["killed"] += 1
         elif how == "demote":
             demote_man(conn, org, a, winner, int(day))
             adjust_relationship(conn, a, winner, int(day), resentment_delta=v(conn, w["demote_resentment"]))

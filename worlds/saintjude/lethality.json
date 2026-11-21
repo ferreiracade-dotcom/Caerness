@@ -34,7 +34,8 @@
    "beating": {"methods": {"fists": 0.55, "blunt": 0.35, "blade": 0.1}},
    "hired_beating": {"methods": {"blunt": 0.5, "fists": 0.3, "blade": 0.2}},
    "abduction": {"methods": {"fists": 0.6, "blunt": 0.3, "blade": 0.1}},
-   "duel": {"methods": {"blade": 0.35, "handgun_range": 0.35, "fists": 0.2, "blunt": 0.1}}
+   "duel": {"methods": {"blade": 0.35, "handgun_range": 0.35, "fists": 0.2, "blunt": 0.1}},
+   "gathering": {"methods": {"handgun_range": 0.6, "handgun_point_blank": 0.2, "blunt": 0.1, "blade": 0.1}}
   },
   "by_class": {
    "street": {

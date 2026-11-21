@@ -218,11 +218,13 @@ def _dormant(conn: sqlite3.Connection, actor: int, org: int, day: int) -> bool:
 
 def _mark_dead(conn: sqlite3.Connection, day: int) -> int:
     rows = conn.execute(
-        """SELECT s.id FROM org_seats s JOIN actors a ON a.id=s.actor_id LEFT JOIN actor_life_profiles lp ON lp.actor_id=s.actor_id
+        """SELECT s.id,s.actor_id,s.org_actor_id,s.role_key FROM org_seats s JOIN actors a ON a.id=s.actor_id LEFT JOIN actor_life_profiles lp ON lp.actor_id=s.actor_id
            WHERE s.status IN ('active','held') AND (lower(COALESCE(a.status,'active')) IN ('dead','deceased','historical')
                                                     OR COALESCE(lp.life_status,'living')<>'living')""").fetchall()
-    for (sid,) in rows:
+    from . import org_tension
+    for sid, actor, org, role in rows:
         conn.execute("UPDATE org_seats SET status='dead', left_day=COALESCE(left_day,?) WHERE id=?", (int(day), int(sid)))
+        org_tension.on_death(conn, int(actor), int(org), role, int(day))  # the other heads weigh the wake
     return len(rows)
 
 

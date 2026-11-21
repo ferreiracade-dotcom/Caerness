@@ -284,16 +284,45 @@ def _build_ranks(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, ki
     return {"counts": {role: len(m) for role, m in members.items()}, "units": None, "unplaced": unplaced}
 
 
+def ensure_institution(conn: sqlite3.Connection, spec: dict) -> None:
+    """An organisation the package founds itself (outfits data `found`: subtype and a note) gets its institution actor here when the
+    seed does not already carry one."""
+    found = spec.get("found")
+    if not found or conn.execute("SELECT 1 FROM actors WHERE name=? AND actor_type='institution'", (spec["institution"],)).fetchone():
+        return
+    conn.execute("INSERT INTO actors(name,actor_type,subtype,status,notes,is_demo) VALUES (?,'institution',?,'active',?,0)",
+                 (spec["institution"], found.get("subtype") or spec["shape"], found.get("note")))
+
+
+def apply_named(conn: sqlite3.Connection, outfit_id: int, spec: dict, day: int) -> None:
+    """Real people in seats (outfits data `named`: the role, which man of it by `index`, a name, an age, optionally a health baseline and a day
+    until which he is held in custody). The man the opening pulled up into the seat becomes him: name, age and health are the record's."""
+    from .health import configure_health_profile
+    for n in spec.get("named") or []:
+        rows = conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active' ORDER BY actor_id", (int(outfit_id), n["role"])).fetchall()
+        if int(n.get("index", 0)) >= len(rows):
+            continue
+        a = int(rows[int(n.get("index", 0))][0])
+        conn.execute("UPDATE actors SET name=name || ' (namesake)' WHERE name=? AND id<>?", (n["name"], a))  # a pulled-up man who happens to share the real name
+        conn.execute("UPDATE actors SET name=?, notes=? WHERE id=?", (n["name"], n.get("why"), a))
+        conn.execute("UPDATE actor_life_profiles SET birth_day=? WHERE actor_id=?", (int(day) - int(n["age"]) * 365, a))
+        if n.get("health") is not None:
+            configure_health_profile(conn, a, baseline_health=float(n["health"]))
+        if n.get("held_until_day") is not None:
+            conn.execute("INSERT INTO custody(actor_id,kind,charge,since_day,until_day) VALUES (?,'held','a racketeering sentence',?,?)", (a, int(day) - 365, int(n["held_until_day"])))
+
+
 def build_org(conn: sqlite3.Connection, key: str, spec: dict, rules: dict, day: int, kind: dict | None = None) -> dict:
     """One organisation as people, in the layout its kind's `opening` data names ("units" or "ranks"). `kind` defaults to
     the package's orgs.json entry for the spec's shape. Returns {"counts": {role: n}, "units": n | None, "unplaced": [...]}."""
     if kind is None:
         kind = kind_data(org_rules(package_for(conn)), spec)
     layout = (kind.get("opening") or {}).get("layout")
-    if layout == "units":
-        return _build_units(conn, key, spec, rules, kind, day)
-    if layout == "ranks":
-        return _build_ranks(conn, key, spec, rules, kind, day)
+    ensure_institution(conn, spec)
+    if layout in ("units", "ranks"):
+        res = (_build_units if layout == "units" else _build_ranks)(conn, key, spec, rules, kind, day)
+        apply_named(conn, outfit_actor(conn, spec["institution"]), spec, day)
+        return res
     raise RuntimeError(f"organisation kind {spec['shape']!r} has no opening layout in the package's orgs data")
 
 
@@ -326,6 +355,10 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
         if res["units"] is not None:
             counts[f"{key}:units"] = res["units"]
         counts[f"{key}:unplaced_seeded"] = len(res["unplaced"])
+    from . import org_temperament, org_tension  # each man's temper is drawn around his organisation's guideline; old quarrels start as tension
+    counts["temperament_drawn"] = org_temperament.draw_opening(conn)
+    counts["tension_seeded"] = org_tension.seed_initial(conn, day)
+    counts["head_relations"] = org_tension.seed_relations(conn, day)
     from . import law_opening  # after the organisations: arrangements are paid by their units' earners, and the law's people pull up from the same city
     for name, n in law_opening.build(conn, day).items():
         counts[f"law:{name}"] = n

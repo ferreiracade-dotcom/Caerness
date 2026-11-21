@@ -5060,3 +5060,34 @@ CREATE INDEX IF NOT EXISTS idx_org_agenda_kind ON org_agenda(kind, status);
 CREATE INDEX IF NOT EXISTS idx_org_money_day ON org_money(day, kind);
 CREATE INDEX IF NOT EXISTS idx_org_money_to ON org_money(to_actor_id, day);
 CREATE INDEX IF NOT EXISTS idx_crime_reports_status ON crime_reports(status);
+
+-- Schema 118 (the Iron Balance): tension between organisations, the acts that moved it, and the organisation layer's heat.
+-- Tension is directional: how much from_org is aggrieved at or pressed by to_org. Nothing here is capped; readers normalise.
+CREATE TABLE IF NOT EXISTS org_tension (
+    from_org INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    to_org INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    level REAL NOT NULL DEFAULT 0,
+    updated_day INTEGER NOT NULL DEFAULT 0,
+    peak REAL NOT NULL DEFAULT 0,
+    PRIMARY KEY (from_org, to_org)
+);
+CREATE TABLE IF NOT EXISTS org_tension_acts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    from_org INTEGER NOT NULL,
+    to_org INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    delta REAL NOT NULL,
+    actor_id INTEGER,
+    victim_id INTEGER,
+    note TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_org_tension_acts_pair ON org_tension_acts(from_org, to_org, day);
+CREATE INDEX IF NOT EXISTS idx_org_tension_acts_day ON org_tension_acts(day, kind);
+CREATE TABLE IF NOT EXISTS org_heat (
+    org_actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
+    public_heat REAL NOT NULL DEFAULT 0,
+    investigative_heat REAL NOT NULL DEFAULT 0,
+    violence_heat REAL NOT NULL DEFAULT 0,
+    updated_day INTEGER NOT NULL DEFAULT 0
+);

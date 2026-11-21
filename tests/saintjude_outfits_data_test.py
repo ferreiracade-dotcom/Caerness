@@ -73,13 +73,13 @@ def run():
         os.environ["CAERNESS_DB_PATH"] = str(db)
 
         # schema 117 (tables of 116 renamed)
-        assert SCHEMA_VERSION == 117
+        assert SCHEMA_VERSION == 118
         assert TABLES <= tables(sj), TABLES - tables(sj)
         assert "quiet_routine" in columns(sj, "simulation_profiles")
         idx = {r[0] for r in sj.execute("SELECT name FROM sqlite_master WHERE type='index'")}
         assert {"idx_org_seats_org_role", "idx_org_seats_superior", "idx_org_lines_holder",
                 "idx_org_agenda_actor", "idx_crime_reports_status"} <= idx
-        assert sj.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 117
+        assert sj.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 118
 
         # the switch, on for Saint Jude only
         assert system_enabled(sj, "outfits")
@@ -103,7 +103,7 @@ def run():
         for key, o in orules["outfits"].items():
             assert sj.execute("SELECT 1 FROM actors WHERE actor_type='institution' AND name=?", (o["institution"],)).fetchone(), key
             assert len(o.get("ground", [])) >= 1, key
-            if o["shape"] == "family":
+            if o["shape"] == "family" and not o.get("found"):  # an outside family held in one place is still a family (the outer ring, B12e)
                 assert len(o["ground"]) >= 2, key
             for place in o.get("ground", []):
                 assert sj.execute("SELECT 1 FROM locations WHERE name=?", (place,)).fetchone(), (key, place)
@@ -116,7 +116,7 @@ def run():
             if a["jurisdiction"] in ("state", "federal"):
                 assert a["arrangements_reach"] is False
         pools = json.loads((ROOT / "worlds/saintjude/design_figures.json").read_text(encoding="utf-8"))["pools"]
-        assert set(orules["line_kinds"]) == {k for k in pools if k != "pad"}
+        assert {k for k in pools if k != "pad"} <= set(orules["line_kinds"])  # every bible pool has its line kind; the independents (B12e) add trades of their own
         for need in ("sabatini", "pellegrino", "ferrante", "vannucci"):
             assert orules["outfits"][need]["members_figure"].endswith(need)
 
