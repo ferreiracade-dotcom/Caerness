@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import os
 import sqlite3
 import sys
@@ -28,13 +29,60 @@ VOLATILE_PREFIXES = ("connector_",)
 VOLATILE_COLUMNS: dict[str, set[str]] = {}
 
 
+def _source_key(package: str) -> str:
+    """A hash of everything a package's opening is built from: the engine, the schema, the package, this builder and the seed files
+    (content for code and data, size and time for the seeds). Any change is a new key, so a stale opening is never reused."""
+    root = Path(__file__).resolve().parent.parent
+    h = hashlib.sha256()
+    for sub, pats in (("engine", ("*.py", "*.sql", "*.json")), (f"worlds/{package}", ("*",)), ("tools", ("build_opening.py",)), ("game/seeds", ("*",))):
+        base = root / sub
+        for f in sorted(f for pat in pats for f in base.rglob(pat) if f.is_file() and "__pycache__" not in f.parts):
+            h.update(str(f.relative_to(root)).encode())
+            if sub == "game/seeds":
+                st = f.stat()
+                h.update(f"{st.st_size}:{st.st_mtime_ns}".encode())
+            else:
+                h.update(f.read_bytes())
+    h.update(sys.version.encode())
+    return h.hexdigest()[:20]
+
+
 def build_opening(db_path: Path, seed_path: Path | None = None, package: str = "caerness") -> None:
+    """Build an opening in `db_path`. A non-default package's own opening (no seed given) is built once and kept in
+    runs/fixture_cache keyed by a hash of its sources, so later builds (tests, runs) copy it; set CAERNESS_NO_OPENING_CACHE=1 to always build."""
     from engine.world_package import DEFAULT_PACKAGE, list_packages
     if package != DEFAULT_PACKAGE and package not in list_packages():
         raise ValueError(f"unknown package {package!r}")
+    cache = None
+    if package != DEFAULT_PACKAGE and seed_path is None and not os.environ.get("CAERNESS_NO_OPENING_CACHE"):
+        try:
+            cdir = Path(__file__).resolve().parent.parent / "runs" / "fixture_cache"
+            cdir.mkdir(parents=True, exist_ok=True)
+            cache = cdir / f"{package}_{_source_key(package)}.db"
+        except OSError:
+            cache = None
     os.environ["CAERNESS_DB_PATH"] = str(db_path)
     # init_db names the world from the configured package, so the argument must win over a stale environment.
     os.environ["CAERNESS_WORLD_PACKAGE"] = package
+    if cache is not None and cache.exists():
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(cache, db_path)
+        return
+    _build(db_path, seed_path, package)
+    if cache is not None:
+        try:  # written beside the final name and renamed, so another process never reads half a file
+            part = cache.with_suffix(f".{os.getpid()}.part")
+            shutil.copyfile(db_path, part)
+            os.replace(part, cache)
+            for old in cache.parent.glob(f"{package}_*.db"):
+                if old != cache:
+                    old.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def _build(db_path: Path, seed_path: Path | None, package: str) -> None:
+    from engine.world_package import DEFAULT_PACKAGE
     from engine.activation import activate_existing_loops
     from engine.current_seed import DEFAULT_CURRENT_SEED, import_current_seed
     from engine.db import connect, init_db

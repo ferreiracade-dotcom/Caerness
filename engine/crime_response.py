@@ -394,6 +394,7 @@ def _respond(conn: sqlite3.Connection, rid: int, day: int) -> None:
     rep = conn.execute("SELECT * FROM crime_reports WHERE id=?", (rid,)).fetchone()
     meta, kind = _meta(rep), rep["crime_kind"]
     offender, victim, loc = (rep["offender_actor_id"] if _knows_offender(conn, rep) else None), rep["victim_actor_id"], rep["location_id"]
+    actual = rep["offender_actor_id"]  # a paid precinct steers away from its payer before he is named: the arrangements look at the man who did it
     pub = float(meta.get("publicity") or 0.0)
     officer_victim = bool(meta.get("officer_victim"))
     primary = agency_for(conn, loc, kind)
@@ -416,7 +417,7 @@ def _respond(conn: sqlite3.Connection, rid: int, day: int) -> None:
         noise = (_rng(conn, "evidence", f"{rid}:{pid}").random() * 2.0 - 1.0) * _n(ev["noise"])
         score = _n(ev["base"]) + _n(ev["publicity"]) * pub / 100.0 + (_n(ev["offender_known"]) if offender is not None else 0.0) + _n(ev["effort"]) * effort + noise
         officer = case_officer(conn, prof, rid)
-        bought = _bought(conn, prof, officer, offender, kind, pub, officer_victim, rid, day)
+        bought = _bought(conn, prof, officer, actual, kind, pub, officer_victim, rid, day)
         cid = _open_case(conn, prof, rid, kind, offender, victim, day, score, officer, {"effort": round(effort, 4), "bought": bool(bought)})
         if bought:
             conn.execute("UPDATE law_enforcement_cases SET status='closed', closed_day=? WHERE id=?", (int(day), cid))

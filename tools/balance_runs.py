@@ -2,7 +2,7 @@
 
   python tools/balance_runs.py [--days 1825] [--seed 7] [--out runs/x.json]
 
-One advance on a copy of the opening (built in a temporary folder; never touches data/*.db), read at each year end: killings and deaths by
+One advance (violence, heads killed and the law, in a single pass) on a copy of the opening (built in a temporary folder; never touches data/*.db), read at each year end: killings and deaths by
 cause, victims by rank, made men lost against inductions, organisation sizes, tension between each pair (level, peak, what moved it),
 first strikes and what came before them, how far the wars widened, attacks with several dead, which families fell apart, wall-clock.
 Real-world figures in the notes are approximate and from memory. It runs on any tree that has tests/sj_fixture.py.
@@ -40,16 +40,24 @@ def _sizes(conn):
     return out
 
 
-def report(days: int, seed: int | None) -> dict:
+def report(days: int, seed: int | None, keep_db: str = "") -> dict:
     from engine.simulation import advance_connection
     conn = _opening(seed)
     callers: Counter = Counter()
     import engine.outfit_choices as _oc
     _real = _oc.kill
 
+    heads_killed: list = []
+
     def _wrapped(conn_, killer, victim, day, **kw):  # counts what asked for each killing and how it ended, by the calling function
+        from engine import orgs as _orgs
+        was_head = [int(r[0]) for r in conn_.execute("SELECT org_actor_id FROM org_seats WHERE actor_id=? AND status='active'", (int(victim),))
+                    if _orgs.head_of(conn_, int(r[0])) == int(victim)]
         res = _real(conn_, killer, victim, day, **kw)
         callers[(sys._getframe(1).f_code.co_name, str(res)[:6])] += 1
+        if was_head and " killed " in str(res):
+            heads_killed.append({"day": int(day), "victim": int(victim), "of": was_head, "killer": int(killer), "by": sys._getframe(1).f_code.co_name,
+                                 "ordered_by": kw.get("ordered_by"), "sanctioned": bool(kw.get("sanctioned"))})
         return res
     _oc.kill = _wrapped
     for mod in list(sys.modules.values()):
@@ -64,9 +72,16 @@ def report(days: int, seed: int | None) -> dict:
         step = min(30, days - done)
         advance_connection(conn, step)
         done += step
+        if done // 365 > (done - step) // 365 or done == days:  # a line each simulated year, so a stall shows
+            print(f"seed {seed}: simulated {done}/{days} days, {time.time() - t0:.0f}s", file=sys.stderr, flush=True)
         if done % 365 == 0 or done == days:
             sizes_by_year[done // 365 if done % 365 == 0 else (done + 364) // 365] = _sizes(conn)
     wall = time.time() - t0
+    if keep_db:  # the run's database kept, so the figures can be asked again without simulating again
+        conn.commit()
+        import shutil
+        shutil.copyfile(conn.execute("PRAGMA database_list").fetchone()[2], keep_db)
+    print(f"seed {seed}: simulation done, reading the figures", file=sys.stderr, flush=True)
     years = max(1, round(days / 365))
     out: dict = {"days": days, "seed": seed, "wall_s": round(wall, 1)}
 
@@ -159,6 +174,10 @@ def report(days: int, seed: int | None) -> dict:
     out["hired_jobs"] = conn.execute("SELECT COUNT(*) FROM org_agenda WHERE kind='hit' AND json_extract(metadata_json,'$.hired')=1").fetchone()[0]
     out["heat_end"] = [(names[int(r[0])], round(r[1], 1), round(r[2], 1)) for r in conn.execute("SELECT org_actor_id,public_heat,violence_heat FROM org_heat ORDER BY public_heat DESC LIMIT 6")]
     out["kill_calls_by_caller_and_result"] = {f"{k[0]}:{k[1]}": v for k, v in sorted(callers.items(), key=lambda kv: -kv[1])}
+    out["heads_killed"] = heads_killed
+    from tools.law_stats import law_figures
+    out["law"] = law_figures(conn)
+    print(f"seed {seed}: figures read", file=sys.stderr, flush=True)
     out["calibration"] = {"mob_killings_per_year": round(len(mob) / years, 1), "killings_across_per_year": round(out["killings_across_outfits"] / years, 1)}
     return out
 
@@ -168,8 +187,9 @@ def main() -> None:
     ap.add_argument("--days", type=int, default=1825)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--out", default="")
+    ap.add_argument("--keep-db", default="")
     a = ap.parse_args()
-    res = report(a.days, a.seed)
+    res = report(a.days, a.seed, a.keep_db)
     txt = json.dumps(res, indent=1, default=str)
     print(txt)
     if a.out:

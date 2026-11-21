@@ -671,9 +671,10 @@ def _do_informs(conn, a, seat, org, day, rng, spec, **o):
     if sup is None:
         return {"summary": "He had no one to inform on.", "skipped": True}
     loc = _ground_of(conn, seat)
-    conn.execute("INSERT INTO crime_reports(day,crime_kind,location_id,offender_actor_id,public,agency_profile_id,status,metadata_json) VALUES (?,?,?,?,0,?,'open',?)",
-                 (int(day), spec["crime_kind"], loc, int(sup), agency_for(conn, loc, spec["crime_kind"]),
-                  json.dumps({"source": "org_happening", "informant": a, "discovered": 0, "close_day": int(day) + int(figure(conn, spec["report_days"]))})))
+    from .crime_response import open_report  # an informant names the man: the law has a case it can work, and the evidence builds like any other
+    open_report(conn, crime_kind=spec["crime_kind"], day=int(day), offender_actor_id=int(sup), location_id=loc,
+                metadata={"source": "org_happening", "informant": a, "discovered": 0, "identified": True,
+                          "close_day": int(day) + int(figure(conn, spec["report_days"]))})
     return {"status": "open", "victim": int(sup), "loc": loc, "summary": f"{_name(conn, a)} gave the police evidence on {_name(conn, sup)}."}
 
 
@@ -736,7 +737,7 @@ def notice_holdouts(conn: sqlite3.Connection, day: int) -> int:
 def discover_informers(conn: sqlite3.Connection, day: int, force: bool = False) -> int:
     spec = _kinds(conn).get("informs") or {}
     n = 0
-    for r in conn.execute("SELECT id,offender_actor_id,metadata_json FROM crime_reports WHERE status='open' AND json_extract(metadata_json,'$.informant') IS NOT NULL "
+    for r in conn.execute("SELECT id,offender_actor_id,metadata_json FROM crime_reports WHERE status IN ('open','buried','arrest') AND json_extract(metadata_json,'$.informant') IS NOT NULL "
                           "AND COALESCE(json_extract(metadata_json,'$.discovered'),0)=0 ORDER BY id").fetchall():
         if not force and _roll(conn, "discover", r["id"], day) >= float(figure(conn, spec["discover_week"])):
             continue

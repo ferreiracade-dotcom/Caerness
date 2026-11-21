@@ -149,8 +149,9 @@ def test_informing_files_a_report_and_discovery_imposes():
     a = _dependent(w)
     res = oh.happen(c, a, "informs", DAY)
     assert res["group"] == "wrong"
-    rep = c.execute("SELECT * FROM crime_reports WHERE offender_actor_id=? AND status='open'", (w.soldier,)).fetchone()
-    assert rep is not None and json.loads(rep["metadata_json"]).get("informant") == a
+    rep = c.execute("SELECT * FROM crime_reports WHERE offender_actor_id=? AND json_extract(metadata_json,'$.informant') IS NOT NULL", (w.soldier,)).fetchone()
+    assert rep is not None and json.loads(rep["metadata_json"]).get("informant") == a  # a case the law opened (it may be open, buried by a paid precinct, or an arrest)
+    assert rep["case_id"] is not None
     c.execute("UPDATE simulation_profiles SET forced_tier=NULL, forced_until_day=NULL WHERE actor_id IN (?,?)", (a, w.soldier))
     oh.discover_informers(c, DAY + 1, force=True)
     assert _forced(c, w.soldier), "the named superior is looked at when it is found out"

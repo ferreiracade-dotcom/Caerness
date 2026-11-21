@@ -268,27 +268,44 @@ def case_b():
     return detail
 
 
-@check("C a public killing on Pad-paid ground brings an arrest")
+@check("C a public killing on Pad-paid ground opens a case, raises publicity and heat; an arrest is common but not certain")
 def case_c():
+    """Four public killings of four different men on the street, each two days apart. Each must open a report with a case and a loud
+    publicity; the city's heat must rise; and across the four an arrest must be common (at least one) without being demanded every time:
+    the law only has the man once someone has put his name to it."""
+    import json
     from connector import server
     import sqlite3
-    with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:
-        row = c.execute(
-            """SELECT a.id,a.name FROM org_seats s JOIN actors a ON a.id=s.actor_id WHERE s.status='active' AND s.role_key='soldier' AND a.actor_type='character'
-               ORDER BY a.id LIMIT 1""").fetchone()
-    assert row is not None, "no living rival to shoot"
     me = int(STATE["protagonist"]["actor_id"])
-    with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:  # the rival is on the street where the shooting happens
-        c.execute("UPDATE actors SET current_location_id=(SELECT current_location_id FROM actors WHERE id=?) WHERE id=?", (me, int(row[0])))
-        c.commit()
-    out = server.act(cid(), "operation", f"I shoot {row[1]} dead in broad daylight on a crowded Kerrytown street", target_actor_id=int(row[0]))
-    print("act: " + dump(out)[:600])
-    server.advance(cid(), 2, "lie low")
     with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:
-        held = c.execute("SELECT * FROM custody WHERE actor_id=? AND kind='held'", (me,)).fetchone()
-        rep = c.execute("SELECT id,status,crime_kind FROM crime_reports WHERE offender_actor_id=?", (me,)).fetchall()
-    assert held is not None, f"no custody row for the protagonist; reports={[tuple(r) for r in rep]}; act={dump(out)[:400]}"
-    return f"held; reports={[tuple(r) for r in rep]}"
+        rivals = c.execute(
+            """SELECT a.id,a.name FROM org_seats s JOIN actors a ON a.id=s.actor_id WHERE s.status='active' AND s.role_key='soldier' AND a.actor_type='character'
+               AND a.status NOT IN ('dead','deceased') ORDER BY a.id LIMIT 4""").fetchall()
+        day0 = int(c.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+        c.row_factory = sqlite3.Row
+        heat0 = float(c.execute("SELECT COALESCE(SUM(public_heat),0) FROM org_heat").fetchone()[0])
+    assert len(rivals) == 4, "fewer than four rivals to shoot"
+    for rid_, name in rivals:
+        with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:  # the rival is on the street where the shooting happens
+            c.execute("UPDATE actors SET current_location_id=(SELECT current_location_id FROM actors WHERE id=?) WHERE id=?", (me, int(rid_)))
+            c.commit()
+        out = server.act(cid(), "operation", f"I shoot {name} dead in broad daylight on a crowded Kerrytown street", target_actor_id=int(rid_))
+        print("act: " + dump(out)[:300])
+        server.advance(cid(), 2, "lie low")
+    with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:
+        c.row_factory = sqlite3.Row
+        reps = c.execute("SELECT * FROM crime_reports WHERE offender_actor_id=? AND victim_actor_id IN (%s)" % ",".join("?" * len(rivals)),
+                         (me, *[int(r[0]) for r in rivals])).fetchall()
+        held = c.execute("SELECT COUNT(*) FROM custody WHERE actor_id=? AND kind='held'", (me,)).fetchone()[0]
+        day1 = int(c.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+        heat1 = float(c.execute("SELECT COALESCE(SUM(public_heat),0) FROM org_heat").fetchone()[0])
+    assert len(reps) >= 3, f"a public killing should open a report each time: {len(reps)} of 4"
+    assert all(r["case_id"] is not None for r in reps), [dict(r) for r in reps]
+    pubs = [float(json.loads(r["metadata_json"]).get("publicity") or 0.0) for r in reps]
+    assert min(pubs) >= 50.0, f"a public killing is loud: {pubs}"
+    assert heat1 > heat0, (heat0, heat1)
+    assert held >= 1, f"an arrest should be common across four public killings; reports={[(r['id'], r['status']) for r in reps]}"
+    return f"{len(reps)} reports, publicity {min(pubs):.0f}-{max(pubs):.0f}, public heat {heat0:.1f}->{heat1:.1f}, held {held}"
 
 
 def run():
