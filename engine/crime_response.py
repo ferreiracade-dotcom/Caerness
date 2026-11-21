@@ -77,7 +77,7 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
     """The three tables this layer adds (also created by the schema; a no-op once they exist)."""
     key = org_motives.db_key(conn)
     if _READY["key"] != key:
-        fresh = conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='public_attention'").fetchone() is None
+        fresh = conn.execute("SELECT 1 FROM engine_meta WHERE key=?", (CURSOR_KEY,)).fetchone() is None  # the tables come with the schema, so the cursor says whether this layer has run here
         for stmt in DDL.split(";"):  # not executescript: that commits, and a time skip is running inside a savepoint
             if stmt.strip():
                 conn.execute(stmt)
@@ -256,6 +256,8 @@ def open_report(conn: sqlite3.Connection, *, crime_kind: str, day: int, offender
                      victims_n=int(meta.get("victims") or 1), bystander=bool(meta.get("bystander")))
     meta.update(publicity=pub["publicity"], publicity_drivers=pub["drivers"], witnesses=pub["witnesses"], hour=pub.get("hour"),
                 notable_victim=pub.get("notable_victim") or pub.get("notable_kind"), officer_victim=bool(pub.get("officer_victim")))
+    if offender_actor_id is not None and harm_id is not None and "identified" not in meta and _cfg(conn).get("identification"):
+        meta["identified"] = _identified_at_filing(conn, int(harm_id), int(day), offender_actor_id, victim_actor_id, pub)
     rid = int(conn.execute(
         """INSERT INTO crime_reports(day,harm_incident_id,crime_kind,location_id,victim_actor_id,offender_actor_id,public,status,metadata_json)
            VALUES (?,?,?,?,?,?,?,'open',?)""",
@@ -267,6 +269,28 @@ def open_report(conn: sqlite3.Connection, *, crime_kind: str, day: int, offender
                  (rid, pub["publicity"], pub["publicity"], json.dumps(audience, sort_keys=True), int(day), json.dumps({"drivers": pub["drivers"]}, sort_keys=True)))
     _respond(conn, rid, int(day))
     return rid
+
+
+def _organised(conn: sqlite3.Connection, actor_id) -> float:
+    """1 when the man holds a seat in any organisation, else 0."""
+    return 1.0 if _orgs_of(conn, actor_id) else 0.0
+
+
+def _identified_at_filing(conn: sqlite3.Connection, harm_id: int, day: int, offender, victim, pub: dict) -> bool:
+    """Whether the law has the offender's name when the crime is filed (data `identification`): the witnesses and the loudness of the
+    story raise it, an organised man's work and a victim from the same world lower it."""
+    c = _cfg(conn)["identification"]
+    x = pub.get("drivers") or {}
+    z = (_n(c["bias"]) + _n(c["witnesses"]) * float(x.get("witnesses") or 0.0) + _n(c["publicity"]) * float(pub["publicity"]) / 100.0
+         + _n(c["offender_organised"]) * _organised(conn, offender) + _n(c["victim_organised"]) * _organised(conn, victim))
+    return org_motives._roll(conn, harm_id, day, "identify") < _logit(z)  # drawn as the arrangements' roll is, so a test can pin it
+
+
+def _knows_offender(conn: sqlite3.Connection, rep) -> bool:
+    """The report names an offender the law has: no offender, or one nobody has yet put a name to, is no one."""
+    if rep["offender_actor_id"] is None:
+        return False
+    return bool(_meta(rep).get("identified", True))
 
 
 # ---- agencies, officers, the arrangements' reach ----
@@ -369,7 +393,7 @@ def _open_case(conn: sqlite3.Connection, profile, rid: int, kind: str, offender,
 def _respond(conn: sqlite3.Connection, rid: int, day: int) -> None:
     rep = conn.execute("SELECT * FROM crime_reports WHERE id=?", (rid,)).fetchone()
     meta, kind = _meta(rep), rep["crime_kind"]
-    offender, victim, loc = rep["offender_actor_id"], rep["victim_actor_id"], rep["location_id"]
+    offender, victim, loc = (rep["offender_actor_id"] if _knows_offender(conn, rep) else None), rep["victim_actor_id"], rep["location_id"]
     pub = float(meta.get("publicity") or 0.0)
     officer_victim = bool(meta.get("officer_victim"))
     primary = agency_for(conn, loc, kind)
@@ -546,8 +570,18 @@ def _reviews(conn: sqlite3.Connection, day: int) -> int:
         kind, offender = rep["crime_kind"], rep["offender_actor_id"]
         pub = publicity_of(conn, rep["id"])
         rng = _rng(conn, "review", f"{cs['id']}:{day}")
+        named = 0.0
+        if offender is not None and not _knows_offender(conn, rep):  # the work may put a name to it
+            rate = _n(_cfg(conn)["identification"]["review_rate"]) * float(m.get("effort") or 0.0)
+            if org_motives._roll(conn, int(rep["id"]), int(day), "name") < rate:
+                rm = _meta(rep)
+                named = _n(c["evidence"]["offender_known"])  # the name is evidence like any other
+                rm.update(identified=True, identified_day=int(day))
+                conn.execute("UPDATE crime_reports SET metadata_json=? WHERE id=?", (json.dumps(rm, sort_keys=True, default=str), rep["id"]))
+            else:
+                offender = None
         gain = (_n(c["review"]["gain"]) + (rng.random() * 2.0 - 1.0) * _n(c["review"]["noise"])) * float(m.get("effort") or 0.0)
-        score = float(cs["evidence_score"]) / 100.0 + gain
+        score = float(cs["evidence_score"]) / 100.0 + gain + named
         prof = conn.execute("SELECT * FROM law_enforcement_profiles WHERE id=?", (cs["profile_id"],)).fetchone()
         conn.execute("UPDATE law_enforcement_cases SET evidence_score=?, last_review_day=? WHERE id=?", (round(min(100.0, max(0.0, 100.0 * score)), 3), int(day), cs["id"]))  # the column's own 0-100 domain; the test below uses the unbounded score
         n += 1

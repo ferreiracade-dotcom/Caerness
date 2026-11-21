@@ -160,7 +160,10 @@ def _better_patron(conn, a, seat, org, day: int | None = None) -> tuple[int | No
     cur = seat["superior_actor_id"]
     if cur is None:
         return None, 0.0
-    role = seat_of(conn, int(cur), org)["role_key"]
+    cur_seat = seat_of(conn, int(cur), org)
+    if cur_seat is None:  # his patron is dead or gone and no one has taken the place yet: there is no patron to compare
+        return None, 0.0
+    role = cur_seat["role_key"]
     own = _take_per_man(conn, int(cur), org, day)
     best, gap = None, 0.0
     for r in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active' AND actor_id<>? ORDER BY actor_id", (org, role, int(cur))).fetchall():

@@ -5,6 +5,7 @@ so every pre-package database keeps loading as Caerness.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from dataclasses import dataclass, field
@@ -129,9 +130,32 @@ def configured_package_id() -> str:
 
 _SWITCH_CACHE: dict[tuple, "WorldPackage"] = {}
 
+# While a time skip runs the data files and the manifest are not edited, so the package a connection is bound to, and
+# each data file's parse, are worked out once per skip instead of once per call (the manifest stat was ~6% of a run).
+# Outside a skip every call still checks the file's mtime, so a test or tool that swaps a package or edits a data file
+# is read fresh.
+_PASS: dict = {"depth": 0, "pkg": {}, "data": {}}
+
+
+@contextlib.contextmanager
+def package_pass():
+    _PASS["depth"] += 1
+    try:
+        yield
+    finally:
+        _PASS["depth"] -= 1
+        if _PASS["depth"] == 0:
+            _PASS["pkg"].clear()
+            _PASS["data"].clear()
+
 
 def package_for(conn) -> "WorldPackage":
     """current_package(conn), memoised on the manifest's identity and mtime (cheap enough for per-person hot paths)."""
+    in_pass = _PASS["depth"] > 0
+    if in_pass:
+        held = _PASS["pkg"].get(id(conn))
+        if held is not None:
+            return held
     try:
         row = conn.execute("SELECT value FROM engine_meta WHERE key=?", (META_KEY,)).fetchone()
     except Exception:
@@ -145,6 +169,8 @@ def package_for(conn) -> "WorldPackage":
     pkg = _SWITCH_CACHE.get(key)
     if pkg is None:
         pkg = _SWITCH_CACHE[key] = load_package(pkg_id)
+    if in_pass:
+        _PASS["pkg"][id(conn)] = pkg
     return pkg
 
 
@@ -258,6 +284,10 @@ def _data_json(pkg: "WorldPackage", name: str) -> dict:
     path = pkg.data.get(name)
     if path is None:
         return {}
+    if _PASS["depth"] > 0:
+        held = _PASS["data"].get(path)
+        if held is not None:
+            return held
     try:
         key = (str(path), path.stat().st_mtime_ns)
     except OSError:
@@ -267,6 +297,8 @@ def _data_json(pkg: "WorldPackage", name: str) -> dict:
             _RULES_CACHE[key] = json.loads(path.read_text(encoding="utf-8"))
         except ValueError:
             _RULES_CACHE[key] = {}
+    if _PASS["depth"] > 0:
+        _PASS["data"][path] = _RULES_CACHE[key]
     return _RULES_CACHE[key]
 
 

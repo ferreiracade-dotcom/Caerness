@@ -152,6 +152,23 @@ def _infer_institution_governance(conn: sqlite3.Connection, iid: int) -> tuple[s
 
 
 
+def resolve_pressures(conn: sqlite3.Connection, where: str, params: tuple, *, day: int, meta_patch: str | None = None) -> list[int]:
+    """Resolve the active pressure rows matching `where` (a clause on organization_pressures). The table keeps one row per
+    (institution, key, status), so a pressure that has been resolved before (a vacancy that comes round again, a need that returns)
+    would collide with its earlier resolved row: that earlier row is kept as history under a key suffixed with its own id, and the
+    newly resolved one takes the plain key. Returns the ids resolved."""
+    ids = [int(r[0]) for r in conn.execute(f"SELECT id FROM organization_pressures WHERE status='active' AND ({where}) ORDER BY id", params)]
+    for pid in ids:
+        inst, key = conn.execute("SELECT institution_actor_id,pressure_key FROM organization_pressures WHERE id=?", (pid,)).fetchone()
+        conn.execute("UPDATE organization_pressures SET pressure_key=pressure_key||'#'||id WHERE institution_actor_id=? AND pressure_key=? AND status IN ('resolved','expired') AND id<>?",
+                     (inst, key, pid))
+        if meta_patch is None:
+            conn.execute("UPDATE organization_pressures SET status='resolved',updated_day=? WHERE id=?", (int(day), pid))
+        else:
+            conn.execute("UPDATE organization_pressures SET status='resolved',updated_day=?,metadata_json=json_patch(metadata_json,?) WHERE id=?", (int(day), meta_patch, pid))
+    return ids
+
+
 def record_organization_pressure(
     conn: sqlite3.Connection, institution_actor_id: int, pressure_key: str, domain: str, *,
     intensity_delta: float, urgency: float, source_kind: str | None = None, source_id: int | None = None,

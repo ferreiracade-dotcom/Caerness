@@ -168,17 +168,10 @@ def _resolve_source_pressure(
     day: int,
     reason: str,
 ) -> int:
-    rows = conn.execute(
-        """SELECT id FROM organization_pressures
-           WHERE institution_actor_id=? AND source_kind=? AND source_id=? AND status='active'""",
-        (institution_actor_id, source_kind, source_id),
-    ).fetchall()
-    for row in rows:
-        pressure_id = int(row["id"])
-        conn.execute(
-            "UPDATE organization_pressures SET status='resolved',updated_day=?,metadata_json=json_patch(metadata_json,?) WHERE id=?",
-            (day, _j({"resolved_reason": reason, "resolved_day": day}), pressure_id),
-        )
+    from .organization_agency import resolve_pressures
+    rows = resolve_pressures(conn, "institution_actor_id=? AND source_kind=? AND source_id=?", (institution_actor_id, source_kind, source_id),
+                             day=day, meta_patch=_j({"resolved_reason": reason, "resolved_day": day}))
+    for pressure_id in rows:
         # A need that ceased to exist should not keep generating approaches. This closes only the
         # search. Already-presented voluntary proposals remain real social facts and are not revoked.
         conn.execute(

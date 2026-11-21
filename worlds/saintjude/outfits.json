@@ -1585,6 +1585,23 @@
    "age_from": "ib_weak_age_from",
    "age_span": "ib_weak_age_span"
   },
+  "guard": {
+   "half": "ten_guard_half",
+   "cover": [
+    {
+     "name": "their_head_guarded",
+     "weight": "ten_cover_guarded"
+    },
+    {
+     "name": "their_head_loved",
+     "weight": "ten_cover_loved"
+    },
+    {
+     "name": "unbacked",
+     "weight": "ten_cover_unbacked"
+    }
+   ]
+  },
   "voice": {
    "aggression_floor": "ib_voice_aggr_floor",
    "role_weight": {
@@ -2159,6 +2176,56 @@
       {
        "name": "their_head_weak",
        "weight": "ib_tg_orderer_their_head_weak"
+      },
+      {
+       "name": "their_head_guarded",
+       "weight": "ten_tg_orderer_not_guarded",
+       "against": true
+      },
+      {
+       "name": "their_head_loved",
+       "weight": "ten_tg_orderer_not_loved",
+       "against": true
+      },
+      {
+       "name": "unbacked",
+       "weight": "ten_tg_orderer_not_unbacked",
+       "against": true
+      },
+      {
+       "name": "caution",
+       "weight": "ten_tg_orderer_not_caution",
+       "against": true
+      },
+      {
+       "name": "secure",
+       "weight": "ten_tg_orderer_not_secure",
+       "against": true
+      },
+      {
+       "name": "weaker",
+       "weight": "ten_tg_orderer_not_weaker",
+       "against": true
+      },
+      {
+       "name": "allies_theirs",
+       "weight": "ten_tg_orderer_not_allies_theirs",
+       "against": true
+      },
+      {
+       "name": "heat_city",
+       "weight": "ten_tg_orderer_not_heat_city",
+       "against": true
+      },
+      {
+       "name": "heat_own",
+       "weight": "ten_tg_orderer_not_heat_own",
+       "against": true
+      },
+      {
+       "name": "broker",
+       "weight": "ten_tg_orderer_not_broker",
+       "against": true
       }
      ]
     },

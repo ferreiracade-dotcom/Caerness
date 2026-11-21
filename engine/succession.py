@@ -4,7 +4,7 @@ import json
 import sqlite3
 from typing import Any
 
-from .organization_agency import record_organization_pressure, ensure_organization_faction, start_regime
+from .organization_agency import record_organization_pressure, resolve_pressures, ensure_organization_faction, start_regime
 from .organization_lifecycle import record_lifecycle_event
 
 _STAGE_RANK = {None: 0, "": 0, "First": 1, "Temper": 2, "Third": 3, "Breach": 4, "Fifth": 5, "Sixth": 6}
@@ -183,10 +183,7 @@ def resolve_authority_transition(conn: sqlite3.Connection, case_id: int, *, clea
         (day, chosen, case_id),
     )
     # Vacancy pressure is no longer active after a clean resolution.
-    conn.execute(
-        "UPDATE organization_pressures SET status='resolved',updated_day=? WHERE institution_actor_id=? AND pressure_key=? AND status='active'",
-        (day, iid, f"authority_vacancy:{key}"),
-    )
+    resolve_pressures(conn, "institution_actor_id=? AND pressure_key=?", (iid, f"authority_vacancy:{key}"), day=day)
     return chosen
 
 

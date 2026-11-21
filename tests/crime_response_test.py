@@ -83,7 +83,7 @@ def test_public_killing_brings_an_arrest_despite_the_pad():
     prof = agency_for(c, w.ground, "homicide")
     _pay_precinct(c, w, prof)
     _hit(c, v, w.soldier, fatal=True, public=True, loc=w.ground)
-    with forced_roll("pad_publicity"):  # the weighed resistance wins (a public killing is nearly impossible to bury)
+    with forced_roll("pad_publicity", "identify"):  # the weighed resistance wins (a public killing is nearly impossible to bury)
         out = _process(c, DAY + 1)
     assert out["reports"] == 1, out
     rep = _latest_report(c)
@@ -116,7 +116,7 @@ def test_routine_assault_on_paid_ground_can_be_buried():
     prof = agency_for(c, w.ground, "assault")
     _pay_precinct(c, w, prof)
     _hit(c, v, w.soldier, fatal=False, public=False, loc=w.ground, method="fists")
-    with forced_roll():  # every draw high: the weighed resistance of a case this quiet does not stop the Pad
+    with forced_roll("identify"):  # every draw high: the weighed resistance of a case this quiet does not stop the Pad
         _process(c, DAY + 1)
     rep = _latest_report(c)
     assert rep["status"] == "buried", dict(rep)
@@ -133,7 +133,8 @@ def test_federal_case_ignores_the_pad():
     officers = _pay_precinct(c, w, prof)
     victim_officer = next(o for o in officers if orgs.is_living(c, o))
     _hit(c, victim_officer, w.soldier, fatal=True, public=False, loc=w.ground)
-    _process(c, DAY + 1)
+    with forced_roll("identify"):  # the agency has the name: the test is about who works the case
+        _process(c, DAY + 1)
     rep = _latest_report(c)
     meta = json.loads(rep["metadata_json"])
     assert meta["officer_victim"] is True
@@ -170,7 +171,7 @@ def test_family_answers_an_arrest():
     rel(c, w.boss, w.soldier, loyalty=90, trust=70)
     rel(c, w.capo, w.soldier, loyalty=90, trust=70)
     _hit(c, v, w.soldier, fatal=True, public=True, loc=w.ground)
-    with forced_roll("pad_publicity"):
+    with forced_roll("pad_publicity", "identify"):
         _process(c, DAY + 1)
     rows = c.execute("SELECT actor_id FROM org_agenda WHERE kind='member_arrested' AND status='open' ORDER BY actor_id").fetchall()
     assert {r[0] for r in rows} == {w.capo, w.boss}, rows
@@ -193,12 +194,13 @@ def test_send_lawyer_brings_bail_sooner_and_costs_a_trust_drop():
     c.execute("UPDATE world_state SET current_day=? WHERE id=1", (DAY,))
     v = _victim(c, {w.soldier}, w.org)
     _hit(c, v, w.soldier, fatal=False, public=False, loc=w.ground, method="blunt")
-    _process(c, DAY + 1)
+    with forced_roll("identify"):
+        _process(c, DAY + 1)
     rep = _latest_report(c)
     if rep["status"] != "arrest":
         # not every assault is arrested at once: file one that is
         rid = cr.open_report(c, crime_kind="assault", day=DAY + 1, offender_actor_id=w.soldier, victim_actor_id=v, location_id=w.ground, public=True,
-                             metadata={"bystander": True, "victims": 2, "hour": 13})
+                             metadata={"bystander": True, "victims": 2, "hour": 13, "identified": True})
         rep = _report(c, rid)
     assert rep["status"] == "arrest", dict(rep)
     case = c.execute("SELECT * FROM law_enforcement_cases WHERE id=?", (rep["case_id"],)).fetchone()
@@ -218,7 +220,7 @@ def test_a_case_runs_to_a_disposition_and_a_conviction_to_a_sentence_and_release
     c.execute("UPDATE world_state SET current_day=? WHERE id=1", (DAY,))
     v = _victim(c, {w.soldier}, w.org)
     _hit(c, v, w.soldier, fatal=True, public=True, loc=w.ground)
-    with forced_roll("pad_publicity"):
+    with forced_roll("pad_publicity", "identify"):
         _process(c, DAY + 1)
     rep = _latest_report(c)
     assert rep["status"] == "arrest"
@@ -260,7 +262,7 @@ def test_two_seats_arrest_reaches_every_org_he_sits_in():
     orgs.seat(c, w.soldier, org2, role2, unit_id=None, superior_actor_id=head2, level=3, day=DAY)
     v = _victim(c, {w.soldier}, w.org)
     _hit(c, v, w.soldier, fatal=True, public=True, loc=w.ground)
-    with forced_roll("pad_publicity"):
+    with forced_roll("pad_publicity", "identify"):
         _process(c, DAY + 1)
     got = {(r["actor_id"], json.loads(r["metadata_json"])["org"]) for r in c.execute("SELECT * FROM org_agenda WHERE kind='member_arrested'")}
     assert (w.boss, w.org) in got and (head2, org2) in got, got

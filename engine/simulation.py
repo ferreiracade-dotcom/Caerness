@@ -724,7 +724,9 @@ def advance_connection_registry(conn: sqlite3.Connection, days: int) -> list[sql
 
 def advance_connection(conn: sqlite3.Connection, days: int) -> list[sqlite3.Row]:
     """Advance authoritative world state through the production ProcessRegistry scheduler."""
-    return advance_connection_registry(conn, days)
+    from .world_package import package_pass
+    with package_pass():
+        return advance_connection_registry(conn, days)
 
 
 def advance(days: int) -> list[sqlite3.Row]:

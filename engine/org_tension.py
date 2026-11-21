@@ -286,6 +286,27 @@ def _head_weak(conn: sqlite3.Connection, head: int | None, day: int) -> float:
     return 1.0 - rest
 
 
+def protection(conn: sqlite3.Connection, man: int | None) -> tuple[float, float]:
+    """What stands between a man and anyone who means to kill him, each 0..1: `guarded` (the men who answer to him, directly or through
+    those under him, against the data's `guard.half`: the number at which a man is half covered) and `loved` (how loyal those who answer to
+    him directly are: the men who would avenge him, or would not). A man nobody answers to has neither. No rank is named: a head's ring is
+    large because the whole outfit is under him, a unit leader's is his crew, an ordinary man's is nothing."""
+    if man is None:
+        return 0.0, 0.0
+    g = data(conn).get("guard") or {}
+    half = max(1e-9, _v(conn, g.get("half"), 20.0))
+    n = int(conn.execute(
+        """WITH RECURSIVE under(a) AS (SELECT actor_id FROM org_seats WHERE superior_actor_id=? AND status='active' AND actor_id<>?
+             UNION SELECT s.actor_id FROM org_seats s JOIN under u ON s.superior_actor_id=u.a WHERE s.status='active' AND s.actor_id<>?)
+           SELECT COUNT(*) FROM under""", (int(man), int(man), int(man))).fetchone()[0])
+    direct = [int(r[0]) for r in conn.execute("SELECT DISTINCT actor_id FROM org_seats WHERE superior_actor_id=? AND status='active' AND actor_id<>?", (int(man), int(man)))]
+    loyal = []
+    for d in direct:
+        r = om._rel(conn, d, int(man))
+        loyal.append(clamp01(float(r["loyalty"]) / 100.0) if r is not None else 0.0)
+    return n / (n + half), (sum(loyal) / len(loyal) if loyal else 0.0)
+
+
 def factors(conn: sqlite3.Connection, voice: int, F: int, T: int, day: int) -> dict[str, float]:
     """Everything a voice of F weighs about T today, each 0..1 (the package's terms name them)."""
     from .org_happenings import _cost_factors, _sees, _size
@@ -296,7 +317,10 @@ def factors(conn: sqlite3.Connection, voice: int, F: int, T: int, day: int) -> d
     rel = om._rel(conn, voice, their_head)
     pa, pb = _places(conn, F, day), _places(conn, T, day)
     own_weak = _head_weak(conn, own_head, day) if own_head != voice else 0.0
-    f.update({"heat": h, "heat_back": hb, "calm": 1.0 - h, "always": 1.0,
+    guarded, loved = protection(conn, their_head)
+    f.update({"their_head_guarded": guarded, "their_head_loved": loved,
+              "unbacked": 0.0 if own_head == voice else 1.0,  # a voice who is not his own head's has not yet his leave
+              "heat": h, "heat_back": hb, "calm": 1.0 - h, "always": 1.0,
               "aggression": om._drive(conn, voice, "aggression"), "ambition": om._drive(conn, voice, "ambition"),
               "caution": 1.0 - om._drive(conn, voice, "risk_tolerance"), "patience": om._drive(conn, voice, "patience"),
               "pragmatism": om._drive(conn, voice, "pragmatism"),
@@ -313,6 +337,11 @@ def factors(conn: sqlite3.Connection, voice: int, F: int, T: int, day: int) -> d
 def _blend(conn, terms, f: dict[str, float]) -> float:
     from .org_happenings import _blend as blend
     return blend(conn, terms, f)
+
+
+def _against(conn, terms, f: dict[str, float]) -> float:
+    from .org_happenings import _against as against
+    return against(conn, terms, f)
 
 
 def _softmax_pick(conn, scored: list[tuple[str, float]], rng: random.Random) -> str | None:
@@ -542,6 +571,18 @@ def _victims(conn, rung: str, voice: int, F: int, T: int, day: int) -> list[int]
     return free([int(r[0]) for r in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' ORDER BY actor_id", (int(T),))])
 
 
+def _pick_victim(conn, vs: list[int], rng: random.Random, T: int, F: int, voice: int, day: int) -> int:
+    """One of the men on the rung. T's head is harder to get at than any of the others: his guards, the men who would avenge him and the
+    voice's own want of backing take a share off his weight (data `guard.cover`, the same blend as every other counter-term)."""
+    head = head_of(conn, T)
+    if head is None or head not in vs or len(vs) == 1:
+        return vs[rng.randrange(len(vs))]
+    f = factors(conn, voice, F, T, day)
+    reach = 1.0 - _against(conn, (data(conn).get("guard") or {}).get("cover") or [], f)
+    w = [reach if x == head else 1.0 for x in vs]
+    return rng.choices(vs, weights=w, k=1)[0]
+
+
 def _do_squeeze(conn, voice, F, T, day, name, spec, f):
     """A beating of one of T's earners or men: the weekly incident, aimed."""
     from .org_happenings import run_incident
@@ -701,7 +742,7 @@ def execute_strike(conn, plan: dict, day: int, *, sanctioned: bool) -> dict:
         vs = _victims(conn, rung, voice, F, T, day)
         if not vs:
             return {"summary": "He found no one to hit."}
-        victim = vs[rng.randrange(len(vs))]
+        victim = _pick_victim(conn, vs, rng, T, F, voice, day)
         team = _team(conn, F, voice, team_n)
         if method == "found":
             for shooter in team:

@@ -654,6 +654,18 @@
     }
    }
   },
+  "identification": {
+   "why": "The harm record names the true offender; the law only has him once someone has put the name to the crime. At filing it is a weighed chance (logistic): those who saw it and a loud story raise it, a made man's work and a victim from the same world (the street keeps its mouth shut) lower it. Targets read from memory of 1975, approximate and flagged so: about a half to three-fifths of assaults reported to police were cleared, most killings overall (a bit under four in five) were cleared, but a killing inside organised crime almost never was. Targets only, never caps; the roll's drivers are what move the result. Reviews can still name him later.",
+   "bias": -0.6,
+   "witnesses": 1.8,
+   "publicity": 1.0,
+   "offender_organised": -1.6,
+   "victim_organised": -0.8,
+   "review_rate": {
+    "value": 0.1,
+    "why": "Per review of an open case, the chance the work puts a name to the crime, times the agency's effort (a case is reviewed about every two weeks and closed after three months)."
+   }
+  },
   "arrest": {
    "evidence": {
     "base": 0.3,
@@ -757,21 +769,21 @@
    },
    "days_why": "Days from arrest to disposition: murder cases take most of a year, street assaults a season (unsourced).",
    "dismiss": {
-    "bias": 0.5,
+    "bias": 0.0,
     "strength": -3.0,
     "lawyer": 2.0,
     "arrangements": 2.0,
     "witness_pressure": 2.5,
     "publicity": -1.0,
-    "why": "z of a charge dropped or dismissed: a weak case, a good lawyer, a bought officer and frightened witnesses push it up; a loud case pushes it down. Calibrate to the real rate (many felony arrests are dropped) after a run."
+    "why": "z of a charge dropped or dismissed: a weak case, a good lawyer, a bought officer and frightened witnesses push it up; a loud case pushes it down. B13b: bias lowered from 0.5 to 0 after a run showed 40% of dispositions dismissed; from memory (approximate) roughly a quarter to a third of 1970s felony arrests were dismissed or dropped. A target, never a cap."
    },
    "trial": {
-    "bias": -1.2,
+    "bias": -2.0,
     "strength": -1.5,
     "lawyer": 1.0,
     "publicity": 1.0,
     "inducted": 1.6,
-    "why": "z of going to trial rather than pleading: a strong case pleads, a loud case and a good lawyer go to trial, and a made man typically refuses to plead if it means naming others (Part II 6.5)."
+    "why": "z of going to trial rather than pleading: a strong case pleads, a loud case and a good lawyer go to trial, and a made man typically refuses to plead if it means naming others (Part II 6.5). B13b: bias lowered from -1.2 to -2.0 after a run showed 17% of dispositions going to verdict; from memory (approximate) about nine in ten convictions were by plea. A target, never a cap."
    },
    "conviction": {
     "bias": -0.2,

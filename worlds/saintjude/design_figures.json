@@ -10628,6 +10628,146 @@
    "source": "unsourced",
    "note": "unsourced; The target ladder, rung 1: the man who did it (the man who last wronged this side). Term `calm`: a calm head keeps it narrow (B12e: engine/org_tension.py)"
   },
+  "ten_guard_half": {
+   "default": 20,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The number of men under a man at which he counts as half covered (guarded = n/(n+half)): a unit leader with a crew of 6 is about a quarter covered, a head with a few hundred under him almost wholly. Boss shootings in the open (Galante 1979, Castellano 1985, both [memory]) came when the guards were outside or absent; a boss in his own territory with his people near was rarely reached. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_cover_guarded": {
+   "default": 0.7,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a head's being well guarded takes off his weight as a man a hit is aimed at: a guarded head is mostly out of reach by an ordinary man of another outfit. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_cover_loved": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much the loyalty of the men directly under a head takes off his weight as a target: they would avenge him, and a head they are loyal to has the right people close. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_cover_unbacked": {
+   "default": 0.85,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much going without one's own head's leave takes off the weight of a head as a target: killing another family's boss without backing is something few men would do and live (a boss's death is a matter for the whole family; the voice answers for it to his own head). Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_guarded": {
+   "default": 0.7,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 (the other side's head) counter-term `their_head_guarded`: a guarded head is a poor choice of target, and the men around him are what a voice sees first. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_loved": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `their_head_loved`: the loyal men under a head will answer his killing; the voice weighs what they will do. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_unbacked": {
+   "default": 0.85,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `unbacked`: a man who is not his own head has not yet his leave, and knows the head will hunt him for a boss's death if the war that follows is not wanted. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `caution`: a careful man does not go for a boss. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_secure": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `secure`: a man with standing and earnings of his own has most to lose from the war a boss's death starts. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_weaker": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `weaker`: killing the head of a stronger outfit is how a small outfit is ended. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_allies_theirs": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `allies_theirs`: the third families that stand with the other head will stand against the killer. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_heat_city": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `heat_city`: a boss killed brings the law and the press down on every family; with the city already hot nobody wants it. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_heat_own": {
+   "default": 0.25,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `heat_own`: the voice's own outfit is already watched. Design proposal. (B13b: engine/org_tension.py)"
+  },
+  "ten_tg_orderer_not_broker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Rung 2 counter-term `broker`: a third head both sides would hear out is making peace; the head is the man he talks to. Design proposal. (B13b: engine/org_tension.py)"
+  },
   "ib_tg_orderer_heat": {
    "default": 0.35,
    "range": null,

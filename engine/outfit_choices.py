@@ -108,7 +108,11 @@ def _attempt_band(conn: sqlite3.Connection, killer: int, victim: int, day: int, 
     if p is None:
         return "killed", None
     picked: list = []
-    band = hit_band(float(p), random.Random(f"{run_seed(conn)}:kill:{int(killer)}:{int(victim)}:{int(day)}"), True, conn, style=style, picked=picked)
+    from .org_tension import protection
+    guarded, loved = protection(conn, victim)  # a man with many answering to him is hard to reach: it takes a share off the chance the blow lands and off its being fatal
+    gl = float(cfg.get("guard_land") or 0.0)
+    p = float(p) * (1.0 - gl * guarded)
+    band = hit_band(float(p), random.Random(f"{run_seed(conn)}:kill:{int(killer)}:{int(victim)}:{int(day)}"), True, conn, style=style, guard=guarded, picked=picked)
     return band, (picked[0] if picked else None)
 
 

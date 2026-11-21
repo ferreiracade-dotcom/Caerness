@@ -5091,3 +5091,42 @@ CREATE TABLE IF NOT EXISTS org_heat (
     violence_heat REAL NOT NULL DEFAULT 0,
     updated_day INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS public_attention (
+    report_id INTEGER PRIMARY KEY REFERENCES crime_reports(id) ON DELETE CASCADE,
+    publicity REAL NOT NULL,
+    loudness REAL NOT NULL,
+    audience_json TEXT NOT NULL DEFAULT '{}',
+    updated_day INTEGER NOT NULL DEFAULT 0,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS case_dispositions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id INTEGER NOT NULL,
+    report_id INTEGER,
+    actor_id INTEGER,
+    day INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    factors_json TEXT NOT NULL DEFAULT '{}',
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS sentences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor_id INTEGER NOT NULL REFERENCES actors(id),
+    case_id INTEGER,
+    report_id INTEGER,
+    disposition_id INTEGER,
+    crime_kind TEXT NOT NULL,
+    victim_actor_id INTEGER,
+    location_id INTEGER,
+    term_days INTEGER NOT NULL,
+    start_day INTEGER NOT NULL,
+    earliest_release_day INTEGER NOT NULL,
+    end_day INTEGER NOT NULL,
+    facility TEXT,
+    status TEXT NOT NULL DEFAULT 'serving',
+    released_day INTEGER,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_sentences_release ON sentences(status, earliest_release_day);
+CREATE INDEX IF NOT EXISTS idx_sentences_actor ON sentences(actor_id, status);
+CREATE INDEX IF NOT EXISTS idx_case_dispositions_case ON case_dispositions(case_id);

@@ -7,6 +7,7 @@
   "hit": "A planned hit is a different intent from a beating. Landed at point-blank it kills about 90-95%; the share falls with a low chance of success (a glancing or interrupted blow) and with a guarded target. The chance that it lands at all is the odds the caller computes (strength, stage, guard).",
   "nonlethal": "A beating-style attack that lands kills rarely (street gangs, which fight with whatever is to hand, more than durable outfits, which send men who know how far to go).",
   "internal": "A killing the head or a man decides on one of his own through the agenda (an ordered hit, a discipline or held-man killing, killing an offender) lands at `internal.land` and then kills at the planned-hit rate, so the man can survive, hurt or not, knowing who tried (Joe Gallo, Carmine Persico and others survived attempts; an ambush by a trusted man lands more often than a hit on a guarded stranger). The state-changing killings of a coup, contest or war (org_coup, org_succession) stay certain: the code that follows each (succession, books, counts) assumes the man is dead. A reply to a killing across outfits goes against a man who expects it, so each man sent lands 0.7 of the time and then kills at the planned-hit rate; the reply is a team, so one failure does not end it.",
+  "guard": "B13b. A man with many answering to him is harder to reach: `internal.guard_land` takes that share (times how guarded he is, 0..1, from `tension.guard.half`) off the chance a planned blow lands, and `hit.guard_weight` off its being fatal once it lands. Carmine Galante (1979) and Paul Castellano (1985) were reached in the open, outside, with their guards away or not in the room (all [memory], approximate); a boss with his whole outfit around him was seldom reached at all. Design proposal.",
   "untreated": "A serious wound with no care can worsen (infection, bleeding) and kill weeks later; treatment cuts the worsening. Firearm wounds start worsening at a lower severity than blows."
  },
  "fatal": {
@@ -48,7 +49,7 @@
    }
   }
  },
- "internal": {"retaliation_land": 0.7, "land": 0.92},
+ "internal": {"retaliation_land": 0.7, "land": 0.92, "guard_land": 0.5},
  "incident": {
   "why": "A weekly beating mostly stays a beating, but a share go too far (a weapon, a bad fall, a bystander). The tail share and its severity are proposals; the deaths are reported by the run, never clamped.",
   "tail_share": 0.06, "tail_lo": 40.0, "tail_hi": 100.0,
