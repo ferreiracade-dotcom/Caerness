@@ -57,7 +57,7 @@ def test_switch_creates_and_resumes_each_world():
     from connector import server
     out = server.resume(world="saintjude")
     assert not out.get("error"), out
-    assert out["world"] == "Saint Jude" and "Caerness" in out["other_worlds"], (out.get("world"), out.get("other_worlds"))
+    assert out["world"] == "Saint Jude" and "Caerness" not in out["other_worlds"], (out.get("world"), out.get("other_worlds"))
     assert db_name() == "saintjude.db"
     out = server.resume(world="caerness")
     assert out["world"] == "Caerness" and "Saint Jude" in out["other_worlds"] and "Caerness" not in out["other_worlds"]
@@ -114,14 +114,13 @@ def test_list_worlds_and_names():
     assert campaign.campaign_name_for("caerness") == "main" and campaign.campaign_name_for("saintjude") == "saintjude"
     rows = {r["world"]: r for r in campaign.list_worlds()}
     assert rows["saintjude"]["display_name"] == "Saint Jude" and rows["caerness"]["campaign"] == "main"
-    assert all(set(r) == {"world", "display_name", "campaign", "exists"} for r in rows.values())
+    assert all(set(r) == {"world", "display_name", "campaign", "exists", "shelved"} for r in rows.values())
 
 
-def test_instructions_name_every_world():
+def test_instructions_name_every_playable_world():
     from connector import server
     text = server.make_mcp().instructions
-    assert "Saint Jude" in text and "Caerness" in text, text
-    assert " or " in text
+    assert "Saint Jude" in text and "Caerness" not in text, text  # a shelved world is never offered in play
 
 
 def test_backup_all_snapshots_every_campaign():

@@ -34,6 +34,7 @@ class WorldPackage:
     rulebook_section: Path | None
     creation_section: Path | None
     systems: dict[str, bool]
+    shelved: bool = False  # a shelved world is kept and tested but never offered in play
     data: dict[str, Path] = field(default_factory=dict)
     name_pools: dict = field(default_factory=dict)
     name_groups: dict = field(default_factory=dict)
@@ -98,6 +99,7 @@ def load_package(pkg_id: str) -> WorldPackage:
         rulebook_section=optional("rulebook_section"),
         creation_section=optional("creation_section"),
         systems=systems,
+        shelved=bool(m.get("shelved", False)),
         data=data,
         name_pools=dict(m.get("name_pools") or {}),
         name_groups=name_groups,

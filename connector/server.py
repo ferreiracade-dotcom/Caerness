@@ -17,13 +17,13 @@ def _world_names() -> str:
     """Every installed world's display name joined with ' or ' (from the packages, never hard-coded)."""
     try:
         from connector.campaign import list_worlds
-        names = [w["display_name"] for w in list_worlds()]
+        names = [w["display_name"] for w in list_worlds() if not w.get("shelved")]
     except Exception:  # an unreadable package must not stop the server from starting
         names = []
-    return " or ".join(names) or "Caerness"
+    return " or ".join(names) or "Narrative Engine"
 
 
-INSTRUCTIONS = INSTRUCTIONS_TEMPLATE.format(name="Caerness")
+INSTRUCTIONS = INSTRUCTIONS_TEMPLATE.format(name="Narrative Engine")
 
 
 def make_mcp(**kwargs) -> MCPServer:
@@ -34,7 +34,7 @@ def make_mcp(**kwargs) -> MCPServer:
     return MCPServer("narrative-engine", instructions=INSTRUCTIONS_TEMPLATE.format(name=_world_names()), **kwargs)
 
 
-_DOC_PREFIX = "Caerness game:"
+_DOC_PREFIX = "Narrative Engine game:"
 
 
 def register_tools(server: MCPServer) -> MCPServer:
@@ -103,7 +103,7 @@ def _snapshot_before_advance() -> None:
 
 
 def resume(world: str | None = None) -> dict:
-    """Caerness game: call first when the user says resume or wants to play; returns the GM rulebook and current scene. world (optional) is the name of the world to play; omit it to continue the world last played."""
+    """Narrative Engine game: call first when the user says resume or wants to play; returns the GM rulebook and current scene. world (optional) is the name of the world to play; omit it to continue the world last played."""
     from connector.session import resume as _resume
     from connector.session import world_info
 
@@ -129,19 +129,19 @@ def _resolve_world(text: str) -> str:
 
 
 def scene() -> dict:
-    """Caerness game: current scene (place, people present, news, competence, condition, notes)."""
+    """Narrative Engine game: current scene (place, people present, news, competence, condition, notes)."""
     from connector.views import compact_scene
     return _call(compact_scene, "scene")
 
 
 def lookup(query: str, offset: int = 0) -> dict:
-    """Caerness game: what the protagonist knows of a person, place, business, outfit, household, crew, institution or role, by name or id. known_more/notes_more say older entries exist; raise offset to read them."""
+    """Narrative Engine game: what the protagonist knows of a person, place, business, outfit, household, crew, institution or role, by name or id. known_more/notes_more say older entries exist; raise offset to read them."""
     from connector.views import lookup as _lookup
     return _call(lambda c: _lookup(c, query, offset), "lookup")
 
 
 def lore(query: str) -> dict:
-    """Caerness game: World Bible passages on the setting (cultivation stages, institutions, places, customs, history)."""
+    """Narrative Engine game: World Bible passages on the setting (institutions, places, customs, history, the world's own rules)."""
     from connector.lore import lore as _lore
     return _call(lambda c: _lore(c, query), "lore")
 
@@ -169,7 +169,7 @@ def advance(call_id: str, days: int, purpose: str, domain: str | None = None, de
 
 def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "general", subject_id: int | None = None,
          threads: list[str] | None = None, field: str | None = None, cause: str | None = None) -> dict:
-    """Caerness game: record what should last. kind=detail (a fact about an actor/location/business/outfit/household/crew/institution/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake; field=fixed with a `corrections` entry's text or id marks it done), fact (change a tagged world fact: field = its key or name from lookup, text = new value; a Fixed fact needs `cause`, the event that changed it)."""
+    """Narrative Engine game: record what should last. kind=detail (a fact about an actor/location/business/outfit/household/crew/institution/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake; field=fixed with a `corrections` entry's text or id marks it done), fact (change a tagged world fact: field = its key or name from lookup, text = new value; a Fixed fact needs `cause`, the event that changed it)."""
     from connector import store
 
     request = {"kind": kind, "text": text, "subject_kind": subject_kind, "subject_id": subject_id,
@@ -183,7 +183,7 @@ def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "gen
 
 
 def author(call_id: str, kind: str, details: dict | None = None) -> dict:
-    """Caerness game: make something new real. kind is free text: person (age, work, name, stage, ties as {actor_id, as: relation in words}, wants, from_elsewhere; sex optional; holds = an Open office taken, once only), business (name, trade, amount), organisation (name, type, members), rumour (text, spread), or protagonist (a whole proposal when the campaign has none; see the creation text). The engine only vetoes contradictions, scales down what the place cannot supply (scaled_down) and fills the rest; a refusal names the clash and has a reason_kind."""
+    """Narrative Engine game: make something new real. kind is free text: person (age, work, name, stage, ties as {actor_id, as: relation in words}, wants, from_elsewhere; sex optional; holds = an Open office taken, once only), business (name, trade, amount), organisation (name, type, members), rumour (text, spread), or protagonist (a whole proposal when the campaign has none; see the creation text). The engine only vetoes contradictions, scales down what the place cannot supply (scaled_down) and fills the rest; a refusal names the clash and has a reason_kind."""
     from connector.authoring import author as _author
     return _call(lambda c: _author(c, call_id, kind, details), "author")
 

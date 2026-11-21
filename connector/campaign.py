@@ -125,11 +125,12 @@ def list_worlds() -> list[dict]:
     out = []
     for pkg_id in list_packages():
         try:
-            display = load_package(pkg_id).display_name
+            p = load_package(pkg_id)
+            display, shelved = p.display_name, p.shelved
         except Exception:  # a broken package is listed by id; opening it reports the real error
-            display = pkg_id
+            display, shelved = pkg_id, False
         name = campaign_name_for(pkg_id)
-        out.append({"world": pkg_id, "display_name": display, "campaign": name, "exists": (campaign_dir() / f"{name}.db").is_file()})
+        out.append({"world": pkg_id, "display_name": display, "campaign": name, "exists": (campaign_dir() / f"{name}.db").is_file(), "shelved": shelved})
     return out
 
 

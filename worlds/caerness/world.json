@@ -1,6 +1,7 @@
 {
   "id": "caerness",
   "display_name": "Caerness",
+  "shelved": true,
   "calendar": {"kind": "sv"},
   "bible_path": "../../canon/world_bible_current.docx",
   "bible_sha256": "45947d046f816a95d118167e03a7d24872867b1521eb1a9414c5fe4349d995e3",

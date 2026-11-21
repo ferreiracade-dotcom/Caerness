@@ -48,7 +48,7 @@ def world_info(conn) -> dict:
     """Which world this campaign is, and the other installed worlds a resume(world=...) can switch to."""
     from connector.campaign import list_worlds
     pkg = current_package(conn)
-    return {"world": pkg.display_name, "other_worlds": [w["display_name"] for w in list_worlds() if w["world"] != pkg.id]}
+    return {"world": pkg.display_name, "other_worlds": [w["display_name"] for w in list_worlds() if w["world"] != pkg.id and not w.get("shelved")]}
 
 
 def resume(conn) -> dict:

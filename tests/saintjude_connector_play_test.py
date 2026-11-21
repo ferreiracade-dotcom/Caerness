@@ -6,6 +6,7 @@ PASS/FAIL with detail; the test fails at the end if any check failed. Case C is 
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import sys
@@ -187,6 +188,39 @@ def c1i():
     return "no leaks"
 
 
+@check("D Open office lookup, author holder once, stable across 30 days, second holder refused")
+def case_d():
+    from connector import server
+    lines = []
+    # The opening seats the senior law offices (law.json level4_offices: a city is never without a Police Commissioner),
+    # so test authoring on an Open office the opening leaves unfilled, chosen from the campaign's own facts.
+    import sqlite3
+    with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:
+        row = c.execute("SELECT subject FROM world_facts WHERE tag='Open' AND key LIKE 'office:%' AND holder_actor_id IS NULL "
+                        "ORDER BY key LIMIT 1").fetchone()
+    assert row, "no unfilled Open office left at the opening"
+    q = row[0]
+    lines.append(f"unfilled Open office: {q}")
+    l0 = server.lookup(q)
+    lines.append(f"lookup before: {dump(l0)[:300]}")
+    assert l0.get("open") is True or l0.get("tag") == "Open", l0
+    a = server.author(cid(), "person", {"name": "Harold Brennan", "age": 58, "work": q, "holds": q, "place": "Saint Jude"})
+    lines.append(f"author holder: {dump(a)[:300]}")
+    assert not refused(a), refusal_text(a)
+    l1 = server.lookup(q)
+    lines.append(f"lookup after: {dump(l1)[:300]}")
+    assert l1.get("found") and "Brennan" in str(l1.get("name")), l1
+    adv = server.advance(cid(), 30, "go about my business")
+    assert not adv.get("error"), adv
+    l2 = server.lookup(q)
+    lines.append(f"lookup after advance: {dump(l2)[:200]}")
+    assert l2.get("found") and l2.get("name") == l1.get("name"), (l1.get("name"), l2.get("name"), dump(l2)[:300])
+    b = server.author(cid(), "person", {"name": "Edmund Voss", "age": 55, "work": q, "holds": q, "place": "Saint Jude"})
+    lines.append(f"second holder: {dump(b)[:400]}")
+    assert refused(b) and "held by" in refusal_text(b), dump(b)[:400]
+    return "\n".join(lines)
+
+
 @check("A federal judge holds a mob boss without bail in 1979: refused (dated rule, 1984)")
 def case_a():
     from connector import server
@@ -244,36 +278,11 @@ def case_c():
     return "REPORT-ONLY (not asserted): " + dump(out)[:1500]
 
 
-@check("D Open office lookup, author holder once, stable across 30 days, second holder refused")
-def case_d():
-    from connector import server
-    lines = []
-    q = "Police Commissioner"
-    l0 = server.lookup(q)
-    lines.append(f"lookup before: {dump(l0)[:300]}")
-    assert l0.get("open") is True or l0.get("tag") == "Open", l0
-    a = server.author(cid(), "person", {"name": "Harold Brennan", "age": 58, "work": "Police Commissioner", "holds": q, "place": "Saint Jude"})
-    lines.append(f"author holder: {dump(a)[:300]}")
-    assert not refused(a), refusal_text(a)
-    l1 = server.lookup(q)
-    lines.append(f"lookup after: {dump(l1)[:300]}")
-    assert l1.get("found") and "Brennan" in str(l1.get("name")), l1
-    adv = server.advance(cid(), 30, "go about my business")
-    assert not adv.get("error"), adv
-    l2 = server.lookup(q)
-    lines.append(f"lookup after advance: {dump(l2)[:200]}")
-    assert l2.get("found") and l2.get("name") == l1.get("name"), (l1.get("name"), l2.get("name"), dump(l2)[:300])
-    b = server.author(cid(), "person", {"name": "Edmund Voss", "age": 55, "work": "Police Commissioner", "holds": q, "place": "Saint Jude"})
-    lines.append(f"second holder: {dump(b)[:400]}")
-    assert refused(b) and "held by" in refusal_text(b), dump(b)[:400]
-    return "\n".join(lines)
-
-
 def run():
     t0 = time.time()
     setup()
     print(f"opening built in {STATE['build_s']:.1f}s -> {STATE['db']}")
-    for fn in (c1a, c1b, c1c, c1d, c1e, c1f, c1g, c1h, c1i, case_a, case_b, case_c, case_d):
+    for fn in (c1a, c1b, c1c, c1d, c1e, c1f, c1g, c1h, c1i, case_d, case_a, case_b, case_c):
         fn()
     print("\nSUMMARY")
     for name, ok, _ in RESULTS:
