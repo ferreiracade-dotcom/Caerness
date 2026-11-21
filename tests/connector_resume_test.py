@@ -84,7 +84,7 @@ def run():
             conn.commit()
             size = len(json.dumps(resume(conn), ensure_ascii=False))
             print("full resume bytes", size)
-            assert size <= 20700, size  # rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150
+            assert size <= 21000, size  # rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
     print("connector_resume_test passed")
 
 
