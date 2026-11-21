@@ -24,7 +24,7 @@ Tags follow Parts I to IV: **Fixed**, **Open**, **Weather** (dated, with strengt
 
 **Named men.** Every name is an **Example**. The engine may change or drop it.
 
-**Real people and organizations.** Real people appear only as history and offstage news. Real organizations (the Provisional IRA, a national motorcycle club, a Soviet-era emigration, a federal agency) are offstage context, tagged [memory]. A real club's real internal events are never Saint Jude history. The Saint Jude groups are stand-ins and are not copies.
+**Real people and organizations.** Real people act within who they documentably were (Index, Content limits). Real organizations (the Provisional IRA, a national motorcycle club, a Soviet-era emigration, a federal agency) are offstage context, tagged [memory]. A real club's real internal events are never Saint Jude history. The Saint Jude groups are stand-ins and are not copies.
 
 ### 0.3 What This Part Will Not Do
 
@@ -809,7 +809,7 @@ Checked by reading Part V against the four Parts as held in the project.
 - The narcotics attitudes of the Life and the taboo row (Part III 7.6, 9).
 - The Pick-3 date and its effect (Part I 9.8).
 - Part IV's touchpoints, with the limit that no family controls the police, fire, hospital or Steelworkers unions (Part IV 2.7).
-- No real person acts or speaks; real organizations are offstage.
+- Real people act within who they documentably were (Index, Content limits). Real organizations are offstage context.
 - Dollars Design, net and unsourced.
 - No em dashes, no named secrets, no operational detail.
 

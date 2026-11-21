@@ -28,7 +28,7 @@ The four-family structure, the geography, Part IV's rules and the Part V narcoti
 
 ### 0.3 What This Part Will Not Do
 
-It gives no method for making, moving, cutting or hiding any drug, weapon or explosive (Part I 0.5, principle 7). It invents no named secret, conspiracy or plot hook. No real person acts or speaks. Real organizations are offstage context. It does not write the narration rules.
+It gives no method for making, moving, cutting or hiding any drug, weapon or explosive (Part I 0.5, principle 7). It invents no named secret, conspiracy or plot hook. Real people act within who they documentably were (Index, Content limits). Real organizations are context. It does not write the narration rules.
 
 ### 0.4 How Well It Is Sourced
 
@@ -1437,7 +1437,7 @@ These four lines are not the family totals. They are the lines the Weather moves
 
 ### 11.5 Consistency check against Parts I to V
 
-**Consistent and carried.** The four families, their territories and trades. The kick-ups on net through the Ladder. The 600 to 1 street payout and 40 percent hold (Part III 7.2). The shark rates (Part III 7.3). The Concrete Club at about 2 percent (Part III 7.4). The Part III 7.5 illustration of a fenced load (35 percent, 10 percent finder, about 10.7 percent costs). The Pick-3 date and its effect. The dial and its defaults (Part V 9.2), unchanged. The cross-river 50/50 as a cross-river share only. Payroll and benefits at three quarters of the city budget (Part IV 6.2). The fiscal year of 1 July. The Governor's appointment of judges and prosecutors. Women never inducted. Real people appear nowhere as actors. No method for any drug or weapon. No named secret. No em dashes.
+**Consistent and carried.** The four families, their territories and trades. The kick-ups on net through the Ladder. The 600 to 1 street payout and 40 percent hold (Part III 7.2). The shark rates (Part III 7.3). The Concrete Club at about 2 percent (Part III 7.4). The Part III 7.5 illustration of a fenced load (35 percent, 10 percent finder, about 10.7 percent costs). The Pick-3 date and its effect. The dial and its defaults (Part V 9.2), unchanged. The cross-river 50/50 as a cross-river share only. Payroll and benefits at three quarters of the city budget (Part IV 6.2). The fiscal year of 1 July. The Governor's appointment of judges and prosecutors. Women never inducted. Real people act within who they documentably were (Index, Content limits). No method for any drug or weapon. No named secret. No em dashes.
 
 **Conflicts found in revision 1, and what revision 2 did.** Each earlier-Part edit is bolded in that Part.
 

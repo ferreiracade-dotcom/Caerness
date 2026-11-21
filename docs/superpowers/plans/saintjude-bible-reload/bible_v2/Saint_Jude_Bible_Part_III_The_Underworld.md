@@ -390,7 +390,7 @@ They cannot be made. They can be rich, trusted, and powerful, and they pay for t
 
 **Tendency.** In Saint Jude's world these outside families have crews and friends in the hinterland: the Marsh, Shore and Pine county suburbs, the resort towns, the road houses. The four Saint Jude families regard the city proper as theirs, and the surrounding counties as shared ground with understandings, favors and occasional quarrels. A man from Elizabeth who retires to the Shore is a neighbor to be received with courtesy. A crew that opens a book in the city without leave is an invasion. These are the Iron Balance's outer ring (6.1).
 
-**Real people.** Real mobsters and officials are named here as history and as offstage presences. The Storyteller does not write them as characters speaking or acting in scenes. The Saint Jude equivalents, men of the same kind, do that work in their place.
+**Real people.** Real mobsters and officials are named here as history. Under the Content limits (Index) they may act and speak on stage within their record: an outside family's established boss acts as a boss. The men in their crews and seats who are not documented are invented Saint Jude-world men of the same kind.
 
 **Tendency.** Contact runs through these channels:
 

@@ -20,7 +20,7 @@ Tags follow Parts I to III: **Fixed**, **Open**, **Weather** (dated, with streng
 
 **Design.** Every dollar figure is a 1975 dollar and an unsourced estimate meant to be changed. Figures are net, never gross, as in Part III 7.1. **Part VI supplies the price book. Where this Part needs a number Part VI does not have, it says so in the entry, and section 8 lists them all.**
 
-**Real people.** Real officials, union leaders and mobsters appear only as history and offstage news, with what they actually did. They never speak or act in a scene. Saint Jude stand-ins do that work.
+**Real people.** Real officials, union leaders, business people and mobsters beyond the city appear on stage within who they documentably were (Index, Content limits): their lawful public lives in full, their wrongdoing only of the kinds on their record. The city's own officials are invented.
 
 **Named men.** Any name given here is an **Example**. The engine may change it or drop it. Local numbers other than 402 and 1201 are Examples too.
 
@@ -1064,7 +1064,7 @@ Checked by reading Part IV against Parts I, II and III as held in the project.
 - Fronts, skims, banks and the Bank Secrecy Act (Part III 7.8, Part I 9.6).
 - The Pad's intermediaries and the effect of a new commander (Part II 3.2, 3.4).
 - Women's routes to power and their near absence from the top posts (Part I 12).
-- Real people kept offstage.
+- Real people act within who they documentably were (Index, Content limits).
 - No em dashes and no named secrets.
 
 **Interpretations made, not contradictions.** Local 1201's geographic claim on the Gannet Terminal (2.7B). The 1973 strike as a strain on the 50/50 deal (2.7B). ERISA changing the method of fund loans (2.6). The Sabatini family as the political family of the Italian wing (4.3, 4.10). Made men not standing for office (4.10). Layoffs falling first on the newest, often Black, officers (6.5).

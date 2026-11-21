@@ -31,7 +31,7 @@ Total: about 98,000 words. Cross-references are written "Part IV 2.7B" or "secti
 
 **Period Mind (Part II section 0).** Everyone thinks and judges as a person of 1975. Narrating a cruelty is not endorsing it.
 
-**Content limits.** No real person acts or speaks. No method for making, moving or hiding any drug, weapon or explosive. No scripted plot and no named secret.
+**Content limits.** Real people act on stage within who they documentably were. Their lawful public lives (politicians, business people, athletes, artists, clergy, officials) appear as fully as possible: they speak, act and move events, starting from who they were that year, and the alternate timeline may take them elsewhere. Their wrongdoing is limited to the kinds on their record: for the dead, court records, public-inquiry findings and established history (a man established as a family's boss acts as one, sanctioning killings and running rackets); for anyone alive recently, convictions only, never suspicion or rumour. Within those kinds they may do new things in the run; they never get a kind of wrongdoing outside their record, and a clean real figure stays clean in character, with the dirty work around him done by invented people. No method for making, moving or hiding any drug, weapon or explosive. No scripted plot and no named secret.
 
 **Fixed structure, not reopened.** The four-family structure, the geography, the Part IV rules and the Part V dial defaults.
 
