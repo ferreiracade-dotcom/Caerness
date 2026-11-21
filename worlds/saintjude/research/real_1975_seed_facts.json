@@ -1,0 +1,1834 @@
+{
+ "as_of": "1975-01-01",
+ "generated": "2026-11-21",
+ "notes": "verified=true only where checked this session (see the md). Everything else is memory, to verify. alive_today as of the research date.",
+ "people": [
+  {
+   "name": "Gerald R. Ford",
+   "role": "President",
+   "org": "US executive",
+   "status_1975": "in office since 9 Aug 1974",
+   "age_1975": 61,
+   "record_kinds": [],
+   "alive_today": "dead 2006",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Nelson A. Rockefeller",
+   "role": "Vice-President",
+   "org": "US executive",
+   "status_1975": "sworn in 19 Dec 1974",
+   "age_1975": 66,
+   "record_kinds": [],
+   "alive_today": "dead 1979",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Henry Kissinger",
+   "role": "Secretary of State and NSA",
+   "org": "US executive",
+   "status_1975": "in office",
+   "age_1975": 51,
+   "record_kinds": [],
+   "alive_today": "dead 2023",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "William E. Simon",
+   "role": "Treasury Secretary",
+   "org": "US executive",
+   "status_1975": "in office",
+   "age_1975": 47,
+   "record_kinds": [],
+   "alive_today": "dead 2000",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "James R. Schlesinger",
+   "role": "Defense Secretary",
+   "org": "US executive",
+   "status_1975": "in office (fired Nov 1975)",
+   "age_1975": 45,
+   "record_kinds": [],
+   "alive_today": "dead 2014",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "William B. Saxbe",
+   "role": "Attorney General",
+   "org": "US executive",
+   "status_1975": "in office until Feb 1975",
+   "age_1975": 58,
+   "record_kinds": [],
+   "alive_today": "dead 2007",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Peter J. Brennan",
+   "role": "Labor Secretary",
+   "org": "US executive",
+   "status_1975": "in office; ex-NY building trades head",
+   "age_1975": 56,
+   "record_kinds": [],
+   "alive_today": "dead 1996",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Clarence M. Kelley",
+   "role": "FBI Director",
+   "org": "FBI",
+   "status_1975": "in office since 1973",
+   "age_1975": 63,
+   "record_kinds": [],
+   "alive_today": "dead 1997",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "William E. Colby",
+   "role": "CIA Director",
+   "org": "CIA",
+   "status_1975": "in office",
+   "age_1975": 54,
+   "record_kinds": [],
+   "alive_today": "dead 1996",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Carl Albert",
+   "role": "Speaker",
+   "org": "US House",
+   "status_1975": "in office",
+   "age_1975": 66,
+   "record_kinds": [],
+   "alive_today": "dead 2000",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Tip O'Neill",
+   "role": "House Majority Leader",
+   "org": "US House",
+   "status_1975": "in office",
+   "age_1975": 62,
+   "record_kinds": [],
+   "alive_today": "dead 1994",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "John J. Rhodes",
+   "role": "House Minority Leader",
+   "org": "US House",
+   "status_1975": "in office",
+   "age_1975": 58,
+   "record_kinds": [],
+   "alive_today": "dead 2003",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Mike Mansfield",
+   "role": "Senate Majority Leader",
+   "org": "US Senate",
+   "status_1975": "in office",
+   "age_1975": 71,
+   "record_kinds": [],
+   "alive_today": "dead 2001",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Hugh Scott",
+   "role": "Senate Minority Leader",
+   "org": "US Senate",
+   "status_1975": "in office",
+   "age_1975": 74,
+   "record_kinds": [],
+   "alive_today": "dead 1994",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Peter W. Rodino Jr.",
+   "role": "House Judiciary chair, NJ-10 Newark",
+   "org": "US House",
+   "status_1975": "in office",
+   "age_1975": 65,
+   "record_kinds": [],
+   "alive_today": "dead 2005",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (seat); age/status memory",
+   "verified": true
+  },
+  {
+   "name": "Harrison A. Williams Jr.",
+   "role": "US Senator, NJ (D)",
+   "org": "US Senate",
+   "status_1975": "in office since 1959",
+   "age_1975": 55,
+   "record_kinds": [
+    "conviction (Abscam, 1981, later)"
+   ],
+   "alive_today": "dead 2001",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Clifford P. Case",
+   "role": "US Senator, NJ (R)",
+   "org": "US Senate",
+   "status_1975": "in office since 1955",
+   "age_1975": 70,
+   "record_kinds": [],
+   "alive_today": "dead 1982",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "James J. Florio",
+   "role": "US Representative, NJ-1 (Camden)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 37,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "William J. Hughes",
+   "role": "US Representative, NJ-2 (Atlantic City, south shore)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 42,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "James J. Howard",
+   "role": "US Representative, NJ-3 (Monmouth and north Ocean shore (city footprint))",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 47,
+   "record_kinds": [],
+   "alive_today": "dead 1988",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Frank Thompson Jr.",
+   "role": "US Representative, NJ-4 (Mercer, Middlesex edges)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 56,
+   "record_kinds": [],
+   "alive_today": "dead 1989",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Millicent Fenwick",
+   "role": "US Representative, NJ-5 (Somerset, Morris)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 64,
+   "record_kinds": [],
+   "alive_today": "dead 1992",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Edwin B. Forsythe",
+   "role": "US Representative, NJ-6 (Burlington, Ocean)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 58,
+   "record_kinds": [],
+   "alive_today": "dead 1986",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Andrew Maguire",
+   "role": "US Representative, NJ-7 (Bergen)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 35,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Robert A. Roe",
+   "role": "US Representative, NJ-8 (Passaic)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 50,
+   "record_kinds": [],
+   "alive_today": "dead 2014",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Henry Helstoski",
+   "role": "US Representative, NJ-9 (Bergen)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 49,
+   "record_kinds": [],
+   "alive_today": "dead 1999",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Joseph G. Minish",
+   "role": "US Representative, NJ-11 (Essex)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 58,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Matthew J. Rinaldo",
+   "role": "US Representative, NJ-12 (Union)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 43,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Helen S. Meyner",
+   "role": "US Representative, NJ-13 (northwest NJ)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 45,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Dominick V. Daniels",
+   "role": "US Representative, NJ-14 (Hudson)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 66,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Edward J. Patten",
+   "role": "US Representative, NJ-15 (Middlesex)",
+   "org": "US House (NJ)",
+   "status_1975": "seated 14 Jan 1975 (94th Congress)",
+   "age_1975": 69,
+   "record_kinds": [],
+   "alive_today": "dead 1994",
+   "source": "politicalgraveyard.com/geo/NJ/ofc/usrep1970s.html (name, seat, term); district geography, age and status memory",
+   "verified": true
+  },
+  {
+   "name": "Brendan T. Byrne",
+   "role": "Governor of New Jersey (D)",
+   "org": "NJ state",
+   "status_1975": "in office since 20 Jan 1974",
+   "age_1975": 50,
+   "record_kinds": [],
+   "alive_today": "dead 2018",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "William F. Hyland",
+   "role": "NJ Attorney General",
+   "org": "NJ state",
+   "status_1975": "in office from 1974",
+   "age_1975": 45,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Richard J. Hughes",
+   "role": "NJ Chief Justice",
+   "org": "NJ judiciary",
+   "status_1975": "in office 1973 to 1979",
+   "age_1975": 65,
+   "record_kinds": [],
+   "alive_today": "dead 1992",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Frank J. Dodd",
+   "role": "NJ Senate President (low confidence)",
+   "org": "NJ legislature",
+   "status_1975": "in office",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Joseph Hirkala Jr.",
+   "role": "NJ Assembly Speaker (low confidence)",
+   "org": "NJ legislature",
+   "status_1975": "in office",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Kenneth A. Gibson",
+   "role": "Mayor of Newark",
+   "org": "Newark",
+   "status_1975": "in office 1970 to 1986",
+   "age_1975": 42,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Jonathan L. Goldstein",
+   "role": "US Attorney, D.N.J. (low confidence)",
+   "org": "US DOJ",
+   "status_1975": "in office",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Simone 'Sam' DeCavalcante",
+   "role": "Boss",
+   "org": "DeCavalcante family (Elizabeth)",
+   "status_1975": "in prison or just released (mid-1970s)",
+   "age_1975": 62,
+   "record_kinds": [
+    "conviction (extortion conspiracy)",
+    "well-established history (FBI tapes)"
+   ],
+   "alive_today": "dead 1997 (memory)",
+   "source": "en.wikipedia.org/wiki/DeCavalcante_crime_family",
+   "verified": true
+  },
+  {
+   "name": "Giovanni 'John' Riggi",
+   "role": "Capo, acting boss from mid-1970s, boss 1980",
+   "org": "DeCavalcante family",
+   "status_1975": "active; Laborers Local 394 business agent",
+   "age_1975": 49,
+   "record_kinds": [
+    "conviction (1990s, memory)",
+    "union fraud history (memory)"
+   ],
+   "alive_today": "dead 2015 (memory)",
+   "source": "en.wikipedia.org/wiki/DeCavalcante_crime_family (role); convictions memory",
+   "verified": true
+  },
+  {
+   "name": "Frank Majuri",
+   "role": "Underboss (1957 era)",
+   "org": "DeCavalcante family",
+   "status_1975": "older, 1975 status unknown",
+   "age_1975": null,
+   "record_kinds": [
+    "Apalachin attendance 1957"
+   ],
+   "alive_today": "unknown",
+   "source": "en.wikipedia.org/wiki/DeCavalcante_crime_family",
+   "verified": true
+  },
+  {
+   "name": "Jerry Catena",
+   "role": "Long-time NJ boss",
+   "org": "Genovese NJ faction",
+   "status_1975": "in prison since 1970 for SCI contempt; released 1975 (dates conflict)",
+   "age_1975": 72,
+   "record_kinds": [
+    "contempt (SCI), public record"
+   ],
+   "alive_today": "dead 2000 (memory)",
+   "source": "bible Part III 6.2; details memory",
+   "verified": false
+  },
+  {
+   "name": "Frank 'Funzi' Tieri",
+   "role": "Acting boss of the Genovese family since 1972",
+   "org": "Genovese family",
+   "status_1975": "active; exposed by SCI hearing Feb 1972",
+   "age_1975": 70,
+   "record_kinds": [
+    "finding of public inquiry (SCI 1972)",
+    "RICO conviction Nov 1980 (memory)"
+   ],
+   "alive_today": "dead 1981 (memory)",
+   "source": "bible Part III 6.2; conviction memory",
+   "verified": false
+  },
+  {
+   "name": "Anthony 'Tony Pro' Provenzano",
+   "role": "Capo; president Teamsters Local 560",
+   "org": "Genovese family / Teamsters",
+   "status_1975": "active",
+   "age_1975": 57,
+   "record_kinds": [
+    "extortion conviction 1963 (memory)",
+    "murder conviction 14 Jun 1978"
+   ],
+   "alive_today": "dead 1988 (memory)",
+   "source": "bible; search snippet (1978 conviction)",
+   "verified": true
+  },
+  {
+   "name": "Ruggiero 'Richie the Boot' Boiardo",
+   "role": "Newark capo",
+   "org": "Genovese family",
+   "status_1975": "elderly, active (memory)",
+   "age_1975": 84,
+   "record_kinds": [
+    "well-established history"
+   ],
+   "alive_today": "dead 1984 (memory)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Anthony 'Tino' Fiumara",
+   "role": "ILA Local 1588 Hoboken racketeer, rising capo",
+   "org": "Genovese family / ILA",
+   "status_1975": "active",
+   "age_1975": 33,
+   "record_kinds": [
+    "conviction c.1980 (UNIRAC, memory)"
+   ],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Salvatore Briguglio",
+   "role": "Local 560 enforcer",
+   "org": "Genovese / Teamsters",
+   "status_1975": "active",
+   "age_1975": null,
+   "record_kinds": [
+    "Hoffa investigation figure"
+   ],
+   "alive_today": "dead 1978 (memory)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Joseph Abate",
+   "role": "Formal NJ boss from 1964",
+   "org": "Lucchese NJ crew",
+   "status_1975": "unknown",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "bible Part III 6.2",
+   "verified": false
+  },
+  {
+   "name": "Anthony 'Tumac' Accetturo",
+   "role": "Capo, rising",
+   "org": "Lucchese NJ crew",
+   "status_1975": "active",
+   "age_1975": 36,
+   "record_kinds": [
+    "convictions 1980s (memory)"
+   ],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Michael Taccetta",
+   "role": "Young soldier/associate",
+   "org": "Lucchese NJ crew",
+   "status_1975": "active",
+   "age_1975": 24,
+   "record_kinds": [
+    "convictions 1990s (memory)"
+   ],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Anthony 'Tony Ducks' Corallo",
+   "role": "Boss (NY), after Tramunti's 1974 conviction",
+   "org": "Lucchese family",
+   "status_1975": "active",
+   "age_1975": 61,
+   "record_kinds": [
+    "Commission trial conviction 1986 (memory)"
+   ],
+   "alive_today": "dead 2000 (memory)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Angelo Bruno",
+   "role": "Boss since 1959; holds South Jersey and Atlantic City",
+   "org": "Philadelphia family",
+   "status_1975": "active",
+   "age_1975": 64,
+   "record_kinds": [
+    "minor convictions (memory)",
+    "murdered 21 Mar 1980"
+   ],
+   "alive_today": "dead 1980",
+   "source": "bible; search snippet (murder date)",
+   "verified": true
+  },
+  {
+   "name": "Philip 'Chicken Man' Testa",
+   "role": "Underboss",
+   "org": "Philadelphia family",
+   "status_1975": "active",
+   "age_1975": 50,
+   "record_kinds": [],
+   "alive_today": "dead 1981 (memory)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Antonio 'Tony Bananas' Caponigro",
+   "role": "Consigliere",
+   "org": "Philadelphia family",
+   "status_1975": "active",
+   "age_1975": 62,
+   "record_kinds": [],
+   "alive_today": "dead 1980 (memory)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Nicodemo 'Little Nicky' Scarfo",
+   "role": "Soldier",
+   "org": "Philadelphia family",
+   "status_1975": "active",
+   "age_1975": 45,
+   "record_kinds": [
+    "manslaughter conviction 1960s (memory)"
+   ],
+   "alive_today": "dead 2017 (memory)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Carlo Gambino",
+   "role": "Boss",
+   "org": "Gambino family",
+   "status_1975": "active",
+   "age_1975": 72,
+   "record_kinds": [],
+   "alive_today": "dead 15 Oct 1976 (memory)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Paul Castellano",
+   "role": "Capo; boss from 1976",
+   "org": "Gambino family",
+   "status_1975": "active",
+   "age_1975": 59,
+   "record_kinds": [],
+   "alive_today": "dead 1985 (memory)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Frank E. Fitzsimmons",
+   "role": "General President",
+   "org": "Teamsters",
+   "status_1975": "in office since 1971",
+   "age_1975": 66,
+   "record_kinds": [],
+   "alive_today": "dead 1981",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Allen Dorfman",
+   "role": "Central States Pension Fund figure",
+   "org": "Teamsters",
+   "status_1975": "active",
+   "age_1975": 52,
+   "record_kinds": [
+    "conviction 1972 (memory)"
+   ],
+   "alive_today": "dead 1983 (killed)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Thomas W. 'Teddy' Gleason",
+   "role": "President",
+   "org": "ILA",
+   "status_1975": "in office since 1963",
+   "age_1975": 74,
+   "record_kinds": [],
+   "alive_today": "dead 1992",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Anthony Scotto",
+   "role": "ILA Local 1814 head; Gambino capo",
+   "org": "ILA",
+   "status_1975": "active",
+   "age_1975": 40,
+   "record_kinds": [
+    "conviction 1979 (memory)"
+   ],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "George Meany",
+   "role": "President",
+   "org": "AFL-CIO",
+   "status_1975": "in office",
+   "age_1975": 80,
+   "record_kinds": [],
+   "alive_today": "dead 1980",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Robert A. Georgine",
+   "role": "Head, Building and Construction Trades Dept.",
+   "org": "AFL-CIO",
+   "status_1975": "in office from 1974",
+   "age_1975": 41,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Peter Fosco",
+   "role": "International president",
+   "org": "Laborers (LIUNA)",
+   "status_1975": "in office",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Charles Marciante",
+   "role": "President, NJ AFL-CIO (low confidence)",
+   "org": "NJ AFL-CIO",
+   "status_1975": "in office",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Donald S. MacNaughton",
+   "role": "Chairman and CEO",
+   "org": "Prudential Insurance (Newark)",
+   "status_1975": "in office 1969 to 1978",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "John D. deButts",
+   "role": "Chairman",
+   "org": "AT&T",
+   "status_1975": "in office 1972 to 1979",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "James E. Burke",
+   "role": "Chairman from 1976",
+   "org": "Johnson & Johnson",
+   "status_1975": "top role from 1976",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Henry W. Gadsden",
+   "role": "CEO to 1976",
+   "org": "Merck",
+   "status_1975": "in office",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "James M. Crosby",
+   "role": "Chairman",
+   "org": "Resorts International",
+   "status_1975": "active",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Bill Gates",
+   "role": "Co-founder",
+   "org": "Microsoft",
+   "status_1975": "founded 4 Apr 1975, Albuquerque",
+   "age_1975": 19,
+   "record_kinds": [],
+   "alive_today": "alive",
+   "source": "spec 5.2c; date memory",
+   "verified": false
+  },
+  {
+   "name": "Paul Allen",
+   "role": "Co-founder",
+   "org": "Microsoft",
+   "status_1975": "founded 4 Apr 1975",
+   "age_1975": 21,
+   "record_kinds": [],
+   "alive_today": "dead 2018",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Steve Jobs",
+   "role": "Co-founder",
+   "org": "Apple",
+   "status_1975": "Apple founded 1 Apr 1976",
+   "age_1975": 19,
+   "record_kinds": [],
+   "alive_today": "dead 2011",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Steve Wozniak",
+   "role": "Co-founder",
+   "org": "Apple",
+   "status_1975": "Apple founded 1 Apr 1976",
+   "age_1975": 24,
+   "record_kinds": [],
+   "alive_today": "alive",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Frederick W. Smith",
+   "role": "Founder",
+   "org": "Federal Express",
+   "status_1975": "flights since 1973",
+   "age_1975": 30,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Phil Knight",
+   "role": "Founder",
+   "org": "Blue Ribbon Sports (Nike)",
+   "status_1975": "active",
+   "age_1975": 36,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Leonard Stern",
+   "role": "Head",
+   "org": "Hartz Mountain Industries",
+   "status_1975": "active",
+   "age_1975": null,
+   "record_kinds": [],
+   "alive_today": "unknown",
+   "source": "memory",
+   "verified": false
+  }
+ ],
+ "orgs": [
+  {
+   "name": "Exxon",
+   "kind": "fortune500_1975",
+   "rank": 1,
+   "revenue_musd": 42061,
+   "profit_musd": 3142,
+   "hq": "NYC",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "General Motors",
+   "kind": "fortune500_1975",
+   "rank": 2,
+   "revenue_musd": 31550,
+   "profit_musd": 950,
+   "hq": "Detroit",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Ford Motor",
+   "kind": "fortune500_1975",
+   "rank": 3,
+   "revenue_musd": 23621,
+   "profit_musd": 361,
+   "hq": "Dearborn",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Texaco",
+   "kind": "fortune500_1975",
+   "rank": 4,
+   "revenue_musd": 23256,
+   "profit_musd": 1586,
+   "hq": "NYC",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Mobil",
+   "kind": "fortune500_1975",
+   "rank": 5,
+   "revenue_musd": 18929,
+   "profit_musd": 1047,
+   "hq": "NYC",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Standard Oil of California",
+   "kind": "fortune500_1975",
+   "rank": 6,
+   "revenue_musd": 17191,
+   "profit_musd": 970,
+   "hq": "San Francisco",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Gulf Oil",
+   "kind": "fortune500_1975",
+   "rank": 7,
+   "revenue_musd": 16458,
+   "profit_musd": 1065,
+   "hq": "Pittsburgh",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "General Electric",
+   "kind": "fortune500_1975",
+   "rank": 8,
+   "revenue_musd": 13413,
+   "profit_musd": 608,
+   "hq": "Fairfield CT",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "IBM",
+   "kind": "fortune500_1975",
+   "rank": 9,
+   "revenue_musd": 12675,
+   "profit_musd": 1838,
+   "hq": "Armonk NY",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "ITT",
+   "kind": "fortune500_1975",
+   "rank": 10,
+   "revenue_musd": 11154,
+   "profit_musd": 451,
+   "hq": "NYC",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Chrysler",
+   "kind": "fortune500_1975",
+   "rank": 11,
+   "revenue_musd": 10971,
+   "profit_musd": -52,
+   "hq": "Highland Park MI",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "U.S. Steel",
+   "kind": "fortune500_1975",
+   "rank": 12,
+   "revenue_musd": 9186,
+   "profit_musd": 635,
+   "hq": "Pittsburgh",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Standard Oil (Indiana)",
+   "kind": "fortune500_1975",
+   "rank": 13,
+   "revenue_musd": 9085,
+   "profit_musd": 970,
+   "hq": "Chicago",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Shell Oil",
+   "kind": "fortune500_1975",
+   "rank": 14,
+   "revenue_musd": 7634,
+   "profit_musd": 621,
+   "hq": "Houston",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Western Electric",
+   "kind": "fortune500_1975",
+   "rank": 15,
+   "revenue_musd": 7382,
+   "profit_musd": 311,
+   "hq": "NYC (works at Kearny NJ); name mapped from AT&T Technologies",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Continental Oil",
+   "kind": "fortune500_1975",
+   "rank": 16,
+   "revenue_musd": 7041,
+   "profit_musd": 328,
+   "hq": "Stamford CT",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "DuPont",
+   "kind": "fortune500_1975",
+   "rank": 17,
+   "revenue_musd": 6910,
+   "profit_musd": 404,
+   "hq": "Wilmington DE",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Atlantic Richfield",
+   "kind": "fortune500_1975",
+   "rank": 18,
+   "revenue_musd": 6740,
+   "profit_musd": 475,
+   "hq": "Los Angeles",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "CBS",
+   "kind": "fortune500_1975",
+   "rank": 19,
+   "revenue_musd": 6466,
+   "profit_musd": 28,
+   "hq": "NYC",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Occidental Petroleum",
+   "kind": "fortune500_1975",
+   "rank": 20,
+   "revenue_musd": 5719,
+   "profit_musd": 281,
+   "hq": "Los Angeles",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Bethlehem Steel",
+   "kind": "fortune500_1975",
+   "rank": 21,
+   "revenue_musd": 5381,
+   "profit_musd": 342,
+   "hq": "Bethlehem PA",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Union Carbide",
+   "kind": "fortune500_1975",
+   "rank": 22,
+   "revenue_musd": 5320,
+   "profit_musd": 530,
+   "hq": "NYC",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Goodyear",
+   "kind": "fortune500_1975",
+   "rank": 23,
+   "revenue_musd": 5256,
+   "profit_musd": 158,
+   "hq": "Akron",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Tenneco",
+   "kind": "fortune500_1975",
+   "rank": 24,
+   "revenue_musd": 5002,
+   "profit_musd": 322,
+   "hq": "Houston",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Phillips Petroleum",
+   "kind": "fortune500_1975",
+   "rank": 25,
+   "revenue_musd": 4981,
+   "profit_musd": 402,
+   "hq": "Bartlesville OK",
+   "status_1975": "Fortune 500 (fiscal 1974)",
+   "source": "scribd.com/document/379544560 (Fortune 1975 list); HQ memory",
+   "verified": true,
+   "verified_note": "rank/revenue/profit verified; HQ and 1975-name mapping memory"
+  },
+  {
+   "name": "Boeing",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Westinghouse Electric",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Eastman Kodak",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Dow Chemical",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "International Harvester",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "RCA",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Procter & Gamble",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Union Oil of California",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Sun Oil",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Standard Oil (Ohio)",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Allied Chemical",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Rockwell International",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Caterpillar",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Firestone",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "International Paper",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Lockheed",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Monsanto",
+   "kind": "fortune500_1975_band_26_100",
+   "rank": null,
+   "revenue_musd": null,
+   "hq": null,
+   "status_1975": "somewhere in ranks 26-100; rank and sales NOT obtained",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Prudential Insurance",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Newark",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "AT&T / Bell Labs (Holmdel in footprint)",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "NYC / Murray Hill / Holmdel",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Johnson & Johnson",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "New Brunswick",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Merck",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Rahway",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Campbell Soup",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Camden",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Public Service Electric & Gas",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Newark",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Jersey Central Power & Light (GPU)",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Morristown",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Allied Chemical",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Morristown",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "American Cyanamid",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Wayne",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Schering-Plough",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Kenilworth",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Hoffmann-La Roche",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Nutley",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Warner-Lambert",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Morris Plains",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Becton Dickinson",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "East Rutherford",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "A&P",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Montvale",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Hartz Mountain Industries",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Secaucus",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Fort Monmouth (Army Electronics Command)",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Monmouth",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Naval Weapons Station Earle",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Colts Neck / Leonardo",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Midlantic National Bank",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Newark",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Fidelity Union Bancorporation",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Newark",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "First National State Bancorporation",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "NJ",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "United Jersey Banks",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Princeton",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "National State Bank",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Elizabeth",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Howard Savings Bank",
+   "kind": "nj_regional_employer_or_bank",
+   "hq": "Newark",
+   "status_1975": "operating",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "DeCavalcante family",
+   "kind": "mob",
+   "status_1975": "Elizabeth; operations in Essex, Middlesex, Monmouth, Ocean",
+   "source": "bible Part III 6.2",
+   "verified": true
+  },
+  {
+   "name": "Genovese NJ faction",
+   "kind": "mob",
+   "status_1975": "Newark-Elizabeth waterfront, Hudson",
+   "source": "bible Part III 6.2",
+   "verified": true
+  },
+  {
+   "name": "Lucchese NJ crew",
+   "kind": "mob",
+   "status_1975": "Newark",
+   "source": "bible Part III 6.2",
+   "verified": true
+  },
+  {
+   "name": "Philadelphia family",
+   "kind": "mob",
+   "status_1975": "South Jersey and Atlantic City",
+   "source": "bible Part III 6.2",
+   "verified": true
+  },
+  {
+   "name": "Gambino presence in NJ",
+   "kind": "mob",
+   "status_1975": "NJ men unknown; invent them",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Teamsters Local 560",
+   "kind": "union",
+   "status_1975": "Union City; Provenzano",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Joint Council 73",
+   "kind": "union",
+   "status_1975": "NJ Teamsters",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "ILA Local 1588",
+   "kind": "union",
+   "status_1975": "Hoboken docks",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Laborers Local 394",
+   "kind": "union",
+   "status_1975": "Riggi business agent",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "State Commission of Investigation",
+   "kind": "state body",
+   "status_1975": "Trenton; created 1968; 1975 members unverified",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Microsoft",
+   "kind": "startup",
+   "status_1975": "Founded 4 Apr 1975",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Apple Computer",
+   "kind": "startup",
+   "status_1975": "Founded 1 Apr 1976",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "name": "Resorts International",
+   "kind": "casino",
+   "status_1975": "Opens in Atlantic City 26 May 1978",
+   "source": "memory",
+   "verified": false
+  }
+ ],
+ "events": [
+  {
+   "date": "1973-11 to 1975-03",
+   "event": "US recession; unemployment peak 9.0% May 1975",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1975-07-30",
+   "event": "Jimmy Hoffa disappears, Bloomfield Hills MI; Provenzano link per bible",
+   "source": "bible Part III 6.2",
+   "verified": true
+  },
+  {
+   "date": "1975-10-29",
+   "event": "Ford 'drop dead' reply to New York City fiscal crisis",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1976-07-08",
+   "event": "NJ income tax signed after Robinson v. Cahill school-funding deadline",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1976-11",
+   "event": "Atlantic City casino referendum passes (statewide 1974 version failed)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1976-10-15",
+   "event": "Carlo Gambino dies",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1977-06",
+   "event": "NJ Casino Control Act",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1978-05-26",
+   "event": "First Atlantic City casino (Resorts International)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1978-06-14",
+   "event": "Provenzano convicted of murder (Castellito)",
+   "source": "search snippet",
+   "verified": true
+  },
+  {
+   "date": "1979-07",
+   "event": "Carmine Galante killed",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1980-03-21",
+   "event": "Angelo Bruno murdered, Philadelphia",
+   "source": "search snippet",
+   "verified": true
+  },
+  {
+   "date": "1980-08",
+   "event": "Abscam made public; Williams convicted May 1981",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1980-11",
+   "event": "Frank Tieri convicted under RICO",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1981-03",
+   "event": "Philip Testa killed; Scarfo ascends",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1984-01-01",
+   "event": "AT&T divestiture",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1985-12-16",
+   "event": "Paul Castellano killed",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1986-11",
+   "event": "Commission trial convictions",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1987-10-19",
+   "event": "Black Monday",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1970-10-15",
+   "event": "RICO enacted",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1976-11 President",
+   "event": "Election: Carter beat Ford; NJ to Ford",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1976-11 NJ Senate",
+   "event": "Election: Williams re-elected",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1977-11 NJ Governor",
+   "event": "Election: Byrne re-elected over Bateman",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1978-11 NJ Senate",
+   "event": "Election: Bradley over Bell",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1980-11 President",
+   "event": "Election: Reagan; NJ to Reagan",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1981-11 NJ Governor",
+   "event": "Election: Kean over Florio by about 1,800 votes",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1982-11 NJ Senate",
+   "event": "Election: Lautenberg over Fenwick (Brady appointed Apr 1982)",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1984-11 President",
+   "event": "Election: Reagan 525 to 13",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1985-11 NJ Governor",
+   "event": "Election: Kean landslide over Shapiro",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1988-11 President",
+   "event": "Election: Bush over Dukakis",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1988-11 NJ Senate",
+   "event": "Election: Lautenberg over Dawkins",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1989-11 NJ Governor",
+   "event": "Election: Florio over Courter",
+   "source": "memory",
+   "verified": false
+  },
+  {
+   "date": "1990-11 NJ Senate",
+   "event": "Election: Bradley narrowly over Whitman",
+   "source": "memory",
+   "verified": false
+  }
+ ]
+}
