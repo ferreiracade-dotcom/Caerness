@@ -1,4 +1,4 @@
-"""The Iron Balance: tension between organisations, and the people who raise and ease it (task B12e). Generic; the package's words and
+"""The understanding between the families: tension between organisations, and the people who raise and ease it (task B12e). Generic; the package's words and
 figures are outfits data `tension` (each figure a Design proposal with its reasoning in design_figures.json).
 
 State. `org_tension(from_org, to_org, level)` is directional: how much `from` is aggrieved at, or pressed by, `to`. It decays by a
@@ -230,7 +230,7 @@ def pairs(conn: sqlite3.Connection, day: int) -> list[tuple[int, int]]:
 
 
 def _max_other_heat(conn: sqlite3.Connection, a: int, b: int, day: int) -> float:
-    """The hottest other pair involving either organisation: a war nearby frays the Balance."""
+    """The hottest other pair involving either organisation: a war nearby frays the understanding."""
     t = _today(conn, day)
     if t["maxheat"] is None:
         m: dict = {}
@@ -828,7 +828,7 @@ def execute_give_up(conn, actor_id, kind, payload, day):
 
 def on_death(conn: sqlite3.Connection, victim: int, org: int, role: str | None, day: int, *, killed_by_org: int | None = None) -> None:
     """A seated man died (of any cause): the heads of the other organisations in contact weigh whether to go to the wake or send word. Going
-    eases the host's feeling toward the guest; a friend's staying away is a slight (bible 6.1: the Balance is kept by small acts)."""
+    eases the host's feeling toward the guest; a friend's staying away is a slight (bible 6.1: the understanding is kept by small acts)."""
     fd = data(conn).get("funeral") or {}
     if not fd or not enabled(conn):
         return

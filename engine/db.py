@@ -4888,7 +4888,7 @@ _MIGRATIONS: dict[int, Migration] = {
     114: ("world_pushes_back_people", "Gap 4b fix pass: fronts run as businesses, city businesses have owners, outfits have named people, loyalty starts dispersed by bonds", _migration_114),
     113: ("world_pushes_back", "Gap 4b: every outfit ticks and has a treasury; own fronts are not protected by rivals; ground and relations seeded", _migration_113),
     112: ("former_members_retired_masters_reckoning", "Former outfit members read as ordinary; retired masters keep a trade at high Stage; the Reckoning at Waymeet with Seth Carrick", _migration_112),
-    118: ("iron_balance", "Tension between organisations (org_tension, org_tension_acts) and the organisation layer's heat (org_heat)", None),
+    118: ("org_tension", "Tension between organisations (org_tension, org_tension_acts) and the organisation layer's heat (org_heat)", None),
     117: ("organisation_core", "Outfit tables become organisation tables (org_profiles, units, seats, holdings, lines, money, agenda, incidents, arrangements)", _migration_117),
 }
 

@@ -9086,7 +9086,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; How long a grievance between two organisations takes to halve. Bible Part III 6.1: the Balance rests on the memory of earlier wars (1929-31, 1946, 1958) and is kept up by many small acts, so old quarrels fade over seasons, not weeks, and the splits of 1958 and 1967 are still felt in 1975 through the initial levels below. Design proposal. (B12e: engine/org_tension.py)"
+   "note": "unsourced; How long a grievance between two organisations takes to halve. Bible Part III 6.1: the understanding rests on the memory of earlier wars (1929-31, 1946, 1958) and is kept up by many small acts, so old quarrels fade over seasons, not weeks, and the splits of 1958 and 1967 are still felt in 1975 through the initial levels below. Design proposal. (B12e: engine/org_tension.py)"
   },
   "ib_scale": {
    "default": 18,
@@ -9116,7 +9116,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; The week's chance that someone on one side of a pair in contact does something about the other, with the pair at rest. About one act in twenty weeks per direction: the Balance is kept up by small acts (bible 6.1) but not weekly ones. Design proposal. (B12e: engine/org_tension.py)"
+   "note": "unsourced; The week's chance that someone on one side of a pair in contact does something about the other, with the pair at rest. About one act in twenty weeks per direction: the understanding is kept up by small acts (bible 6.1) but not weekly ones. Design proposal. (B12e: engine/org_tension.py)"
   },
   "ib_pair_per_heat": {
    "default": 0.55,
@@ -9146,7 +9146,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Age at which a head begins to read as old to the other side (bible 6.1: a sick boss frays the Balance; Carlo Gambino was 73 and ill in 1975 [memory]). Design proposal. (B12e: engine/org_tension.py)"
+   "note": "unsourced; Age at which a head begins to read as old to the other side (bible 6.1: a sick boss frays the understanding; Carlo Gambino was 73 and ill in 1975 [memory]). Design proposal. (B12e: engine/org_tension.py)"
   },
   "ib_weak_age_span": {
    "default": 20,
@@ -9496,7 +9496,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; What a message carried by a friend of both (bible 6.3 step 1) takes off a pair's tension, each way. Small acts keep the Balance; this is the smallest. Design proposal. (B12e: engine/org_tension.py)"
+   "note": "unsourced; What a message carried by a friend of both (bible 6.3 step 1) takes off a pair's tension, each way. Small acts keep the understanding; this is the smallest. Design proposal. (B12e: engine/org_tension.py)"
   },
   "ib_message_recip": {
    "default": 1.0,
@@ -10356,7 +10356,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `war_near`: a war nearby frays the Balance (bible 6.1) (B12e: engine/org_tension.py)"
+   "note": "unsourced; How a voice weighs killing one of the other side's men. A hothead can come to this directly; a cautious one only through heat and grievance, and neither is shut out (the owner's rule: violence by temperament, never forbidden). Term `war_near`: a war nearby frays the understanding (bible 6.1) (B12e: engine/org_tension.py)"
   },
   "ib_strike_not_heat_own": {
    "default": 0.35,

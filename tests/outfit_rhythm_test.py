@@ -52,7 +52,7 @@ def test_routine_week_writes_no_decision_rows():
     from engine import org_motives
     real_roll = org_motives._roll
     org_motives._roll = lambda conn, actor_id, day, stream: 0.99
-    from engine import org_tension  # the Balance's weekly pass is the one thing that puts items on a head's list in a routine week; tests/iron_balance_b12e_test.py
+    from engine import org_tension  # the understanding's weekly pass is the one thing that puts items on a head's list in a routine week; tests/iron_balance_b12e_test.py
     real_tension, org_tension.process_due = org_tension.process_due, lambda conn, day: {}
     t0 = time.time()
     try:

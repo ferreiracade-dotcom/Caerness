@@ -1,4 +1,4 @@
-"""Measure the Iron Balance on a Saint Jude opening (task B12e). Reports; clamps and enforces nothing.
+"""Measure the understanding between the families on a Saint Jude opening (task B12e). Reports; clamps and enforces nothing.
 
   python tools/balance_runs.py [--days 1825] [--seed 7] [--out runs/x.json]
 

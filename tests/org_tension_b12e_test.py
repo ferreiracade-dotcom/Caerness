@@ -1,7 +1,7 @@
-"""Task B12e: the Iron Balance (tension between organisations raised and eased by small acts, weighed by people), violence from each man's
+"""Task B12e: tension between the families (tension between organisations raised and eased by small acts, weighed by people), violence from each man's
 own temperament, wars that widen, heat on the organisation layer, the outer ring and the men in no family. Nothing here is capped.
 
-Run: CAERNESS_DB_PATH=<scratch db> PYTHONPATH=. python tests/iron_balance_b12e_test.py
+Run: CAERNESS_DB_PATH=<scratch db> PYTHONPATH=. python tests/org_tension_b12e_test.py
 """
 from __future__ import annotations
 

@@ -5061,7 +5061,7 @@ CREATE INDEX IF NOT EXISTS idx_org_money_day ON org_money(day, kind);
 CREATE INDEX IF NOT EXISTS idx_org_money_to ON org_money(to_actor_id, day);
 CREATE INDEX IF NOT EXISTS idx_crime_reports_status ON crime_reports(status);
 
--- Schema 118 (the Iron Balance): tension between organisations, the acts that moved it, and the organisation layer's heat.
+-- Schema 118 (tension between the families): tension between organisations, the acts that moved it, and the organisation layer's heat.
 -- Tension is directional: how much from_org is aggrieved at or pressed by to_org. Nothing here is capped; readers normalise.
 CREATE TABLE IF NOT EXISTS org_tension (
     from_org INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
