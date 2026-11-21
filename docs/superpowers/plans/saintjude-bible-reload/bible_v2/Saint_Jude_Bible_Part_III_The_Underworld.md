@@ -285,7 +285,7 @@ Each family is described as an institution. Sections 4.1 to 4.4 list tendencies,
 
 ### 4.5 The Families' Quarrel
 
-**Fixed.** The four are not partners. They are the heirs of two original combinations, the Sabatini and the Pellegrino, and of the splits that made the Ferrante (1958) and the Vannucci (1967). They regard each other as usurpers. Their peace is the Iron Balance (section 6): a standing mutual fear, bound by the cost of war and the closeness of federal eyes.
+**Fixed.** The four are not partners. They are the heirs of two original combinations, the Sabatini and the Pellegrino, and of the splits that made the Ferrante (1958) and the Vannucci (1967). They regard each other as usurpers. What holds between them is an uneasy, unwritten understanding (section 6): a standing mutual fear, bound by the cost of war and the closeness of federal eyes.
 
 ### 4.6 Examples: Suggested Starting Seats
 
@@ -368,13 +368,13 @@ They cannot be made. They can be rich, trusted, and powerful, and they pay for t
 
 ---
 
-## 6. Diplomacy, the Iron Balance, and Neutral Ground
+## 6. Diplomacy, the Understanding Between the Families, and Neutral Ground
 
-### 6.1 The Iron Balance
+### 6.1 The Understanding Between the Families
 
-**Fixed (design).** Saint Jude has no Boss of Bosses, no governing body, and no written agreement among its four families. Their peace is **the Iron Balance**, an old standing understanding resting on three things: the cost of an open war, the nearness of federal eyes, and the memory of earlier wars (the 1929 to 1931 harbor wars, the 1946 Four-Corner War, the 1958 Ferrante Schism). A boss who starts a war pays for it in dead men, lost earnings, and prosecutors, and every boss knows it.
+**Fixed (design).** Saint Jude has no Boss of Bosses, no governing body, and no written agreement among its four families. What holds between them is an uneasy standing understanding. Nobody planned it, nobody agreed it at a table, and it is never complete. It rests on three things: the cost of an open war, the nearness of federal eyes, and the memory of earlier wars (the 1929 to 1931 harbor wars, the 1946 Four-Corner War, the 1958 Ferrante Schism). A boss who starts a war pays for it in dead men, lost earnings, and prosecutors, and every boss knows it.
 
-**Tendency.** The Balance is not a love. It is a mutual deterrence kept up by many small acts: a sit-down called before a quarrel grows, a go-between sent to say a thing, a favor owed and remembered, a funeral attended. It frays when a family is weak, a boss is sick, an ambitious underboss sees an opening, or a war breaks out nearby.
+**Tendency.** Nobody in the Life gives it a name. Men say "the way things are", "nobody wants a war", "we got an understanding with them", "everybody's eating", "keep it quiet". It is not a peace in any full sense: slights, squeezes, beatings, poached earners and the odd killing happen inside it, and it can boil over. The understanding is not a love. It is a mutual deterrence kept up by many small acts: a sit-down called before a quarrel grows, a go-between sent to say a thing, a favor owed and remembered, a funeral attended. It frays when a family is weak, a boss is sick, an ambitious underboss sees an opening, or a war breaks out nearby.
 
 ### 6.2 New York and the Other Cities
 
@@ -388,7 +388,7 @@ They cannot be made. They can be rich, trusted, and powerful, and they pay for t
 - **The Philadelphia family**, under Angelo Bruno from 1959, holds South Jersey and Atlantic City as its fief, and refused New York a share of it [verified].
 - **The Gambino family** is present across the State [verified].
 
-**Tendency.** In Saint Jude's world these outside families have crews and friends in the hinterland: the Marsh, Shore and Pine county suburbs, the resort towns, the road houses. The four Saint Jude families regard the city proper as theirs, and the surrounding counties as shared ground with understandings, favors and occasional quarrels. A man from Elizabeth who retires to the Shore is a neighbor to be received with courtesy. A crew that opens a book in the city without leave is an invasion. These are the Iron Balance's outer ring (6.1).
+**Tendency.** In Saint Jude's world these outside families have crews and friends in the hinterland: the Marsh, Shore and Pine county suburbs, the resort towns, the road houses. The four Saint Jude families regard the city proper as theirs, and the surrounding counties as shared ground with understandings, favors and occasional quarrels. A man from Elizabeth who retires to the Shore is a neighbor to be received with courtesy. A crew that opens a book in the city without leave is an invasion. These are the outer ring of the families' understanding (6.1).
 
 **Real people.** Real mobsters and officials are named here as history. Under the Content limits (Index) they may act and speak on stage within their record: an outside family's established boss acts as a boss. The men in their crews and seats who are not documented are invented Saint Jude-world men of the same kind.
 
@@ -590,7 +590,7 @@ Beatings, threats, burnt cars, broken windows, a dead dog on a doorstep, and a f
 | **Killing a reporter** | The press, the public, the Mayor, the Governor, the federal government | from a front-page outcry and a task force to quiet if the victim was minor and the story is buried | the boss, rarely |
 | **Killing a made man without sanction** | His capo, his Family, the boss | from a death sentence on the killer to a payment and a quiet | the boss of the dead man's Family |
 | **Striking a made man** | The same | from a beating in return to a sit-down and an apology | the boss, the capo |
-| **Killing a made man of another family** | Both bosses; the Iron Balance | war, a sit-down, a payment, or the killer's surrender | both bosses |
+| **Killing a made man of another family** | Both bosses; the understanding between the families | war, a sit-down, a payment, or the killer's surrender | both bosses |
 | **Holding out** (hiding a score, shorting the envelope) | The capo, the boss | a beating, a fine, a demotion, shelving, or death if the sum is large | the capo, the boss |
 | **Informing** | Every man in the Life; the Family | death, a hunt across the country, a curse on the family | none; a boss may let an informant live out of calculation, but only for his own reasons |
 | **Dealing narcotics where the Family forbids it** | The boss, the older capos | warning, loss of status, shelving, death | the boss, who may be in the trade himself |

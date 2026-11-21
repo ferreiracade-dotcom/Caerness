@@ -53,7 +53,7 @@ It does not write a price book (Part VI), the outside groups or drug markets (Pa
 
 ### 1.2 The Touchpoints
 
-**Tendency.** The families do not own the upperworld. They rent access to it at specific points. The family named in each row is the one usually nearest. Any of them can reach any point, and the Iron Balance (Part III 6.1) governs the quarrels.
+**Tendency.** The families do not own the upperworld. They rent access to it at specific points. The family named in each row is the one usually nearest. Any of them can reach any point, and the families' uneasy understanding (Part III 6.1) governs the quarrels.
 
 | Touchpoint | Upperworld side | What crosses | Usually nearest |
 |---|---|---|---|

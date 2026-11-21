@@ -8,8 +8,8 @@
     },
     {
       "file": "Saint_Jude_Bible_Part_I_The_City.md",
-      "bytes": 94936,
-      "sha256": "4c4bc00d0e3be37b0d423c61d8185eca08a7d04fd55bbe3cf03cfb5a885c165c"
+      "bytes": 94943,
+      "sha256": "55e4c031f0ad5c05be4788b10cd044dacf687415a9b633d051205b8960fc387a"
     },
     {
       "file": "Saint_Jude_Bible_Part_II_The_Law.md",
@@ -18,18 +18,18 @@
     },
     {
       "file": "Saint_Jude_Bible_Part_III_The_Underworld.md",
-      "bytes": 78670,
-      "sha256": "05ac4384d43c931227a136c089571dd2814efcf373fdabfe74cab8f6a408d9b1"
+      "bytes": 79163,
+      "sha256": "2025349e39e664a24afd278e75367e0ce36f66b6f5e07a7693ab61d7be468f29"
     },
     {
       "file": "Saint_Jude_Bible_Part_IV_The_Upperworld.md",
-      "bytes": 131338,
-      "sha256": "af86b66a0f6d588c7ff37c6485c53ac758a1a0f2d2a2f7820e5045aff3db8d3a"
+      "bytes": 131356,
+      "sha256": "9bcef51bbf6045426d88ecb3e442000b89be1e6a75649c4ca941875916a3a80f"
     },
     {
       "file": "Saint_Jude_Bible_Part_V_The_Outside_Groups.md",
-      "bytes": 82004,
-      "sha256": "af3774697454475be3d81c98d82f3e1bb7d9d88daf288930545dc206270beeed"
+      "bytes": 82033,
+      "sha256": "a15b051d50cbbc72a990243fb7d1e6710c40af7a743ee5985fa625643f8a9c54"
     },
     {
       "file": "Saint_Jude_Bible_Part_VI_The_Price_Book.md",
@@ -37,5 +37,5 @@
       "sha256": "df001048f1a8c2f1dedec0fc8245727d54d27ddb33a7566d50981d6ddbbc2d4c"
     }
   ],
-  "bible_md_sha256": "06041745564fc64094bc200625c0b16637f8d30dcf1b58c04204c14d4f3df9f2"
+  "bible_md_sha256": "bee5efee8f259ba8a0f64ca7fcbae0af4b623b423aef064141ba6f5f08af6c96"
 }

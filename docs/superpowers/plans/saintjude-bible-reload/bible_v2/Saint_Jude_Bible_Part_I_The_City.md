@@ -127,7 +127,7 @@ Tradition says the settlement nearly ended in its second winter, with food gone 
 | 1920 to 1933 | Prohibition. The families are made here | Anchor, local detail open |
 | 1929 to 1931 | The Harbor wars among the Italian combinations; Sabatini and Pellegrino come out on top | invented, mirrors the Castellammarese War |
 | 1939 to 1945 | The war. The port runs at full tilt; the steel mills run three shifts | Anchor |
-| 1946 | **The Four-Corner Harbor War.** A short, brutal war for the four corners of the harbor (the North Piers, the South Piers, the Basin, and the Narrows). Ends in exhaustion and sets the divide of the Iron Balance | invented |
+| 1946 | **The Four-Corner Harbor War.** A short, brutal war for the four corners of the harbor (the North Piers, the South Piers, the Basin, and the Narrows). Ends in exhaustion and sets the divide the families still hold to | invented |
 | 1949 to 1953 | A newspaper series and state hearings expose the docks. The State creates the **Killbuck Waterfront Commission** in 1954 as a sister to the real bi-state Waterfront Commission of New York Harbor of 1953, whose district covers the Port of New York and lies just north of Saint Jude, to register longshoremen and stop the shape-up (Anchor: Waterfront Commission of New York Harbor, 1953) | Anchor model |
 | 1950 | The city's peak population, about 1.35 million | invented |
 | 1950 to 1951 | A U.S. Senate committee holds hearings in Crown Harbor; the city's mayor is embarrassed | Anchor model |

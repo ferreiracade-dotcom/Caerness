@@ -650,7 +650,7 @@ See section 11 for the dated table. The sequence in outline: the heroin supply s
 
 **Tendency.** A ruling by a mediator is binding in honor and breakable in practice (Part III 6.3). An outside group's ruling is more fragile, because the family can walk away and the group cannot.
 
-**Where the Commission-style conventions reach.** The Iron Balance (Part III 6.1) binds the four families. It does not bind an outside group. The Gold Coast convention binds an outside group only through the families' revenge (2.3). The sit-down is open to an outside group only at the families' invitation.
+**Where the Commission-style conventions reach.** The families' uneasy understanding (Part III 6.1) holds among the four families only. It does not bind an outside group. The Gold Coast convention binds an outside group only through the families' revenge (2.3). The sit-down is open to an outside group only at the families' invitation.
 
 ### 10.4 The Taboo Table, Extended for Outside Groups
 
