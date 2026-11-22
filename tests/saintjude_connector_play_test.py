@@ -278,9 +278,15 @@ def case_c():
     import sqlite3
     me = int(STATE["protagonist"]["actor_id"])
     with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:
+        # two made soldiers (outfit heat rises for their killing) and two ordinary men holding no seat: B13b's identification rule makes a
+        # killing inside organised crime almost never cleared (the street keeps its mouth shut), so the arrest this check wants can only
+        # come from the killings of men outside the outfits
         rivals = c.execute(
             """SELECT a.id,a.name FROM org_seats s JOIN actors a ON a.id=s.actor_id WHERE s.status='active' AND s.role_key='soldier' AND a.actor_type='character'
-               AND a.status NOT IN ('dead','deceased') ORDER BY a.id LIMIT 4""").fetchall()
+               AND a.status NOT IN ('dead','deceased') ORDER BY a.id LIMIT 2""").fetchall()
+        rivals += c.execute(
+            """SELECT a.id,a.name FROM actors a WHERE a.actor_type='character' AND a.status NOT IN ('dead','deceased') AND a.id<>?
+               AND NOT EXISTS (SELECT 1 FROM org_seats s WHERE s.actor_id=a.id AND s.status='active') ORDER BY a.id LIMIT 2""", (me,)).fetchall()
         day0 = int(c.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
         c.row_factory = sqlite3.Row
         heat0 = float(c.execute("SELECT COALESCE(SUM(public_heat),0) FROM org_heat").fetchone()[0])
