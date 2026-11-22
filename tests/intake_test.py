@@ -18,6 +18,12 @@ if str(ROOT) not in sys.path:
 from tests.outfit_choice_fixture import DAY, open_world as _open_world
 
 
+def _fund(conn, actor, amount):
+    """The fixture opening leaves purses empty; a test that spends gives its person coin first."""
+    from engine import ledger
+    ledger.receive(conn, ("person", int(actor)), amount, purpose="test funding")
+
+
 def _caerness():
     """A Caerness copy (the live data/caerness.db is only read, never written) with a protagonist; returns (conn, me)."""
     tmp = tempfile.mkdtemp()
@@ -50,6 +56,59 @@ def test_caerness_has_no_intake_rules():
     from engine.world_package import intake_rules, package_for
     conn, _me = _caerness()
     assert intake_rules(package_for(conn)) == {}
+
+
+def test_words_and_fields_pick_the_shape():
+    from engine import intake
+    w = _open_world()
+    c = w.conn
+    assert intake.shape_for(c, "a numbers bank", {"members": [w.soldier]}).name == "organisation"
+    assert intake.shape_for(c, "the warehouse on Ferry Street", {}).name == "holding"
+    assert intake.shape_for(c, "a ten percent deal", {}).name == "arrangement"
+    assert intake.shape_for(c, "the Saint Rocco truce", {}).name == "custom"
+    s = intake.shape_for(c, "something nobody has a word for", {})
+    assert s.name == "thing" and s.floor_backed
+
+
+def test_registering_a_maker_replaces_the_floor_shape():
+    from engine import intake
+    w = _open_world()
+    c = w.conn
+    intake.register_shape(intake.Shape("holding", (), (), lambda conn, me, p, cid: {"backing_table": "x", "backing_id": 1}, False))
+    try:
+        assert intake.shape_for(c, "a pier", {}).floor_backed is False
+    finally:
+        intake._reset_registry_for_tests()
+    assert intake.shape_for(c, "a pier", {}).floor_backed is True
+
+
+def test_money_words_parse_to_start_and_weekly():
+    from engine import intake
+    w = _open_world()
+    c = w.conn
+    p = intake.normalise(c, w.capo, "a bookmaking wire", {"what": "a wire", "money": {"start": 500, "income": "1,000 a month", "upkeep": "$200 a week"}})
+    assert p.start_cost == 500 and abs(p.income_weekly - 1000 * 7 / 30) < 0.01 and p.upkeep_weekly == 200
+    _fund(c, w.capo, 1000)
+    q = intake.normalise(c, w.capo, "x", {"what": "x", "money": {"start": "half", "from": "me"}})
+    assert q.start_cost > 0
+
+
+def test_an_unknown_place_is_kept_as_words_not_refused():
+    from engine import intake
+    w = _open_world()
+    p = intake.normalise(w.conn, w.capo, "a pier", {"what": "a pier", "place": "Nowhere Quay of the Moon"})
+    assert p.location_id is None and p.place_text == "Nowhere Quay of the Moon"
+
+
+def test_caerness_unclear_shape_still_input_gap():
+    from engine import intake
+    from engine.authoring import AuthoringRefused
+    conn, _me = _caerness()
+    try:
+        intake.shape_for(conn, "an obscure arrangement", {})
+        assert False
+    except AuthoringRefused as e:
+        assert e.reason_kind == "input_gap"
 
 
 tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
