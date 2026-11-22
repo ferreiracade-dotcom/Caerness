@@ -8822,6 +8822,166 @@
   "source": "unsourced",
   "note": "unsourced; how many patronage jobs the city's offices hand out between them at the opening (a design size)."
  },
+ "race_open_days": {
+  "default": 330,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How many days before an election its race opens and candidates begin to weigh filing."
+ },
+ "race_filing_lead_days": {
+  "default": 45,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Filing closes this long before the first vote of the race (the primary, or the general where there is none)."
+ },
+ "file_base": {
+  "default": -1.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The base of a person's weighed choice to file for an office he is eligible for."
+ },
+ "file_w_incumbent": {
+  "default": 2.5,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; An incumbent leans toward filing again."
+ },
+ "file_w_backing": {
+  "default": 2.0,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much an organisation's delivery in the district leans its man toward filing."
+ },
+ "file_w_standing": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a man's standing in his organisation leans him toward filing."
+ },
+ "vote_w_incumbent": {
+  "default": 0.5,
+  "range": null,
+  "unit": "score",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; What being the incumbent adds to a candidate's score in a group."
+ },
+ "vote_w_delivery": {
+  "default": 1.5,
+  "range": null,
+  "unit": "score per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; What the delivery of a candidate's organisation in a group adds to his score there."
+ },
+ "vote_w_regard": {
+  "default": 0.8,
+  "range": null,
+  "unit": "score per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; What the group's regard (information 1b) for the candidate adds to his score."
+ },
+ "vote_w_local": {
+  "default": 0.3,
+  "range": null,
+  "unit": "score",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; What living in the group's district adds."
+ },
+ "vote_noise_sd": {
+  "default": 0.25,
+  "range": null,
+  "unit": "score",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The spread of the random part of a group's score for a candidate (seeded by race, group and candidate)."
+ },
+ "vote_temperature": {
+  "default": 1.0,
+  "range": null,
+  "unit": "scale",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How sharply a group's vote follows the score gap: the softmax temperature."
+ },
+ "primary_turnout_factor": {
+  "default": 0.4,
+  "range": null,
+  "unit": "share",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much of a general election's turnout a primary draws."
+ },
+ "fraud_base": {
+  "default": -2.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The base of the chance that a fraud in one group is caught."
+ },
+ "fraud_w_watchers": {
+  "default": 1.5,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much the rivals' delivery in the group (their poll watchers) raises the chance a fraud is caught."
+ },
+ "fraud_w_size": {
+  "default": 0.15,
+  "range": null,
+  "unit": "logit per vote logged",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much the size of a fraud raises the chance it is caught (logged votes)."
+ },
   "male_share_law_official": {
    "default": 0.97,
    "range": null,

@@ -2000,5 +2000,38 @@
    "office:licensing:board": 0.1,
    "office:sjpd:police-commissioner": 0.2
   }
+ },
+ "race_stages": {
+  "venture_kind": "campaign",
+  "stages": [
+   "filing",
+   "primary",
+   "campaign",
+   "general",
+   "result"
+  ],
+  "note": "A race is a venture of the business layer's campaign kind. Stage lengths come from the office's own dates; the race code moves the stage (the business pass leaves it parked)."
+ },
+ "vote_drivers": {
+  "incumbent": "vote_w_incumbent",
+  "delivery": "vote_w_delivery",
+  "regard": "vote_w_regard",
+  "local": "vote_w_local",
+  "noise_sd": "vote_noise_sd",
+  "temperature": "vote_temperature",
+  "primary_turnout": "primary_turnout_factor",
+  "filing": {
+   "base": "file_base",
+   "incumbent": "file_w_incumbent",
+   "backing": "file_w_backing",
+   "standing": "file_w_standing"
+  },
+  "fraud": {
+   "base": "fraud_base",
+   "watchers": "fraud_w_watchers",
+   "size": "fraud_w_size"
+  },
+  "crime_kind": "election_fraud",
+  "note": "Every weight is a design figure, never tuned to a result. Money and endorsements have no data source in P1 and are not drivers yet."
  }
 }

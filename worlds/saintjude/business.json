@@ -147,6 +147,49 @@
   "entertainment_licence"
  ],
  "venture_kinds": {
+  "campaign": {
+   "stages": [
+    {
+     "key": "filing",
+     "days": 60,
+     "cost_share": 0.0,
+     "approvals": [],
+     "driver_sector": "retail"
+    },
+    {
+     "key": "primary",
+     "days": 30,
+     "cost_share": 0.0,
+     "approvals": [],
+     "driver_sector": "retail"
+    },
+    {
+     "key": "campaign",
+     "days": 60,
+     "cost_share": 0.0,
+     "approvals": [],
+     "driver_sector": "retail"
+    },
+    {
+     "key": "general",
+     "days": 1,
+     "cost_share": 0.0,
+     "approvals": [],
+     "driver_sector": "retail"
+    },
+    {
+     "key": "result",
+     "days": 30,
+     "cost_share": 0.0,
+     "approvals": [],
+     "driver_sector": "retail"
+    }
+   ],
+   "stall_days": 3650,
+   "payoff": {
+    "kind": "none"
+   }
+  },
   "open_business": {
    "stages": [
     {
