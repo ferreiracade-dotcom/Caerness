@@ -12,7 +12,7 @@ Rules applied (all from the bible):
     carries canon_tag "Example".  Fixed history never names a person; it speaks of roles (Part I 2.5).
   * Officials' names are Open (Part I 15.1, Part II 10, Index 7): the offices and institutions are seeded,
     their holders are not.
-  * Women are never made (Part I 12.2); a woman of consequence comes by one of the four routes of Part I 12.4.
+  * Women are not made, and none is expected (Part I 12.2); a woman of consequence comes by one of the four routes of Part I 12.4.
   * Where the bible is silent this module says so in the note and invents no rule.
 """
 from __future__ import annotations

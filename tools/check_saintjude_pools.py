@@ -190,8 +190,8 @@ def check(data: dict) -> list[str]:
         if abs(pop[y] - want) > 0.01:
             errs.append(f"population {y}: path gives {pop[y]:.4f}M, bible {want}M")
     pe = figs["made_men_pellegrino"]
-    if pe.get("ceiling") != 55 or pe.get("extended_range") != [51, 55]:
-        errs.append("Pellegrino must keep 51-55 as an extended range with ceiling 55")
+    if any(k in pe for k in ("ceiling", "extended_range", "extended_requires")):
+        errs.append("Pellegrino's made-men figure is a starting calibration: no ceiling or extended range (owner, 2026-11-22)")
 
     # 7. tables
     var = g("pick3_variable_net_per_dollar")

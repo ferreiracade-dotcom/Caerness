@@ -25,7 +25,7 @@ def run():
     # Spot asserts straight from the bible.
     assert figs["population_city_1975_m"]["default"] == 1.1 and figs["population_decline_pct"]["range"] == [0.4, 1.5]
     assert figs["sjpd_sworn"]["default"] == 4800 and figs["sjpd_sworn"]["range"] == [4200, 5400]
-    assert figs["made_men_pellegrino"]["default"] == 45 and figs["made_men_pellegrino"]["ceiling"] == 55
+    assert figs["made_men_pellegrino"]["default"] == 45 and "ceiling" not in figs["made_men_pellegrino"]
     assert abs(figs["associates_total"]["default"] - 1202) < 1
     assert figs["numbers_handle_m"]["default"] == 25.0 and figs["numbers_handle_m"]["range"] == [15, 40]
     assert abs(figs["numbers_bank_net_m"]["default"] - 2.0) < 1e-9
