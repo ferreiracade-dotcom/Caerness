@@ -1,6 +1,6 @@
 # The politics sphere (design)
 
-Date: 2026-11-22. Status: **DRAFT**, written without the owner on the supervisor's instruction, from what was already agreed. One owner correction is in (2026-11-22): the Machine can be succeeded (end of §5.2). Every call not already agreed is marked **[my call]**, and the open questions in §10 await the owner's answers.
+Date: 2026-11-22. Status: **DRAFT**, written without the owner on the supervisor's instruction, from what was already agreed. The owner answered the open questions on 2026-11-22 (§10). Question 3 still awaits the owner's confirmation. Calls the owner has not ruled on stay marked **[my call]**.
 
 Builds on:
 - `2026-11-19-saintjude-three-spheres-design.md`: §5.1 the org core; §5.2 the politics layer; §5.2a B/C depth, the shared drivers, ventures and property; §5.2b the agreements ledger, real people and widening circles; §5.2c politics at B depth and limits that are plausibility, not ceilings.
@@ -71,6 +71,7 @@ Politics must always run, so that a mob or business campaign feels it: the alder
 
 ### 5.1 Offices and the calendar (package data, generic engine)
 
+- **Offices and races are generic across levels (owner, 2026-11-22).** The same office model, race venture and drivers serve a precinct captaincy, a ward, the city, the county, a State Senate district, the state and the nation, with no role that exists only in the city. The levels differ only in data: the jurisdiction, the electorate's coarseness, the powers, and the calendar.
 - An **office** is a seat in an institution, with:
   - its **jurisdiction** (city, ward, county, state, district, nation);
   - how it is **filled**: elected (with its cycle), appointed (by whom, with whose consent), or chosen within an org (a ward leader by the county committee);
@@ -85,7 +86,7 @@ Politics must always run, so that a mob or business campaign feels it: the alder
   - the NJ Assembly in odd years;
   - the NJ Senate in 1977, 1981, 1983, 1987 [memory, to verify];
   - the Saint Jude mayor in 1975, 1979 and on;
-  - the council on its own cycle: elected in the even year after the mayor (1977, 1981), so that the Machine fights two campaigns. Bible §4.6 leaves the cycle unstated. **[my call; open question 2.]**
+  - the council on its own cycle: elected two years after the mayor (1977, 1981), so that the Machine fights two campaigns. Bible §4.6 leaves the cycle unstated. **[Accepted by the owner, 2026-11-22: the council follows this calendar.]**
 - **Seeding.** Real holders come from the research file, at their real age and health. Saint Jude's own officials are fictional, as the city is: the mayor, the 15 councilmen, the ward leaders, the boards, the county chairman, and the city's state senators (Design: about six) and assemblymen. They are generated at the opening with lived histories, following the bible's character text for the Machine, the reformers and the Black wards.
 - **The firewall on real figures:** each acts within who they documentably were (the content limits). Byrne, for example, governs, signs and vetoes as himself, with no invented wrongdoing.
 
@@ -143,8 +144,8 @@ No outcome is scripted. The bible's 1975 Machine is the starting state. The play
   - a seeded noise term.
 
   No result is fixed. The bible's "reformers win about one in three" and incumbents' advantage are calibration targets, reported across seeds.
-- **Fraud** is a weighed act by people: padded rolls, ballot stuffing, paid "walking-around money", a crooked count in a ward. It has a gain, a risk of exposure (poll watchers, the press, the U.S. Attorney, the SCI) and consequences through the case chain. **[my call: in from P1; open question 5.]**
-- **State and national races run at B** from the same drivers on coarser audiences: counties for the state, states for the nation. The real result is the default track. The run may diverge only when its own drivers give cause, for example a scandal the run created or an economy that went differently. **[my call, open question 3: by default, a national race uses the real result unless the run's state of the world moved a driver past a weighed margin. This keeps the 1976 and 1980 presidential results real unless the run gives a reason, and stays cheap.]**
+- **Fraud** is a weighed act by people: padded rolls, ballot stuffing, paid "walking-around money", a crooked count in a ward. It has a gain, a risk of exposure (poll watchers, the press, the U.S. Attorney, the SCI) and consequences through the case chain. It is in from P1 (owner, 2026-11-22).
+- **State and national races run at B** from the same drivers on coarser audiences: counties for the state, states for the nation. The real result is the default track. The run may diverge only when its own drivers give cause, for example a scandal the run created or an economy that went differently. **[PENDING the owner's confirmation, proposed 2026-11-22: real national results hold unless a named cause from the run changes them. That cause can come from the protagonist or from the simulation itself, directly or indirectly, consistent with the history design's H1: history stays unless it is touched directly or indirectly. A divergence must name its cause.]**
 
 ### 5.4 Powers, votes and laws
 
@@ -211,8 +212,8 @@ The families' political reach is the Pad extended upward. An alderman or a judge
 
 C is a later build per level (§5.2a), using the same drivers in finer detail. When the protagonist runs or works a race, more of the world comes into focus:
 
-- **City (the first C) [my call: the city first, open question 4; whether the Machine or the campaign comes first is open question 1]:**
-  - the Machine, or its successor, in full: the chairman's office, ward leaders and precinct captains as named people, jobs handed out, favours called in, factions manoeuvring, and a succession fight when one comes;
+- **City (the first C to be built; owner, 2026-11-22). Building it first does not exclude the levels above: the protagonist can be at any level from the start, played at B until that level's C lands.**
+  - the Machine, or its successor, in full, whether he works inside it or against it: the chairman's office, ward leaders and precinct captains as named people, jobs handed out, favours called in, factions manoeuvring, and a succession fight when one comes;
   - his ward or the citywide race in full: precinct-level blocs, door-knocking, rallies, the precinct captains as named people;
   - rival candidates with campaigns;
   - his party's factions;
@@ -224,7 +225,7 @@ C is a later build per level (§5.2a), using the same drivers in finer detail. W
 
 ### 5.10 The protagonist under the same rules; reaching the top
 
-- **He can hold any seat he can plausibly win or be given.** Eligibility is law (age, residence, citizenship; bars for some convictions). Everything else is weighed: money, the party's backing, standing in the audiences, his record, his age, his temperament and competence, rivals and luck.
+- **He can hold any seat he can plausibly win or be given, at any level (owner, 2026-11-22):** ward, city, county, State Senate, state and beyond, inside the Machine or against it. Eligibility is law (age, residence, citizenship; bars for some convictions). Everything else is weighed: money, the party's backing, standing in the audiences, his record, his age, his temperament and competence, rivals and luck.
 - **There are no fixed rungs.** A rich outsider can run for governor without having been an alderman. It is plausible but hard, and the drivers say how hard.
 - **His past is a cost.** A mob record, an arrest, or a known associate is a claim that can surface (the press's morgue, a rival's opposition research, an informer, the SCI). He hides it, buys it off, outlives it or loses to it.
 - **The presidency is reachable and very rare.** It needs decades of standing, a national base, money, the party's nomination, a moment and luck. Nothing caps it; the drivers make it what it was.
@@ -254,12 +255,12 @@ C is a later build per level (§5.2a), using the same drivers in finer detail. W
    - Mayoral and council elections as ventures.
    - Council and board votes on zoning, contracts and licences (these are the business seams).
    - Appointments by sponsorship for the prosecutor and the commissioner.
-   - Election fraud as a weighed act [my call; open question 5].
+   - Election fraud as a weighed act (owner, 2026-11-22).
    - Political arrangements and the law's answer.
 
-   Needs [my call; open question 6]: the business layer's shared drivers, ventures and the agreements ledger (§5.2a, §5.2b), and information phase 1b's audiences.
+   Builds after (owner, 2026-11-22) the business layer's shared drivers, ventures and the agreements ledger (§5.2a, §5.2b), and information phase 1b's audiences.
 2. **P2, the state and the nation at B.** Real holders and the calendar, coarse elections with the real default, laws with effects, and federal and state investigators driven by ambition.
-3. **P3, the city at C:** the Machine (or its successor) as named people and campaigns run ward by ward; which comes first is open question 1.
+3. **P3, the city at C:** the Machine (or its successor) as named people, for working inside it or against it, and campaigns run ward by ward.
 4. **P4 and later:** the state at C (Trenton), then the nation at C.
 
 ## 8. Calibration targets (reported, never enforced; from memory, approximate)
@@ -297,16 +298,15 @@ C is a later build per level (§5.2a), using the same drivers in finer detail. W
   - the outer ring's families already hold some of those arrangements (the Genovese NJ crew in Hudson; Philadelphia in Atlantic City), so expansion runs into them through org tension;
   - business owns the firm's entry; politics owns the officials; the mob layer owns the rival family's answer.
 
-## 10. Open questions for the owner, most important first
+## 10. The owner's answers (2026-11-22)
 
-**Already decided by the owner (2026-11-22):** the Machine is not permanent. It can weaken, split, be reformed or be replaced by a successor (a reform faction, a rival boss's machine, a new coalition), and the player can work within either. See the end of §5.2.
+**Earlier correction:** the Machine is not permanent. It can weaken, split, be reformed or be replaced by a successor (a reform faction, a rival boss's machine, a new coalition), and the player can work within either. See the end of §5.2.
 
-Still open:
-1. **What role do you picture for yourself in politics:** running for office, working the Machine (or its successor) from behind, or both over a life? This decides whether P3's city C starts with the campaign or with the Machine as named people.
-2. **The council's election cycle.** I made the council stand in the even year after the mayor (1977, 1981). Bible §4.6 says only "on its own cycle". Do you want a different cycle?
-3. **National races default to the real result unless the run gives a driver a reason.** Do you want more divergence by default, for example a fully simulated 1976 presidential race?
-4. **The first C.** I chose the city. Do you want Trenton earlier, because a governor's race is the bigger story?
-5. **Election fraud as a weighed act.** I included it, with a risk of exposure. Should it be there from P1, or later?
-6. **Order against business.** P1 needs business's shared drivers, ventures and the ledger. Is it right to build business first and then politics P1, as spec §5.3 already says?
+1. **Role:** both, inside the Machine and against it. The role can be anything at any level: ward, city, county, State Senate, state and beyond. Offices and races are modelled generically across levels, not as city-only roles (§5.1, §5.9, §5.10).
+2. **Council cycle:** accepted. The council is elected two years after the mayor (1977, 1981).
+3. **National races: PENDING the owner's confirmation.** Proposed: real national results hold unless a named cause from the run changes them, whether that cause comes from the protagonist or from the simulation itself, directly or indirectly (history design H1) (§5.3).
+4. **First C:** accepted, the city first as the build order. Answer 1 means the levels above are not excluded.
+5. **Election fraud:** accepted, from P1.
+6. **Build order:** accepted. The business sphere's shared layer comes first, then politics P1.
 
 **To verify before P2 seeds them:** the NJ Senate election years and New Jersey's campaign-finance rules, both written from memory.
