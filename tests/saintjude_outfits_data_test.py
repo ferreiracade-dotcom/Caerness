@@ -73,13 +73,13 @@ def run():
         os.environ["CAERNESS_DB_PATH"] = str(db)
 
         # schema 117 (tables of 116 renamed)
-        assert SCHEMA_VERSION == 121
+        assert SCHEMA_VERSION == 122
         assert TABLES <= tables(sj), TABLES - tables(sj)
         assert "quiet_routine" in columns(sj, "simulation_profiles")
         idx = {r[0] for r in sj.execute("SELECT name FROM sqlite_master WHERE type='index'")}
         assert {"idx_org_seats_org_role", "idx_org_seats_superior", "idx_org_lines_holder",
                 "idx_org_agenda_actor", "idx_crime_reports_status"} <= idx
-        assert sj.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 121
+        assert sj.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 122
 
         # the switch, on for Saint Jude only
         assert system_enabled(sj, "outfits")

@@ -310,9 +310,13 @@ def compact_scene(conn) -> dict:
         notes_more += max(0, store.notes_count(conn, kind, int(sid)) - 2)
     notes_more += max(0, len(notes) - _LIMITS["notes"])
     desc = "; ".join(x for x in (loc.get("kind"), loc.get("notes"), loc.get("political_owner")) if x)
-    from engine import commitments
+    from engine import commitments, texture
     pending_work = commitments.active(conn, int(me["actor_id"]), 5)
+    tex = texture.block(conn, int(me["actor_id"]), here, [int(a["id"]) for a in sampled])
+    if tex is not None:
+        conn.commit()  # the ledger marks what this call delivers
     return _drop_none({
+        "texture": tex,
         "commitments": [{"what": _clip(c["what"], 100), "kind": c["kind"], "due_in_days": max(0, int(c["due_day"]) - day) if c["due_day"] is not None else None}
                         for c in pending_work] or None,
         "day": day,

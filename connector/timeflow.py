@@ -89,6 +89,11 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
             out["interruption"] = _clip(run["interruptions"][0]["reason"], 300)
         if days > end - start:  # an interruption also leaves the rest of the request undone
             out["remaining_days"] = days - (end - start)
+        from engine import texture
+        loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()
+        tex = texture.block(conn, me, loc[0] if loc else None, [])
+        if tex is not None:
+            out["texture"] = tex
         return out
 
     return store.run_once(conn, call_id, "advance", {"days": days, "purpose": purpose, "focus": focus, "domain": domain,

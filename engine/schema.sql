@@ -5212,3 +5212,60 @@ CREATE TABLE IF NOT EXISTS org_deals (
     paid_day INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_org_deals_status ON org_deals(status, patron_org, client_org);
+
+-- schema 122 (I1a): bearing, the room read, deference acts and the delivery ledger (information phase 1a).
+CREATE TABLE IF NOT EXISTS bearing_marks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    ref_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+    amount REAL,
+    source TEXT NOT NULL DEFAULT 'proposed' CHECK (source IN ('proposed','derived')),
+    beyond_means INTEGER NOT NULL DEFAULT 0,
+    recorded_day INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','gone')),
+    UNIQUE(actor_id, kind, text)
+);
+CREATE INDEX IF NOT EXISTS idx_bearing_marks_actor ON bearing_marks(actor_id, status, kind);
+CREATE TABLE IF NOT EXISTS room_reads (
+    observer_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    subject_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    first_day INTEGER NOT NULL,
+    day INTEGER NOT NULL,
+    stance TEXT,
+    source TEXT,
+    sure TEXT,
+    recognised INTEGER NOT NULL DEFAULT 0,
+    basis TEXT,
+    PRIMARY KEY(observer_actor_id, subject_actor_id)
+);
+CREATE TABLE IF NOT EXISTS form_acts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    subject_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    outcome TEXT NOT NULL,
+    note TEXT,
+    witnesses INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS delivery_ledger (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    viewer_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    item_key TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    via TEXT,
+    significance REAL NOT NULL DEFAULT 0,
+    first_day INTEGER NOT NULL,
+    delivered_day INTEGER,
+    delivered_count INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(viewer_actor_id, item_key)
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_ledger_pending ON delivery_ledger(viewer_actor_id, delivered_day);
+CREATE TABLE IF NOT EXISTS texture_cursor (
+    viewer_actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
+    knowledge_id INTEGER NOT NULL DEFAULT 0,
+    event_id INTEGER NOT NULL DEFAULT 0,
+    rumour_id INTEGER NOT NULL DEFAULT 0
+);

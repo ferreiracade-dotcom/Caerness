@@ -107,7 +107,7 @@ def notes_count(conn, subject_kind: str, subject_id: int) -> int:
     return int(conn.execute("SELECT COUNT(*) FROM gm_notes WHERE subject_kind=? AND subject_id=?", (subject_kind, int(subject_id))).fetchone()[0])
 
 
-NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact")
+NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact", "bearing", "form")
 SHEET_FIELDS = ("appearance", "voice", "temperament", "ambitions", "habits", "history", "standing")
 _CLIP = {"recap": 600, "thread": 160, "sheet": 300, "rule": 300, "error": 500}
 MAX_THREADS = 8
@@ -118,6 +118,24 @@ MAX_CORRECTIONS = 5  # newest open error reports returned by resume
 def _clip(text, n: int) -> str:
     text = " ".join(str(text or "").split())
     return text if len(text) <= n else text[: n - 1].rstrip() + "…"
+
+
+def _presence_note(conn, kind: str, text: str, subject_id, field) -> dict:
+    """bearing: record what he wears, drives, lives in, keeps company with, or how long he has been in the life (field = the kind,
+    subject_id = whose; default the protagonist). form: a form of deference shown (field = shown | missed | wrong; subject_id = the man
+    deferred to; text = what was done)."""
+    from engine import bearing
+    from engine.player import get_player
+    pl = get_player(conn)
+    me = int(pl["player_actor_id"]) if pl else None
+    if kind == "bearing":
+        who = int(subject_id) if subject_id is not None else me
+        if who is None:
+            raise ValueError("no protagonist is set")
+        return bearing.record_mark(conn, who, str(field or ""), text)
+    if me is None or subject_id is None:
+        raise ValueError("kind=form needs subject_id: the man deferred to")
+    return bearing.form_outcome(conn, me, int(subject_id), str(field or ""), text)
 
 
 def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "general", subject_id: int | None = None,
@@ -135,6 +153,8 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
             raise ValueError(str(e)) from e
     if kind == "detail":
         return add_note(conn, subject_kind, subject_id, text, call_id)
+    if kind in ("bearing", "form"):
+        return _presence_note(conn, kind, text, subject_id, field)
     body = _clip(text, _CLIP[kind])
     if not body:
         raise ValueError("text must not be empty")

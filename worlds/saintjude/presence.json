@@ -1,0 +1,449 @@
+{
+ "_doc": {
+  "what": "How standing shows and is read in this world (engine/bearing.py and engine/texture.py read this; they hold no world words). Source: bible Part III 2.1 (Deference). Every number is a design figure named in design_figures.json.",
+  "forms": "Forms of deference. due_to: any condition matching the man deferred to; a condition has kind (org kind), roles (seat roles), min_age. scope: own = the one showing it belongs to the same organisation as the man deferred to; other = he belongs to another; any = either. known_kind: the org kind whose men learn it (inducted men know it; others learn through time in the life). setting: place kinds where it is apt (omitted = anywhere).",
+  "retinue": "Per seat role: who attends him (from_roles = roles of the men who attend, mean = design figure for how many). Recorded once so the crew persists.",
+  "violent_event_types": "Substrings of event types that weigh as violence or arrest.",
+  "channels": "Words for how news reaches him (read, told, talk, home).",
+  "core_marks": "Bearing facts the GM is asked to propose when none is recorded (kind, ask).",
+  "readings": "What a stranger reads from signals alone, by how much shows (low to high).",
+  "figures": "Every number the presence and texture code uses, each a Design proposal (kept here, beside the data that names them, so a run reads them without a design draw)."
+ },
+ "forms": [
+  {
+   "key": "hands",
+   "text": "approaches with his head slightly bowed and takes the hand in both of his, or kisses it or the cheek; an old man with a ring may allow his hand to be kissed, and a modern head pulls it away",
+   "due_to": [
+    {
+     "kind": "family",
+     "roles": [
+      "boss"
+     ]
+    },
+    {
+     "kind": "family",
+     "min_age": 62
+    }
+   ],
+   "scope": "own",
+   "known_kind": "family",
+   "setting": [
+    "club",
+    "home",
+    "restaurant",
+    "church",
+    "street",
+    "bar"
+   ]
+  },
+  {
+   "key": "stand",
+   "text": "stands when he enters and does not sit until he sits",
+   "due_to": [
+    {
+     "kind": "family",
+     "roles": [
+      "boss",
+      "underboss",
+      "consigliere"
+     ]
+    }
+   ],
+   "scope": "own",
+   "known_kind": "family"
+  },
+  {
+   "key": "answer_only",
+   "text": "does not speak until spoken to, answers what is asked and volunteers no opinions; to interrupt him is to give offence",
+   "due_to": [
+    {
+     "kind": "family",
+     "roles": [
+      "boss",
+      "underboss",
+      "consigliere",
+      "capo"
+     ]
+    }
+   ],
+   "scope": "own",
+   "known_kind": "family"
+  },
+  {
+   "key": "own_title",
+   "text": "calls him 'the boss' or 'the old man', or 'Don' if Sicilian-born or after the tone",
+   "due_to": [
+    {
+     "kind": "family",
+     "roles": [
+      "boss"
+     ]
+    }
+   ],
+   "scope": "own",
+   "known_kind": "family"
+  },
+  {
+   "key": "other_title",
+   "text": "calls him 'Mr.' and the surname, or 'the gentleman', and never a nickname to his face",
+   "due_to": [
+    {
+     "kind": "family",
+     "roles": [
+      "boss"
+     ]
+    }
+   ],
+   "scope": "other",
+   "known_kind": "family"
+  },
+  {
+   "key": "seating",
+   "text": "takes the lower end of the table, or stands, with the deputy and the adviser near the head and the captains by seniority",
+   "due_to": [
+    {
+     "kind": "family",
+     "roles": [
+      "boss"
+     ]
+    }
+   ],
+   "scope": "own",
+   "known_kind": "family",
+   "setting": [
+    "club",
+    "home",
+    "restaurant"
+   ]
+  },
+  {
+   "key": "silence",
+   "text": "says nothing of the Family before women, children or strangers and uses no names on the telephone ('that thing', 'our friend', 'the gentleman')",
+   "due_to": [
+    {
+     "kind": "family"
+    }
+   ],
+   "scope": "own",
+   "known_kind": "family"
+  }
+ ],
+ "retinue": {
+  "boss": {
+   "from_roles": [
+    "soldier",
+    "associate"
+   ],
+   "mean": "retinue_mean_head"
+  },
+  "underboss": {
+   "from_roles": [
+    "soldier",
+    "associate"
+   ],
+   "mean": "retinue_mean_second"
+  },
+  "capo": {
+   "from_roles": [
+    "soldier",
+    "associate"
+   ],
+   "mean": "retinue_mean_unit"
+  }
+ },
+ "violent_event_types": [
+  "kill",
+  "murder",
+  "shoot",
+  "shot",
+  "beat",
+  "arrest",
+  "bust",
+  "inform",
+  "war",
+  "assault"
+ ],
+ "channels": {
+  "read": [
+   "in the papers",
+   "on the radio",
+   "on the evening news"
+  ],
+  "told": [
+   "word reaches him"
+  ],
+  "talk": [
+   "talk on the street"
+  ],
+  "home": [
+   "it comes home"
+  ]
+ },
+ "core_marks": [
+  {
+   "kind": "dress",
+   "ask": "how he dresses"
+  },
+  {
+   "kind": "car",
+   "ask": "how he gets about"
+  },
+  {
+   "kind": "in_the_life",
+   "ask": "how long he has been in the life"
+  }
+ ],
+ "readings": [
+  "nobody in particular",
+  "someone who matters a little",
+  "a man of some weight",
+  "a man who is plainly somebody"
+ ],
+ "figures": {
+  "retinue_mean_head": {
+   "default": 2.5,
+   "unit": "men",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: how many men attend a head of an organisation when he goes about (a draw around this, recorded once)"
+  },
+  "retinue_mean_second": {
+   "default": 1.5,
+   "unit": "men",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: how many men attend a head's deputy"
+  },
+  "retinue_mean_unit": {
+   "default": 0.8,
+   "unit": "men",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: how many men attend the leader of a unit"
+  },
+  "recog_base": {
+   "default": 0.1,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: a stranger placing a man he has never been told about"
+  },
+  "recog_familiarity": {
+   "default": 0.6,
+   "unit": "probability per 100 familiarity",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: placing a man through dealings with him"
+  },
+  "recog_years": {
+   "default": 0.35,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: placing a man through time in the life (saturating, 1 - exp(-years/2))"
+  },
+  "recog_retinue": {
+   "default": 0.12,
+   "unit": "probability per man",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: each visible attendant makes a man easier to place"
+  },
+  "recog_signals": {
+   "default": 0.06,
+   "unit": "probability per signal",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: each worn or arriving-with signal"
+  },
+  "recog_told": {
+   "default": 0.35,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: he has been told of the man"
+  },
+  "recog_fame": {
+   "default": 0.3,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: the man is widely known"
+  },
+  "reading_band": {
+   "default": 0.3,
+   "unit": "weight per step",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: how much evidence moves a stranger one step up the readings of a man he cannot place"
+  },
+  "form_prior": {
+   "default": 0.15,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: knowing a custom with no time in the life"
+  },
+  "form_per_year": {
+   "default": 0.45,
+   "unit": "hazard per year",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: learning customs through time in the life, 1 - exp(-rate * years)"
+  },
+  "form_inducted": {
+   "default": 0.97,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: a man taken in knows the customs"
+  },
+  "form_right_respect": {
+   "default": 3.0,
+   "unit": "relationship points",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: regard earned by the right form"
+  },
+  "form_right_trust": {
+   "default": 1.5,
+   "unit": "relationship points",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: trust earned by the right form"
+  },
+  "form_wrong_resent": {
+   "default": 5.0,
+   "unit": "relationship points",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: resentment from a form missed or got wrong"
+  },
+  "form_wrong_respect": {
+   "default": 4.0,
+   "unit": "relationship points",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: regard lost by a form missed or got wrong"
+  },
+  "form_witness_share": {
+   "default": 0.3,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: the share of the effect that falls on onlookers"
+  },
+  "spend_free_ratio": {
+   "default": 0.25,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: outflow over purse plus outflow above which he reads as spending freely"
+  },
+  "beyond_means_ratio": {
+   "default": 1.0,
+   "unit": "ratio",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: a display costing more than this times his purse is beyond his means"
+  },
+  "in_life_entry_age": {
+   "default": 18,
+   "unit": "years",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: age at which a man of the opening is taken to have entered the life"
+  },
+  "sig_base": {
+   "default": 0.2,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: a happening's baseline significance"
+  },
+  "sig_public": {
+   "default": 0.4,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: added when public"
+  },
+  "sig_sev": {
+   "default": 0.12,
+   "unit": "weight per severity step",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: severity of the happening"
+  },
+  "sig_him": {
+   "default": 1.2,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: it touches him"
+  },
+  "sig_circle": {
+   "default": 0.6,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: it touches his kin, household, men or people he knows (scaled by closeness)"
+  },
+  "sig_violent": {
+   "default": 0.3,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: violence or arrest"
+  },
+  "reach_base": {
+   "default": 0.05,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: a public happening reaching him with nothing else behind it"
+  },
+  "reach_public": {
+   "default": 0.35,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: public"
+  },
+  "reach_sev": {
+   "default": 0.08,
+   "unit": "probability per severity step",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: severity"
+  },
+  "reach_circle": {
+   "default": 0.6,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: it touches people close to him (scaled by closeness)"
+  },
+  "reach_habit": {
+   "default": 0.25,
+   "unit": "probability",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: he keeps a habit that carries news (a paper, the radio)"
+  },
+  "push_attention": {
+   "default": 4.0,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: how much significance one call carries before the rest waits for the next (the rest is returned later, never dropped)"
+  },
+  "push_age_gain": {
+   "default": 0.05,
+   "unit": "per day waiting",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1a: an unshown item grows heavier each day it waits"
+  }
+ }
+}
