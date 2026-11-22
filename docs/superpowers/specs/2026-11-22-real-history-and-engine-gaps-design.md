@@ -1,6 +1,6 @@
 # One intake: anything narrated sticks, real history included (DRAFT design)
 
-Status: DRAFT v2, recast around one intake after the owner's binding clarification (2026-11-22); written without the owner, for the supervisor to take to him. Calls marked **[my call]** are open to correction.
+Status: APPROVED by the owner 2026-11-22 (v2, one intake; his answers to the open questions are folded in and recorded in section 11). Calls still marked **[my call]** were accepted with the design.
 
 ## 1. Intent
 
@@ -158,7 +158,7 @@ Every held thing is simulated, so it can't go stale:
 A real fact is proposed through the same door. Example: `author(kind="firm", details={what, real_date, source, needs, people, place, ...})`, or `kind="law"`, `kind="technology"`. The real-fact fields:
 - `class`: one of technology, firm, firm_event (IPO, merger, failure), person_event (election, appointment, death, conviction), law, office, price, culture, event. It feeds the shape choice in 5.1.
 - `real_date`: ISO, as precise as known, with a `precision` of day, month or year.
-- `source`: a URL and a short quote, or `"memory"`. A `"memory"` fact is marked **to verify**, like the research files.
+- `source`: a URL and a short quote, or `"memory"`. A `"memory"` fact is marked **to verify**. **Owner decision (H4):** a memory-sourced fact about something **major** (a law, an election result, a firm's founding or IPO, a technology's arrival, a real person's office or death) is recorded **provisional**: it may be narrated, but systems read it only as a default until a source verifies it. A **minor** detail (a street price, a model name, a date within the month) is fine from memory. The GM verifies provisional facts when it can search, and verification promotes them with `note(kind="fact")` and the source.
 - `needs`: the preconditions, each a short phrase plus, where possible, a reference (`actor:12`, `org:7`, `history:intel-4004`, `place:…`, `law:…`). These are the causes that had to hold in real history. Examples:
   - Gates and Allen alive and free;
   - the MITS Altair announced (January 1975);
@@ -203,7 +203,7 @@ The outcome is weighed, not listed. Each broken or bent cause carries a weight: 
 
 The draw is seeded per campaign and per fact, so it is repeatable, and the reasons always name the causes. The GM may answer with a better-argued proposal: a substitute it has a source for. The engine re-weighs. It never refuses for "not on a list". It refuses only a named contradiction, such as a dead man founding a firm or a law in force before the legislature that passes it exists.
 
-**Distance rule [my call, owner question 1]:** a fact with no shared entity and no divergence near its field passes on time. National and global history holds unless the run touched it. This keeps "Apple exists" from depending on a coin flip, and puts the change where the run actually acted.
+**Distance rule (owner decision H1):** real history holds as real **unless the run touches it, directly or indirectly**. Directly means a run divergence shares an entity with the fact (its founder, its firm, its office, its law). Indirectly means a **chain of named causes** links them: the run changed A, A was a named cause of B, and B is a named cause of this fact (the protagonist bankrupted a supplier, the supplier would have financed the founder). The engine walks the `needs` of accepted history entries and the divergence ledger to find such chains, and the reason names every link. There is **no general drift**: chance never moves a fact on its own. With no direct or indirect touch, the fact passes on time.
 
 ### 5.8 The divergence ledger
 
@@ -259,10 +259,20 @@ A real person who first appears in play (a congressman, a founder, a CEO) is pro
 
 Their death is decided by the engine's mortality, with the real date as calibration. It isn't a scheduled event **[my call; the mortality model already takes canon anchors]**.
 
+### 5.11b Foreknowledge (owner decision H2)
+
+The player and the GM know the future; the protagonist does not. Foreknowledge never pays by itself.
+
+- A bet, investment, purchase or plan whose only basis is knowing the future is judged as the **character** would see it. That means what he could plausibly know on that day and his advisers' competence in the field, never the player's knowledge. Buying Apple in 1977 "because" is judged like any small bet on an unknown garage firm in an unknown field: a long shot his accountant would argue against.
+- The player profits from foresight only by **positioning the character** so he plausibly comes across the information. He learns the field (training, competence), hires people who know it (an engineer, a broker, a man in Sunnyvale), reads the trade press, or puts money and men where the news is made. The engine then judges the bet on what those people and his learning could plausibly have told him then, through the information layer and `actor_competence`.
+- So the same move can be a reckless guess in one run and a sound bet in another. The difference is the people and learning the character built, not what the player knows.
+- This is the protagonist-under-the-same-rules principle: NPCs get the same judgement, and their bets come from their own knowledge and competence.
+
 ### 5.12 Ties to the business and politics designs
 
 - **Business ("business-design").** Firms founded after 1975, IPOs, mergers and failures arrive as `firm` and `firm_event` entries. The firm population beyond the seeded large firms grows only through this door. Sector drivers read `tech_level` (what products exist and their cost) and price points. The invention check (5.10) produces ventures in business's shape. A real firm's answer to an offer (Microsoft taking no outside money until 1981) is the real person's documented stance, looked up when the offer is made. The business spec should own: what a firm org's money and holdings fields are, how an IPO changes them, and how a demand judgement is made.
 - **Politics ("politics-design").** Offices and the election calendar beyond what the package seeds, the results of real elections outside Saint Jude, and every law beyond the package list come through this door. Real results are the defaults, and the politics simulation decides where the run touched them: the protagonist's money, his candidates, scandals he caused. Laws carry their effects as politics §5.4 data. The politics spec should own: which offices are simulated, as opposed to taken as history defaults, and at what distance from Saint Jude (owner question 3).
+- **How wide the simulation runs (owner decision H3).** Saint Jude, New Jersey and the outer ring are simulated. National politics is simulated only where the run touched it (his donations, his candidates, his scandals), directly or through a chain of causes as in 5.7. The rest of the world is history defaults through the intake.
 - **The law.** Every new statute, ruling or agency (the 1984 Act, Smith v. Maryland, CALEA, the PATRIOT Act) is a law entry. Its run date gates what the law layer can do.
 
 ## 6. Part B: the audit (narrated, then forgotten)
@@ -343,10 +353,10 @@ The concrete changes:
 - Whether `held_things` holds the floor's own money lines or always goes through a ledger holder (my lean: a ledger holder kind `thing:<id>`).
 - Whether the Holding shape extends `org_holdings` and `org_lines` or `possessions`. My lean is the org tables, because they already carry legality and money.
 
-## 11. Open questions for the owner, most important first
+## 11. The owner's decisions (2026-11-22)
 
-1. **How far does the run bend distant history?** My call is that real history holds unless something in the run touches it through a named cause, so Apple and the Berlin Wall happen on time unless he or his world changed their causes. The alternative is a little general drift (chance alone moves dates a bit), which feels more alive and is less predictable.
-2. **Can the protagonist get ahead of history from foreknowledge?** He is an invented man in 1975 with no knowledge of the future, but the GM and the player know it. Does the engine refuse a plan whose only basis is knowing the future (buying Apple stock in 1977 "because"), unless there is an in-world reason? Or is that the player's skill and allowed? My lean: allowed, but his NPC advisers and his own competence judge the bet without foreknowledge, so it is a costly gamble to them.
-3. **How wide is history simulated rather than taken as given?** My call: Saint Jude, New Jersey and the outer ring are simulated. National politics is simulated only where the run touched it (his donations, his candidates). The rest of the world is history defaults.
-4. **Sources.** When the GM can't look something up (no web search on the phone), is "from memory, to verify" good enough to make it canon, or should those stay provisional until verified?
-5. **When the shape is unclear.** My call is that the intake never refuses for that: it lands on the Thing floor (people, money, agenda, place, dates, simulated generically) with a gap flag. The alternative is to ask the GM to say what kind of thing it is (input_gap) before accepting.
+1. **H1, distant history:** history stays as real unless the run touches it, directly or indirectly, through a chain of named causes. There is no general drift (5.7).
+2. **H2, foreknowledge:** profit only through competence and plausibility. The player positions the character through his learning and his employees so he might plausibly come across the information. The bet is judged on what the character could plausibly know and his advisers' competence, never on the player's foreknowledge (5.11b).
+3. **H3, width:** accepted. Saint Jude, New Jersey and the outer ring are simulated, national politics where touched, and the rest is defaults (5.12).
+4. **H4, sources:** accepted. Memory-sourced facts are provisional for anything major until verified, and fine for minor detail (5.5).
+5. **H5, unclear shape:** accepted. It lands on the Thing floor with a gap flag, never a refusal (7.1).
