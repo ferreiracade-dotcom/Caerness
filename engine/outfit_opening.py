@@ -362,6 +362,9 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
     from . import law_opening  # after the organisations: arrangements are paid by their units' earners, and the law's people pull up from the same city
     for name, n in law_opening.build(conn, day).items():
         counts[f"law:{name}"] = n
+    from . import offices  # the package's offices and their holders (a no-op without politics data)
+    for name, n in offices.build(conn, day).items():
+        counts[f"politics:{name}"] = n
     from . import outfit_money  # after the people: holdings need the units and men (outfit_money imports this module)
     for key, gross in outfit_money.build_holdings(conn, day).items():
         counts[f"{key}:gross_yearly"] = int(round(gross))

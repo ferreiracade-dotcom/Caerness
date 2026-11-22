@@ -8622,6 +8622,86 @@
    "source": "unsourced",
    "note": "unsourced; Part II 3.2 says most Pad money moves through intermediaries; sergeants carry it, one to two per precinct and paying family"
   },
+ "office_min_age_mayor": {
+  "default": 25,
+  "range": null,
+  "unit": "years",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Youngest age to run for mayor. NJ municipal charters of the 1970s set 21 to 30; verify."
+ },
+ "office_min_age_council": {
+  "default": 21,
+  "range": null,
+  "unit": "years",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Youngest age to run for council (voting age was 18 from 1971; charters set 21)."
+ },
+ "office_min_age_board": {
+  "default": 21,
+  "range": null,
+  "unit": "years",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Youngest age to sit on a city board."
+ },
+ "office_min_age_commissioner": {
+  "default": 30,
+  "range": null,
+  "unit": "years",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Youngest age for a professional appointed head (commissioner, prosecutor)."
+ },
+ "council_quorum_share": {
+  "default": 0.5,
+  "range": null,
+  "unit": "share of members",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Share of a council that must be present to vote."
+ },
+ "board_quorum_share": {
+  "default": 0.5,
+  "range": null,
+  "unit": "share of members",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Share of a board that must be present to vote."
+ },
+ "vacancy_fill_days": {
+  "default": 60,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Days a vacant office waits for its rule to fill it (a special election takes at least this long to set)."
+ },
+ "male_share_city_office": {
+  "default": 0.92,
+  "range": null,
+  "unit": "share male",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Council and board seats at the opening are drawn at this share male; Saint Jude city government in 1975 is near-all male."
+ },
   "male_share_law_official": {
    "default": 0.97,
    "range": null,

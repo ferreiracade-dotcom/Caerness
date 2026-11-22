@@ -1,0 +1,1080 @@
+{
+ "about": "Politics P1 package data (engine/offices.py and the civic modules read this; the engine names no office, party or ward). Offices are keyed on the world facts' office keys where a world fact exists. cycle {every_years, first_year}: charter calendar (NJ, 1975); {real:true} is the real calendar, filled by P2. Numbers that are not charter facts are design_figures.json entries named here with *_figure.",
+ "calendar": {
+  "election_rule": "first_tuesday_after_first_monday_november",
+  "primary_month": 9,
+  "note": "General election: the Tuesday after the first Monday in November. Primary: first Tuesday of the office's primary_month."
+ },
+ "offices": {
+  "office:city-hall:mayor": {
+   "jurisdiction": "city",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1975
+   },
+   "primary_month": 9,
+   "powers": [
+    "appoint",
+    "veto",
+    "budget",
+    "executive"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_mayor",
+    "residence": "city",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "special_election"
+   },
+   "seats": 1
+  },
+  "office:council:ward-1": {
+   "jurisdiction": "ward",
+   "district": "Ironhaven",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, Ironhaven"
+  },
+  "office:council:ward-2": {
+   "jurisdiction": "ward",
+   "district": "Kerrytown",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, Kerrytown"
+  },
+  "office:council:ward-3": {
+   "jurisdiction": "ward",
+   "district": "Killbuck Flats",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, Killbuck Flats"
+  },
+  "office:council:ward-4": {
+   "jurisdiction": "ward",
+   "district": "Killbuck Point",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, Killbuck Point"
+  },
+  "office:council:ward-5": {
+   "jurisdiction": "ward",
+   "district": "Kosciuszko Park",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, Kosciuszko Park"
+  },
+  "office:council:ward-6": {
+   "jurisdiction": "ward",
+   "district": "North Hill",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, North Hill"
+  },
+  "office:council:ward-7": {
+   "jurisdiction": "ward",
+   "district": "South Hill",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, South Hill"
+  },
+  "office:council:ward-8": {
+   "jurisdiction": "ward",
+   "district": "The Eastside",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, The Eastside"
+  },
+  "office:council:ward-9": {
+   "jurisdiction": "ward",
+   "district": "The Sixth Ward",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, The Sixth Ward"
+  },
+  "office:council:ward-10": {
+   "jurisdiction": "ward",
+   "district": "The East Slope",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, The East Slope"
+  },
+  "office:council:ward-11": {
+   "jurisdiction": "ward",
+   "district": "Fenwick (College Hill)",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, Fenwick (College Hill)"
+  },
+  "office:council:ward-12": {
+   "jurisdiction": "ward",
+   "district": "Greenwood",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, Greenwood"
+  },
+  "office:council:ward-13": {
+   "jurisdiction": "ward",
+   "district": "San Lorenzo (the Hill)",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, San Lorenzo (the Hill)"
+  },
+  "office:council:ward-14": {
+   "jurisdiction": "ward",
+   "district": "The Heights",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, The Heights"
+  },
+  "office:council:ward-15": {
+   "jurisdiction": "ward",
+   "district": "Crown Harbor",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "primary_month": 9,
+   "powers": [
+    "vote",
+    "zoning",
+    "licences",
+    "tenders",
+    "budget"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_council",
+    "residence": "district",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "body_chooses",
+    "by": "office:council:body"
+   },
+   "seats": 1,
+   "role_text": "Council member, Crown Harbor"
+  },
+  "office:council:body": {
+   "jurisdiction": "city",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1977
+   },
+   "powers": [
+    "legislate"
+   ],
+   "eligibility": {},
+   "vacancy": {},
+   "seats": 0,
+   "body": {
+    "members": [
+     "office:council:ward-1",
+     "office:council:ward-2",
+     "office:council:ward-3",
+     "office:council:ward-4",
+     "office:council:ward-5",
+     "office:council:ward-6",
+     "office:council:ward-7",
+     "office:council:ward-8",
+     "office:council:ward-9",
+     "office:council:ward-10",
+     "office:council:ward-11",
+     "office:council:ward-12",
+     "office:council:ward-13",
+     "office:council:ward-14",
+     "office:council:ward-15"
+    ],
+    "chair": "office:city-hall:mayor",
+    "quorum_figure": "council_quorum_share",
+    "tie_rule": "chair_votes",
+    "passes": "majority_present"
+   }
+  },
+  "office:works:board-seat-1": {
+   "jurisdiction": "city",
+   "filled_by": "appointed",
+   "appointer": "office:city-hall:mayor",
+   "term_years": 4,
+   "powers": [
+    "tenders",
+    "contracts"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_board",
+    "residence": "city",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "appointed_by",
+    "by": "office:city-hall:mayor"
+   },
+   "seats": 1,
+   "institution": "sj:institution:board-public-works",
+   "role_text": "Board of Public Works member"
+  },
+  "office:works:board-seat-2": {
+   "jurisdiction": "city",
+   "filled_by": "appointed",
+   "appointer": "office:city-hall:mayor",
+   "term_years": 4,
+   "powers": [
+    "tenders",
+    "contracts"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_board",
+    "residence": "city",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "appointed_by",
+    "by": "office:city-hall:mayor"
+   },
+   "seats": 1,
+   "institution": "sj:institution:board-public-works",
+   "role_text": "Board of Public Works member"
+  },
+  "office:works:board-seat-3": {
+   "jurisdiction": "city",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "every_years": 4,
+    "first_year": 1975
+   },
+   "primary_month": 9,
+   "powers": [
+    "tenders",
+    "contracts"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_board",
+    "residence": "city",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "special_election"
+   },
+   "seats": 1,
+   "institution": "sj:institution:board-public-works",
+   "role_text": "Board of Public Works member"
+  },
+  "office:works:board": {
+   "jurisdiction": "city",
+   "filled_by": "appointed",
+   "powers": [
+    "tenders",
+    "contracts"
+   ],
+   "eligibility": {},
+   "vacancy": {},
+   "seats": 0,
+   "body": {
+    "members": [
+     "office:works:board-seat-1",
+     "office:works:board-seat-2",
+     "office:works:board-seat-3"
+    ],
+    "chair": "office:works:board-seat-3",
+    "quorum_figure": "board_quorum_share",
+    "tie_rule": "re_vote",
+    "passes": "majority_present"
+   }
+  },
+  "office:zoning:board": {
+   "jurisdiction": "city",
+   "filled_by": "appointed",
+   "appointer": "office:city-hall:mayor",
+   "term_years": 5,
+   "powers": [
+    "zoning"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_board",
+    "residence": "city",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "appointed_by",
+    "by": "office:city-hall:mayor"
+   },
+   "seats": 5,
+   "body": {
+    "members_of_office": "office:zoning:board",
+    "chair": null,
+    "quorum_figure": "board_quorum_share",
+    "tie_rule": "failure",
+    "passes": "majority_present"
+   },
+   "role_text": "Zoning Board member"
+  },
+  "office:licensing:board": {
+   "jurisdiction": "city",
+   "filled_by": "appointed",
+   "appointer": "office:city-hall:mayor",
+   "term_years": 5,
+   "powers": [
+    "licences"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_board",
+    "residence": "city",
+    "citizenship": true,
+    "conviction_bar": [
+     "bribery",
+     "kickback",
+     "election_fraud",
+     "no_show_job"
+    ]
+   },
+   "vacancy": {
+    "how": "appointed_by",
+    "by": "office:city-hall:mayor"
+   },
+   "seats": 5,
+   "body": {
+    "members_of_office": "office:licensing:board",
+    "chair": null,
+    "quorum_figure": "board_quorum_share",
+    "tie_rule": "failure",
+    "passes": "majority_present"
+   },
+   "role_text": "Licensing Board member"
+  },
+  "office:sjpd:police-commissioner": {
+   "jurisdiction": "city",
+   "filled_by": "appointed",
+   "appointer": "office:city-hall:mayor",
+   "term_years": null,
+   "at_pleasure": true,
+   "powers": [
+    "police_command"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_commissioner",
+    "residence": "city",
+    "citizenship": true,
+    "conviction_bar": []
+   },
+   "vacancy": {
+    "how": "appointed_by",
+    "by": "office:city-hall:mayor"
+   },
+   "seats": 1
+  },
+  "office:state:governor": {
+   "jurisdiction": "state",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "real": true
+   },
+   "powers": [
+    "appoint"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "special_election"
+   },
+   "seats": 1
+  },
+  "office:state:senate-killbuck": {
+   "jurisdiction": "county",
+   "filled_by": "elected",
+   "term_years": 4,
+   "cycle": {
+    "real": true
+   },
+   "powers": [
+    "consent"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "special_election"
+   },
+   "seats": 1
+  },
+  "office:county-prosecutor:killbuck-county-prosecutor": {
+   "jurisdiction": "county",
+   "filled_by": "appointed",
+   "appointer": "office:state:governor",
+   "consent": "office:state:senate-killbuck",
+   "term_years": 5,
+   "powers": [
+    "prosecute"
+   ],
+   "eligibility": {
+    "min_age_figure": "office_min_age_commissioner",
+    "residence": "county",
+    "citizenship": true,
+    "conviction_bar": []
+   },
+   "vacancy": {
+    "how": "appointed_by",
+    "by": "office:state:governor"
+   },
+   "seats": 1
+  },
+  "office:party:county-chairman": {
+   "jurisdiction": "county",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-1": {
+   "jurisdiction": "ward",
+   "district": "Ironhaven",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-2": {
+   "jurisdiction": "ward",
+   "district": "Kerrytown",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-3": {
+   "jurisdiction": "ward",
+   "district": "Killbuck Flats",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-4": {
+   "jurisdiction": "ward",
+   "district": "Killbuck Point",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-5": {
+   "jurisdiction": "ward",
+   "district": "Kosciuszko Park",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-6": {
+   "jurisdiction": "ward",
+   "district": "North Hill",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-7": {
+   "jurisdiction": "ward",
+   "district": "South Hill",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-8": {
+   "jurisdiction": "ward",
+   "district": "The Eastside",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-9": {
+   "jurisdiction": "ward",
+   "district": "The Sixth Ward",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-10": {
+   "jurisdiction": "ward",
+   "district": "The East Slope",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-11": {
+   "jurisdiction": "ward",
+   "district": "Fenwick (College Hill)",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-12": {
+   "jurisdiction": "ward",
+   "district": "Greenwood",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-13": {
+   "jurisdiction": "ward",
+   "district": "San Lorenzo (the Hill)",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-14": {
+   "jurisdiction": "ward",
+   "district": "The Heights",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  },
+  "office:party:ward-leader-15": {
+   "jurisdiction": "ward",
+   "district": "Crown Harbor",
+   "filled_by": "org",
+   "powers": [
+    "party_office"
+   ],
+   "eligibility": {},
+   "vacancy": {
+    "how": "org_chooses"
+   },
+   "seats": 1,
+   "role_text": "party officer"
+  }
+ },
+ "institution_default": "sj:institution:city-hall",
+ "holders_1975": {
+  "note": "Offices with a world fact keep the holder the opening already gave them; every other seat of an elected or appointed office is pulled up from the city's people (offices.build)."
+ }
+}

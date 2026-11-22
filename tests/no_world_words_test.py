@@ -19,6 +19,8 @@ ROOT = Path(__file__).resolve().parent.parent
 WORDS = re.compile(
     r"\b(capos?|soldiers?|boss(?:es)?|underbosses|underboss|consigliere|associates?|pad|made_men|mobs?|mobster|mafia|"
     r"sabatini|pellegrino|ferrante|vannucci|brigades|combine|horsemen|russians|bolita|charlestown|families|family)\b", re.I)
+POLITICS_WORDS = re.compile(r"(machine|democrat\w*|republican\w*|tammany|alderm\w+|mayor\w*|ward|wards)", re.I)  # politics modules: offices, parties and wards are package data
+POLITICS_FILES = ("offices.py", "electorate.py", "races.py", "appointments.py", "civic_seams.py", "civic_field.py", "civic_patronage.py", "civic_votes.py", "civic_tick.py")
 CAERNESS_TABLES = re.compile(r"underworld_(personnel|crews|organizations|leader_wealth)")
 
 
@@ -26,6 +28,7 @@ def scanned_files() -> list[Path]:
     files = [ROOT / "engine" / "orgs.py", ROOT / "engine" / "law_opening.py", ROOT / "engine" / "crime_response.py", ROOT / "connector" / "views.py",
              ROOT / "engine" / "bearing.py", ROOT / "engine" / "texture.py", ROOT / "engine" / "claims.py", ROOT / "engine" / "news_choices.py",
              ROOT / "engine" / "business_data.py", ROOT / "engine" / "business_drivers.py", ROOT / "engine" / "agreement_terms.py", ROOT / "engine" / "places.py", ROOT / "engine" / "ventures.py", ROOT / "engine" / "intake_business.py"]
+    files += [ROOT / "engine" / n for n in POLITICS_FILES]
     files += sorted((ROOT / "engine").glob("org_*.py")) + sorted((ROOT / "engine").glob("outfit_*.py"))
     out: list[Path] = []
     for f in files:
@@ -61,7 +64,7 @@ def offenders() -> list[str]:
         for i, line in code_lines(path):
             if path.name == "views.py" and CAERNESS_TABLES.search(line):
                 continue
-            for m in WORDS.finditer(line):
+            for m in (list(WORDS.finditer(line)) + (list(POLITICS_WORDS.finditer(line)) if path.name in POLITICS_FILES else [])):
                 found.append(f"{path.relative_to(ROOT)}:{i}: {m.group(0)!r} in {line.strip()[:90]}")
     return found
 

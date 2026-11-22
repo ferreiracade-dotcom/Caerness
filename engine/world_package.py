@@ -328,6 +328,11 @@ def intake_rules(pkg: "WorldPackage") -> dict:
     return _data_json(pkg, "intake")
 
 
+def politics_rules(pkg: "WorldPackage") -> dict:
+    """The package's politics rules (data "politics": offices, calendar, voter groups, races, votes); empty when it has none."""
+    return _data_json(pkg, "politics")
+
+
 def law_rules(pkg: "WorldPackage") -> dict:
     """The package's law and enforcement rules (data "law"); empty when it has none."""
     return _data_json(pkg, "law")

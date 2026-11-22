@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 125
+SCHEMA_VERSION = 126
 
 
 def _running_tests() -> bool:
@@ -4900,6 +4900,7 @@ _MIGRATIONS: dict[int, Migration] = {
     123: ("information_phase_1b", "Claims held by people and audiences, impressions per audience, the personal circle's reactions (audiences, claims, impressions, circle_reactions, claims_state)", None),
     124: ("intake_core", "One intake: held things at B depth and the depth gaps they flag (held_things, depth_gaps)", None),
     125: ("business_layer", "BZ1 shared business layer: driver readings, ventures with parties and approvals, places, agreement terms and breaches (driver_readings, venture_details, venture_parties, venture_approvals, place_details, agreement_terms, agreement_breaches)", None),
+    126: ("politics_p1", "Politics P1: offices, terms, vacancies, field holdings, voter groups, races, civic items and effects, sponsorships (offices, office_terms, office_vacancies, field_holdings, voter_groups, races, race_candidates, civic_items, civic_item_votes, civic_effects, sponsorships)", None),
     117: ("organisation_core", "Outfit tables become organisation tables (org_profiles, units, seats, holdings, lines, money, agenda, incidents, arrangements)", _migration_117),
 }
 

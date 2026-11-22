@@ -5462,3 +5462,128 @@ CREATE TABLE IF NOT EXISTS agreement_breaches (
     owed_usd REAL NOT NULL,
     effect_json TEXT NOT NULL DEFAULT '{}'
 );
+
+-- schema 126: politics P1 (offices, field holdings, voter groups, races, civic items, effects, sponsorships)
+CREATE TABLE IF NOT EXISTS offices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    office_key TEXT NOT NULL UNIQUE,
+    jurisdiction_kind TEXT NOT NULL DEFAULT '',
+    jurisdiction_ref TEXT,
+    filled_by TEXT NOT NULL CHECK (filled_by IN ('elected','appointed','org')),
+    appointer_office_key TEXT,
+    consent_office_key TEXT,
+    term_years INTEGER,
+    cycle_json TEXT NOT NULL DEFAULT '{}',
+    powers_json TEXT NOT NULL DEFAULT '[]',
+    eligibility_json TEXT NOT NULL DEFAULT '{}',
+    vacancy_json TEXT NOT NULL DEFAULT '{}',
+    body_json TEXT NOT NULL DEFAULT '{}',
+    seats INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS office_terms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    office_id INTEGER NOT NULL REFERENCES offices(id),
+    actor_id INTEGER NOT NULL REFERENCES actors(id),
+    seat_no INTEGER NOT NULL DEFAULT 1,
+    start_day INTEGER NOT NULL,
+    end_day INTEGER,
+    how TEXT NOT NULL CHECK (how IN ('opening','elected','appointed','succeeded','special')),
+    ended_how TEXT,
+    source_id INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_office_terms_open ON office_terms(office_id, seat_no, end_day);
+CREATE TABLE IF NOT EXISTS office_vacancies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    office_id INTEGER NOT NULL REFERENCES offices(id),
+    seat_no INTEGER NOT NULL DEFAULT 1,
+    since_day INTEGER NOT NULL,
+    cause TEXT NOT NULL,
+    rule_json TEXT NOT NULL DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','filled','dropped')),
+    filled_day INTEGER,
+    filled_how TEXT
+);
+CREATE TABLE IF NOT EXISTS field_holdings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    holder_kind TEXT NOT NULL CHECK (holder_kind IN ('org','actor')),
+    holder_id INTEGER NOT NULL,
+    stake_kind TEXT NOT NULL,
+    stake_ref TEXT NOT NULL,
+    strength REAL NOT NULL DEFAULT 1.0,
+    since_day INTEGER NOT NULL,
+    ended_day INTEGER,
+    cause_kind TEXT,
+    cause_id INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_field_holdings_holder ON field_holdings(holder_kind, holder_id, ended_day);
+CREATE INDEX IF NOT EXISTS idx_field_holdings_stake ON field_holdings(stake_kind, stake_ref, ended_day);
+CREATE TABLE IF NOT EXISTS voter_groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_key TEXT NOT NULL UNIQUE,
+    district_ref TEXT,
+    location_id INTEGER,
+    words_json TEXT NOT NULL DEFAULT '{}',
+    size INTEGER NOT NULL DEFAULT 0,
+    turnout_base REAL NOT NULL DEFAULT 0.5,
+    grievances_json TEXT NOT NULL DEFAULT '[]',
+    audience_id INTEGER REFERENCES audiences(id)
+);
+CREATE TABLE IF NOT EXISTS races (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    office_id INTEGER NOT NULL REFERENCES offices(id),
+    seat_no INTEGER NOT NULL DEFAULT 1,
+    stage TEXT NOT NULL DEFAULT 'filing',
+    primary_day INTEGER,
+    election_day INTEGER NOT NULL,
+    venture_id INTEGER,
+    result_json TEXT NOT NULL DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','decided','void')),
+    special INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS race_candidates (
+    race_id INTEGER NOT NULL REFERENCES races(id),
+    actor_id INTEGER NOT NULL REFERENCES actors(id),
+    party_org_id INTEGER,
+    filed_day INTEGER NOT NULL,
+    dropped_day INTEGER,
+    drop_reason TEXT,
+    primary_share REAL,
+    general_share REAL,
+    PRIMARY KEY (race_id, actor_id)
+);
+CREATE TABLE IF NOT EXISTS civic_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    body_office_key TEXT NOT NULL,
+    item_kind TEXT NOT NULL,
+    subject_json TEXT NOT NULL DEFAULT '{}',
+    opened_day INTEGER NOT NULL,
+    vote_day INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','passed','failed','void')),
+    outcome_json TEXT NOT NULL DEFAULT '{}',
+    venture_id INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_civic_items_due ON civic_items(status, vote_day);
+CREATE TABLE IF NOT EXISTS civic_item_votes (
+    item_id INTEGER NOT NULL REFERENCES civic_items(id),
+    member_actor_id INTEGER NOT NULL,
+    vote TEXT NOT NULL CHECK (vote IN ('yes','no','abstain','absent')),
+    why_json TEXT NOT NULL DEFAULT '{}',
+    PRIMARY KEY (item_id, member_actor_id)
+);
+CREATE TABLE IF NOT EXISTS civic_effects (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_kind TEXT NOT NULL,
+    source_id INTEGER,
+    effect_key TEXT NOT NULL,
+    value_json TEXT NOT NULL DEFAULT '{}',
+    from_day INTEGER NOT NULL,
+    to_day INTEGER
+);
+CREATE TABLE IF NOT EXISTS sponsorships (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    appointee_actor_id INTEGER NOT NULL,
+    office_id INTEGER NOT NULL,
+    sponsor_actor_id INTEGER,
+    ledger_ref INTEGER,
+    day INTEGER NOT NULL
+);
