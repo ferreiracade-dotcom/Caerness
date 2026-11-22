@@ -62,7 +62,7 @@ def run():
             for need in ("The Period Mind", "Taboos: Acts and Their Consequences", "Names", "Women in Saint Jude",
                          "Price Weather", "Law Weather"):
                 assert need.lower() in paths.lower(), need
-            assert "A taboo is never a wall" in text and "women are never made" in text
+            assert "A taboo is never a wall" in text and "Women are not made" in text
             assert "**Content limits.** Real people act on stage within who they documentably were." in text and "No real person acts or speaks" not in text
             assert text.count("[verified") >= 100, text.count("[verified")
             assert "Pellegrino" in text and "Ferrante" in text  # the renamed families

@@ -5191,7 +5191,7 @@
    "source": "Part I 4.1",
    "kind": "fixed",
    "mark": "Design",
-   "note": "rule: growth capped at 0.5 percent a year before 1990"
+   "note": "growth before 1990 would be unusual and needs a strong cause the story can date (Part I); a tendency, not a cap"
   },
   "population_change_requires_dated_cause": {
    "default": true,
@@ -5291,7 +5291,7 @@
    "source": "Part III 3.2",
    "kind": "draw",
    "mark": "Design",
-   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_sabatini_mid)"
+   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_sabatini_mid); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_pellegrino": {
    "default": 45,
@@ -5304,13 +5304,7 @@
    "source": "Part III 3.2",
    "kind": "draw",
    "mark": "Design",
-   "extended_range": [
-    51,
-    55
-   ],
-   "extended_requires": "a dated cause (Part III 3.2; Part VI 9.9 item 2)",
-   "ceiling": 55,
-   "note": "default 45 stated in Part III 3.2; Part VI 9 also uses it as the midpoint"
+   "note": "default 45 stated in Part III 3.2; Part VI 9 also uses it as the midpoint; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_ferrante": {
    "default": 44,
@@ -5323,7 +5317,7 @@
    "source": "Part III 3.2",
    "kind": "draw",
    "mark": "Design",
-   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_ferrante_mid)"
+   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_ferrante_mid); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_vannucci": {
    "default": 36,
@@ -5336,7 +5330,7 @@
    "source": "Part III 3.2",
    "kind": "draw",
    "mark": "Design",
-   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_vannucci_mid)"
+   "note": "default set inside the range at a non-round value (Part III 3.2 as revised); Part VI 9 uses the range midpoint (made_men_vannucci_mid); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_total": {
    "default": 182,
@@ -5348,7 +5342,7 @@
    "mark": "Design",
    "formula": "made_men_sabatini+made_men_pellegrino+made_men_ferrante+made_men_vannucci",
    "tol": 0.5,
-   "note": "sum of the drawn defaults; ranges sum 160 to 200, about 180 to 190 (Part III 3.2)"
+   "note": "sum of the drawn defaults; ranges sum 160 to 200, about 180 to 190 (Part III 3.2); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_sabatini_mid": {
    "default": 55,
@@ -5358,7 +5352,7 @@
    "source": "Part VI 9 intro (range midpoint)",
    "kind": "fixed",
    "mark": "Design",
-   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_sabatini"
+   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_sabatini; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_pellegrino_mid": {
    "default": 45,
@@ -5368,7 +5362,7 @@
    "source": "Part VI 9 intro (range midpoint)",
    "kind": "fixed",
    "mark": "Design",
-   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_pellegrino"
+   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_pellegrino; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_ferrante_mid": {
    "default": 45,
@@ -5378,7 +5372,7 @@
    "source": "Part VI 9 intro (range midpoint)",
    "kind": "fixed",
    "mark": "Design",
-   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_ferrante"
+   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_ferrante; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_vannucci_mid": {
    "default": 35,
@@ -5388,7 +5382,7 @@
    "source": "Part VI 9 intro (range midpoint)",
    "kind": "fixed",
    "mark": "Design",
-   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_vannucci"
+   "note": "midpoint of the Part III 3.2 range; the scale test and its per-man figures use it, the draw default is made_men_vannucci; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "made_men_total_mid": {
    "default": 180,
@@ -5400,7 +5394,7 @@
    "mark": "Design",
    "formula": "made_men_sabatini_mid+made_men_pellegrino_mid+made_men_ferrante_mid+made_men_vannucci_mid",
    "tol": 0.5,
-   "note": "the 180 men of the scale test"
+   "note": "the 180 men of the scale test; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_sabatini": {
    "default": 6.7,
@@ -12556,7 +12550,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The DeCavalcante Family (Elizabeth), a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+   "note": "unsourced; Made men simulated for The DeCavalcante Family (Elizabeth), a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_decavalcante": {
    "default": 0.5,
@@ -12576,7 +12570,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The Genovese New Jersey Faction, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+   "note": "unsourced; Made men simulated for The Genovese New Jersey Faction, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_genovesenj": {
    "default": 0.5,
@@ -12596,7 +12590,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The Lucchese New Jersey Crew, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+   "note": "unsourced; Made men simulated for The Lucchese New Jersey Crew, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_lucchesenj": {
    "default": 0.5,
@@ -12616,7 +12610,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The Philadelphia Family, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+   "note": "unsourced; Made men simulated for The Philadelphia Family, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_philadelphia": {
    "default": 0.5,
@@ -12636,7 +12630,7 @@
    "kind": "fixed",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The Gambino Presence, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py)"
+   "note": "unsourced; Made men simulated for The Gambino Presence, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_gambino": {
    "default": 0.5,

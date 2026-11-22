@@ -481,7 +481,7 @@ Part III 7.8 describes what the family does. This is what the owner's books look
 | Part I 4.4 | A Democratic machine has run the city for a century. It was Irish through most of the twentieth century. Italians have been rising since the 1950s, and the Black community's share is growing against stubborn resistance. Reform candidates win about one election in three. City jobs are the machine's currency. In the mid 1970s its money is running out. |
 | Part I 4.6 | Mayoral elections fall in odd-numbered years on a four-year cycle, on the first Tuesday after the first Monday in November, with a party primary in September. The 1975 election is Open. |
 | Part I 8.1 | The Port Authority board is appointed by the Governor and the Mayor. It has no voters, a great deal of patronage and a long record of being run for whoever controls the board. |
-| Part I 12.1 | At most one woman sits on the Council. No woman has been Mayor, police commissioner, County Prosecutor or ward leader of a major ward. |
+| Part I 12.1 | A woman on the Council is a rarity (one, perhaps two in a generation, or none). No woman has been Mayor, police commissioner, County Prosecutor or ward leader of a major ward. |
 | Part II 2.6, 3 | The Dolan Commission (1970 to 1972) and the reforms that followed. The Pad survives through intermediaries. A new commander reopens every arrangement. |
 | Part II 4.5 | The State Commission of Investigation can subpoena and hold public hearings but cannot prosecute. |
 | Part III 4.1 | The Sabatini bosses have been politicians for two generations, with the most friends in City Hall, the Buildings Department and the courts. |

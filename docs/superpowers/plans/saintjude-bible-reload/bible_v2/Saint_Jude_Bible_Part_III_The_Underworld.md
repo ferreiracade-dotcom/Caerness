@@ -582,7 +582,7 @@ Beatings, threats, burnt cars, broken windows, a dead dog on a doorstep, and a f
 
 ## 9. Taboos: Acts and Their Consequences
 
-**Fixed.** Nothing in the Life is *impossible*, **with one exception: women are never made (section 11, Part I 12.2), and that rule carries no price.** There are acts that bring heavy consequences. A taboo is a fact of the world: some people will care very much if it is broken, and they will react in a range depending on who did it, who saw it, what the circumstances were, and what the offender is worth. **A taboo is never a wall that stops the player or an NPC.** It is a price.
+**Fixed.** Nothing in the Life is *impossible*, **Women are not made (section 11, Part I 12.2): none has been in living memory, and none is expected. It would be an extraordinary shock that needs a cause the story can state, and every family would react.** There are acts that bring heavy consequences. A taboo is a fact of the world: some people will care very much if it is broken, and they will react in a range depending on who did it, who saw it, what the circumstances were, and what the offender is worth. **A taboo is never a wall that stops the player or an NPC.** It is a price.
 
 | Act | Who cares most | Typical reaction range | Who can excuse it |
 |---|---|---|---|

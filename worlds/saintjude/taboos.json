@@ -1,5 +1,5 @@
 {
-  "about": "Each taboo is an act that the people who care will react to, not one that cannot happen: a taboo is a price, not a wall (Part III 9; Part V 10.4). The reactions are ranges for judging plausibility, not a menu to choose from, and each reaction is individual (Tendency): a boss, a capo and a man who learns of the act each decide for himself. The one exception is in fixed_rules: women are never made, and that carries no price.",
+  "about": "Each taboo is an act that the people who care will react to, not one that cannot happen: a taboo is a price, not a wall (Part III 9; Part V 10.4). The reactions are ranges for judging plausibility, not a menu to choose from, and each reaction is individual (Tendency): a boss, a capo and a man who learns of the act each decide for himself. fixed_rules: women are not made. None has been in living memory and none is expected; it would be an extraordinary shock with a stated cause, and every family would react.",
   "source": "Part III 9 (15 rows, Fixed) and Part V 10.4 (8 rows, Fixed); the reaction ranges are Tendency. Wording of the cells follows the bible; a row's cell that was a range 'from X to Y' is split into its ends and steps.",
   "taboos": {
     "killing_a_police_officer": {
@@ -440,7 +440,7 @@
     {
       "kind": "fixed_rule",
       "key": "women_are_never_made",
-      "rule": "Women are never made.",
+      "rule": "Women are not made: none in living memory, none expected; only an extraordinary shock with a stated cause, and every family reacts.",
       "carries_no_price": true,
       "note": "Not a taboo and not an act a player can do and pay for: no price and no event breaks it (Part III 9: 'that rule carries no price'; Part I 12.2). Women reach power by other routes (Part I 12.4).",
       "source": "Part III 9; Part I 12.2; Part III 11",

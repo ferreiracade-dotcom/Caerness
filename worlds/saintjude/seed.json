@@ -9,7 +9,7 @@
   "opening_date": "1975-01-01",
   "calendar_rule": "Gregorian; day 0 is Wednesday 1 January 1975; birth_day is authoritative arithmetic and birth_date its rendering.",
   "example_rule": "Every named person is an Example (Part III 4.6, Part V 0.2) with canon_tag 'Example' and may be replaced; Fixed history in the claims names no person, only roles and events.",
-  "families_rule": "The four families are Sabatini, Pellegrino, Ferrante and Vannucci (Part III 0). Women are never made (Part I 12.2).",
+  "families_rule": "The four families are Sabatini, Pellegrino, Ferrante and Vannucci (Part III 0). Women are not made: none has been in living memory and none is expected (Part I 12.2).",
   "open_offices_rule": "Offices and institutions are seeded; the names of their holders are Open (Part I 15.1, Part II 10, Index 7) and are not seeded.",
   "no_pressures_rule": "No pressures, secrets, deadlines or plot hooks are stored; motives are ordinary traits.",
   "open_offices": [
