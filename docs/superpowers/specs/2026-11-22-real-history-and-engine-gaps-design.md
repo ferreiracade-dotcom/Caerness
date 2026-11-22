@@ -1,15 +1,27 @@
-# Real history on demand, and what the engine cannot hold (DRAFT design)
+# One intake: anything narrated sticks, real history included (DRAFT design)
 
-Status: DRAFT, written without the owner, for the supervisor to take to him. Calls marked **[my call]** are open to correction.
+Status: DRAFT v2, recast around one intake after the owner's binding clarification (2026-11-22); written without the owner, for the supervisor to take to him. Calls marked **[my call]** are open to correction.
 
 ## 1. Intent
 
 The owner's words: "there's only so much real life stuff we can put in the database. There needs to be a way for the agent to look something up and for it to be able to be added into the engine ... some things might not happen when they did, or they might not happen at all." Also: "all of those things are possible with the agent but then the engine won't be able to reflect them."
 
-There are two problems here, and they share one root: the GM can tell more than the engine can hold.
+The root of both is the same: the GM can tell more than the engine can hold.
 
-- **A. Real history.** Sixty years of technology, firms, IPOs, politicians, laws and prices can't be preloaded. The GM looks a fact up when play needs it and proposes it with a source and date. The engine checks it against this run's alternate history and records the outcome as dated canon that other systems read.
-- **B. Narrated, then forgotten.** Some things a player or NPC plausibly does in Saint Jude have nowhere to live in the engine. They are narrated once and then lost. Section 6 is the audit, ranked. Section 7 is the generic fix.
+**Owner's clarification (binding, 2026-11-22, via the supervisor):**
+- The audit closes the gaps found now, but some will always be missed. So the core deliverable is a generic **catch-all**: whenever the GM plausibly narrates something the engine has no mechanism for (expansion outside the city, a new kind of venture, an institution, a custom), there must be a way to make it stick. It is recorded as a persisting, simulated thing with owners or people, money, an agenda, a place, dates and consequences, so it can't be forgotten and doesn't ruin the run.
+- It is flagged as a gap for a later deep build.
+- It extends the depth rule (B: a generic living org through the org core) to anything, not only orgs: facts, standing arrangements, customs, territories, technologies.
+- Real history feeds it. A looked-up real fact enters through the same path, checked against the alternate history.
+- There is **one intake with veto-only checks**, not two systems.
+
+So the design is one door, **the intake** (section 5). Its parts:
+- the generic thing it records (5.1);
+- the checks it runs (5.2);
+- how a thing lives at B depth (5.3);
+- how it is flagged for C (5.4).
+
+Real history (5.5 to 5.10) is the intake with a source and a real date, which add one extra check: do the causes still hold in this run? Section 6 is the audit, which says what the intake must cover first. Section 7 says what the intake replaces.
 
 ## 2. Goals, non-goals, anti-goals
 
@@ -54,19 +66,97 @@ There are two problems here, and they share one root: the GM can tell more than 
 
 ## 4. Approaches considered
 
-1. **Grow the package timeline** with research sessions writing more entries. This fails the owner's point: it is a database waiting for its time, it never covers 60 years, and dates stay hard.
-2. **The GM writes facts through `note`.** This is cheap, but nothing checks causes, nothing dates it in the run, and no system reads it. It is the "narrated and forgotten" problem in another form.
-3. **A history ledger (recommended).** The GM proposes a real fact with a source, its real date and what it depends on. The engine resolves each dependency against the run, weighs the outcome, and records the result as a dated entry with effects as data. The package timeline becomes the seed of that ledger, as defaults, and stops being a wall.
+1. **Grow the package timeline and add mechanisms one by one.** This fails the owner's point: it is a database waiting for its time, it never covers 60 years, and every missed case is forgotten until someone builds for it.
+2. **Two systems: a history ledger plus a separate catch-all.** This is what the first draft did. The owner ruled it out: two doors means two sets of checks and a GM who must choose between them.
+3. **One intake (chosen by the owner).** Every lasting thing the GM narrates, invented or real, goes through `author`.
+   - The engine picks the nearest shape it has, runs veto-only checks, and records it as a living B-depth thing with owners, money, agenda, place, dates and consequences.
+   - A thing that has a source and a real date also gets the history-causes check.
+   - Anything without deep machinery is flagged as a gap for a C build.
+   - The package timeline becomes intake defaults and stops being a wall.
 
-## 5. The design (Part A)
+## 5. The design
 
-### 5.1 The proposal: `author(kind="history")`
+### 5.1 The intake and the generic thing
 
-This rides the existing `author` tool, whose docstring already says "make something new real" **[my call]**. A new tool would cost the connector a tool slot and the GM one more thing to remember.
+**The door.** `author(kind, details)` is already "make something new real", and its `kind` is already free text. The intake widens it. No new tool **[my call]**. Free-operation commitments that settle (`settle_due`) and lasting outcomes of `act` also pass through it internally, so nothing lasting bypasses the door.
 
-`details`:
-- `what`: the fact in words ("Microsoft is founded in Albuquerque by Bill Gates and Paul Allen").
-- `class`: one of technology, firm, firm_event (IPO, merger, failure), person_event (election, appointment, death, conviction), law, office, price, culture, event. A free word maps to the nearest, as `_kind_of` does now.
+**The common fields** every thing may carry, whatever its kind. All are optional except `what`, and the engine fills or asks for the rest:
+- `what`: the thing in words ("the Ferrante crew's numbers bank in South Philadelphia", "the families' truce for the Feast of Saint Rocco", "the pocket pager", "Microsoft").
+- `people`: owners, members and leaders, as refs or new persons (made by the person path).
+- `place`: a ref, or a place name. An unknown real place is made lazily at coarse depth (5.3), and a gazetteer-replaced town is still refused.
+- `money`: what it costs to start (from whom, taken by the ledger), and its yearly or weekly income and upkeep (and from where).
+- `agenda`: what it wants or does, in words ("grow into Camden", "hold the truce", "sell to hospitals").
+- `dates`: start, end or recurrence (a custom's yearly day), and due dates.
+- `legality`: legal, grey or illegal, under which law where known.
+- `knows`: who knows it (the information layer).
+- `consequences`: what it changes, in words, which the engine maps to readers (5.3).
+- **Real facts only:** `source` (a URL and a quote, or `"memory"`, marked to verify), `real_date` with `precision`, and `needs` (the causes it depended on in real history).
+
+**Shapes.** The engine chooses the nearest shape it can deepen, as `_kind_of` does now. It reads the words first, then the fields present:
+
+| shape | backed by | examples |
+|---|---|---|
+| Person | actors (exists) | a new man, a real congressman |
+| Org | the org core (exists) | a crew in Philadelphia, a newspaper, a PAC, a start-up firm |
+| Place / territory | locations plus a coarse jurisdiction, and territorial control | Newark, Atlantic City, a Bahamas bank's island, "the docks south of Pier 9" |
+| Holding | `org_holdings` and `org_lines`, or `possessions` | a building, a fleet, a chop shop, a share stake |
+| Arrangement | `agreements` and `org_arrangements` | 10% of the take, a supply contract, a marriage |
+| Custom / standing rule | a recurring dated fact with participants | a truce week, a tribute day, a tithe, the Sunday dinner where disputes are heard |
+| Technology | `tech_level` (new) | the pager, the microcomputer, an invention of his |
+| Dated fact | `history_entries` plus `world_facts` (new and existing) | a law, an IPO, an election result, a price |
+| **Thing** (the floor) | `held_things` alone | anything that fits none of the above |
+
+**One row for every intake, whatever its shape.** Every intake writes a `held_things` row:
+- the shape, plus the backing table and id if any;
+- people, place, money lines, agenda, dates, legality and knows;
+- consequences and the readers they were mapped to, with any unmapped words kept;
+- source and verify mark;
+- a `depth` field, `B` until C is built;
+- a gap flag.
+
+If no shape fits, the row itself is the thing, and the generic tick (5.3) keeps it alive. **This is the guarantee: nothing accepted is ever only a log line.**
+
+### 5.2 The checks (veto only)
+
+The checks run in order. Each either refuses with a named reason (`reason_kind`: contradiction or input_gap), scales the thing down with its reason, or passes. None offers options.
+
+1. **World text.** The gazetteer and the timeline: a replaced real town is refused. A dated *law* not in force in the run is refused. A dated *technology* goes to check 6 instead of being refused.
+2. **Established facts and entities.** A dead owner, a jailed founder, a place already held by someone, a Fixed fact without a cause, or an office already filled is refused, with the clash named.
+3. **Real-people rule.** A real person acting off their record (a clean figure doing dirty work, wrongdoing of a kind not on their record) is refused, and the GM is told to use an invented man.
+4. **World scale.** Money comes from a named holder and is taken by the ledger. Men come from where men are. An oversized ask gets what exists (`scaled_down`), as authoring does now.
+5. **History causes**, only when `source` or `real_date` is given (5.7): the outcome is on time, earlier, later, changed or not at all.
+6. **Enablers**, only when the thing is or needs a technology (5.10). A missing enabler is a named contradiction. Distance ahead of the run's technology is cost and time, never a ceiling.
+7. **Means and competence**, for a thing someone builds: skill, people and time become a commitment with a due day, and the thing goes live when it settles.
+
+### 5.3 Living at B depth
+
+Every held thing is simulated, so it can't go stale:
+- **Money lines** run through the ledger every tick (income and upkeep, to and from its people or org). A thing that can't pay its upkeep weakens and then ends, and its people are told.
+- **Its agenda** gives it happenings, on the pattern of `org_happenings`. Each tick it may grow, shrink, draw attention, clash with whoever shares its place or field (org tension), or ask its owner for something (an interaction). The chance is drawn from its size, money, agenda and legality.
+- **Consequences** are mapped to readers that exist:
+  - illegal means heat and a possible law case where it sits;
+  - known by people means knowledge and rumours;
+  - a place means that jurisdiction's law and officials;
+  - an arrangement's breach means tension and loyalty;
+  - a custom's day means its participants' behaviour (a truce lowers violence between the named outfits that week, through org tension);
+  - a technology means what business and the law can do;
+  - the owner's death means succession and inheritance.
+
+  Words that map to no reader are kept on the row, and they mark the gap (5.4).
+- **Lazy places** are made at coarse depth: population band, its jurisdiction's offices and law agencies (their real 1975 state from the GM, through this same intake), outfits present, and routes to Saint Jude. That is enough for org seats, lines and travel to point at.
+- **Ending.** It ends when its dates run out, its money fails, it is destroyed (an attack or a raid), or it is folded into a deeper build. Its row stays as history.
+
+### 5.4 The gap flag and the path to C
+
+- Every intake that lands on the **Thing** floor, or carries consequence words no reader takes, writes or bumps a `depth_gaps` row. The row holds the class of thing (normalised words), the count, the first and last day, example held_things ids, and the missing readers.
+- `lookup` shows open gaps, and the supervisor or owner sees them as a build queue: the most frequent and most consequential gaps first.
+- The depth rule's "play is heading here" flag fires when one class recurs (three foreign ventures, four civil disputes).
+- When a C build lands for a class, a migration moves its held things into the new tables and clears the gap. Nothing narrated in the meantime is lost.
+
+### 5.5 Real facts: the same intake with a source
+
+A real fact is proposed through the same door. Example: `author(kind="firm", details={what, real_date, source, needs, people, place, ...})`, or `kind="law"`, `kind="technology"`. The real-fact fields:
+- `class`: one of technology, firm, firm_event (IPO, merger, failure), person_event (election, appointment, death, conviction), law, office, price, culture, event. It feeds the shape choice in 5.1.
 - `real_date`: ISO, as precise as known, with a `precision` of day, month or year.
 - `source`: a URL and a short quote, or `"memory"`. A `"memory"` fact is marked **to verify**, like the research files.
 - `needs`: the preconditions, each a short phrase plus, where possible, a reference (`actor:12`, `org:7`, `history:intel-4004`, `place:…`, `law:…`). These are the causes that had to hold in real history. Examples:
@@ -74,17 +164,17 @@ This rides the existing `author` tool, whose docstring already says "make someth
   - the MITS Altair announced (January 1975);
   - no rival BASIC dominant on the Altair.
 - `about`: the engine entities it touches, if any.
-- `effects` (optional, the GM's proposal): what the fact changes, in the words of section 5.5.
+- `effects` (optional, the GM's proposal): what the fact changes, in the words of section 5.9.
 
-The GM is told in the rulebook to propose the causes honestly, including the ones that would break it in this run. The engine doesn't trust the list blindly. It adds the causes it can see itself (5.3).
+The GM is told in the rulebook to propose the causes honestly, including the ones that would break it in this run. The engine doesn't trust the list blindly. It adds the causes it can see itself (5.7).
 
-### 5.2 When the GM looks something up (lazy introduction)
+### 5.6 When the GM looks something up (lazy introduction)
 
 Nothing is preloaded. A fact enters at one of four moments:
 
 1. **Play reaches a domain.** A scene turns to computers, a council vote or a stock. The GM looks up what was real then and nearby, and proposes only what the scene uses.
 2. **A time-skip crosses dates.** `advance` returns, as it already returns interrupts, a short "what was due in the real world" prompt for the domains the protagonist touches (his trades, his offices, his city's politics, the law against him). The GM looks those up and proposes them. This means elections, laws and major firm events in his sphere are never missed, without a list waiting in the database **[my call]**.
-3. **A character's plan needs it.** An invention, an investment in a real firm, a run for office. The plan's check asks for its enablers (5.6), and the GM proposes the missing ones.
+3. **A character's plan needs it.** An invention, an investment in a real firm, a run for office. The plan's check asks for its enablers (5.10), and the GM proposes the missing ones.
 4. **An NPC with documented history acts.** A real person's next real move (Byrne's 1977 campaign) is looked up when his B-depth turn comes and the engine asks for it.
 
 A fact proposed **for a date still ahead** of the game date (the GM foresees Apple's 1980 IPO while in 1979) is stored as **foreseen**:
@@ -95,14 +185,14 @@ A fact proposed **for a date still ahead** of the game date (the GM foresees App
 
 This is the only "waiting" row, and it exists only because play reached for it.
 
-### 5.3 The engine's check: do the causes still hold here?
+### 5.7 The engine's check: do the causes still hold here?
 
 The engine resolves each `needs` item against the run:
 - **Holds:** the referenced actor is alive, free and in the stated role; the org exists; the law is in force; the history entry was accepted on or before the date.
 - **Broken:** the actor is dead, jailed or elsewhere; the org is gone or absorbed; the niche is held by someone else; the law was defeated.
 - **Unknown:** there is no entity to check, so it is treated as holding, because history holds by default.
 
-The engine also adds causes of its own, from the **divergence ledger** (5.4), when the fact's subject or field shares an entity with a recorded divergence. For example, the protagonist's firm already sells a BASIC for the Altair, or the real founder was killed in the run. This is how the run's own acts reach facts the GM didn't think to link.
+The engine also adds causes of its own, from the **divergence ledger** (5.8), when the fact's subject or field shares an entity with a recorded divergence. For example, the protagonist's firm already sells a BASIC for the Altair, or the real founder was killed in the run. This is how the run's own acts reach facts the GM didn't think to link.
 
 The outcome is weighed, not listed. Each broken or bent cause carries a weight: how central it was (the founder himself versus a supplier) and whether a substitute plausibly exists (another investor, another chip). Then:
 - **all hold:** **on time**, at the real date;
@@ -115,7 +205,7 @@ The draw is seeded per campaign and per fact, so it is repeatable, and the reaso
 
 **Distance rule [my call, owner question 1]:** a fact with no shared entity and no divergence near its field passes on time. National and global history holds unless the run touched it. This keeps "Apple exists" from depending on a coin flip, and puts the change where the run actually acted.
 
-### 5.4 The divergence ledger
+### 5.8 The divergence ledger
 
 A new `divergences` table. A row is written whenever the run departs from a known real default:
 - a real person dies, is jailed, wins or loses off his real date or outcome;
@@ -124,9 +214,9 @@ A new `divergences` table. A row is written whenever the run departs from a know
 - a history entry comes out earlier, later, changed or not at all;
 - the protagonist founds a firm or venture in a field a real firm later enters (written when that history fact is first proposed, by matching field words).
 
-Each row records the subject entity, the field words, the day, the cause (an event or act id) and a short text. It is cheap and read only by the check in 5.3 and by the GM's `lookup` ("how has this world gone differently?").
+Each row records the subject entity, the field words, the day, the cause (an event or act id) and a short text. It is cheap and read only by the check in 5.7 and by the GM's `lookup` ("how has this world gone differently?").
 
-### 5.5 Recording: dated canon with effects as data
+### 5.9 Recording: dated canon with effects as data
 
 The accepted outcome becomes:
 - a `history_entries` row: class, what, real date, run date (or null for not at all), outcome, reasons, `needs` with their resolution, source, verify mark, effects, status (foreseen, in_force, never, superseded);
@@ -136,7 +226,7 @@ Effects are applied at the run date by class, into systems that already exist or
 
 | class | effect (data) | read by |
 |---|---|---|
-| technology | `tech_level` entry: thing, exists, available, common (run dates), price band | invention check (5.6), business drivers, the law (wiretap, DNA), `dated_rules` |
+| technology | `tech_level` entry: thing, exists, available, common (run dates), price band | invention check (5.10), business drivers, the law (wiretap, DNA), `dated_rules` |
 | law | an in-force law with effects (politics draft §5.4: tax rate, sector cost, crime-policy shift) | law, crime_response, business drivers, `dated_rules` |
 | office / person_event | office holder in `world_facts` (`holder_actor_id`); a real person seeded or moved | politics, standing, the law |
 | firm | a generic org at B depth (org core) with real founders as real people, a sector, size and money | business sphere |
@@ -146,20 +236,20 @@ Effects are applied at the run date by class, into systems that already exist or
 
 The **package timeline** is loaded as **defaults** into `history_entries` (outcome "default", status per date), not as a wall. `dated_rules` changes from "named before its real date → refuse" to the following:
 - for a **law or institution:** before its run date, refuse; it isn't in force here;
-- for a **technology:** before its run date, don't refuse. Send it to the invention check (5.6), and refuse only if that check finds a missing enabler;
+- for a **technology:** before its run date, don't refuse. Send it to the invention check (5.10), and refuse only if that check finds a missing enabler;
 - an entry whose run outcome is "not at all" is refused with the reason ("the casino referendum failed here in 1976 because …").
 
-### 5.6 Invention plausibility
+### 5.10 Invention plausibility
 
 An act or authored business that builds something (a device, a process, a product, a service) goes through the check:
 
-1. **Enablers.** The GM names what it needs, and the engine looks each up in `tech_level` and `history_entries`. A missing enabler is proposed by the GM right away (5.2, moment 3) and judged. An enabler that doesn't exist yet in the run is a **named contradiction**: "a pocket cellular phone needs cellular networks; none exist in 1977 here". A character can, however, set out to create the enabler. Then it becomes his project, judged the same way.
+1. **Enablers.** The GM names what it needs, and the engine looks each up in `tech_level` and `history_entries`. A missing enabler is proposed by the GM right away (5.6, moment 3) and judged. An enabler that doesn't exist yet in the run is a **named contradiction**: "a pocket cellular phone needs cellular networks; none exist in 1977 here". A character can, however, set out to create the enabler. Then it becomes his project, judged the same way.
 2. **Distance ahead of the run's technology.** How far the thing is ahead of when its enablers became available scales its cost, time and failure chance. There is no ceiling. A PC company in 1976 is cheap and plausible. A GPS navigator in 1980 needs a satellite constellation nobody can build, so it fails at step 1.
 3. **Means.** Competence in the field (`actor_competence`, expertise), money (the ledger), people with the skill (they are hired, and the labour market has them only if the field exists), and time (a commitment with a due day).
 4. **Law and demand.** Required approvals (FCC, FDA, as law data) and a market. Demand is read from the business sphere's drivers. Until those exist it is a seeded judgement with reasons **[my call]**.
 5. **Result.** A venture in the business sphere, a `tech_level` entry with the run's own date and the inventor as its source, and divergence rows for the real firms in that field. Their later history proposals meet a taken niche and come out changed, later or not at all.
 
-### 5.7 Real people through the same door
+### 5.11 Real people through the same door
 
 A real person who first appears in play (a congressman, a founder, a CEO) is proposed with a source for their 1 January 1975 state. They are checked like any fact: alive, there, in that role, given the run. Then they are seeded under the real-people rule:
 - lawful public life in full;
@@ -169,9 +259,9 @@ A real person who first appears in play (a congressman, a founder, a CEO) is pro
 
 Their death is decided by the engine's mortality, with the real date as calibration. It isn't a scheduled event **[my call; the mortality model already takes canon anchors]**.
 
-### 5.8 Ties to the business and politics designs
+### 5.12 Ties to the business and politics designs
 
-- **Business ("business-design").** Firms founded after 1975, IPOs, mergers and failures arrive as `firm` and `firm_event` entries. The firm population beyond the seeded large firms grows only through this door. Sector drivers read `tech_level` (what products exist and their cost) and price points. The invention check (5.6) produces ventures in business's shape. A real firm's answer to an offer (Microsoft taking no outside money until 1981) is the real person's documented stance, looked up when the offer is made. The business spec should own: what a firm org's money and holdings fields are, how an IPO changes them, and how a demand judgement is made.
+- **Business ("business-design").** Firms founded after 1975, IPOs, mergers and failures arrive as `firm` and `firm_event` entries. The firm population beyond the seeded large firms grows only through this door. Sector drivers read `tech_level` (what products exist and their cost) and price points. The invention check (5.10) produces ventures in business's shape. A real firm's answer to an offer (Microsoft taking no outside money until 1981) is the real person's documented stance, looked up when the offer is made. The business spec should own: what a firm org's money and holdings fields are, how an IPO changes them, and how a demand judgement is made.
 - **Politics ("politics-design").** Offices and the election calendar beyond what the package seeds, the results of real elections outside Saint Jude, and every law beyond the package list come through this door. Real results are the defaults, and the politics simulation decides where the run touched them: the protagonist's money, his candidates, scandals he caused. Laws carry their effects as politics §5.4 data. The politics spec should own: which offices are simulated, as opposed to taken as history defaults, and at what distance from Saint Jude (owner question 3).
 - **The law.** Every new statute, ruling or agency (the 1984 Act, Smith v. Maryland, CALEA, the PATRIOT Act) is a law entry. Its run date gates what the law layer can do.
 
@@ -185,17 +275,17 @@ Their death is decided by the engine's mortality, with the real date as calibrat
 
 Ranked by likelihood in Saint Jude play × how much it matters:
 
-| # | What a player or NPC plausibly does | Held today? | Does B-depth org catch it? | What's missing |
+| # | What a player or NPC plausibly does | Held today? | Does B-depth org catch it? | Deep (C) build it needs; the intake holds it at B meanwhile |
 |---|---|---|---|---|
 | 1 | **Expand outside Saint Jude**: a crew in Philadelphia, a numbers bank in Newark, a piece of Atlantic City, a contact in Miami or Sicily, a family taking over another | **No, confirmed.** `authoring._place` refuses "there is no place called …" for anything outside the seed's 70 places, and no author kind makes a place | Partly: an org can be authored, but its seats, holdings and lines need a `location_id` | **Lazy places:** a place or jurisdiction made on demand at coarse depth (population, its offices and law agencies as data, which outfits are there). The politics draft §9 asks for this |
 | 2 | **A lasting venture by free operation**: start a loan-sharking book in a new district, open a chop shop, set up a bookmaking wire, rig a bid, start a newspaper, buy a pier | Only until due day, **confirmed** (above) | The depth rule says it should become a B org; the code doesn't do it | **Settle into a thing**: the commitment's result becomes a holding, a line or an org at B depth, with money lines and legality (section 7) |
 | 3 | **Buy or own property and assets**: a building, land, a house, a car, a truck fleet, a boat, a plane | **Likely no.** `trade` only matches "business / shop / stall / inn …", so the rest falls to the catch-all. A `possessions` table exists, but I found no Saint Jude path into it | No: assets aren't orgs | An **asset** shape: owner, legal owner (a front), place, value, upkeep, income, who knows, and whether it was bought with dirty money |
 | 4 | **Deals and promises between people**: "10% of the take", a partnership, a supply contract, a loan to a councilman, a silent stake in a club | Partly: `lend` and `agreements` exist, and org arrangements cover payoffs to officials | Payoffs, yes (`org_arrangements`); other deals, no | An **arrangement** shape that covers any two-party terms (who owes what, when, and what breach costs), read by tension, loyalty and standing |
-| 5 | **Real-world dated facts**: a new device, a firm, a law, an election result, prices | Only the 63 timeline items, and those as a wall | n/a | Part A |
-| 6 | **Invest or speculate**: buy shares of a real firm, gold, real estate, back a start-up | **No** (no shares or market table found) | No | Business sphere plus Part A firm events. Until then, an asset with a value that the GM can't move by narration |
+| 5 | **Real-world dated facts**: a new device, a firm, a law, an election result, prices | Only the 63 timeline items, and those as a wall | n/a | Real facts on the intake (5.5 to 5.10) |
+| 6 | **Invest or speculate**: buy shares of a real firm, gold, real estate, back a start-up | **No** (no shares or market table found) | No | Business sphere plus firm events on the intake. Until then, an asset with a value that the GM can't move by narration |
 | 7 | **Marriage, affairs, children, family break-ups for the protagonist** | Partly: authoring a person with ties marries or makes kin (`_marry`, kinship). Marrying an existing NPC in play, a mistress or a divorce: **likely no** path | No | An **arrangement or relation** shape for unions (`household_unions` exists, but I found no Saint Jude path); divorce as a civil matter (row 10) |
-| 8 | **Inventions and new products** | No | No | Part A 5.6 |
-| 9 | **Politics by the protagonist**: run a candidate, donate, deliver a ward, sit on a board | Offices can be held (`holds`); donations and elections, no | Politics as B orgs per the politics draft | The politics draft covers it; it needs Part A for anything beyond the city |
+| 8 | **Inventions and new products** | No | No | Technology on the intake (5.10) |
+| 9 | **Politics by the protagonist**: run a candidate, donate, deliver a ward, sit on a board | Offices can be held (`holds`); donations and elections, no | Politics as B orgs per the politics draft | The politics draft covers it; it needs real facts on the intake for anything beyond the city |
 | 10 | **Civil law**: sue, be sued, injunctions, liens, divorce, bankruptcy, a business license revoked | **No.** The law layer is criminal | No | The law layer's civil side: a case of the same shape with money and an order as outcomes (a prison or law spec follow-up) |
 | 11 | **Taxes and the books**: income tax on legit income, IRS audits, laundering through a business, a false-return case | **Likely no** (Bank Secrecy Act is in the timeline; I found no tax liability) | Partly: org money exists | Tax as law data read by the ledger. An audit is a law case started by gaps between visible spending and declared income (the "Capone" path) |
 | 12 | **False identities and documents**: an alias, a fake passport, a no-show job as cover, a front owner | **No** (there is a front owner in `possessions.legal_owner`, but no path) | No | An identity or cover record on the actor, read by the law (who they think owns what) and by the information layer |
@@ -208,31 +298,29 @@ Ranked by likelihood in Saint Jude play × how much it matters:
 | 19 | **Learning a skill, a degree, a licence (bar, broker, pilot)** | Training is caught; credentials **likely no** in Saint Jude | No | Credentials as data per field, read by law (who may practise) and business |
 | 20 | **Small lasting details**: his habits, his apartment's look, a scar | Held as `note` detail text | n/a | Fine as text; nothing reads it, and nothing needs to |
 
-## 7. The generic fix: five shapes, each with a reader
+## 7. What the intake changes in the code today
 
-The depth rule says no silent bucket: anything with no mechanism becomes a generic living org at B depth. Rows 1 to 4, 6, 7 and 12 show that an org isn't the only shape a lasting thing takes. The fix generalises the rule to **five B-depth shapes**. Every narrated lasting thing becomes one of them, and each shape has at least one system that reads it:
+With the intake in place, every row of section 6 is held from its first narration:
+- rows 1 to 4, 6, 7 and 12 to 14 land on an existing or lazily made shape (Place, Holding, Arrangement, Org);
+- rows 5 and 8 are real facts and technologies (5.5 to 5.10);
+- row 10 (civil law) and row 11 (tax) land on the **Thing** floor with a gap flag until their C builds.
 
-| shape | made from | holds | read by |
-|---|---|---|---|
-| **Org** (exists) | a group with a purpose | seats, money, agenda, reactions | the org core, tension, the law |
-| **Place** (new, lazy) | a named place outside the seed | coarse population, jurisdiction, offices and law agencies as data, outfits present, routes | travel, authoring, org seats and lines, politics, the law |
-| **Holding** (extend `org_holdings` and `org_lines`, or `possessions`) | an asset, venture or property | owner, front owner, place, value, upkeep and income, legality, who knows | ledger and org money, the law (seizure, tax, RICO forfeiture), heat, information |
-| **Arrangement** (extend `agreements` and `org_arrangements`) | any two-party terms | parties, terms, due, breach cost, witnesses | tension, loyalty, standing, the law (a co-conspirator) |
-| **Dated fact** (Part A) | a real or run-made fact | class, run date, effects | business, politics, the law, the invention check |
+Section 6's last column is then the deep-build queue, and the `depth_gaps` counts order it from real play.
 
-The three changes that close whole classes:
+The concrete changes:
 
-1. **The catch-all settles into a shape [the biggest single fix].** `settle_due` stops ending at "carried out as planned". A settled commitment becomes a Holding, an Arrangement or an Org, judged from its words and costs the way `author` chooses its kind now. It keeps its money lines and its legality, and it registers who knows. The protagonist's chop shop then earns, draws heat, can be raided and can be inherited. If the shape can't be judged, it asks the GM through `reason_kind: input_gap` and never drops it.
-2. **Lazy places.** `author(kind="place")` and the travel path make an unknown real place at coarse depth from a GM proposal: its 1975 state with a source. It is checked against the gazetteer (a real town Saint Jude replaces is still refused). Jurisdiction data comes in as history entries (its offices, law agencies and outfits). This opens expansion, travel, accounts abroad and the outer ring as places rather than names.
-3. **A coverage tripwire.** The silent-disconnection audit lesson ("check reachability before tuning") becomes a standing test and a play-time check:
-   - **Test:** for each shape, a fixture builds one through the GM tools and asserts a reader changes because of it (the venture's income reaches org money; the arrangement's breach raises tension; the place's office appears in politics).
-   - **Play:** `note(kind="recap")` already carries threads. The connector compares the recap's lasting things against what the turn created. When a thread names something with no entity behind it, the next tool result carries an "unheld: …" line, so the GM authors it or lets it go knowingly. **[my call: a warning, never a refusal]**
-   - **C-depth flag:** repeated settlements of one class (three civil disputes, four foreign ventures) raise the depth rule's "play is heading here" flag. That's the signal to build C depth for that domain.
+1. **`settle_due` passes through the intake.** A settled free-operation commitment no longer ends at "carried out as planned". Its words, people, costs and target become an intake proposal, and the result is a held thing: the chop shop earns, draws heat, can be raided and can be inherited. Partly funded becomes smaller, never dropped. If the shape can't be judged, the thing lands on the Thing floor with a gap flag, not a refusal **[my call]**.
+2. **`authoring._place` stops refusing unknown real places.** It makes them lazily at coarse depth (5.3). A gazetteer-replaced town is still refused.
+3. **`dated_rules` reads run dates.** Laws stay refused until in force here, a technology goes to the enabler check, and a "not at all" entry is refused with its reason. The package timeline is loaded as intake defaults.
+4. **A generic B tick for held things** (5.3), run in `advance` next to the org core's tick.
+5. **The coverage tripwire.** The silent-disconnection lesson becomes a standing test and a play-time check:
+   - **Test:** for each shape, a fixture builds one through the GM tools and asserts a reader changes because of it (the venture's income reaches org money; the arrangement's breach raises tension; the place's office appears in politics; a custom's day lowers violence between its outfits; a Thing-floor row pays its upkeep).
+   - **Play:** `note(kind="recap")` already carries threads. When a thread names something with no held thing behind it, the next tool result carries an "unheld: …" line, so the GM sends it through the intake or lets it go knowingly. **[my call: a warning, never a refusal]**
 
 ## 8. Constraints
 
 - Packages are data. Class words, effect fields and the timeline defaults live in the package or are generic. There are no world words in `engine/`.
-- Engine vetoes, not menus. The engine never offers what history has in store. It answers proposals.
+- Engine vetoes, not menus. One intake, veto-only checks: the engine never offers what history or the world has in store, it answers proposals.
 - No hard caps. Dates and limits are defaults and costs. Refusals name a missing cause or a contradiction.
 - The protagonist is under the same rules, and real people stay within their record.
 - Caerness is untouched: no timeline and no history ledger means none of this runs.
@@ -240,18 +328,19 @@ The three changes that close whole classes:
 
 ## 9. Order of work [my call]
 
-1. The catch-all settles into a shape (7.1). It is the largest gap, and every sphere needs it.
-2. The history ledger core: `author(kind="history")`, `history_entries`, divergences, `world_facts` mirroring, and the timeline loaded as defaults with the `dated_rules` change (5.1 to 5.5).
-3. Lazy places (7.2).
-4. The invention check (5.6), with `tech_level`.
-5. The coverage tripwire (7.3) and the `advance` "what was due" prompt (5.2, moment 2).
-6. The business and politics specs plug firm, firm_event, law and office effects in as they are built.
+1. The intake core: `held_things`, `depth_gaps`, the shape choice, checks 1 to 4 and 7, the generic B tick, and `settle_due` routed through it (7.1, 7.4). Every sphere needs it, and it closes the root gap.
+2. Lazy places (7.2).
+3. Real facts on the same intake: `history_entries`, divergences, `world_facts` mirroring, check 5, the timeline as defaults with the `dated_rules` change (5.5 to 5.9, 7.3).
+4. Technology: `tech_level` and check 6 (5.10).
+5. The coverage tripwire (7.5) and the `advance` "what was due" prompt (5.6, moment 2).
+6. The business and politics specs plug their deeper shapes in as C builds. Each migration moves held things out of the floor and clears its gap.
 
 ## 10. Left to the builder
 
 - Whether `history_entries` and `historical_anchors` merge (anchors have a good shape: certainty, scope, source kind).
-- The exact weights and delay distributions in 5.3 and the lead-time floor for "earlier". Report calibration, never enforce it.
+- The exact weights and delay distributions in 5.7 and the lead-time floor for "earlier". Report calibration, never enforce it.
 - How the field words for divergence matching are kept (a small package word list versus the GM supplying them with each proposal).
+- Whether `held_things` holds the floor's own money lines or always goes through a ledger holder (my lean: a ledger holder kind `thing:<id>`).
 - Whether the Holding shape extends `org_holdings` and `org_lines` or `possessions`. My lean is the org tables, because they already carry legality and money.
 
 ## 11. Open questions for the owner, most important first
@@ -260,4 +349,4 @@ The three changes that close whole classes:
 2. **Can the protagonist get ahead of history from foreknowledge?** He is an invented man in 1975 with no knowledge of the future, but the GM and the player know it. Does the engine refuse a plan whose only basis is knowing the future (buying Apple stock in 1977 "because"), unless there is an in-world reason? Or is that the player's skill and allowed? My lean: allowed, but his NPC advisers and his own competence judge the bet without foreknowledge, so it is a costly gamble to them.
 3. **How wide is history simulated rather than taken as given?** My call: Saint Jude, New Jersey and the outer ring are simulated. National politics is simulated only where the run touched it (his donations, his candidates). The rest of the world is history defaults.
 4. **Sources.** When the GM can't look something up (no web search on the phone), is "from memory, to verify" good enough to make it canon, or should those stay provisional until verified?
-5. **The catch-all settling (7.1).** Is it fine for the engine to judge the shape of a settled commitment from its words, and ask the GM only when it can't tell?
+5. **When the shape is unclear.** My call is that the intake never refuses for that: it lands on the Thing floor (people, money, agenda, place, dates, simulated generically) with a gap flag. The alternative is to ask the GM to say what kind of thing it is (input_gap) before accepting.
