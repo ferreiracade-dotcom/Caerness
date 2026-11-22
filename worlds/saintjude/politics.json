@@ -1990,5 +1990,15 @@
    }
   ]
  },
- "patronage_line_kind": "a public job"
+ "patronage_line_kind": "a public job",
+ "patronage_1975": {
+  "note": "Shares of the city's patronage jobs (figure patronage_jobs_total) each office hands out; a design split, unsourced.",
+  "offices": {
+   "office:city-hall:mayor": 0.4,
+   "office:works:board": 0.2,
+   "office:zoning:board": 0.1,
+   "office:licensing:board": 0.1,
+   "office:sjpd:police-commissioner": 0.2
+  }
+ }
 }

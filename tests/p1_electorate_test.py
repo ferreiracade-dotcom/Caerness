@@ -92,10 +92,10 @@ def test_delivery_falls_with_jobs():
     unit = int(c.execute("SELECT id FROM org_units WHERE org_actor_id=? ORDER BY id LIMIT 1", (machine,)).fetchone()[0])
     bare = electorate.delivery(c, gid, "org", machine)
     for i in range(40):
-        c.execute("INSERT INTO org_lines(unit_id,description,weekly_take,status,started_day) VALUES (?,?,0,'active',0)", (unit, f"{kind} {i}"))
+        c.execute("INSERT INTO org_lines(unit_id,description,weekly_take,status,started_day) VALUES (?,?,0,'active',0)", (unit, f"{kind} extra {i}"))
     full = electorate.delivery(c, gid, "org", machine)
     assert full > bare > 0, (full, bare)
-    c.execute("UPDATE org_lines SET status='ended' WHERE description LIKE ?", (kind + "%",))
+    c.execute("UPDATE org_lines SET status='ended' WHERE description LIKE ?", (kind + " extra%",))
     assert abs(electorate.delivery(c, gid, "org", machine) - bare) < 1e-9
     # a group no one holds delivers nothing
     assert electorate.delivery(c, gid, "org", _org(c, "taxpayers")) == 0.0

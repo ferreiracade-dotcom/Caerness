@@ -8812,6 +8812,16 @@
   "source": "unsourced",
   "note": "unsourced; How many patronage jobs a holder needs for half of the job-dependent share of its delivery."
  },
+ "patronage_jobs_total": {
+  "default": 200,
+  "range": null,
+  "unit": "jobs",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; how many patronage jobs the city's offices hand out between them at the opening (a design size)."
+ },
   "male_share_law_official": {
    "default": 0.97,
    "range": null,

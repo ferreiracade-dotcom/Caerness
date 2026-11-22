@@ -378,6 +378,8 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
     counts['politics:voter_groups'] = electorate.seed_groups(conn)
     for name, n in civic_field.seed_field(conn, day).items():
         counts[f"politics:{name}"] = n
+    from . import civic_patronage  # the jobs each office hands out, held with its patronage stake
+    counts['politics:patronage_lines'] = civic_patronage.seed_patronage(conn, day)
     from . import outfit_money  # after the people: holdings need the units and men (outfit_money imports this module)
     for key, gross in outfit_money.build_holdings(conn, day).items():
         counts[f"{key}:gross_yearly"] = int(round(gross))
