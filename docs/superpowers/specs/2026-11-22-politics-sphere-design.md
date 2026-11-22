@@ -1,6 +1,6 @@
 # The politics sphere (design)
 
-Date: 2026-11-22. Status: **DRAFT**, written without the owner on the supervisor's instruction, from what was already agreed. The owner answered the open questions on 2026-11-22 and then reframed politics as a general field, not as the Machine (binding; §10). Question 3 still awaits the owner's confirmation. Calls the owner has not ruled on stay marked **[my call]**.
+Date: 2026-11-22. Status: **APPROVED by the owner, 2026-11-22.** It was drafted without the owner, then corrected by the owner's answers and the owner's binding reframe of politics as a general field (§10). Calls the owner has not ruled on separately stay marked **[my call]** and stand as approved with the doc.
 
 Builds on:
 - `2026-11-19-saintjude-three-spheres-design.md`: §5.1 the org core; §5.2 the politics layer; §5.2a B/C depth, the shared drivers, ventures and property; §5.2b the agreements ledger, real people and widening circles; §5.2c politics at B depth and limits that are plausibility, not ceilings.
@@ -168,7 +168,7 @@ Whoever wins the old patronage lines, seats and ledger entries takes them on, an
 
   No result is fixed. The bible's "reformers win about one in three" and incumbents' advantage are calibration targets, reported across seeds.
 - **Fraud** is a weighed act by people: padded rolls, ballot stuffing, paid "walking-around money", a crooked count in a ward. It has a gain, a risk of exposure (poll watchers, the press, the U.S. Attorney, the SCI) and consequences through the case chain. It is in from P1 (owner, 2026-11-22).
-- **State and national races run at B** from the same drivers on coarser audiences: counties for the state, states for the nation. The real result is the default track. The run may diverge only when its own drivers give cause, for example a scandal the run created or an economy that went differently. **[PENDING the owner's confirmation, proposed 2026-11-22: real national results hold unless a named cause from the run changes them. That cause can come from the protagonist or from the simulation itself, directly or indirectly, consistent with the history design's H1: history stays unless it is touched directly or indirectly. A divergence must name its cause.]**
+- **State and national races run at B** from the same drivers on coarser audiences: counties for the state, states for the nation. The real result is the default track. The run may diverge only when its own drivers give cause, for example a scandal the run created or an economy that went differently. **[Owner-confirmed 2026-11-22: real national results hold unless a named cause from the run changes them. That cause can come from the protagonist or from the simulation itself, directly or indirectly, consistent with the history design's H1: history stays unless it is touched directly or indirectly. A divergence must name its cause.]**
 
 ### 5.4 Powers, votes and laws
 
@@ -322,7 +322,7 @@ C is a later build per level (§5.2a), using the same drivers in finer detail. W
 
 1. **Role:** with or against any actor. The role can be anything at any level: ward, city, county, State Senate, state and beyond. Offices and races are modelled generically across levels, not as city-only roles (§5.1, §5.9, §5.10).
 2. **Council cycle:** accepted. The council is elected two years after the mayor (1977, 1981).
-3. **National races: PENDING the owner's confirmation.** Proposed: real national results hold unless a named cause from the run changes them, whether that cause comes from the protagonist or from the simulation itself, directly or indirectly (history design H1) (§5.3).
+3. **National races:** confirmed. Real national results hold unless a named cause from the run changes them, whether that cause comes from the protagonist or from the simulation itself, directly or indirectly (history design H1) (§5.3).
 4. **First C:** accepted, the city first as the build order. Answer 1 means the levels above are not excluded.
 5. **Election fraud:** accepted, from P1.
 6. **Build order:** accepted. The business sphere's shared layer comes first, then politics P1.
