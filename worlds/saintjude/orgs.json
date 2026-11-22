@@ -53,7 +53,7 @@
    ]
   },
   "loyalties": {
-   "sphere": "underworld", "head": "elder", "unit_leader": null, "courtship_scan": false,
+   "sphere": "underworld", "head": "elder", "unit_leader": null, "courtship_scan": false, "flat": true,
    "labels": {"elder": "Elder", "middle": "Middle", "young": "Young"}, "rules": [],
    "opening": {"layout": "ranks", "male_share_key": "loyalties",
     "roles": {"elder": {"ages": [45, 75]}, "middle": {"ages": [30, 55]}, "young": {"ages": [18, 30]}},
@@ -61,6 +61,7 @@
   },
   "banks": {
    "sphere": "underworld", "head": "banker", "unit_leader": null, "courtship_scan": false,
+   "lifecycle": {"succession": {"banker": ["controller"]}},
    "labels": {"banker": "Banker", "controller": "Controller", "runner": "Runner"}, "rules": [],
    "opening": {"layout": "ranks", "male_share_key": "banks",
     "roles": {"banker": {"ages": [40, 70]}, "controller": {"ages": [25, 55], "superior": {"role": "banker", "pick": "round_robin"}},
@@ -68,6 +69,7 @@
   },
   "club": {
    "sphere": "underworld", "head": "president", "unit_leader": null, "courtship_scan": false,
+   "lifecycle": {"succession": {"president": ["officer"]}},
    "labels": {"president": "President", "officer": "Officer", "member": "Member", "prospect": "Prospect"}, "rules": [],
    "opening": {"layout": "ranks", "male_share_key": "club",
     "roles": {"president": {"ages": [35, 60]}, "officer": {"ages": [28, 55], "superior": {"role": "president", "pick": "first"}},
@@ -76,6 +78,7 @@
   },
   "handful": {
    "sphere": "underworld", "head": "senior", "unit_leader": null, "courtship_scan": false,
+   "lifecycle": {"succession": {"senior": ["man"]}},
    "labels": {"senior": "Senior", "man": "Man"}, "rules": [],
    "opening": {"layout": "ranks", "male_share_key": "handful",
     "roles": {"senior": {"ages": [50, 75]}, "man": {"ages": [22, 55], "superior": {"role": "senior", "pick": "first"}}}}
@@ -84,6 +87,7 @@
    "sphere": "underworld",
    "head": "principal",
    "unit_leader": null,
+   "lifecycle": {"succession": {"principal": ["hand"]}},
    "courtship_scan": false,
    "labels": {
     "principal": "Principal",

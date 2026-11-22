@@ -51,6 +51,7 @@ ALLOW: tuple[tuple[str, str], ...] = (
     (r"court[- ]martial", "1975 military-law term, not the cultivation/martial-path sense"),
     (r"martial law", "1975 civil-order term"),
     (r"martial arts?", "1975 boxing/karate gym term"),
+    (r"martial execution", "engine/career_reach.py structural career-track domain label (armed work); Caerness rows carry it too, so it is changed only with a Caerness fingerprint round"),
 )
 
 # Tables that are engine vocabulary and never reach Claude. Each needs a reason. Deliberately empty:
@@ -273,6 +274,22 @@ def _compile():
 _FIXED_RE, _NAME_RE, _OLD_RE, _ALLOW_RE = _compile()
 
 
+
+def _keys(names) -> frozenset[str]:
+    """The longest word of each literal: any whole-word match of the literal contains it as a whole token."""
+    out = set()
+    for n in names:
+        runs = re.findall(r"\w+", n)
+        if runs:
+            out.add(max(runs, key=len))
+    return frozenset(out)
+
+
+_NAME_KEYS = _keys(FORBIDDEN[len(_FIXED):])
+_OLD_KEYS = _keys(OLD_BIBLE)
+_TOKEN = re.compile(r"\w+")
+
+
 def find_hits(text: str) -> list[tuple[str, str, str]]:
     """Return [(matched, kind, excerpt)] for one text value."""
     if not text or len(text) < 2:
@@ -291,11 +308,12 @@ def find_hits(text: str) -> list[tuple[str, str, str]]:
         for m in rx.finditer(text):
             if ok(m.span()):
                 out.append((label, "caerness", excerpt(m.span())))
-    if _NAME_RE:
+    tokens = set(_TOKEN.findall(text))  # one cheap pass first: the big alternations only run on texts that hold one of their key words
+    if _NAME_RE and tokens & _NAME_KEYS:
         for m in _NAME_RE.finditer(text):
             if ok(m.span()):
                 out.append((m.group(0), "caerness", excerpt(m.span())))
-    if _OLD_RE:
+    if _OLD_RE and tokens & _OLD_KEYS:
         for m in _OLD_RE.finditer(text):
             if ok(m.span()):
                 out.append((m.group(0), "old_bible", excerpt(m.span())))
@@ -320,6 +338,7 @@ def scan(db_path) -> list[Leak]:
     leaks: list[Leak] = []
     try:
         own = _own_bible_source_ids(conn)
+        memo: dict[str, list] = {}
         tables = [r[0] for r in conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")]
         for t in tables:
@@ -345,7 +364,10 @@ def scan(db_path) -> list[Leak]:
                     continue
                 for c, v in zip(cols, row[1:]):
                     if isinstance(v, str):
-                        for matched, kind, ex in find_hits(v):
+                        hits = memo.get(v)  # a long run repeats the same kind/status words a million times: look each distinct text up once
+                        if hits is None:
+                            hits = memo[v] = find_hits(v)
+                        for matched, kind, ex in hits:
                             leaks.append(Leak(t, c, rid if has_rowid else None, matched, kind, ex))
     finally:
         conn.close()

@@ -60,4 +60,6 @@ def connect(path: Path) -> sqlite3.Connection:
     """A connection to a fixture database with sqlite3.Row rows."""
     conn = sqlite3.connect(str(path))
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA cache_size = -262144")  # as engine.db.connect: a late-run save is far bigger than the default page cache
+    conn.execute("PRAGMA temp_store = MEMORY")
     return conn

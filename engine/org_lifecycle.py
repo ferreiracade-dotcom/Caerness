@@ -42,8 +42,9 @@ def unit_pool(conn: sqlite3.Connection, unit_id: int, day: int, exclude: int | N
         return []
     org = int(unit["org_actor_id"])
     role = orgs.kind_rules(conn, org).get("unit_leader")
+    head_role = orgs.kind_rules(conn, org).get("head")  # a man who rose to head from this unit keeps its unit id: he is no one's choice to lead it again
     old = unit["leader_actor_id"]
-    members = [r for r in orgs.members(conn, org) if r["unit_id"] == int(unit_id) and r["role_key"] != role
+    members = [r for r in orgs.members(conn, org) if r["unit_id"] == int(unit_id) and r["role_key"] != role and r["role_key"] != head_role
                and (old is None or int(r["actor_id"]) != int(old)) and (exclude is None or int(r["actor_id"]) != int(exclude)) and orgs.is_living(conn, int(r["actor_id"]))]
     return [r for r in members if r["inducted_day"] is not None] or members
 
@@ -319,6 +320,19 @@ def _vacate(conn: sqlite3.Connection, seat, why: str, day: int) -> None:
     if target is not None:
         conn.execute("UPDATE org_seats SET superior_actor_id=? WHERE org_actor_id=? AND superior_actor_id=? AND status='active' AND actor_id<>?",
                      (target, org, gone, target))
+        # the man who now answers for the gone seat must not still answer to the dead man (a unit leader whose co-leader died, a successor
+        # taken from under him): he answers to the gone man's own superior, else the head, and to no one when he is the head
+        mine = conn.execute("SELECT superior_actor_id FROM org_seats WHERE actor_id=? AND org_actor_id=? AND status='active'", (int(target), org)).fetchone()
+        if mine is not None and mine[0] is not None and int(mine[0]) == gone:
+            above = seat["superior_actor_id"]
+            head = orgs.head_of(conn, org)
+            up = None
+            for cand in (above, head):
+                if cand is not None and int(cand) not in (gone, int(target)) and orgs.seat_of(conn, int(cand), org) is not None \
+                        and orgs.seat_of(conn, int(cand), org)["status"] == "active" and orgs.is_living(conn, int(cand)):
+                    up = int(cand)
+                    break
+            conn.execute("UPDATE org_seats SET superior_actor_id=? WHERE actor_id=? AND org_actor_id=?", (up, int(target), org))
     for (sub,) in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' AND superior_actor_id=?",
                                (org, target if target is not None else -1)).fetchall():
         orgs.imposed(conn, int(sub))  # the men whose superior is gone are looked at again tomorrow
@@ -340,6 +354,62 @@ def _process_vacancies(conn: sqlite3.Connection, day: int) -> int:
             "INSERT INTO org_agenda(actor_id,kind,due_day,subject_kind,subject_id,created_day,status,resolved_day,metadata_json) VALUES (?,?,?,?,?,?,'resolved',?,?)",
             (int(seat["actor_id"]), "vacancy", int(day), "org", int(seat["org_actor_id"]), int(day), int(day), json.dumps({"why": seat["status"]})))
     return len(rows)
+
+
+def _reattach(conn: sqlite3.Connection, day: int) -> int:
+    """A man in a kind with ranks who answers to no one living (taken on while his unit had no leader, or his superior is gone and the
+    vacancy was settled some other way) answers to his unit's leader, else the head. Nothing is moved when there is no one to answer to."""
+    n = 0
+    rows = conn.execute(
+        """SELECT s.id,s.actor_id,s.org_actor_id,s.unit_id,s.role_key FROM org_seats s WHERE s.status='active' AND (s.superior_actor_id IS NULL OR NOT EXISTS
+             (SELECT 1 FROM org_seats t WHERE t.actor_id=s.superior_actor_id AND t.org_actor_id=s.org_actor_id AND t.status IN ('active','held')))
+           ORDER BY s.id""").fetchall()
+    for r in rows:
+        org, a = int(r["org_actor_id"]), int(r["actor_id"])
+        rules = orgs.kind_rules(conn, org)
+        if rules.get("flat") or r["role_key"] == rules.get("head"):
+            continue
+        cands = []
+        if r["unit_id"] is not None:
+            u = conn.execute("SELECT leader_actor_id FROM org_units WHERE id=?", (int(r["unit_id"]),)).fetchone()
+            cands.append(None if u is None else u[0])
+        cands.append(orgs.head_of(conn, org))
+        for c in cands:
+            if c is None or int(c) == a or not orgs.is_living(conn, int(c)):
+                continue
+            cs = orgs.seat_of(conn, int(c), org)
+            if cs is not None and cs["status"] == "active":
+                conn.execute("UPDATE org_seats SET superior_actor_id=? WHERE id=?", (int(c), int(r["id"])))
+                n += 1
+                break
+    return n
+
+
+def _fill_headless(conn: sqlite3.Connection, day: int) -> int:
+    """An organisation with men in it and no one in its head's seat (no contest open, no acting man) takes the matter up the way a
+    vacancy does: the registered head-vacancy hooks (a contest), else the kind's own succession. A vacancy settled while the seat's
+    last holder was not recorded as head (an acting man who died after stepping back) would otherwise leave a family leaderless for years."""
+    n = 0
+    for (org,) in conn.execute("SELECT org_actor_id FROM org_profiles ORDER BY org_actor_id").fetchall():
+        org = int(org)
+        rules = orgs.kind_rules(conn, org)
+        head_role = rules.get("head")
+        if not head_role or rules.get("flat"):
+            continue
+        if conn.execute("SELECT 1 FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active' LIMIT 1", (org, head_role)).fetchone():
+            continue
+        if not conn.execute("SELECT 1 FROM org_seats WHERE org_actor_id=? AND status='active' LIMIT 1", (org,)).fetchone():
+            continue
+        if conn.execute("SELECT 1 FROM org_agenda WHERE status='open' AND ((kind='contest' AND actor_id=?) OR (kind='acting_head' AND subject_id=?)) LIMIT 1", (org, org)).fetchone():
+            continue
+        last = conn.execute("SELECT * FROM org_seats WHERE org_actor_id=? AND role_key=? ORDER BY id DESC LIMIT 1", (org, head_role)).fetchone()
+        if last is None:
+            continue
+        if any(fn(conn, org, last, int(day), last["status"]) for _k, fn in list(_HEAD_VACANCY)):
+            n += 1
+        elif head_role in (_lc(conn, org).get("succession") or {}) and fill_post(conn, org, head_role, int(day)) is not None:
+            n += 1
+    return n
 
 
 def _custody_held(conn: sqlite3.Connection) -> dict[int, int]:
@@ -510,6 +580,8 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
     out = {"died": _mark_dead(conn, int(day))}
     out["released"] = _held_and_released(conn, int(day))
     out["vacancies"] = _process_vacancies(conn, int(day))
+    out["headless_taken_up"] = _fill_headless(conn, int(day))
+    out["reattached"] = _reattach(conn, int(day))
     out["dormant"] = _dormant_the_left(conn, int(day))
     out["levels"] = _levels(conn, int(day))
     for _k, fn in list(_WEEKLY):

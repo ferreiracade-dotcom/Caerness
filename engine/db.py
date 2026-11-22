@@ -75,6 +75,10 @@ def connect() -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     conn.execute("PRAGMA synchronous = NORMAL")
+    # A late-run save is 100+ MB and the default 2 MB page cache re-reads pages for nearly every query: 30 days at year 5 took 18.4 s,
+    # 11.5 s with this. Memory is only used as pages are touched. Changes no result (B15).
+    conn.execute("PRAGMA cache_size = -262144")
+    conn.execute("PRAGMA temp_store = MEMORY")
     return conn
 
 

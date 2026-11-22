@@ -9,7 +9,7 @@ the weekly lifecycle process (`org_lifecycle.on_week`) and on every vacancy (`or
              leader for one name (`propose_member`); the leader names the dependant with the best standing in his unit whose
              family name is in the induction `father_name_group`; the head makes him (`make_member`); the men he brought in
              answer to him. A short count with nothing open reopens the books after `books.retry_days`.
-  dependants lost dependants (inducted, dead, out) are replaced one by one, at most one a week a unit, by pulling up young
+  dependants lost dependants (inducted, dead, out) are replaced one by one (each missing place has its own weekly chance, no limit per week), by pulling up young
              people from the city's background population with the organisation's name-group mix; a dependant's standing
              rises weekly while he earns.
   hidden     a hidden line is caught with a weekly chance that falls with its holder's caution; the head gets `discipline`
