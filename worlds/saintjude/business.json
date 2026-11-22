@@ -30,6 +30,10 @@
   "venture_outcome": {
    "complete_at": 0.85,
    "late_below": 0.6
+  },
+  "place_condition": {
+   "strained_below": 40.0,
+   "derelict_below": 15.0
   }
  },
  "seasonality": {
@@ -230,43 +234,57 @@
    "building_kind": "shop",
    "upkeep_usd_30": 300,
    "decay_per_30_unpaid": 6,
-   "base_capacity": 40
+   "base_capacity": 40,
+   "rent_breach_word": "street",
+   "rent_grace_days": 30
   },
   "bar_room": {
    "building_kind": "shop",
    "upkeep_usd_30": 350,
    "decay_per_30_unpaid": 6,
-   "base_capacity": 55
+   "base_capacity": 55,
+   "rent_breach_word": "street",
+   "rent_grace_days": 30
   },
   "warehouse": {
    "building_kind": "warehouse",
    "upkeep_usd_30": 500,
    "decay_per_30_unpaid": 4,
-   "base_capacity": 70
+   "base_capacity": 70,
+   "rent_breach_word": "street",
+   "rent_grace_days": 30
   },
   "tenement": {
    "building_kind": "residence",
    "upkeep_usd_30": 600,
    "decay_per_30_unpaid": 5,
-   "base_capacity": 60
+   "base_capacity": 60,
+   "rent_breach_word": "street",
+   "rent_grace_days": 30
   },
   "office_floor": {
    "building_kind": "hall",
    "upkeep_usd_30": 450,
    "decay_per_30_unpaid": 4,
-   "base_capacity": 45
+   "base_capacity": 45,
+   "rent_breach_word": "street",
+   "rent_grace_days": 30
   },
   "garage": {
    "building_kind": "workshop",
    "upkeep_usd_30": 250,
    "decay_per_30_unpaid": 5,
-   "base_capacity": 35
+   "base_capacity": 35,
+   "rent_breach_word": "street",
+   "rent_grace_days": 30
   },
   "lot": {
    "building_kind": "other",
    "upkeep_usd_30": 60,
    "decay_per_30_unpaid": 2,
-   "base_capacity": 20
+   "base_capacity": 20,
+   "rent_breach_word": "street",
+   "rent_grace_days": 30
   }
  },
  "breach_words": {

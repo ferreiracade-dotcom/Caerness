@@ -19,7 +19,8 @@ _TOP = {"basis", "assumption", "extra_sectors", "seasonality", "shocks", "approv
         "place_kinds", "breach_words", "calibration"}
 _BLOCKS = {"seasonality", "shocks", "approval_kinds", "venture_kinds", "place_kinds", "breach_words", "calibration"}
 _CALIBRATION = {"breach": ("tension_per_1000_usd", "creditor_resentment", "creditor_trust", "debtor_share"),
-                "venture_outcome": ("complete_at", "late_below")}
+                "venture_outcome": ("complete_at", "late_below"),
+                "place_condition": ("strained_below", "derelict_below")}
 
 
 class BusinessDataError(ValueError):
@@ -106,6 +107,8 @@ def validate(data: dict, *, source: str, sectors: set[str]) -> dict:
             if need not in spec:
                 raise _bad(source, f"place_kinds.{kind}", need, "is missing")
             _number(source, f"place_kinds.{kind}.{need}", spec[need])
+        if "rent_breach_word" in spec and spec["rent_breach_word"] not in (data.get("breach_words") or {}):
+            raise _bad(source, f"place_kinds.{kind}.rent_breach_word", spec["rent_breach_word"], "is not in breach_words")
     for word, path in (data.get("breach_words") or {}).items():
         if path not in BREACH_PATHS:
             raise _bad(source, f"breach_words.{word}", path, f"is not one of {BREACH_PATHS}")
