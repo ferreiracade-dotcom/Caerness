@@ -5449,6 +5449,7 @@ CREATE TABLE IF NOT EXISTS agreement_terms (
     purpose TEXT NOT NULL,
     missed_count INTEGER NOT NULL DEFAULT 0,
     owed_usd REAL NOT NULL DEFAULT 0,
+    unpaid_since_day INTEGER,
     status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','ended','breached','orphaned')),
     created_day INTEGER NOT NULL
 );

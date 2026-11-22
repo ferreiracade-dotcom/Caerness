@@ -15,6 +15,7 @@ from collections import defaultdict
 
 from . import ledger
 from .design import figure, run_seed
+from . import orgs
 from .orgs import kind_rules
 from .world_package import org_rules, package_for
 
@@ -513,3 +514,9 @@ def post_arrangements(conn: sqlite3.Connection, day: int, days: int, roster: Ros
     for i in lapse:
         conn.execute("UPDATE org_arrangements SET status='lapsed', ended_day=? WHERE id=?", (int(day), i))
     return paid_out
+
+
+def purse_ref(conn: sqlite3.Connection, org_id: int) -> str | None:
+    """The ledger holder an organisation's own obligations are paid from: its living head's purse; None when it has none."""
+    head = orgs.head_of(conn, int(org_id))
+    return f"person:{head}" if head is not None and orgs.is_living(conn, head) else None

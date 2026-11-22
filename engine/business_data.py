@@ -16,8 +16,10 @@ PAYOFF_KINDS = ("money", "place", "terms", "none")
 BUILDING_KINDS = ("residence", "workshop", "shop", "warehouse", "hall", "temple", "fortified_residence",
                   "public_building", "bridge", "garden", "estate_improvement", "other")
 _TOP = {"basis", "assumption", "extra_sectors", "seasonality", "shocks", "approval_kinds", "venture_kinds",
-        "place_kinds", "breach_words"}
-_BLOCKS = {"seasonality", "shocks", "approval_kinds", "venture_kinds", "place_kinds", "breach_words"}
+        "place_kinds", "breach_words", "calibration"}
+_BLOCKS = {"seasonality", "shocks", "approval_kinds", "venture_kinds", "place_kinds", "breach_words", "calibration"}
+_CALIBRATION = {"breach": ("tension_per_1000_usd", "creditor_resentment", "creditor_trust", "debtor_share"),
+                "venture_outcome": ("complete_at", "late_below")}
 
 
 class BusinessDataError(ValueError):
@@ -107,6 +109,13 @@ def validate(data: dict, *, source: str, sectors: set[str]) -> dict:
     for word, path in (data.get("breach_words") or {}).items():
         if path not in BREACH_PATHS:
             raise _bad(source, f"breach_words.{word}", path, f"is not one of {BREACH_PATHS}")
+    for group, spec in (data.get("calibration") or {}).items():
+        if group not in _CALIBRATION:
+            raise _bad(source, "calibration", group, "is not a calibration group")
+        for key, val in spec.items():
+            if key not in _CALIBRATION[group]:
+                raise _bad(source, f"calibration.{group}", key, "is not a figure of this group")
+            _number(source, f"calibration.{group}.{key}", val)
     return data
 
 
@@ -158,3 +167,14 @@ def breach_path(conn: sqlite3.Connection, word: str) -> str:
     if word not in words:
         raise BusinessDataError(f"business.json: breach_words: {word!r} is not a breach word this package declares")
     return words[word]
+
+
+def calibration(conn: sqlite3.Connection, group: str) -> dict:
+    """A group of calibration figures from the package (never limits); raises naming the group when it is not given."""
+    spec = (_need(conn).get("calibration") or {}).get(group)
+    if spec is None:
+        raise BusinessDataError(f"business.json: calibration: {group!r} is not given by this package")
+    missing = [k for k in _CALIBRATION[group] if k not in spec]
+    if missing:
+        raise BusinessDataError(f"business.json: calibration.{group}: {missing[0]!r} is missing")
+    return spec
