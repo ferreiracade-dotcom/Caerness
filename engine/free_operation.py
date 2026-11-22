@@ -424,6 +424,32 @@ def _message(conn, me, intent, f, res, targets, committed, days, call_id) -> dic
             "commitment_id": cid, "ready_in_days": span}
 
 
+def _hold_settled(conn, me: int, r, d: dict, kind) -> tuple[int | None, str]:
+    """A commitment that settled leaves a held thing (a package without intake data leaves nothing, as before). Returns the held
+    thing's id and a sentence to add to the result."""
+    from . import intake
+    from .authoring import AuthoringRefused
+    if not intake.enabled(conn):
+        return None, ""
+    day = _day(conn)
+    if kind == "intake":  # a thing already held while it was being built goes live now
+        hid = d.get("held_thing_id")
+        row = conn.execute("SELECT id,name FROM held_things WHERE id=?", (hid,)).fetchone() if hid else None
+        if row is None:
+            return None, ""
+        conn.execute("UPDATE held_things SET status='active',updated_day=? WHERE id=? AND status='building'", (day, row["id"]))
+        return int(row["id"]), f" It now stands as {row['name']}."
+    details = {"what": r["description"], "people": [int(x) for x in (d.get("people") or [])], "money": {"start": 0},
+               "consequences": [r["description"]], "start_day": day}
+    if r["target_location_id"] is not None:
+        details["place"] = int(r["target_location_id"])
+    try:  # the costs were taken when it was committed; the kind word of a commitment names no shape, its description does
+        out = intake.take_in(conn, me, r["description"], details, f"settle:{r['id']}")
+    except AuthoringRefused as e:
+        return None, f" Nothing of it lasts: {str(e).rstrip('.')}."
+    return int(out["held_thing_id"]), f" It now stands as {out['name']}."
+
+
 def settle_due(conn: sqlite3.Connection, me: int) -> list[dict]:
     """Carry out commitments whose day has come. Returns what happened, for the GM to narrate within."""
     from . import findings
@@ -434,6 +460,7 @@ def settle_due(conn: sqlite3.Connection, me: int) -> list[dict]:
                           (me, commitments.SOURCE, day)).fetchall():
         d = commitments.details_of(r)
         kind = d.get("kind")
+        held_id = None
         if kind == "message":
             rid = int(d.get("recipient") or r["target_actor_id"] or 0)
             if rid and po._living(conn, rid):
@@ -450,9 +477,11 @@ def settle_due(conn: sqlite3.Connection, me: int) -> list[dict]:
             funded = float(d.get("funded", 1.0))
             result = ("It was carried out as planned." if funded >= 0.999 else
                       "It was only partly carried out: the means fell short of what was meant.")
+            held_id, note = _hold_settled(conn, me, r, d, kind)
+            result += note
         commitments.complete(conn, int(r["id"]))
         _log(conn, me, "Commitment settled", f"{r['description'][:120]} {result}")
-        done.append({"what": r["description"], "result": result, "kind": kind})
+        done.append({"what": r["description"], "result": result, "kind": kind, **({"held_thing_id": held_id} if held_id else {})})
     return done
 
 

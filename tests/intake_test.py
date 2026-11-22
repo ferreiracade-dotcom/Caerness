@@ -269,6 +269,35 @@ def test_a_thing_can_belong_to_the_protagonist_and_fails_like_anyone_s():
     assert c.execute("SELECT status FROM held_things WHERE id=?", (out["held_thing_id"],)).fetchone()[0] == "ended"
 
 
+def test_a_free_operation_that_settles_leaves_a_held_thing():
+    from engine import free_operation
+    from engine.player import set_player
+    w = _open_world()
+    c = w.conn
+    set_player(c, w.capo)
+    out = free_operation.run(c, w.capo, "set up a bookmaking wire in the back of the Ferry Street candy store", {"time": "a week"}, "t5-1")
+    assert out.get("commitment_id"), out  # nothing models it, so it is a commitment
+    c.execute("UPDATE world_state SET current_day=current_day+8 WHERE id=1")
+    done = free_operation.settle_due(c, w.capo)
+    hid = done[0]["held_thing_id"]
+    assert c.execute("SELECT status FROM held_things WHERE id=?", (hid,)).fetchone()[0] == "active"
+    assert "now stands as" in done[0]["result"]
+
+
+def test_a_building_thing_goes_live_when_its_commitment_settles():
+    from engine import authoring, free_operation
+    from engine.player import set_player
+    w = _open_world()
+    c = w.conn
+    set_player(c, w.capo)
+    out = authoring.author(c, w.capo, "a new pier", {"what": "the Harbour pier", "ready_in_days": 10}, "t5-2")
+    assert c.execute("SELECT status FROM held_things WHERE id=?", (out["held_thing_id"],)).fetchone()[0] == "building"
+    c.execute("UPDATE world_state SET current_day=current_day+11 WHERE id=1")
+    done = free_operation.settle_due(c, w.capo)
+    assert done and done[0]["held_thing_id"] == out["held_thing_id"]
+    assert c.execute("SELECT status FROM held_things WHERE id=?", (out["held_thing_id"],)).fetchone()[0] == "active"
+
+
 tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
 tests.sort(key=lambda f: f.__code__.co_firstlineno)
 
