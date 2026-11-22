@@ -1088,20 +1088,23 @@ def next_household_life_due_day(conn: sqlite3.Connection, after_day: int, end_da
         if r is not None:
             vals.append(int(r))
     # Exact family-plan due dates are decision-relevant history; do not round them to a monthly tick.
-    for u in conn.execute("SELECT started_day,family_plan_json FROM household_unions WHERE status='active'").fetchall():
-        plan = json.loads(u["family_plan_json"] or "{}")
-        if plan.get("auto_children"):
-            due = int(plan.get("earliest_next_child_day", int(u["started_day"]) + int(plan.get("spacing_days", 730))))
-            if after_day < due <= end_day:
-                vals.append(due)
+    # Asked in SQL, not row by row in Python: this runs every time the scheduler asks for the next due day, over every union and every living actor.
+    r = conn.execute(
+        """SELECT MIN(COALESCE(json_extract(family_plan_json,'$.earliest_next_child_day'),
+                               started_day + COALESCE(json_extract(family_plan_json,'$.spacing_days'), 730)))
+           FROM household_unions WHERE status='active' AND COALESCE(json_extract(family_plan_json,'$.auto_children'),0) NOT IN (0,'',0.0)
+             AND COALESCE(json_extract(family_plan_json,'$.earliest_next_child_day'), started_day + COALESCE(json_extract(family_plan_json,'$.spacing_days'), 730)) > ?
+             AND COALESCE(json_extract(family_plan_json,'$.earliest_next_child_day'), started_day + COALESCE(json_extract(family_plan_json,'$.spacing_days'), 730)) <= ?""",
+        (after_day, end_day)).fetchone()[0]
+    if r is not None:
+        vals.append(int(r))
     # Life-stage boundaries are also scheduled on their exact threshold day when a birth day is known.
-    for r in conn.execute("SELECT birth_day,life_stage FROM actor_life_profiles WHERE life_status='living' AND birth_day IS NOT NULL").fetchall():
-        thresholds = {"infant": 2*365, "child": 13*365, "youth": 18*365, "adult": 60*365}
-        offset = thresholds.get(str(r["life_stage"]))
-        if offset is not None:
-            d = int(r["birth_day"]) + offset
-            if after_day < d <= end_day:
-                vals.append(d)
+    r = conn.execute(
+        """SELECT MIN(d) FROM (SELECT birth_day + CASE life_stage WHEN 'infant' THEN ? WHEN 'child' THEN ? WHEN 'youth' THEN ? WHEN 'adult' THEN ? END AS d
+                               FROM actor_life_profiles WHERE life_status='living' AND birth_day IS NOT NULL) WHERE d > ? AND d <= ?""",
+        (2 * 365, 13 * 365, 18 * 365, 60 * 365, after_day, end_day)).fetchone()[0]
+    if r is not None:
+        vals.append(int(r))
     # Profiles without an exact upcoming boundary still receive a bounded periodic review.
     if conn.execute("SELECT 1 FROM actor_life_profiles WHERE life_status='living' LIMIT 1").fetchone():
         d = ((after_day // 30) + 1) * 30

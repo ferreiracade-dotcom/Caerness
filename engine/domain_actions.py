@@ -407,6 +407,9 @@ def _household_service_option(conn: sqlite3.Connection, actor_id: int, day: int)
     rows=conn.execute(
         """SELECT h.*,a.status AS head_status FROM households h JOIN actors a ON a.id=h.head_actor_id
            WHERE h.location_id=? AND h.status='active' AND h.head_actor_id IS NOT NULL AND h.head_actor_id<>?
+             AND a.status='active' AND h.liquidity>=10 AND h.wealth>0 AND h.staff_capacity>=35
+             AND COALESCE(CASE WHEN json_valid(h.metadata_json) THEN json_extract(h.metadata_json,'$.economic_resolution') END,'')<>'STRUCTURAL_ONLY'
+             AND COALESCE(CASE WHEN json_valid(h.metadata_json) THEN json_extract(h.metadata_json,'$.economic_state') END,'')<>'NOT_SEPARATELY_QUANTIFIED'
            ORDER BY h.liquidity DESC,h.staff_capacity DESC,h.id""", (loc,actor_id)
     ).fetchall()
     for h in rows:
