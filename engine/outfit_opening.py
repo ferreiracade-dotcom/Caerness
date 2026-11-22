@@ -355,6 +355,15 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
         if res["units"] is not None:
             counts[f"{key}:units"] = res["units"]
         counts[f"{key}:unplaced_seeded"] = len(res["unplaced"])
+    from .world_package import politics_rules  # the package's political organisations are built with the same generic builder
+    pol = politics_rules(package_for(conn)).get("polity_orgs") or {}
+    rules_o, rorg = outfit_rules(package_for(conn)), org_rules(package_for(conn))
+    for want in (True, False):
+        for key, spec in pol.items():
+            if ((kind_data(rorg, spec).get("opening") or {}).get("layout") == "units") == want:
+                res = build_org(conn, key, spec, rules_o, day)
+                for role, n in res["counts"].items():
+                    counts[f"{key}:{role}"] = n
     from . import org_temperament, org_tension  # each man's temper is drawn around his organisation's guideline; old quarrels start as tension
     counts["temperament_drawn"] = org_temperament.draw_opening(conn)
     counts["tension_seeded"] = org_tension.seed_initial(conn, day)
@@ -364,6 +373,9 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
         counts[f"law:{name}"] = n
     from . import offices  # the package's offices and their holders (a no-op without politics data)
     for name, n in offices.build(conn, day).items():
+        counts[f"politics:{name}"] = n
+    from . import civic_field  # what each political actor holds (after the offices exist)
+    for name, n in civic_field.seed_field(conn, day).items():
         counts[f"politics:{name}"] = n
     from . import outfit_money  # after the people: holdings need the units and men (outfit_money imports this module)
     for key, gross in outfit_money.build_holdings(conn, day).items():

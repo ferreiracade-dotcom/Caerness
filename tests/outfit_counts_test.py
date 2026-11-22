@@ -276,10 +276,10 @@ def test_discipline_follows_temperament():
 def test_inducted_men_have_standing_from_years_role_and_earnings():
     w = open_world()
     c = w.conn
-    rows = {r[0]: r[1] for r in c.execute("SELECT role_key,AVG(standing) FROM org_seats WHERE inducted_day IS NOT NULL GROUP BY 1")}
+    rows = {r[0]: r[1] for r in c.execute("SELECT role_key,AVG(standing) FROM org_seats WHERE inducted_day IS NOT NULL AND org_actor_id IN (SELECT org_actor_id FROM org_profiles WHERE org_kind NOT IN ('party','political_club','interest')) GROUP BY 1")}
     assert all(v > 0.2 for v in rows.values()), rows
     assert rows["boss"] > rows["soldier"] and rows["capo"] > rows["soldier"], rows
-    assert not [r for r in c.execute("SELECT 1 FROM org_seats WHERE inducted_day IS NOT NULL AND standing=0")]
+    assert not [r for r in c.execute("SELECT 1 FROM org_seats WHERE inducted_day IS NOT NULL AND standing=0 AND org_actor_id IN (SELECT org_actor_id FROM org_profiles WHERE org_kind NOT IN ('party','political_club','interest'))")]
 
 
 def test_inducted_standing_moves_weekly():

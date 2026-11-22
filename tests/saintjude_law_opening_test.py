@@ -105,7 +105,7 @@ def test_level4_offices_filled_once():
                                WHERE role_text IN ('Alderman of a ward on mob ground','Member of the City Council')""").fetchone()[0]
     assert aldermen == round(figure(conn, "mob_wards")), aldermen  # the seeded councilman is one of them
     # a captain for every precinct that contains a family crew's ground
-    grounds = {r[0] for r in conn.execute("SELECT DISTINCT ground_location_id FROM org_units WHERE ground_location_id IS NOT NULL")}
+    grounds = {r[0] for r in conn.execute("SELECT DISTINCT ground_location_id FROM org_units WHERE ground_location_id IS NOT NULL AND org_actor_id IN (SELECT org_actor_id FROM org_profiles WHERE org_kind NOT IN ('party','political_club','interest'))")}
     assert grounds
     covered = set()
     for g in grounds:
@@ -153,7 +153,7 @@ def test_pad_officers_and_envelopes_balance():
         assert tier in ("captain", "sergeant", "patrolman") and int(n) >= 1
     # every precinct captain on family ground has an envelope larger than any patrolman's
     biggest_patrolman = max(e["weekly_usd"] for e in env if e["position_key"].split(":")[1] == "patrolman")
-    grounds = {r[0] for r in conn.execute("SELECT DISTINCT ground_location_id FROM org_units WHERE ground_location_id IS NOT NULL")}
+    grounds = {r[0] for r in conn.execute("SELECT DISTINCT ground_location_id FROM org_units WHERE ground_location_id IS NOT NULL AND org_actor_id IN (SELECT org_actor_id FROM org_profiles WHERE org_kind NOT IN ('party','political_club','interest'))")}
     precincts = {law_opening.precinct_for_location(conn, g) for g in grounds} - {None}
     for pid in precincts:
         capt = [e for e in env if e["position_key"].startswith(f"{pid}:captain:")]

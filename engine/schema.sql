@@ -5547,6 +5547,7 @@ CREATE TABLE IF NOT EXISTS race_candidates (
     filed_day INTEGER NOT NULL,
     dropped_day INTEGER,
     drop_reason TEXT,
+    agenda_json TEXT NOT NULL DEFAULT '[]',
     primary_share REAL,
     general_share REAL,
     PRIMARY KEY (race_id, actor_id)

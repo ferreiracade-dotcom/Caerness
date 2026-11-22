@@ -8702,6 +8702,116 @@
   "source": "unsourced",
   "note": "unsourced; Council and board seats at the opening are drawn at this share male; Saint Jude city government in 1975 is near-all male."
  },
+ "party_members_machine": {
+  "default": 45,
+  "range": null,
+  "unit": "people",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The Machine's core organisation at the opening: chairman, treasurer, ward leaders and committeemen (not every precinct worker in the city); a design size."
+ },
+ "party_ward_leader_minimum": {
+  "default": 15,
+  "range": null,
+  "unit": "ward leaders",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; One ward leader for each of the fifteen council wards."
+ },
+ "party_one_leader_per_men": {
+  "default": 3,
+  "range": null,
+  "unit": "men per leader",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; A ward leader for every three of the organisation's core men, so the fifteen wards each have one."
+ },
+ "party_workers_per_man": {
+  "default": 1.0,
+  "range": null,
+  "unit": "workers per core man",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Precinct workers over the core men; a design size for the people the Machine can turn out."
+ },
+ "field_strength_scale": {
+  "default": 10.0,
+  "range": null,
+  "unit": "stake-strength units",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The sum of a holder's stake strengths is divided by this to give its field strength (a reading, never a cap): ten full stakes read as 1.0 and more reads higher."
+ },
+ "city_voting_age_population": {
+  "default": 775500,
+  "range": null,
+  "unit": "people",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "Part I 4.1",
+  "note": "Voting-age residents of the city: 1.1 million (bible Part I 4.1) times the 18-and-over share of the background age table (0.33 + 0.21 + 0.165 = 0.705)."
+ },
+ "turnout_w_grievance": {
+  "default": 0.35,
+  "range": null,
+  "unit": "logit per named grievance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a race that names one of a voter group's grievances raises that group's turnout (added to the logit of its base turnout)."
+ },
+ "turnout_w_drive": {
+  "default": 0.8,
+  "range": null,
+  "unit": "logit per unit of delivery",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much organised delivery (the sum of the delivery stakes' effort) raises a group's turnout."
+ },
+ "turnout_w_winter": {
+  "default": -0.15,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; A cold or wet election day lowers turnout a little; applied in winter and in a storm."
+ },
+ "delivery_base_share": {
+  "default": 0.5,
+  "range": null,
+  "unit": "share",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The share of a delivery stake's strength that holds without any jobs to give; the rest follows the holder's patronage jobs."
+ },
+ "delivery_line_scale": {
+  "default": 20.0,
+  "range": null,
+  "unit": "jobs",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How many patronage jobs a holder needs for half of the job-dependent share of its delivery."
+ },
   "male_share_law_official": {
    "default": 0.97,
    "range": null,

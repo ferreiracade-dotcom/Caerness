@@ -13,6 +13,208 @@
  "ledger_purpose": "outfit {flow}",
  "arrangement_kinds": {"envelope": {"flow": "pad", "ledger_kind": "bribe", "purpose": "the Pad"}},
  "kinds": {
+  "party": {
+   "sphere": "politics",
+   "head": "chairman",
+   "unit_leader": "ward_leader",
+   "purse_roles": [
+    "ward_leader"
+   ],
+   "courtship_scan": false,
+   "lifecycle": {
+    "succession": {
+     "chairman": [
+      "treasurer",
+      "ward_leader"
+     ],
+     "treasurer": [
+      "ward_leader"
+     ],
+     "ward_leader": [
+      "committeeman"
+     ]
+    }
+   },
+   "labels": {
+    "chairman": "Chairman",
+    "treasurer": "Treasurer",
+    "ward_leader": "Ward leader",
+    "committeeman": "Committeeman",
+    "precinct_worker": "Precinct worker"
+   },
+   "rules": [],
+   "opening": {
+    "layout": "units",
+    "executives": [
+     "chairman",
+     "treasurer"
+    ],
+    "member_role": "committeeman",
+    "dependent_role": "precinct_worker",
+    "unit_label": "{surname}'s ward organisation",
+    "own_group_share": 0.8,
+    "inducted_after_age": 25,
+    "leader_minimum_figure": "party_ward_leader_minimum",
+    "members_per_leader_figure": "party_one_leader_per_men",
+    "in_roles": [
+     "ward_leader",
+     "committeeman"
+    ],
+    "line_roles": [
+     "ward_leader",
+     "committeeman"
+    ],
+    "roles": {
+     "chairman": {
+      "ages": [
+       55,
+       75
+      ],
+      "sex": "male",
+      "level": 3
+     },
+     "treasurer": {
+      "ages": [
+       50,
+       70
+      ],
+      "sex": "male",
+      "level": 3
+     },
+     "ward_leader": {
+      "ages": [
+       40,
+       65
+      ],
+      "sex": "male",
+      "level": 3
+     },
+     "committeeman": {
+      "ages": [
+       30,
+       65
+      ],
+      "sex": "male",
+      "level": 3
+     },
+     "precinct_worker": {
+      "ages": [
+       20,
+       60
+      ],
+      "male_share_key": "precinct_worker",
+      "level": 3,
+      "standing": {
+       "mean": 0.3,
+       "sd": 0.2
+      },
+      "criminal_weight": 0.0
+     }
+    }
+   }
+  },
+  "political_club": {
+   "sphere": "politics",
+   "head": "chair",
+   "unit_leader": null,
+   "courtship_scan": false,
+   "lifecycle": {
+    "succession": {
+     "chair": [
+      "officer"
+     ]
+    }
+   },
+   "labels": {
+    "chair": "Chair",
+    "officer": "Officer",
+    "member": "Member"
+   },
+   "rules": [],
+   "opening": {
+    "layout": "ranks",
+    "male_share_key": "political_club",
+    "roles": {
+     "chair": {
+      "ages": [
+       35,
+       65
+      ]
+     },
+     "officer": {
+      "ages": [
+       28,
+       60
+      ],
+      "superior": {
+       "role": "chair",
+       "pick": "first"
+      }
+     },
+     "member": {
+      "ages": [
+       20,
+       65
+      ],
+      "superior": {
+       "role": "officer",
+       "pick": "round_robin"
+      }
+     }
+    }
+   }
+  },
+  "interest": {
+   "sphere": "politics",
+   "head": "president",
+   "unit_leader": null,
+   "courtship_scan": false,
+   "lifecycle": {
+    "succession": {
+     "president": [
+      "director"
+     ]
+    }
+   },
+   "labels": {
+    "president": "President",
+    "director": "Director",
+    "member": "Member"
+   },
+   "rules": [],
+   "opening": {
+    "layout": "ranks",
+    "male_share_key": "interest",
+    "roles": {
+     "president": {
+      "ages": [
+       40,
+       70
+      ]
+     },
+     "director": {
+      "ages": [
+       35,
+       65
+      ],
+      "superior": {
+       "role": "president",
+       "pick": "first"
+      }
+     },
+     "member": {
+      "ages": [
+       25,
+       70
+      ],
+      "superior": {
+       "role": "director",
+       "pick": "round_robin"
+      }
+     }
+    }
+   }
+  },
   "family": {
    "sphere": "underworld", "head": "boss", "unit_leader": "capo", "purse_roles": ["capo"], "inducted_label": "made", "courtship_scan": false,
    "choices": ["remove_superior", "start_racket"],

@@ -692,6 +692,9 @@
   "Associate": "associate"
  },
  "male_share": {
+  "precinct_worker": 0.9,
+  "political_club": 0.88,
+  "interest": 0.92,
   "made": 1.0,
   "loyalties": 1.0,
   "club": 1.0,

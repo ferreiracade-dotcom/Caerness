@@ -1076,5 +1076,919 @@
  "institution_default": "sj:institution:city-hall",
  "holders_1975": {
   "note": "Offices with a world fact keep the holder the opening already gave them; every other seat of an elected or appointed office is pulled up from the city's people (offices.build)."
- }
+ },
+ "polity_orgs": {
+  "county_party": {
+   "institution": "Killbuck County Democratic Committee",
+   "shape": "party",
+   "members_figure": "party_members_machine",
+   "dependents_figure": "party_workers_per_man",
+   "name_group": "italian",
+   "ground": [
+    "Ironhaven",
+    "Kerrytown",
+    "Killbuck Flats",
+    "Killbuck Point",
+    "Kosciuszko Park",
+    "North Hill",
+    "South Hill",
+    "The Eastside",
+    "The Sixth Ward",
+    "The East Slope",
+    "Fenwick (College Hill)",
+    "Greenwood",
+    "San Lorenzo (the Hill)",
+    "The Heights",
+    "Crown Harbor"
+   ],
+   "found": {
+    "subtype": "political party organisation",
+    "note": "The county party committee that has run the city for a century (bible Part I). A package organisation: it holds what the field data gives it and can lose any of it."
+   }
+  },
+  "county_opposition": {
+   "institution": "Killbuck County Republican Committee",
+   "shape": "political_club",
+   "name_group": "irish",
+   "ranks": {
+    "chair": {
+     "count": 1,
+     "level": 3
+    },
+    "officer": {
+     "count": 4,
+     "level": 3
+    },
+    "member": {
+     "count": 10,
+     "level": 3
+    }
+   },
+   "ground": [
+    "The Heights"
+   ],
+   "found": {
+    "subtype": "political party organisation",
+    "note": "The minority party, strongest on the Heights."
+   }
+  },
+  "reform_clubs": {
+   "institution": "Citizens for Honest Government",
+   "shape": "political_club",
+   "ranks": {
+    "chair": {
+     "count": 1,
+     "level": 3
+    },
+    "officer": {
+     "count": 4,
+     "level": 3
+    },
+    "member": {
+     "count": 12,
+     "level": 3
+    }
+   },
+   "ground": [
+    "Fenwick (College Hill)",
+    "Greenwood"
+   ],
+   "found": {
+    "subtype": "reform club",
+    "note": "Reform Democrats and independents who want the Machine out."
+   }
+  },
+  "civil_rights": {
+   "institution": "Saint Jude Freedom Council",
+   "shape": "political_club",
+   "name_group": "black",
+   "ranks": {
+    "chair": {
+     "count": 1,
+     "level": 3
+    },
+    "officer": {
+     "count": 4,
+     "level": 3
+    },
+    "member": {
+     "count": 12,
+     "level": 3
+    }
+   },
+   "ground": [
+    "The Eastside"
+   ],
+   "found": {
+    "subtype": "civil rights organisation",
+    "note": "The civil-rights organisation of the Eastside."
+   }
+  },
+  "taxpayers": {
+   "institution": "Killbuck Taxpayers Association",
+   "shape": "interest",
+   "ranks": {
+    "president": {
+     "count": 1,
+     "level": 3
+    },
+    "director": {
+     "count": 3,
+     "level": 3
+    },
+    "member": {
+     "count": 8,
+     "level": 3
+    }
+   },
+   "ground": [
+    "The Heights"
+   ],
+   "found": {
+    "subtype": "interest group",
+    "note": "Property owners who fight the city's tax rate."
+   }
+  }
+ },
+ "stake_kinds": {
+  "party_office": "a party post (a chairmanship, a ward leadership)",
+  "patronage": "an office's hiring",
+  "sponsor": "a seat in an appointment chain",
+  "delivery": "a voter group's turnout and support",
+  "ledger": "a bundle of favours owed"
+ },
+ "holdings_1975": [
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:county-chairman",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-1",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-2",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-3",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-4",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-5",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-6",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-7",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-8",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-9",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-10",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "reform_clubs"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-11",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "reform_clubs"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-12",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-13",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-14",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "party_office",
+   "stake_ref": "office:party:ward-leader-15",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "patronage",
+   "stake_ref": "office:city-hall:mayor",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "patronage",
+   "stake_ref": "office:works:board",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "patronage",
+   "stake_ref": "office:zoning:board",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "patronage",
+   "stake_ref": "office:licensing:board",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "patronage",
+   "stake_ref": "office:sjpd:police-commissioner",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "sponsor",
+   "stake_ref": "office:county-prosecutor:killbuck-county-prosecutor",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "sponsor",
+   "stake_ref": "office:works:board-seat-1",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "sponsor",
+   "stake_ref": "office:works:board-seat-2",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "sponsor",
+   "stake_ref": "office:sjpd:police-commissioner",
+   "strength": 1.0
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "delivery",
+   "wards": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10,
+    13,
+    15
+   ],
+   "strength": 0.8
+  },
+  {
+   "holder": {
+    "org": "reform_clubs"
+   },
+   "stake_kind": "delivery",
+   "wards": [
+    11,
+    12
+   ],
+   "strength": 0.6
+  },
+  {
+   "holder": {
+    "org": "county_opposition"
+   },
+   "stake_kind": "delivery",
+   "wards": [
+    14
+   ],
+   "strength": 0.6
+  },
+  {
+   "holder": {
+    "org": "civil_rights"
+   },
+   "stake_kind": "delivery",
+   "wards": [
+    8
+   ],
+   "strength": 0.6
+  },
+  {
+   "holder": {
+    "org": "county_party"
+   },
+   "stake_kind": "delivery",
+   "wards": [
+    8,
+    11,
+    12,
+    14
+   ],
+   "strength": 0.3
+  },
+  {
+   "holder": {
+    "org": "taxpayers"
+   },
+   "stake_kind": "delivery",
+   "wards": [
+    14,
+    12
+   ],
+   "strength": 0.3
+  }
+ ],
+ "voter_groups": {
+  "audience_key": "electorate",
+  "population_figure": "city_voting_age_population",
+  "note": "Two groups per ward. Sizes split the city's voting-age population (figure) across wards with a design spread; turnout_base is a 1975 municipal-election design reading (about 0.3 to 0.7 by group); grievance words are the package's, mapped to what a candidate or an item can name.",
+  "groups": [
+   {
+    "key": "ward-1:irish-catholic-working",
+    "ward": 1,
+    "district": "Ironhaven",
+    "words": {
+     "descent": "irish",
+     "class": "working",
+     "religion": "catholic",
+     "union": "building trades"
+    },
+    "size": 31020,
+    "turnout_base": 0.52,
+    "grievances": [
+     "jobs",
+     "taxes"
+    ]
+   },
+   {
+    "key": "ward-1:polish-working",
+    "ward": 1,
+    "district": "Ironhaven",
+    "words": {
+     "descent": "polish",
+     "class": "working",
+     "religion": "catholic",
+     "union": "steel"
+    },
+    "size": 20680,
+    "turnout_base": 0.48,
+    "grievances": [
+     "jobs",
+     "housing"
+    ]
+   },
+   {
+    "key": "ward-2:irish-catholic-working",
+    "ward": 2,
+    "district": "Kerrytown",
+    "words": {
+     "descent": "irish",
+     "class": "working",
+     "religion": "catholic",
+     "union": "teamsters"
+    },
+    "size": 35983,
+    "turnout_base": 0.55,
+    "grievances": [
+     "jobs",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-2:irish-elderly",
+    "ward": 2,
+    "district": "Kerrytown",
+    "words": {
+     "descent": "irish",
+     "class": "retired",
+     "religion": "catholic",
+     "age": "60 plus"
+    },
+    "size": 23989,
+    "turnout_base": 0.66,
+    "grievances": [
+     "taxes",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-3:black-poor",
+    "ward": 3,
+    "district": "Killbuck Flats",
+    "words": {
+     "descent": "black",
+     "class": "poor",
+     "religion": "baptist"
+    },
+    "size": 28538,
+    "turnout_base": 0.38,
+    "grievances": [
+     "jobs",
+     "police",
+     "housing"
+    ]
+   },
+   {
+    "key": "ward-3:puerto-rican-poor",
+    "ward": 3,
+    "district": "Killbuck Flats",
+    "words": {
+     "descent": "puerto rican",
+     "class": "poor",
+     "religion": "catholic"
+    },
+    "size": 19026,
+    "turnout_base": 0.3,
+    "grievances": [
+     "housing",
+     "schools"
+    ]
+   },
+   {
+    "key": "ward-4:italian-working",
+    "ward": 4,
+    "district": "Killbuck Point",
+    "words": {
+     "descent": "italian",
+     "class": "working",
+     "religion": "catholic",
+     "union": "longshore"
+    },
+    "size": 33502,
+    "turnout_base": 0.54,
+    "grievances": [
+     "jobs",
+     "taxes"
+    ]
+   },
+   {
+    "key": "ward-4:italian-shopkeepers",
+    "ward": 4,
+    "district": "Killbuck Point",
+    "words": {
+     "descent": "italian",
+     "class": "small business",
+     "religion": "catholic"
+    },
+    "size": 22334,
+    "turnout_base": 0.6,
+    "grievances": [
+     "taxes",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-5:polish-catholic",
+    "ward": 5,
+    "district": "Kosciuszko Park",
+    "words": {
+     "descent": "polish",
+     "class": "working",
+     "religion": "catholic",
+     "parish": "Saint Stanislaus"
+    },
+    "size": 26057,
+    "turnout_base": 0.56,
+    "grievances": [
+     "jobs",
+     "schools"
+    ]
+   },
+   {
+    "key": "ward-5:polish-union",
+    "ward": 5,
+    "district": "Kosciuszko Park",
+    "words": {
+     "descent": "polish",
+     "class": "working",
+     "union": "auto workers"
+    },
+    "size": 17371,
+    "turnout_base": 0.5,
+    "grievances": [
+     "jobs",
+     "taxes"
+    ]
+   },
+   {
+    "key": "ward-6:italian-catholic-working",
+    "ward": 6,
+    "district": "North Hill",
+    "words": {
+     "descent": "italian",
+     "class": "working",
+     "religion": "catholic",
+     "parish": "Santa Maria della Corte"
+    },
+    "size": 31020,
+    "turnout_base": 0.58,
+    "grievances": [
+     "jobs",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-6:italian-professional",
+    "ward": 6,
+    "district": "North Hill",
+    "words": {
+     "descent": "italian",
+     "class": "professional",
+     "religion": "catholic"
+    },
+    "size": 20680,
+    "turnout_base": 0.62,
+    "grievances": [
+     "taxes",
+     "schools"
+    ]
+   },
+   {
+    "key": "ward-7:italian-working",
+    "ward": 7,
+    "district": "South Hill",
+    "words": {
+     "descent": "italian",
+     "class": "working",
+     "religion": "catholic"
+    },
+    "size": 35983,
+    "turnout_base": 0.55,
+    "grievances": [
+     "jobs",
+     "housing"
+    ]
+   },
+   {
+    "key": "ward-7:irish-working",
+    "ward": 7,
+    "district": "South Hill",
+    "words": {
+     "descent": "irish",
+     "class": "working",
+     "religion": "catholic",
+     "union": "building trades"
+    },
+    "size": 23989,
+    "turnout_base": 0.55,
+    "grievances": [
+     "jobs",
+     "taxes"
+    ]
+   },
+   {
+    "key": "ward-8:black-working",
+    "ward": 8,
+    "district": "The Eastside",
+    "words": {
+     "descent": "black",
+     "class": "working",
+     "religion": "baptist",
+     "union": "municipal workers"
+    },
+    "size": 28538,
+    "turnout_base": 0.46,
+    "grievances": [
+     "jobs",
+     "police",
+     "schools"
+    ]
+   },
+   {
+    "key": "ward-8:black-churchgoing",
+    "ward": 8,
+    "district": "The Eastside",
+    "words": {
+     "descent": "black",
+     "class": "middle",
+     "religion": "baptist",
+     "age": "40 plus"
+    },
+    "size": 19026,
+    "turnout_base": 0.58,
+    "grievances": [
+     "schools",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-9:mixed-renters",
+    "ward": 9,
+    "district": "The Sixth Ward",
+    "words": {
+     "class": "poor",
+     "descent": "mixed"
+    },
+    "size": 33502,
+    "turnout_base": 0.32,
+    "grievances": [
+     "housing",
+     "jobs"
+    ]
+   },
+   {
+    "key": "ward-9:black-poor",
+    "ward": 9,
+    "district": "The Sixth Ward",
+    "words": {
+     "descent": "black",
+     "class": "poor",
+     "religion": "baptist"
+    },
+    "size": 22334,
+    "turnout_base": 0.34,
+    "grievances": [
+     "housing",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-10:italian-middle",
+    "ward": 10,
+    "district": "The East Slope",
+    "words": {
+     "descent": "italian",
+     "class": "middle",
+     "religion": "catholic"
+    },
+    "size": 26057,
+    "turnout_base": 0.57,
+    "grievances": [
+     "taxes",
+     "schools"
+    ]
+   },
+   {
+    "key": "ward-10:mixed-middle",
+    "ward": 10,
+    "district": "The East Slope",
+    "words": {
+     "descent": "mixed",
+     "class": "middle"
+    },
+    "size": 17371,
+    "turnout_base": 0.52,
+    "grievances": [
+     "schools",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-11:students",
+    "ward": 11,
+    "district": "Fenwick (College Hill)",
+    "words": {
+     "class": "student",
+     "age": "18 to 29"
+    },
+    "size": 31020,
+    "turnout_base": 0.34,
+    "grievances": [
+     "jobs",
+     "police",
+     "housing"
+    ]
+   },
+   {
+    "key": "ward-11:faculty-professional",
+    "ward": 11,
+    "district": "Fenwick (College Hill)",
+    "words": {
+     "class": "professional",
+     "descent": "mixed"
+    },
+    "size": 20680,
+    "turnout_base": 0.7,
+    "grievances": [
+     "schools",
+     "taxes"
+    ]
+   },
+   {
+    "key": "ward-12:professional-reform",
+    "ward": 12,
+    "district": "Greenwood",
+    "words": {
+     "class": "professional",
+     "descent": "mixed"
+    },
+    "size": 35983,
+    "turnout_base": 0.68,
+    "grievances": [
+     "taxes",
+     "schools"
+    ]
+   },
+   {
+    "key": "ward-12:homeowners",
+    "ward": 12,
+    "district": "Greenwood",
+    "words": {
+     "class": "middle",
+     "descent": "mixed",
+     "religion": "protestant"
+    },
+    "size": 23989,
+    "turnout_base": 0.64,
+    "grievances": [
+     "taxes",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-13:italian-parish",
+    "ward": 13,
+    "district": "San Lorenzo (the Hill)",
+    "words": {
+     "descent": "italian",
+     "class": "working",
+     "religion": "catholic",
+     "parish": "Santa Maria della Corte"
+    },
+    "size": 28538,
+    "turnout_base": 0.6,
+    "grievances": [
+     "jobs",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-13:italian-elderly",
+    "ward": 13,
+    "district": "San Lorenzo (the Hill)",
+    "words": {
+     "descent": "italian",
+     "class": "retired",
+     "religion": "catholic",
+     "age": "60 plus"
+    },
+    "size": 19026,
+    "turnout_base": 0.68,
+    "grievances": [
+     "taxes",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-14:protestant-wealthy",
+    "ward": 14,
+    "district": "The Heights",
+    "words": {
+     "descent": "mixed",
+     "class": "wealthy",
+     "religion": "protestant"
+    },
+    "size": 33502,
+    "turnout_base": 0.72,
+    "grievances": [
+     "taxes",
+     "schools"
+    ]
+   },
+   {
+    "key": "ward-14:managers",
+    "ward": 14,
+    "district": "The Heights",
+    "words": {
+     "descent": "mixed",
+     "class": "professional",
+     "religion": "protestant"
+    },
+    "size": 22334,
+    "turnout_base": 0.66,
+    "grievances": [
+     "taxes",
+     "police"
+    ]
+   },
+   {
+    "key": "ward-15:waterfront-labor",
+    "ward": 15,
+    "district": "Crown Harbor",
+    "words": {
+     "descent": "mixed",
+     "class": "working",
+     "union": "longshore"
+    },
+    "size": 26057,
+    "turnout_base": 0.5,
+    "grievances": [
+     "jobs",
+     "housing"
+    ]
+   },
+   {
+    "key": "ward-15:harbor-shopkeepers",
+    "ward": 15,
+    "district": "Crown Harbor",
+    "words": {
+     "descent": "mixed",
+     "class": "small business"
+    },
+    "size": 17371,
+    "turnout_base": 0.58,
+    "grievances": [
+     "taxes",
+     "police"
+    ]
+   }
+  ]
+ },
+ "patronage_line_kind": "a public job"
 }
