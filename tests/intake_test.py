@@ -197,6 +197,78 @@ def test_unread_consequences_flag_a_gap_and_illegal_adds_heat_reader():
     assert "heat" in r["readers_json"] and "saints weep" in r["unmapped_json"] and out.get("gap")
 
 
+def test_a_held_thing_earns_and_pays_each_week():
+    from engine import authoring, held_things, ledger
+    w = _open_world()
+    c = w.conn
+    authoring.author(c, w.capo, "a jukebox route", {"what": "the Ward 3 jukebox route", "money": {"income": "300 a week", "upkeep": "100 a week"}}, "t4-1")
+    b = ledger.balance(c, ("person", w.capo))
+    held_things.process_due(c, DAY + 7)
+    assert abs(ledger.balance(c, ("person", w.capo)) - (b + 200)) < 0.01
+
+
+def test_a_thing_that_cannot_pay_fails_then_ends_and_its_owner_is_told():
+    from engine import authoring, held_things
+    w = _open_world()
+    c = w.conn
+    out = authoring.author(c, w.soldier, "a racing pigeon loft", {"what": "the loft", "money": {"upkeep": "1,000,000 a week"}}, "t4-2")
+    for k in range(1, 6):
+        held_things.process_due(c, DAY + 7 * k)
+    row = c.execute("SELECT status,ended_reason FROM held_things WHERE id=?", (out["held_thing_id"],)).fetchone()
+    assert row["status"] == "ended" and "pay its way" in row["ended_reason"]
+    assert c.execute("SELECT 1 FROM knowledge WHERE knower_actor_id=? AND belief_text LIKE '%the loft is over%'", (w.soldier,)).fetchone()
+
+
+def test_a_dead_owners_thing_passes_to_the_next_of_its_people():
+    from engine import authoring, held_things
+    w = _open_world()
+    c = w.conn
+    out = authoring.author(c, w.capo, "a social club", {"what": "the Vesuvio room", "people": [w.capo, w.soldier]}, "t4-3")
+    c.execute("UPDATE actors SET status='deceased' WHERE id=?", (w.capo,))
+    held_things.process_due(c, DAY + 7)
+    assert c.execute("SELECT owner_actor_id FROM held_things WHERE id=?", (out["held_thing_id"],)).fetchone()[0] == w.soldier
+
+
+def test_a_thing_with_no_one_left_ends_with_its_reason_not_a_dead_mans_purse():
+    from engine import authoring, held_things
+    w = _open_world()
+    c = w.conn
+    out = authoring.author(c, w.soldier, "a loft", {"what": "the lonely loft", "money": {"income": "50 a week"}}, "t4-3b")
+    c.execute("DELETE FROM org_seats WHERE actor_id=?", (w.soldier,))
+    c.execute("UPDATE actors SET status='deceased' WHERE id=?", (w.soldier,))
+    held_things.process_due(c, DAY + 7)
+    row = c.execute("SELECT status,ended_reason FROM held_things WHERE id=?", (out["held_thing_id"],)).fetchone()
+    assert row["status"] == "ended" and "no one took it up" in row["ended_reason"]
+
+
+def test_an_illegal_thing_draws_heat_on_its_owners_organisation():
+    from engine import authoring, held_things, org_heat
+    w = _open_world()
+    c = w.conn
+    authoring.author(c, w.capo, "a chop shop", {"what": "the Route 1 chop shop", "legality": "illegal", "money": {"income": "400 a week"}}, "t4-4")
+    h0 = org_heat.read(c, w.org, DAY + 7)["investigative_heat"]
+    held_things.process_due(c, DAY + 7)
+    assert org_heat.read(c, w.org, DAY + 7)["investigative_heat"] > h0
+
+
+def test_caerness_registers_no_held_things_work():
+    from engine import held_things
+    conn, _me = _caerness()
+    assert held_things.next_due_day(conn, 0, 10_000) is None
+
+
+def test_a_thing_can_belong_to_the_protagonist_and_fails_like_anyone_s():
+    from engine import authoring, held_things
+    from engine.player import set_player
+    w = _open_world()
+    c = w.conn
+    set_player(c, w.soldier)
+    out = authoring.author(c, w.soldier, "a racing pigeon loft", {"what": "his own loft", "money": {"upkeep": "900 a week"}}, "t4-6")
+    for k in range(1, 6):
+        held_things.process_due(c, DAY + 7 * k)
+    assert c.execute("SELECT status FROM held_things WHERE id=?", (out["held_thing_id"],)).fetchone()[0] == "ended"
+
+
 tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
 tests.sort(key=lambda f: f.__code__.co_firstlineno)
 
