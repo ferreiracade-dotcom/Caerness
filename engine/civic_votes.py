@@ -12,7 +12,7 @@ import json
 import math
 import random
 
-from . import civic_patronage, civic_seams, design, electorate, offices, races
+from . import civic_field, civic_patronage, civic_seams, design, electorate, offices, races
 from .design import figure
 from .world_package import package_for, politics_rules
 
@@ -162,6 +162,8 @@ def decide(conn, item_id: int, day: int) -> dict:
     it = item(conn, item_id)
     if it["status"] != "open":
         return _j(it["outcome_json"], {})
+    if it["item_kind"] == "choose_member":
+        return _choose(conn, it, day)
     body = _body(conn, it["body_office_key"])
     sub = _j(it["subject_json"], {})
     members = sorted({a for _, _, a in offices.members(conn, it["body_office_key"])})
@@ -229,6 +231,56 @@ def _tell_groups(conn, it, sub: dict, votes: dict[int, str], day: int) -> None:
             if names & set(json.loads(g["grievances_json"] or "[]")):
                 civic_seams.tell_group(conn, int(g["id"]), int(m), f"voted {v} on {sub.get('title') or it['item_kind']}", source="record", confidence=0.8,
                                        valence=0.3 if v == "yes" else -0.3, day=int(day))
+
+
+# ---- a body choosing one of its own ---------------------------------------------------------------------------------
+
+def open_choice(conn, body_office_key: str, office_key: str, seat_no: int, candidates: list[int], *, vote_day: int, day: int) -> int:
+    """The body fills a vacant seat: each member backs one candidate by the same lean a vote has (regard, party line, favours, money)."""
+    return open_item(conn, body_office_key, "choose_member",
+                     {"office_key": office_key, "seat_no": int(seat_no), "candidates": [int(c) for c in candidates], "title": f"choose a member for {office_key}"},
+                     vote_day=vote_day, day=day)
+
+
+def _choose(conn, it, day: int) -> dict:
+    sub = _j(it["subject_json"], {})
+    cands = [int(c) for c in sub.get("candidates") or []]
+    members = sorted({a for _, _, a in offices.members(conn, it["body_office_key"])})
+    d = _md(conn)
+    tally = {c: 0 for c in cands}
+    for m in members:
+        if _absent(conn, m) or not cands:
+            continue
+        gs = _district_groups(conn, m, it["body_office_key"])
+        scores = []
+        for c in cands:
+            regard = sum(electorate.regard(conn, int(g["id"]), c, day) for g in gs) / max(1, len(gs)) if gs else 0.0
+            scores.append(_f(conn, d.get("regard")) * regard + _f(conn, d.get("line")) * _line(conn, m, c) - _f(conn, d.get("favour")) * civic_patronage.owed(conn, m, c)
+                          + _f(conn, d.get("money")) * math.log1p(max(0.0, _money_on(conn, m, c))) + _rng(conn, it["id"], m, c, "choose").gauss(0.0, _f(conn, d.get("noise_sd"))))
+        top = max(scores)
+        w = [math.exp(s - top) for s in scores]
+        u = _rng(conn, it["id"], m, "pick").random() * sum(w)
+        acc = 0.0
+        for c, wi in zip(cands, w):
+            acc += wi
+            if u <= acc:
+                tally[c] += 1
+                break
+    out: dict = {"tally": {str(c): n for c, n in tally.items()}}
+    if not cands or not any(tally.values()):
+        conn.execute("UPDATE civic_items SET status='failed',outcome_json=? WHERE id=?", (json.dumps({**out, "reason": "nobody chosen"}), int(it["id"])))
+        return out
+    best = max(tally.values())
+    leaders = sorted(c for c, n in tally.items() if n == best)
+    winner = leaders[0] if len(leaders) == 1 else _rng(conn, it["id"], "tie").choice(leaders)
+    out["winner"] = winner
+    conn.execute("UPDATE civic_items SET status='passed',outcome_json=? WHERE id=?", (json.dumps(out, sort_keys=True), int(it["id"])))
+    offices.seat_holder(conn, sub["office_key"], winner, how="elected", day=int(day), seat_no=int(sub.get("seat_no", 1)), source_id=int(it["id"]))
+    if civic_field.holder_of(conn, "patronage", sub["office_key"]) is not None:
+        civic_patronage.follow(conn, sub["office_key"], winner, day=int(day), cause="chosen")
+    civic_seams.hold_outcome(conn, what=f"{it['body_office_key']} chose a member for {sub['office_key']}", people=[winner], dates={"start_day": int(day)},
+                             consequences=[f"{best} of {sum(tally.values())} backed him"], day=int(day))
+    return out
 
 
 # ---- tenders ------------------------------------------------------------------------------------------------------

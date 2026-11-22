@@ -2064,7 +2064,11 @@
     "ordinance"
    ]
   },
-  "note": "The body that decides each kind of item and the effect keys a passed item may write for business and the rest of the world to read."
+  "note": "The body that decides each kind of item and the effect keys a passed item may write for business and the rest of the world to read.",
+  "choose_member": {
+   "body": null,
+   "effects": []
+  }
  },
  "approval_bodies": {
   "liquor_licence": "office:licensing:board",

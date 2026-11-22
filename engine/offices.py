@@ -154,6 +154,55 @@ def pending_vacancies(conn) -> list[sqlite3.Row]:
                            WHERE v.status='pending' ORDER BY v.id""").fetchall()
 
 
+def _fig(conn, name: str, default: float) -> float:
+    from .design import figure
+    return float(figure(conn, name, default))
+
+
+def process_vacancies(conn, day: int) -> int:
+    """Run the rule of each pending vacancy once it is old enough (a figure): a special election is dated, an appointer or a body
+    or the organisation that holds the post names a successor. Returns the vacancies acted on. A seat whose holder is in custody is
+    held, not vacant, unless the package gives `custody_vacates_after_days` for the office."""
+    from . import appointments, civic_field, civic_votes, races
+    n = 0
+    for t in conn.execute("SELECT t.id,t.actor_id,o.office_key FROM office_terms t JOIN offices o ON o.id=t.office_id WHERE t.end_day IS NULL ORDER BY t.id").fetchall():
+        limit = spec(conn, t["office_key"]).get("custody_vacates_after_days")
+        if limit is None:
+            continue
+        if conn.execute("SELECT 1 FROM custody WHERE actor_id=? AND kind='held' AND until_day IS NULL AND since_day<=?", (int(t["actor_id"]), int(day) - int(limit))).fetchone():
+            end_term(conn, int(t["id"]), "removed", int(day))
+    wait = int(_fig(conn, "vacancy_fill_days", 21))
+    for v in pending_vacancies(conn):
+        if int(day) < int(v["since_day"]) + wait:
+            continue
+        key, seat = v["office_key"], int(v["seat_no"])
+        rule = _json(v["rule_json"], {})
+        how = rule.get("how")
+        if how == "special_election":
+            n += 1 if races.schedule_special(conn, key, seat, int(day)) is not None else 0
+        elif how == "appointed_by":
+            n += 1 if appointments.fill(conn, key, int(day), seat) is not None else 0
+        elif how == "body_chooses" and rule.get("by"):
+            if conn.execute("SELECT 1 FROM civic_items WHERE item_kind='choose_member' AND status='open' AND subject_json LIKE ?", (f'%"office_key": "{key}"%',)).fetchone():
+                continue
+            cands = [a for a in dict.fromkeys(races.pool_for(conn, key) + races.residents_in_orgs(conn, key)) if eligible(conn, a, key, int(day))[0] and not races._is_player(conn, a)]
+            if not cands:  # nobody of the organisations lives there: the body looks to the district's own residents
+                cands = [int(r[0]) for r in conn.execute("SELECT id FROM actors WHERE actor_type='character' AND status='active' ORDER BY id")]
+                cands = [a for a in cands if eligible(conn, a, key, int(day))[0] and not races._is_player(conn, a)]
+            if cands:
+                civic_votes.open_choice(conn, rule["by"], key, seat, cands, vote_day=int(day), day=int(day))
+                n += 1
+            elif "no_candidates" not in str(v["cause"]):
+                conn.execute("UPDATE office_vacancies SET cause=? WHERE id=?", (f"{v['cause']} | no_candidates", int(v["id"])))
+        elif how == "org_chooses":
+            h = civic_field.holder_of(conn, "party_office", key)
+            who = int(h[1]) if h is not None and h[0] == "actor" else civic_field._filler(conn, int(h[1]), key) if h is not None else None
+            if who is not None and orgs.is_living(conn, int(who)):
+                civic_field._seat_post(conn, h[0], int(h[1]), key, int(day))
+                n += 1
+    return n
+
+
 # ---- eligibility (a veto with its reason) ------------------------------------------------------------------------
 
 def _age(conn, actor_id: int, day: int) -> float | None:

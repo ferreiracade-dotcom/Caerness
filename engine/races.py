@@ -139,11 +139,36 @@ def schedule(conn, day: int) -> int:
     return n
 
 
+def schedule_special(conn, office_key_: str, seat_no: int, day: int) -> int | None:
+    """A special election for a vacant seat: dated from the vacancy by the figure, no primary. None when one is already open for the seat."""
+    o = offices.office(conn, office_key_)
+    if conn.execute("SELECT 1 FROM races WHERE office_id=? AND seat_no=? AND special=1 AND status='open'", (int(o["id"]), int(seat_no))).fetchone():
+        return None
+    el = int(day) + int(_f(conn, "vacancy_special_days", 120))
+    return int(conn.execute("INSERT INTO races(office_id,seat_no,stage,primary_day,election_day,result_json,special) VALUES (?,?,?,?,?,?,1)",
+                            (int(o["id"]), int(seat_no), "filing", None, el, json.dumps({"term_start_day": el + int(_f(conn, "vacancy_special_seat_days", 14)), "special": True}))).lastrowid)
+
+
 # ---- filing -------------------------------------------------------------------------------------------------------
 
 def pool(conn, race_id: int) -> list[int]:
     """Who weighs filing: the incumbent and the man each organisation with a hold on the district would put up."""
-    key = office_key(conn, race_id)
+    return pool_for(conn, office_key(conn, race_id))
+
+
+def residents_in_orgs(conn, key: str) -> list[int]:
+    """Every man seated in an organisation that holds a stake in the district: who a body can pick from when it fills the seat."""
+    out: list[int] = []
+    seen: set[int] = set()
+    for g in electorate._district_groups(conn, key):
+        for h in civic_field.holders_of(conn, "delivery", g["group_key"]):
+            if h["holder_kind"] == "org" and int(h["holder_id"]) not in seen:
+                seen.add(int(h["holder_id"]))
+                out += [int(r[0]) for r in conn.execute("SELECT DISTINCT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' ORDER BY actor_id", (int(h["holder_id"]),))]
+    return out
+
+
+def pool_for(conn, key: str) -> list[int]:
     out: list[int] = []
     inc = offices.holder(conn, key)
     if inc is not None:

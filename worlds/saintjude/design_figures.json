@@ -15861,6 +15861,36 @@
   "mark": "Design proposal",
   "source": "unsourced",
   "note": "unsourced; Scales the ambition of an officer toward a target by the target's office rank."
+ },
+ "vacancy_fill_days": {
+  "default": 21,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Days a vacancy waits before its rule acts (an appointer, a body or a party names a successor)."
+ },
+ "vacancy_special_days": {
+  "default": 120,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Days from a vacancy to the special election its rule calls."
+ },
+ "vacancy_special_seat_days": {
+  "default": 14,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Days from a special election to the winner taking the seat."
  }
  },
  "pools": {

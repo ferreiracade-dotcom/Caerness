@@ -40,8 +40,9 @@ def _sigmoid(z: float) -> float:
 def sponsor_actor(conn, office_key: str) -> int | None:
     """The person who sponsors for this office now: the head of the organisation that holds its sponsor stake, or the person who holds it."""
     h = civic_field.holder_of(conn, "sponsor", office_key)
-    if h is None:
-        return None
+    if h is None:  # no stake in the chain: the appointer puts his own man forward
+        key = offices.office(conn, office_key)["appointer_office_key"]
+        return offices.holder(conn, key) if key else None
     return int(h[1]) if h[0] == "actor" else orgs.head_of(conn, int(h[1]))
 
 
@@ -53,6 +54,10 @@ def sponsor_of(conn, actor_id: int, office_key: str) -> int | None:
 
 def _pool(conn, office_key: str) -> list[int]:
     h = civic_field.holder_of(conn, "sponsor", office_key)
+    if h is None:
+        sp = sponsor_actor(conn, office_key)
+        org = races.party_of(conn, int(sp)) if sp is not None else None
+        h = ("org", org) if org is not None else None
     if h is None:
         return []
     if h[0] == "org":
