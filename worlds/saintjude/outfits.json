@@ -1896,6 +1896,11 @@
       "name": "council",
       "weight": "ib_slight_b12f_not_council",
       "against": true
+     },
+     {
+      "name": "dealt",
+      "weight": "ib_slight_dealt",
+      "against": true
      }
     ]
    },
@@ -1954,6 +1959,11 @@
      {
       "name": "council",
       "weight": "ib_press_ground_b12f_not_council",
+      "against": true
+     },
+     {
+      "name": "dealt",
+      "weight": "ib_press_ground_dealt",
       "against": true
      }
     ]
@@ -2023,6 +2033,11 @@
      {
       "name": "informed",
       "weight": "ib_squeeze_b12f_informed"
+     },
+     {
+      "name": "dealt",
+      "weight": "ib_squeeze_dealt",
+      "against": true
      }
     ]
    },
@@ -2109,6 +2124,11 @@
      {
       "name": "informed",
       "weight": "ib_strike_b12f_informed"
+     },
+     {
+      "name": "dealt",
+      "weight": "ib_strike_dealt",
+      "against": true
      }
     ]
    },
@@ -2146,6 +2166,11 @@
      {
       "name": "heat_city",
       "weight": "ib_levy_not_heat_city",
+      "against": true
+     },
+     {
+      "name": "dealt",
+      "weight": "ib_levy_dealt",
       "against": true
      }
     ],
@@ -2222,6 +2247,11 @@
       "name": "weaker",
       "weight": "ib_poach_not_weaker",
       "against": true
+     },
+     {
+      "name": "dealt",
+      "weight": "ib_poach_dealt",
+      "against": true
      }
     ]
    },
@@ -2257,6 +2287,79 @@
      {
       "name": "heat_city",
       "weight": "ib_absorb_not_heat_city",
+      "against": true
+     },
+     {
+      "name": "family_unleft",
+      "weight": "ib_absorb_b12g_not_family_unleft",
+      "against": true
+     },
+     {
+      "name": "other_blood",
+      "weight": "ib_absorb_b12g_not_other_blood",
+      "against": true
+     }
+    ]
+   },
+   "client": {
+    "do": "client",
+    "terms": [
+     {
+      "name": "stronger",
+      "weight": "ib_client_act_stronger"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "ib_client_act_pragmatism"
+     },
+     {
+      "name": "ambition",
+      "weight": "ib_client_act_ambition"
+     },
+     {
+      "name": "caution",
+      "weight": "ib_client_act_not_caution",
+      "against": true
+     },
+     {
+      "name": "dealt",
+      "weight": "ib_client_act_not_dealt",
+      "against": true
+     }
+    ]
+   },
+   "alliance": {
+    "do": "alliance",
+    "terms": [
+     {
+      "name": "friendly",
+      "weight": "ib_alliance_act_friendly"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "ib_alliance_act_pragmatism"
+     },
+     {
+      "name": "war_near",
+      "weight": "ib_alliance_act_war_near"
+     },
+     {
+      "name": "calm",
+      "weight": "ib_alliance_act_calm"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_alliance_act_not_aggression",
+      "against": true
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_alliance_act_not_grievance",
+      "against": true
+     },
+     {
+      "name": "dealt",
+      "weight": "ib_alliance_act_not_dealt",
       "against": true
      }
     ]
@@ -3338,6 +3441,7 @@
   },
   "dealings": {
    "debt": {
+    "keep": "ib_debt_keep",
     "rate": "ib_debt_rate",
     "scale": "ib_debt_scale",
     "who_base": "ib_debt_who_base",
@@ -3464,6 +3568,150 @@
      {
       "name": "aggression",
       "weight": "ib_absorb_accept_not_aggression",
+      "against": true
+     },
+     {
+      "name": "same_blood",
+      "weight": "ib_absorb_accept_b12g_same_blood"
+     },
+     {
+      "name": "family_unleft",
+      "weight": "ib_absorb_accept_b12g_not_family_unleft",
+      "against": true
+     },
+     {
+      "name": "proud",
+      "weight": "ib_absorb_accept_b12g_not_proud",
+      "against": true
+     },
+     {
+      "name": "other_blood",
+      "weight": "ib_absorb_accept_b12g_not_other_blood",
+      "against": true
+     }
+    ],
+    "holds": {
+     "family": [
+      "italian",
+      "none"
+     ]
+    },
+    "identity": {
+     "horsemen": "outlaw_biker",
+     "brigades": "irish"
+    },
+    "region": {
+     "sabatini": "campania",
+     "pellegrino": "sicily_west",
+     "vannucci": "calabria",
+     "ferrante": "abruzzo"
+    }
+   },
+   "client": {
+    "refused_raise": "ib_client_refused",
+    "accept": [
+     {
+      "name": "always",
+      "weight": "ib_client_accept_always"
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_client_accept_weaker"
+     },
+     {
+      "name": "heat",
+      "weight": "ib_client_accept_heat"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "ib_client_accept_pragmatism"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_client_accept_friendly"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_client_accept_not_aggression",
+      "against": true
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_client_accept_not_grievance",
+      "against": true
+     }
+    ]
+   },
+   "alliance": {
+    "refused_raise": "ib_alliance_refused",
+    "accept": [
+     {
+      "name": "always",
+      "weight": "ib_alliance_accept_always"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_alliance_accept_friendly"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "ib_alliance_accept_pragmatism"
+     },
+     {
+      "name": "war_near",
+      "weight": "ib_alliance_accept_war_near"
+     },
+     {
+      "name": "council",
+      "weight": "ib_alliance_accept_council"
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_alliance_accept_not_grievance",
+      "against": true
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_alliance_accept_not_aggression",
+      "against": true
+     }
+    ]
+   },
+   "deal": {
+    "share": "ib_deal_share",
+    "eased": "ib_deal_eased",
+    "end_rate": "ib_deal_end_rate",
+    "broken_raise": "ib_deal_broken",
+    "end": [
+     {
+      "name": "grievance",
+      "weight": "ib_deal_end_grievance"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_deal_end_aggression"
+     },
+     {
+      "name": "ambition",
+      "weight": "ib_deal_end_ambition"
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_deal_end_their_head_weak"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_deal_end_not_friendly",
+      "against": true
+     },
+     {
+      "name": "caution",
+      "weight": "ib_deal_end_not_caution",
+      "against": true
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_deal_end_not_weaker",
       "against": true
      }
     ]

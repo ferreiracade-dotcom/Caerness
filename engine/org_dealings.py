@@ -10,13 +10,19 @@ Sides. A man who goes over to another organisation (a rival head makes him an of
 and raises his old organisation's tension toward the new one, by his rank and by what he earned.
 
 Taking in. A head weighs absorbing a much smaller organisation, an act like any other the voices weigh each week; the other head weighs
-coming in. When it happens the men and lines pass over. The same drivers that make one family stronger make this likelier.
+coming in. When it happens the men and lines pass over. Whether a group can be taken in at all is the package's (`absorb.holds`: which
+identities each kind of organisation holds, from the group's own descent, pride and the setting's text); where it cannot, the same
+voices weigh a client or an alliance instead, deals in which each organisation stays its own. Taking in an organisation of one's own
+descent weighs the leave of a table of heads, blood and the men's pride, so it is rare.
+
+Deals. A client deal: a smaller organisation pays a share of its weekly take to a larger one and is left alone; an alliance: two
+organisations ease each other. Either holds until a head weighs ending it, which sours the pair.
 """
 from __future__ import annotations
 
 import sqlite3
 
-from . import ledger, org_tension as ot, outfit_motives as om
+from . import ledger, org_motives, org_tension as ot, outfit_motives as om
 from .orgs import clamp01, head_of, imposed, kind_rules, seat_of
 from .relationships import adjust_relationship
 
@@ -35,10 +41,60 @@ def _rng(conn, stream: str, *keys):
 
 def _flush(conn, day: int) -> None:
     t = ot._today(conn, day)
-    t.update(orgs=None, places={}, maxheat=None, press={}, cp=None, sz=None)
+    t.update(orgs=None, places={}, maxheat=None, press={}, cp=None, sz=None, pf=None)
+
+
+def identity(conn: sqlite3.Connection, org: int) -> str:
+    """The descent/identity tag the package gives an organisation (its name group, or `absorb.identity`; `none` where it has none)."""
+    key = conn.execute("SELECT package_key FROM org_profiles WHERE org_actor_id=?", (int(org),)).fetchone()
+    key = key[0] if key else None
+    over = (dd(conn).get("absorb") or {}).get("identity") or {}
+    if key in over:
+        return str(over[key])
+    return str((((org_motives._sphere_data(conn).get("outfits") or {}).get(key) or {}).get("name_group")) or "none")
+
+
+def can_hold(conn: sqlite3.Connection, F: int, T: int) -> bool:
+    """Whether F's kind of organisation may take T in at all, from the package's list of identities each kind holds."""
+    kind = conn.execute("SELECT org_kind FROM org_profiles WHERE org_actor_id=?", (int(F),)).fetchone()
+    holds = ((dd(conn).get("absorb") or {}).get("holds") or {}).get(kind[0] if kind else None) or []
+    return identity(conn, T) in holds
+
+
+def _region(conn, org: int) -> str | None:
+    key = conn.execute("SELECT package_key FROM org_profiles WHERE org_actor_id=?", (int(org),)).fetchone()
+    return ((dd(conn).get("absorb") or {}).get("region") or {}).get(key[0] if key else None)
+
+
+def pair_factors(conn: sqlite3.Connection, F: int, T: int, day: int) -> dict[str, float]:
+    """Readings of the pair that deals and taking in weigh: a deal in force, one descent, the same or another region's blood, and (for the same
+    descent) whether a table of heads that holds both has given its leave."""
+    from . import org_council
+    t = ot._today(conn, day)
+    memo = t.get("pf")
+    if memo is None or memo[0] != int(day):
+        t["pf"] = memo = (int(day), {})
+    hit = memo[1].get((int(F), int(T)))
+    if hit is not None:
+        return dict(hit)
+    iF, iT = identity(conn, F), identity(conn, T)
+    kin = 1.0 if iF == iT and iF != "none" else 0.0
+    rF, rT = _region(conn, F), _region(conn, T)
+    leave = org_council.bound_standing(conn, F, T, day) if kin else 0.0
+    out = {"dealt": 1.0 if _deal_between(conn, F, T) is not None else 0.0, "kin_group": kin, "same_blood": 1.0 if rF and rF == rT else 0.0,
+           "other_blood": 1.0 if rF and rT and rF != rT else 0.0, "unleft": 1.0 - leave, "family_unleft": kin * (1.0 - leave)}
+    memo[1][(int(F), int(T))] = out
+    return dict(out)
 
 
 # ---- debts ----
+
+def payable(conn: sqlite3.Connection, person: int) -> float:
+    """What a head can pay out of his purse toward a debt, a redress or a client's share: the rest he keeps, because he must go on paying
+    those who answer to him (the money rules pass shares down out of the head's purse)."""
+    keep = _v(conn, (dd(conn).get("debt") or {}).get("keep"), 0.0)
+    return max(0.0, ledger.balance(conn, ("person", int(person))) * (1.0 - keep))
+
 
 def owe(conn: sqlite3.Connection, creditor: int, debtor: int, amount: float, origin: str, day: int) -> int | None:
     """`debtor` (an organisation) owes `creditor` this much; returns the debt id."""
@@ -54,7 +110,8 @@ def settle_up(conn: sqlite3.Connection, payer: int, payee: int, amount: float, o
     ph, qh = head_of(conn, payer), head_of(conn, payee)
     paid = 0.0
     if ph is not None and qh is not None and amount > 0:
-        paid = ledger.transfer(conn, ("person", int(ph)), ("person", int(qh)), float(amount), flow_kind="tribute", purpose=origin, allow_partial=True) or 0.0
+        pay = min(float(amount), payable(conn, ph))
+        paid = (ledger.transfer(conn, ("person", int(ph)), ("person", int(qh)), pay, flow_kind="tribute", purpose=origin, allow_partial=True) or 0.0) if pay > 0 else 0.0
     owe(conn, payee, payer, float(amount) - float(paid), origin, day)
     return float(paid)
 
@@ -75,11 +132,12 @@ def _debts(conn, day: int) -> int:
         left = remaining(r)
         if hd is not None and hc is not None and ot._free(conn, hd):
             f = ot.factors(conn, hd, D, C, day)
-            bal = ledger.balance(conn, ("person", int(hd)))
+            bal = payable(conn, hd)
             f["can_pay"] = clamp01(bal / left) if left > 0 else 1.0
             f["owed_much"] = left / (left + max(1e-9, _v(conn, d.get("scale"), 1.0)))
             if _rng(conn, "pay", r["id"], day).random() < _blend(conn, d["pay"], f):
-                got = ledger.transfer(conn, ("person", int(hd)), ("person", int(hc)), left, flow_kind="tribute", purpose="a debt", allow_partial=True) or 0.0
+                pay = min(left, payable(conn, hd))
+                got = (ledger.transfer(conn, ("person", int(hd)), ("person", int(hc)), pay, flow_kind="tribute", purpose="a debt", allow_partial=True) or 0.0) if pay > 0 else 0.0
                 if got > 0:
                     left -= got
                     conn.execute("UPDATE org_debts SET paid=paid+? WHERE id=?", (got, r["id"]))
@@ -200,7 +258,7 @@ def do_poach(conn, voice, F, T, day, name, spec, f):
 
 def feasible_absorb(conn, voice: int, F: int, T: int, day: int) -> bool:
     from .org_happenings import _size
-    return head_of(conn, T) is not None and dependent_role(conn, F) is not None and 0 < _size(conn, T) < _size(conn, F)
+    return head_of(conn, T) is not None and dependent_role(conn, F) is not None and 0 < _size(conn, T) < _size(conn, F) and can_hold(conn, F, T)
 
 
 def do_absorb(conn, voice, F, T, day, name, spec, f):
@@ -210,6 +268,8 @@ def do_absorb(conn, voice, F, T, day, name, spec, f):
     fT = ot.factors(conn, hT, T, F, day)
     fT["head_weak"] = ot._head_weak(conn, hT, day)
     fT["small"] = fT["weaker"]
+    fT.update(pair_factors(conn, F, T, day))
+    fT["proud"] = fT["kin_group"] * (1.0 - om._drive(conn, hT, "pragmatism"))
     imposed(conn, hT)
     if _rng(conn, "absorb", F, T, day).random() < _blend(conn, a["accept"], fT):
         men = [(int(r[0]), r[1]) for r in conn.execute("SELECT actor_id,role_key FROM org_seats WHERE org_actor_id=? AND status='active' ORDER BY actor_id", (int(T),))]
@@ -226,10 +286,101 @@ def do_absorb(conn, voice, F, T, day, name, spec, f):
     return {"summary": f"{ot._name(conn, hT)} would not come in under {ot._name(conn, voice)}."}
 
 
+# ---- deals: a client, an alliance ----
+
+def _deal_between(conn, a: int, b: int):
+    return conn.execute("SELECT * FROM org_deals WHERE status='active' AND ((patron_org=? AND client_org=?) OR (patron_org=? AND client_org=?)) LIMIT 1",
+                        (int(a), int(b), int(b), int(a))).fetchone()
+
+
+def feasible_client(conn, voice: int, F: int, T: int, day: int) -> bool:
+    from .org_happenings import _size
+    return head_of(conn, T) is not None and 0 < _size(conn, T) < _size(conn, F) and _deal_between(conn, F, T) is None and ot._weekly_take(conn, T) > 0
+
+
+def feasible_alliance(conn, voice: int, F: int, T: int, day: int) -> bool:
+    return head_of(conn, T) is not None and _deal_between(conn, F, T) is None
+
+
+def _make_deal(conn, kind: str, F: int, T: int, day: int, voice: int) -> int:
+    d = (dd(conn).get("deal") or {})
+    did = int(conn.execute("INSERT INTO org_deals(kind,patron_org,client_org,since_day) VALUES (?,?,?,?)", (kind, int(F), int(T), int(day))).lastrowid)
+    _flush(conn, day)
+    pts = _v(conn, d.get("eased"), 0.0)
+    ot.add(conn, F, T, "deal_made", -pts, day, actor=voice)
+    ot.add(conn, T, F, "deal_made", -pts, day, actor=voice)
+    return did
+
+
+def _answer_deal(conn, kind: str, F: int, T: int, day: int, voice: int) -> bool:
+    spec = (dd(conn).get(kind) or {})
+    hT = head_of(conn, T)
+    fT = ot.factors(conn, hT, T, F, day)
+    fT.update(pair_factors(conn, F, T, day))
+    imposed(conn, hT)
+    if _rng(conn, kind, F, T, day).random() < _blend(conn, spec["accept"], fT):
+        _make_deal(conn, kind, F, T, day, voice)
+        return True
+    ot.add(conn, T, F, f"{kind}_refused", _v(conn, spec.get("refused_raise"), 0.0), day, actor=voice)
+    return False
+
+
+def do_client(conn, voice, F, T, day, name, spec, f):
+    """A larger organisation offers a smaller one to be left alone for a share of its take; the other head weighs it."""
+    if _answer_deal(conn, "client", F, T, day, voice):
+        return {"summary": f"{ot._name(conn, head_of(conn, T))} agreed to pay {ot._name(conn, voice)} and be left alone."}
+    return {"summary": f"{ot._name(conn, head_of(conn, T))} would not be anyone's client."}
+
+
+def do_alliance(conn, voice, F, T, day, name, spec, f):
+    if _answer_deal(conn, "alliance", F, T, day, voice):
+        return {"summary": f"{ot._name(conn, voice)} and {ot._name(conn, head_of(conn, T))} came to an understanding."}
+    return {"summary": f"{ot._name(conn, head_of(conn, T))} would not take {ot._name(conn, voice)}'s hand."}
+
+
+def _deals(conn, day: int) -> int:
+    d = dd(conn).get("deal") or {}
+    if not d:
+        return 0
+    n = 0
+    for r in conn.execute("SELECT * FROM org_deals WHERE status='active' ORDER BY id").fetchall():
+        P, C = int(r["patron_org"]), int(r["client_org"])
+        hp, hc = head_of(conn, P), head_of(conn, C)
+        if hp is None or hc is None:  # a vacancy while a successor is found is not the end of a deal; an organisation with no men left is
+            if not conn.execute("SELECT 1 FROM org_seats WHERE org_actor_id=? AND status='active' LIMIT 1", (P if hp is None else C,)).fetchone():
+                conn.execute("UPDATE org_deals SET status='ended', ended_day=?, end_reason='gone' WHERE id=?", (int(day), r["id"]))
+            continue
+        last = int(r["paid_day"] if r["paid_day"] is not None else r["since_day"])
+        if r["kind"] == "client" and day - last >= 7:
+            owed = ot._weekly_take(conn, C) * _v(conn, d.get("share"), 0.0) * (day - last) / 7.0
+            owed = min(owed, payable(conn, hc))
+            if owed > 0:
+                ledger.transfer(conn, ("person", int(hc)), ("person", int(hp)), owed, flow_kind="tribute", purpose="a client's share", allow_partial=True)
+            conn.execute("UPDATE org_deals SET paid_day=? WHERE id=?", (int(day), r["id"]))
+        end_by = hc if r["kind"] == "client" or _rng(conn, "endwho", r["id"], day).random() < 0.5 else hp
+        side_from, side_to = (C, P) if end_by == hc else (P, C)
+        rate = _v(conn, d.get("end_rate"), 0.0)
+        draw = _rng(conn, "end", r["id"], day).random()
+        if draw >= rate:  # the weighing is at most 1, so it cannot pass: not worth reading the pair
+            continue
+        f = ot.factors(conn, end_by, side_from, side_to, day)
+        if draw < _blend(conn, d["end"], f) * rate:
+            conn.execute("UPDATE org_deals SET status='ended', ended_day=?, end_reason='broken' WHERE id=?", (int(day), r["id"]))
+            ot.add(conn, side_to, side_from, "deal_broken", _v(conn, d.get("broken_raise"), 0.0), day, actor=end_by)
+            imposed(conn, hp)
+            imposed(conn, hc)
+            n += 1
+    return n
+
+
 # ---- the weekly pass ----
 
 def process_due(conn: sqlite3.Connection, day: int) -> dict:
     if not ot.enabled(conn) or not dd(conn):
         return {}
     n = _debts(conn, int(day))
-    return {"debts_paid": n} if n else {}
+    out = {"debts_paid": n} if n else {}
+    k = _deals(conn, int(day))
+    if k:
+        out["deals_ended"] = k
+    return out

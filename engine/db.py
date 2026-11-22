@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 120
+SCHEMA_VERSION = 121
 
 
 def _running_tests() -> bool:
@@ -4891,6 +4891,7 @@ _MIGRATIONS: dict[int, Migration] = {
     118: ("org_tension", "Tension between organisations (org_tension, org_tension_acts) and the organisation layer's heat (org_heat)", None),
     119: ("crime_response_tables", "Law response to crime: public_attention, case_dispositions and sentences (tables from schema.sql; crime_response.ensure_tables keeps creating them for an older save)", None),
     120: ("org_council_dealings", "Councils of heads, debts between organisations, informers and absorptions (org_councils, org_council_seats, org_council_acts, org_debts, org_informers, org_absorptions)", None),
+    121: ("org_deals", "Deals between organisations that stay their own: a client pays a share, an alliance eases both (org_deals)", None),
     117: ("organisation_core", "Outfit tables become organisation tables (org_profiles, units, seats, holdings, lines, money, agenda, incidents, arrangements)", _migration_117),
 }
 

@@ -13899,7 +13899,7 @@
    "note": "unsourced; Whether a voice the table has refused strikes anyway: his temper, the opening, his grievance for; the table's standing and his own caution against. Weight of the reading `caution` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
   },
   "ib_debt_rate": {
-   "default": 0.05,
+   "default": 0.02,
    "range": null,
    "unit": "points per day at full weight",
    "tag": "Design",
@@ -14399,7 +14399,7 @@
    "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `made` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
   },
   "ib_inf_rival_rate": {
-   "default": 0.1,
+   "default": 0.04,
    "range": null,
    "unit": "per pair per week at full heat",
    "tag": "Design",
@@ -14717,6 +14717,526 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; A table both heads sit at makes coming to a sit-down likelier. Weight of the reading `council`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_absorb_b12g_not_family_unleft": {
+   "default": 0.85,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a family weighs taking in another family: no table of heads has given its leave (the Commission's word, Part III 6), and foreign blood (Part III 4: each family has a region of Italy in its blood). Weight of the reading `family_unleft` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_absorb_b12g_not_other_blood": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How a family weighs taking in another family: no table of heads has given its leave (the Commission's word, Part III 6), and foreign blood (Part III 4: each family has a region of Italy in its blood). Weight of the reading `other_blood` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_b12g_same_blood": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head of a family weighs coming in under another: the table's leave, his men's pride (he is not pragmatic), and the blood of the other family (Part III 4: Sicilians, Calabrians, Neapolitans and Abruzzesi hold one another's prejudices as truths). Weight of the reading `same_blood`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_b12g_not_family_unleft": {
+   "default": 0.85,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head of a family weighs coming in under another: the table's leave, his men's pride (he is not pragmatic), and the blood of the other family (Part III 4: Sicilians, Calabrians, Neapolitans and Abruzzesi hold one another's prejudices as truths). Weight of the reading `family_unleft` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_b12g_not_proud": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head of a family weighs coming in under another: the table's leave, his men's pride (he is not pragmatic), and the blood of the other family (Part III 4: Sicilians, Calabrians, Neapolitans and Abruzzesi hold one another's prejudices as truths). Weight of the reading `proud` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_b12g_not_other_blood": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the head of a family weighs coming in under another: the table's leave, his men's pride (he is not pragmatic), and the blood of the other family (Part III 4: Sicilians, Calabrians, Neapolitans and Abruzzesi hold one another's prejudices as truths). Weight of the reading `other_blood` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_act_stronger": {
+   "default": 0.35,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice of a larger organisation leans toward offering a smaller one to be left alone for a share (Part III 5: arrangements, protection and tribute, are the way the Italian families deal with the others). Weight of the reading `stronger`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_act_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice of a larger organisation leans toward offering a smaller one to be left alone for a share (Part III 5: arrangements, protection and tribute, are the way the Italian families deal with the others). Weight of the reading `pragmatism`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_act_ambition": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice of a larger organisation leans toward offering a smaller one to be left alone for a share (Part III 5: arrangements, protection and tribute, are the way the Italian families deal with the others). Weight of the reading `ambition`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_act_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice of a larger organisation leans toward offering a smaller one to be left alone for a share (Part III 5: arrangements, protection and tribute, are the way the Italian families deal with the others). Weight of the reading `caution` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_act_not_dealt": {
+   "default": 1.0,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice of a larger organisation leans toward offering a smaller one to be left alone for a share (Part III 5: arrangements, protection and tribute, are the way the Italian families deal with the others). Weight of the reading `dealt` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_act_friendly": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward an understanding with a neighbour (Part V: the Combine works with the families by arrangement; Chinatown deals only by arrangement). Weight of the reading `friendly`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_act_pragmatism": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward an understanding with a neighbour (Part V: the Combine works with the families by arrangement; Chinatown deals only by arrangement). Weight of the reading `pragmatism`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_act_war_near": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward an understanding with a neighbour (Part V: the Combine works with the families by arrangement; Chinatown deals only by arrangement). Weight of the reading `war_near`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_act_calm": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward an understanding with a neighbour (Part V: the Combine works with the families by arrangement; Chinatown deals only by arrangement). Weight of the reading `calm`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_act_not_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward an understanding with a neighbour (Part V: the Combine works with the families by arrangement; Chinatown deals only by arrangement). Weight of the reading `aggression` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_act_not_grievance": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward an understanding with a neighbour (Part V: the Combine works with the families by arrangement; Chinatown deals only by arrangement). Weight of the reading `grievance` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_act_not_dealt": {
+   "default": 1.0,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward an understanding with a neighbour (Part V: the Combine works with the families by arrangement; Chinatown deals only by arrangement). Weight of the reading `dealt` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_refused": {
+   "default": 1.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A smaller organisation's head refusing to pay for quiet leaves it a little aggrieved. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_accept_always": {
+   "default": 0.05,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head agrees to pay a larger one to be left alone: being the weaker, the heat on him, his common sense for; his temper and grudges against. Weight of the reading `always`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_accept_weaker": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head agrees to pay a larger one to be left alone: being the weaker, the heat on him, his common sense for; his temper and grudges against. Weight of the reading `weaker`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_accept_heat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head agrees to pay a larger one to be left alone: being the weaker, the heat on him, his common sense for; his temper and grudges against. Weight of the reading `heat`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_accept_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head agrees to pay a larger one to be left alone: being the weaker, the heat on him, his common sense for; his temper and grudges against. Weight of the reading `pragmatism`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_accept_friendly": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head agrees to pay a larger one to be left alone: being the weaker, the heat on him, his common sense for; his temper and grudges against. Weight of the reading `friendly`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_accept_not_aggression": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head agrees to pay a larger one to be left alone: being the weaker, the heat on him, his common sense for; his temper and grudges against. Weight of the reading `aggression` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_client_accept_not_grievance": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head agrees to pay a larger one to be left alone: being the weaker, the heat on him, his common sense for; his temper and grudges against. Weight of the reading `grievance` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_refused": {
+   "default": 0.5,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A refused hand leaves the one who offered it a little aggrieved. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_accept_always": {
+   "default": 0.0,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head takes a neighbour's hand: how well he knows him, his common sense, the war near, a table both sit at for; his grudges and temper against. Weight of the reading `always`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_accept_friendly": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head takes a neighbour's hand: how well he knows him, his common sense, the war near, a table both sit at for; his grudges and temper against. Weight of the reading `friendly`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_accept_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head takes a neighbour's hand: how well he knows him, his common sense, the war near, a table both sit at for; his grudges and temper against. Weight of the reading `pragmatism`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_accept_war_near": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head takes a neighbour's hand: how well he knows him, his common sense, the war near, a table both sit at for; his grudges and temper against. Weight of the reading `war_near`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_accept_council": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head takes a neighbour's hand: how well he knows him, his common sense, the war near, a table both sit at for; his grudges and temper against. Weight of the reading `council`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_accept_not_grievance": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head takes a neighbour's hand: how well he knows him, his common sense, the war near, a table both sit at for; his grudges and temper against. Weight of the reading `grievance` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_alliance_accept_not_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head takes a neighbour's hand: how well he knows him, his common sense, the war near, a table both sit at for; his grudges and temper against. Weight of the reading `aggression` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_share": {
+   "default": 0.1,
+   "range": null,
+   "unit": "share of weekly take",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a client pays to be left alone: a tenth of what it takes in each week (a levy in the shape of a regular share; Part III 5 mentions protection and tribute, no figure). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_eased": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What making a deal eases between the two organisations, each way. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_end_rate": {
+   "default": 0.02,
+   "range": null,
+   "unit": "per deal per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Scales the weekly weighing of ending a deal: a deal is a habit, and ending one is an event. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_broken": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A head ending a deal leaves the other organisation aggrieved at him. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_end_grievance": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head ends a deal: his grudges, temper, ambition and the other's weakness for; knowing him well, caution and his own weakness against. Weight of the reading `grievance`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_end_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head ends a deal: his grudges, temper, ambition and the other's weakness for; knowing him well, caution and his own weakness against. Weight of the reading `aggression`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_end_ambition": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head ends a deal: his grudges, temper, ambition and the other's weakness for; knowing him well, caution and his own weakness against. Weight of the reading `ambition`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_end_their_head_weak": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head ends a deal: his grudges, temper, ambition and the other's weakness for; knowing him well, caution and his own weakness against. Weight of the reading `their_head_weak`. Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_end_not_friendly": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head ends a deal: his grudges, temper, ambition and the other's weakness for; knowing him well, caution and his own weakness against. Weight of the reading `friendly` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_end_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head ends a deal: his grudges, temper, ambition and the other's weakness for; knowing him well, caution and his own weakness against. Weight of the reading `caution` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_deal_end_not_weaker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head ends a deal: his grudges, temper, ambition and the other's weakness for; knowing him well, caution and his own weakness against. Weight of the reading `weaker` as a counter-term (it takes a share off the answer). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_slight_dealt": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A deal in force between the pair takes a share off the weighing of a slight (they have an arrangement; Part III 5). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_press_ground_dealt": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A deal in force between the pair takes a share off the weighing of a press_ground (they have an arrangement; Part III 5). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_squeeze_dealt": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A deal in force between the pair takes a share off the weighing of a squeeze (they have an arrangement; Part III 5). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_strike_dealt": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A deal in force between the pair takes a share off the weighing of a strike (they have an arrangement; Part III 5). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_levy_dealt": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A deal in force between the pair takes a share off the weighing of a levy (they have an arrangement; Part III 5). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_poach_dealt": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A deal in force between the pair takes a share off the weighing of a poach (they have an arrangement; Part III 5). Design proposal. (B12g: engine/org_dealings.py)"
+  },
+  "ib_debt_keep": {
+   "default": 0.5,
+   "range": null,
+   "unit": "share of purse",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; the share of his purse a head keeps back when paying a debt, a redress or a client's share: he must go on passing shares down to the men who answer to him, so he does not empty it on a creditor. Design proposal. (B12g: engine/org_dealings.py)"
   }
  },
  "pools": {

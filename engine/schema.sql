@@ -5198,3 +5198,17 @@ CREATE TABLE IF NOT EXISTS org_absorptions (
     lines INTEGER NOT NULL DEFAULT 0,
     how TEXT
 );
+
+-- schema 121 (B12g): deals between organisations that stay their own (a client pays a share, an alliance eases both).
+CREATE TABLE IF NOT EXISTS org_deals (
+    id INTEGER PRIMARY KEY,
+    kind TEXT NOT NULL,
+    patron_org INTEGER NOT NULL,
+    client_org INTEGER NOT NULL,
+    since_day INTEGER NOT NULL,
+    ended_day INTEGER,
+    status TEXT NOT NULL DEFAULT 'active',
+    end_reason TEXT,
+    paid_day INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_org_deals_status ON org_deals(status, patron_org, client_org);

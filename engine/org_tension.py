@@ -320,7 +320,8 @@ def factors(conn: sqlite3.Connection, voice: int, F: int, T: int, day: int) -> d
     pa, pb = _places(conn, F, day), _places(conn, T, day)
     own_weak = _head_weak(conn, own_head, day) if own_head != voice else 0.0
     guarded, loved = protection(conn, their_head)
-    from . import org_council, org_informing
+    from . import org_council, org_dealings, org_informing
+    f.update(org_dealings.pair_factors(conn, F, T, day))
     f.update({"council": org_council.bound_standing(conn, F, T, day), "informed": org_informing.informed(conn, F, T), "their_head_guarded": guarded, "their_head_loved": loved,
               "unbacked": 0.0 if own_head == voice else 1.0,  # a voice who is not his own head's has not yet his leave
               "heat": h, "heat_back": hb, "calm": 1.0 - h, "always": 1.0,
@@ -441,9 +442,9 @@ def _feasible(conn, spec: dict, voice: int, F: int, T: int, day: int) -> bool:
         return head_of(conn, T) is not None and _size(conn, T) < _size(conn, F) and _weekly_take(conn, T) > 0
     if do == "strike":
         return bool(_victims(conn, "anyone", voice, F, T, day))
-    if do in ("poach", "absorb"):
+    if do in ("poach", "absorb", "client", "alliance"):
         from . import org_dealings
-        return (org_dealings.feasible_poach if do == "poach" else org_dealings.feasible_absorb)(conn, voice, F, T, day)
+        return getattr(org_dealings, "feasible_" + do)(conn, voice, F, T, day)
     return False
 
 
@@ -924,12 +925,22 @@ def _do_poach(*a):
     return org_dealings.do_poach(*a)
 
 
+def _do_client(*a):
+    from . import org_dealings
+    return org_dealings.do_client(*a)
+
+
+def _do_alliance(*a):
+    from . import org_dealings
+    return org_dealings.do_alliance(*a)
+
+
 def _do_absorb(*a):
     from . import org_dealings
     return org_dealings.do_absorb(*a)
 
 
-_DO = {"poach": _do_poach, "absorb": _do_absorb, "levy": _do_levy, "ease": _do_ease, "sit_down": _do_sit_down, "slight": _do_slight, "press_ground": _do_press_ground, "squeeze": _do_squeeze, "strike": _do_strike}
+_DO = {"poach": _do_poach, "absorb": _do_absorb, "client": _do_client, "alliance": _do_alliance, "levy": _do_levy, "ease": _do_ease, "sit_down": _do_sit_down, "slight": _do_slight, "press_ground": _do_press_ground, "squeeze": _do_squeeze, "strike": _do_strike}
 
 for _kind, _fn in (("approve_strike", execute_approve), ("refuse_strike", execute_refuse), ("back_him", execute_back_him),
                    ("make_good", execute_make_good), ("give_him_up", execute_give_up)):
