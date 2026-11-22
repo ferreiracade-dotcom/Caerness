@@ -3,101 +3,13 @@ from __future__ import annotations
 import json
 import math
 import sqlite3
+from pathlib import Path
 from typing import Any
 
 
-# Engine-level business vocabulary. These are simulation archetypes, not setting-canon
-# claims that every city must contain every type. Campaigns instantiate only what exists.
-_ARCHETYPES: dict[str, dict[str, Any]] = {
-    # Hospitality / travel
-    "inn": {"name":"Inn", "sector":"hospitality", "enterprise_kind":"service", "base_revenue":34, "cost_ratio":0.62,
-            "weights":{"traveler_flow":0.42,"foot_traffic":0.18,"event_activity":0.16,"disposable_income":0.10,"security":0.14}, "regulation":0.05},
-    "tavern": {"name":"Tavern", "sector":"hospitality", "enterprise_kind":"service", "base_revenue":30, "cost_ratio":0.58,
-               "weights":{"foot_traffic":0.30,"traveler_flow":0.20,"disposable_income":0.18,"event_activity":0.20,"security":0.12}, "regulation":0.08},
-    "bathhouse": {"name":"Bathhouse", "sector":"hospitality", "enterprise_kind":"service", "base_revenue":29, "cost_ratio":0.64,
-                  "weights":{"foot_traffic":0.24,"disposable_income":0.24,"traveler_flow":0.12,"elite_patronage":0.12,"security":0.12,"event_activity":0.16}, "regulation":0.06},
-    "stable": {"name":"Stable", "sector":"logistics", "enterprise_kind":"service", "base_revenue":26, "cost_ratio":0.67,
-               "weights":{"traveler_flow":0.34,"trade_flow":0.28,"foot_traffic":0.12,"security":0.16,"event_activity":0.10}, "regulation":0.03},
-    "horse_breeder": {"name":"Horse Breeder / Stud", "sector":"agriculture_logistics", "enterprise_kind":"estate", "base_revenue":31, "cost_ratio":0.71,
-               "weights":{"military_demand":0.30,"elite_patronage":0.22,"trade_flow":0.16,"security":0.10,"reputation_climate":0.22}, "regulation":0.04, "skill_sensitive":True},
-    # Entertainment / social venues. Pleasure houses are represented only as non-explicit
-    # economic/social institutions: clientele, reputation, regulation, staffing and information flow.
-    "theatre": {"name":"Theatre", "sector":"entertainment", "enterprise_kind":"service", "base_revenue":42, "cost_ratio":0.70,
-                "weights":{"cultural_activity":0.34,"disposable_income":0.24,"elite_patronage":0.14,"foot_traffic":0.12,"event_activity":0.16}, "regulation":0.08},
-    "music_hall": {"name":"Music Hall", "sector":"entertainment", "enterprise_kind":"service", "base_revenue":36, "cost_ratio":0.68,
-                   "weights":{"cultural_activity":0.30,"disposable_income":0.24,"foot_traffic":0.18,"event_activity":0.18,"elite_patronage":0.10}, "regulation":0.08},
-    "gambling_house": {"name":"Gambling House", "sector":"regulated_entertainment", "enterprise_kind":"service", "base_revenue":48, "cost_ratio":0.55,
-                       "weights":{"foot_traffic":0.22,"disposable_income":0.24,"traveler_flow":0.14,"event_activity":0.20,"elite_patronage":0.10,"security":0.10}, "regulation":0.46},
-    "pleasure_house": {"name":"Pleasure / Courtesan House", "sector":"regulated_entertainment", "enterprise_kind":"service", "base_revenue":44, "cost_ratio":0.66,
-                       "weights":{"foot_traffic":0.20,"disposable_income":0.22,"traveler_flow":0.12,"elite_patronage":0.18,"event_activity":0.14,"security":0.14}, "regulation":0.42},
-    "salon": {"name":"Private Salon", "sector":"entertainment", "enterprise_kind":"service", "base_revenue":31, "cost_ratio":0.62,
-              "weights":{"elite_patronage":0.34,"cultural_activity":0.26,"disposable_income":0.16,"reputation_climate":0.14,"security":0.10}, "regulation":0.04},
-    # Finance
-    "moneylender": {"name":"Moneylender", "sector":"finance", "enterprise_kind":"service", "base_revenue":24, "cost_ratio":0.36,
-                    "weights":{"credit_demand":0.48,"trade_flow":0.18,"disposable_income":0.08,"security":0.10,"reputation_climate":0.16}, "regulation":0.15, "capital_sensitive":True},
-    "loan_house": {"name":"Loan House", "sector":"finance", "enterprise_kind":"service", "base_revenue":33, "cost_ratio":0.40,
-                   "weights":{"credit_demand":0.42,"trade_flow":0.24,"elite_patronage":0.10,"security":0.10,"reputation_climate":0.14}, "regulation":0.18, "capital_sensitive":True},
-    "pawnbroker": {"name":"Pawnbroker", "sector":"finance", "enterprise_kind":"shop", "base_revenue":23, "cost_ratio":0.48,
-                   "weights":{"credit_demand":0.34,"foot_traffic":0.22,"trade_flow":0.12,"disposable_income":0.10,"security":0.10,"reputation_climate":0.12}, "regulation":0.12, "capital_sensitive":True},
-    # Craft / manufacturing
-    "smithy": {"name":"Smithy", "sector":"craft", "enterprise_kind":"workshop", "base_revenue":24, "cost_ratio":0.61,
-               "weights":{"craft_demand":0.28,"trade_flow":0.18,"military_demand":0.26,"foot_traffic":0.08,"security":0.08,"disposable_income":0.12}, "regulation":0.02, "skill_sensitive":True},
-    "armorer": {"name":"Armorer", "sector":"craft", "enterprise_kind":"workshop", "base_revenue":29, "cost_ratio":0.66,
-                "weights":{"military_demand":0.40,"craft_demand":0.22,"trade_flow":0.16,"elite_patronage":0.10,"security":0.12}, "regulation":0.04, "skill_sensitive":True},
-    "tailor": {"name":"Tailor", "sector":"craft", "enterprise_kind":"workshop", "base_revenue":25, "cost_ratio":0.57,
-               "weights":{"disposable_income":0.24,"craft_demand":0.18,"foot_traffic":0.12,"elite_patronage":0.22,"cultural_activity":0.14,"reputation_climate":0.10}, "regulation":0.01, "skill_sensitive":True},
-    "weaver": {"name":"Weaver", "sector":"craft", "enterprise_kind":"workshop", "base_revenue":25, "cost_ratio":0.63,
-               "weights":{"craft_demand":0.30,"trade_flow":0.22,"disposable_income":0.18,"cultural_activity":0.12,"elite_patronage":0.08,"security":0.10}, "regulation":0.01, "skill_sensitive":True},
-    "jeweler": {"name":"Jeweler", "sector":"craft", "enterprise_kind":"workshop", "base_revenue":34, "cost_ratio":0.60,
-                "weights":{"elite_patronage":0.34,"disposable_income":0.24,"cultural_activity":0.12,"trade_flow":0.10,"reputation_climate":0.20}, "regulation":0.03, "skill_sensitive":True},
-    "carpenter": {"name":"Carpenter", "sector":"craft", "enterprise_kind":"workshop", "base_revenue":24, "cost_ratio":0.60,
-                  "weights":{"craft_demand":0.34,"trade_flow":0.14,"construction_demand":0.30,"disposable_income":0.10,"security":0.12}, "regulation":0.01, "skill_sensitive":True},
-    "instrument_maker": {"name":"Instrument Maker", "sector":"craft", "enterprise_kind":"workshop", "base_revenue":27, "cost_ratio":0.60,
-                         "weights":{"cultural_activity":0.28,"elite_patronage":0.22,"craft_demand":0.18,"disposable_income":0.18,"reputation_climate":0.14}, "regulation":0.01, "skill_sensitive":True},
-    "refiner": {"name":"Refiner", "sector":"craft", "enterprise_kind":"workshop", "base_revenue":31, "cost_ratio":0.69,
-                "weights":{"craft_demand":0.22,"trade_flow":0.24,"health_demand":0.14,"military_demand":0.14,"elite_patronage":0.10,"security":0.16}, "regulation":0.10, "skill_sensitive":True},
-    # Retail
-    "food_shop": {"name":"Food Shop", "sector":"retail", "enterprise_kind":"shop", "base_revenue":27, "cost_ratio":0.73,
-                  "weights":{"foot_traffic":0.30,"disposable_income":0.12,"traveler_flow":0.14,"trade_flow":0.18,"event_activity":0.14,"security":0.12}, "regulation":0.03},
-    "cloth_shop": {"name":"Cloth Shop", "sector":"retail", "enterprise_kind":"shop", "base_revenue":28, "cost_ratio":0.67,
-                   "weights":{"foot_traffic":0.20,"disposable_income":0.20,"trade_flow":0.22,"cultural_activity":0.12,"elite_patronage":0.12,"reputation_climate":0.14}, "regulation":0.02},
-    "bookshop": {"name":"Book / Manuscript Shop", "sector":"retail", "enterprise_kind":"shop", "base_revenue":24, "cost_ratio":0.61,
-                 "weights":{"cultural_activity":0.28,"elite_patronage":0.18,"disposable_income":0.14,"foot_traffic":0.10,"trade_flow":0.12,"reputation_climate":0.18}, "regulation":0.05},
-    "medicine_shop": {"name":"Medicine Shop", "sector":"retail", "enterprise_kind":"shop", "base_revenue":29, "cost_ratio":0.66,
-                      "weights":{"health_demand":0.42,"foot_traffic":0.16,"trade_flow":0.16,"disposable_income":0.10,"reputation_climate":0.16}, "regulation":0.08},
-    "luxury_goods": {"name":"Luxury Goods Shop", "sector":"retail", "enterprise_kind":"shop", "base_revenue":38, "cost_ratio":0.64,
-                     "weights":{"elite_patronage":0.34,"disposable_income":0.26,"cultural_activity":0.12,"trade_flow":0.10,"reputation_climate":0.18}, "regulation":0.03},
-    # Professional services
-    "physician_practice": {"name":"Physician Practice", "sector":"professional", "enterprise_kind":"service", "base_revenue":31, "cost_ratio":0.48,
-                           "weights":{"health_demand":0.46,"disposable_income":0.14,"foot_traffic":0.08,"elite_patronage":0.10,"reputation_climate":0.22}, "regulation":0.07, "skill_sensitive":True},
-    "vein_mender_practice": {"name":"Vein-Mender Practice", "sector":"professional", "enterprise_kind":"service", "base_revenue":43, "cost_ratio":0.52,
-                            "weights":{"health_demand":0.30,"military_demand":0.18,"elite_patronage":0.20,"trade_flow":0.08,"reputation_climate":0.24}, "regulation":0.08, "skill_sensitive":True},
-    "appraiser": {"name":"Appraiser / Authenticator", "sector":"professional", "enterprise_kind":"service", "base_revenue":28, "cost_ratio":0.43,
-                  "weights":{"elite_patronage":0.26,"cultural_activity":0.22,"trade_flow":0.18,"reputation_climate":0.28,"security":0.06}, "regulation":0.03, "skill_sensitive":True},
-    "architectural_practice": {"name":"Architectural Practice", "sector":"professional", "enterprise_kind":"service", "base_revenue":34, "cost_ratio":0.51,
-                               "weights":{"construction_demand":0.38,"elite_patronage":0.24,"disposable_income":0.10,"cultural_activity":0.10,"reputation_climate":0.18}, "regulation":0.03, "skill_sensitive":True},
-    # Trade / logistics
-    "warehouse": {"name":"Warehouse", "sector":"trade", "enterprise_kind":"other", "base_revenue":26, "cost_ratio":0.56,
-                  "weights":{"trade_flow":0.46,"traveler_flow":0.08,"security":0.20,"event_activity":0.08,"credit_demand":0.08,"foot_traffic":0.10}, "regulation":0.04},
-    "wholesaler": {"name":"Wholesaler", "sector":"trade", "enterprise_kind":"other", "base_revenue":34, "cost_ratio":0.70,
-                   "weights":{"trade_flow":0.48,"credit_demand":0.12,"security":0.14,"disposable_income":0.08,"traveler_flow":0.08,"reputation_climate":0.10}, "regulation":0.04},
-    "caravan_firm": {"name":"Caravan Firm", "sector":"logistics", "enterprise_kind":"shipping", "base_revenue":35, "cost_ratio":0.72,
-                     "weights":{"trade_flow":0.38,"traveler_flow":0.16,"security":0.22,"credit_demand":0.08,"event_activity":0.06,"reputation_climate":0.10}, "regulation":0.03},
-    "shipping_house": {"name":"Shipping House", "sector":"logistics", "enterprise_kind":"shipping", "base_revenue":41, "cost_ratio":0.76,
-                       "weights":{"trade_flow":0.44,"security":0.20,"credit_demand":0.08,"elite_patronage":0.06,"event_activity":0.08,"reputation_climate":0.14}, "regulation":0.06},
-    "courier": {"name":"Courier Service", "sector":"logistics", "enterprise_kind":"service", "base_revenue":25, "cost_ratio":0.61,
-                "weights":{"trade_flow":0.26,"traveler_flow":0.18,"security":0.20,"credit_demand":0.06,"event_activity":0.12,"reputation_climate":0.18}, "regulation":0.02},
-    "cartage_firm": {"name":"Cartage Firm", "sector":"logistics", "enterprise_kind":"service", "base_revenue":28, "cost_ratio":0.70,
-                     "weights":{"trade_flow":0.34,"traveler_flow":0.14,"construction_demand":0.16,"security":0.18,"event_activity":0.08,"reputation_climate":0.10}, "regulation":0.02},
-    # Security
-    "escort_office": {"name":"Escort Office", "sector":"security", "enterprise_kind":"service", "base_revenue":36, "cost_ratio":0.68,
-                      "weights":{"trade_flow":0.28,"traveler_flow":0.16,"military_demand":0.20,"security_inverse":0.20,"reputation_climate":0.16}, "regulation":0.05, "skill_sensitive":True},
-    "bodyguard_firm": {"name":"Bodyguard Firm", "sector":"security", "enterprise_kind":"service", "base_revenue":37, "cost_ratio":0.67,
-                       "weights":{"elite_patronage":0.28,"military_demand":0.16,"security_inverse":0.22,"disposable_income":0.10,"reputation_climate":0.24}, "regulation":0.05, "skill_sensitive":True},
-    # Culture / market institutions
-    "auction_house": {"name":"Auction House", "sector":"culture_trade", "enterprise_kind":"service", "base_revenue":35, "cost_ratio":0.48,
-                      "weights":{"elite_patronage":0.30,"cultural_activity":0.24,"trade_flow":0.16,"disposable_income":0.10,"reputation_climate":0.20}, "regulation":0.05},
-}
+# Caerness's business vocabulary is package data: worlds/caerness/archetypes.json.
+CAERNESS_ARCHETYPES_PATH = Path(__file__).resolve().parent.parent / "worlds" / "caerness" / "archetypes.json"
+
 
 _CONTEXT_DEFAULTS = {
     "foot_traffic": 50.0,
@@ -133,20 +45,29 @@ def _loads(text: str | None) -> dict[str, Any]:
         return {}
 
 
-def archetypes(conn: sqlite3.Connection | None = None) -> dict[str, dict[str, Any]]:
-    """The world package's archetypes.json when it defines one, else the Caerness vocabulary."""
+def _package_archetypes_path(conn: sqlite3.Connection | None) -> Path | None:
     if conn is not None and conn.execute("SELECT 1 FROM engine_meta WHERE key='world_package_id'").fetchone():
         from .world_package import package_for
-        path = package_for(conn).data.get("archetypes")
-        if path is not None:
-            return json.loads(path.read_text(encoding="utf-8"))
-    return _ARCHETYPES
+        return package_for(conn).data.get("archetypes")
+    return None
+
+
+def package_has_own_archetypes(conn: sqlite3.Connection | None) -> bool:
+    """True when the campaign's package supplies an archetypes file other than the Caerness one."""
+    path = _package_archetypes_path(conn)
+    return path is not None and Path(path).resolve() != CAERNESS_ARCHETYPES_PATH.resolve()
+
+
+def archetypes(conn: sqlite3.Connection | None = None) -> dict[str, dict[str, Any]]:
+    """The world package's archetypes.json when it defines one, else worlds/caerness/archetypes.json."""
+    path = _package_archetypes_path(conn) or CAERNESS_ARCHETYPES_PATH
+    return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
 def seed_business_archetypes(conn: sqlite3.Connection) -> int:
     count = 0
     catalog = archetypes(conn)
-    if catalog is not _ARCHETYPES:  # a package with its own vocabulary: drop the unused Caerness rows seeded at init
+    if package_has_own_archetypes(conn):  # a package with its own vocabulary: drop the unused Caerness rows seeded at init
         conn.execute("DELETE FROM business_archetypes WHERE archetype_key NOT IN (%s) AND id NOT IN (SELECT archetype_id FROM enterprise_business_profiles)"
                      % ",".join("?" * len(catalog)), tuple(catalog))
     for key, spec in catalog.items():

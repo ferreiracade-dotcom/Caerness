@@ -19,6 +19,6 @@
     "caerness_trade": true,
     "merchant_houses": true
   },
-  "data": {},
+  "data": {"archetypes": "archetypes.json"},
   "name_pools": {}
 }

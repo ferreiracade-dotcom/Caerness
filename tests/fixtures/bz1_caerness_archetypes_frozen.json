@@ -1,0 +1,622 @@
+{
+ "appraiser": {
+  "base_revenue": 28,
+  "cost_ratio": 0.43,
+  "enterprise_kind": "service",
+  "name": "Appraiser / Authenticator",
+  "regulation": 0.03,
+  "sector": "professional",
+  "skill_sensitive": true,
+  "weights": {
+   "cultural_activity": 0.22,
+   "elite_patronage": 0.26,
+   "reputation_climate": 0.28,
+   "security": 0.06,
+   "trade_flow": 0.18
+  }
+ },
+ "architectural_practice": {
+  "base_revenue": 34,
+  "cost_ratio": 0.51,
+  "enterprise_kind": "service",
+  "name": "Architectural Practice",
+  "regulation": 0.03,
+  "sector": "professional",
+  "skill_sensitive": true,
+  "weights": {
+   "construction_demand": 0.38,
+   "cultural_activity": 0.1,
+   "disposable_income": 0.1,
+   "elite_patronage": 0.24,
+   "reputation_climate": 0.18
+  }
+ },
+ "armorer": {
+  "base_revenue": 29,
+  "cost_ratio": 0.66,
+  "enterprise_kind": "workshop",
+  "name": "Armorer",
+  "regulation": 0.04,
+  "sector": "craft",
+  "skill_sensitive": true,
+  "weights": {
+   "craft_demand": 0.22,
+   "elite_patronage": 0.1,
+   "military_demand": 0.4,
+   "security": 0.12,
+   "trade_flow": 0.16
+  }
+ },
+ "auction_house": {
+  "base_revenue": 35,
+  "cost_ratio": 0.48,
+  "enterprise_kind": "service",
+  "name": "Auction House",
+  "regulation": 0.05,
+  "sector": "culture_trade",
+  "weights": {
+   "cultural_activity": 0.24,
+   "disposable_income": 0.1,
+   "elite_patronage": 0.3,
+   "reputation_climate": 0.2,
+   "trade_flow": 0.16
+  }
+ },
+ "bathhouse": {
+  "base_revenue": 29,
+  "cost_ratio": 0.64,
+  "enterprise_kind": "service",
+  "name": "Bathhouse",
+  "regulation": 0.06,
+  "sector": "hospitality",
+  "weights": {
+   "disposable_income": 0.24,
+   "elite_patronage": 0.12,
+   "event_activity": 0.16,
+   "foot_traffic": 0.24,
+   "security": 0.12,
+   "traveler_flow": 0.12
+  }
+ },
+ "bodyguard_firm": {
+  "base_revenue": 37,
+  "cost_ratio": 0.67,
+  "enterprise_kind": "service",
+  "name": "Bodyguard Firm",
+  "regulation": 0.05,
+  "sector": "security",
+  "skill_sensitive": true,
+  "weights": {
+   "disposable_income": 0.1,
+   "elite_patronage": 0.28,
+   "military_demand": 0.16,
+   "reputation_climate": 0.24,
+   "security_inverse": 0.22
+  }
+ },
+ "bookshop": {
+  "base_revenue": 24,
+  "cost_ratio": 0.61,
+  "enterprise_kind": "shop",
+  "name": "Book / Manuscript Shop",
+  "regulation": 0.05,
+  "sector": "retail",
+  "weights": {
+   "cultural_activity": 0.28,
+   "disposable_income": 0.14,
+   "elite_patronage": 0.18,
+   "foot_traffic": 0.1,
+   "reputation_climate": 0.18,
+   "trade_flow": 0.12
+  }
+ },
+ "caravan_firm": {
+  "base_revenue": 35,
+  "cost_ratio": 0.72,
+  "enterprise_kind": "shipping",
+  "name": "Caravan Firm",
+  "regulation": 0.03,
+  "sector": "logistics",
+  "weights": {
+   "credit_demand": 0.08,
+   "event_activity": 0.06,
+   "reputation_climate": 0.1,
+   "security": 0.22,
+   "trade_flow": 0.38,
+   "traveler_flow": 0.16
+  }
+ },
+ "carpenter": {
+  "base_revenue": 24,
+  "cost_ratio": 0.6,
+  "enterprise_kind": "workshop",
+  "name": "Carpenter",
+  "regulation": 0.01,
+  "sector": "craft",
+  "skill_sensitive": true,
+  "weights": {
+   "construction_demand": 0.3,
+   "craft_demand": 0.34,
+   "disposable_income": 0.1,
+   "security": 0.12,
+   "trade_flow": 0.14
+  }
+ },
+ "cartage_firm": {
+  "base_revenue": 28,
+  "cost_ratio": 0.7,
+  "enterprise_kind": "service",
+  "name": "Cartage Firm",
+  "regulation": 0.02,
+  "sector": "logistics",
+  "weights": {
+   "construction_demand": 0.16,
+   "event_activity": 0.08,
+   "reputation_climate": 0.1,
+   "security": 0.18,
+   "trade_flow": 0.34,
+   "traveler_flow": 0.14
+  }
+ },
+ "cloth_shop": {
+  "base_revenue": 28,
+  "cost_ratio": 0.67,
+  "enterprise_kind": "shop",
+  "name": "Cloth Shop",
+  "regulation": 0.02,
+  "sector": "retail",
+  "weights": {
+   "cultural_activity": 0.12,
+   "disposable_income": 0.2,
+   "elite_patronage": 0.12,
+   "foot_traffic": 0.2,
+   "reputation_climate": 0.14,
+   "trade_flow": 0.22
+  }
+ },
+ "courier": {
+  "base_revenue": 25,
+  "cost_ratio": 0.61,
+  "enterprise_kind": "service",
+  "name": "Courier Service",
+  "regulation": 0.02,
+  "sector": "logistics",
+  "weights": {
+   "credit_demand": 0.06,
+   "event_activity": 0.12,
+   "reputation_climate": 0.18,
+   "security": 0.2,
+   "trade_flow": 0.26,
+   "traveler_flow": 0.18
+  }
+ },
+ "escort_office": {
+  "base_revenue": 36,
+  "cost_ratio": 0.68,
+  "enterprise_kind": "service",
+  "name": "Escort Office",
+  "regulation": 0.05,
+  "sector": "security",
+  "skill_sensitive": true,
+  "weights": {
+   "military_demand": 0.2,
+   "reputation_climate": 0.16,
+   "security_inverse": 0.2,
+   "trade_flow": 0.28,
+   "traveler_flow": 0.16
+  }
+ },
+ "food_shop": {
+  "base_revenue": 27,
+  "cost_ratio": 0.73,
+  "enterprise_kind": "shop",
+  "name": "Food Shop",
+  "regulation": 0.03,
+  "sector": "retail",
+  "weights": {
+   "disposable_income": 0.12,
+   "event_activity": 0.14,
+   "foot_traffic": 0.3,
+   "security": 0.12,
+   "trade_flow": 0.18,
+   "traveler_flow": 0.14
+  }
+ },
+ "gambling_house": {
+  "base_revenue": 48,
+  "cost_ratio": 0.55,
+  "enterprise_kind": "service",
+  "name": "Gambling House",
+  "regulation": 0.46,
+  "sector": "regulated_entertainment",
+  "weights": {
+   "disposable_income": 0.24,
+   "elite_patronage": 0.1,
+   "event_activity": 0.2,
+   "foot_traffic": 0.22,
+   "security": 0.1,
+   "traveler_flow": 0.14
+  }
+ },
+ "horse_breeder": {
+  "base_revenue": 31,
+  "cost_ratio": 0.71,
+  "enterprise_kind": "estate",
+  "name": "Horse Breeder / Stud",
+  "regulation": 0.04,
+  "sector": "agriculture_logistics",
+  "skill_sensitive": true,
+  "weights": {
+   "elite_patronage": 0.22,
+   "military_demand": 0.3,
+   "reputation_climate": 0.22,
+   "security": 0.1,
+   "trade_flow": 0.16
+  }
+ },
+ "inn": {
+  "base_revenue": 34,
+  "cost_ratio": 0.62,
+  "enterprise_kind": "service",
+  "name": "Inn",
+  "regulation": 0.05,
+  "sector": "hospitality",
+  "weights": {
+   "disposable_income": 0.1,
+   "event_activity": 0.16,
+   "foot_traffic": 0.18,
+   "security": 0.14,
+   "traveler_flow": 0.42
+  }
+ },
+ "instrument_maker": {
+  "base_revenue": 27,
+  "cost_ratio": 0.6,
+  "enterprise_kind": "workshop",
+  "name": "Instrument Maker",
+  "regulation": 0.01,
+  "sector": "craft",
+  "skill_sensitive": true,
+  "weights": {
+   "craft_demand": 0.18,
+   "cultural_activity": 0.28,
+   "disposable_income": 0.18,
+   "elite_patronage": 0.22,
+   "reputation_climate": 0.14
+  }
+ },
+ "jeweler": {
+  "base_revenue": 34,
+  "cost_ratio": 0.6,
+  "enterprise_kind": "workshop",
+  "name": "Jeweler",
+  "regulation": 0.03,
+  "sector": "craft",
+  "skill_sensitive": true,
+  "weights": {
+   "cultural_activity": 0.12,
+   "disposable_income": 0.24,
+   "elite_patronage": 0.34,
+   "reputation_climate": 0.2,
+   "trade_flow": 0.1
+  }
+ },
+ "loan_house": {
+  "base_revenue": 33,
+  "capital_sensitive": true,
+  "cost_ratio": 0.4,
+  "enterprise_kind": "service",
+  "name": "Loan House",
+  "regulation": 0.18,
+  "sector": "finance",
+  "weights": {
+   "credit_demand": 0.42,
+   "elite_patronage": 0.1,
+   "reputation_climate": 0.14,
+   "security": 0.1,
+   "trade_flow": 0.24
+  }
+ },
+ "luxury_goods": {
+  "base_revenue": 38,
+  "cost_ratio": 0.64,
+  "enterprise_kind": "shop",
+  "name": "Luxury Goods Shop",
+  "regulation": 0.03,
+  "sector": "retail",
+  "weights": {
+   "cultural_activity": 0.12,
+   "disposable_income": 0.26,
+   "elite_patronage": 0.34,
+   "reputation_climate": 0.18,
+   "trade_flow": 0.1
+  }
+ },
+ "medicine_shop": {
+  "base_revenue": 29,
+  "cost_ratio": 0.66,
+  "enterprise_kind": "shop",
+  "name": "Medicine Shop",
+  "regulation": 0.08,
+  "sector": "retail",
+  "weights": {
+   "disposable_income": 0.1,
+   "foot_traffic": 0.16,
+   "health_demand": 0.42,
+   "reputation_climate": 0.16,
+   "trade_flow": 0.16
+  }
+ },
+ "moneylender": {
+  "base_revenue": 24,
+  "capital_sensitive": true,
+  "cost_ratio": 0.36,
+  "enterprise_kind": "service",
+  "name": "Moneylender",
+  "regulation": 0.15,
+  "sector": "finance",
+  "weights": {
+   "credit_demand": 0.48,
+   "disposable_income": 0.08,
+   "reputation_climate": 0.16,
+   "security": 0.1,
+   "trade_flow": 0.18
+  }
+ },
+ "music_hall": {
+  "base_revenue": 36,
+  "cost_ratio": 0.68,
+  "enterprise_kind": "service",
+  "name": "Music Hall",
+  "regulation": 0.08,
+  "sector": "entertainment",
+  "weights": {
+   "cultural_activity": 0.3,
+   "disposable_income": 0.24,
+   "elite_patronage": 0.1,
+   "event_activity": 0.18,
+   "foot_traffic": 0.18
+  }
+ },
+ "pawnbroker": {
+  "base_revenue": 23,
+  "capital_sensitive": true,
+  "cost_ratio": 0.48,
+  "enterprise_kind": "shop",
+  "name": "Pawnbroker",
+  "regulation": 0.12,
+  "sector": "finance",
+  "weights": {
+   "credit_demand": 0.34,
+   "disposable_income": 0.1,
+   "foot_traffic": 0.22,
+   "reputation_climate": 0.12,
+   "security": 0.1,
+   "trade_flow": 0.12
+  }
+ },
+ "physician_practice": {
+  "base_revenue": 31,
+  "cost_ratio": 0.48,
+  "enterprise_kind": "service",
+  "name": "Physician Practice",
+  "regulation": 0.07,
+  "sector": "professional",
+  "skill_sensitive": true,
+  "weights": {
+   "disposable_income": 0.14,
+   "elite_patronage": 0.1,
+   "foot_traffic": 0.08,
+   "health_demand": 0.46,
+   "reputation_climate": 0.22
+  }
+ },
+ "pleasure_house": {
+  "base_revenue": 44,
+  "cost_ratio": 0.66,
+  "enterprise_kind": "service",
+  "name": "Pleasure / Courtesan House",
+  "regulation": 0.42,
+  "sector": "regulated_entertainment",
+  "weights": {
+   "disposable_income": 0.22,
+   "elite_patronage": 0.18,
+   "event_activity": 0.14,
+   "foot_traffic": 0.2,
+   "security": 0.14,
+   "traveler_flow": 0.12
+  }
+ },
+ "refiner": {
+  "base_revenue": 31,
+  "cost_ratio": 0.69,
+  "enterprise_kind": "workshop",
+  "name": "Refiner",
+  "regulation": 0.1,
+  "sector": "craft",
+  "skill_sensitive": true,
+  "weights": {
+   "craft_demand": 0.22,
+   "elite_patronage": 0.1,
+   "health_demand": 0.14,
+   "military_demand": 0.14,
+   "security": 0.16,
+   "trade_flow": 0.24
+  }
+ },
+ "salon": {
+  "base_revenue": 31,
+  "cost_ratio": 0.62,
+  "enterprise_kind": "service",
+  "name": "Private Salon",
+  "regulation": 0.04,
+  "sector": "entertainment",
+  "weights": {
+   "cultural_activity": 0.26,
+   "disposable_income": 0.16,
+   "elite_patronage": 0.34,
+   "reputation_climate": 0.14,
+   "security": 0.1
+  }
+ },
+ "shipping_house": {
+  "base_revenue": 41,
+  "cost_ratio": 0.76,
+  "enterprise_kind": "shipping",
+  "name": "Shipping House",
+  "regulation": 0.06,
+  "sector": "logistics",
+  "weights": {
+   "credit_demand": 0.08,
+   "elite_patronage": 0.06,
+   "event_activity": 0.08,
+   "reputation_climate": 0.14,
+   "security": 0.2,
+   "trade_flow": 0.44
+  }
+ },
+ "smithy": {
+  "base_revenue": 24,
+  "cost_ratio": 0.61,
+  "enterprise_kind": "workshop",
+  "name": "Smithy",
+  "regulation": 0.02,
+  "sector": "craft",
+  "skill_sensitive": true,
+  "weights": {
+   "craft_demand": 0.28,
+   "disposable_income": 0.12,
+   "foot_traffic": 0.08,
+   "military_demand": 0.26,
+   "security": 0.08,
+   "trade_flow": 0.18
+  }
+ },
+ "stable": {
+  "base_revenue": 26,
+  "cost_ratio": 0.67,
+  "enterprise_kind": "service",
+  "name": "Stable",
+  "regulation": 0.03,
+  "sector": "logistics",
+  "weights": {
+   "event_activity": 0.1,
+   "foot_traffic": 0.12,
+   "security": 0.16,
+   "trade_flow": 0.28,
+   "traveler_flow": 0.34
+  }
+ },
+ "tailor": {
+  "base_revenue": 25,
+  "cost_ratio": 0.57,
+  "enterprise_kind": "workshop",
+  "name": "Tailor",
+  "regulation": 0.01,
+  "sector": "craft",
+  "skill_sensitive": true,
+  "weights": {
+   "craft_demand": 0.18,
+   "cultural_activity": 0.14,
+   "disposable_income": 0.24,
+   "elite_patronage": 0.22,
+   "foot_traffic": 0.12,
+   "reputation_climate": 0.1
+  }
+ },
+ "tavern": {
+  "base_revenue": 30,
+  "cost_ratio": 0.58,
+  "enterprise_kind": "service",
+  "name": "Tavern",
+  "regulation": 0.08,
+  "sector": "hospitality",
+  "weights": {
+   "disposable_income": 0.18,
+   "event_activity": 0.2,
+   "foot_traffic": 0.3,
+   "security": 0.12,
+   "traveler_flow": 0.2
+  }
+ },
+ "theatre": {
+  "base_revenue": 42,
+  "cost_ratio": 0.7,
+  "enterprise_kind": "service",
+  "name": "Theatre",
+  "regulation": 0.08,
+  "sector": "entertainment",
+  "weights": {
+   "cultural_activity": 0.34,
+   "disposable_income": 0.24,
+   "elite_patronage": 0.14,
+   "event_activity": 0.16,
+   "foot_traffic": 0.12
+  }
+ },
+ "vein_mender_practice": {
+  "base_revenue": 43,
+  "cost_ratio": 0.52,
+  "enterprise_kind": "service",
+  "name": "Vein-Mender Practice",
+  "regulation": 0.08,
+  "sector": "professional",
+  "skill_sensitive": true,
+  "weights": {
+   "elite_patronage": 0.2,
+   "health_demand": 0.3,
+   "military_demand": 0.18,
+   "reputation_climate": 0.24,
+   "trade_flow": 0.08
+  }
+ },
+ "warehouse": {
+  "base_revenue": 26,
+  "cost_ratio": 0.56,
+  "enterprise_kind": "other",
+  "name": "Warehouse",
+  "regulation": 0.04,
+  "sector": "trade",
+  "weights": {
+   "credit_demand": 0.08,
+   "event_activity": 0.08,
+   "foot_traffic": 0.1,
+   "security": 0.2,
+   "trade_flow": 0.46,
+   "traveler_flow": 0.08
+  }
+ },
+ "weaver": {
+  "base_revenue": 25,
+  "cost_ratio": 0.63,
+  "enterprise_kind": "workshop",
+  "name": "Weaver",
+  "regulation": 0.01,
+  "sector": "craft",
+  "skill_sensitive": true,
+  "weights": {
+   "craft_demand": 0.3,
+   "cultural_activity": 0.12,
+   "disposable_income": 0.18,
+   "elite_patronage": 0.08,
+   "security": 0.1,
+   "trade_flow": 0.22
+  }
+ },
+ "wholesaler": {
+  "base_revenue": 34,
+  "cost_ratio": 0.7,
+  "enterprise_kind": "other",
+  "name": "Wholesaler",
+  "regulation": 0.04,
+  "sector": "trade",
+  "weights": {
+   "credit_demand": 0.12,
+   "disposable_income": 0.08,
+   "reputation_climate": 0.1,
+   "security": 0.14,
+   "trade_flow": 0.48,
+   "traveler_flow": 0.08
+  }
+ }
+}
