@@ -848,6 +848,9 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None, only_c
     from . import org_temperament, org_tension
     for act, n in org_tension.process_due(conn, int(day)).items():
         out[f"tension:{act}"] = n
+    from . import org_council, org_dealings, org_informing
+    for mod in (org_council, org_dealings, org_informing):
+        out.update(mod.process_due(conn, int(day)))
     if int(day) // WEEK % 52 == 0:
         org_temperament.age_year(conn, int(day))
     return out
@@ -943,6 +946,9 @@ def execute_pay(conn, actor_id, kind, payload, day):
     if paid <= 0:
         return execute_refuse(conn, actor_id, "refuse", payload, day)
     _finish(conn, payload, day, "paid")
+    if paid < amount and payload.get("offender_org") is not None and payload.get("org") is not None:
+        from . import org_dealings
+        org_dealings.owe(conn, int(payload["org"]), int(payload["offender_org"]), amount - paid, "redress he could only part pay", int(day))
     adjust_relationship(conn, vh, int(actor_id), int(day), respect_delta=float(figure(conn, "hap_resp_sit_respect")), resentment_delta=-float(figure(conn, "hap_resp_sit_respect")))
     if payload.get("offender_org") is not None and payload.get("org") is not None:
         from . import org_tension

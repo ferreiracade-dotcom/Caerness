@@ -12967,6 +12967,1756 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; Spread of resentment. Design proposal. (B12e: engine/org_tension.py)"
+  },
+  "ib_raise_council_walkout": {
+   "default": 3,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A head who walks out of a table leaves the others a little aggrieved (the walk-out of a head from the sit-downs of 1958 is the bible's own picture of how a table frays, Part III 6.1). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_raise_council_defied": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A head who defies the table's ruling leaves the other side aggrieved at him: the ruling was meant to end it. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_raise_council_witness": {
+   "default": 2.5,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The other members of a table watch a ruling defied; each is a little more aggrieved at the one who defied it. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_raise_council_breach": {
+   "default": 5,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A member strikes another against the table's word: each other member is aggrieved at him (the table's honour is theirs too). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_raise_informer_exposed": {
+   "default": 8,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A man found reporting to a rival leaves his own organisation aggrieved at the rival that turned him (a bigger insult than a slight, short of a killing). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_poach_ambition": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `ambition`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_aggression": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `aggression`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_stronger": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `stronger`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_their_head_weak": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `their_head_weak`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_grievance": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `grievance`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `caution` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_not_friendly": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `friendly` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_not_heat_city": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `heat_city` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_not_weaker": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward making an offer to another organisation's earner. Weight of the reading `weaker` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_stronger": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward taking a much smaller organisation in. Weight of the reading `stronger`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_their_head_weak": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward taking a much smaller organisation in. Weight of the reading `their_head_weak`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_ambition": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward taking a much smaller organisation in. Weight of the reading `ambition`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_aggression": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward taking a much smaller organisation in. Weight of the reading `aggression`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_not_friendly": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward taking a much smaller organisation in. Weight of the reading `friendly` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_not_caution": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward taking a much smaller organisation in. Weight of the reading `caution` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_not_heat_city": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a voice leans toward taking a much smaller organisation in. Weight of the reading `heat_city` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "co_min_seats": {
+   "default": 3,
+   "range": null,
+   "unit": "organisations",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What makes a table: two heads sitting down is a sit-down; three or more with a standing is a table. A definition, not a limit on how many sit. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_lookback_days": {
+   "default": 365,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How far back a head counts the dead and a table counts killings between its members. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_lost_full": {
+   "default": 0.05,
+   "range": null,
+   "unit": "share of men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The share of an organisation's men killed in a year that a head reads as 'all I can bear' (1.0 of `lost`). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_scale": {
+   "default": 3,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Standing at which a table is half as binding as it can be read (standing/(standing+scale)); it has no top. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_half_life_days": {
+   "default": 365,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How long a table's standing takes to halve when it is not used: a table nobody brings anything to is forgotten within a few years. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_start": {
+   "default": 1,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The standing a table has the day it forms. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_rate": {
+   "default": 0.006,
+   "range": null,
+   "unit": "per head per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Scales the weekly weighing of proposing a table: even a head who wants one most seldom moves in a given week. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_join_rate": {
+   "default": 0.01,
+   "range": null,
+   "unit": "per head per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How often a seated head asks a neighbour not yet at the table to come in. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_leave_rate": {
+   "default": 0.02,
+   "range": null,
+   "unit": "per head per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Scales the weekly weighing of leaving a table. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_walkout_cost": {
+   "default": 0.5,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a head's walking out costs the table. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_killing_cost": {
+   "default": 1.5,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What members killing each other without leave from the table costs it. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_weary": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to propose a table (Part III 6.1: bosses tired of war, a strong mediator, outside pressure, personal ties, one family large enough that a table suits it). Weight of the reading `weary`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_lost": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to propose a table (Part III 6.1: bosses tired of war, a strong mediator, outside pressure, personal ties, one family large enough that a table suits it). Weight of the reading `lost`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_outside": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to propose a table (Part III 6.1: bosses tired of war, a strong mediator, outside pressure, personal ties, one family large enough that a table suits it). Weight of the reading `outside`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_ties": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to propose a table (Part III 6.1: bosses tired of war, a strong mediator, outside pressure, personal ties, one family large enough that a table suits it). Weight of the reading `ties`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_mediator": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to propose a table (Part III 6.1: bosses tired of war, a strong mediator, outside pressure, personal ties, one family large enough that a table suits it). Weight of the reading `mediator`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_dominance": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to propose a table (Part III 6.1: bosses tired of war, a strong mediator, outside pressure, personal ties, one family large enough that a table suits it). Weight of the reading `dominance`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_not_aggression": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to propose a table (Part III 6.1: bosses tired of war, a strong mediator, outside pressure, personal ties, one family large enough that a table suits it). Weight of the reading `aggression` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_propose_not_grievance": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to propose a table (Part III 6.1: bosses tired of war, a strong mediator, outside pressure, personal ties, one family large enough that a table suits it). Weight of the reading `grievance` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_always": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `always`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_weary": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `weary`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_lost": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `lost`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_outside": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `outside`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_ties": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `ties`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_asker_ties": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `asker_ties`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_mediator": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `mediator`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_council": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `council`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_not_asker_big": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `asker_big` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_not_heat_to_asker": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `heat_to_asker` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_not_asker_grievance": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `asker_grievance` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_not_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `aggression` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_accept_not_dominance": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to come when another asks him to a table: his own weariness and fears, how well he knows the asker, and how much a table the asker runs would run him. Weight of the reading `dominance` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_leave_ignored": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to walk out of a table: that it is not kept, his grudges, his temper, his size against the rest. Weight of the reading `ignored`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_leave_grievance": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to walk out of a table: that it is not kept, his grudges, his temper, his size against the rest. Weight of the reading `grievance`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_leave_aggression": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to walk out of a table: that it is not kept, his grudges, his temper, his size against the rest. Weight of the reading `aggression`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_leave_dominance": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to walk out of a table: that it is not kept, his grudges, his temper, his size against the rest. Weight of the reading `dominance`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_leave_not_council": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to walk out of a table: that it is not kept, his grudges, his temper, his size against the rest. Weight of the reading `council` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_leave_not_weary": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to walk out of a table: that it is not kept, his grudges, his temper, his size against the rest. Weight of the reading `weary` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_leave_not_ties": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What moves a head to walk out of a table: that it is not kept, his grudges, his temper, his size against the rest. Weight of the reading `ties` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_rate": {
+   "default": 0.15,
+   "range": null,
+   "unit": "per pair per week at full heat",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How likely a table is to rule on a quarrel between two of its members in a week, times the pair's heat. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_delta": {
+   "default": 8,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How much a kept ruling eases each side (scaled by the table's standing). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_relation": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Respect, trust and grudge moved between the two heads by a ruling kept. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_standing_up": {
+   "default": 0.5,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a ruling both sides keep adds to the table's standing. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_standing_down": {
+   "default": 1.0,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a ruling defied costs the table (twice that when both sides defy it). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_redress_per_death": {
+   "default": 15000,
+   "range": null,
+   "unit": "dollars",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What the table asks a side to make good for each man more than it has lost (no figure in the bible: blood money between families, unsourced). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_owes_full": {
+   "default": 2,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How many men more lost than taken a side reads as 'all it is owed'. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_accept_always": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head keeps the table's ruling in a quarrel with another member. Weight of the reading `always`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_accept_council": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head keeps the table's ruling in a quarrel with another member. Weight of the reading `council`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_accept_weary": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head keeps the table's ruling in a quarrel with another member. Weight of the reading `weary`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_accept_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head keeps the table's ruling in a quarrel with another member. Weight of the reading `pragmatism`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_accept_heat_city": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head keeps the table's ruling in a quarrel with another member. Weight of the reading `heat_city`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_accept_owes": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head keeps the table's ruling in a quarrel with another member. Weight of the reading `owes`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_accept_not_aggression": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head keeps the table's ruling in a quarrel with another member. Weight of the reading `aggression` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_rule_accept_not_grievance": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a head keeps the table's ruling in a quarrel with another member. Weight of the reading `grievance` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_struck_full": {
+   "default": 2,
+   "range": null,
+   "unit": "men",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How many of its men another member has killed in the year before a side reads the provocation as full. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_approved_standing": {
+   "default": 0.5,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a killing the table sanctions adds to its standing (the table is being used). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_barred_standing": {
+   "default": 0.3,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a strike the table refuses and the voice gives up adds to its standing (it is obeyed). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_breach_cost": {
+   "default": 2,
+   "range": null,
+   "unit": "standing",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What a strike by one member on another against the table's word costs the table. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_breach_relation": {
+   "default": 8,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Respect and trust the other members' heads lose in the one who breaks the table's word. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_approve_always": {
+   "default": 0.05,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the table lets a member strike another: the provocation (heat, men already lost) for it; the table's standing, what the striker has already done, and being the stronger against. Weight of the reading `always`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_approve_provoked": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the table lets a member strike another: the provocation (heat, men already lost) for it; the table's standing, what the striker has already done, and being the stronger against. Weight of the reading `provoked`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_approve_struck_first": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the table lets a member strike another: the provocation (heat, men already lost) for it; the table's standing, what the striker has already done, and being the stronger against. Weight of the reading `struck_first`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_approve_not_council": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the table lets a member strike another: the provocation (heat, men already lost) for it; the table's standing, what the striker has already done, and being the stronger against. Weight of the reading `council` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_approve_not_they_struck": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the table lets a member strike another: the provocation (heat, men already lost) for it; the table's standing, what the striker has already done, and being the stronger against. Weight of the reading `they_struck` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_approve_not_stronger": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the table lets a member strike another: the provocation (heat, men already lost) for it; the table's standing, what the striker has already done, and being the stronger against. Weight of the reading `stronger` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_defy_aggression": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a voice the table has refused strikes anyway: his temper, the opening, his grievance for; the table's standing and his own caution against. Weight of the reading `aggression`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_defy_ambition_open": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a voice the table has refused strikes anyway: his temper, the opening, his grievance for; the table's standing and his own caution against. Weight of the reading `ambition_open`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_defy_heat": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a voice the table has refused strikes anyway: his temper, the opening, his grievance for; the table's standing and his own caution against. Weight of the reading `heat`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_defy_grievance": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a voice the table has refused strikes anyway: his temper, the opening, his grievance for; the table's standing and his own caution against. Weight of the reading `grievance`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_defy_struck_first": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a voice the table has refused strikes anyway: his temper, the opening, his grievance for; the table's standing and his own caution against. Weight of the reading `struck_first`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_defy_not_council": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a voice the table has refused strikes anyway: his temper, the opening, his grievance for; the table's standing and his own caution against. Weight of the reading `council` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "co_strike_defy_not_caution": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a voice the table has refused strikes anyway: his temper, the opening, his grievance for; the table's standing and his own caution against. Weight of the reading `caution` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_debt_rate": {
+   "default": 0.05,
+   "range": null,
+   "unit": "points per day at full weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How fast an unpaid debt keeps the creditor aggrieved: a month of a large debt owed by a head is about a point and a half. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_scale": {
+   "default": 50000,
+   "range": null,
+   "unit": "dollars",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A debt this large is half as big as a debt can weigh (amount/(amount+scale)). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_who_base": {
+   "default": 1.0,
+   "range": null,
+   "unit": "multiplier",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A debt owed by a man of no rank counts as this much. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_who_rank": {
+   "default": 0.5,
+   "range": null,
+   "unit": "multiplier",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The extra a debtor's rank adds: a head's unpaid debt is a bigger insult than a soldier's. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_ease": {
+   "default": 4,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; What paying a debt in full eases the creditor. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_pay_always": {
+   "default": 0.15,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a debtor's head pays what he owes this week: what he has, being the weaker, his habit of keeping his word; his temper, the creditor's weakness and his grudges against. Weight of the reading `always`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_pay_can_pay": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a debtor's head pays what he owes this week: what he has, being the weaker, his habit of keeping his word; his temper, the creditor's weakness and his grudges against. Weight of the reading `can_pay`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_pay_pragmatism": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a debtor's head pays what he owes this week: what he has, being the weaker, his habit of keeping his word; his temper, the creditor's weakness and his grudges against. Weight of the reading `pragmatism`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_pay_weaker": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a debtor's head pays what he owes this week: what he has, being the weaker, his habit of keeping his word; his temper, the creditor's weakness and his grudges against. Weight of the reading `weaker`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_pay_friendly": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a debtor's head pays what he owes this week: what he has, being the weaker, his habit of keeping his word; his temper, the creditor's weakness and his grudges against. Weight of the reading `friendly`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_pay_not_aggression": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a debtor's head pays what he owes this week: what he has, being the weaker, his habit of keeping his word; his temper, the creditor's weakness and his grudges against. Weight of the reading `aggression` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_pay_not_their_head_weak": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a debtor's head pays what he owes this week: what he has, being the weaker, his habit of keeping his word; his temper, the creditor's weakness and his grudges against. Weight of the reading `their_head_weak` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_debt_pay_not_grievance": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a debtor's head pays what he owes this week: what he has, being the weaker, his habit of keeping his word; his temper, the creditor's weakness and his grudges against. Weight of the reading `grievance` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_side_raise": {
+   "default": 4,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A man going over to another organisation leaves his old one aggrieved at the new one by this much. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_side_rank_base": {
+   "default": 1.0,
+   "range": null,
+   "unit": "multiplier",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A man of no rank changing sides counts as this much. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_side_rank": {
+   "default": 2.0,
+   "range": null,
+   "unit": "multiplier",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The extra his rank adds (a capo's going over is felt far more than an associate's). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_side_take": {
+   "default": 6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The extra for what he earned: a man who brought a lot in takes it with him. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_side_take_scale": {
+   "default": 5000,
+   "range": null,
+   "unit": "dollars per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A man earning this much a week is half as big a loss as an earner can be. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_side_resentment": {
+   "default": 12,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The grudge his old head holds against him. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_refused": {
+   "default": 1.5,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; An offer to an earner turned down: his old organisation hears of it. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_earn_scale": {
+   "default": 2000,
+   "range": null,
+   "unit": "dollars per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; An earner this large is half as tempting as an offer can make him read. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_accept_always": {
+   "default": 0.05,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man takes another organisation's offer: his greed, his grudge against the man he answers to, his want of loyalty and his ambition for; his loyalty and his standing against. Weight of the reading `always`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_accept_greed": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man takes another organisation's offer: his greed, his grudge against the man he answers to, his want of loyalty and his ambition for; his loyalty and his standing against. Weight of the reading `greed`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_accept_resentful": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man takes another organisation's offer: his greed, his grudge against the man he answers to, his want of loyalty and his ambition for; his loyalty and his standing against. Weight of the reading `resentful`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_accept_disloyal": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man takes another organisation's offer: his greed, his grudge against the man he answers to, his want of loyalty and his ambition for; his loyalty and his standing against. Weight of the reading `disloyal`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_accept_ambition": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man takes another organisation's offer: his greed, his grudge against the man he answers to, his want of loyalty and his ambition for; his loyalty and his standing against. Weight of the reading `ambition`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_accept_earner": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man takes another organisation's offer: his greed, his grudge against the man he answers to, his want of loyalty and his ambition for; his loyalty and his standing against. Weight of the reading `earner`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_accept_not_loyal": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man takes another organisation's offer: his greed, his grudge against the man he answers to, his want of loyalty and his ambition for; his loyalty and his standing against. Weight of the reading `loyal` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_poach_accept_not_standing": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man takes another organisation's offer: his greed, his grudge against the man he answers to, his want of loyalty and his ambition for; his loyalty and his standing against. Weight of the reading `standing` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_refused": {
+   "default": 3,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A much smaller organisation's head refusing to come in leaves it aggrieved at the one who asked. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_relation": {
+   "default": 10,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; The grudge a refused head holds against the one who asked him to come in. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_always": {
+   "default": 0.0,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head comes in under a larger one: his weakness, his age and sickness, his losses and the heat on him for; his temper against. Weight of the reading `always`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_weaker": {
+   "default": 0.12,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head comes in under a larger one: his weakness, his age and sickness, his losses and the heat on him for; his temper against. Weight of the reading `weaker`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_head_weak": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head comes in under a larger one: his weakness, his age and sickness, his losses and the heat on him for; his temper against. Weight of the reading `head_weak`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_heat": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head comes in under a larger one: his weakness, his age and sickness, his losses and the heat on him for; his temper against. Weight of the reading `heat`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_lost": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head comes in under a larger one: his weakness, his age and sickness, his losses and the heat on him for; his temper against. Weight of the reading `lost`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_heat_city": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head comes in under a larger one: his weakness, his age and sickness, his losses and the heat on him for; his temper against. Weight of the reading `heat_city`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_friendly": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head comes in under a larger one: his weakness, his age and sickness, his losses and the heat on him for; his temper against. Weight of the reading `friendly`. Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_absorb_accept_not_aggression": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a smaller organisation's head comes in under a larger one: his weakness, his age and sickness, his losses and the heat on him for; his temper against. Weight of the reading `aggression` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_dealings.py)"
+  },
+  "ib_inf_law_lookback": {
+   "default": 90,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How recently a man was arrested for the police to think of him as a man they can turn. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_rate": {
+   "default": 0.006,
+   "range": null,
+   "unit": "per man per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Scales the weekly chance the police turn a man they hold something over. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_leverage": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `leverage`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_arrested": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `arrested`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_kin_tie": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `kin_tie`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_greed": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `greed`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_disloyal": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `disloyal`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_afraid": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `afraid`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_interest": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `interest`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_not_loyal": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `loyal` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_not_made": {
+   "default": 0.8,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `made` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_rate": {
+   "default": 0.1,
+   "range": null,
+   "unit": "per pair per week at full heat",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How likely an organisation is to try to turn a man of one it is aggrieved at, times the pair's heat. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_weigh_greed": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Which man of the rival a head thinks he could turn. Weight of the reading `greed`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_weigh_resentful": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Which man of the rival a head thinks he could turn. Weight of the reading `resentful`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_weigh_disloyal": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Which man of the rival a head thinks he could turn. Weight of the reading `disloyal`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_weigh_not_loyal": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Which man of the rival a head thinks he could turn. Weight of the reading `loyal` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_weigh_not_made": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Which man of the rival a head thinks he could turn. Weight of the reading `made` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_accept_always": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the man agrees to report to the rival. Weight of the reading `always`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_accept_greed": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the man agrees to report to the rival. Weight of the reading `greed`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_accept_resentful": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the man agrees to report to the rival. Weight of the reading `resentful`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_accept_disloyal": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the man agrees to report to the rival. Weight of the reading `disloyal`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_accept_heat": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the man agrees to report to the rival. Weight of the reading `heat`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_accept_ambition": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the man agrees to report to the rival. Weight of the reading `ambition`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_accept_not_loyal": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the man agrees to report to the rival. Weight of the reading `loyal` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_rival_accept_not_afraid": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether the man agrees to report to the rival. Weight of the reading `afraid` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_report_rate": {
+   "default": 0.08,
+   "range": null,
+   "unit": "per informer per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Scales how often a turned man gives the police something. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_report_always": {
+   "default": 0.1,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a turned man gives the police something this week. Weight of the reading `always`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_report_greed": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a turned man gives the police something this week. Weight of the reading `greed`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_report_leverage": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a turned man gives the police something this week. Weight of the reading `leverage`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_report_disloyal": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a turned man gives the police something this week. Weight of the reading `disloyal`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_report_resentful": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a turned man gives the police something this week. Weight of the reading `resentful`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_report_not_loyal": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a turned man gives the police something this week. Weight of the reading `loyal` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_exposed_rate": {
+   "default": 0.01,
+   "range": null,
+   "unit": "per informer per week",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Scales how often a man reporting to a rival is found out. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_exposed_always": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man reporting to a rival is found out this week: his own care (fear makes him careful). Weight of the reading `always`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_exposed_greed": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man reporting to a rival is found out this week: his own care (fear makes him careful). Weight of the reading `greed`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_exposed_not_afraid": {
+   "default": 0.2,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Whether a man reporting to a rival is found out this week: his own care (fear makes him careful). Weight of the reading `afraid` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_slight_b12f_not_council": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the table's standing and what an informer has told a voice weigh in his slight. Weight of the reading `council` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_press_ground_b12f_not_council": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the table's standing and what an informer has told a voice weigh in his press_ground. Weight of the reading `council` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_squeeze_b12f_not_council": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the table's standing and what an informer has told a voice weigh in his squeeze. Weight of the reading `council` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_squeeze_b12f_informed": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the table's standing and what an informer has told a voice weigh in his squeeze. Weight of the reading `informed`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_strike_b12f_not_council": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the table's standing and what an informer has told a voice weigh in his strike. Weight of the reading `council` as a counter-term (it takes a share off the answer). Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_strike_b12f_informed": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How the table's standing and what an informer has told a voice weigh in his strike. Weight of the reading `informed`. Design proposal. (B12f: engine/org_council.py)"
+  },
+  "ib_sit_accept_b12f_council": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; A table both heads sit at makes coming to a sit-down likelier. Weight of the reading `council`. Design proposal. (B12f: engine/org_council.py)"
   }
  },
  "pools": {

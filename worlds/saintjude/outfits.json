@@ -1651,7 +1651,12 @@
    "refused_peace": "ib_raise_refused_peace",
    "settled": "ib_raise_settled",
    "paid": "ib_raise_paid",
-   "accepted": "ib_raise_accepted"
+   "accepted": "ib_raise_accepted",
+   "council_walkout": "ib_raise_council_walkout",
+   "council_defied": "ib_raise_council_defied",
+   "council_witness": "ib_raise_council_witness",
+   "council_breach": "ib_raise_council_breach",
+   "informer_exposed": "ib_raise_informer_exposed"
   },
   "rank_scale": {
    "base": "ib_rank_base",
@@ -1835,6 +1840,10 @@
       "name": "aggression",
       "weight": "ib_sit_accept_not_aggression",
       "against": true
+     },
+     {
+      "name": "council",
+      "weight": "ib_sit_accept_b12f_council"
      }
     ]
    },
@@ -1881,6 +1890,11 @@
      {
       "name": "broker",
       "weight": "ib_slight_not_broker",
+      "against": true
+     },
+     {
+      "name": "council",
+      "weight": "ib_slight_b12f_not_council",
       "against": true
      }
     ]
@@ -1935,6 +1949,11 @@
      {
       "name": "heat_own",
       "weight": "ib_press_ground_not_heat_own",
+      "against": true
+     },
+     {
+      "name": "council",
+      "weight": "ib_press_ground_b12f_not_council",
       "against": true
      }
     ]
@@ -1995,6 +2014,15 @@
       "name": "weaker",
       "weight": "ib_squeeze_not_weaker",
       "against": true
+     },
+     {
+      "name": "council",
+      "weight": "ib_squeeze_b12f_not_council",
+      "against": true
+     },
+     {
+      "name": "informed",
+      "weight": "ib_squeeze_b12f_informed"
      }
     ]
    },
@@ -2072,6 +2100,15 @@
       "name": "cautious",
       "weight": "ib_strike_not_cautious",
       "against": true
+     },
+     {
+      "name": "council",
+      "weight": "ib_strike_b12f_not_council",
+      "against": true
+     },
+     {
+      "name": "informed",
+      "weight": "ib_strike_b12f_informed"
      }
     ]
    },
@@ -2142,6 +2179,87 @@
     ],
     "ease": "ib_levy_ease",
     "refuse": "ib_levy_refuse"
+   },
+   "poach": {
+    "do": "poach",
+    "terms": [
+     {
+      "name": "ambition",
+      "weight": "ib_poach_ambition"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_poach_aggression"
+     },
+     {
+      "name": "stronger",
+      "weight": "ib_poach_stronger"
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_poach_their_head_weak"
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_poach_grievance"
+     },
+     {
+      "name": "caution",
+      "weight": "ib_poach_not_caution",
+      "against": true
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_poach_not_friendly",
+      "against": true
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_poach_not_heat_city",
+      "against": true
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_poach_not_weaker",
+      "against": true
+     }
+    ]
+   },
+   "absorb": {
+    "do": "absorb",
+    "terms": [
+     {
+      "name": "stronger",
+      "weight": "ib_absorb_stronger"
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_absorb_their_head_weak"
+     },
+     {
+      "name": "ambition",
+      "weight": "ib_absorb_ambition"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_absorb_aggression"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_absorb_not_friendly",
+      "against": true
+     },
+     {
+      "name": "caution",
+      "weight": "ib_absorb_not_caution",
+      "against": true
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_absorb_not_heat_city",
+      "against": true
+     }
+    ]
    }
   },
   "ladders": {
@@ -2956,6 +3074,586 @@
    "orgs": [
     "hired_men"
    ]
+  },
+  "council": {
+   "min_seats": "co_min_seats",
+   "outside": [
+    "decavalcante",
+    "genovesenj",
+    "lucchesenj",
+    "philadelphia",
+    "gambino"
+   ],
+   "lookback_days": "co_lookback_days",
+   "lost_full": "co_lost_full",
+   "scale": "co_scale",
+   "half_life_days": "co_half_life_days",
+   "start": "co_start",
+   "propose_rate": "co_propose_rate",
+   "join_rate": "co_join_rate",
+   "leave_rate": "co_leave_rate",
+   "walkout_cost": "co_walkout_cost",
+   "killing_cost": "co_killing_cost",
+   "propose": [
+    {
+     "name": "weary",
+     "weight": "co_propose_weary"
+    },
+    {
+     "name": "lost",
+     "weight": "co_propose_lost"
+    },
+    {
+     "name": "outside",
+     "weight": "co_propose_outside"
+    },
+    {
+     "name": "ties",
+     "weight": "co_propose_ties"
+    },
+    {
+     "name": "mediator",
+     "weight": "co_propose_mediator"
+    },
+    {
+     "name": "dominance",
+     "weight": "co_propose_dominance"
+    },
+    {
+     "name": "aggression",
+     "weight": "co_propose_not_aggression",
+     "against": true
+    },
+    {
+     "name": "grievance",
+     "weight": "co_propose_not_grievance",
+     "against": true
+    }
+   ],
+   "accept": [
+    {
+     "name": "always",
+     "weight": "co_accept_always"
+    },
+    {
+     "name": "weary",
+     "weight": "co_accept_weary"
+    },
+    {
+     "name": "lost",
+     "weight": "co_accept_lost"
+    },
+    {
+     "name": "outside",
+     "weight": "co_accept_outside"
+    },
+    {
+     "name": "ties",
+     "weight": "co_accept_ties"
+    },
+    {
+     "name": "asker_ties",
+     "weight": "co_accept_asker_ties"
+    },
+    {
+     "name": "mediator",
+     "weight": "co_accept_mediator"
+    },
+    {
+     "name": "council",
+     "weight": "co_accept_council"
+    },
+    {
+     "name": "asker_big",
+     "weight": "co_accept_not_asker_big",
+     "against": true
+    },
+    {
+     "name": "heat_to_asker",
+     "weight": "co_accept_not_heat_to_asker",
+     "against": true
+    },
+    {
+     "name": "asker_grievance",
+     "weight": "co_accept_not_asker_grievance",
+     "against": true
+    },
+    {
+     "name": "aggression",
+     "weight": "co_accept_not_aggression",
+     "against": true
+    },
+    {
+     "name": "dominance",
+     "weight": "co_accept_not_dominance",
+     "against": true
+    }
+   ],
+   "leave": [
+    {
+     "name": "ignored",
+     "weight": "co_leave_ignored"
+    },
+    {
+     "name": "grievance",
+     "weight": "co_leave_grievance"
+    },
+    {
+     "name": "aggression",
+     "weight": "co_leave_aggression"
+    },
+    {
+     "name": "dominance",
+     "weight": "co_leave_dominance"
+    },
+    {
+     "name": "council",
+     "weight": "co_leave_not_council",
+     "against": true
+    },
+    {
+     "name": "weary",
+     "weight": "co_leave_not_weary",
+     "against": true
+    },
+    {
+     "name": "ties",
+     "weight": "co_leave_not_ties",
+     "against": true
+    }
+   ],
+   "rule": {
+    "rate": "co_rule_rate",
+    "delta": "co_rule_delta",
+    "relation": "co_rule_relation",
+    "standing_up": "co_rule_standing_up",
+    "standing_down": "co_rule_standing_down",
+    "redress_per_death": "co_redress_per_death",
+    "owes_full": "co_owes_full",
+    "accept": [
+     {
+      "name": "always",
+      "weight": "co_rule_accept_always"
+     },
+     {
+      "name": "council",
+      "weight": "co_rule_accept_council"
+     },
+     {
+      "name": "weary",
+      "weight": "co_rule_accept_weary"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "co_rule_accept_pragmatism"
+     },
+     {
+      "name": "heat_city",
+      "weight": "co_rule_accept_heat_city"
+     },
+     {
+      "name": "owes",
+      "weight": "co_rule_accept_owes"
+     },
+     {
+      "name": "aggression",
+      "weight": "co_rule_accept_not_aggression",
+      "against": true
+     },
+     {
+      "name": "grievance",
+      "weight": "co_rule_accept_not_grievance",
+      "against": true
+     }
+    ]
+   },
+   "strike": {
+    "struck_full": "co_struck_full",
+    "approved_standing": "co_approved_standing",
+    "barred_standing": "co_barred_standing",
+    "breach_cost": "co_breach_cost",
+    "breach_relation": "co_breach_relation",
+    "approve": [
+     {
+      "name": "always",
+      "weight": "co_strike_approve_always"
+     },
+     {
+      "name": "provoked",
+      "weight": "co_strike_approve_provoked"
+     },
+     {
+      "name": "struck_first",
+      "weight": "co_strike_approve_struck_first"
+     },
+     {
+      "name": "council",
+      "weight": "co_strike_approve_not_council",
+      "against": true
+     },
+     {
+      "name": "they_struck",
+      "weight": "co_strike_approve_not_they_struck",
+      "against": true
+     },
+     {
+      "name": "stronger",
+      "weight": "co_strike_approve_not_stronger",
+      "against": true
+     }
+    ],
+    "defy": [
+     {
+      "name": "aggression",
+      "weight": "co_strike_defy_aggression"
+     },
+     {
+      "name": "ambition_open",
+      "weight": "co_strike_defy_ambition_open"
+     },
+     {
+      "name": "heat",
+      "weight": "co_strike_defy_heat"
+     },
+     {
+      "name": "grievance",
+      "weight": "co_strike_defy_grievance"
+     },
+     {
+      "name": "struck_first",
+      "weight": "co_strike_defy_struck_first"
+     },
+     {
+      "name": "council",
+      "weight": "co_strike_defy_not_council",
+      "against": true
+     },
+     {
+      "name": "caution",
+      "weight": "co_strike_defy_not_caution",
+      "against": true
+     }
+    ]
+   }
+  },
+  "dealings": {
+   "debt": {
+    "rate": "ib_debt_rate",
+    "scale": "ib_debt_scale",
+    "who_base": "ib_debt_who_base",
+    "who_rank": "ib_debt_who_rank",
+    "ease": "ib_debt_ease",
+    "pay": [
+     {
+      "name": "always",
+      "weight": "ib_debt_pay_always"
+     },
+     {
+      "name": "can_pay",
+      "weight": "ib_debt_pay_can_pay"
+     },
+     {
+      "name": "pragmatism",
+      "weight": "ib_debt_pay_pragmatism"
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_debt_pay_weaker"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_debt_pay_friendly"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_debt_pay_not_aggression",
+      "against": true
+     },
+     {
+      "name": "their_head_weak",
+      "weight": "ib_debt_pay_not_their_head_weak",
+      "against": true
+     },
+     {
+      "name": "grievance",
+      "weight": "ib_debt_pay_not_grievance",
+      "against": true
+     }
+    ]
+   },
+   "side": {
+    "raise": "ib_side_raise",
+    "rank_base": "ib_side_rank_base",
+    "rank": "ib_side_rank",
+    "raise_take": "ib_side_take",
+    "take_scale": "ib_side_take_scale",
+    "resentment": "ib_side_resentment"
+   },
+   "poach": {
+    "refused_raise": "ib_poach_refused",
+    "earn_scale": "ib_poach_earn_scale",
+    "accept": [
+     {
+      "name": "always",
+      "weight": "ib_poach_accept_always"
+     },
+     {
+      "name": "greed",
+      "weight": "ib_poach_accept_greed"
+     },
+     {
+      "name": "resentful",
+      "weight": "ib_poach_accept_resentful"
+     },
+     {
+      "name": "disloyal",
+      "weight": "ib_poach_accept_disloyal"
+     },
+     {
+      "name": "ambition",
+      "weight": "ib_poach_accept_ambition"
+     },
+     {
+      "name": "earner",
+      "weight": "ib_poach_accept_earner"
+     },
+     {
+      "name": "loyal",
+      "weight": "ib_poach_accept_not_loyal",
+      "against": true
+     },
+     {
+      "name": "standing",
+      "weight": "ib_poach_accept_not_standing",
+      "against": true
+     }
+    ]
+   },
+   "absorb": {
+    "refused_raise": "ib_absorb_refused",
+    "relation": "ib_absorb_relation",
+    "accept": [
+     {
+      "name": "always",
+      "weight": "ib_absorb_accept_always"
+     },
+     {
+      "name": "weaker",
+      "weight": "ib_absorb_accept_weaker"
+     },
+     {
+      "name": "head_weak",
+      "weight": "ib_absorb_accept_head_weak"
+     },
+     {
+      "name": "heat",
+      "weight": "ib_absorb_accept_heat"
+     },
+     {
+      "name": "lost",
+      "weight": "ib_absorb_accept_lost"
+     },
+     {
+      "name": "heat_city",
+      "weight": "ib_absorb_accept_heat_city"
+     },
+     {
+      "name": "friendly",
+      "weight": "ib_absorb_accept_friendly"
+     },
+     {
+      "name": "aggression",
+      "weight": "ib_absorb_accept_not_aggression",
+      "against": true
+     }
+    ]
+   }
+  },
+  "informing": {
+   "roles": {
+    "family": [
+     "associate",
+     "soldier"
+    ],
+    "independent": [
+     "principal",
+     "hand"
+    ],
+    "club": [
+     "officer",
+     "member",
+     "prospect"
+    ],
+    "banks": [
+     "controller",
+     "runner"
+    ],
+    "loyalties": [
+     "middle",
+     "young"
+    ],
+    "handful": [
+     "man"
+    ]
+   },
+   "law": {
+    "lookback_days": "ib_inf_law_lookback",
+    "rate": "ib_inf_law_rate",
+    "terms": [
+     {
+      "name": "leverage",
+      "weight": "ib_inf_law_leverage"
+     },
+     {
+      "name": "arrested",
+      "weight": "ib_inf_law_arrested"
+     },
+     {
+      "name": "kin_tie",
+      "weight": "ib_inf_law_kin_tie"
+     },
+     {
+      "name": "greed",
+      "weight": "ib_inf_law_greed"
+     },
+     {
+      "name": "disloyal",
+      "weight": "ib_inf_law_disloyal"
+     },
+     {
+      "name": "afraid",
+      "weight": "ib_inf_law_afraid"
+     },
+     {
+      "name": "interest",
+      "weight": "ib_inf_law_interest"
+     },
+     {
+      "name": "loyal",
+      "weight": "ib_inf_law_not_loyal",
+      "against": true
+     },
+     {
+      "name": "made",
+      "weight": "ib_inf_law_not_made",
+      "against": true
+     }
+    ]
+   },
+   "rival": {
+    "rate": "ib_inf_rival_rate",
+    "weigh": [
+     {
+      "name": "greed",
+      "weight": "ib_inf_rival_weigh_greed"
+     },
+     {
+      "name": "resentful",
+      "weight": "ib_inf_rival_weigh_resentful"
+     },
+     {
+      "name": "disloyal",
+      "weight": "ib_inf_rival_weigh_disloyal"
+     },
+     {
+      "name": "loyal",
+      "weight": "ib_inf_rival_weigh_not_loyal",
+      "against": true
+     },
+     {
+      "name": "made",
+      "weight": "ib_inf_rival_weigh_not_made",
+      "against": true
+     }
+    ],
+    "accept": [
+     {
+      "name": "always",
+      "weight": "ib_inf_rival_accept_always"
+     },
+     {
+      "name": "greed",
+      "weight": "ib_inf_rival_accept_greed"
+     },
+     {
+      "name": "resentful",
+      "weight": "ib_inf_rival_accept_resentful"
+     },
+     {
+      "name": "disloyal",
+      "weight": "ib_inf_rival_accept_disloyal"
+     },
+     {
+      "name": "heat",
+      "weight": "ib_inf_rival_accept_heat"
+     },
+     {
+      "name": "ambition",
+      "weight": "ib_inf_rival_accept_ambition"
+     },
+     {
+      "name": "loyal",
+      "weight": "ib_inf_rival_accept_not_loyal",
+      "against": true
+     },
+     {
+      "name": "afraid",
+      "weight": "ib_inf_rival_accept_not_afraid",
+      "against": true
+     }
+    ]
+   },
+   "report": {
+    "rate": "ib_inf_report_rate",
+    "crime_kind": "racket",
+    "report_days": "hap_report_days",
+    "terms": [
+     {
+      "name": "always",
+      "weight": "ib_inf_report_always"
+     },
+     {
+      "name": "greed",
+      "weight": "ib_inf_report_greed"
+     },
+     {
+      "name": "leverage",
+      "weight": "ib_inf_report_leverage"
+     },
+     {
+      "name": "disloyal",
+      "weight": "ib_inf_report_disloyal"
+     },
+     {
+      "name": "resentful",
+      "weight": "ib_inf_report_resentful"
+     },
+     {
+      "name": "loyal",
+      "weight": "ib_inf_report_not_loyal",
+      "against": true
+     }
+    ]
+   },
+   "exposed": {
+    "rate": "ib_inf_exposed_rate",
+    "respond_delay": "hap_respond_delay",
+    "terms": [
+     {
+      "name": "always",
+      "weight": "ib_inf_exposed_always"
+     },
+     {
+      "name": "greed",
+      "weight": "ib_inf_exposed_greed"
+     },
+     {
+      "name": "afraid",
+      "weight": "ib_inf_exposed_not_afraid",
+      "against": true
+     }
+    ]
+   }
   }
  },
  "temperament": {

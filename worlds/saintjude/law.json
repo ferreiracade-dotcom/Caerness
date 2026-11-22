@@ -666,6 +666,36 @@
     "why": "Per review of an open case, the chance the work puts a name to the crime, times the agency's effort (a case is reviewed about every two weeks and closed after three months)."
    }
   },
+  "sweep": {
+   "why": "A killing the police take hard brings a sweep (B12f): a pressure from the report (how public, how hot the outfits, how much the agency can do, an officer killed), then a number of men around a mean the pressure raises, picked by how close each stands to the killer. The men are held a few days and a joint case names them as co-defendants. Unsourced; the Bureau and the SJPD did sweep after a killing that made the papers (bible Part II 6, 7).",
+   "kinds": [
+    "homicide"
+   ],
+   "conspiracy_kind": "racket",
+   "bias": -4.5,
+   "weights": {
+    "publicity": 2.5,
+    "heat": 1.5,
+    "capacity": 1.0,
+    "officer_victim": 2.0,
+    "organised": 0.5
+   },
+   "men": {
+    "base": 1.5,
+    "per_publicity": 4.0,
+    "per_heat": 3.0
+   },
+   "pick": {
+    "base": 0.2,
+    "same_unit": 1.5,
+    "offender_org": 0.8,
+    "inducted": 0.5
+   },
+   "hold_days": {
+    "median": 3,
+    "sigma": 0.6
+   }
+  },
   "arrest": {
    "evidence": {
     "base": 0.3,

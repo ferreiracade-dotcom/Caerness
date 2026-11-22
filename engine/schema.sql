@@ -5130,3 +5130,71 @@ CREATE TABLE IF NOT EXISTS sentences (
 CREATE INDEX IF NOT EXISTS idx_sentences_release ON sentences(status, earliest_release_day);
 CREATE INDEX IF NOT EXISTS idx_sentences_actor ON sentences(actor_id, status);
 CREATE INDEX IF NOT EXISTS idx_case_dispositions_case ON case_dispositions(case_id);
+
+-- Schema 120 (what the families can build together): councils, debts between organisations, men who turn informant, absorptions.
+-- Nothing here is capped; a council exists only because heads weighed it, and ends when they weigh it away.
+CREATE TABLE IF NOT EXISTS org_councils (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    formed_day INTEGER NOT NULL,
+    ended_day INTEGER,
+    end_reason TEXT,
+    standing REAL NOT NULL DEFAULT 0,
+    updated_day INTEGER NOT NULL DEFAULT 0,
+    convener_org INTEGER,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS org_council_seats (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    council_id INTEGER NOT NULL REFERENCES org_councils(id) ON DELETE CASCADE,
+    org_actor_id INTEGER NOT NULL,
+    joined_day INTEGER NOT NULL,
+    left_day INTEGER,
+    left_reason TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_org_council_seats_org ON org_council_seats(org_actor_id, left_day);
+CREATE TABLE IF NOT EXISTS org_council_acts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    council_id INTEGER NOT NULL,
+    day INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    org_a INTEGER,
+    org_b INTEGER,
+    actor_id INTEGER,
+    standing_delta REAL NOT NULL DEFAULT 0,
+    note TEXT
+);
+CREATE TABLE IF NOT EXISTS org_debts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    creditor_org INTEGER NOT NULL,
+    debtor_org INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    paid REAL NOT NULL DEFAULT 0,
+    origin TEXT NOT NULL,
+    since_day INTEGER NOT NULL,
+    accrued_day INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',
+    debtor_actor_id INTEGER,
+    creditor_actor_id INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_org_debts_open ON org_debts(status, creditor_org, debtor_org);
+CREATE TABLE IF NOT EXISTS org_informers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    informer_actor_id INTEGER NOT NULL,
+    org_actor_id INTEGER NOT NULL,
+    turned_by_kind TEXT NOT NULL,
+    turned_by_id INTEGER,
+    since_day INTEGER NOT NULL,
+    ended_day INTEGER,
+    status TEXT NOT NULL DEFAULT 'active',
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_org_informers_status ON org_informers(status, org_actor_id);
+CREATE TABLE IF NOT EXISTS org_absorptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    absorber_org INTEGER NOT NULL,
+    absorbed_org INTEGER NOT NULL,
+    men INTEGER NOT NULL DEFAULT 0,
+    lines INTEGER NOT NULL DEFAULT 0,
+    how TEXT
+);

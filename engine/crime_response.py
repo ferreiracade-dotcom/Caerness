@@ -418,7 +418,8 @@ def _respond(conn: sqlite3.Connection, rid: int, day: int) -> None:
         score = _n(ev["base"]) + _n(ev["publicity"]) * pub / 100.0 + (_n(ev["offender_known"]) if offender is not None else 0.0) + _n(ev["effort"]) * effort + noise
         officer = case_officer(conn, prof, rid)
         bought = _bought(conn, prof, officer, actual, kind, pub, officer_victim, rid, day)
-        cid = _open_case(conn, prof, rid, kind, offender, victim, day, score, officer, {"effort": round(effort, 4), "bought": bool(bought)})
+        cid = _open_case(conn, prof, rid, kind, offender, victim, day, score, officer,
+                         {"effort": round(effort, 4), "bought": bool(bought), **({"co_defendants": meta["co_defendants"]} if meta.get("co_defendants") else {})})
         if bought:
             conn.execute("UPDATE law_enforcement_cases SET status='closed', closed_day=? WHERE id=?", (int(day), cid))
             m = json.loads(conn.execute("SELECT metadata_json FROM law_enforcement_cases WHERE id=?", (cid,)).fetchone()[0])
@@ -464,12 +465,24 @@ def _arrest(conn: sqlite3.Connection, rid: int, case_id: int, profile, offender:
     conn.execute("INSERT INTO custody(actor_id,case_id,agency_profile_id,kind,charge,since_day,until_day) VALUES (?,?,?,'held',?,?,NULL)",
                  (offender, case_id, int(profile["id"]), kind, int(day)))
     stage_day = bail_day if bail_day is not None else dispo
-    _set_case_meta(conn, case_id, stage="bail" if bail_day is not None else "disposition", bail_day=bail_day, disposition_day=dispo, arrest_day=int(day), arrested=offender)
+    with_him = []  # co-defendants on the one case: the men a sweep named with him are held on it as he is
+    for co in (_meta_of_case(conn, case_id).get("co_defendants") or []):
+        if int(co) != offender and _living(conn, co) and conn.execute("SELECT 1 FROM custody WHERE actor_id=? AND kind='held' AND case_id IS NOT NULL LIMIT 1", (int(co),)).fetchone() is None:
+            conn.execute("INSERT INTO custody(actor_id,case_id,agency_profile_id,kind,charge,since_day,until_day) VALUES (?,?,?,'held',?,?,NULL)", (int(co), case_id, int(profile["id"]), kind, int(day)))
+            with_him.append(int(co))
+    _set_case_meta(conn, case_id, stage="bail" if bail_day is not None else "disposition", bail_day=bail_day, disposition_day=dispo, arrest_day=int(day), arrested=offender, held_with=with_him)
     conn.execute("UPDATE law_enforcement_cases SET status='actionable', next_review_day=?, evidence_score=MAX(evidence_score,?) WHERE id=?",
                  (stage_day, float(conn.execute("SELECT evidence_score FROM law_enforcement_cases WHERE id=?", (case_id,)).fetchone()[0]), case_id))
     meta["arrest_day"] = int(day)
     conn.execute("UPDATE crime_reports SET status='arrest', metadata_json=? WHERE id=?", (json.dumps(meta, sort_keys=True), rid))
     _answer_arrest(conn, rid, case_id, offender, kind, int(day), float(meta.get("publicity") or 0.0))
+    for co in with_him:
+        _answer_arrest(conn, rid, case_id, co, kind, int(day), float(meta.get("publicity") or 0.0))
+
+
+def _meta_of_case(conn: sqlite3.Connection, case_id: int) -> dict:
+    row = conn.execute("SELECT metadata_json FROM law_enforcement_cases WHERE id=?", (int(case_id),)).fetchone()
+    return json.loads(row[0] or "{}") if row else {}
 
 
 def _answer_arrest(conn: sqlite3.Connection, rid: int, case_id: int, offender: int, kind: str, day: int, pub: float) -> None:
@@ -617,11 +630,11 @@ def _bail(conn: sqlite3.Connection, day: int) -> int:
         m = _meta(cs)
         if m.get("stage") != "bail":
             continue
-        a = int(m["arrested"])
-        conn.execute("UPDATE custody SET kind='bailed', until_day=? WHERE case_id=? AND actor_id=? AND kind='held'", (int(day), cs["id"], a))
+        for a in [int(m["arrested"]), *[int(x) for x in m.get("held_with") or []]]:
+            conn.execute("UPDATE custody SET kind='bailed', until_day=? WHERE case_id=? AND actor_id=? AND kind='held'", (int(day), cs["id"], a))
+            imposed(conn, a)  # he is out: looked at tomorrow
         _set_case_meta(conn, cs["id"], stage="disposition", bailed_day=int(day))
         conn.execute("UPDATE law_enforcement_cases SET next_review_day=? WHERE id=?", (int(m["disposition_day"]), cs["id"]))
-        imposed(conn, a)  # he is out: looked at tomorrow
         n += 1
     return n
 
@@ -652,11 +665,21 @@ def _facility(conn: sqlite3.Connection, profile, term: int) -> str:
 
 
 def _dispose(conn: sqlite3.Connection, cs, day: int) -> None:
+    """The case's disposition, once for the man arrested and once for each co-defendant held on it (his own plea, trial or walk)."""
+    m = _meta(cs)
+    lead = int(m["arrested"])
+    for a in [lead, *[int(x) for x in m.get("held_with") or []]]:
+        if a != lead and conn.execute("SELECT 1 FROM custody WHERE actor_id=? AND case_id=? AND kind IN ('held','bailed') LIMIT 1", (a, cs["id"])).fetchone() is None:
+            continue
+        _dispose_one(conn, cs, day, a, cs["id"] if a == lead else f"{cs['id']}:{a}")
+
+
+def _dispose_one(conn: sqlite3.Connection, cs, day: int, a: int, key) -> None:
     c = _cfg(conn)
     d = c["disposition"]
     m = _meta(cs)
     rep = conn.execute("SELECT * FROM crime_reports WHERE id=?", (m["crime_report_id"],)).fetchone()
-    a, kind, rid = int(m["arrested"]), rep["crime_kind"], int(rep["id"])
+    kind, rid = rep["crime_kind"], int(rep["id"])
     rmeta = _meta(rep)
     prof = conn.execute("SELECT * FROM law_enforcement_profiles WHERE id=?", (cs["profile_id"],)).fetchone()
     pub = publicity_of(conn, rid) / 100.0
@@ -671,7 +694,7 @@ def _dispose(conn: sqlite3.Connection, cs, day: int) -> None:
         return _n(spec["bias"]) + sum(_n(v) * x[k] for k, v in spec.items() if k in x)
 
     p_dismiss, p_trial, p_guilty = _logit(z(d["dismiss"])), _logit(z(d["trial"])), _logit(z(d["conviction"]))
-    rng = _rng(conn, "disposition", cs["id"])
+    rng = _rng(conn, "disposition", key)
     r1, r2, r3 = rng.random(), rng.random(), rng.random()
     if r1 < p_dismiss:
         kind_out, convicted = "dismissed", False
@@ -764,11 +787,84 @@ def next_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int 
         return None
 
 
+SWEEP_CURSOR = "crime_response_sweep_cursor"
+
+
+def _sweeps(conn: sqlite3.Connection, day: int, since: int) -> int:
+    """A killing the police take hard (a loud one, a hot group, an agency with the means) can bring a sweep: men tied to it, from the groups on
+    either side, are picked up together under one joint case with co-defendants. The weighing is the package's (`response.sweep`): a pressure
+    on the report, a number of men drawn around a mean that the pressure raises, and a pick weighted by how close each man stands to it. Nothing
+    caps the men taken or the sweeps in a year."""
+    sw = _cfg(conn).get("sweep")
+    if not sw:
+        return 0
+    from . import org_heat
+    kinds = list(sw["kinds"])
+    n = 0
+    for rep in conn.execute("SELECT * FROM crime_reports WHERE id>? AND crime_kind IN (%s) AND offender_actor_id IS NOT NULL ORDER BY id" % ",".join("?" * len(kinds)), (int(since), *kinds)).fetchall():
+        meta = _meta(rep)
+        if meta.get("source") == "sweep":
+            continue
+        offender, victim = int(rep["offender_actor_id"]), rep["victim_actor_id"]
+        involved = sorted(set(_orgs_of(conn, offender)) | set(_orgs_of(conn, victim)))
+        if not involved:
+            continue
+        pub = publicity_of(conn, int(rep["id"])) / 100.0
+        heat = max((org_heat.own_factor(conn, o, int(day)) for o in involved), default=0.0) if org_heat.enabled(conn) else 0.0
+        prof = conn.execute("SELECT * FROM law_enforcement_profiles WHERE id=?", (rep["agency_profile_id"],)).fetchone() if rep["agency_profile_id"] else None
+        cap = float(prof["capacity"]) / 100.0 if prof is not None else 0.0
+        x = {"publicity": pub, "heat": heat, "capacity": cap, "officer_victim": 1.0 if meta.get("officer_victim") else 0.0,
+             "organised": 1.0 if _orgs_of(conn, offender) and _orgs_of(conn, victim) else 0.0}
+        z = _n(sw["bias"]) + sum(_n(v) * x[k] for k, v in sw["weights"].items() if k in x)
+        if _rng(conn, "sweep", rep["id"]).random() >= _logit(z):
+            continue
+        rng = _rng(conn, "sweep_men", rep["id"])
+        want = _poisson(rng, _n(sw["men"]["base"]) + _n(sw["men"]["per_publicity"]) * pub + _n(sw["men"]["per_heat"]) * heat)
+        pool = []
+        offender_units = {int(r[0]) for r in conn.execute("SELECT unit_id FROM org_seats WHERE actor_id=? AND status='active' AND unit_id IS NOT NULL", (offender,))}
+        offender_orgs = set(_orgs_of(conn, offender))
+        for org in involved:
+            for r in conn.execute("SELECT actor_id,unit_id,inducted_day FROM org_seats WHERE org_actor_id=? AND status='active' ORDER BY actor_id", (org,)).fetchall():
+                a = int(r["actor_id"])
+                if a == offender or a == victim or not _living(conn, a) or conn.execute("SELECT 1 FROM custody WHERE actor_id=? AND kind='held' LIMIT 1", (a,)).fetchone():
+                    continue
+                w = (_n(sw["pick"]["base"]) + (_n(sw["pick"]["same_unit"]) if r["unit_id"] in offender_units else 0.0)
+                     + (_n(sw["pick"]["offender_org"]) if org in offender_orgs else 0.0) + (_n(sw["pick"]["inducted"]) if r["inducted_day"] is not None else 0.0))
+                pool.append((a, w))
+        taken: list[int] = []
+        while pool and len(taken) < want:
+            pick = rng.random() * sum(w for _, w in pool)
+            for i, (a, w) in enumerate(pool):
+                pick -= w
+                if pick < 0 or i == len(pool) - 1:
+                    taken.append(a)
+                    pool.pop(i)
+                    break
+        if not taken:
+            continue
+        lead, others = taken[0], taken[1:]
+        jr = open_report(conn, crime_kind=sw["conspiracy_kind"], day=int(day), offender_actor_id=lead, victim_actor_id=victim, location_id=rep["location_id"],
+                         metadata={"source": "sweep", "sweep_of": int(rep["id"]), "identified": True, "co_defendants": others})
+        jrow = conn.execute("SELECT * FROM crime_reports WHERE id=?", (jr,)).fetchone()
+        for a in taken:
+            if conn.execute("SELECT 1 FROM custody WHERE actor_id=? AND kind='held' LIMIT 1", (a,)).fetchone() is None:  # picked up for a few days (the arrest of the lead holds all of them on the case)
+                days = _lognormal_days(conn, {"default": sw["hold_days"]}, "default", "sweep_hold", f"{rep['id']}:{a}")
+                conn.execute("INSERT INTO custody(actor_id,kind,charge,since_day,until_day) VALUES (?,'held',?,?,?)", (a, "a sweep", int(day), int(day) + days))
+                _answer_arrest(conn, jr, int(jrow["case_id"] or 0), a, sw["conspiracy_kind"], int(day), pub * 100.0)
+            imposed(conn, a)
+        n += 1
+    return n
+
+
 def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dict:
     if not _cfg(conn):
         return {}
     ensure_tables(conn)
+    cur = conn.execute("SELECT value FROM engine_meta WHERE key=?", (SWEEP_CURSOR,)).fetchone()
+    since = int(cur[0]) if cur else int(conn.execute("SELECT COALESCE(MAX(id),0) FROM crime_reports").fetchone()[0])
     out = {"reports": _intake(conn, int(day))}
+    out["swept"] = _sweeps(conn, int(day), since)
+    conn.execute("INSERT INTO engine_meta(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (SWEEP_CURSOR, str(int(conn.execute("SELECT COALESCE(MAX(id),0) FROM crime_reports").fetchone()[0]))))
     out["envelopes_reopened"] = _void_envelopes(conn, int(day))
     out["reviewed"] = _reviews(conn, int(day))
     out["bailed"] = _bail(conn, int(day))

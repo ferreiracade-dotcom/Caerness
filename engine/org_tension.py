@@ -135,8 +135,10 @@ def on_killing(conn: sqlite3.Connection, killer: int, victim: int, victim_org: i
     d *= _v(conn, (data(conn).get("rank_scale") or {}).get("base"), 1.0) + _v(conn, (data(conn).get("rank_scale") or {}).get("rank"), 0.0) * rank
     if not sanctioned:
         d *= 1.0 + _raise(conn, "unsanctioned")
+    from . import org_council
     for k in sorted(int(x) for x in killer_orgs):
         add(conn, int(victim_org), k, "killing", d, day, actor=killer, victim=victim, note=str(role or ""))
+        org_council.on_killing(conn, int(victim_org), k, sanctioned, day)
 
 
 def on_answer(conn: sqlite3.Connection, a: int, b: int, name: str, day: int, *, actor: int | None = None, victim: int | None = None) -> None:
@@ -318,7 +320,8 @@ def factors(conn: sqlite3.Connection, voice: int, F: int, T: int, day: int) -> d
     pa, pb = _places(conn, F, day), _places(conn, T, day)
     own_weak = _head_weak(conn, own_head, day) if own_head != voice else 0.0
     guarded, loved = protection(conn, their_head)
-    f.update({"their_head_guarded": guarded, "their_head_loved": loved,
+    from . import org_council, org_informing
+    f.update({"council": org_council.bound_standing(conn, F, T, day), "informed": org_informing.informed(conn, F, T), "their_head_guarded": guarded, "their_head_loved": loved,
               "unbacked": 0.0 if own_head == voice else 1.0,  # a voice who is not his own head's has not yet his leave
               "heat": h, "heat_back": hb, "calm": 1.0 - h, "always": 1.0,
               "aggression": om._drive(conn, voice, "aggression"), "ambition": om._drive(conn, voice, "ambition"),
@@ -438,6 +441,9 @@ def _feasible(conn, spec: dict, voice: int, F: int, T: int, day: int) -> bool:
         return head_of(conn, T) is not None and _size(conn, T) < _size(conn, F) and _weekly_take(conn, T) > 0
     if do == "strike":
         return bool(_victims(conn, "anyone", voice, F, T, day))
+    if do in ("poach", "absorb"):
+        from . import org_dealings
+        return (org_dealings.feasible_poach if do == "poach" else org_dealings.feasible_absorb)(conn, voice, F, T, day)
     return False
 
 
@@ -612,6 +618,8 @@ def _do_levy(conn, voice, F, T, day, name, spec, f):
     if _rng(conn, "levy", F, T, day).random() < p:
         paid = ledger.transfer(conn, ("person", int(payer)), ("person", int(voice)), amount, flow_kind="tribute", purpose="protection", allow_partial=True) if amount > 0 else 0.0
         if paid > 0:
+            from . import org_dealings
+            org_dealings.owe(conn, F, T, amount - paid, "a levy he could only part pay", day)  # what he could not pay is owed
             add(conn, T, F, "levy_paid", -_v(conn, spec["ease"]), day, actor=voice)
             return {"summary": f"{_name(conn, payer)} paid {_name(conn, voice)} ${paid:,.0f} for protection."}
     add(conn, T, F, "levy_refused", _v(conn, spec["refuse"]), day, actor=voice)
@@ -710,7 +718,12 @@ def execute_strike(conn, plan: dict, day: int, *, sanctioned: bool) -> dict:
     """Carry out a planned strike: pick the man on the rung, then the method's way of reaching him. Everything is lethal through the
     existing hit machinery, so it can miss, wound, maim or kill; a gathering reaches everyone present."""
     from .outfit_choices import kill
+    from . import org_council
     F, T, voice, rung, method = int(plan["from"]), int(plan["to"]), int(plan["voice"]), plan["rung"], plan["method"]
+    verdict = org_council.strike_verdict(conn, plan, int(day), sanctioned)  # a table that binds both sides is asked first (it binds in honour; it can be defied at a price)
+    if verdict == "barred":
+        return {"summary": f"The table would not let {_name(conn, voice)} strike {_name(conn, head_of(conn, T))}'s people.", "barred": True}
+    sanctioned = sanctioned or verdict == "approved"
     rng = _rng(conn, "strike", F, T, day)
     md = (data(conn).get("methods") or {}).get(method) or {}
     team_n = int(round(_v(conn, md.get("team"), 1.0)))
@@ -906,7 +919,17 @@ def on_death(conn: sqlite3.Connection, victim: int, org: int, role: str | None, 
             add(conn, org, O, "funeral_missed", _v(conn, fd.get("missed_delta"), 0.0) * f["friendly"] * rank, day, actor=guest, victim=victim)
 
 
-_DO = {"levy": _do_levy, "ease": _do_ease, "sit_down": _do_sit_down, "slight": _do_slight, "press_ground": _do_press_ground, "squeeze": _do_squeeze, "strike": _do_strike}
+def _do_poach(*a):
+    from . import org_dealings
+    return org_dealings.do_poach(*a)
+
+
+def _do_absorb(*a):
+    from . import org_dealings
+    return org_dealings.do_absorb(*a)
+
+
+_DO = {"poach": _do_poach, "absorb": _do_absorb, "levy": _do_levy, "ease": _do_ease, "sit_down": _do_sit_down, "slight": _do_slight, "press_ground": _do_press_ground, "squeeze": _do_squeeze, "strike": _do_strike}
 
 for _kind, _fn in (("approve_strike", execute_approve), ("refuse_strike", execute_refuse), ("back_him", execute_back_him),
                    ("make_good", execute_make_good), ("give_him_up", execute_give_up)):
