@@ -468,9 +468,10 @@ def spread(conn, day: int) -> int:
         rival = 1.0 + (B.fig(conn, "rival_boost") if rs is not None and float(rs["resentment"]) >= 30 and float(c["valence"]) < 0 else 0.0)
         eff = _eff(conn, c, day)
         base = B.fig(conn, "tell_rate") * (0.3 + abs(float(c["valence"]))) * (1.0 + (B.fig(conn, "tell_bad_bonus") if float(c["valence"]) < 0 else 0.0)) * rival
-        for r in conn.execute("SELECT actor_b_id,familiarity FROM relationships WHERE actor_a_id=? AND familiarity>=?", (h, fam_min)).fetchall():
+        draw = B._rng(conn, "tell", c["id"], day)  # one generator per claim per week, a draw for each neighbour in id order (a generator per pair was 700k a year)
+        for r in conn.execute("SELECT actor_b_id,familiarity FROM relationships WHERE actor_a_id=? AND familiarity>=? ORDER BY actor_b_id", (h, fam_min)).fetchall():
             t = int(r["actor_b_id"])
-            if B._rng(conn, "tell", c["id"], t, day).random() >= base * (0.5 + float(r["familiarity"]) / 100.0):
+            if draw.random() >= base * (0.5 + float(r["familiarity"]) / 100.0):
                 continue
             if not B._alive(conn, t):
                 continue

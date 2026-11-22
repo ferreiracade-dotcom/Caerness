@@ -236,8 +236,10 @@ def _max_other_heat(conn: sqlite3.Connection, a: int, b: int, day: int) -> float
     t = _today(conn, day)
     if t["maxheat"] is None:
         m: dict = {}
-        for r in conn.execute("SELECT from_org,to_org,level FROM org_tension WHERE level>0").fetchall():
-            h = heat(conn, int(r[0]), int(r[1]), day)
+        half, scale = _half(conn), max(1e-9, _v(conn, data(conn).get("scale"), 1.0))  # what heat() works out, once, for every pair
+        for r in conn.execute("SELECT from_org,to_org,level,updated_day FROM org_tension WHERE level>0").fetchall():
+            lv = float(r[2]) if half <= 0 or day <= r[3] else float(r[2]) * 0.5 ** ((int(day) - int(r[3])) / half)
+            h = lv / (lv + scale)
             for o in (int(r[0]), int(r[1])):
                 m.setdefault(o, []).append((h, int(r[0]), int(r[1])))
         t["maxheat"] = m

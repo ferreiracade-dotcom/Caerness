@@ -150,8 +150,9 @@ def test_drivers(conn):
     for t in (teller_f, teller_r):
         for o in sol[10:50]:
             adjust_relationship(conn, t, o, day, familiarity_delta=50)
-    C.record(conn, s, "actor", teller_f, "he skims", "saw", 0.9, -0.5, 0, False)
-    C.record(conn, s, "actor", teller_r, "he skims on the side", "saw", 0.9, -0.5, 0, False)
+    for k in range(8):  # several claims each, so the comparison is of rates and not of one draw
+        C.record(conn, s, "actor", teller_f, f"he skims {k}", "saw", 0.9, -0.5, 0, False)
+        C.record(conn, s, "actor", teller_r, f"he skims on the side {k}", "saw", 0.9, -0.5, 0, False)
     with figs(tell_rate=0.2):
         n = C.spread(conn, day)
     told = lambda t: conn.execute("SELECT COUNT(*) FROM claims WHERE source_ref=? AND subject_actor_id=?", (t, s)).fetchone()[0]
