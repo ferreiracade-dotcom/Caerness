@@ -23,7 +23,7 @@ def test_schema_120_and_no_table_at_the_opening():
     w = open_world()
     c = w.conn
     from engine.db import SCHEMA_VERSION
-    assert SCHEMA_VERSION == 124
+    assert SCHEMA_VERSION == 125
     for t in ("org_councils", "org_council_seats", "org_council_acts", "org_debts", "org_informers", "org_absorptions"):
         assert c.execute("SELECT COUNT(*) FROM " + t).fetchone()[0] == 0, t  # nothing is forced to exist: a table, a debt, an informer come from what happens
 

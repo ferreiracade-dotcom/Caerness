@@ -5379,3 +5379,85 @@ CREATE TABLE IF NOT EXISTS depth_gaps (
     missing_json TEXT NOT NULL DEFAULT '[]',
     status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','built'))
 );
+
+-- BZ1 shared business layer: side tables keyed on the existing civilian_projects, buildings and org rows.
+-- Holder refs are ledger strings (person:<id>, business:<id>, institution:<id>).
+CREATE TABLE IF NOT EXISTS driver_readings (
+    subject_kind TEXT NOT NULL,
+    subject_id INTEGER NOT NULL,
+    day INTEGER NOT NULL,
+    factors_json TEXT NOT NULL,
+    total REAL NOT NULL,
+    PRIMARY KEY (subject_kind, subject_id)
+);
+CREATE TABLE IF NOT EXISTS venture_details (
+    project_id INTEGER PRIMARY KEY REFERENCES civilian_projects(id) ON DELETE CASCADE,
+    venture_kind TEXT NOT NULL,
+    backer_ref TEXT NOT NULL,
+    budget_usd REAL NOT NULL DEFAULT 0,
+    spent_usd REAL NOT NULL DEFAULT 0,
+    stage_key TEXT NOT NULL,
+    stage_started_day INTEGER NOT NULL,
+    stage_due_day INTEGER NOT NULL,
+    stalled_days INTEGER NOT NULL DEFAULT 0,
+    outcome TEXT,
+    outcome_reason TEXT,
+    payoff_json TEXT NOT NULL DEFAULT '{}',
+    next_due_day INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_venture_details_due ON venture_details(next_due_day);
+CREATE TABLE IF NOT EXISTS venture_parties (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL REFERENCES civilian_projects(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    party_ref TEXT NOT NULL,
+    term_id INTEGER
+);
+CREATE TABLE IF NOT EXISTS venture_approvals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL REFERENCES civilian_projects(id) ON DELETE CASCADE,
+    approval_kind TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','granted','refused','not_needed')),
+    decided_day INTEGER,
+    decided_by_actor_id INTEGER,
+    reason TEXT
+);
+CREATE TABLE IF NOT EXISTS place_details (
+    building_id INTEGER PRIMARY KEY REFERENCES buildings(id) ON DELETE CASCADE,
+    place_kind TEXT NOT NULL,
+    owner_ref TEXT NOT NULL,
+    legal_owner_ref TEXT,
+    landlord_ref TEXT,
+    rent_usd_30 REAL NOT NULL DEFAULT 0,
+    upkeep_usd_30 REAL NOT NULL DEFAULT 0,
+    enterprise_id INTEGER,
+    rent_term_id INTEGER,
+    next_due_day INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_place_details_due ON place_details(next_due_day);
+CREATE TABLE IF NOT EXISTS agreement_terms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ref_kind TEXT NOT NULL,
+    ref_id INTEGER,
+    debtor_ref TEXT NOT NULL,
+    creditor_ref TEXT NOT NULL,
+    amount_usd REAL NOT NULL CHECK (amount_usd >= 0),
+    every_days INTEGER,
+    next_due_day INTEGER NOT NULL,
+    grace_days INTEGER NOT NULL DEFAULT 0,
+    breach_word TEXT NOT NULL,
+    purpose TEXT NOT NULL,
+    missed_count INTEGER NOT NULL DEFAULT 0,
+    owed_usd REAL NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','ended','breached','orphaned')),
+    created_day INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_agreement_terms_due ON agreement_terms(status, next_due_day);
+CREATE TABLE IF NOT EXISTS agreement_breaches (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    term_id INTEGER NOT NULL REFERENCES agreement_terms(id),
+    day INTEGER NOT NULL,
+    path TEXT NOT NULL,
+    owed_usd REAL NOT NULL,
+    effect_json TEXT NOT NULL DEFAULT '{}'
+);

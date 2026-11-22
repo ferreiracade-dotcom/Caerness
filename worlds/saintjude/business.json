@@ -1,0 +1,79 @@
+{
+ "basis": {
+  "seasonality": "The bible (IV 3.8) gives dated business weather, not monthly curves. These monthly multipliers are Design estimates: hospitality peaks in the holiday months and sags in the cold, retail has the December rush, construction stops in the hard winter, haulage follows the harvest and holiday freight.",
+  "shocks": "Windows and sectors from bible IV 3.8 (business weather). The multipliers are Design estimates; the Regulation Q end date is to verify.",
+  "approval_kinds": "Who decides what gets built or opened, from bible I 4.3 (Licensing Board, State ABC Board, Zoning Board, Buildings Department). Politics decides them later.",
+  "venture_kinds": "Design estimates of stage lengths and cost shares for a small opening, a build or refit, and a bid.",
+  "place_kinds": "Upkeep dollars per 30 days are Design estimates at 1975 prices.",
+  "breach_words": "How a missed term turns into trouble, by the kind of parties."
+ },
+ "assumption": {
+  "seasonality": true,
+  "shocks": true,
+  "approval_kinds": false,
+  "venture_kinds": true,
+  "place_kinds": true,
+  "breach_words": true
+ },
+ "extra_sectors": ["banking"],
+ "seasonality": {
+  "hospitality": [0.92, 0.94, 0.98, 1.0, 1.04, 1.08, 1.1, 1.08, 1.0, 0.98, 1.0, 1.12],
+  "retail": [0.88, 0.9, 0.96, 1.0, 1.02, 1.0, 0.98, 1.0, 1.02, 1.04, 1.1, 1.3],
+  "construction": [0.6, 0.65, 0.85, 1.05, 1.15, 1.2, 1.2, 1.2, 1.15, 1.05, 0.85, 0.65],
+  "logistics": [0.9, 0.92, 0.98, 1.0, 1.02, 1.0, 0.98, 1.02, 1.06, 1.1, 1.08, 1.12]
+ },
+ "shocks": [
+  {"name": "1975 recession and municipal austerity", "from": "1975-01-01", "to": "1976-12-31",
+   "sectors": {"retail": 0.88, "construction": 0.8, "hospitality": 0.95}, "source": "bible IV 3.8: recession, 1975 to 1977, strong, small owners, retail, construction"},
+  {"name": "Very high interest rates", "from": "1979-01-01", "to": "1983-12-31",
+   "sectors": {"construction": 0.75, "retail": 0.92, "trade": 0.92}, "source": "bible IV 3.8: very high interest rates, 1979 to 1983, strong, developers, small firms"},
+  {"name": "Disco boom and bust", "from": "1977-01-01", "to": "1979-12-31",
+   "sectors": {"entertainment": 1.1, "regulated_entertainment": 1.1}, "source": "bible IV 3.8: disco boom and bust, 1977 to 1979, moderate, the Strip's clubs"},
+  {"name": "Regulation Q ends for banks", "from": "1980-03-31", "to": null,
+   "sectors": {"banking": 0.95}, "source": "Depository Institutions Deregulation and Monetary Control Act, March 1980 (verify)"}
+ ],
+ "approval_kinds": ["liquor_licence", "building_permit", "zoning_variance", "occupancy", "entertainment_licence"],
+ "venture_kinds": {
+  "open_business": {
+   "stages": [
+    {"key": "fit_out", "days": 45, "cost_share": 0.7, "approvals": ["building_permit"], "driver_sector": "construction"},
+    {"key": "licence", "days": 30, "cost_share": 0.1, "approvals": ["liquor_licence", "occupancy"], "driver_sector": "hospitality"},
+    {"key": "open_doors", "days": 15, "cost_share": 0.2, "approvals": [], "driver_sector": "hospitality"}
+   ],
+   "stall_days": 60,
+   "payoff": {"kind": "none"}
+  },
+  "build_or_refit": {
+   "stages": [
+    {"key": "plans", "days": 30, "cost_share": 0.1, "approvals": ["zoning_variance", "building_permit"], "driver_sector": "construction"},
+    {"key": "works", "days": 90, "cost_share": 0.8, "approvals": [], "driver_sector": "construction"},
+    {"key": "sign_off", "days": 20, "cost_share": 0.1, "approvals": ["occupancy"], "driver_sector": "construction"}
+   ],
+   "stall_days": 90,
+   "payoff": {"kind": "none"}
+  },
+  "bid_contract": {
+   "stages": [
+    {"key": "bid", "days": 30, "cost_share": 1.0, "approvals": [], "driver_sector": "construction"}
+   ],
+   "stall_days": 30,
+   "payoff": {"kind": "none"}
+  }
+ },
+ "place_kinds": {
+  "storefront": {"building_kind": "shop", "upkeep_usd_30": 300, "decay_per_30_unpaid": 6, "base_capacity": 40},
+  "bar_room": {"building_kind": "shop", "upkeep_usd_30": 350, "decay_per_30_unpaid": 6, "base_capacity": 55},
+  "warehouse": {"building_kind": "warehouse", "upkeep_usd_30": 500, "decay_per_30_unpaid": 4, "base_capacity": 70},
+  "tenement": {"building_kind": "residence", "upkeep_usd_30": 600, "decay_per_30_unpaid": 5, "base_capacity": 60},
+  "office_floor": {"building_kind": "hall", "upkeep_usd_30": 450, "decay_per_30_unpaid": 4, "base_capacity": 45},
+  "garage": {"building_kind": "workshop", "upkeep_usd_30": 250, "decay_per_30_unpaid": 5, "base_capacity": 35},
+  "lot": {"building_kind": "other", "upkeep_usd_30": 60, "decay_per_30_unpaid": 2, "base_capacity": 20}
+ },
+ "breach_words": {
+  "sue": "claim",
+  "street": "debt",
+  "grudge": "grudge",
+  "walk_out": "grudge",
+  "between_orgs": "tension"
+ }
+}
