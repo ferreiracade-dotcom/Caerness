@@ -597,7 +597,7 @@ def process_due_civilian(conn: sqlite3.Connection, day: int, *, event_logger: Ca
     sites = conn.execute("SELECT * FROM production_sites WHERE active=1 AND last_resolved_day<?", (day,)).fetchall()
     for row in sites:
         _resolve_production(conn, row, day)
-    projects = conn.execute("SELECT * FROM civilian_projects WHERE status='active' AND last_resolved_day<?", (day,)).fetchall()
+    projects = conn.execute("SELECT * FROM civilian_projects WHERE status='active' AND last_resolved_day<? AND id NOT IN (SELECT project_id FROM venture_details)", (day,)).fetchall()
     for row in projects:
         _resolve_project(conn, row, day, event_logger)
     auctions = conn.execute("SELECT id FROM auctions WHERE status='scheduled' AND scheduled_day<=? ORDER BY scheduled_day,id", (day,)).fetchall()
