@@ -50,8 +50,10 @@ def main() -> None:
             Path(str(db) + suffix).unlink(missing_ok=True)
         if p.stem in PACKAGED_OPENING_TESTS:
             shutil.copy2(ROOT / "data" / "caerness.db", db)
+        tmp = out / "tmp" / p.stem  # each test's own temp dir (mkdtemp lands here), removed when it ends
+        shutil.rmtree(tmp, ignore_errors=True); tmp.mkdir(parents=True)
         env = dict(os.environ, CAERNESS_TEST_MODE="1", CAERNESS_DB_PATH=str(db), CAERNESS_BACKUP_DIR=str(out / "backups" / p.stem),
-                   PYTHONIOENCODING="utf-8", PYTHONPATH=str(ROOT))
+                   PYTHONIOENCODING="utf-8", PYTHONPATH=str(ROOT), TMP=str(tmp), TEMP=str(tmp), TMPDIR=str(tmp))
         t0 = time.time()
         try:
             r = subprocess.run([sys.executable, str(p)], cwd=ROOT, env=env, capture_output=True, text=True,
@@ -64,6 +66,8 @@ def main() -> None:
         (out / f"{p.stem}.log").write_text(log, encoding="utf-8")
         for suffix in ("", "-wal", "-shm"):
             Path(str(db) + suffix).unlink(missing_ok=True)
+        shutil.rmtree(tmp, ignore_errors=True)
+        shutil.rmtree(out / "backups" / p.stem, ignore_errors=True)
         return {"test": p.stem, "status": status, "secs": round(time.time() - t0, 1)}
 
     with ThreadPoolExecutor(max_workers=max(1, a.jobs)) as pool:
