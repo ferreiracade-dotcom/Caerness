@@ -266,6 +266,20 @@ def resolve_business_cycle(conn: sqlite3.Connection, enterprise_id: int, day: in
         capital_factor = max(0.45, min(1.75, 0.60 + math.log1p(capital_base) / 8.0))
 
     gross = float(row["base_revenue_per_30"]) * capacity_scale * (utilization / 100.0) * time_scale * price_multiplier * capital_factor
+    drivers_note = ""
+    from . import business_data
+    if business_data.load(conn) is not None:  # a package with BZ1 business data: the shared drivers say what else moved this month
+        from . import business_drivers
+        cond_row = conn.execute("""SELECT MIN(b.condition) FROM place_details d JOIN buildings b ON b.id=d.building_id
+                                   WHERE d.enterprise_id=? AND b.status<>'destroyed'""", (enterprise_id,)).fetchone()
+        factors = business_drivers.reading(conn, "enterprise", enterprise_id, day, sector=row["sector"], location_id=row["location_id"],
+                                           quality=quality, condition=float(cond_row[0]) if cond_row and cond_row[0] is not None else 100.0,
+                                           demand_weights=weights)
+        business_drivers.record(conn, "enterprise", enterprise_id, day, factors)
+        # the cycle already weighs local demand and the firm's quality (demand_index); the other drivers multiply the month
+        applied = business_drivers.total({k: f for k, f in factors.items() if k not in ("demand", "form")})
+        gross *= applied
+        drivers_note = f"; drivers x{applied:.3f}"
 
     # Finance businesses additionally earn a bounded return from actual outstanding credit they carry.
     credit_income = 0.0
@@ -358,7 +372,7 @@ def resolve_business_cycle(conn: sqlite3.Connection, enterprise_id: int, day: in
                context_json,notes
            ) VALUES (?,?,?,?,?,?,?,?,?,?)""",
         (enterprise_id, day, elapsed, demand_index, utilization, gross, operating_cost, net,
-         json.dumps(ctx, sort_keys=True), f"Resolved as {row['archetype_key']}; credit income {credit_income:.2f}; unfunded operating deficit {unfunded_deficit:.2f} capitalized as generic liabilities."),
+         json.dumps(ctx, sort_keys=True), f"Resolved as {row['archetype_key']}; credit income {credit_income:.2f}; unfunded operating deficit {unfunded_deficit:.2f} capitalized as generic liabilities.{drivers_note}"),
     )
     return {
         "cycle_id": int(cur.lastrowid), "enterprise_id": enterprise_id, "enterprise": row["enterprise_name"],
@@ -440,6 +454,8 @@ def business_profile(conn: sqlite3.Connection, enterprise_id: int) -> dict[str, 
     out = dict(row)
     out["demand_weights"] = _loads(out.pop("demand_weights_json", "{}"))
     out["commercial_context"] = commercial_context(conn, out.get("location_id"))
+    from . import business_drivers
+    out["why"] = business_drivers.why(conn, "enterprise", enterprise_id)
     out["recent_cycles"] = [dict(r) for r in conn.execute(
         "SELECT id,day,elapsed_days,demand_index,utilization,gross_revenue,operating_cost,net_income,notes FROM business_cycles WHERE enterprise_id=? ORDER BY day DESC,id DESC LIMIT 12",
         (enterprise_id,),

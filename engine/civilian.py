@@ -575,6 +575,13 @@ def next_civilian_due_day(conn: sqlite3.Connection, after_day: int, end_day: int
     if b is not None: vals.append(int(b))
     h = next_household_life_due_day(conn, after_day, end_day)
     if h is not None: vals.append(int(h))
+    from . import agreement_terms, places, ventures
+    for nxt in (agreement_terms.next_terms_due_day, places.next_places_due_day, ventures.next_ventures_due_day):
+        try:
+            v = nxt(conn, after_day, end_day)
+        except sqlite3.OperationalError:  # a database made before the business layer's tables
+            v = None
+        if v is not None: vals.append(int(v))
     # Active civilian systems are updated at a coarse 30-day cadence; exact scheduled events still interrupt earlier.
     next_month = ((after_day // 30) + 1) * 30
     if next_month <= end_day and conn.execute(
@@ -597,7 +604,10 @@ def process_due_civilian(conn: sqlite3.Connection, day: int, *, event_logger: Ca
     sites = conn.execute("SELECT * FROM production_sites WHERE active=1 AND last_resolved_day<?", (day,)).fetchall()
     for row in sites:
         _resolve_production(conn, row, day)
-    projects = conn.execute("SELECT * FROM civilian_projects WHERE status='active' AND last_resolved_day<? AND id NOT IN (SELECT project_id FROM venture_details)", (day,)).fetchall()
+    try:
+        projects = conn.execute("SELECT * FROM civilian_projects WHERE status='active' AND last_resolved_day<? AND id NOT IN (SELECT project_id FROM venture_details)", (day,)).fetchall()
+    except sqlite3.OperationalError:  # no venture table yet: every project is a Caerness one
+        projects = conn.execute("SELECT * FROM civilian_projects WHERE status='active' AND last_resolved_day<?", (day,)).fetchall()
     for row in projects:
         _resolve_project(conn, row, day, event_logger)
     auctions = conn.execute("SELECT id FROM auctions WHERE status='scheduled' AND scheduled_day<=? ORDER BY scheduled_day,id", (day,)).fetchall()
@@ -607,6 +617,14 @@ def process_due_civilian(conn: sqlite3.Connection, day: int, *, event_logger: Ca
     _resolve_enterprise_status(conn, day)
     careers = review_careers(conn, day, event_logger=event_logger)
     shadow = _resolve_shadow_links(conn, day)
+    from . import agreement_terms, places, ventures
+    try:
+        agreement_terms.process_due_terms(conn, day)  # first: rent paid this day is seen by the place
+        places.process_due_places(conn, day)
+        ventures.process_due_ventures(conn, day)
+    except sqlite3.OperationalError:
+        if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='agreement_terms'").fetchone():
+            raise  # the tables are there: a real error
     businesses = process_due_businesses(conn, day)
     emergence = _review_latent_commercial_emergence(conn, day)
     deep = process_due_civilian_life(conn, day, event_logger=event_logger)

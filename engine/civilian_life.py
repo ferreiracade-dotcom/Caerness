@@ -228,7 +228,11 @@ def create_professional_membership(conn: sqlite3.Connection, actor_id: int, inst
 
 def _resolve_buildings(conn: sqlite3.Connection, day: int) -> int:
     count = 0
-    for b in conn.execute("SELECT * FROM buildings WHERE status IN ('active','strained','derelict') AND updated_day<?", (day,)).fetchall():
+    try:  # places (the business layer) keep their own upkeep and condition
+        rows = conn.execute("SELECT * FROM buildings WHERE status IN ('active','strained','derelict') AND updated_day<? AND id NOT IN (SELECT building_id FROM place_details)", (day,)).fetchall()
+    except sqlite3.OperationalError:
+        rows = conn.execute("SELECT * FROM buildings WHERE status IN ('active','strained','derelict') AND updated_day<?", (day,)).fetchall()
+    for b in rows:
         elapsed = day - int(b["updated_day"])
         burden = float(b["maintenance_burden"]) * elapsed / 30.0
         funded = False
