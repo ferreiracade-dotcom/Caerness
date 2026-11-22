@@ -20,6 +20,9 @@ PERIOD = 30
 _EPS = 1e-6
 
 
+ON_FINISH: list = []  # layers that hold a venture's result (the intake) register here: fn(conn, project_id, outcome, reason, day)
+
+
 def _state(v: sqlite3.Row) -> dict:
     return json.loads(v["payoff_json"] or "{}")
 
@@ -89,6 +92,8 @@ def _finish(conn: sqlite3.Connection, pid: int, outcome: str, reason: str | None
                  (outcome, reason, int(day), int(pid)))
     conn.execute("UPDATE civilian_projects SET status=?,last_resolved_day=? WHERE id=?",
                  ("completed" if outcome == "completed" else "failed", int(day), int(pid)))
+    for hook in ON_FINISH:
+        hook(conn, int(pid), outcome, reason, int(day))
 
 
 def _weakest(factors: dict) -> str:
@@ -129,7 +134,9 @@ def _event(conn: sqlite3.Connection, v: sqlite3.Row, E: int) -> None:
     need = max(0.0, float(v["budget_usd"]) * (prior + float(st["cost_share"]) * frac) - spent)
     pay = 0.0
     holder = ledger.parse_holder(backer, 0)
-    if need > _EPS and ledger.balance(conn, holder) > _EPS:
+    if state.get("prepaid"):  # the backer paid it all at the door (the intake): nothing more is drawn, and nothing can run dry
+        pay = need
+    elif need > _EPS and ledger.balance(conn, holder) > _EPS:
         pay = float(ledger.spend(conn, holder, need, purpose=f"venture {pid} stage {st['key']}", allow_partial=True) or 0.0)
     spent += pay
     state.pop("_stall_reason", None)

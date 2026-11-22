@@ -16,8 +16,8 @@ PAYOFF_KINDS = ("money", "place", "terms", "none")
 BUILDING_KINDS = ("residence", "workshop", "shop", "warehouse", "hall", "temple", "fortified_residence",
                   "public_building", "bridge", "garden", "estate_improvement", "other")
 _TOP = {"basis", "assumption", "extra_sectors", "seasonality", "shocks", "approval_kinds", "venture_kinds",
-        "place_kinds", "breach_words", "calibration"}
-_BLOCKS = {"seasonality", "shocks", "approval_kinds", "venture_kinds", "place_kinds", "breach_words", "calibration"}
+        "place_kinds", "breach_words", "calibration", "defaults"}
+_BLOCKS = {"seasonality", "shocks", "approval_kinds", "venture_kinds", "place_kinds", "breach_words", "calibration", "defaults"}
 _CALIBRATION = {"breach": ("tension_per_1000_usd", "creditor_resentment", "creditor_trust", "debtor_share"),
                 "venture_outcome": ("complete_at", "late_below"),
                 "place_condition": ("strained_below", "derelict_below")}
@@ -112,6 +112,16 @@ def validate(data: dict, *, source: str, sectors: set[str]) -> dict:
     for word, path in (data.get("breach_words") or {}).items():
         if path not in BREACH_PATHS:
             raise _bad(source, f"breach_words.{word}", path, f"is not one of {BREACH_PATHS}")
+    dflt = data.get("defaults") or {}
+    for key in dflt:
+        if key not in ("breach_word", "grace_days", "build_venture_kind"):
+            raise _bad(source, "defaults", key, "is not a default of this file")
+    if "breach_word" in dflt and dflt["breach_word"] not in (data.get("breach_words") or {}):
+        raise _bad(source, "defaults.breach_word", dflt["breach_word"], "is not in breach_words")
+    if "build_venture_kind" in dflt and dflt["build_venture_kind"] not in (data.get("venture_kinds") or {}):
+        raise _bad(source, "defaults.build_venture_kind", dflt["build_venture_kind"], "is not in venture_kinds")
+    if "grace_days" in dflt:
+        _number(source, "defaults.grace_days", dflt["grace_days"])
     for group, spec in (data.get("calibration") or {}).items():
         if group not in _CALIBRATION:
             raise _bad(source, "calibration", group, "is not a calibration group")
@@ -181,3 +191,8 @@ def calibration(conn: sqlite3.Connection, group: str) -> dict:
     if missing:
         raise BusinessDataError(f"business.json: calibration.{group}: {missing[0]!r} is missing")
     return spec
+
+
+def default(conn: sqlite3.Connection, key: str):
+    """A figure the package names for a proposal that did not say (breach word, grace days, the venture kind a built thing goes through)."""
+    return (_need(conn).get("defaults") or {}).get(key)

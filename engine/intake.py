@@ -57,6 +57,7 @@ class Shape:
 # ---- registry -----------------------------------------------------------------------------------------------------
 
 _REGISTERED: dict[str, Shape] = {}
+OWN_MONEY_TABLES: set[str] = set()  # backings whose money the layer behind them moves itself; the weekly held-thing tick leaves them alone
 
 
 def register_shape(shape: Shape) -> None:
@@ -407,3 +408,7 @@ def adopt_floor(conn, shape_name: str) -> int:
     if not open_left:
         conn.execute("UPDATE depth_gaps SET status='built' WHERE shape=?", (shape_name,))
     return n
+
+
+from . import intake_business  # noqa: E402  (registers the BZ1 makers; the module imports this one, so it comes last)
+intake_business.register()

@@ -73,6 +73,16 @@ def _resolve(conn: sqlite3.Connection, ref: str) -> str | None:
 
 # ---- terms ----
 
+def _say_unread(conn: sqlite3.Connection, term_id: int) -> None:
+    """A civil claim has no reader yet: if the term backs a held thing, the intake's gap list says so."""
+    try:
+        held = conn.execute("SELECT id FROM held_things WHERE backing_table='agreement_terms' AND backing_id=?", (int(term_id),)).fetchone()
+    except sqlite3.OperationalError:
+        return
+    from . import intake
+    intake.bump_gap(conn, "civil claim", "arrangement", int(held[0]) if held else 0, ["a reader for a civil claim"])
+
+
 def add_term(conn: sqlite3.Connection, *, ref_kind: str, ref_id: int | None, debtor_ref: str, creditor_ref: str,
              amount_usd: float, first_due_day: int, every_days: int | None, grace_days: int, breach_word: str,
              purpose: str, day: int) -> int:
@@ -201,5 +211,6 @@ def breach(conn: sqlite3.Connection, term_id: int, day: int) -> int:
         between_people("grudge between persons")
     else:  # claim: civil law is not built, so nothing reads this yet
         effect["unread"] = "civil claim"
+        _say_unread(conn, term_id)
     return int(conn.execute("INSERT INTO agreement_breaches(term_id,day,path,owed_usd,effect_json) VALUES (?,?,?,?,?)",
                             (int(term_id), int(day), path, owed, json.dumps(effect, sort_keys=True))).lastrowid)

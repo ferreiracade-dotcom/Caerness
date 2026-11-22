@@ -1,20 +1,88 @@
 {
   "shape_words": {
-    "holding": ["building", "property", "land", "house", "apartment", "car", "truck", "fleet", "boat", "plane", "pier", "lot", "stake", "share", "account", "warehouse"],
-    "arrangement": ["deal", "contract", "agreement", "partnership", "arrangement", "understanding", "promise", "lease", "marriage", "engagement", "pact"],
-    "custom": ["custom", "tradition", "truce", "feast", "standing rule", "ritual", "every year", "every sunday"]
+    "holding": [
+      "building",
+      "property",
+      "land",
+      "house",
+      "apartment",
+      "car",
+      "truck",
+      "fleet",
+      "boat",
+      "plane",
+      "pier",
+      "lot",
+      "stake",
+      "share",
+      "account",
+      "warehouse",
+      "garage",
+      "storefront",
+      "tenement",
+      "office"
+    ],
+    "arrangement": [
+      "deal",
+      "contract",
+      "agreement",
+      "partnership",
+      "arrangement",
+      "understanding",
+      "promise",
+      "lease",
+      "marriage",
+      "engagement",
+      "pact"
+    ],
+    "custom": [
+      "custom",
+      "tradition",
+      "truce",
+      "feast",
+      "standing rule",
+      "ritual",
+      "every year",
+      "every sunday"
+    ]
   },
   "readers": {
-    "money": ["earns", "income", "pays", "costs", "upkeep", "takes in", "profit"],
-    "heat": ["illegal", "police", "cops", "heat", "raid", "law"],
-    "knowledge": ["known", "talk", "word", "rumour", "everyone knows"],
-    "succession": ["inherit", "heir", "passes to", "will"]
+    "money": [
+      "earns",
+      "income",
+      "pays",
+      "costs",
+      "upkeep",
+      "takes in",
+      "profit"
+    ],
+    "heat": [
+      "illegal",
+      "police",
+      "cops",
+      "heat",
+      "raid",
+      "law"
+    ],
+    "knowledge": [
+      "known",
+      "talk",
+      "word",
+      "rumour",
+      "everyone knows"
+    ],
+    "succession": [
+      "inherit",
+      "heir",
+      "passes to",
+      "will"
+    ]
   },
   "tick": {
     "happening_week_rate": 0.05,
     "arrears_weeks_to_fail": 4,
-    "grow_share": 0.10,
-    "shrink_share": 0.10,
+    "grow_share": 0.1,
+    "shrink_share": 0.1,
     "illegal_weekly_investigative_heat": 0.05
   }
 }

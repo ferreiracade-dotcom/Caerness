@@ -6,7 +6,8 @@
   "venture_kinds": "Design estimates of stage lengths and cost shares for a small opening, a build or refit, and a bid.",
   "place_kinds": "Upkeep dollars per 30 days are Design estimates at 1975 prices.",
   "breach_words": "How a missed term turns into trouble, by the kind of parties.",
-  "calibration": "Calibration figures, not limits: how hard a missed term pushes, and where a stage's weighed reading turns from done to late to failed. Design estimates, reported and never tuned to hit a target."
+  "calibration": "Calibration figures, not limits: how hard a missed term pushes, and where a stage's weighed reading turns from done to late to failed. Design estimates, reported and never tuned to hit a target.",
+  "defaults": "What the intake uses when a proposal does not say: the breach word and grace of a bare deal, and the venture kind a built thing goes through."
  },
  "assumption": {
   "seasonality": true,
@@ -15,7 +16,8 @@
   "venture_kinds": true,
   "place_kinds": true,
   "breach_words": true,
-  "calibration": true
+  "calibration": true,
+  "defaults": true
  },
  "extra_sectors": [
   "banking"
@@ -293,5 +295,10 @@
   "grudge": "grudge",
   "walk_out": "grudge",
   "between_orgs": "tension"
+ },
+ "defaults": {
+  "breach_word": "street",
+  "grace_days": 14,
+  "build_venture_kind": "build_or_refit"
  }
 }

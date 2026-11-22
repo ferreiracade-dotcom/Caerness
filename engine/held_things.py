@@ -69,6 +69,9 @@ def _heat(conn, row, owner: int, day: int, tick: dict) -> None:
 
 def _pay(conn, row, owner: int, day: int) -> tuple[bool, float]:
     """Takings in, upkeep out. Returns (upkeep fully paid, income received)."""
+    from . import intake
+    if row["backing_table"] in intake.OWN_MONEY_TABLES:
+        return True, 0.0
     holder = ("person", owner)
     income = float(row["income_weekly"])
     upkeep = float(row["upkeep_weekly"])

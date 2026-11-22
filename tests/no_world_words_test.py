@@ -25,7 +25,7 @@ CAERNESS_TABLES = re.compile(r"underworld_(personnel|crews|organizations|leader_
 def scanned_files() -> list[Path]:
     files = [ROOT / "engine" / "orgs.py", ROOT / "engine" / "law_opening.py", ROOT / "engine" / "crime_response.py", ROOT / "connector" / "views.py",
              ROOT / "engine" / "bearing.py", ROOT / "engine" / "texture.py", ROOT / "engine" / "claims.py", ROOT / "engine" / "news_choices.py",
-             ROOT / "engine" / "business_data.py", ROOT / "engine" / "business_drivers.py", ROOT / "engine" / "agreement_terms.py", ROOT / "engine" / "places.py", ROOT / "engine" / "ventures.py"]
+             ROOT / "engine" / "business_data.py", ROOT / "engine" / "business_drivers.py", ROOT / "engine" / "agreement_terms.py", ROOT / "engine" / "places.py", ROOT / "engine" / "ventures.py", ROOT / "engine" / "intake_business.py"]
     files += sorted((ROOT / "engine").glob("org_*.py")) + sorted((ROOT / "engine").glob("outfit_*.py"))
     out: list[Path] = []
     for f in files:
