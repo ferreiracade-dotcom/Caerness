@@ -8982,6 +8982,136 @@
   "source": "unsourced",
   "note": "unsourced; How much the size of a fraud raises the chance it is caught (logged votes)."
  },
+ "member_base": {
+  "default": 0.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The base lean of a member toward yes."
+ },
+ "member_w_regard": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much his groups' regard for the sponsor leans a member."
+ },
+ "member_w_fit": {
+  "default": 1.2,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much an item that names his groups' grievances leans him to yes."
+ },
+ "member_w_line": {
+  "default": 1.5,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much his party's line on the sponsor leans him, times his loyalty."
+ },
+ "member_w_favour": {
+  "default": 0.6,
+  "range": null,
+  "unit": "logit per favour",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a favour he owes (or is owed) the sponsor leans him."
+ },
+ "member_w_money": {
+  "default": 0.5,
+  "range": null,
+  "unit": "logit per log dollar",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much money on him from the sponsor leans him."
+ },
+ "member_w_deal": {
+  "default": 2.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a vote he promised leans him."
+ },
+ "member_w_conscience": {
+  "default": 2.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a corrupt item leans a man of conscience (low pragmatism) away."
+ },
+ "member_noise_sd": {
+  "default": 0.3,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The spread of the random part of a member's lean (seeded by item and member)."
+ },
+ "tender_w_price": {
+  "default": 2.0,
+  "range": null,
+  "unit": "logit per log ratio",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a lower price than the average bid leans a member to a bid."
+ },
+ "tender_w_tie": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a bidder of the member's own party leans him."
+ },
+ "tender_w_favour": {
+  "default": 0.6,
+  "range": null,
+  "unit": "logit per favour",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much favours owed lean him to a bid."
+ },
+ "tender_w_kickback": {
+  "default": 1.5,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much an arrangement paying him from the bidder leans him to its bid."
+ },
   "male_share_law_official": {
    "default": 0.97,
    "range": null,

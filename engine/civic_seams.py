@@ -79,6 +79,8 @@ def ledger_entry(conn, a: int, b: int, *, kind: str, terms: dict, due_day: int |
 def ledger_breach(conn, entry_id: int, by: int, day: int, why: str) -> None:
     """Run BZ1's breach path for the entry (the path is its breach word's)."""
     from . import agreement_terms
+    # a promise with no money due yet is worth what it was for: the stake the breach path weighs
+    conn.execute("UPDATE agreement_terms SET owed_usd=amount_usd WHERE id=? AND owed_usd=0", (int(entry_id),))
     agreement_terms.breach(conn, int(entry_id), int(day))
     conn.execute("UPDATE agreement_terms SET status='breached' WHERE id=? AND status='active'", (int(entry_id),))
 

@@ -116,7 +116,7 @@
   "political_club": {
    "sphere": "politics",
    "head": "chair",
-   "unit_leader": null,
+   "unit_leader": null, "purse_roles": ["chair"],
    "courtship_scan": false,
    "lifecycle": {
     "succession": {
@@ -167,7 +167,7 @@
   "interest": {
    "sphere": "politics",
    "head": "president",
-   "unit_leader": null,
+   "unit_leader": null, "purse_roles": ["president"],
    "courtship_scan": false,
    "lifecycle": {
     "succession": {

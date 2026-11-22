@@ -2033,5 +2033,61 @@
   },
   "crime_kind": "election_fraud",
   "note": "Every weight is a design figure, never tuned to a result. Money and endorsements have no data source in P1 and are not drivers yet."
+ },
+ "item_kinds": {
+  "zoning_variance": {
+   "body": "office:zoning:board",
+   "effects": [
+    "zoning"
+   ]
+  },
+  "licence": {
+   "body": "office:licensing:board",
+   "effects": [
+    "licensing"
+   ]
+  },
+  "tender": {
+   "body": "office:works:board",
+   "effects": []
+  },
+  "budget": {
+   "body": "office:council:body",
+   "effects": [
+    "budget"
+   ]
+  },
+  "ordinance": {
+   "body": "office:council:body",
+   "effects": [
+    "ordinance"
+   ]
+  },
+  "note": "The body that decides each kind of item and the effect keys a passed item may write for business and the rest of the world to read."
+ },
+ "approval_bodies": {
+  "liquor_licence": "office:licensing:board",
+  "entertainment_licence": "office:licensing:board",
+  "building_permit": "office:zoning:board",
+  "zoning_variance": "office:zoning:board",
+  "occupancy": "office:zoning:board"
+ },
+ "member_drivers": {
+  "base": "member_base",
+  "regard": "member_w_regard",
+  "fit": "member_w_fit",
+  "line": "member_w_line",
+  "favour": "member_w_favour",
+  "money": "member_w_money",
+  "deal": "member_w_deal",
+  "conscience": "member_w_conscience",
+  "noise_sd": "member_noise_sd",
+  "tender": {
+   "price": "tender_w_price",
+   "tie": "tender_w_tie",
+   "favour": "tender_w_favour",
+   "kickback": "tender_w_kickback"
+  },
+  "note": "A member votes by a weighed lean, never a rule: his groups' regard for the sponsor, the fit of the item to their grievances, his party's line (by his loyalty), favours he owes, money on him, a vote he has promised, and his conscience (the opposite of his pragmatism) where the item is corrupt. Every weight is a design figure."
  }
 }
