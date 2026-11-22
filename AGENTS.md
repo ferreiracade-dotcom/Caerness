@@ -18,6 +18,8 @@ The repository folder and the `CAERNESS_*` environment variables, `data/caerness
 
 ## 2. Where work stands
 
+**BZ1 done (2026-11-22, schema 125):** the shared business layer (drivers, agreement terms, places, ventures, intake makers) runs on the Saint Jude clock from `worlds/saintjude/business.json`; Caerness has no business data and is untouched. Report: `.superpowers/sdd/2026-11-19-saintjude-org-core/task-BZ1-report.md`.
+
 ### Current direction (2026-10-16): play through Claude
 
 The owner now plays **only through the Claude apps (desktop and phone, Claude Pro) via a custom connector hosted on an Oracle Cloud Always Free VM; stdio on the PC remains for development**. Claude is the game master and prose; the engine is memory, plausibility and the living world. Requirements: `D:\Theology\Caerness_Agreed_Narrative_Design_Baseline_2026-10-16.md` (16 agreed areas) and `D:\Theology\Caerness_Repository_Audit_2026-10-16.md`.
