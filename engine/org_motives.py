@@ -172,7 +172,12 @@ def pressure(conn: sqlite3.Connection, actor_id: int, day: int, choice: str) -> 
         v = clamp01(reader(conn, int(actor_id), int(day)))
         parts[str(m["name"])] = v
         rest *= 1.0 - clamp01(_value(conn, m.get("weight"))) * v
-    return 1.0 - rest, parts
+    p = 1.0 - rest
+    for m in found[0]["rates"].get("against") or []:  # what it would cost him: each counter-term takes its share off the pressure (never a cap)
+        reader = _READERS.get((choice, str(m["name"])))
+        if reader is not None:
+            p *= 1.0 - clamp01(_value(conn, m.get("weight"))) * clamp01(reader(conn, int(actor_id), int(day)))
+    return p, parts
 
 
 def weight_of(conn: sqlite3.Connection, actor_id: int, choice: str, name: str) -> float:
@@ -231,12 +236,16 @@ def weekly_chance(conn: sqlite3.Connection, actor_id: int, day: int, choice: str
     return base * pressure(conn, actor_id, day, choice)[0] * _temperament(conn, actor_id, found)
 
 
+_DRAW = random.Random()
+
+
 def _roll(conn: sqlite3.Connection, actor_id: int, day: int, stream: str) -> float:
     """The one point where a seeded draw is made for a man's choices (tests patch it). Same seed, actor, day, stream: same draw."""
     snap = _snap(conn)
     if snap.get("seed_day") != int(day):  # the seed is read once a day, not once per draw
         snap["seed_day"], snap["seed"] = int(day), run_seed(conn)
-    return random.Random(f"{snap['seed']}:org:{stream}:{int(actor_id)}:{int(day)}").random()
+    _DRAW.seed(f"{snap['seed']}:org:{stream}:{int(actor_id)}:{int(day)}")  # one generator, seeded afresh each time: the same draws as a new Random(seed) each time
+    return _DRAW.random()
 
 
 def _review_scale(conn: sqlite3.Connection, actor_id: int, day: int) -> float:

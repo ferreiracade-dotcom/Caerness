@@ -251,8 +251,10 @@ def hunt_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list
     if against:  # what going after him costs: heat on his own outfit and the city, his caution, what he thinks of the man
         from . import org_heat
         org = int(meta["org"]) if meta.get("org") is not None else None
+        from .org_tension import protection
+        kg, kl = protection(conn, killer)  # a killer with many men under him, loyal to him, is a costly man to go after
         hf = {"heat_own": org_heat.own_factor(conn, org, int(day)) if org is not None else 0.0, "heat_city": org_heat.city_factor(conn, int(day)),
-              "cautious": 1.0 - om._drive(conn, actor_id, "aggression"), "valued": kept / (lost + kept)}
+              "cautious": 1.0 - om._drive(conn, actor_id, "aggression"), "valued": kept / (lost + kept), "killer_guarded": kg, "killer_loved": kl}
         hunt *= 1.0 - _against(conn, against, hf)
     payload = {"killer": killer, "org": meta.get("org")}
     return [

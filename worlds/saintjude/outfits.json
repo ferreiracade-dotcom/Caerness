@@ -1183,6 +1183,7 @@
  "rates": {
   "remove_superior": {
    "base_rate": "remove_superior_base_week",
+   "against": [{"name": "leader_guarded", "weight": "rm_against_guarded"}, {"name": "leader_loved", "weight": "rm_against_loved"}, {"name": "head_backs_leader", "weight": "rm_against_head_backs"}],
    "temperament": [
     {
      "trait": "aggression",
@@ -1413,7 +1414,7 @@
      {"name": "temper", "weight": "hap_k_settle_accept_temper", "against": true},
      {"name": "broken_peace", "weight": "hap_k_settle_accept_broken_peace", "against": true}
     ],
-    "hunt": {"against": [{"name": "heat_own", "weight": "ib_hunt_heat_own", "against": true}, {"name": "heat_city", "weight": "ib_hunt_heat_city", "against": true}, {"name": "cautious", "weight": "ib_hunt_cautious", "against": true}, {"name": "valued", "weight": "ib_hunt_valued", "against": true}]},
+    "hunt": {"against": [{"name": "heat_own", "weight": "ib_hunt_heat_own", "against": true}, {"name": "heat_city", "weight": "ib_hunt_heat_city", "against": true}, {"name": "cautious", "weight": "ib_hunt_cautious", "against": true}, {"name": "valued", "weight": "ib_hunt_valued", "against": true}, {"name": "killer_guarded", "weight": "ib_hunt_guarded", "against": true}, {"name": "killer_loved", "weight": "ib_hunt_loved", "against": true}]},
     "cost": {
      "lookback_days": "hap_k_cost_lookback_days",
      "lost_share_full": "hap_k_cost_lost_share_full",

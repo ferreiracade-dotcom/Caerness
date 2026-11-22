@@ -490,6 +490,36 @@ def appetite(conn, actor_id, day):
     return clamp01((_drive(conn, actor_id, "ambition") + float(seat["greed"])) / 2.0 * _drive(conn, actor_id, "risk_tolerance"))
 
 
+def _leader_of(conn, actor_id):
+    ctx = context(conn, actor_id, REMOVE)
+    return (None, None) if ctx is None else (ctx[2], ctx[3])
+
+
+def leader_guarded(conn, actor_id, day):
+    """Counter-term: the men who answer to his leader stand between him and anyone who means to kill him (org_tension.protection)."""
+    from .org_tension import protection
+    leader, _head = _leader_of(conn, actor_id)
+    return protection(conn, leader)[0] if leader is not None else 0.0
+
+
+def leader_loved(conn, actor_id, day):
+    """Counter-term: the men under his leader are loyal to him, so they would avenge him."""
+    from .org_tension import protection
+    leader, _head = _leader_of(conn, actor_id)
+    return protection(conn, leader)[1] if leader is not None else 0.0
+
+
+def head_backs_leader(conn, actor_id, day):
+    """Counter-term: the head trusts and respects the leader, so a man who takes him out unasked answers for it."""
+    leader, head = _leader_of(conn, actor_id)
+    if leader is None or head is None or head == leader:
+        return 0.0
+    r = _rel(conn, head, leader)
+    return 0.0 if r is None else clamp01((float(r["trust"]) + float(r["respect"])) / 200.0)
+
+
+for _name, _fn in (("leader_guarded", leader_guarded), ("leader_loved", leader_loved), ("head_backs_leader", head_backs_leader)):
+    org_motives.register_motive(REMOVE, _name, _fn)  # read only as counter-terms (rates.against), never as motives
 for _name, _fn in (("grievance", grievance), ("squeezed", squeezed), ("passed_over", passed_over), ("blocked_ambition", blocked_ambition),
                    ("fear", fear), ("leader_weak", leader_weak), ("outside_push", outside_push), ("revenge", revenge),
                    ("head_wants_it", head_wants_it)):

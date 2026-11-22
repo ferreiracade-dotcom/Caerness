@@ -571,14 +571,17 @@ def _victims(conn, rung: str, voice: int, F: int, T: int, day: int) -> list[int]
     return free([int(r[0]) for r in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' ORDER BY actor_id", (int(T),))])
 
 
-def _pick_victim(conn, vs: list[int], rng: random.Random, T: int, F: int, voice: int, day: int) -> int:
+def _pick_victim(conn, vs: list[int], rng: random.Random, T: int, F: int, voice: int, day: int) -> int | None:
     """One of the men on the rung. T's head is harder to get at than any of the others: his guards, the men who would avenge him and the
-    voice's own want of backing take a share off his weight (data `guard.cover`, the same blend as every other counter-term)."""
+    voice's own want of backing take a share off his weight (data `guard.cover`, the same blend as every other counter-term). When he is
+    the only man on the rung (the guilty man, or the orderer) the same share is the chance the strike gets near him at all; None when it does not."""
     head = head_of(conn, T)
-    if head is None or head not in vs or len(vs) == 1:
+    if head is None or head not in vs:
         return vs[rng.randrange(len(vs))]
     f = factors(conn, voice, F, T, day)
     reach = 1.0 - _against(conn, (data(conn).get("guard") or {}).get("cover") or [], f)
+    if len(vs) == 1:
+        return vs[0] if rng.random() < reach else None
     w = [reach if x == head else 1.0 for x in vs]
     return rng.choices(vs, weights=w, k=1)[0]
 
@@ -743,6 +746,8 @@ def execute_strike(conn, plan: dict, day: int, *, sanctioned: bool) -> dict:
         if not vs:
             return {"summary": "He found no one to hit."}
         victim = _pick_victim(conn, vs, rng, T, F, voice, day)
+        if victim is None:
+            return {"summary": f"{_name(conn, voice)}'s men could not get near him."}
         team = _team(conn, F, voice, team_n)
         if method == "found":
             for shooter in team:

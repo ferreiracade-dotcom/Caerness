@@ -134,7 +134,7 @@ _SWITCH_CACHE: dict[tuple, "WorldPackage"] = {}
 # each data file's parse, are worked out once per skip instead of once per call (the manifest stat was ~6% of a run).
 # Outside a skip every call still checks the file's mtime, so a test or tool that swaps a package or edits a data file
 # is read fresh.
-_PASS: dict = {"depth": 0, "pkg": {}, "data": {}}
+_PASS: dict = {"depth": 0, "pkg": {}, "data": {}, "memo": {}}
 
 
 @contextlib.contextmanager
@@ -147,6 +147,17 @@ def package_pass():
         if _PASS["depth"] == 0:
             _PASS["pkg"].clear()
             _PASS["data"].clear()
+            _PASS["memo"].clear()
+
+
+def pass_memo(conn, key: str, load):
+    """`load()` for something that does not change while a time skip runs (who the player is): read once per skip, fresh outside one."""
+    if _PASS["depth"] <= 0:
+        return load()
+    k = (id(conn), key)
+    if k not in _PASS["memo"]:
+        _PASS["memo"][k] = load()
+    return _PASS["memo"][k]
 
 
 def package_for(conn) -> "WorldPackage":

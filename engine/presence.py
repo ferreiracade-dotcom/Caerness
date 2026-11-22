@@ -110,83 +110,82 @@ def seed_presence_from_existing_state(conn: sqlite3.Connection, *, effective_day
     migration/current day and cite their basis. Explicit travel remains authoritative.
     """
     day = _current_day(conn) if effective_day is None else int(effective_day)
+    # One pass over the tables instead of three queries per character (this runs every few days over every character):
+    # the profiles that exist, the open habits, each character's enterprises and institutions are read once.
+    had_profile = {int(r[0]) for r in conn.execute("SELECT actor_id FROM actor_presence_profiles")}
+    open_habits = {(int(r[0]), int(r[1]), r[2], r[3], r[4]) for r in conn.execute(
+        "SELECT actor_id,location_id,habit_kind,basis_kind,basis_id FROM actor_presence_habits WHERE effective_to_day IS NULL")}
+    enterprises: dict[int, list[tuple[int, int]]] = {}
+    for r in conn.execute(
+            """SELECT e.id,e.location_id,e.owner_actor_id,ep.actor_id FROM civilian_enterprises e
+               LEFT JOIN enterprise_partners ep ON ep.enterprise_id=e.id AND ep.status='active'
+               WHERE e.status IN ('active','strained','insolvent') AND e.location_id IS NOT NULL ORDER BY e.id"""):
+        for who in {r[2], r[3]} - {None}:
+            enterprises.setdefault(int(who), [])
+            if (int(r[0]), int(r[1])) not in enterprises[int(who)]:
+                enterprises[int(who)].append((int(r[0]), int(r[1])))
+    institutions: dict[int, list[tuple[int, int]]] = {}
+    for r in conn.execute(
+            """SELECT im.member_actor_id,im.institution_actor_id,a.current_location_id FROM institution_memberships im
+               JOIN actors a ON a.id=im.institution_actor_id
+               WHERE im.status='active' AND a.current_location_id IS NOT NULL ORDER BY im.id"""):
+        institutions.setdefault(int(r[0]), []).append((int(r[1]), int(r[2])))
     made = 0
 
     def has_open_habit(actor_id: int, location_id: int, habit_kind: str, basis_kind: str | None, basis_id: int | None) -> bool:
-        return conn.execute(
-            """SELECT 1 FROM actor_presence_habits
-               WHERE actor_id=? AND location_id=? AND habit_kind=?
-                 AND basis_kind IS ? AND basis_id IS ? AND effective_to_day IS NULL
-               LIMIT 1""",
-            (actor_id, location_id, habit_kind, basis_kind, basis_id),
-        ).fetchone() is not None
+        return (actor_id, location_id, habit_kind, basis_kind, basis_id) in open_habits
+
+    def add(aid: int, loc: int, **kw) -> None:
+        add_presence_habit(conn, aid, loc, **kw)
+        open_habits.add((aid, loc, kw["habit_kind"], kw["basis_kind"], kw["basis_id"]))
 
     actors = conn.execute(
         """SELECT id,home_location_id,current_location_id FROM actors
            WHERE actor_type='character' AND status='active' ORDER BY id"""
     ).fetchall()
+    made = sum(1 for a in actors if int(a["id"]) not in had_profile)
+    # every active character's profile is set to the derived values in one statement; a row already equal is left alone
+    conn.execute(
+        """INSERT INTO actor_presence_profiles(actor_id,base_location_id,source_kind,confidence,effective_from_day,notes)
+           SELECT id,home_location_id,'migration',0.65,?,? FROM actors WHERE actor_type='character' AND status='active' ORDER BY id
+           ON CONFLICT(actor_id) DO UPDATE SET
+             base_location_id=COALESCE(excluded.base_location_id,actor_presence_profiles.base_location_id),
+             source_kind=excluded.source_kind,confidence=excluded.confidence,notes=excluded.notes
+           WHERE actor_presence_profiles.base_location_id IS NOT COALESCE(excluded.base_location_id,actor_presence_profiles.base_location_id)
+             OR actor_presence_profiles.source_kind IS NOT excluded.source_kind OR actor_presence_profiles.confidence IS NOT excluded.confidence
+             OR actor_presence_profiles.notes IS NOT excluded.notes""",
+        (day, "PRES-01 profile derived from existing present-day state; not a historical movement claim."),
+    )
     for actor in actors:
         aid = int(actor["id"])
-        existed = conn.execute("SELECT 1 FROM actor_presence_profiles WHERE actor_id=?", (aid,)).fetchone()
-        ensure_presence_profile(
-            conn, aid,
-            base_location_id=int(actor["home_location_id"]) if actor["home_location_id"] is not None else None,
-            source_kind="migration", confidence=0.65, effective_from_day=day,
-            notes="PRES-01 profile derived from existing present-day state; not a historical movement claim.",
-        )
-        if not existed:
-            made += 1
         if actor["home_location_id"] is not None:
             home_id = int(actor["home_location_id"])
             if not has_open_habit(aid, home_id, "home", "actor_home", aid):
-                add_presence_habit(
-                    conn, aid, home_id, habit_kind="home", weight=0.62,
+                add(aid, home_id, habit_kind="home", weight=0.62,
                     cadence_days=1, basis_kind="actor_home", basis_id=aid, source_kind="migration",
-                    confidence=0.9, effective_from_day=day,
-                )
+                    confidence=0.9, effective_from_day=day)
         # current_location_id is a broad legacy anchor, not exact co-presence.
         if actor["current_location_id"] is not None and actor["current_location_id"] != actor["home_location_id"]:
             current_id = int(actor["current_location_id"])
             if not has_open_habit(aid, current_id, "legacy_anchor", "legacy_current_location", aid):
-                add_presence_habit(
-                    conn, aid, current_id, habit_kind="legacy_anchor", weight=0.18,
+                add(aid, current_id, habit_kind="legacy_anchor", weight=0.18,
                     cadence_days=7, basis_kind="legacy_current_location", basis_id=aid, source_kind="migration",
                     confidence=0.45, effective_from_day=day,
-                    notes="Legacy current_location imported only as a low-confidence habitual anchor.",
-                )
+                    notes="Legacy current_location imported only as a low-confidence habitual anchor.")
 
         # Explicit enterprise ties are legitimate present-day work anchors.
-        for ent in conn.execute(
-            """SELECT e.id,e.location_id FROM civilian_enterprises e
-               LEFT JOIN enterprise_partners ep ON ep.enterprise_id=e.id AND ep.actor_id=? AND ep.status='active'
-               WHERE e.status IN ('active','strained','insolvent') AND e.location_id IS NOT NULL
-                 AND (e.owner_actor_id=? OR ep.actor_id=?)""",
-            (aid, aid, aid),
-        ).fetchall():
-            ent_id = int(ent["id"])
-            ent_loc = int(ent["location_id"])
+        for ent_id, ent_loc in enterprises.get(aid, ()):
             if not has_open_habit(aid, ent_loc, "work", "enterprise", ent_id):
-                add_presence_habit(
-                    conn, aid, ent_loc, habit_kind="work", weight=0.74, cadence_days=2,
+                add(aid, ent_loc, habit_kind="work", weight=0.74, cadence_days=2,
                     basis_kind="enterprise", basis_id=ent_id, source_kind="derived", confidence=0.85,
-                    effective_from_day=day,
-                )
+                    effective_from_day=day)
 
         # Institution membership can create a weaker institutional anchor if that institution has a location.
-        for inst in conn.execute(
-            """SELECT im.institution_actor_id,a.current_location_id FROM institution_memberships im
-               JOIN actors a ON a.id=im.institution_actor_id
-               WHERE im.member_actor_id=? AND im.status='active' AND a.current_location_id IS NOT NULL""",
-            (aid,),
-        ).fetchall():
-            inst_id = int(inst["institution_actor_id"])
-            inst_loc = int(inst["current_location_id"])
+        for inst_id, inst_loc in institutions.get(aid, ()):
             if not has_open_habit(aid, inst_loc, "institution", "institution", inst_id):
-                add_presence_habit(
-                    conn, aid, inst_loc, habit_kind="institution", weight=0.34, cadence_days=7,
+                add(aid, inst_loc, habit_kind="institution", weight=0.34, cadence_days=7,
                     basis_kind="institution", basis_id=inst_id, source_kind="derived",
-                    confidence=0.65, effective_from_day=day,
-                )
+                    confidence=0.65, effective_from_day=day)
     return made
 
 

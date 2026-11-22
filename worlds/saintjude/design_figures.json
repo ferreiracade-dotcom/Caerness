@@ -12808,6 +12808,56 @@
    "source": "unsourced",
    "note": "unsourced; Counter-term: the law's attention to the city counts against going after a man of his own. Design proposal. (B12e: engine/org_tension.py)"
   },
+  "rm_against_guarded": {
+   "default": 0.7,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: a unit leader with many men under him is hard to take out. Design proposal. (B13d)"
+  },
+  "rm_against_loved": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: a leader whose men are loyal will be avenged. Design proposal. (B13d)"
+  },
+  "rm_against_head_backs": {
+   "default": 0.5,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: a leader the head trusts and respects is not removed unasked. Design proposal. (B13d)"
+  },
+  "ib_hunt_guarded": {
+   "default": 0.4,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: a killer with many men under him is hard to hunt. Design proposal. (B13d)"
+  },
+  "ib_hunt_loved": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Counter-term: a killer whose men are loyal will be avenged. Design proposal. (B13d)"
+  },
   "ib_hunt_cautious": {
    "default": 0.25,
    "range": null,

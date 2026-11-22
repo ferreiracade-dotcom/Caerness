@@ -291,7 +291,8 @@ def _review_actor(conn: sqlite3.Connection, profile: sqlite3.Row, day: int) -> N
 
     # The configured player is not an autonomous NPC. Passive/background state can still
     # advance with world time, but the engine must never choose the player's intentions.
-    player_row = conn.execute("SELECT player_actor_id FROM player_state WHERE id=1").fetchone()
+    from .world_package import pass_memo
+    player_row = pass_memo(conn, "player_actor", lambda: conn.execute("SELECT player_actor_id FROM player_state WHERE id=1").fetchone())
     if player_row and player_row[0] is not None and int(player_row[0]) == actor_id:
         conn.execute(
             "UPDATE simulation_profiles SET last_review_day=?,next_review_day=? WHERE actor_id=?",

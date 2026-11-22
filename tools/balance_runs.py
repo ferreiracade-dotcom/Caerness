@@ -82,6 +82,7 @@ def report(days: int, seed: int | None, keep_db: str = "") -> dict:
         import shutil
         shutil.copyfile(conn.execute("PRAGMA database_list").fetchone()[2], keep_db)
     print(f"seed {seed}: simulation done, reading the figures", file=sys.stderr, flush=True)
+    t_read = time.time()
     years = max(1, round(days / 365))
     out: dict = {"days": days, "seed": seed, "wall_s": round(wall, 1)}
 
@@ -177,7 +178,7 @@ def report(days: int, seed: int | None, keep_db: str = "") -> dict:
     out["heads_killed"] = heads_killed
     from tools.law_stats import law_figures
     out["law"] = law_figures(conn)
-    print(f"seed {seed}: figures read", file=sys.stderr, flush=True)
+    print(f"seed {seed}: figures read in {time.time() - t_read:.0f}s", file=sys.stderr, flush=True)
     out["calibration"] = {"mob_killings_per_year": round(len(mob) / years, 1), "killings_across_per_year": round(out["killings_across_outfits"] / years, 1)}
     return out
 

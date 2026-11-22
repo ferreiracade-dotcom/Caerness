@@ -591,11 +591,24 @@ def _process_disability_adaptation(conn: sqlite3.Connection, day: int) -> int:
         _recalculate_profile(conn,aid,day)
     return changed
 
+def _has_mortality_audit(conn: sqlite3.Connection) -> bool:
+    """Whether the audit table exists: once seen it stays (a table is not dropped under a running connection), so the schema is asked once."""
+    if getattr(conn, "_mortality_audit", False):
+        return True
+    found = conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='mortality_audit'").fetchone() is not None
+    if found:
+        try:
+            conn._mortality_audit = True
+        except AttributeError:
+            pass
+    return found
+
+
 def _natural_mortality_check(conn: sqlite3.Connection, actor_id: int, day: int, elapsed_days: int) -> bool:
     p=conn.execute("SELECT * FROM actor_health_profiles WHERE actor_id=?",(actor_id,)).fetchone()
     if not p:
         return False
-    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='mortality_audit'").fetchone():
+    if _has_mortality_audit(conn):
         prior=conn.execute("SELECT died FROM mortality_audit WHERE actor_id=? AND day=? AND source_kind='ordinary_health' ORDER BY id DESC LIMIT 1",(actor_id,day)).fetchone()
         if prior:
             return bool(prior[0])
@@ -613,7 +626,7 @@ def _natural_mortality_check(conn: sqlite3.Connection, actor_id: int, day: int, 
             annual=max(annual,min(0.45,(pressure/100.0)**3*0.55))
         prob=1.0-(1.0-annual)**(max(1,elapsed_days)/365.0)
         rng=random.Random(_seed(conn,actor_id*1009+day)); draw=rng.random(); died=draw<prob
-    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='mortality_audit'").fetchone():
+    if _has_mortality_audit(conn):
         conn.execute(
             """INSERT INTO mortality_audit(actor_id,day,age_years,annual_hazard,elapsed_days,draw,died,source_kind,metadata_json)
                VALUES (?,?,?,?,?,?,?,'ordinary_health',?)""",
