@@ -9112,6 +9112,96 @@
   "source": "unsourced",
   "note": "unsourced; How much an arrangement paying him from the bidder leans him to its bid."
  },
+ "nominee_w_loyalty": {
+  "default": 1.0,
+  "range": null,
+  "unit": "score per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a nominee's loyalty weighs with the sponsor putting him forward."
+ },
+ "nominee_w_standing": {
+  "default": 1.0,
+  "range": null,
+  "unit": "score per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much his standing in the sponsor's organisation weighs."
+ },
+ "nominee_w_debt": {
+  "default": 0.5,
+  "range": null,
+  "unit": "score per favour",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a favour he owes the sponsor weighs."
+ },
+ "nominee_noise_sd": {
+  "default": 0.3,
+  "range": null,
+  "unit": "score",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The random part of the sponsor's pick."
+ },
+ "appoint_base": {
+  "default": 1.5,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The appointer's base lean to accept a nominee."
+ },
+ "appoint_w_line": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much the nominee being of the appointer's side (or the other) leans him."
+ },
+ "appoint_w_press": {
+  "default": 0.5,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much the voters' regard for the nominee (the press) leans him."
+ },
+ "replace_base": {
+  "default": -0.5,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The base lean of a new appointer to replace an at-pleasure appointee."
+ },
+ "replace_w_line": {
+  "default": 2.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much an appointee of the other side leans a new appointer to replace him."
+ },
   "male_share_law_official": {
    "default": 0.97,
    "range": null,

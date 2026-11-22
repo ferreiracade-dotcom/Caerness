@@ -847,7 +847,8 @@
     "how": "appointed_by",
     "by": "office:state:governor"
    },
-   "seats": 1
+   "seats": 1,
+   "courtesy_block": true
   },
   "office:party:county-chairman": {
    "jurisdiction": "county",
@@ -2089,5 +2090,23 @@
    "kickback": "tender_w_kickback"
   },
   "note": "A member votes by a weighed lean, never a rule: his groups' regard for the sponsor, the fit of the item to their grievances, his party's line (by his loyalty), favours he owes, money on him, a vote he has promised, and his conscience (the opposite of his pragmatism) where the item is corrupt. Every weight is a design figure."
+ },
+ "appointment_drivers": {
+  "nominee": {
+   "loyalty": "nominee_w_loyalty",
+   "standing": "nominee_w_standing",
+   "debt": "nominee_w_debt",
+   "noise_sd": "nominee_noise_sd"
+  },
+  "appointer": {
+   "base": "appoint_base",
+   "line": "appoint_w_line",
+   "press": "appoint_w_press"
+  },
+  "replace": {
+   "base": "replace_base",
+   "line": "replace_w_line"
+  },
+  "note": "A sponsor puts forward a man he trusts (loyal, high in his organisation, in his debt); the appointer weighs the party line and the press; a home-county senator who holds a courtesy block vetoes a nominee hostile to him. A new appointer may replace an at-pleasure appointee by a weighed lean. All weights are design figures."
  }
 }
