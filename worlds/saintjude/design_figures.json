@@ -15811,7 +15811,57 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; the share of his purse a head keeps back when paying a debt, a redress or a client's share: he must go on passing shares down to the men who answer to him, so he does not empty it on a creditor. Design proposal. (B12g: engine/org_dealings.py)"
-  }
+  },
+ "corr_base": {
+  "default": -6.0,
+  "range": null,
+  "unit": "logit a week",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Baseline weekly chance a standing payment to an officeholder comes to light."
+ },
+ "corr_w_size": {
+  "default": 0.35,
+  "range": null,
+  "unit": "logit per log dollar a week",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a larger weekly payment raises the chance it comes to light."
+ },
+ "corr_w_ambition": {
+  "default": 1.2,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much an ambitious officer going after a higher office raises the chance he finds it."
+ },
+ "corr_w_press": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit per unit of ill regard",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much the electorate's ill regard of the payee raises the chance it comes to light."
+ },
+ "corr_ambition_scale": {
+  "default": 0.4,
+  "range": null,
+  "unit": "per rank step",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Scales the ambition of an officer toward a target by the target's office rank."
+ }
  },
  "pools": {
   "numbers_it": {

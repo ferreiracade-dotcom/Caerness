@@ -2108,5 +2108,30 @@
    "line": "replace_w_line"
   },
   "note": "A sponsor puts forward a man he trusts (loyal, high in his organisation, in his debt); the appointer weighs the party line and the press; a home-county senator who holds a courtesy block vetoes a nominee hostile to him. A new appointer may replace an at-pleasure appointee by a weighed lean. All weights are design figures."
+ },
+ "office_rank": {
+  "office:state:governor": 5,
+  "office:city-hall:mayor": 4,
+  "office:county-prosecutor:killbuck-county-prosecutor": 3,
+  "office:sjpd:police-commissioner": 3,
+  "office:council:body": 2,
+  "office:works:board": 2,
+  "office:zoning:board": 2,
+  "office:licensing:board": 2,
+  "office:state:senate-killbuck": 3,
+  "_default": 1
+ },
+ "corruption_drivers": {
+  "base": "corr_base",
+  "size": "corr_w_size",
+  "ambition": "corr_w_ambition",
+  "press": "corr_w_press",
+  "ambition_scale": "corr_ambition_scale",
+  "kinds": [
+   "kickback",
+   "retainer"
+  ],
+  "crime_kind": "bribery",
+  "investigator_office": "office:county-prosecutor:killbuck-county-prosecutor"
  }
 }

@@ -3745,6 +3745,15 @@
     ],
     "handful": [
      "man"
+    ],
+    "party": [
+     "treasurer",
+     "ward_leader",
+     "committeeman"
+    ],
+    "political_club": [
+     "officer",
+     "member"
     ]
    },
    "law": {
