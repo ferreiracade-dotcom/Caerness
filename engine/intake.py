@@ -229,3 +229,181 @@ def normalise(conn, me: int, kind: str, details: dict) -> Proposal:
         source=str(d["source"])[:200] if d.get("source") else None, real_date=str(d["real_date"])[:40] if d.get("real_date") else None,
         ready_in_days=int(ready) if isinstance(ready, (int, float)) and not isinstance(ready, bool) and ready > 0 else None,
         details=dict(d))
+
+
+# ---- the door -----------------------------------------------------------------------------------------------------
+
+_STOP = frozenset("a an the of for in on at to by with and or from is are was were his her their its my our your".split())
+_ENTITY_KEYS = (("actor_id", "actors"), ("enterprise_id", "civilian_enterprises"), ("outfit_id", "underworld_organizations"),
+                ("institution_actor_id", "actors"), ("rumour_id", "rumours"))
+
+
+def enabled(conn) -> bool:
+    return bool(_rules(conn))
+
+
+def _norm_name(s: str) -> str:
+    return " ".join(re.findall(r"[a-z0-9]+", str(s).lower()))
+
+
+def _gap_key(shape: str, kind_text: str, what: str) -> str:
+    words = [w for w in re.findall(r"[a-z0-9]+", (kind_text or what).lower()) if w not in _STOP][:3]
+    return shape + ":" + " ".join(words)
+
+
+def _check_facts(conn, p: Proposal, details: dict) -> None:
+    """Established facts: the living, the already-held, a place that exists. A refusal names the clash."""
+    from .player_operations import _living
+    for aid in dict.fromkeys((p.owner, *p.people, *p.knows)):
+        if not _living(conn, aid):
+            row = conn.execute("SELECT name FROM actors WHERE id=?", (aid,)).fetchone()
+            raise AuthoringRefused(f"{row[0] if row else 'actor ' + str(aid)} is dead")
+    loc = details.get("location_id")
+    if isinstance(loc, int) and not isinstance(loc, bool) and not conn.execute("SELECT 1 FROM locations WHERE id=?", (loc,)).fetchone():
+        raise AuthoringRefused("unknown location")
+    want = _norm_name(p.what)
+    for r in conn.execute("SELECT id,name FROM held_things WHERE owner_actor_id=? AND status IN ('building','active','failing')", (p.owner,)):
+        if _norm_name(r["name"]) == want:
+            raise AuthoringRefused(f"that is already held (held thing {r['id']})")
+
+
+def _readers(rules: dict, p: Proposal) -> tuple[list[str], list[str]]:
+    words = rules.get("readers", {})
+
+    def match(text: str) -> list[str]:
+        t = text.lower()
+        return [k for k, ws in words.items() if any(_has_word(t, w) for w in ws)]
+
+    readers: list[str] = []
+    unmapped: list[str] = []
+    for phrase in p.consequences:
+        hit = match(phrase)
+        if hit:
+            readers += [h for h in hit if h not in readers]
+        else:
+            unmapped.append(phrase)
+    for k in match(p.agenda):
+        if k not in readers:
+            readers.append(k)
+    if p.legality == "illegal" and "heat" not in readers:
+        readers.append("heat")
+    return readers, unmapped
+
+
+def bump_gap(conn, gap_key: str, shape: str, held_id: int, missing: list[str]) -> None:
+    day = _day(conn)
+    row = conn.execute("SELECT examples_json,missing_json FROM depth_gaps WHERE gap_key=?", (gap_key,)).fetchone()
+    if row is None:
+        conn.execute("INSERT INTO depth_gaps(gap_key,shape,count,first_day,last_day,examples_json,missing_json) VALUES (?,?,1,?,?,?,?)",
+                     (gap_key, shape, day, day, json.dumps([held_id]), json.dumps(list(missing))))
+        return
+    ex = (json.loads(row["examples_json"]) + [held_id])[-5:]  # a sample for the reader, not a limit on the count
+    miss = json.loads(row["missing_json"])
+    miss += [m for m in missing if m not in miss]
+    conn.execute("UPDATE depth_gaps SET count=count+1,last_day=?,examples_json=?,missing_json=?,status='open' WHERE gap_key=?",
+                 (day, json.dumps(ex), json.dumps(miss), gap_key))
+
+
+def _backing(out: dict) -> tuple[str | None, int | None]:
+    if out.get("backing_table") and out.get("backing_id") is not None:
+        return str(out["backing_table"]), int(out["backing_id"])
+    for key, table in _ENTITY_KEYS:
+        if key in out:
+            return table, int(out[key])
+    return None, None
+
+
+def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
+    """Everything lasting the GM narrates: shape, veto-only checks, the maker (if any), one held_things row, a gap when nothing
+    deeper exists. Raises AuthoringRefused for a refusal; all-or-nothing."""
+    d = details if isinstance(details, dict) else {}
+    rules = _rules(conn)
+    if not rules:  # a package without intake data keeps today's path exactly
+        return authoring._KINDS[authoring._kind_of(kind, d)](conn, int(me), d, str(call_id))
+    prior = conn.execute("SELECT id,name,shape,gap_key FROM held_things WHERE call_id=?", (str(call_id),)).fetchone()
+    if prior:  # a replay: one row, no second gap bump
+        return {"status": "created", "kind": prior["shape"], "held_thing_id": int(prior["id"]), "name": prior["name"],
+                "replayed": True, **({"gap": prior["gap_key"]} if prior["gap_key"] else {})}
+    shape = shape_for(conn, kind, d)
+    p = normalise(conn, int(me), kind, d)
+    _check_facts(conn, p, d)
+    day = _day(conn)
+    conn.execute("SAVEPOINT intake_take")
+    try:
+        scaled = None
+        income, upkeep = p.income_weekly, p.upkeep_weekly
+        if p.start_cost > 0:
+            try:
+                holder = ledger.parse_holder(p.from_ref, int(me), conn)
+            except ValueError as e:
+                raise AuthoringRefused(str(e), "input_gap") from e
+            if not ledger.can_draw(conn, int(me), holder):
+                raise AuthoringRefused("He has no right to draw on that purse")
+            spent = ledger.spend(conn, holder, p.start_cost, purpose=p.what, allow_partial=True)
+            if spent < p.start_cost - 1e-9:
+                share = spent / p.start_cost
+                income, upkeep = income * share, upkeep * share
+                scaled = "the money on hand covered only part of it"
+        out: dict[str, Any] = {}
+        if shape.make is not None:
+            out = dict(shape.make(conn, int(me), p, str(call_id)) or {})
+        table, bid = _backing(out)
+        readers, unmapped = _readers(rules, p)
+        name = (str(d.get("name") or "").strip() or str(out.get("name") or "") or p.what)[:80]
+        floor = shape.floor_backed and table is None
+        gap = _gap_key(shape.name, p.kind_text, p.what) if (floor or unmapped) else None
+        status = "building" if p.ready_in_days else "active"
+        hid = int(conn.execute(
+            """INSERT INTO held_things(name,kind_text,shape,backing_table,backing_id,owner_actor_id,people_json,location_id,place_text,from_ref,
+                 start_cost,income_weekly,upkeep_weekly,agenda,start_day,end_day,recurrence_days,legality,knows_json,consequences_json,
+                 readers_json,unmapped_json,source,real_date,depth,status,gap_key,call_id,created_day,updated_day)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'B',?,?,?,?,?)""",
+            (name, p.kind_text, shape.name, table, bid, p.owner, json.dumps(list(p.people)), p.location_id, p.place_text, p.from_ref,
+             p.start_cost, income, upkeep, p.agenda, p.start_day, p.end_day, p.recurrence_days, p.legality, json.dumps(list(p.knows)),
+             json.dumps(list(p.consequences)), json.dumps(readers), json.dumps(unmapped), p.source, p.real_date, status, gap,
+             str(call_id), day, day)).lastrowid)
+        if p.ready_in_days:
+            from . import commitments
+            commitments.record(conn, int(me), p.what, kind="intake", due_day=day + p.ready_in_days, details={"held_thing_id": hid})
+        if gap:
+            bump_gap(conn, gap, shape.name, hid, unmapped if unmapped else ["a deeper model for this shape"])
+        if p.knows:
+            from . import findings
+            for k in p.knows:
+                findings.tell(conn, k, [p.what], source=p.owner)
+    except BaseException:
+        conn.execute("ROLLBACK TO SAVEPOINT intake_take")
+        conn.execute("RELEASE SAVEPOINT intake_take")
+        raise
+    conn.execute("RELEASE SAVEPOINT intake_take")
+    out.update({"status": "scaled_down" if scaled else "created", "kind": shape.name, "held_thing_id": hid, "name": name})
+    if scaled:
+        out["scaled"] = scaled
+    if gap:
+        out["gap"] = gap
+    return out
+
+
+def adopt_floor(conn, shape_name: str) -> int:
+    """Re-run the now-registered maker for every active floor row of a shape; the row gains its backing and loses its gap."""
+    shape = next((s for s in shapes(conn) if s.name == shape_name), None)
+    if shape is None or shape.make is None:
+        return 0
+    n = 0
+    for r in conn.execute("SELECT * FROM held_things WHERE shape=? AND backing_table IS NULL AND status IN ('building','active','failing')",
+                          (shape_name,)).fetchall():
+        d = {"what": r["name"], "name": r["name"], "people": json.loads(r["people_json"]), "owner": r["owner_actor_id"],
+             "place": r["location_id"] if r["location_id"] is not None else r["place_text"], "agenda": r["agenda"],
+             "legality": r["legality"], "money": {"start": 0, "income": r["income_weekly"], "upkeep": r["upkeep_weekly"]}}
+        p = normalise(conn, int(r["owner_actor_id"]), r["kind_text"], d)
+        out = dict(shape.make(conn, int(r["owner_actor_id"]), p, str(r["call_id"] or f"adopt:{r['id']}")) or {})
+        table, bid = _backing(out)
+        if table is None:
+            continue
+        conn.execute("UPDATE held_things SET backing_table=?,backing_id=?,gap_key=NULL,updated_day=? WHERE id=?", (table, bid, _day(conn), r["id"]))
+        n += 1
+    open_left = conn.execute("SELECT 1 FROM held_things WHERE shape=? AND backing_table IS NULL AND gap_key IS NOT NULL AND status!='ended'",
+                             (shape_name,)).fetchone()
+    if not open_left:
+        conn.execute("UPDATE depth_gaps SET status='built' WHERE shape=?", (shape_name,))
+    return n

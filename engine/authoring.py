@@ -695,14 +695,16 @@ def _kind_of(kind: Any, d: dict) -> str:
 def author(conn: sqlite3.Connection, me: int, kind: str, details: dict, call_id: str) -> dict:
     """Make something invented real, or raise AuthoringRefused saying why not. All-or-nothing."""
     d = details if isinstance(details, dict) else {}
-    target = _kind_of(kind, d)
+    from . import intake  # a package with intake data takes everything lasting through the one door
+    through_intake = intake.enabled(conn)
+    target = None if through_intake else _kind_of(kind, d)
     try:  # the world package's text vetoes: a real town that is not here, a dated rule not yet in force
         veto.check_world_text(conn, d)
     except veto.Contradiction as e:
         raise AuthoringRefused(str(e)) from e
     conn.execute("SAVEPOINT authoring")
     try:
-        out = _KINDS[target](conn, int(me), d, str(call_id))
+        out = intake.take_in(conn, int(me), kind, d, str(call_id)) if through_intake else _KINDS[target](conn, int(me), d, str(call_id))
     except BaseException:
         conn.execute("ROLLBACK TO SAVEPOINT authoring")
         conn.execute("RELEASE SAVEPOINT authoring")
