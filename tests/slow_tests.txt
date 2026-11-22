@@ -7,3 +7,4 @@ schema115_test                  # ~4.5 min
 saintjude_leak_scan_test        # ~3 min
 saintjude_connector_play_test   # ~2.5 min
 arch02_scheduler_chunk_invariance_test  # ~1.5 min
+saintjude_mob_fires_test      # ~16 min: simulates five years itself. Long run: `python tests/saintjude_mob_fires_test.py` (all three seeds: B15_SEED=<n>), or on a kept DB `B15_DB=<db> B15_SEED=<n>`

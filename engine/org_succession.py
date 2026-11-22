@@ -697,6 +697,18 @@ def install_head(conn: sqlite3.Connection, org: int, man: int, day: int, how: st
             conn.execute("UPDATE org_seats SET role_key=?, unit_id=NULL, superior_actor_id=NULL WHERE id=?", (head_role, int(seat["id"])))
     else:
         conn.execute("UPDATE org_seats SET superior_actor_id=NULL WHERE id=?", (int(seat["id"]),))
+    # a man sitting in the head's seat when another is installed (one seated by a contest while a war ran, say) does not stay head beside him:
+    # he goes back to the role the data gives a man who lost the seat, and those who answered to him answer to the new head
+    back = (kind_rules(conn, org).get("lifecycle") or {}).get("returns_as")
+    if back and back != head_role:
+        for other in conn.execute("SELECT id,actor_id FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active' AND actor_id<>?", (int(org), head_role, int(man))).fetchall():
+            conn.execute("UPDATE org_seats SET role_key=?, superior_actor_id=? WHERE id=?", (back, int(man), int(other[0])))
+            membership_text(conn, org, int(other[1]), back)
+            lv = role_level(conn, org, back)
+            if lv is not None:
+                orgs.set_level(conn, int(other[1]), lv, int(day), org)
+            late_ids.append(int(other[1]))
+            imposed(conn, int(other[1]))
     if late_ids:
         conn.execute("UPDATE org_seats SET superior_actor_id=? WHERE org_actor_id=? AND status='active' AND superior_actor_id IN (%s) AND actor_id<>?" % ",".join("?" * len(late_ids)),
                      (int(man), int(org), *late_ids, int(man)))

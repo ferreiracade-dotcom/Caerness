@@ -138,6 +138,72 @@ def test_the_law_and_the_organisation_act_on_the_protagonist_as_on_anyone():
     assert after > before, "no organisation money passed through the protagonist"
 
 
+def test_informing_and_discipline_can_reach_the_protagonist():
+    """The law turns a held man into an informer and a man who kept money back is brought up for discipline: both pick him as they pick anyone."""
+    from engine import org_informing as inf, org_membership as om
+    from engine.player import set_player
+    from tests.outfit_choice_fixture import DAY, open_world
+    w = open_world()
+    c = w.conn
+    c.execute("UPDATE world_state SET current_day=? WHERE id=1", (DAY,))
+    me = int(c.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' AND role_key='soldier' ORDER BY actor_id LIMIT 1", (w.org,)).fetchone()[0])
+    set_player(c, me)
+    # discipline: his superior is put to decide about him, as for any man who kept money back
+    aid = om.discipline_for_holdout(c, me, w.org, 500.0, DAY - 60, 0, DAY)
+    assert aid is not None, "no one was asked to decide about the protagonist"
+    row = c.execute("SELECT actor_id,subject_id FROM org_agenda WHERE id=?", (aid,)).fetchone()
+    assert int(row["subject_id"]) == me and int(row["actor_id"]) != me
+    # informing: held, with an open case, and the draw passing, the law turns him
+    c.execute("INSERT INTO custody(actor_id,kind,charge,since_day,until_day) VALUES (?,'held','racket',?,?)", (me, DAY - 5, DAY + 60))
+
+    class _Low:
+        @staticmethod
+        def random():
+            return 0.0
+    real = inf._rng
+    inf._rng = lambda conn, stream, *keys: _Low()
+    try:
+        inf._law_turns(c, DAY)
+    finally:
+        inf._rng = real
+    assert inf.is_informer(c, me), "the law's turning did not reach the protagonist"
+
+
+def test_a_head_replaced_by_a_contest_does_not_retake_the_seat_when_released_into_a_vacancy():
+    """Seed 7 ended with two heads in two families: a released ex-head found the seat vacant (the sitting head had just been held) and sat in it
+    while the contest for the new vacancy ran. A man a contest replaced has no claim."""
+    from engine import orgs, org_lifecycle
+    conn = _open()
+    r = conn.execute("SELECT s.* FROM org_seats s JOIN org_profiles o ON o.org_actor_id=s.org_actor_id WHERE o.package_key='sabatini' AND s.role_key='boss' AND s.status='active'").fetchone()
+    a, org = int(r["actor_id"]), int(r["org_actor_id"])
+    conn.execute("UPDATE org_seats SET status='held', left_day=5 WHERE id=?", (int(r["id"]),))
+    conn.execute("INSERT INTO org_agenda(actor_id,kind,due_day,subject_kind,subject_id,status,created_day,resolved_day,metadata_json) VALUES (?,?,?,?,?,?,?,?,?)",
+                 (org, "contest", 6, "actor", a, "resolved", 6, 6, '{"outcome": "agreed"}'))
+    assert orgs.head_of(conn, org) is None
+    org_lifecycle._return(conn, conn.execute("SELECT * FROM org_seats WHERE id=?", (int(r["id"]),)).fetchone(), 400)
+    back = conn.execute("SELECT role_key,status FROM org_seats WHERE id=?", (int(r["id"]),)).fetchone()
+    assert back["role_key"] != "boss", "the replaced head sat in the vacant seat again"
+    assert orgs.head_of(conn, org) is None  # the seat stays vacant for the contest or the headless catch-up
+
+
+def test_installing_a_head_leaves_no_second_head_in_the_seat():
+    """Seed 3 kept two heads in a family for years: a civil war ended with its winner installed beside the man a contest had seated during the war.
+    The man already sitting goes back to the role the data gives a man who lost the seat."""
+    from engine import orgs
+    from engine.org_succession import install_head
+    conn = _open()
+    r = conn.execute("SELECT s.* FROM org_seats s JOIN org_profiles o ON o.org_actor_id=s.org_actor_id WHERE o.package_key='sabatini' AND s.role_key='boss' AND s.status='active'").fetchone()
+    winner, org = int(r["actor_id"]), int(r["org_actor_id"])
+    sitting = int(conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND role_key='capo' AND status='active' ORDER BY actor_id", (org,)).fetchone()[0])
+    conn.execute("UPDATE org_seats SET role_key='boss', superior_actor_id=NULL WHERE actor_id=? AND org_actor_id=?", (sitting, org))
+    assert conn.execute("SELECT COUNT(*) FROM org_seats WHERE org_actor_id=? AND role_key='boss' AND status='active'", (org,)).fetchone()[0] == 2
+    install_head(conn, org, winner, 100, "civil_war")
+    assert conn.execute("SELECT COUNT(*) FROM org_seats WHERE org_actor_id=? AND role_key='boss' AND status='active'", (org,)).fetchone()[0] == 1
+    assert orgs.head_of(conn, org) == winner
+    back = conn.execute("SELECT role_key,superior_actor_id FROM org_seats WHERE actor_id=? AND org_actor_id=?", (sitting, org)).fetchone()
+    assert back["role_key"] != "boss" and int(back["superior_actor_id"]) == winner
+
+
 def _run_all() -> int:
     tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_") and callable(f)]
     failed = 0

@@ -29,7 +29,7 @@ os.environ["CAERNESS_WORLD_PACKAGE"] = "saintjude"
 from tests.sj_fixture import build_saintjude, connect
 
 DAYS = 1825
-FLEET = ("org_%", "crime_reports", "law_cases", "law_judgments", "custody")
+FLEET = ("org_%", "crime_reports", "law_enforcement_cases", "case_dispositions", "sentences", "custody")
 BUDGET_ROWS_PER_YEAR = 30_000
 # The brief's budget was 15 MB a year, set before the organisation layers. Measured on the final code: 24-26 MB a year, nearly all of it the
 # ledger (economic_flows, org_money: every period's money) and the decision audit (see task-B15-report.md). 15 is reported as missed; this
@@ -142,6 +142,19 @@ def check_structure(path: Path, start_mb: float) -> dict:
     found["seats_without_a_superior"] = len(bad)
     assert not bad, f"{len(bad)} active seats have no live superior in their org, e.g. {bad[:5]}"
 
+    # 1b. one head at a time in a family: a second head-role seat is an acting man named by an open `acting_head` marker (a contest in flight)
+    twice = []
+    for org, kind in kind_of.items():
+        kr = orgs.kind_rules(conn, org)
+        if kind != "family" or not kr.get("head"):  # a bank has several bankers by design; a family has one head and, in a contest, acting men
+            continue
+        n_heads = conn.execute("SELECT COUNT(*) FROM org_seats WHERE org_actor_id=? AND role_key=? AND status='active'", (org, kr["head"])).fetchone()[0]
+        acting = conn.execute("SELECT COUNT(*) FROM org_agenda WHERE kind='acting_head' AND status='open' AND subject_id=?", (org,)).fetchone()[0]
+        if n_heads > 1 + acting:
+            twice.append((kind, org, n_heads, acting))
+    found["orgs_with_two_heads"] = len(twice)
+    assert not twice, f"organisations with more than one head and no contest to explain it: {twice[:5]}"
+
     # 2. money kinds are the package's
     kinds = {r[0] for r in conn.execute("SELECT DISTINCT kind FROM org_money")}
     assert kinds <= set(flows), f"org_money kinds outside orgs.json flows: {sorted(kinds - set(flows))}"
@@ -201,14 +214,16 @@ def findings(path: Path) -> dict:
     out["rackets_started"] = one("SELECT COUNT(*) FROM org_lines WHERE started_day>0")
     out["incidents_that_mattered"] = one("SELECT COUNT(*) FROM org_incidents WHERE matters=1")
     out["reports"] = one("SELECT COUNT(*) FROM crime_reports")
-    out["cases"] = one("SELECT COUNT(*) FROM law_cases")
+    out["cases"] = one("SELECT COUNT(*) FROM law_enforcement_cases")
+    out["dispositions"] = one("SELECT COUNT(*) FROM case_dispositions")
+    out["sentences"] = one("SELECT COUNT(*) FROM sentences")
     out["held_in_custody_ever"] = one("SELECT COUNT(DISTINCT actor_id) FROM custody")
     out["families"] = {r[0]: {"active": r[1], "heads": r[2], "unit_leaders": r[3], "inducted": r[4]} for r in c.execute(
         """SELECT COALESCE(p.package_key,'?'),COUNT(*),SUM(s.superior_actor_id IS NULL),SUM(s.role_key='capo'),SUM(s.inducted_day IS NOT NULL)
            FROM org_seats s JOIN org_profiles p ON p.org_actor_id=s.org_actor_id WHERE p.org_kind='family' AND s.status='active' GROUP BY 1""")}
     out["fires"] = {r[0]: [r[1], r[2]] for r in c.execute(
         "SELECT process_key,COUNT(*),SUM(executed_count) FROM process_execution_log WHERE process_key LIKE 'org%' OR process_key LIKE 'outfit%' OR process_key LIKE 'crime%' OR process_key LIKE 'law%' GROUP BY 1")}
-    for t in ("org_tension_acts", "org_councils", "org_deals", "org_informers", "org_absorptions", "org_debts", "org_arrangements", "law_judgments"):
+    for t in ("org_tension_acts", "org_councils", "org_deals", "org_informers", "org_absorptions", "org_debts", "org_arrangements"):
         try:
             out.setdefault("rows", {})[t] = one(f"SELECT COUNT(*) FROM {t}")
         except sqlite3.Error:

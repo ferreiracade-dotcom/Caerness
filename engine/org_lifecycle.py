@@ -486,6 +486,9 @@ def _return(conn: sqlite3.Connection, seat, day: int) -> None:
     elif role == rules.get("head"):
         h = orgs.head_of(conn, org)
         taken = h is not None and h != a
+        if not taken and conn.execute("SELECT 1 FROM org_agenda WHERE kind='contest' AND subject_id=? AND actor_id=? AND COALESCE(json_extract(metadata_json,'$.outcome'),'')<>'returned' LIMIT 1",
+                                      (a, org)).fetchone() is not None:
+            taken = True  # a contest replaced him (or is still running): a seat that fell vacant again is not his to retake, and two heads follow if he does
         if taken and any(fn(conn, org, a, int(day)) for _k, fn in list(_RETURNS)):
             taken = False
     conn.execute("DELETE FROM org_agenda WHERE kind='vacancy' AND actor_id=? AND subject_id=?", (a, org))
