@@ -28,8 +28,9 @@ The protagonist is under the same rules throughout.
 | History step 3 (real facts), **only if landed** | `divergences` | P1 writes no divergences (it has no real offices); P2 does. If step 3 has landed, P1 records a divergence when a **fictional** default named in `timeline.json` is changed (for example, the 1975 mayoral race being Open means there is no default, so nothing is written). |
 | Business BZ1 | ventures (widened `civilian_projects`, stages as package data), the agreements-ledger `terms` and breach path, shared drivers including **required approvals**, and widened `buildings` | a race is a venture; favours, deals and sponsorship debts are ledger entries; licence and zoning approvals are requested by business and decided here |
 | Information I1a (landed, schema 122) | the push and delivery ledger | election nights, indictments and votes that touch the protagonist are pushed |
+| Information I1b (landed, 8535472, schema 123) | `engine/claims.py`: `audiences` rows keyed `(key, ref_id)` with rules from `presence.json` `audiences`; `claims.record` (holder `audience`); `claims.impression(conn, aud, subject, day)` giving regard, force and mass, with decay, bad-weighs-more, costly-over-talk and spill; `audiences_of`, `is_member`, `members`; the weekly pass on `org_lifecycle.on_week` | **voter groups are I1b audiences.** Every impression a voter group holds of a candidate, an office-holder or an org is a set of I1b claims, and P1 keeps no impression store of its own |
 
-Information phase 1b (audiences) is **not** a prerequisite. P1 owns voter groups and their impressions (Task 3) through an API that 1b's claims will call later. **[my call: the spec's §7 said P1 "needs" 1b audiences. The owner's order (BZ1, then P1 alongside BZ2 and BZ3) does not wait for 1b, so the electorate is built here as a voter-group audience that 1b adopts.]**
+**Voter groups and I1b (supervisor's correction, 2026-11-22).** P1 owns what makes a voter group an electorate: its district, identity words, size, grievances, **turnout** and the **delivery** organised actors can get from it. I1b owns its impressions. Each voter group is one I1b audience row (`key` = the package's electorate audience key, `ref_id` = `voter_groups.id`). Every political act that should move opinion is recorded as an audience claim through I1b, and read back through `claims.impression`.
 
 ## Global Constraints
 
@@ -40,7 +41,7 @@ Information phase 1b (audiences) is **not** a prerequisite. P1 owns voter groups
 - **The protagonist is under the same rules.** Every behaviour test that acts on an NPC has a paired assertion acting on the protagonist (`engine.player.set_player`). The only exception in the whole engine is the existing lean toward life over death when both are possible.
 - **Real people** act within their record. P1 seeds no real office-holder; Saint Jude's officials are fictional.
 - **Caerness stays behaviour-identical.** `tests/fixtures/caerness_opening_fingerprint.json` must be unchanged, and with no `politics.json`, every P1 tick is a no-op.
-- **Schema:** one migration to the next free version at build time (expected 125, after the history intake core and BZ1). Bump `SCHEMA_VERSION` in `engine/db.py`.
+- **Schema:** one migration to the next free version at build time (I1b is 123; expected 126, after the history intake core and BZ1). Bump `SCHEMA_VERSION` in `engine/db.py`.
 - **Cost:** with P1 on, the 30-day advance stays under 10 s and five years stays under 10 min on the PC (AGENTS.md targets). Measured in Task 11.
 - **Never write `data/*.db`.** Sims run against a copy, and long runs follow constraints.md (at most two at once).
 - After tests, run `git restore game/campaign_01/model_requests/`. Commit only the files a task names. Never push, stash, reset or switch branches.
@@ -59,10 +60,11 @@ Information phase 1b (audiences) is **not** a prerequisite. P1 owns voter groups
 
 | File | Responsibility |
 |---|---|
-| `engine/civic_seams.py` (new) | the only file that calls prerequisite APIs: venture, ledger entry, intake, approvals, push |
+| `engine/civic_seams.py` (new) | the only file that calls prerequisite APIs: venture, ledger entry, intake, approvals, push, I1b claims and impressions |
 | `engine/offices.py` (new) | offices, terms, holders, eligibility, vacancy; mirrors to `world_facts.holder_actor_id` |
 | `engine/civic_field.py` (new) | field holdings (what each actor holds), transfer, the org-level reading of strength |
-| `engine/electorate.py` (new) | voter groups, impressions, turnout, delivery |
+| `engine/electorate.py` (new) | voter groups as I1b audiences (the `voter_group` audience rule), turnout and delivery |
+| `engine/claims.py` | one generic hook only: `register_audience_rule`, so a package rule I1b does not know can be supplied by another module (no politics words) |
 | `engine/civic_patronage.py` (new; `engine/patronage.py` is Caerness and is not touched) | public jobs as lines, favours |
 | `engine/races.py` (new) | filing, primary, general, the vote, fraud, the result |
 | `engine/civic_votes.py` (new) | agenda items, member weighing, deals, tenders, approvals, ordinances with effects |
@@ -87,9 +89,7 @@ office_terms(id, office_id, actor_id, seat_no, start_day, end_day, how
 field_holdings(id, holder_kind CHECK(holder_kind IN ('org','actor')), holder_id, stake_kind, stake_ref,
         strength REAL, since_day, ended_day, cause_kind, cause_id)
 voter_groups(id, group_key UNIQUE, district_ref, location_id, words_json, size, turnout_base,
-        grievances_json)
-voter_impressions(group_id, subject_kind, subject_id, value REAL, updated_day, PRIMARY KEY(group_id,subject_kind,subject_id))
-impression_moves(id, group_id, subject_kind, subject_id, delta, day, cause_kind, cause_id, note)
+        grievances_json, audience_id REFERENCES audiences(id))   -- impressions live in I1b's claims/impressions
 races(id, office_id, seat_no, stage, primary_day, election_day, venture_id, result_json, status)
 race_candidates(race_id, actor_id, party_org_id, filed_day, dropped_day, drop_reason, primary_share, general_share)
 civic_items(id, body_office_key, item_kind, subject_json, opened_day, vote_day, status, outcome_json, venture_id)
@@ -119,9 +119,12 @@ Nothing has a CHECK list of world words. Kinds such as `stake_kind`, `item_kind`
   - `hold_outcome(conn, *, what: str, people: list[int], dates: dict, consequences: list[str], day: int) -> int` (returns the `held_things.id`)
   - `approval_requests(conn, day: int) -> list[dict]` and `answer_approval(conn, request_id: int, granted: bool, by_office_key: str, why: dict, day: int) -> None`
   - `push(conn, actor: int, kind: str, text: str, day: int, ref: dict) -> None`
+  - `group_audience(conn, group_id: int) -> dict`, the I1b audience dict (`{id,key,ref,label}`), made through I1b's own audience helper
+  - `tell_group(conn, group_id: int, subject: int, text: str, *, source: str, confidence: float, valence: float, force: float = 0.0, costly: bool = False, day: int) -> int`, which calls `claims.record(holder_kind='audience', …)` and returns the claim id
+  - `group_regard(conn, group_id: int, subject: int, day: int) -> float`, the `regard` from `claims.impression`
 
 - [ ] **Step 1: Write the failing test.**
-  - `test_each_seam_reaches_its_prerequisite`, on a `build_saintjude` copy. `open_venture` makes a row the BZ1 venture reader sees. `ledger_entry`, then `ledger_breach`, leaves the entry broken and runs the breach path (BZ1's breach marker present). `hold_outcome` writes one `held_things` row with `depth='B'`. `push` writes one I1a delivery row for the actor.
+  - `test_each_seam_reaches_its_prerequisite`, on a `build_saintjude` copy. `open_venture` makes a row the BZ1 venture reader sees. `ledger_entry`, then `ledger_breach`, leaves the entry broken and runs the breach path (BZ1's breach marker present). `hold_outcome` writes one `held_things` row with `depth='B'`. `push` writes one I1a delivery row for the actor. `tell_group`, then `group_regard`, moves regard in the claim's direction, and the claim row has `holder_kind='audience'`.
   - `test_missing_prerequisite_names_itself`: monkeypatch the intake import away; `hold_outcome` raises `RuntimeError` whose message contains "history intake core".
 - [ ] **Step 2: Run** `PYTHONPATH=. python tests/p1_seams_test.py`. Expected: FAIL (module missing).
 - [ ] **Step 3: Implement** each function as a thin call to the landed API, with no logic of its own beyond argument mapping.
@@ -217,32 +220,52 @@ Existing orgs (unions, the families, the *Chronicle*, the Archdiocese where it e
 - [ ] **Step 4: Run** this test plus the Caerness fingerprint test. Expected: PASS, with the fingerprint unchanged.
 - [ ] **Step 5: Commit** "feat(politics): the field's actors and holdings; the Machine is package data".
 
-### Task 3: Voter groups, impressions, turnout, delivery
+### Task 3: Voter groups as I1b audiences; turnout and delivery
 
 **Files:**
 - Create: `engine/electorate.py`
-- Modify: `politics.json` (`voter_groups` per ward: `words` (descent, class, parish, union, age), `size`, `turnout_base`, `grievances` (words mapped to drivers: "jobs", "schools", "police", "taxes", "housing")), `design_figures.json`
+- Modify:
+  - `engine/claims.py`: add `register_audience_rule(rule: str, *, of_subject, is_member, members)` and have `audiences_of`, `is_member` and `members` fall through to a registered rule after their built-in `org`, `circle` and `home_place`. The hook carries no politics words, and the existing three rules are unchanged.
+  - `worlds/saintjude/presence.json` `audiences`: add `"electorate": {"rule": "voter_group", "label": "the voters"}`.
+  - `politics.json` `voter_groups` per ward: `words` (descent, class, parish, union, age), `size`, `turnout_base`, and `grievances` (words mapped to drivers: "jobs", "schools", "police", "taxes", "housing").
+  - `design_figures.json`.
 - Test: `tests/p1_electorate_test.py`
 
 **Interfaces:**
+- Consumes: `civic_seams.group_audience`, `tell_group` and `group_regard`; `claims.register_audience_rule`.
 - Produces:
-  - `seed_groups(conn) -> int`
-  - `impression(conn, group_id, subject_kind, subject_id) -> float` (0 when unknown)
-  - `nudge(conn, group_id, subject_kind, subject_id, delta, *, day, cause_kind, cause_id, note) -> None`. **This is the API information 1b's claims will call.**
-  - `turnout(conn, group_id, race_id, day) -> float`, from `turnout_base`, the grievance stakes in the race, weather (`calendar`), and organised drive (the sum of `delivery` stakes' effort)
-  - `delivery(conn, holder_kind, holder_id, group_id, candidate_id, day) -> float`, from the stake's strength, what the holder can give (its patronage lines, Task 4) and its effort for this candidate
+  - `seed_groups(conn) -> int`: makes the `voter_groups` rows and one I1b audience each, and stores its `audience_id`.
+  - The `voter_group` rule, registered at import:
+    - **of_subject(subject):** the groups in whose district the subject is a candidate or holds an office, plus the groups in which the subject (an actor or an org actor) holds a `delivery` stake;
+    - **is_member(actor, aud):** his home is in the group's district and his descent, parish, union or age words match the group's;
+    - **members(aud):** `[]`, because a crowd is held as an impression only, as I1b does for `home_place`.
 
-Impressions update lazily: they change only on `nudge`, plus a decay to neutral applied on read from `updated_day` (`impression_halflife_days`).
+    So I1b's own pass (told by a member, then reaching the audience; spill to the subject's people; decay) works for voters unchanged.
+  - `regard(conn, group_id, subject, day) -> float`: delegates to `civic_seams.group_regard`. P1 code never reads I1b tables directly.
+  - `turnout(conn, group_id, race_id, day) -> float`: from `turnout_base`, the grievance stakes in the race, weather (`calendar`), and organised drive (the sum of `delivery` stakes' effort).
+  - `delivery(conn, holder_kind, holder_id, group_id, candidate_id, day) -> float`: from the stake's strength, what the holder can give (its patronage lines, Task 4) and its effort for this candidate.
+
+**Political acts tell the groups.** Later tasks record opinion moves as audience claims with `civic_seams.tell_group`, with words a GM can read back. Each move gets a valence, a force and `costly`, from that task's figures.
+- **A race result (Task 5):** "won the mayoralty", "lost in ward 7".
+- **Fraud exposed (Task 5):** costly and bad.
+- **A vote on an item a group's grievance names (Task 6).**
+- **Jobs given or cut (Task 4).**
+- **An indictment (Task 8).**
+
+There is no separate decay or half-life in P1: decay is I1b's `claim_half_life_days`.
 
 - [ ] **Step 1: Write the failing tests:**
-  - `test_groups_from_data`: every ward has at least one group, and the sizes sum to the city's voting-age population figure within rounding.
-  - `test_nudge_records_cause_and_decays`: `nudge(+0.4)` and a read 0 days later give 0.4. A read `halflife` days later gives 0.2. `impression_moves` has the cause.
-  - `test_delivery_falls_with_jobs`: halving a holder's patronage lines lowers its `delivery` (this test is completed after Task 4; here, stub lines with an `org_lines` insert).
-  - `test_turnout_rises_with_grievance_at_stake`: a race whose candidates' agendas name a group's grievance gives a higher `turnout` than one that doesn't.
+  - `test_groups_from_data`: every ward has at least one group; the sizes sum to the city's voting-age population figure within rounding; each group has an `audiences` row with key `electorate`.
+  - `test_group_is_an_i1b_audience`: `claims.audiences_of(candidate)` includes the groups of his district once he files (after Task 5; before then, seat him in the ward's council office). `tell_group(…, valence=-0.6, confidence=0.8)` makes `regard` < 0. A read `claim_half_life_days` later is closer to 0. A resident member who hears a claim about the candidate reaches the group through I1b's `_reach_audiences` without P1 code.
+  - `test_no_impression_store_in_p1`: the schema has no P1 impression table, and grep finds no `INSERT INTO impressions` or `INSERT INTO claims` outside `engine/claims.py`.
+  - `test_existing_audience_rules_unchanged`: rerun `tests/i1b_test.py`; it passes.
+  - `test_delivery_falls_with_jobs`: halving a holder's patronage lines lowers its `delivery`. This test is completed after Task 4; here, stub the lines with an `org_lines` insert.
+  - `test_turnout_rises_with_grievance_at_stake`: a race whose candidates' agendas name a group's grievance has higher `turnout` than one that does not.
+  - `test_protagonist_held_alike`: the same claim told to a group about the protagonist and about an NPC candidate gives the same regard.
 - [ ] **Step 2: Run.** Expected: FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run.** Expected: PASS.
-- [ ] **Step 5: Commit** "feat(politics): voter groups, impressions, turnout and delivery".
+- [ ] **Step 3: Implement** the hook in `claims.py` first, then `electorate.py`.
+- [ ] **Step 4: Run** this test, `tests/i1b_test.py` and `tests/no_world_words_test.py`. Expected: PASS.
+- [ ] **Step 5: Commit** `engine/electorate.py engine/claims.py worlds/saintjude/presence.json worlds/saintjude/politics.json worlds/saintjude/design_figures.json tests/p1_electorate_test.py`, with the message "feat(politics): voter groups as I1b audiences; turnout and delivery".
 
 ### Task 4: Patronage and favours
 
@@ -290,8 +313,8 @@ Impressions update lazily: they change only on `nudge`, plus a decay to neutral 
   - `result_why(conn, race_id) -> dict` (driver contributions per candidate)
 
 **The vote.** Per group, a candidate's score is
-`w_inc*incumbent + Σ_org delivery + w_imp*impression + w_tie*ties + w_econ*economy_fit + w_scandal*scandal + w_money*log1p(spend) + w_end*endorsements + noise`.
-Each group's turnout times its share-softmax gives the votes, and the votes are summed. The weights are figures. `noise` is from `_rng(conn, 'race', race_id, group_id)`. `ties` come from shared descent, parish and union words between the candidate and the group. **Fraud** adds votes in one group and draws an exposure chance from the figures (poll watchers, which come from rivals' delivery stakes in that group; press; `heat`). Exposure opens a crime report through `open_report(crime_kind='election_fraud', ...)` and nudges every group's impression of the beneficiary down.
+`w_inc*incumbent + Σ_org delivery + w_imp*regard (electorate.regard, I1b) + w_tie*ties + w_econ*economy_fit + w_scandal*scandal + w_money*log1p(spend) + w_end*endorsements + noise`.
+Each group's turnout times its share-softmax gives the votes, and the votes are summed. The weights are figures. `noise` is from `_rng(conn, 'race', race_id, group_id)`. `ties` come from shared descent, parish and union words between the candidate and the group. **Fraud** adds votes in one group and draws an exposure chance from the figures (poll watchers, which come from rivals' delivery stakes in that group; press; `heat`). Exposure opens a crime report through `open_report(crime_kind='election_fraud', ...)` and tells every group in the district a costly bad claim about the beneficiary (`tell_group`). Each result is also told to the district's groups as a claim about the winner and the losers.
 
 - [ ] **Step 1: Write the failing tests:**
   - `test_1975_mayoral_race_resolves`: from the opening, advance to 5 November 1975. The race has a winner. The mayor office's holder from 1 January 1976 is that winner. A `held_things` row exists, and `result_why` lists each driver.
@@ -317,9 +340,9 @@ Each group's turnout times its share-softmax gives the votes, and the votes are 
 - Consumes: `offices.holders`, `electorate.impression`, `civic_patronage.owed`, `civic_seams.ledger_*` and `approval_requests`/`answer_approval`, `org_arrangements` (money on an official).
 - Produces:
   - `open_item(conn, body_office_key, item_kind, subject: dict, *, vote_day, day) -> int`
-  - `member_vote(conn, item_id, member, day) -> tuple[str, dict]`, weighing the member's district impression of the subject's sponsor, his patron's or faction's line, the interests pressing him, favours owed, money on him, his own agenda and conscience (temperament), and press exposure
+  - `member_vote(conn, item_id, member, day) -> tuple[str, dict]`, weighing his district groups' `electorate.regard` of the subject's sponsor and of himself, his patron's or faction's line, the interests pressing him, favours owed, money on him, his own agenda and conscience (temperament), and press exposure
   - `pre_vote_deal(conn, item_id, member, counterparty, terms, day) -> int` (a ledger entry; voting against it calls `ledger_breach`)
-  - `decide(conn, item_id, day) -> dict` (count, quorum, tie rule; writes `civic_effects` for a passed ordinance and `hold_outcome`)
+  - `decide(conn, item_id, day) -> dict` (count, quorum, tie rule; writes `civic_effects` for a passed ordinance and `hold_outcome`; tells each group whose grievance the item names how its own member voted, through `tell_group`)
   - **Tender**, replacing BZ3's stub with the same interface the stub exposes:
     - `open_tender(conn, office_key, spec: dict, *, close_day, day) -> int`
     - `award_tender(conn, item_id, day) -> dict` (bids come from business; the members weigh price, ties, favours and kickbacks)
@@ -449,7 +472,7 @@ Each group's turnout times its share-softmax gives the votes, and the votes are 
 - Produces:
   - `process_due(conn, day, *, event_logger) -> dict`, which runs, in order: `races.schedule`; race stages due; `civic_votes` items due; `decide_approvals`; `process_vacancies`; and weekly, `exposure_check` and `weekly_shift`
   - `next_due_day(conn, after_day, through_day) -> int | None`, for the skip planner
-  - `view(conn, observer, day) -> dict` (behind the firewall): seats near him, who owes him and whom he owes, the calendar ahead, and his impression in each group he deals with
+  - `view(conn, observer, day) -> dict` (behind the firewall): seats near him, who owes him and whom he owes, the calendar ahead, and, for his standing with voters, I1b's existing `held_of_him` filtered to `electorate` audiences (no new reader)
   - Pushes: election night, a vote on an item he sponsored, an indictment of someone he deals with, a law that touches his business
 
 - [ ] **Step 1: Write the failing tests:**
@@ -482,7 +505,7 @@ Each group's turnout times its share-softmax gives the votes, and the votes are 
 |---|---|
 | §5.1 offices, generic across levels, calendar, seeding, firewall | Task 1. P2 adds real offices; the same model with `cycle.real` |
 | §5.2 field actors, money and patronage, the Machine as one org, after it | Tasks 2, 4 and 10 |
-| §5.3 the electorate, races, drivers, fraud | Tasks 3 and 5. State and national at B is P2 |
+| §5.3 the electorate, races, drivers, fraud | Tasks 3 (voter groups as I1b audiences) and 5. State and national at B is P2 |
 | §5.4 powers, votes, laws (city ordinances in full) | Tasks 1 (powers as data) and 6. State and national laws are P2 |
 | §5.5 appointments | Task 7 |
 | §5.6 the families as an interest | Tasks 2 (delivery stakes) and 8 (the Pad upward) |
