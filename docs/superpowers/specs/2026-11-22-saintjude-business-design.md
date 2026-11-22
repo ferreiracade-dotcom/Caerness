@@ -1,6 +1,6 @@
-# The business sphere (design) — DRAFT
+# The business sphere (design)
 
-Status: **DRAFT, written without the owner.** The supervisor told the brainstorm to design from what was already agreed and to mark every call made here. Where a line says **[my call]**, the owner has not decided it yet. Corrections come back through the supervisor. (An earlier commit wrongly marked this approved; the answers it recorded were not the owner's.)
+Status: **Approved by the owner on 2026-11-22, with the answers in §15.** It was first written without the owner. The remaining **[my call]** marks are designer calls accepted with the draft; the owner's answers are marked **[owner]**.
 
 Sources:
 - the parent spec, `2026-11-19-saintjude-three-spheres-design.md`, §5.1, §5.2, §5.2a–c and §5.3;
@@ -17,7 +17,7 @@ The business sphere makes the economy a set of actors with agendas, not a backdr
 - **Every business is three things together:** a trade with a real cost structure, a place with a condition, and a ledger of agreements with others.
 - **The mob, politics and the protagonist reach the economy through those same objects.** Protection is an arrangement on a business's books. A front is a business whose lines carry dirty money. A tender is an agenda item that firms bid on.
 
-It must serve three kinds of play:
+It must serve every start and every scale, with no fixed arc **[owner]**: a man who stays small and specialised by choice, one who stays small because he fails, one who grows from a corner shop, and an heir who starts inside a conglomerate. In particular, it must serve three kinds of play:
 - a mob campaign that feels the economy (a bar's takings fall, so the envelope gets thin);
 - a business campaign from a corner shop to a conglomerate;
 - a mix of the two: a legitimate man the mob reaches for, or a made man going straight.
@@ -235,7 +235,7 @@ Banks already exist as an org kind (`banks`). Business adds:
 
 ### 6.7 Contracts and tenders
 
-Public tenders are politics' agenda items (politics §9). Business owns:
+Public tenders are politics' agenda items (politics §9). They come from offices at any level that politics models, from the ward and the city through the county and the state and beyond **[owner]**: a city paving job, a county road, a state highway or a federal installation's contract all run the same way. Business owns:
 - the bid;
 - the firm's capacity;
 - the price;
@@ -280,10 +280,10 @@ Seeded at the opening on 1 January 1975, from the research files, each with its 
 
 **B fidelity [my call]:**
 - **Giants run monthly.** Each has an agenda, its head (a real person, within the record), its main lines and its relation to Saint Jude: a plant to keep or close, a contract to let, an office to move.
-- **City firms run on the org cadence.**
+- **City firms run on the org cadence.** Fewer firms are named up front **[owner]**: the main employers, the family touchpoints, the banks, the *Chronicle*, and firms the story already touches. Each neighbourhood's remaining small trade is a **named neighbourhood abstraction** per trade (for example "the Racks' bars: about 40, total takings X, protection share Y"). It states what it stands for, so it is not a silent bucket. More firms are named whenever play needs them, through the history catch-all (the history-on-demand design). From then on each is a full B firm.
 - **Everything else outside is the named market abstraction.**
 
-**Real people.** Real executives act on their documented public record. Wrongdoing is of documented kinds only (established history for the dead, convictions for the recently alive). Invented people do the dirty work around clean figures.
+**Real people [owner].** Real executives and founders act within what is documented **or plausible** for them: they may sell, partner, compete or lose out when the run gives a reason. The record is firmest on illegality: a real person is never made a criminal beyond the record (established history for the dead, convictions for the recently alive). Invented people do the dirty work around clean figures.
 
 The real people's answers to offers are plausible to the person:
 - Gates in 1975 does not sell Microsoft to a stranger for cash, because of his documented attitude.
@@ -341,6 +341,8 @@ A new package file, `worlds/saintjude/regions.json` **[my call]**. Each region h
   - Resorts International opening (26 May 1978);
   - the Shore casino question, which the bible leaves **Open**.
 
+  Casinos follow the real 2 November 1976 vote and the real 1978 opening by default, and the run can change either **[owner]**.
+
 The gazetteer has no regions today, so this file is new research. **Real places use the real holders of 1975, within the record. Fictional places use the bible.**
 
 ### 9.2 How a family moves in
@@ -379,7 +381,7 @@ Entry goes through machinery that already exists:
   - friction runs on the normal tension cadence.
 - **C, when play moves there:** the region widens like a sector does (§8.2), with its bars, its locals, its officials and its street.
 
-**Atlantic City after 1978 is the likeliest C, so it gets seeded research first [my call].**
+**Atlantic City is the first region researched and seeded [owner].** After 1978 it is the likeliest C.
 
 ### 9.4 Symmetry
 
@@ -441,7 +443,7 @@ The only exception is the existing lean toward life over death when both are pos
 - **C sectors and regions:** daily for the named people in the story, and weekly for their firms.
 - **Target:** a five-year run with business on should stay within about 1.5× today's run time. This is reported, not enforced. If it is too slow, fix the cadence, not the population.
 
-## 13. Order of work [my call]
+## 13. Order of work [owner: BZ1 first, then politics P1 alongside BZ2 and BZ3]
 
 1. **BZ1 — Shared layer.**
    - Shared drivers, ventures (widened `civilian_projects`), property (widened `buildings`) and the agreements ledger terms and breach path.
@@ -469,16 +471,19 @@ Each step ends with a five-year run that reports its measures (Long-runs rule: a
 
 - Small-business failure: roughly half of new small firms gone within five years.
 - Owner's take per trade within the bible's table ranges.
-- Protection on a share of bars and shops in mob neighbourhoods, per the bible's sense of it, **to fix with the owner**.
+- Protection on a share of bars and shops in mob neighbourhoods, per the bible's sense of it. The figure is a check only, never a target **[owner]**.
 - The families' legitimate holdings grow through the decade, as the bible's §3.3 touchpoints imply.
 - Manufacturing jobs in the city fall and services rise (bible §3.3), driven by firms' agendas, not set.
 - Atlantic City draws Saint Jude men after 1978 if the Shore stays closed (bible line 853).
 
-## 15. Open questions for the owner, most important first
+## 15. The owner's answers (2026-11-22)
 
-1. **What does a business campaign's day look like for you?** Running one shop by hand, or deals and boardrooms over years? This decides whether BZ7's C widening or BZ5's national population matters first. I assumed both, with the city first.
-2. **Expansion targets and the Shore casinos.** Is Atlantic City the first region to research? And does the Shore stay casino-free by default (bible Open) unless the run's politics changes it? I assumed yes to both.
-3. **Real executives' answers.** May a real founder (Gates, Jobs) plausibly sell, partner or be outcompeted when the run gives a reason, or should the big tech names keep their real path unless the protagonist acts directly on them? I assumed the first, weighed on their documented attitudes.
-4. **How many city firms at B.** A few hundred named firms, or fewer with named market abstractions per neighbourhood? This is a cost and depth trade.
-5. **Protection's reach.** How much of the city's small business pays, by neighbourhood? I need a number to calibrate against, not to enforce.
-6. **Order against politics.** BZ1 first, then politics P1 alongside BZ2 to BZ3? This is what both drafts assume.
+1. **Campaign shape:** it depends on the life and his choices. He may stay small and specialised by choice, stay small because he fails, or start as heir to a conglomerate. Every start and every scale must be possible, with no fixed arc (§1). The order of work does not assume one arc: BZ5's national population and BZ7's C widening serve different lives equally.
+2. **Regions:** Atlantic City first. Casinos follow the real 1976 vote and the 1978 opening by default (§9.1, §9.3).
+3. **Real founders** act within what is documented or plausible. Documentation is firmest on illegality: never make a real person a criminal beyond the record (§8.1).
+4. **City firms:** fewer named firms plus neighbourhood trade, with more named whenever play needs them (§8.1).
+5. **Protection reach:** a check only (§14).
+6. **Order:** BZ1 first, then politics P1 alongside BZ2 and BZ3 (§13).
+7. **Also from the owner:**
+   - Politics roles span every level, from the ward to the state and beyond, so public contracts come from offices at any level (§6.7).
+   - Contracts and the Concrete Club stay tied to whichever machine holds the city (§6.7, §10).
