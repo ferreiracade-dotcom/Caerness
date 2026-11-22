@@ -372,6 +372,16 @@ def room_read(conn, subject: int, observer: int) -> dict:
     stance = _stance(conn, observer, subject)
     src, p = _source(conn, observer, subject)
     placed, score = recognises(conn, observer, subject)
+    held = None
+    if placed:  # what he holds of the man (claims) gives the source and how sure, and a stance where dealings give none
+        from . import claims
+        held = claims.read_for(conn, observer, subject) if claims.enabled(conn) else None
+        if held is not None:
+            src, p = held["source"], held["sure"]
+            t = fig(conn, "react_regard_t")
+            words = (data(conn).get("claims") or {}).get("regard_words") or {}
+            if stance is None and abs(held["regard"]) >= t:
+                stance = words.get("good" if held["regard"] > 0 else "bad")
     basis = f"{src}|{stance}|{int(placed)}"
     prev = conn.execute("SELECT * FROM room_reads WHERE observer_actor_id=? AND subject_actor_id=?", (int(observer), int(subject))).fetchone()
     changed = None
@@ -387,6 +397,8 @@ def room_read(conn, subject: int, observer: int) -> dict:
             conn.execute("UPDATE room_reads SET day=?,stance=?,source=?,sure=?,recognised=?,basis=? WHERE observer_actor_id=? AND subject_actor_id=?",
                          (day, stance, src, _sure(p), int(placed), basis, int(observer), int(subject)))
     out = {"stance": stance, "from": src, "sure": _sure(p), "placed": placed}
+    if held is not None and held["holds"]:
+        out["holds"] = held["holds"]
     if not placed:
         words = data(conn).get("readings") or []
         if words:

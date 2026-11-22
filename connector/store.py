@@ -107,7 +107,7 @@ def notes_count(conn, subject_kind: str, subject_id: int) -> int:
     return int(conn.execute("SELECT COUNT(*) FROM gm_notes WHERE subject_kind=? AND subject_id=?", (subject_kind, int(subject_id))).fetchone()[0])
 
 
-NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact", "bearing", "form")
+NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact", "bearing", "form", "claim")
 SHEET_FIELDS = ("appearance", "voice", "temperament", "ambitions", "habits", "history", "standing")
 _CLIP = {"recap": 600, "thread": 160, "sheet": 300, "rule": 300, "error": 500}
 MAX_THREADS = 8
@@ -138,6 +138,29 @@ def _presence_note(conn, kind: str, text: str, subject_id, field) -> dict:
     return bearing.form_outcome(conn, me, int(subject_id), str(field or ""), text)
 
 
+def _claim_note(conn, text: str, subject_id, field) -> dict:
+    """claim: a statement held about a subject (subject_id; default the protagonist). field carries the rest as `key=value` pairs
+    separated by `;`: holder (an audience key, a person's name or id; omitted: the street), source (saw|told|read|inferred), confidence (0..1),
+    valence (-1..1, how it colours the name), force (-1..1, how formidable it makes him), costly (a costly act), event (a happening id)."""
+    from engine import claims
+    from engine.player import get_player
+    pl = get_player(conn)
+    who = int(subject_id) if subject_id is not None else (int(pl["player_actor_id"]) if pl else None)
+    if who is None:
+        raise ValueError("kind=claim needs subject_id: whom it is about")
+    kv = {}
+    for part in str(field or "").split(";"):
+        if "=" in part:
+            k, v = part.split("=", 1)
+            kv[k.strip().lower()] = v.strip()
+        elif part.strip():
+            kv[part.strip().lower()] = "1"
+    def num(k, d):
+        return float(kv[k]) if k in kv else d
+    return claims.propose(conn, text, who, holder=kv.get("holder"), source=kv.get("source", "inferred"), confidence=num("confidence", 0.6), valence=num("valence", 0.0),
+                          force=num("force", 0.0), costly=kv.get("costly", "0") not in ("0", "false", "no"), truth_event_id=int(kv["event"]) if "event" in kv else None)
+
+
 def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "general", subject_id: int | None = None,
            threads: list[str] | None = None, field: str | None = None, cause: str | None = None) -> dict:
     """Record something that should last across chats. Does not commit: callers run it inside run_once."""
@@ -153,6 +176,8 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
             raise ValueError(str(e)) from e
     if kind == "detail":
         return add_note(conn, subject_kind, subject_id, text, call_id)
+    if kind == "claim":
+        return _claim_note(conn, text, subject_id, field)
     if kind in ("bearing", "form"):
         return _presence_note(conn, kind, text, subject_id, field)
     body = _clip(text, _CLIP[kind])

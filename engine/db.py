@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 122
+SCHEMA_VERSION = 123
 
 
 def _running_tests() -> bool:
@@ -4897,6 +4897,7 @@ _MIGRATIONS: dict[int, Migration] = {
     120: ("org_council_dealings", "Councils of heads, debts between organisations, informers and absorptions (org_councils, org_council_seats, org_council_acts, org_debts, org_informers, org_absorptions)", None),
     121: ("org_deals", "Deals between organisations that stay their own: a client pays a share, an alliance eases both (org_deals)", None),
     122: ("information_phase_1a", "Bearing marks, room reads, deference acts, the delivery ledger and its cursor (bearing_marks, room_reads, form_acts, delivery_ledger, texture_cursor)", None),
+    123: ("information_phase_1b", "Claims held by people and audiences, impressions per audience, the personal circle's reactions (audiences, claims, impressions, circle_reactions, claims_state)", None),
     117: ("organisation_core", "Outfit tables become organisation tables (org_profiles, units, seats, holdings, lines, money, agenda, incidents, arrangements)", _migration_117),
 }
 

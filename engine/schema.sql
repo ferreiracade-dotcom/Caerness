@@ -5269,3 +5269,65 @@ CREATE TABLE IF NOT EXISTS texture_cursor (
     event_id INTEGER NOT NULL DEFAULT 0,
     rumour_id INTEGER NOT NULL DEFAULT 0
 );
+
+-- schema 123: claims and audiences (information phase 1b)
+CREATE TABLE IF NOT EXISTS audiences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL,
+    ref_id INTEGER NOT NULL DEFAULT 0,
+    label TEXT NOT NULL,
+    UNIQUE(key, ref_id)
+);
+CREATE TABLE IF NOT EXISTS claims (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    holder_kind TEXT NOT NULL CHECK (holder_kind IN ('actor','audience')),
+    holder_id INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    source TEXT NOT NULL,
+    source_ref INTEGER,
+    hops INTEGER NOT NULL DEFAULT 0,
+    confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    valence REAL NOT NULL DEFAULT 0,
+    force REAL NOT NULL DEFAULT 0,
+    costly INTEGER NOT NULL DEFAULT 0,
+    truth_event_id INTEGER REFERENCES events(id) ON DELETE SET NULL,
+    knowledge_id INTEGER REFERENCES knowledge(id) ON DELETE SET NULL,
+    spilled INTEGER NOT NULL DEFAULT 0,
+    first_day INTEGER NOT NULL,
+    day INTEGER NOT NULL,
+    UNIQUE(subject_actor_id, holder_kind, holder_id, text)
+);
+CREATE INDEX IF NOT EXISTS idx_claims_subject ON claims(subject_actor_id, holder_kind, holder_id);
+CREATE INDEX IF NOT EXISTS idx_claims_holder ON claims(holder_kind, holder_id, day);
+CREATE INDEX IF NOT EXISTS idx_claims_day ON claims(day);
+CREATE TABLE IF NOT EXISTS impressions (
+    audience_id INTEGER NOT NULL REFERENCES audiences(id) ON DELETE CASCADE,
+    subject_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    regard REAL NOT NULL DEFAULT 0,
+    force REAL NOT NULL DEFAULT 0,
+    mass REAL NOT NULL DEFAULT 0,
+    day INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY(audience_id, subject_actor_id)
+);
+CREATE TABLE IF NOT EXISTS circle_reactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    person_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    subject_actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
+    claim_id INTEGER REFERENCES claims(id) ON DELETE SET NULL,
+    regard REAL NOT NULL DEFAULT 0,
+    fear REAL NOT NULL DEFAULT 0,
+    present_json TEXT NOT NULL DEFAULT '[]',
+    text TEXT NOT NULL,
+    routing TEXT NOT NULL,
+    entered_day INTEGER,
+    cutaway_day INTEGER,
+    told_day INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_circle_reactions_subject ON circle_reactions(subject_actor_id, told_day, id);
+CREATE TABLE IF NOT EXISTS claims_state (
+    key TEXT PRIMARY KEY,
+    value INTEGER NOT NULL DEFAULT 0
+);

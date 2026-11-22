@@ -7,7 +7,9 @@
   "channels": "Words for how news reaches him (read, told, talk, home).",
   "core_marks": "Bearing facts the GM is asked to propose when none is recorded (kind, ask).",
   "readings": "What a stranger reads from signals alone, by how much shows (low to high).",
-  "figures": "Every number the presence and texture code uses, each a Design proposal (kept here, beside the data that names them, so a run reads them without a design draw)."
+  "figures": "Every number the presence and texture code uses, each a Design proposal (kept here, beside the data that names them, so a run reads them without a design draw).",
+  "audiences": "Audiences (engine/claims.py reads these; no closed list). rule: org = the men who hold a seat in an organisation the subject belongs to; circle = his kin and household; home_place = the people of the place he lives in (a crowd, held as an impression). A rule is the only thing the engine knows; the keys and labels are the package's.",
+  "claims": "event_effects: what a happening does to a name. match = substrings of the event type; valence/force are per audience key (default for any other); costly = a costly act (believed over talk). circle_phrases: how the people around the connected person treat them (cold, warm, afraid, mixed), texture only. regard_words: how a net regard reads in the room read when no relationship gives one. public: the happening reaches the subject's audiences directly (an arrest, a killing in the open); without it only those who were there hold it and word of mouth carries it. Organisation incidents (org_incidents.kind) are matched the same way."
  },
  "forms": [
   {
@@ -444,6 +446,381 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; I1a: an unshown item grows heavier each day it waits"
+  },
+  "claim_half_life_days": {
+   "default": 120,
+   "unit": "days",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: an unreinforced claim loses half its weight in about four months"
+  },
+  "stigma_mult": {
+   "default": 4.0,
+   "unit": "x",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a costly bad claim fades this many times slower (stigma persists)"
+  },
+  "hop_factor": {
+   "default": 0.7,
+   "unit": "per hop",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a claim told second-hand carries this much of the teller's weight each hop"
+  },
+  "costly_mult": {
+   "default": 2.5,
+   "unit": "x",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a costly act weighs more than talk"
+  },
+  "bad_weight": {
+   "default": 1.6,
+   "unit": "x",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: bad news sticks harder"
+  },
+  "good_weight": {
+   "default": 1.0,
+   "unit": "x",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: trust built slowly (good weighs less than bad)"
+  },
+  "prior_mass": {
+   "default": 0.6,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: how much agnosticism a few claims must overcome"
+  },
+  "tell_window": {
+   "default": 21,
+   "unit": "days",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: people repeat a thing while it is fresh; after this it is only repeated if it is heard again"
+  },
+  "tell_rate": {
+   "default": 0.06,
+   "unit": "per contact per week",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: chance a fresh claim is told to one person he knows in a week"
+  },
+  "tell_bad_bonus": {
+   "default": 0.6,
+   "unit": "x",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: bad news travels faster"
+  },
+  "rival_boost": {
+   "default": 0.8,
+   "unit": "x",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a rival spreads bad news about the man he resents"
+  },
+  "resist": {
+   "default": 0.7,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a close friend discounts bad news about the subject"
+  },
+  "rival_discount": {
+   "default": 0.6,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a man who resents the subject discounts good news about him"
+  },
+  "tell_fam_min": {
+   "default": 15,
+   "unit": "familiarity",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: who is within telling reach"
+  },
+  "cred_floor": {
+   "default": 0.25,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: even a poor source gets this much credit"
+  },
+  "forget_below": {
+   "default": 0.03,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a claim that has faded below this is forgotten (storage only, never a cap)"
+  },
+  "audience_share": {
+   "default": 0.35,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: how much of a named holder's claim reaches the audience he belongs to"
+  },
+  "public_reach_base": {
+   "default": 0.12,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a public act reaches the audience"
+  },
+  "public_reach_sev": {
+   "default": 0.07,
+   "unit": "per severity",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a graver public act reaches further"
+  },
+  "audience_pull": {
+   "default": 0.3,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a named man's belief draws on the audience's impression"
+  },
+  "spill_share": {
+   "default": 0.4,
+   "unit": "share",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a claim spills onto family and outfit"
+  },
+  "standing_pull": {
+   "default": 0.25,
+   "unit": "per week",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: seat standing moves toward the outfit's impression of the man"
+  },
+  "standing_prior": {
+   "default": 1.0,
+   "unit": "weight",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: how much the outfit must have said before standing follows it"
+  },
+  "react_rate": {
+   "default": 0.6,
+   "unit": "per week",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: how readily a connected person meets a reaction"
+  },
+  "react_regard_t": {
+   "default": 0.25,
+   "unit": "regard",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: the line between cold/warm and mixed"
+  },
+  "react_fear_t": {
+   "default": 40,
+   "unit": "fear",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: afraid reading"
+  },
+  "present_n": {
+   "default": 3,
+   "unit": "people",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: how many people are named around a reaction"
+  },
+  "spill_stance": {
+   "default": 6.0,
+   "unit": "stance",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: how others' regard for the subject moves their stance to the connected person"
+  },
+  "react_resent": {
+   "default": 2.0,
+   "unit": "resentment",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: a connected person comes home with a grievance"
+  },
+  "access_rate": {
+   "default": 0.15,
+   "unit": "per week",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: chance an approach comes to a name held in regard"
+  },
+  "access_regard": {
+   "default": 0.4,
+   "unit": "regard",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: regard at which approaches begin"
+  },
+  "answer_base": {
+   "default": 0.5,
+   "unit": "utility",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: how much a man weighs answering a damaging claim about himself"
+  },
+  "answer_fear": {
+   "default": 8.0,
+   "unit": "fear",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: the man leaned on comes away more afraid"
+  },
+  "answer_resent": {
+   "default": 6.0,
+   "unit": "resentment",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: and resents it"
+  },
+  "answer_trust": {
+   "default": 5.0,
+   "unit": "trust",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; I1b: and trusts him less"
+  }
+ },
+ "audiences": {
+  "outfit": {
+   "rule": "org",
+   "label": "the outfit"
+  },
+  "circle": {
+   "rule": "circle",
+   "label": "his people"
+  },
+  "neighbourhood": {
+   "rule": "home_place",
+   "label": "the neighbourhood"
+  }
+ },
+ "claims": {
+  "event_effects": [
+   {
+    "match": [
+     "inform"
+    ],
+    "valence": {
+     "default": -0.4,
+     "outfit": -0.9
+    },
+    "force": {
+     "default": -0.3,
+     "outfit": -0.6
+    },
+    "costly": false
+   },
+   {
+    "match": [
+     "busted",
+     "arrest",
+     "indict"
+    ],
+    "valence": {
+     "default": -0.3,
+     "outfit": -0.1
+    },
+    "force": {
+     "default": -0.2
+    },
+    "costly": false,
+    "public": true
+   },
+   {
+    "match": [
+     "hit",
+     "kill",
+     "murder",
+     "slain",
+     "shoot",
+     "shot"
+    ],
+    "valence": {
+     "default": -0.5,
+     "outfit": 0.3
+    },
+    "force": {
+     "default": 0.8
+    },
+    "costly": true,
+    "public": true
+   },
+   {
+    "match": [
+     "display_beyond_means"
+    ],
+    "valence": {
+     "default": -0.1,
+     "outfit": -0.25
+    },
+    "force": {
+     "default": 0.0
+    },
+    "costly": false
+   },
+   {
+    "match": [
+     "form_shown"
+    ],
+    "valence": {
+     "default": 0.2,
+     "outfit": 0.4
+    },
+    "force": {
+     "default": 0.0
+    },
+    "costly": true
+   },
+   {
+    "match": [
+     "form_missed",
+     "form_wrong"
+    ],
+    "valence": {
+     "default": -0.1,
+     "outfit": -0.4
+    },
+    "force": {
+     "default": -0.1
+    },
+    "costly": false
+   },
+   {
+    "match": [
+     "answered_talk"
+    ],
+    "valence": {
+     "default": -0.15,
+     "outfit": 0.1
+    },
+    "force": {
+     "default": 0.5
+    },
+    "costly": true
+   }
+  ],
+  "circle_phrases": {
+   "cold": "turn cold toward",
+   "warm": "go out of their way for",
+   "afraid": "step carefully around",
+   "mixed": "watch"
+  },
+  "regard_words": {
+   "good": "thinks well of him",
+   "bad": "thinks ill of him"
   }
  }
 }

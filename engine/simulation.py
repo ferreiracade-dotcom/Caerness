@@ -38,6 +38,7 @@ from .org_happenings import next_due_day as next_outfit_incidents_due_day, proce
 from .crime_response import next_due_day as next_crime_response_due_day, process_due as process_due_crime_response
 from .org_lifecycle import next_due_day as next_org_lifecycle_due_day, process_due as process_due_org_lifecycle
 from . import org_membership  # noqa: F401  (registers the lifecycle hooks and the books and discipline agenda)
+from . import claims, news_choices  # noqa: F401  (registers the weekly claims pass and the answer-a-damaging-claim choice)
 from . import org_succession, org_coup  # noqa: F401  (heir, contest, appointments, plots, coups, civil war: lifecycle hooks and agenda)
 from .cultivation import next_cultivation_due_day, process_due_cultivation
 from .groundbinding import next_groundbinding_due_day, process_due_groundbinding

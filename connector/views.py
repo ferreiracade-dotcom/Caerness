@@ -543,6 +543,16 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
         office = facts.office_of(conn, out["id"])
         if office:
             out["office"] = office
+    if kind == "actor" and me is not None:  # what he holds of this man, and what he has been shown
+        from engine import claims, texture
+        if claims.enabled(conn):
+            held = claims.claims_about(conn, out["id"], me)
+            if held:
+                out["held_of_him"] = held
+        if texture.enabled(conn) and out["id"] == me:
+            seen = texture.shown(conn, me)
+            if seen:
+                out["shown_to_him"] = seen
     if slot is not None:
         out["fact"] = facts.view_of(conn, slot)
     else:

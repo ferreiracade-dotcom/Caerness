@@ -140,6 +140,10 @@ def ingest(conn, me: int, place: int | None, day: int) -> None:
             key = f"home:{k['id']}"
             _enter(conn, me, key, "home", f"{B.name_of(conn, k['knower_actor_id'])}: {k['belief_text']}", _via(conn, "home", key, None),
                    B.fig(conn, "sig_base") + B.fig(conn, "sig_him") + B.fig(conn, "sig_circle"), day)
+    from . import claims
+    if claims.enabled(conn):  # his people's days, and what others tell him of himself
+        for key, kind, text in claims.deliveries(conn, me, day):
+            _enter(conn, me, key, kind, text, _via(conn, "home", key, None), B.fig(conn, "sig_base") + B.fig(conn, "sig_him") + B.fig(conn, "sig_circle"), day)
     mk = conn.execute("SELECT COALESCE(MAX(id),0) FROM knowledge").fetchone()[0]
     me_ = conn.execute("SELECT COALESCE(MAX(id),0) FROM events").fetchone()[0]
     mr = conn.execute("SELECT COALESCE(MAX(id),0) FROM rumours").fetchone()[0]
@@ -194,7 +198,7 @@ def block(conn, me: int, place: int | None, people: list[int], *, news: bool = T
             due = B.forms_due(conn, me, int(p))
             shows = [f["key"] for f in due if B.form_known(conn, int(p), f)]
         entry = {"id": int(p), "name": B.name_of(conn, p), "toward_him": rr.get("stance"), "from": rr["from"], "sure": rr["sure"], "changed": rr.get("changed"),
-                 "reads_him_as": rr.get("reads_him_as")}
+                 "holds": rr.get("holds"), "reads_him_as": rr.get("reads_him_as")}
         if shows:
             entry["shows"] = shows
             forms_used.update(shows)
@@ -228,6 +232,10 @@ def block(conn, me: int, place: int | None, people: list[int], *, news: bool = T
         waiting = pending_count(conn, me)
         if waiting:
             out["more_waiting"] = waiting
+    if news:
+        from . import claims
+        if claims.enabled(conn):
+            hidden += claims.cutaways(conn, me, day)
     if hidden:
         out["outside_his_knowledge"] = hidden
     todo = B.unrecorded(conn, me)
