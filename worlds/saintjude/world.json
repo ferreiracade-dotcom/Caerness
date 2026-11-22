@@ -33,6 +33,7 @@
   "gazetteer": "gazetteer.json",
   "outfits": "outfits.json",
   "orgs": "orgs.json",
+  "intake": "intake.json",
   "law": "law.json",
   "lethality": "lethality.json",
   "presence": "presence.json"

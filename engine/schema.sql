@@ -5331,3 +5331,51 @@ CREATE TABLE IF NOT EXISTS claims_state (
     key TEXT PRIMARY KEY,
     value INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS held_things (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    kind_text TEXT NOT NULL DEFAULT '',
+    shape TEXT NOT NULL,
+    backing_table TEXT,
+    backing_id INTEGER,
+    owner_actor_id INTEGER REFERENCES actors(id) ON DELETE SET NULL,
+    people_json TEXT NOT NULL DEFAULT '[]',
+    location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL,
+    place_text TEXT,
+    from_ref TEXT,
+    start_cost REAL NOT NULL DEFAULT 0,
+    income_weekly REAL NOT NULL DEFAULT 0,
+    upkeep_weekly REAL NOT NULL DEFAULT 0,
+    arrears_weeks INTEGER NOT NULL DEFAULT 0,
+    agenda TEXT NOT NULL DEFAULT '',
+    start_day INTEGER NOT NULL,
+    end_day INTEGER,
+    recurrence_days INTEGER,
+    legality TEXT NOT NULL DEFAULT 'unknown' CHECK (legality IN ('legal','grey','illegal','unknown')),
+    knows_json TEXT NOT NULL DEFAULT '[]',
+    consequences_json TEXT NOT NULL DEFAULT '[]',
+    readers_json TEXT NOT NULL DEFAULT '[]',
+    unmapped_json TEXT NOT NULL DEFAULT '[]',
+    source TEXT,
+    real_date TEXT,
+    verify INTEGER NOT NULL DEFAULT 0 CHECK (verify IN (0,1)),
+    depth TEXT NOT NULL DEFAULT 'B',
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('building','active','failing','ended')),
+    ended_reason TEXT,
+    gap_key TEXT,
+    call_id TEXT,
+    created_day INTEGER NOT NULL,
+    updated_day INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_held_things_status ON held_things(status);
+CREATE TABLE IF NOT EXISTS depth_gaps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gap_key TEXT NOT NULL UNIQUE,
+    shape TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    first_day INTEGER NOT NULL,
+    last_day INTEGER NOT NULL,
+    examples_json TEXT NOT NULL DEFAULT '[]',
+    missing_json TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','built'))
+);
