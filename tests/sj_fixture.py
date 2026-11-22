@@ -8,6 +8,7 @@ printed once so later tasks can note the opening time.
 """
 from __future__ import annotations
 
+import atexit
 import os
 import shutil
 import sqlite3
@@ -53,7 +54,19 @@ def build_saintjude(tmp: Path) -> Path:
     _COPIES[0] += 1
     out = Path(tmp) / f"saintjude_{_COPIES[0]}.db"
     shutil.copyfile(src, out)
+    _remove_at_exit(Path(tmp))
     return out
+
+
+_TO_REMOVE: set[Path] = set()
+
+
+def _remove_at_exit(d: Path) -> None:
+    """Callers pass a mkdtemp() dir and never remove it; remove it when the process ends (only under the temp root)."""
+    d = d.resolve()
+    if d.is_relative_to(Path(tempfile.gettempdir()).resolve()) and d not in _TO_REMOVE:
+        _TO_REMOVE.add(d)
+        atexit.register(shutil.rmtree, d, ignore_errors=True)
 
 
 def connect(path: Path) -> sqlite3.Connection:
