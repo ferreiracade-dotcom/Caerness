@@ -28,13 +28,14 @@ if str(ROOT) not in sys.path:
 
 
 def _open(seed: int | None):
-    from tests.sj_fixture import build_saintjude, connect
+    from tests.sj_fixture import build_saintjude
     tmp = Path(tempfile.mkdtemp())
     path = build_saintjude(tmp)
     os.environ["CAERNESS_DB_PATH"] = str(path)
     os.environ["CAERNESS_WORLD_PACKAGE"] = "saintjude"
     import engine.simulation  # noqa: F401
-    conn = connect(path)
+    from engine.db import connect as engine_connect  # the connection the connector and the VM open (and time through), not the fixture's plain one
+    conn = engine_connect()
     if seed is not None:
         conn.execute("UPDATE world_state SET rng_seed=?", (seed,))
         conn.commit()

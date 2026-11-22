@@ -26,6 +26,11 @@ _INTERNAL = ("retinue", "retinue_set", "in_the_life", "habit")
 
 
 def data(conn: sqlite3.Connection) -> dict:
+    from .world_package import _PASS
+    if _PASS["depth"] > 0:  # inside a time skip the data does not change: read the file once per skip, not a stat per figure (hundreds of thousands a year)
+        held = _PASS["data"].get(("presence", id(conn)))
+        if held is not None:
+            return held
     path = package_for(conn).data.get("presence")
     if path is None:
         return {}
@@ -33,6 +38,8 @@ def data(conn: sqlite3.Connection) -> dict:
     key = (str(path), st.st_mtime_ns, st.st_size)
     if _DATA["key"] != key:
         _DATA.update(key=key, data=json.loads(path.read_text(encoding="utf-8")))
+    if _PASS["depth"] > 0:
+        _PASS["data"][("presence", id(conn))] = _DATA["data"]
     return _DATA["data"]
 
 

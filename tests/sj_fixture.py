@@ -69,9 +69,13 @@ def _remove_at_exit(d: Path) -> None:
         atexit.register(shutil.rmtree, d, ignore_errors=True)
 
 
+class _Conn(sqlite3.Connection):
+    """A plain connection that can hold an attribute, as the engine's own can: engine.orgs.db_key keeps the database name on the connection, and on a bare sqlite3.Connection it asked SQLite every call (millions a five-year run, about a seventh of the time)."""
+
+
 def connect(path: Path) -> sqlite3.Connection:
     """A connection to a fixture database with sqlite3.Row rows."""
-    conn = sqlite3.connect(str(path))
+    conn = sqlite3.connect(str(path), factory=_Conn)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA cache_size = -262144")  # as engine.db.connect: a late-run save is far bigger than the default page cache
     conn.execute("PRAGMA temp_store = MEMORY")

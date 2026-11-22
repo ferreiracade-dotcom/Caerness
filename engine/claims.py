@@ -458,6 +458,7 @@ def spread(conn, day: int) -> int:
     hop discounted. A subject can hear what is said of him this way."""
     n = 0
     window, hop = int(B.fig(conn, "tell_window")), B.fig(conn, "hop_factor")
+    fam_min = B.fig(conn, "tell_fam_min")
     fresh = conn.execute("SELECT * FROM claims WHERE holder_kind='actor' AND day>=? AND day<=? AND holder_id<>subject_actor_id ORDER BY id", (int(day) - window, int(day))).fetchall()
     for c in fresh:
         h, s = int(c["holder_id"]), int(c["subject_actor_id"])
@@ -467,7 +468,7 @@ def spread(conn, day: int) -> int:
         rival = 1.0 + (B.fig(conn, "rival_boost") if rs is not None and float(rs["resentment"]) >= 30 and float(c["valence"]) < 0 else 0.0)
         eff = _eff(conn, c, day)
         base = B.fig(conn, "tell_rate") * (0.3 + abs(float(c["valence"]))) * (1.0 + (B.fig(conn, "tell_bad_bonus") if float(c["valence"]) < 0 else 0.0)) * rival
-        for r in conn.execute("SELECT actor_b_id,familiarity FROM relationships WHERE actor_a_id=? AND familiarity>=?", (h, B.fig(conn, "tell_fam_min"))).fetchall():
+        for r in conn.execute("SELECT actor_b_id,familiarity FROM relationships WHERE actor_a_id=? AND familiarity>=?", (h, fam_min)).fetchall():
             t = int(r["actor_b_id"])
             if B._rng(conn, "tell", c["id"], t, day).random() >= base * (0.5 + float(r["familiarity"]) / 100.0):
                 continue
