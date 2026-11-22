@@ -1,6 +1,6 @@
-# The business sphere (design)
+# The business sphere (design) — DRAFT
 
-Status: **Approved by the owner on 2026-11-22, with the answers in §15.** It was first written without the owner, and the remaining **[my call]** marks are designer calls the owner accepted with the draft. The owner's answers are marked **[owner]**.
+Status: **DRAFT, written without the owner.** The supervisor told the brainstorm to design from what was already agreed and to mark every call made here. Where a line says **[my call]**, the owner has not decided it yet. Corrections come back through the supervisor. (An earlier commit wrongly marked this approved; the answers it recorded were not the owner's.)
 
 Sources:
 - the parent spec, `2026-11-19-saintjude-three-spheres-design.md`, §5.1, §5.2, §5.2a–c and §5.3;
@@ -250,7 +250,7 @@ The Concrete Club (bible §3.6) is an arrangement with:
 
 Its victims are real: an outside firm that bids low gets its trucks stopped, its bond refused or its site burned.
 
-**The rigging is tied to whichever machine holds the city [owner].** Politics models the Machine and the organisations that may succeed it. Public contracts and the Concrete Club's arrangement with the board reference the political org that currently holds the awarding offices, never a fixed name. If the Machine falls, a reformer wins, or a successor takes over, the Club's arrangement is renegotiated, broken or carried over through the same tension, deal and absorption machinery. The Club's rotation and tax can then change, stop or move to the new holder.
+**The rigging is tied to whichever machine holds the city.** Politics models the Machine and the organisations that may succeed it. Public contracts and the Concrete Club's arrangement with the board reference the political org that currently holds the awarding offices, never a fixed name. If the Machine falls, a reformer wins, or a successor takes over, the Club's arrangement is renegotiated, broken or carried over through the same tension, deal and absorption machinery. The Club's rotation and tax can then change, stop or move to the new holder.
 
 Private contracts work the same way without the board.
 
@@ -280,12 +280,12 @@ Seeded at the opening on 1 January 1975, from the research files, each with its 
 
 **B fidelity [my call]:**
 - **Giants run monthly.** Each has an agenda, its head (a real person, within the record), its main lines and its relation to Saint Jude: a plant to keep or close, a contract to let, an office to move.
-- **City firms run on the org cadence.** Fewer firms are named up front **[owner]**: the main employers, the family touchpoints, the banks, the *Chronicle*, and firms the story already touches. Each neighbourhood's remaining small trade is a **named neighbourhood abstraction** per trade (for example "the Racks' bars: about 40, total takings X, protection share Y"). This is not a silent bucket, because it states what it stands for. A firm inside it is named on demand through the history catch-all (the history-on-demand design) when play, an NPC or an audit reaches it. From then on it is a full B firm.
+- **City firms run on the org cadence.**
 - **Everything else outside is the named market abstraction.**
 
 **Real people.** Real executives act on their documented public record. Wrongdoing is of documented kinds only (established history for the dead, convictions for the recently alive). Invented people do the dirty work around clean figures.
 
-Real founders may sell, partner or lose out when the run gives a reason, within their documented record **[owner]**. The real people's answers to offers are plausible to the person:
+The real people's answers to offers are plausible to the person:
 - Gates in 1975 does not sell Microsoft to a stranger for cash, because of his documented attitude.
 - Jobs and Wozniak in 1976 might take a seed investor, as they took Markkula.
 
@@ -341,8 +341,6 @@ A new package file, `worlds/saintjude/regions.json` **[my call]**. Each region h
   - Resorts International opening (26 May 1978);
   - the Shore casino question, which the bible leaves **Open**.
 
-  Casinos follow the real referendum and the real 1978 opening by default, and the run can change either **[owner]**. The Shore stays without casinos unless the run's politics widens the law.
-
 The gazetteer has no regions today, so this file is new research. **Real places use the real holders of 1975, within the record. Fictional places use the bible.**
 
 ### 9.2 How a family moves in
@@ -381,7 +379,7 @@ Entry goes through machinery that already exists:
   - friction runs on the normal tension cadence.
 - **C, when play moves there:** the region widens like a sector does (§8.2), with its bars, its locals, its officials and its street.
 
-**Atlantic City is the first region researched and seeded [owner].** After 1978 it is the likeliest C.
+**Atlantic City after 1978 is the likeliest C, so it gets seeded research first [my call].**
 
 ### 9.4 Symmetry
 
@@ -443,7 +441,7 @@ The only exception is the existing lean toward life over death when both are pos
 - **C sectors and regions:** daily for the named people in the story, and weekly for their firms.
 - **Target:** a five-year run with business on should stay within about 1.5× today's run time. This is reported, not enforced. If it is too slow, fix the cadence, not the population.
 
-## 13. Order of work [owner: BZ1 first, then politics P1 alongside BZ2 and BZ3]
+## 13. Order of work [my call]
 
 1. **BZ1 — Shared layer.**
    - Shared drivers, ventures (widened `civilian_projects`), property (widened `buildings`) and the agreements ledger terms and breach path.
@@ -471,17 +469,16 @@ Each step ends with a five-year run that reports its measures (Long-runs rule: a
 
 - Small-business failure: roughly half of new small firms gone within five years.
 - Owner's take per trade within the bible's table ranges.
-- Protection on a share of bars and shops in mob neighbourhoods, per the bible's sense of it. The figure is a check only, never a target the engine steers to **[owner]**.
+- Protection on a share of bars and shops in mob neighbourhoods, per the bible's sense of it, **to fix with the owner**.
 - The families' legitimate holdings grow through the decade, as the bible's §3.3 touchpoints imply.
 - Manufacturing jobs in the city fall and services rise (bible §3.3), driven by firms' agendas, not set.
 - Atlantic City draws Saint Jude men after 1978 if the Shore stays closed (bible line 853).
 
-## 15. The owner's answers (2026-11-22)
+## 15. Open questions for the owner, most important first
 
-1. **Campaign shape:** both over a life, starting small. A campaign begins with one business run by hand and can grow to deals and boardrooms. BZ2 to BZ4 and the city C come before the national population matters, but BZ5 stays in the plan for the later life.
-2. **Regions:** Atlantic City first. Casinos follow the real 1976 referendum and the 1978 opening by default, unless the run changes them (§9.1, §9.3).
-3. **Real founders** may sell, partner or lose out within their documented record (§8.1).
-4. **City firms:** fewer named firms plus named neighbourhood abstractions, named on demand through the history catch-all (§8.1).
-5. **Protection reach:** a check only, never a target (§14).
-6. **Order:** BZ1 first, then politics P1 alongside BZ2 and BZ3 (§13).
-7. **Added by the owner:** politics models the Machine and its possible successor organisations. Public contracts and the Concrete Club stay tied to whichever machine holds the city (§6.7, §10).
+1. **What does a business campaign's day look like for you?** Running one shop by hand, or deals and boardrooms over years? This decides whether BZ7's C widening or BZ5's national population matters first. I assumed both, with the city first.
+2. **Expansion targets and the Shore casinos.** Is Atlantic City the first region to research? And does the Shore stay casino-free by default (bible Open) unless the run's politics changes it? I assumed yes to both.
+3. **Real executives' answers.** May a real founder (Gates, Jobs) plausibly sell, partner or be outcompeted when the run gives a reason, or should the big tech names keep their real path unless the protagonist acts directly on them? I assumed the first, weighed on their documented attitudes.
+4. **How many city firms at B.** A few hundred named firms, or fewer with named market abstractions per neighbourhood? This is a cost and depth trade.
+5. **Protection's reach.** How much of the city's small business pays, by neighbourhood? I need a number to calibrate against, not to enforce.
+6. **Order against politics.** BZ1 first, then politics P1 alongside BZ2 to BZ3? This is what both drafts assume.
