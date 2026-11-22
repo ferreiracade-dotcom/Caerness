@@ -1,6 +1,6 @@
 # The politics sphere (design)
 
-Date: 2026-11-22. Status: **DRAFT**, written without the owner on the supervisor's instruction, from what was already agreed. The owner answered the open questions on 2026-11-22 (§10). Question 3 still awaits the owner's confirmation. Calls the owner has not ruled on stay marked **[my call]**.
+Date: 2026-11-22. Status: **DRAFT**, written without the owner on the supervisor's instruction, from what was already agreed. The owner answered the open questions on 2026-11-22 and then reframed politics as a general field, not as the Machine (binding; §10). Question 3 still awaits the owner's confirmation. Calls the owner has not ruled on stay marked **[my call]**.
 
 Builds on:
 - `2026-11-19-saintjude-three-spheres-design.md`: §5.1 the org core; §5.2 the politics layer; §5.2a B/C depth, the shared drivers, ventures and property; §5.2b the agreements ledger, real people and widening circles; §5.2c politics at B depth and limits that are plausibility, not ceilings.
@@ -10,14 +10,26 @@ Builds on:
 
 ## 1. Intent
 
-Saint Jude is a machine city. Its politics should be what it was in 1975:
-- favours, jobs and the vote delivered ward by ward;
-- an old Irish Democratic machine, under pressure from the Italians, the Black wards and the reformers;
-- appointed prosecutors and judges, each with a sponsor;
-- a broke city that needs builders;
-- above it, Trenton and Washington on their real calendars, sending down laws, money and pressure.
+Politics is a **general field**, not a machine story (owner, 2026-11-22, binding). It is made up of:
+- offices at every level, from ward to state and beyond;
+- voter groups by neighbourhood and identity, each with its own grievances and turnout;
+- parties and factions;
+- organised interests: unions, builders, banks, the Church, police and fire unions, landlords, the press, civil-rights groups;
+- money and patronage;
+- the press and scandal;
+- prosecutors and courts;
+- higher levels of government;
+- individuals.
 
-Politics must always run, so that a mob or business campaign feels it: the alderman who stops taking calls in an election year, the new prosecutor who wants headlines, the casino vote. It must also be playable all the way up, so the protagonist can buy an alderman, become one, run the Machine, or run for governor or president, if his life can plausibly carry him there.
+Each acts for itself on the generic org core. Saint Jude in 1975 is where the field starts, not a fixed shape:
+- an old Irish Democratic machine is dominant, holding parts of the field and under pressure from the Italians, the Black wards and the reformers;
+- prosecutors and judges are appointed, each with a sponsor;
+- the city is broke and needs builders;
+- Trenton and Washington sit above it on their real calendars, sending down laws, money and pressure.
+
+The Machine is one organisation in the package data. It can lose any part it holds, and politics carries on without it.
+
+Politics must always run, so that a mob or business campaign feels it: the alderman who stops taking calls in an election year, the new prosecutor who wants headlines, the casino vote. It must also be playable all the way up. The protagonist can work with or against any actor at any level: buy an alderman, become one, build a coalition, serve or fight the Machine or whatever replaces it, or run for governor or president, if his life can plausibly carry him there.
 
 ## 2. Goals, non-goals, anti-goals
 
@@ -27,7 +39,7 @@ Politics must always run, so that a mob or business campaign feels it: the alder
 - Office-holders with powers, agendas and favours.
 - Votes and laws with effects.
 - Appointments made through sponsors.
-- The Machine as a living organisation.
+- A field of actors acting for themselves: voter groups, parties and factions, organised interests, the press, prosecutors and courts, higher government and individuals. Any organisation, including the Machine, can rise, hold, lose or yield any part of it.
 - Corruption and the law's answer.
 - C depth where the protagonist goes.
 
@@ -41,6 +53,7 @@ Politics must always run, so that a mob or business campaign feels it: the alder
 - **A ladder or a menu.** For example "alderman, then mayor, then governor" as fixed steps, or a list of allowed bribes. The engine vetoes only contradictions: a 30-year-old cannot be president, and a convicted felon could not hold some offices.
 - **Caps on outcomes,** such as "reformers win at most 1 in 3". The bible's "about one in three" is a calibration target.
 - **A player exemption.** He can be indicted, beaten at the polls, betrayed by a ward leader, or used by a governor the same as anyone.
+- **A special case for any actor or outcome.** There is no Machine-only code path and no scripted aftermath. A successor machine, a reform government, candidate-centred coalitions, kingmaker interests and rule from above all come out of the same drivers.
 - **Real politicians given invented crimes.**
 - **A silent bucket:** a seat bought in narration that the engine then forgets.
 
@@ -60,7 +73,7 @@ Politics must always run, so that a mob or business campaign feels it: the alder
 1. **Offices as world_facts only, with the GM narrating elections.** Cheap, but it is a silent bucket. Results are not plausibility-checked, and favours are forgotten. Rejected.
 2. **A separate political simulator:** its own tables for parties, votes and polls, beside the org core. It has full detail, but it forks the core. Business, the mob and the press could not share people, money and arrangements with it. Rejected.
 3. **Politics on the org core, with an electorate model built on the information design's audiences. [chosen; my call, following §5.2's direction]**
-   - Parties, the Machine, ward organisations, reform clubs and campaign committees are orgs with seats.
+   - Every actor in the field is an org with seats, or an individual: parties and factions, the Machine, reform clubs, organised interests, the press, campaign committees.
    - Offices are seats in institutions.
    - Elections are ventures (§5.2a) with a dated outcome.
    - Voters are audiences with blocs and impressions.
@@ -86,46 +99,56 @@ Politics must always run, so that a mob or business campaign feels it: the alder
   - the NJ Assembly in odd years;
   - the NJ Senate in 1977, 1981, 1983, 1987 [memory, to verify];
   - the Saint Jude mayor in 1975, 1979 and on;
-  - the council on its own cycle: elected two years after the mayor (1977, 1981), so that the Machine fights two campaigns. Bible §4.6 leaves the cycle unstated. **[Accepted by the owner, 2026-11-22: the council follows this calendar.]**
+  - the council on its own cycle: elected two years after the mayor (1977, 1981), so that every party and interest fights two campaigns. Bible §4.6 leaves the cycle unstated. **[Accepted by the owner, 2026-11-22: the council follows this calendar.]**
 - **Seeding.** Real holders come from the research file, at their real age and health. Saint Jude's own officials are fictional, as the city is: the mayor, the 15 councilmen, the ward leaders, the boards, the county chairman, and the city's state senators (Design: about six) and assemblymen. They are generated at the opening with lived histories, following the bible's character text for the Machine, the reformers and the Black wards.
 - **The firewall on real figures:** each acts within who they documentably were (the content limits). Byrne, for example, governs, signs and vetoes as himself, with no invented wrongdoing.
 
-### 5.2 Political organisations on the org core
+### 5.2 The field's actors on the org core
 
-These are org kinds in package data:
-- **The party:** the county Democratic organisation, with a chairman, a county committee and **ward leaders** over **precinct captains**. These are seats, with standing, loyalty and patronage lines.
-- **Rival factions** within the party: the Irish old guard, the rising Italians, the Black ward leaders.
-- **The Republicans,** small in the city and stronger in the suburbs and state.
-- **Reform clubs.**
-- **Civic and ethnic organisations** that deliver or withhold votes: parishes, the Sons of Italy, Black churches and political clubs, unions (§5.6).
-- **Campaign committees:** one per candidate per race, which are ventures.
+**Every actor acts for itself (owner, 2026-11-22, binding).** Each actor below is an org kind or a person on the generic org core. Each has its own goals, purse, seats, standing with voter groups, ledger entries and temperament, and weighs its own acts. None has a special code path. Package data says which actors exist in 1975 and what each holds.
 
-The **Machine's economy** runs as money and arrangements, exactly like the Ladder:
-- city jobs are **patronage lines**, given by office-holders to ward leaders and passed on to precinct captains' people;
-- **favours** go on the agreements ledger: a pothole filled, a licence fast-tracked, a nephew hired, a judge's ear;
-- **kickbacks** on contracts and **campaign money** are arrangements with flows.
+- **Parties and factions:** the county Democratic organisation, with a chairman, a county committee, ward leaders and precinct captains as seats; factions within it (the Irish old guard, the rising Italians, the Black ward leaders); the Republicans, small in the city and stronger in the suburbs and state; reform clubs.
+- **Organised interests:**
+  - unions: the building trades, the Teamsters, public-employee unions, and the police and fire unions;
+  - builders and contractors;
+  - banks;
+  - the Church: the Archdiocese and the parishes;
+  - landlords and real estate;
+  - the press, whose own politics comes from the information design;
+  - civil-rights and Black political organisations;
+  - ethnic and civic societies;
+  - the families, whose reach is the Pad extended upward (§5.6).
+- **Voter groups** (§5.3): electorates, not orgs, but with their own grievances and turnout.
+- **Prosecutors and courts** (§5.5, §5.7), and **higher levels of government** (§5.8), as office-holders with their own drivers.
+- **Individuals:** a rich donor, a fixer, a priest with a following, a columnist, a candidate with no organisation behind him.
 
-A ward leader delivers votes in proportion to his jobs, his people's loyalty and his standing. When the jobs dry up (the money crisis), his hold weakens. That is the driver behind "old and tired".
+**How actors act.** They endorse and deliver votes, give money (legal or not), put workers on the streets on election day, apply pressure (a strike before a budget vote, a sermon, an editorial, a lawsuit), trade favours on the agreements ledger, and bargain for what they want back: contracts, jobs, zoning, licences, laws, appointments, protection.
 
-**The Machine can be succeeded (owner, 2026-11-22).** The Machine is an org like any other, not a permanent fixture. Drivers that already exist can break it:
+**Money and patronage are generic.** Public jobs are **patronage lines** held by whichever office-holder controls the hiring and passed down to whoever he chooses. **Favours** go on the agreements ledger: a pothole filled, a licence fast-tracked, a nephew hired, a judge's ear. **Kickbacks** on contracts and **campaign money** are arrangements with flows. An organisation's delivery of votes follows from what it can give, its people's loyalty and its standing. When it has less to give (the money crisis), its hold weakens.
+
+**The Machine is one organisation (owner, 2026-11-22).** In 1975 it holds large parts of the field: the party's chairmanship, most ward leaderships, the patronage lines from City Hall, the sponsor chain for appointments, and ledger entries with interests across the city. That is starting data, not a role. Drivers that already exist can take any part of it away:
 - lost jobs and money;
 - defeats at the polls;
 - indictments;
 - a boss's death or fall;
 - ward leaders defecting;
-- a bloc turning.
+- a voter group turning;
+- an interest finding a better partner.
 
-What follows comes out of the same weighed acts as for mob families: absorption, splits, succession. The Machine can:
-- **weaken:** fewer wards delivered, captains drifting;
-- **split:** a faction walks out with its wards, forming a new org through the org core's split path;
-- **be reformed from inside:** a reform faction takes the chairmanship and the seats change hands;
-- **be replaced by a successor organisation:** a reform coalition, a rival boss's machine (the rising Italians, the Black ward leaders) or a new coalition. The successor takes over the patronage lines, the ward seats and the ledger entries it can hold, and the old Machine's debts and grudges carry into the new arrangement.
+It can weaken, split through the org core's split path, be taken over from inside, or dissolve, through the same weighed acts as mob families: absorption, splits, succession.
 
-No outcome is scripted. The bible's 1975 Machine is the starting state. The player can work inside the Machine, inside a successor, or build the successor himself, under the same rules.
+**After the Machine, politics continues.** What fills the field is decided by the run's drivers, with no special case for any outcome. The possibilities include:
+- a successor machine (a rival boss's, the rising Italians', the Black ward leaders');
+- reform government;
+- fragmented, candidate-centred coalitions;
+- kingmaker interests (the unions, the builders, the press);
+- rule from above (state takeover, federal pressure, a receiver over a broke city).
+
+Whoever wins the old patronage lines, seats and ledger entries takes them on, and the old debts and grudges carry into the new arrangements.
 
 ### 5.3 The electorate and elections (B depth always)
 
-- **Voters are audiences** (information design §7.1). Each ward has blocs by descent, class, parish, union and age, with shares from the package data and drifting with the population layer. Each bloc holds an **impression** of each candidate and party, built from claims, the press, the candidate's deeds, the economy and endorsements.
+- **Voters are audiences** (information design §7.1). Each ward has voter groups by neighbourhood and identity (descent, class, parish, union, age), each with its own grievances and turnout, with shares from the package data and drifting with the population layer. Each bloc holds an **impression** of each candidate and party, built from claims, the press, the candidate's deeds, the economy and endorsements.
 - **A race** is a venture.
   1. **Filing.** Candidates decide to run as weighed choices, from ambition, standing, money, the party's backing and the odds they can read.
   2. **The primary,** then the general election.
@@ -133,14 +156,14 @@ No outcome is scripted. The bible's 1975 Machine is the starting state. The play
   4. **Result day.**
 - **The vote is computed per ward and bloc from drivers:**
   - incumbency;
-  - party and machine delivery (ward leaders' strength times their effort for this candidate);
+  - organised delivery: each party, faction or interest's strength in that group times its effort for this candidate;
   - the bloc's impression;
   - ethnic and personal ties;
   - the economy (unemployment, the city's cuts);
   - scandal (claims in that audience);
   - money spent and on what;
-  - endorsements (unions, the *Chronicle*, the Church, the families' quiet word);
-  - turnout, by weather, the stakes and the machine's cars to the polls;
+  - endorsements (unions, the *Chronicle*, the Church, civil-rights groups, the families' quiet word);
+  - turnout per group, from its grievances, the stakes, the weather and whoever is driving its voters to the polls;
   - a seeded noise term.
 
   No result is fixed. The bible's "reformers win about one in three" and incumbents' advantage are calibration targets, reported across seeds.
@@ -159,7 +182,8 @@ No outcome is scripted. The bible's 1975 Machine is the starting state. The play
   - pardon or commute (the Governor; the President).
 - **Votes.** A council or board vote is an agenda item. Each member weighs it:
   - his ward's impression;
-  - his patron's line;
+  - his patron's or faction's line;
+  - the interests pressing him;
   - favours owed;
   - money (legal or not);
   - his own agenda and conscience;
@@ -177,22 +201,16 @@ No outcome is scripted. The bible's 1975 Machine is the starting state. The play
 
 ### 5.5 Appointments by sponsorship
 
-Prosecutors and judges are appointed by the Governor with the Senate's consent, on the recommendation of the county's senators and chairman (bible §4.3). Each appointment is a chain of weighed choices:
+Prosecutors and judges are appointed by the Governor with the Senate's consent, on the recommendation of the county's senators and chairman (bible §4.3). Whoever holds those seats at the time is the sponsor chain, whether that is the Machine, a successor or a reform chairman. Each appointment is a chain of weighed choices:
 1. who is put forward (sponsors' loyalties and debts);
 2. the Governor's counsel weighing fit, politics and the press;
 3. Senate courtesy, under which a home-county senator can block a nominee.
 
 Every appointee has a **sponsor**, and owes him. A change of Governor (1977, 1981) can change the County Prosecutor. The same machinery covers the Police Commissioner (appointed by the mayor), the board members and the patronage posts.
 
-### 5.6 Unions, the Church and the families as political actors
+### 5.6 The families as political actors
 
-These are orgs already, or are coming with business. Their political acts go through the same drivers:
-- **Endorsements** and **delivered votes:** union halls, parish pulpits, the families' word in the Italian wards.
-- **Money:** union PACs, the Archdiocese's influence, mob cash.
-- **Workers on election day.**
-- **Pressure:** strikes before a budget vote, or a sermon.
-
-The families' political reach is the Pad extended upward. An alderman or a judge can be "on" an arrangement, with the same reach, integrity and exposure rules as the police Pad, and the same law response.
+The families are organised interests like the others (§5.2). Their political reach is the Pad extended upward. An alderman or a judge can be "on" an arrangement, with the same reach, integrity and exposure rules as the police Pad, and the same law response.
 
 ### 5.7 Corruption and the law's answer
 
@@ -213,7 +231,7 @@ The families' political reach is the Pad extended upward. An alderman or a judge
 C is a later build per level (§5.2a), using the same drivers in finer detail. When the protagonist runs or works a race, more of the world comes into focus:
 
 - **City (the first C to be built; owner, 2026-11-22). Building it first does not exclude the levels above: the protagonist can be at any level from the start, played at B until that level's C lands.**
-  - the Machine, or its successor, in full, whether he works inside it or against it: the chairman's office, ward leaders and precinct captains as named people, jobs handed out, favours called in, factions manoeuvring, and a succession fight when one comes;
+  - the field around him in full: the actors he works with or against (party officers, ward leaders and precinct captains, interest leaders, editors, the prosecutor's office) as named people; jobs handed out, favours called in, factions manoeuvring, and the fights when an organisation's hold breaks;
   - his ward or the citywide race in full: precinct-level blocs, door-knocking, rallies, the precinct captains as named people;
   - rival candidates with campaigns;
   - his party's factions;
@@ -225,7 +243,7 @@ C is a later build per level (§5.2a), using the same drivers in finer detail. W
 
 ### 5.10 The protagonist under the same rules; reaching the top
 
-- **He can hold any seat he can plausibly win or be given, at any level (owner, 2026-11-22):** ward, city, county, State Senate, state and beyond, inside the Machine or against it. Eligibility is law (age, residence, citizenship; bars for some convictions). Everything else is weighed: money, the party's backing, standing in the audiences, his record, his age, his temperament and competence, rivals and luck.
+- **He can hold any seat he can plausibly win or be given, at any level (owner, 2026-11-22):** ward, city, county, State Senate, state and beyond, with or against any actor at any level. Eligibility is law (age, residence, citizenship; bars for some convictions). Everything else is weighed: money, the backing of parties, factions and interests, standing in the audiences, his record, his age, his temperament and competence, rivals and luck.
 - **There are no fixed rungs.** A rich outsider can run for governor without having been an alderman. It is plausible but hard, and the drivers say how hard.
 - **His past is a cost.** A mob record, an arrest, or a known associate is a claim that can surface (the press's morgue, a rival's opposition research, an informer, the SCI). He hides it, buys it off, outlives it or loses to it.
 - **The presidency is reachable and very rare.** It needs decades of standing, a national base, money, the party's nomination, a moment and luck. Nothing caps it; the drivers make it what it was.
@@ -249,7 +267,7 @@ C is a later build per level (§5.2a), using the same drivers in finer detail. W
 
 1. **P1, the city at B.**
    - Offices and the calendar.
-   - Parties, the Machine and the wards as orgs.
+   - The field's actors as orgs, with the 1975 holdings in package data: parties and factions (the Machine among them), the organised interests, and the wards.
    - Patronage lines and favours on the ledger.
    - Electorate blocs per ward.
    - Mayoral and council elections as ventures.
@@ -260,12 +278,12 @@ C is a later build per level (§5.2a), using the same drivers in finer detail. W
 
    Builds after (owner, 2026-11-22) the business layer's shared drivers, ventures and the agreements ledger (§5.2a, §5.2b), and information phase 1b's audiences.
 2. **P2, the state and the nation at B.** Real holders and the calendar, coarse elections with the real default, laws with effects, and federal and state investigators driven by ambition.
-3. **P3, the city at C:** the Machine (or its successor) as named people, for working inside it or against it, and campaigns run ward by ward.
+3. **P3, the city at C:** the actors around the protagonist as named people, and campaigns run ward by ward.
 4. **P4 and later:** the state at C (Trenton), then the nation at C.
 
 ## 8. Calibration targets (reported, never enforced; from memory, approximate)
 
-- Incumbent mayors and councilmen are usually re-elected. Machine candidates win most primaries; reformers win about one race in three (bible).
+- Incumbent mayors and councilmen are usually re-elected. While the Machine holds the party, its candidates win most primaries; reformers win about one race in three (bible). These are targets for 1975 conditions only, and the drivers move them when the field changes.
 - Turnout in city elections runs at roughly 40–60%, higher in presidential years.
 - Some indictments of local officials per decade in a NJ city of this kind (Newark 1970, Hudson 1971–72).
 - Prosecutors turn over on a change of Governor about as often as the bible's text implies.
@@ -300,9 +318,9 @@ C is a later build per level (§5.2a), using the same drivers in finer detail. W
 
 ## 10. The owner's answers (2026-11-22)
 
-**Earlier correction:** the Machine is not permanent. It can weaken, split, be reformed or be replaced by a successor (a reform faction, a rival boss's machine, a new coalition), and the player can work within either. See the end of §5.2.
+**Reframe (binding, supersedes the earlier Machine-first framing):** politics is a general field of actors that each act for themselves on the generic org core. The Machine is one organisation in Saint Jude's package data: dominant in 1975, holding parts of the field, and able to lose any part. When it is gone, politics continues, and what follows (a successor machine, reform government, fragmented candidate-centred coalitions, kingmaker interests, rule from above) is decided by the run's drivers, with no special case for any of them. The protagonist can work with or against any actor at any level (§1, §5.2).
 
-1. **Role:** both, inside the Machine and against it. The role can be anything at any level: ward, city, county, State Senate, state and beyond. Offices and races are modelled generically across levels, not as city-only roles (§5.1, §5.9, §5.10).
+1. **Role:** with or against any actor. The role can be anything at any level: ward, city, county, State Senate, state and beyond. Offices and races are modelled generically across levels, not as city-only roles (§5.1, §5.9, §5.10).
 2. **Council cycle:** accepted. The council is elected two years after the mayor (1977, 1981).
 3. **National races: PENDING the owner's confirmation.** Proposed: real national results hold unless a named cause from the run changes them, whether that cause comes from the protagonist or from the simulation itself, directly or indirectly (history design H1) (§5.3).
 4. **First C:** accepted, the city first as the build order. Answer 1 means the levels above are not excluded.
