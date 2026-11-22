@@ -374,7 +374,8 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
     from . import offices  # the package's offices and their holders (a no-op without politics data)
     for name, n in offices.build(conn, day).items():
         counts[f"politics:{name}"] = n
-    from . import civic_field  # what each political actor holds (after the offices exist)
+    from . import civic_field, electorate  # the voters' groups, then what each political actor holds (after the offices exist)
+    counts['politics:voter_groups'] = electorate.seed_groups(conn)
     for name, n in civic_field.seed_field(conn, day).items():
         counts[f"politics:{name}"] = n
     from . import outfit_money  # after the people: holdings need the units and men (outfit_money imports this module)

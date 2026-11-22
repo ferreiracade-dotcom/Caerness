@@ -705,6 +705,10 @@
   "neighbourhood": {
    "rule": "home_place",
    "label": "the neighbourhood"
+  },
+  "electorate": {
+   "rule": "voter_group",
+   "label": "the voters"
   }
  },
  "claims": {

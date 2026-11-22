@@ -1423,7 +1423,7 @@
     "org": "county_party"
    },
    "stake_kind": "delivery",
-   "wards": [
+   "districts": [
     1,
     2,
     3,
@@ -1443,7 +1443,7 @@
     "org": "reform_clubs"
    },
    "stake_kind": "delivery",
-   "wards": [
+   "districts": [
     11,
     12
    ],
@@ -1454,7 +1454,7 @@
     "org": "county_opposition"
    },
    "stake_kind": "delivery",
-   "wards": [
+   "districts": [
     14
    ],
    "strength": 0.6
@@ -1464,7 +1464,7 @@
     "org": "civil_rights"
    },
    "stake_kind": "delivery",
-   "wards": [
+   "districts": [
     8
    ],
    "strength": 0.6
@@ -1474,7 +1474,7 @@
     "org": "county_party"
    },
    "stake_kind": "delivery",
-   "wards": [
+   "districts": [
     8,
     11,
     12,
@@ -1487,7 +1487,7 @@
     "org": "taxpayers"
    },
    "stake_kind": "delivery",
-   "wards": [
+   "districts": [
     14,
     12
    ],

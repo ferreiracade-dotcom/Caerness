@@ -53,7 +53,7 @@ def strength(conn, holder_kind: str, holder_id: int) -> float:
 # ---- moving stakes ----------------------------------------------------------------------------------------------
 
 def _filler(conn, org_id: int, stake_ref: str) -> int | None:
-    """Who in an organisation fills a party post: its head for a chairmanship, a unit leader for the n-th ward, else its head."""
+    """Who in an organisation fills a party post: its head for a chairmanship, a unit leader for the n-th district, else its head."""
     m = re.search(r"-(\d+)$", stake_ref)
     if m:
         leaders = [int(r[0]) for r in conn.execute("SELECT leader_actor_id FROM org_units WHERE org_actor_id=? AND leader_actor_id IS NOT NULL ORDER BY id", (int(org_id),))]
@@ -111,14 +111,14 @@ def _resolve(conn, holder: dict) -> int | None:
     return None
 
 
-def _ward_of(group_key: str) -> int | None:
-    m = re.match(r"ward-(\d+)", group_key or "")
+def _district_no(group_key: str) -> int | None:
+    m = re.match(r"[a-z]+-(\d+)", group_key or "")
     return int(m.group(1)) if m else None
 
 
 def seed_field(conn, day: int | None = None) -> dict:
     """Give every holder its 1975 stakes from the package data (idempotent: a stake already held by that holder is skipped).
-    Delivery stakes name wards and are expanded over the voter groups that exist (see `seed_delivery`)."""
+    Delivery stakes name districts by number and are expanded over the voter groups that exist (see `seed_delivery`)."""
     day = _day(conn) if day is None else int(day)
     out = {"stakes": 0, "unresolved": 0}
     for h in _rules(conn).get("holdings_1975") or []:
@@ -138,7 +138,7 @@ def seed_field(conn, day: int | None = None) -> dict:
 
 
 def seed_delivery(conn, day: int | None = None) -> int:
-    """Delivery stakes over the voter groups of the named wards (run again when the groups exist)."""
+    """Delivery stakes over the voter groups of the named districts (run again when the groups exist)."""
     day = _day(conn) if day is None else int(day)
     groups = conn.execute("SELECT group_key FROM voter_groups ORDER BY id").fetchall()
     n = 0
@@ -149,7 +149,7 @@ def seed_delivery(conn, day: int | None = None) -> int:
         if hid is None:
             continue
         for g in groups:
-            if _ward_of(g[0]) in set(h.get("wards") or []):
+            if _district_no(g[0]) in set(h.get("districts") or []):
                 if conn.execute("SELECT 1 FROM field_holdings WHERE holder_kind='org' AND holder_id=? AND stake_kind='delivery' AND stake_ref=? AND ended_day IS NULL",
                                 (hid, g[0])).fetchone():
                     continue

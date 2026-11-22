@@ -63,6 +63,15 @@ def kin(conn, subject: int) -> dict[int, float]:
 
 # ---- audiences ----------------------------------------------------------------------------------------------
 
+_RULES: dict[str, dict] = {}  # rules a package audience may name besides org, circle and home_place, supplied by another layer
+
+
+def register_audience_rule(rule: str, *, of_subject, is_member, members) -> None:
+    """Supply a membership rule the package's `audiences` may name. of_subject(conn, subject, key, df) -> [audience dicts];
+    is_member(conn, actor, aud) -> bool; members(conn, aud) -> [actor ids] (a crowd with no enumerable members gives [])."""
+    _RULES[rule] = {"of_subject": of_subject, "is_member": is_member, "members": members}
+
+
 def _aud(conn, key: str, ref: int, label: str) -> dict:
     r = conn.execute("SELECT id,label FROM audiences WHERE key=? AND ref_id=?", (key, int(ref))).fetchone()
     if r is None:
@@ -86,6 +95,8 @@ def audiences_of(conn, subject: int) -> list[dict]:
             if loc is not None:
                 nm = conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()
                 out.append(_aud(conn, key, loc, f"{df.get('label', key)}: {nm[0] if nm else loc}"))
+        elif rule in _RULES:
+            out.extend(_RULES[rule]["of_subject"](conn, subject, key, df))
     return out
 
 
@@ -101,6 +112,8 @@ def is_member(conn, actor: int, aud: dict) -> bool:
         return int(actor) in kin(conn, aud["ref"])
     if rule == "home_place":
         return _home(conn, actor) == aud["ref"]
+    if rule in _RULES:
+        return bool(_RULES[rule]["is_member"](conn, int(actor), aud))
     return False
 
 
@@ -111,6 +124,8 @@ def members(conn, aud: dict) -> list[int]:
         return [int(r[0]) for r in conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active'", (aud["ref"],))]
     if rule == "circle":
         return list(kin(conn, aud["ref"]))
+    if rule in _RULES:
+        return list(_RULES[rule]["members"](conn, aud))
     return []
 
 
