@@ -100,6 +100,44 @@ def test_the_head_who_rose_from_a_unit_is_not_picked_to_lead_it_again():
     assert a not in {int(x["actor_id"]) for x in org_lifecycle.unit_pool(conn, unit, 10)}
 
 
+def test_the_law_and_the_organisation_act_on_the_protagonist_as_on_anyone():
+    """The protagonist lives under the same rules: made a soldier of the family and named on a homicide report, the law holds, charges and
+    disposes of him like the other men, and the organisation's money passes through him like theirs."""
+    import json
+    from engine import crime_response as cr
+    from engine.org_money import Roster, post_period
+    from engine.player import set_player
+    from tests.outfit_choice_fixture import DAY, forced_roll, open_world
+    w = open_world()
+    c = w.conn
+    cr.ensure_tables(c)
+    c.execute("UPDATE world_state SET current_day=? WHERE id=1", (DAY,))
+    men = [int(r[0]) for r in c.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' AND role_key='soldier' ORDER BY actor_id LIMIT 4", (w.org,))]
+    me, others = men[0], men[1:]
+    set_player(c, me)  # the protagonist is the lead on the report
+    rid = cr.open_report(c, crime_kind="homicide", day=DAY, offender_actor_id=me, victim_actor_id=None, location_id=w.ground,
+                         metadata={"identified": True, "public": True, "co_defendants": others})
+    with forced_roll("pad_publicity", "identify"):
+        for day in range(DAY + 1, DAY + 4):
+            c.execute("UPDATE world_state SET current_day=? WHERE id=1", (day,))
+            cr.process_due(c, day)
+    rep = c.execute("SELECT * FROM crime_reports WHERE id=?", (rid,)).fetchone()
+    assert rep["status"] == "arrest", rep["status"]
+    assert c.execute("SELECT 1 FROM custody WHERE actor_id=? AND case_id=? AND kind IN ('held','bailed')", (me, rep["case_id"])).fetchone() is not None, "the law did not hold the protagonist"
+    meta = json.loads(c.execute("SELECT metadata_json FROM law_enforcement_cases WHERE id=?", (rep["case_id"],)).fetchone()[0])
+    day = DAY + 4
+    while day <= int(meta["disposition_day"]) + 3:
+        c.execute("UPDATE world_state SET current_day=? WHERE id=1", (day,))
+        cr.process_due(c, day)
+        day += 1
+    assert c.execute("SELECT 1 FROM case_dispositions WHERE actor_id=? AND case_id=?", (me, rep["case_id"])).fetchone() is not None, "the protagonist got no disposition"
+    # and the organisation's money: his kick-up and his share are posted as for the others
+    before = c.execute("SELECT COUNT(*) FROM org_money WHERE from_actor_id=? OR to_actor_id=?", (me, me)).fetchone()[0]
+    post_period(c, day + 60, 60)
+    after = c.execute("SELECT COUNT(*) FROM org_money WHERE from_actor_id=? OR to_actor_id=?", (me, me)).fetchone()[0]
+    assert after > before, "no organisation money passed through the protagonist"
+
+
 def _run_all() -> int:
     tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_") and callable(f)]
     failed = 0
