@@ -7,7 +7,8 @@ from engine.player import get_player
 
 # result key -> table the new entity lives in
 _ENTITY = (("actor_id", "actors"), ("enterprise_id", "civilian_enterprises"), ("outfit_id", "underworld_organizations"),
-           ("institution_actor_id", "actors"), ("rumour_id", "rumours"))
+           ("institution_actor_id", "actors"), ("rumour_id", "rumours"),
+           ("held_thing_id", "held_things"))  # last: a backed shape records its own table first
 
 
 def _protagonist(conn, call_id: str, details: dict, player) -> dict:

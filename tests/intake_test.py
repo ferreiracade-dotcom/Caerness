@@ -298,6 +298,39 @@ def test_a_building_thing_goes_live_when_its_commitment_settles():
     assert c.execute("SELECT status FROM held_things WHERE id=?", (out["held_thing_id"],)).fetchone()[0] == "active"
 
 
+def _connector_world():
+    from connector import store
+    from engine.player import set_player
+    w = _open_world()
+    c = w.conn
+    store.ensure_connector_schema(c)
+    set_player(c, w.capo)
+    c.commit()
+    return w, c
+
+
+def test_the_same_call_twice_holds_one_thing_and_one_gap_bump_through_the_connector():
+    from connector.authoring import author
+    w, c = _connector_world()
+    r1 = author(c, "t6-1", "a pigeon club", {"what": "the Ferry Street pigeon club"})
+    r2 = author(c, "t6-1", "a pigeon club", {"what": "the Ferry Street pigeon club"})
+    assert r2.get("replayed") and r2["held_thing_id"] == r1["held_thing_id"]
+    assert c.execute("SELECT COUNT(*) FROM held_things WHERE call_id='t6-1'").fetchone()[0] == 1
+    assert c.execute("SELECT count FROM depth_gaps WHERE gap_key=?", (r1["gap"],)).fetchone()[0] == 1
+    assert c.execute("SELECT entity_table FROM authored_entities WHERE call_id='t6-1'").fetchone()[0] == "held_things"
+
+
+def test_lookup_finds_a_held_thing_and_lists_gaps():
+    from connector.authoring import author
+    from connector.views import lookup
+    w, c = _connector_world()
+    author(c, "t6-2", "a pigeon club", {"what": "the Ferry Street pigeon club", "money": {"income": "50 a week"}})
+    hit = lookup(c, "the Ferry Street pigeon club")
+    assert hit["found"] and hit["kind"] == "thing" and hit["basics"]["depth"] == "B", hit
+    gaps = lookup(c, "gaps")
+    assert gaps["kind"] == "gaps" and gaps["gaps"][0]["count"] >= 1
+
+
 tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
 tests.sort(key=lambda f: f.__code__.co_firstlineno)
 

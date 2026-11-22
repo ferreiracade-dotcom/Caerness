@@ -435,6 +435,23 @@ def _crew_view(conn, c, me: int | None) -> dict:
                        "men": int(c["size_estimate"]) if mine else None, "works": c["purpose_kind"] if mine else None})
 
 
+def _held_thing_view(conn, r) -> dict:
+    owner = conn.execute("SELECT name FROM actors WHERE id=?", (r["owner_actor_id"],)).fetchone() if r["owner_actor_id"] is not None else None
+    where = conn.execute("SELECT name FROM locations WHERE id=?", (r["location_id"],)).fetchone() if r["location_id"] is not None else None
+    return _drop_none({"shape": r["shape"], "owner": owner[0] if owner else None, "place": where[0] if where else r["place_text"],
+                       "status": r["status"], "weekly_income": round(float(r["income_weekly"]), 2) or None,
+                       "weekly_upkeep": round(float(r["upkeep_weekly"]), 2) or None,
+                       "legality": r["legality"] if r["legality"] != "unknown" else None, "agenda": _clip(r["agenda"], 160) or None,
+                       "depth": r["depth"]})
+
+
+def _gaps_view(conn) -> dict:
+    """The open depth gaps, most reached-for first: a shape the engine holds but has no deeper model for."""
+    rows = conn.execute("SELECT * FROM depth_gaps WHERE status='open' ORDER BY count DESC,last_day DESC,id LIMIT 10").fetchall()
+    return {"found": True, "kind": "gaps", "gaps": [{"gap_key": g["gap_key"], "shape": g["shape"], "count": g["count"], "last_day": g["last_day"],
+                                                     "missing": json.loads(g["missing_json"])} for g in rows]}
+
+
 def lookup(conn, query: str, offset: int = 0) -> dict:
     """Find what the protagonist knows of a person, place, business, outfit, household, crew, institution or role.
     `offset` pages the older known facts and notes (the newest come first); the reply says how many more there are."""
@@ -444,12 +461,15 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
     offset = max(0, int(offset or 0))
     if not q:
         return {"found": False, "candidates": []}
+    if q.lower() == "gaps":  # what the GM keeps reaching for that nothing deeper models yet
+        return _gaps_view(conn)
     pl0 = get_player(conn)
     me0 = int(pl0["player_actor_id"]) if pl0 else None
     kinds = [("actor", _find(conn, "actors", q)), ("location", _find(conn, "locations", q)), ("business", _find(conn, "civilian_enterprises", q)),
              ("outfit", [o for o in _find(conn, "underworld_organizations", q) if _knows_of(conn, me0, "outfit", o)]),
              ("household", [h for h in _find(conn, "households", q) if _knows_of(conn, me0, "household", h)]),
-             ("crew", [c for c in _find(conn, "underworld_crews", q) if _knows_of(conn, me0, "crew", c)])]
+             ("crew", [c for c in _find(conn, "underworld_crews", q) if _knows_of(conn, me0, "crew", c)]),
+             ("thing", [t for t in _find(conn, "held_things", q) if t["status"] != "ended"] if not q.isdigit() else [])]
     hits = [(k, r) for k, rows in kinds for r in rows]
     from engine import facts
     slot = facts.resolve(conn, q, open_only=True)  # an office named in the setting's words is answered by its holder, or by "Open"
@@ -499,6 +519,8 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
         out["basics"] = _household_view(conn, r, me)
     elif kind == "crew":
         out["basics"] = _crew_view(conn, r, me)
+    elif kind == "thing":
+        out["basics"] = _held_thing_view(conn, r)
     else:
         out["basics"] = _drop_none({"kind": r["kind"], "owner": r["political_owner"], "notes": _clip(r["notes"], 160)})
     table = {"actor": "actors", "business": "civilian_enterprises", "outfit": "underworld_organizations", "household": "households", "crew": "underworld_crews"}.get(kind)
