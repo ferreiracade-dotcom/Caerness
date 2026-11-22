@@ -57,7 +57,7 @@ class Shape:
 # ---- registry -----------------------------------------------------------------------------------------------------
 
 _REGISTERED: dict[str, Shape] = {}
-OWN_MONEY_TABLES: set[str] = set()  # backings whose money the layer behind them moves itself; the weekly held-thing tick leaves them alone
+OWN_MONEY_TABLES: dict[str, str] = {}  # backing table -> "all" (its layer moves every cent) or "upkeep" (its layer pays upkeep; takings still come through the held tick)
 
 
 def register_shape(shape: Shape) -> None:

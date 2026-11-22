@@ -77,6 +77,27 @@ def test_author_build_goes_through_venture():
         assert h["status"] == "ended" and h["ended_reason"], dict(h)
 
 
+def test_unreadable_holding_stays_on_floor_with_gap():
+    from engine import authoring
+    w = _open_world()
+    c = w.conn
+    out = authoring.author(c, w.soldier, "a warehouse", {"what": "a warehouse somewhere unplaced"}, "bz8-5")
+    h = _held(c, out["held_thing_id"])
+    assert h["backing_table"] is None and h["gap_key"] and out.get("gap"), dict(h)
+
+
+def test_held_income_of_a_place_still_comes_through_the_tick():
+    from engine import authoring, held_things
+    w = _open_world()
+    c = w.conn
+    out = authoring.author(c, w.soldier, "a garage", {"what": "the chop shop garage", "place": w.ground, "money": {"income": 200, "upkeep": 50}}, "bz8-6")
+    assert _held(c, out["held_thing_id"])["backing_table"] == "place_details"
+    from engine import ledger
+    before = ledger.balance(c, ("person", w.soldier))
+    held_things.process_due(c, 7)
+    assert abs(ledger.balance(c, ("person", w.soldier)) - before - 200.0) < 0.01  # takings in; upkeep is the place's own, every 30 days
+
+
 def test_claim_breach_bumps_gap():
     from engine import agreement_terms
     w = _open_world()

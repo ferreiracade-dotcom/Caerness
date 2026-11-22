@@ -99,8 +99,8 @@ def _on_venture_finish(conn, pid: int, outcome: str, reason: str | None, day: in
 
 
 def register() -> None:
-    intake.register_shape(Shape("holding", (), (), make_holding, False))
-    intake.register_shape(Shape("arrangement", (), (), make_arrangement, False))
-    intake.OWN_MONEY_TABLES.update({"place_details", "agreement_terms", "venture_details"})
+    intake.register_shape(Shape("holding", (), (), make_holding, True))
+    intake.register_shape(Shape("arrangement", (), (), make_arrangement, True))
+    intake.OWN_MONEY_TABLES.update({"place_details": "upkeep", "agreement_terms": "all", "venture_details": "all"})
     if _on_venture_finish not in ventures.ON_FINISH:
         ventures.ON_FINISH.append(_on_venture_finish)

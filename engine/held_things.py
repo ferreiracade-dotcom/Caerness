@@ -70,14 +70,15 @@ def _heat(conn, row, owner: int, day: int, tick: dict) -> None:
 def _pay(conn, row, owner: int, day: int) -> tuple[bool, float]:
     """Takings in, upkeep out. Returns (upkeep fully paid, income received)."""
     from . import intake
-    if row["backing_table"] in intake.OWN_MONEY_TABLES:
+    own = intake.OWN_MONEY_TABLES.get(row["backing_table"])
+    if own == "all":
         return True, 0.0
     holder = ("person", owner)
     income = float(row["income_weekly"])
     upkeep = float(row["upkeep_weekly"])
     if income > 0:
         ledger.receive(conn, holder, income, purpose=f"{row['name']}: takings")
-    if upkeep <= 0:
+    if upkeep <= 0 or own == "upkeep":  # a place pays its own upkeep every 30 days (places.py)
         return True, income
     return ledger.spend(conn, holder, upkeep, purpose=f"{row['name']}: upkeep", allow_partial=True) >= upkeep - 1e-9, income
 
