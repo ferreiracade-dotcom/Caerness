@@ -94,7 +94,13 @@ def package_figures(conn: sqlite3.Connection) -> dict[str, dict]:
 
 
 def _ensure(conn: sqlite3.Connection) -> None:
-    conn.executescript(_DDL)
+    """Create the tables if they are missing. Statement by statement, never executescript: that commits, and a figure is read inside
+    time skips that hold a savepoint."""
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='design_figures'").fetchone():
+        return
+    for stmt in _DDL.split(";"):
+        if stmt.strip():
+            conn.execute(stmt)
 
 
 def _has_table(conn: sqlite3.Connection) -> bool:

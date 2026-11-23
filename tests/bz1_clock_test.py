@@ -49,7 +49,8 @@ def test_advance_runs_terms_places_ventures():
     assert rent >= 2 and weekly >= 10, (rent, weekly)
     assert int(c.execute("SELECT next_due_day FROM place_details WHERE building_id=?", (bid,)).fetchone()[0]) > d0 + 60
     v = ventures.venture(c, pid)
-    assert v["spent_usd"] > 0 and (v["stage_key"] != "fit_out" or v["outcome"] is not None), (v["stage_key"], v["spent_usd"])
+    refused = any(a["status"] == "refused" for a in v["approvals"])  # politics now answers the permit: a refusal fails the venture
+    assert (refused and v["outcome"] == "failed") or (v["spent_usd"] > 0 and (v["stage_key"] != "fit_out" or v["outcome"] is not None)), (v["stage_key"], v["spent_usd"])
     assert c.execute("SELECT status FROM agreement_terms WHERE id=?", (tid,)).fetchone()[0] in ("active", "breached")
 
 
