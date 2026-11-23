@@ -77,6 +77,15 @@ def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: st
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
             name = cand
             break
+    if name is None:  # the family's common given names are all in use: a middle initial, as a crowded city's families do
+        for init in "JMAEFRTWCDGHLPS":
+            for g in sorted(given):
+                cand = f"{g} {init}. {family}"
+                if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
+                    name = cand
+                    break
+            if name:
+                break
     if name is None:
         raise Contradiction("no free name for a relative of that family")
     birth = day - int(round(age * 365.0)) - rng.randrange(365)
@@ -618,6 +627,11 @@ def _community_name(conn, group: str, sex: str, key: str) -> str:
         cand = f"{rng.choice(sorted(g['female' if sex == 'female' else 'male']))} {rng.choice(sorted(g['family']))}"
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
             return cand
+    for init in "JMAEFRTWCDGHLPS":
+        for first in sorted(g['female' if sex == 'female' else 'male']):
+            cand = f"{first} {init}. {rng.choice(sorted(g['family']))}"
+            if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
+                return cand
     raise Contradiction("no free name in that community")
 
 
