@@ -16,7 +16,6 @@ from . import ledger, veto
 from .veto import Contradiction
 
 SOURCE = {"source": "new_character", "not_canon": True}
-_STAGE_CLASS = {"First": "first", "Temper": "temper", "Third": "third", "Breach": "breach", "Fifth": "fifth"}
 
 
 def _day(conn) -> int:
@@ -57,17 +56,23 @@ def _mark_actor(conn, aid: int, patch: dict) -> None:
 
 # ---------------------------------------------------------------- revealing kin
 
-def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: str, day: int, reason: str, hearth: bool) -> int:
-    """Reveal an already-existing relative through the latent-person route, at low attention, named for his sex."""
-    from .cultivation import VEINBORN_SHARE, calibrate_revealed_profile
-    from .demographic_sex import FEMALE_GIVEN_NAMES, MALE_GIVEN_NAMES
+def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: str, day: int, reason: str, name: str | None = None,
+                   work: str | None = None) -> int:
+    """Reveal an already-existing relative through the latent-person route, at low attention, named for his sex (or by the name the
+    player gave). The age is exact: the birth day is set so that the whole years are what was said."""
+    from .demographic_sex import FEMALE_GIVEN_NAMES, MALE_GIVEN_NAMES, package_given_pool
     from .health import configure_health_profile
     from .resolution_controller import _materialize_latent_person
+    from .world_package import system_enabled
     rng = _rng(f"reveal:{key}")
-    from .demographic_sex import package_given_pool
     given = package_given_pool(conn, sex, family) or sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
-    name = None
+    if name:
+        veto.canon_figure(conn, name)
+        veto.real_person(conn, name)
+        veto.name_taken(conn, name)
     for _ in range(400):
+        if name:
+            break
         cand = f"{rng.choice(given)} {family}"
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
             name = cand
@@ -75,7 +80,11 @@ def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: st
     if name is None:
         raise Contradiction("no free name for a relative of that family")
     birth = day - int(round(age * 365.0)) - rng.randrange(365)
-    cons = {"name": name, "birth_day": birth, "demographic_sex": sex, "open_core": rng.random() < VEINBORN_SHARE[bool(hearth)], "stage": None}
+    cons = {"name": name, "birth_day": birth, "demographic_sex": sex, "stage": None}
+    cult = system_enabled(conn, "cultivation")
+    if cult:
+        from .cultivation import VEINBORN_SHARE
+        cons["open_core"] = rng.random() < VEINBORN_SHARE[False]
     cur = conn.execute(
         """INSERT INTO latent_entities(latent_kind,archetype,location_id,count_estimate,constraints_json,historical_context_json,status,created_day,updated_day,notes)
            VALUES ('person','kin',?,1,?,?,'latent',?,?,?)""",
@@ -87,7 +96,11 @@ def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: st
     conn.execute("UPDATE latent_entities SET status='crystallized',crystallized_entity_kind='actor',crystallized_entity_id=? WHERE id=?", (aid, int(latent["id"])))
     _low_attention(conn, aid, day, reason)
     configure_health_profile(conn, aid, longevity_class="ordinary")
-    calibrate_revealed_profile(conn, aid, active=False)
+    if cult:
+        from .cultivation import calibrate_revealed_profile
+        calibrate_revealed_profile(conn, aid, active=False)
+    if work:
+        conn.execute("UPDATE background_person_profiles SET occupation_domain=? WHERE actor_id=?", (veto.categorise(work), aid))
     _mark_actor(conn, aid, {"relation_reason": reason})
     return aid
 
@@ -161,53 +174,87 @@ def _family(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex
     return out
 
 
-def _origin(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex: str, age: int, family_name: str, hearth: bool) -> dict:
+def _origin(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex: str, age: int, family_name: str, stated: dict) -> dict:
+    """His origin family. What the player said is taken as said: each parent alive or dead, each sibling with the age and sex given,
+    all revealed as real people tied to him by kinship. What he left unsaid is drawn from the engine's own mortality and
+    birth-interval models, as before. `acct` lists, field by field, what was stated and what was filled."""
     from .health import childhood_circumstance
     from .opening_family import draw_origin_family
     mult, _ = childhood_circumstance(conn, parent_ids=[aid], location_id=loc)
-    o = draw_origin_family(f"{key}:origin", age=age, sex=sex, hearth=hearth, childhood_multiplier=mult)
-    fam = proposal.get("family") or {}
-    parents_text = str(fam.get("parents", "")).lower()
-    if any(w in parents_text for w in ("dead", "orphan", "died")):
-        o["mother"]["alive"] = o["father"]["alive"] = False
+    o = draw_origin_family(f"{key}:origin", age=age, sex=sex, hearth=False, childhood_multiplier=mult)
+    sp, sibs = stated["parents"], stated["siblings"]
     rng = _rng(f"{key}:originreveal")
     revealed: dict[str, Any] = {"parents": [], "siblings": []}
     counts = {"parents_dead": 0, "parents_unnamed": 0, "siblings_alive": 0, "siblings_dead": 0}
+    acct: list[dict] = []
     birth = day - age * 365
     people: dict[str, int] = {}
     for who, sx in (("father", "male"), ("mother", "female")):
-        p = o[who]
-        if not p["alive"]:
+        p, said = o[who], sp.get(who)
+        if said is not None and said["alive"] is not None:
+            alive, how = bool(said["alive"]), "stated"
+        else:
+            alive, how = bool(p["alive"]), "filled"
+        age_now = (said or {}).get("age") or p["age_now"]
+        if not alive:
             counts["parents_dead"] += 1
-        elif rng.random() < 0.7:
-            fam_name = family_name if who == "father" else _rng(f"{key}:{who}:fam").choice(
-                ("Ashby", "Marrow", "Tillet", "Penhall", "Corvane", "Hale", "Dunmere", "Raske", "Wend", "Lorne", "Brask", "Ostrey"))
-            people[who] = _reveal_person(conn, key=f"{key}:{who}", sex=sx, age=p["age_now"], loc=loc, family=fam_name, day=day,
-                                         reason="parent of a new protagonist", hearth=hearth)
+            acct.append({"field": who, "status": how, "value": "dead",
+                         "reason": "as you said" if how == "stated" else "drawn from the city's mortality for people of that age and time"})
+            continue
+        if how == "stated" or rng.random() < 0.7:
+            nm = (said or {}).get("name")
+            people[who] = _reveal_person(conn, key=f"{key}:{who}", sex=sx, age=age_now, loc=loc, family=family_name, day=day,
+                                         reason="parent of a new protagonist", name=nm, work=(said or {}).get("work"))
             _kin(conn, people[who], aid, "parent", birth, f"{key}:{who}")
             revealed["parents"].append(people[who])
+            acct.append({"field": who, "status": how, "value": f"alive, {_name(conn, people[who])}, {int(age_now)}",
+                         "reason": ("alive as you said" if how == "stated" else "alive by the city's mortality; named and placed")
+                         + ("" if (said or {}).get("age") is not None else f"; age {int(age_now)} filled")})
         else:
             counts["parents_unnamed"] += 1
+            acct.append({"field": who, "status": "filled", "value": "alive, not yet named", "reason": "alive by the city's mortality"})
     if "father" in people and "mother" in people:
         from .household_life import create_union
         uid = create_union(conn, people["father"], people["mother"],
                            create_new_household_name=f"Household of {_name(conn, people['father'])} and {_name(conn, people['mother'])}")
-        start = day - int(max(1, o["mother"]["age_now"] - age - 18) * 365)
+        mage = (sp.get("mother") or {}).get("age") or o["mother"]["age_now"]
+        start = day - int(max(1, mage - age - 18) * 365)
+        start = min(start, day - int((age + 1) * 365))
         conn.execute("UPDATE household_unions SET started_day=? WHERE id=?", (start, uid))
         conn.execute("UPDATE kinship_links SET started_day=? WHERE kin_kind='spouse' AND actor_a_id IN (?,?) AND actor_b_id IN (?,?)",
                      (start, people["father"], people["mother"], people["father"], people["mother"]))
-    for i, s in enumerate(o["siblings"]):
+    if sibs is not None:  # the player said who his brothers and sisters are: exactly those
+        plan = [{"sex": s["sex"], "age": s["age"], "alive": s["alive"], "name": s["name"], "work": s["work"], "how": "stated"} for s in sibs]
+    else:
+        plan = [{"sex": s["sex"], "age": s["age_now"], "alive": s["alive"], "name": None, "work": None, "how": "filled"} for s in o["siblings"]]
+    for i, s in enumerate(plan):
+        sx = s["sex"] or ("male" if _rng(f"{key}:sibsex{i}").random() < 0.5 else "female")
         if not s["alive"]:
             counts["siblings_dead"] += 1
-        elif rng.random() < 0.7:
-            sid = _reveal_person(conn, key=f"{key}:sib{i}", sex=s["sex"], age=s["age_now"], loc=loc, family=family_name, day=day,
-                                 reason="sibling of a new protagonist", hearth=hearth)
-            _kin(conn, aid, sid, "sibling", day - int(min(s["age_now"], age) * 365), f"{key}:sib{i}")
-            for par in people.values():
-                _kin(conn, par, sid, "parent", day - int(s["age_now"] * 365), f"{key}:{par}:{sid}")
-            revealed["siblings"].append(sid)
-        else:
+            acct.append({"field": f"sibling {i + 1}", "status": s["how"], "value": f"{sx}, dead",
+                         "reason": "as you said" if s["how"] == "stated" else "drawn from the city's child mortality"})
+            continue
+        if s["how"] == "filled" and rng.random() >= 0.7:
             counts["siblings_alive"] += 1
+            continue
+        sid = _reveal_person(conn, key=f"{key}:sib{i}", sex=sx, age=float(s["age"]), loc=loc, family=family_name, day=day,
+                             reason="sibling of a new protagonist", name=s["name"], work=s["work"])
+        _kin(conn, aid, sid, "sibling", day - int(min(float(s["age"]), age) * 365), f"{key}:sib{i}")
+        for par in people.values():
+            _kin(conn, par, sid, "parent", day - int(float(s["age"]) * 365), f"{key}:{par}:{sid}")
+        revealed["siblings"].append(sid)
+        people[f"sibling{i}"] = sid
+        if s["how"] == "stated":
+            notes = ["real person, his kin"]
+            if s["sex"] is None:
+                notes.append("sex filled (an even split)")
+            if s.get("age_filled"):
+                notes.append("age filled")
+            reason = "; ".join(notes)
+        else:
+            reason = "drawn from the city's family sizes"
+        acct.append({"field": f"sibling {i + 1}", "status": s["how"],
+                     "value": f"{_name(conn, sid)}, {'brother' if sx == 'male' else 'sister'}, {int(float(s['age']))}", "reason": reason})
     hh = conn.execute("SELECT household_id FROM household_members WHERE actor_id=? AND status='active' ORDER BY household_id LIMIT 1",
                       (people.get("mother") or people.get("father") or 0,)).fetchone()
     if hh is not None:
@@ -221,7 +268,8 @@ def _origin(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex
             add_household_member(conn, int(hh[0]), aid, role="child", authority=5, dependency=80)
             conn.execute("UPDATE actor_life_profiles SET current_household_id=?,origin_household_id=? WHERE actor_id=?", (int(hh[0]), int(hh[0]), aid))
     _mark_actor(conn, aid, {"origin_family": counts})
-    return {**counts, "revealed_parents": len(revealed["parents"]), "revealed_siblings": len(revealed["siblings"]), "people": people}
+    return {**counts, "revealed_parents": len(revealed["parents"]), "revealed_siblings": len(revealed["siblings"]), "people": people, "acct": acct,
+            "sibling_ids": list(revealed["siblings"])}
 
 
 def _ties(conn, aid: int, *, key: str, day: int, loc: int, age: int, cat: str, affiliation: dict | None, also: list[int] | None = None) -> dict:
@@ -369,12 +417,10 @@ def fill_lived_past(conn: sqlite3.Connection, aid: int, *, key: str, proposal: d
                           FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.id=?""", (aid,)).fetchone()
     loc, sex, age = int(row["loc"]), str(row["sex"]), _age(conn, aid, day)
     cat = veto.categorise(proposal.get("work"), proposal.get("category"))
-    from .cultivation import location_in_hearth
     pr = conn.execute("SELECT current_location_id FROM background_person_profiles WHERE actor_id=?", (aid,)).fetchone()
     home_loc = int(pr[0]) if pr and pr[0] is not None else loc
     if _settlement(conn, home_loc) == _settlement(conn, loc):
         home_loc = loc  # not from elsewhere: he grew up where he lives
-    hearth = location_in_hearth(conn, _settlement(conn, home_loc))
     family_name = _family_surname(str(row["name"]))
     aff = proposal.get("_affiliation")  # resolved by create_protagonist: {"kind","id"} of a body he belongs to
     # a household he already heads or belongs to is his home: a spouse joins it rather than a new house being formed around him
@@ -383,7 +429,8 @@ def fill_lived_past(conn: sqlite3.Connection, aid: int, *, key: str, proposal: d
     if home is not None:
         conn.execute("UPDATE actor_life_profiles SET current_household_id=? WHERE actor_id=? AND current_household_id IS NULL", (int(home[0]), aid))
     fam = _family(conn, aid, key=key, proposal=proposal, day=day, loc=loc, sex=sex, age=age)
-    origin = _origin(conn, aid, key=key, proposal=proposal, day=day, loc=home_loc, sex=sex, age=age, family_name=family_name, hearth=hearth)
+    origin = _origin(conn, aid, key=key, proposal=proposal, day=day, loc=home_loc, sex=sex, age=age, family_name=family_name,
+                    stated=proposal.get("_stated") or {"parents": {}, "siblings": None})
     ties = _ties(conn, aid, key=key, day=day, loc=loc, age=age, cat=cat, affiliation=aff, also=proposal.get("_ties_with"))
     score = _competence(conn, aid, cat, age) if age >= 14 else 0.0
     kin = [x for x in ([fam["spouse"]] if fam["spouse"] else []) + fam["children"] + list(origin["people"].values()) if x]
@@ -394,7 +441,8 @@ def fill_lived_past(conn: sqlite3.Connection, aid: int, *, key: str, proposal: d
               "siblings_known": origin["revealed_siblings"], "neighbours": ties["neighbours"], "colleagues": ties["colleagues"],
               "mentor": bool(ties["mentor"]), "knowledge": nk, "memories": nm}
     _mark_actor(conn, aid, {"lived_past_key": key, "lived_past_digest": digest})
-    return {"already": False, "digest": digest, "competence": score}
+    return {"already": False, "digest": digest, "competence": score, "people": origin["people"], "acct": origin["acct"],
+            "spouse": fam["spouse"], "children": fam["children"]}
 
 
 # ================================================================ proposal -> protagonist
@@ -539,6 +587,158 @@ def _join(conn, aid: int, found: dict, role: Any, day: int) -> dict:
     return found
 
 
+def _name_group(conn, p: dict) -> str | None:
+    """The package name group (community) the player said he is from: `background` / `ethnicity` / `heritage` / `group`, or, when his own
+    concept words name exactly one group, that one. None when he said nothing: the place's people decide."""
+    if p.get("name"):
+        return None
+    from .world_package import package_for
+    groups = sorted((package_for(conn).name_groups or {}))
+    if not groups:
+        return None
+
+    def hits(text: str) -> list[str]:
+        t = re.sub(r"[^a-z]+", " ", text.lower())
+        return [g for g in groups if re.search(r"\b" + re.escape(g.split("_")[0]) + r"\b", t)]
+
+    for k in ("background", "ethnicity", "heritage", "group"):
+        if p.get(k):
+            h = hits(str(p[k]))
+            if len(h) == 1:
+                return h[0]
+    h = hits(str(p.get("concept") or ""))
+    return h[0] if len(h) == 1 else None
+
+
+def _community_name(conn, group: str, sex: str, key: str) -> str:
+    from .world_package import package_for
+    g = (package_for(conn).name_groups or {})[group]
+    rng = _rng(f"{key}:communityname")
+    for _ in range(400):
+        cand = f"{rng.choice(sorted(g['female' if sex == 'female' else 'male']))} {rng.choice(sorted(g['family']))}"
+        if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
+            return cand
+    raise Contradiction("no free name in that community")
+
+
+def _materialise_exact(conn, p: dict, *, loc: int, sex: str, age: int, cat: str, stage, key: str, call_id: str, got: dict, window: int,
+                       group: str | None, day: int) -> tuple[int, int]:
+    """Reveal the person the player described, at exactly the age he said. The place's own people are searched at his exact age first,
+    then in widening bands; a person found off by some years has his birth date set so that the whole years are what was said
+    (the offset is returned so the report can say so). Returns (actor id, offset in years: found minus said)."""
+    from . import authoring
+    work_text = p.get("work")
+    last = None
+    pool = veto.settlement_of(conn, loc)
+    # Search the place's people at his exact age first (of his community when he named one), then in a band of a few years; where the
+    # community has nobody of that age left unlinked, anyone of that age takes a name of that community (his family is hers by name).
+    tries = [(w, occ, grp) for grp in ([True, False] if group else [False]) for w in (0, 1, 3) for occ in ((True, False) if work_text else (False,))]
+    full = (str(p["name"]).strip() if p.get("name") else None)
+    for w, occ, grp in tries:
+        pick = authoring._pick_args(loc=pool if pool is not None else loc, sex=sex, age=age, work_domain=cat if (work_text and occ) else None,
+                                    stage=stage, elsewhere=bool(p.get("from_elsewhere")), window=w)
+        nm = full
+        if group and grp:
+            pick["name_group"] = group
+        elif group and not full:
+            nm = _community_name(conn, group, sex, key)
+            got["community_name"] = True
+        try:
+            aid = authoring.materialise_person(
+                conn, loc=loc, sex=sex, age=age, work_domain=cat if work_text else None, stage=stage, elsewhere=bool(p.get("from_elsewhere")),
+                name=nm, pick_seed=key, call_id=call_id, out=got, pick=pick,
+                reason="New protagonist", notes="Protagonist designed with the owner; not canon.", exact_stage=bool(stage), window=w, growth_batches=64)
+            break
+        except ValueError as e:  # the band holds nobody: widen it
+            last = e
+    else:
+        raise Contradiction("the people of that place cannot supply such a person" + ("" if p.get("from_elsewhere") else " (he could have come from elsewhere)")) from last
+    if work_text:  # what he does is as he said, whatever the identity drawn was set to
+        conn.execute("UPDATE background_person_profiles SET occupation_domain=? WHERE actor_id=?", (cat, aid))
+    got_age = _age(conn, aid, day)
+    if got_age != age:
+        birth = day - age * 365 - _rng(f"{key}:birthday").randrange(365)
+        conn.execute("UPDATE actor_life_profiles SET birth_day=? WHERE actor_id=?", (birth, aid))
+        _mark_actor(conn, aid, {"age_set_by_player": age, "age_drawn": got_age})
+    return aid, got_age - age
+
+
+def _family_business(conn, fb: dict, *, me: int, people: dict, loc: int, day: int, key: str, call_id: str, acct: list, made: list) -> dict:
+    """The family business as the player said it: the owner (his father or mother) owns it; the people named work in it as staff. It is a
+    business and a place of the shared layer (the place is held by the owner, upkeep and condition run on the civilian clock). Nothing here
+    is scaled to the town: a business the player says exists is not made smaller, only its money is filled from the owner's means."""
+    from . import authoring, places
+    from .business import configure_enterprise_business
+    from .civilian import create_enterprise
+    from .health import _family_means
+    from .merchant import add_enterprise_staff
+    owner = people.get(fb["owner"])
+    if owner is None:
+        raise Contradiction(f"his {fb['owner']} is not a living person in this family, so cannot own the {fb.get('name') or 'business'}")
+    lastname = _name(conn, me).split()[-1]
+    trade = str(fb.get("type") or fb.get("name") or "shop")
+    name = str(fb.get("name") or f"{lastname} {trade.title()}")
+    if conn.execute("SELECT 1 FROM civilian_enterprises WHERE name=? AND location_id=?", (name, loc)).fetchone():
+        raise Contradiction(f"a business called {name} already stands here, and it belongs to someone else; give his family's another name")
+    archetype, kind = authoring._archetype(trade, None, conn)
+    means, _ = _family_means(conn, [owner])
+    capital = round(2.0 * max(0.5, means / 50.0), 2)
+    eid = create_enterprise(conn, name, kind, owner_actor_id=owner, location_id=loc, capital=capital, cash=capital,
+                            metadata={"authored": True, "trade": trade, "stated_by_player": True, "family_business_of": me})
+    add_enterprise_staff(conn, eid, owner, role="owner", authority=100)
+    configure_enterprise_business(conn, eid, archetype, quality=50, price_position=50, capacity=40, clientele_fit=50,
+                                  service_reliability=50, regulatory_pressure=10, cadence_days=30, metadata={"authored": True})
+    conn.execute("""INSERT INTO enterprise_ecology_state(enterprise_id,founded_day,crystallized_day,structural_origin,last_review_day,metadata_json)
+                    VALUES (?,?,?,'formed_during_simulation',?,?) ON CONFLICT(enterprise_id) DO NOTHING""",
+                 (eid, day - 365 * 8, day, day, json.dumps({"authored": True, "population_delta": 0}, sort_keys=True)))
+    from . import business_data
+    pk = None
+    data = business_data.load(conn)
+    for word in sorted((data or {}).get("place_kinds") or {}, key=len, reverse=True):
+        if re.search(r"(?<![a-z])" + re.escape(word.replace("_", " ")) + r"(?![a-z])", f"{trade} {name}".lower().replace("_", " ")):
+            pk = word
+            break
+    place_id = None
+    if pk:
+        place_id = places.make_place(conn, name=name, place_kind=pk, location_id=loc, owner_ref=f"person:{owner}", day=day - 365 * 8,
+                                     enterprise_id=eid)
+    works: list[tuple[str, int]] = []
+    wl = fb["works"]
+    if any(w in ("self", "me", "myself", "protagonist", "him", "he") for w in wl):
+        works.append(("him", me))
+    sib_ids = [people[k] for k in sorted(people) if k.startswith("sibling")]
+    if any(w in ("siblings", "brothers", "sisters", "sons", "all", "family", "us", "we") for w in wl):
+        works += [("his sibling", s) for s in sib_ids]
+    for w in wl:
+        if w.isdigit() and 0 < int(w) <= len(sib_ids):
+            works.append(("his sibling", sib_ids[int(w) - 1]))
+    seen = set()
+    staffed = []
+    for label, a in works:
+        if a in seen:
+            continue
+        seen.add(a)
+        a_age = _age(conn, a, day)
+        if a_age < 12:
+            continue
+        add_enterprise_staff(conn, eid, a, role="mechanic" if "repair" in trade.lower() or "garage" in trade.lower() else "hand", authority=25)
+        staffed.append(a)
+    from .opening_family import _seed_pair
+    crew = [owner] + staffed
+    for i, a in enumerate(crew):
+        for b in crew[i + 1:]:
+            _seed_pair(conn, a, b, "colleague", key=f"{key}:fbiz:{a}:{b}", started_day=day - 365)
+    names = ", ".join(_name(conn, a) for a in staffed)
+    acct.append({"field": "family business", "status": "stated", "value": f"{name}, owned by his {fb['owner']} ({_name(conn, owner)})",
+                 "reason": "as you said; it exists in full, not scaled to the town" + ("" if fb.get("name") else "; its name filled from the family name")})
+    acct.append({"field": "employment", "status": "stated", "value": f"{len(staffed)} work there as employees: {names}" if staffed else "none placed",
+                 "reason": "as you said; the owner is his " + fb["owner"] + ", so they are staff and own none of it"})
+    acct.append({"field": "business money", "status": "filled", "value": ledger.scale_word(capital),
+                 "reason": "not said; set from the owner's means and the district's businesses of that kind"})
+    made.append(f"works in his {fb['owner']}'s {trade}, {name}")
+    return {"enterprise_id": eid, "place_id": place_id, "staff": staffed}
+
+
 def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
     from . import authoring
     from .health import _family_means
@@ -547,13 +747,27 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
     draw = int(p.get("draw", 0) or 0)
     day = _day(conn)
     sex, drawn = resolve_sex(conn, p, key)
-    prop = {**p, "sex": sex, "_exact": True}
+    from . import stated_family as sf
+    age_said = int(p["age"]) if isinstance(p.get("age"), int) and not isinstance(p.get("age"), bool) else None
+    fam_in = p.get("family") if isinstance(p.get("family"), dict) else {}
+    sibs_in = sf.read_siblings(fam_in.get("siblings"))
+    stated = {"parents": sf.read_parents(fam_in.get("parents")), "siblings": sibs_in}
+    fbiz = sf.read_business(p)
+    if age_said is not None:
+        sf.unsaid_ages(_rng(f"{key}:ages"), age_said, stated["parents"], sibs_in or [])
+        sf.check(age_said, stated["parents"], sibs_in or [], fbiz)
+    p = {**p, "_stated": stated, "_family_business": fbiz}
+    if fbiz is not None:  # he works for his own kin: nothing of his is a body to lead or to join
+        p["affiliation"] = None
+        p["family_business"] = None
+    group = _name_group(conn, p)
+    prop = {**p, "sex": sex, "_exact": True, "_name_group": group}
     try:
         facts = veto.check_proposal(conn, prop)
     except Contradiction as e:
         if drawn and "cannot supply" in str(e):  # a drawn sex the place cannot supply is flipped; a stated one is a clash
             sex = "female" if sex == "male" else "male"
-            prop = {**p, "sex": sex, "_exact": True}
+            prop = {**p, "sex": sex, "_exact": True, "_name_group": group}
             facts = veto.check_proposal(conn, prop)
         else:
             raise
@@ -566,16 +780,21 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
     cash = next((float(h["amount"]) for h in adj if h.get("kind") == "cash"), 0.0)
     businesses = [h for h in adj if h.get("kind") != "cash"]
     work_text = p.get("work")
-    got: dict = {}
-    aid = authoring.materialise_person(
-        conn, loc=loc, sex=sex, age=age, work_domain=cat if work_text else None, stage=stage, elsewhere=bool(p.get("from_elsewhere")),
-        name=(str(p["name"]).strip() if p.get("name") else None), pick_seed=key, call_id=call_id,
-        retired=bool(work_text and cat not in ("soldier", "criminal") and stage in ("Breach", "Fifth", "Sixth")), out=got,
-        reason="New protagonist", notes="Protagonist designed with the owner; not canon.", exact_stage=bool(stage), window=facts["window"], growth_batches=64)
-    got_age = _age(conn, aid, day)
-    if got_age != age:
-        down.append({"asked": f"{age} years", "got": f"{got_age} years", "why": "he is the nearest to that age and standing the place has"})
-        age = got_age
+    got: dict = {"work_text": work_text}
+    aid, off = _materialise_exact(conn, p, loc=loc, sex=sex, age=age, cat=cat, stage=stage, key=key, call_id=call_id, got=got,
+                                  window=facts["window"], group=group, day=day)
+    acct: list[dict] = []
+    acct.append({"field": "age", "status": "stated", "value": str(age),
+                 "reason": "exactly as you said" + (f"; the person drawn from the city's people was {abs(off)} year{'s' if abs(off) > 1 else ''} "
+                                                    f"{'younger' if off < 0 else 'older'}, so his birth date was set to make it so" if off else "")})
+    acct.append({"field": "sex", "status": "filled" if drawn else "stated", "value": sex,
+                 "reason": ("not said; drawn from the city's population" if drawn else "as you said or as his name says")})
+    acct.append({"field": "place", "status": "stated", "value": _loc(conn, loc), "reason": "as you said"})
+    if work_text:
+        acct.append({"field": "work", "status": "stated", "value": str(work_text), "reason": "as you said"})
+    if group:
+        acct.append({"field": "background", "status": "stated", "value": group.replace("_", " "), "reason": "as you said; his name comes from that community" + ("" if not got.get("community_name") else
+                 " (nobody of his age from it was left unlinked in the city, so he is a man of that age given a name of that community)")})
     _mark_actor(conn, aid, {"concept": str(p.get("concept") or "")[:600], "draw": draw})
     means, _tags = _family_means(conn, [aid])
     start = round(0.5 * 4.0 * (means / 50.0) ** 3 * max(0.4, min(1.2, age / 45.0)), 2) if age >= 16 else 0.0
@@ -675,21 +894,38 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
         if other:
             _seed_pair(conn, aid, int(other[0]), "acquaintance", key=f"{key}:tie:{who}", started_day=day - 700)
     past = fill_lived_past(conn, aid, key=key, proposal={**p, "_affiliation": aff_resolved, "_holds": holds})
+    acct += past.get("acct", [])
+    fbiz = p.get("_family_business")
+    if fbiz is not None:
+        _family_business(conn, fbiz, me=aid, people=past.get("people", {}), loc=loc, day=day, key=key, call_id=call_id, acct=acct, made=made)
+    acct.append({"field": "leads", "status": "stated" if (fbiz or not (aff_resolved or outfit_ids)) else "stated", "value": ", ".join(
+        m for m in made if m.startswith(("leads", "heads", "keeps", "owns"))) or "nothing",
+        "reason": "as you said" if fbiz else "only what you gave him to lead or own"})
+    acct.append({"field": "money", "status": "filled", "value": ledger.scale_word(max(start, 0.01)),
+                 "reason": "not said; savings follow his family's means and his years"})
+    acct.append({"field": "neighbours, colleagues, local knowledge, memories", "status": "filled",
+                 "value": f"{past['digest'].get('neighbours', 0)} neighbours, {past['digest'].get('colleagues', 0)} colleagues",
+                 "reason": "not said; the city's people and what a man of that age and trade would know"})
+    sp = fam_in.get("spouse")
+    ch = fam_in.get("children")
+    acct.append({"field": "spouse and children", "status": "stated" if (sp is not None or ch is not None) else "filled",
+                 "value": ("married" if past["digest"].get("spouse") else "not married") + (f", {past['digest'].get('children', 0)} children" if past["digest"].get("children") else ""),
+                 "reason": "as you said" if (sp is not None or ch is not None) else "not said; drawn from the city's marriage rates for his age"})
     staff: dict = {}
     if hid is not None:
         from .household_staff import ensure_household_staff
         staff = ensure_household_staff(conn, hid, key=key)
-    return _summary(conn, aid, past, made, down, staff, draw, got, loc)
+    return _summary(conn, aid, past, made, down, staff, draw, got, loc, acct)
 
 
-def _summary(conn, aid: int, past: dict, made: list[str], down: list[dict], staff: dict, draw: int, got: dict, loc: int) -> dict:
+def _summary(conn, aid: int, past: dict, made: list[str], down: list[dict], staff: dict, draw: int, got: dict, loc: int, acct: list[dict]) -> dict:
     day = _day(conn)
     row = conn.execute("""SELECT a.name,lp.demographic_sex sex FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.id=?""", (aid,)).fetchone()
     place = _loc(conn, loc)
     age = _age(conn, aid, day)
     d = past.get("digest", {})
     prof = conn.execute("SELECT occupation_domain FROM background_person_profiles WHERE actor_id=?", (aid,)).fetchone()
-    work = prof["occupation_domain"] if prof else "ordinary work"
+    work = got.get("work_text") or (prof["occupation_domain"] if prof else "ordinary work")
 
     def word(n: int) -> str:
         return {0: "no", 1: "one", 2: "two", 3: "three"}.get(n, "several")
@@ -718,6 +954,9 @@ def _summary(conn, aid: int, past: dict, made: list[str], down: list[dict], staf
         },
         "sheet": {"history": f"{row['name']}: {', '.join(fam)}. " + ("; ".join(made) if made else "Lives by his work."), "standing": f"Known in {place}."},
     }
+    out["as_stated"] = [a for a in acct if a["status"] == "stated"]
+    out["filled"] = [a for a in acct if a["status"] == "filled"]
+    out["scaled"] = [{"field": x.get("asked"), "asked": x.get("asked"), "got": x.get("got"), "reason": x.get("why")} for x in down]
     if down:
         out["scaled_down"] = down
     return out

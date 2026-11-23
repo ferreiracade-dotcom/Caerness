@@ -25,11 +25,22 @@ def _protagonist(conn, call_id: str, details: dict, player) -> dict:
     return out
 
 
+def _entry(conn, details: dict) -> dict:
+    """The entry date (before the protagonist exists): accept=false describes it, accept=true simulates up to a year toward it per call."""
+    from engine import entry
+    try:
+        return entry.run_chunk(conn, details) if details.get("accept") else entry.describe(conn, details)
+    except entry.EntryRefused as e:
+        return {"status": "refused", "kind": "entry", "reason": str(e), "reason_kind": e.reason_kind}
+
+
 def author(conn, call_id: str, kind: str, details: dict | None = None) -> dict:
     request = {"kind": kind, "details": details or {}}
 
     def go() -> dict:
         player = get_player(conn)
+        if str(kind).strip().lower() in ("entry", "entry date", "start date"):
+            return _entry(conn, dict(details or {}))
         if str(kind).strip().lower() in ("protagonist", "player character", "pc"):
             return _protagonist(conn, call_id, details or {}, player)
         if not player:

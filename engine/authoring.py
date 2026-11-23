@@ -324,6 +324,14 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     prof = conn.execute("SELECT * FROM background_person_profiles WHERE actor_id=?", (aid,)).fetchone()
     origin = got.get("origin")
     me_age = _age(conn, aid, day)
+    age_set = None
+    if age is not None and me_age != age:  # the age is as said: the person drawn is nearest to it, so his birth date is set to make it so
+        import random
+        conn.execute("UPDATE actor_life_profiles SET birth_day=? WHERE actor_id=?",
+                     (day - age * 365 - random.Random(f"{call_id}:birthday").randrange(365), aid))
+        age_set = {"asked": f"{age} years", "got": f"{age} years", "why": f"exactly as said; the person drawn was {abs(me_age - age)} year(s) "
+                   f"{'younger' if me_age < age else 'older'}, so his birth date was set to make it so"}
+        me_age = age
 
     for t in ties:
         tid, kind = int(t["actor_id"]), t["_kind"]
@@ -356,7 +364,9 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     held = _hold_office(conn, slot, aid, day, call_id) if slot is not None else None
     return {"status": "created", "kind": "person", "actor_id": aid, "name": name, "sex": sex, "age": me_age,
             "work": held or prof["occupation_domain"], **({"work_domain": prof["occupation_domain"]} if held else {}), "location": conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0],
-            "from": origin, **({"holds": held} if held else {}), **({"scaled_down": down} if down else {})}
+            "from": origin, **({"holds": held} if held else {}), **({"scaled_down": down} if down else {}),
+            "as_stated": [x for x in ({"field": "age", "value": str(age), "reason": age_set["why"] if age_set else "exactly as said"} if age is not None else None,
+                                      {"field": "sex", "value": sex, "reason": "as said or as the name says"} if not sex_drawn else None) if x]}
 
 
 def _office_slot(conn, holds: Any):

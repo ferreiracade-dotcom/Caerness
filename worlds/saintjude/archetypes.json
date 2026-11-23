@@ -371,5 +371,24 @@
     "basis": "About 800 members paying about 15 a month in dues (a little over one percent of a trades or freight wage) at full utilisation; staff, the hall and pension and welfare administration are most of the cost.",
     "assumption": true,
     "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
-  }
+  },
+ "auto_repair": {
+  "name": "Auto Repair Garage",
+  "sector": "service",
+  "enterprise_kind": "shop",
+  "base_revenue": 14000,
+  "cost_ratio": 0.6,
+  "regulation": 0.05,
+  "weights": {
+   "foot_traffic": 0.1,
+   "disposable_income": 0.3,
+   "reputation_climate": 0.25,
+   "trade_flow": 0.2,
+   "security": 0.15
+  },
+  "price_refs": [],
+  "basis": "A family garage doing about 8 jobs a week at roughly 55 a job in 1975 money over 30 days at full utilisation; parts are most of the cost ratio.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ }
 }
