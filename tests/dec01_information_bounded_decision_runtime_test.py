@@ -5,6 +5,8 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
+import os
+os.environ["CAERNESS_DECISION_AUDIT"] = "1"  # this test reads the candidate audit rows
 from engine.db import reset_db, init_db, connect, ENGINE_VERSION, SCHEMA_VERSION
 from engine.decisions import build_actor_context, decide_actor
 from engine.decision_runtime import generate_candidates

@@ -1,5 +1,7 @@
 import json
 
+import os
+os.environ["CAERNESS_DECISION_AUDIT"] = "1"  # this test reads the candidate audit rows
 from engine.canon import DEFAULT_CANON, index_canon
 from engine.db import connect, init_db, reset_db
 from engine.simulation import advance, seed_demo

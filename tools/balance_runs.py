@@ -29,8 +29,15 @@ def _opening(seed):
     return _open(seed)
 
 
+class _Names(dict):
+    """Organisations made after the opening (a party, an office) have no profile: name them by id and go on reporting."""
+
+    def __missing__(self, k):
+        return f"org {k}"
+
+
 def _names(conn):
-    return {int(r[0]): (r[2] or r[1]) for r in conn.execute("SELECT p.org_actor_id,a.name,p.package_key FROM org_profiles p JOIN actors a ON a.id=p.org_actor_id")}
+    return _Names({int(r[0]): (r[2] or r[1]) for r in conn.execute("SELECT p.org_actor_id,a.name,p.package_key FROM org_profiles p JOIN actors a ON a.id=p.org_actor_id")})
 
 
 def _sizes(conn):

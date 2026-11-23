@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import random
 import sqlite3
 from dataclasses import dataclass, field
@@ -207,6 +208,12 @@ def generate_candidates(conn: sqlite3.Connection, actor_id: int, tier: str, day:
     return [dedup[k] for k in sorted(dedup)]
 
 
+def audit_candidates() -> bool:
+    """Candidate-by-candidate audit rows (decision_candidate_audit) are written only when CAERNESS_DECISION_AUDIT=1: nothing in the engine, connector or tools reads them, and they were
+    the second-largest table by year 5. Read at each call so a test or a debugging session can switch it on."""
+    return os.environ.get("CAERNESS_DECISION_AUDIT", "") not in ("", "0")
+
+
 def choose_candidate(conn: sqlite3.Connection, actor_id: int, tier: str, day: int, envelope: dict[str, Any]) -> tuple[DecisionCandidate, int]:
     candidates = generate_candidates(conn, actor_id, tier, day, envelope)
     if not candidates:
@@ -242,7 +249,7 @@ def choose_candidate(conn: sqlite3.Connection, actor_id: int, tier: str, day: in
     )
     evaluation_id = int(cur.lastrowid)
     prob_by_key = {c.key: p for c, p in zip(plausible, probabilities)}
-    for c in candidates:
+    for c in (candidates if audit_candidates() else ()):
         conn.execute(
             """INSERT INTO decision_candidate_audit(evaluation_id,candidate_key,provider_key,action_kind,utility,selection_probability,
                    plausible,selected,target_actor_id,interaction_type,information_basis_json,payload_json,tags_json,estimated_cost,risk)
@@ -274,7 +281,7 @@ def record_external_selection(
            VALUES (?,?,?,?,?,?,?)""", (day,actor_id,tier,1.0,0.0,selected_key,json.dumps(summary,sort_keys=True))
     )
     eid=int(cur.lastrowid)
-    for c in candidates:
+    for c in (candidates if audit_candidates() else ()):
         conn.execute(
             """INSERT INTO decision_candidate_audit(evaluation_id,candidate_key,provider_key,action_kind,utility,selection_probability,
                    plausible,selected,target_actor_id,interaction_type,information_basis_json,payload_json,tags_json,estimated_cost,risk)
