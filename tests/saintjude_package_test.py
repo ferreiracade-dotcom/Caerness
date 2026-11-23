@@ -233,7 +233,8 @@ def run_data():
     arch = json.loads(pkg.data["archetypes"].read_text(encoding="utf-8"))
     want = {"bar", "diner", "pizzeria", "social_club", "nightclub", "trucking_firm", "warehouse", "car_dealership",
             "construction_firm", "laundromat", "vending_route", "numbers_bank", "sports_book", "bakery", "butcher",
-            "funeral_home", "union_local_office", "auto_repair"}
+            "funeral_home", "union_local_office", "auto_repair", "grocery", "barber_shop", "dry_cleaner", "hardware_store",
+            "pharmacy", "shoe_repair", "contractor", "insurance_agency", "law_office"}
     assert set(arch) == want, set(arch) ^ want
     kinds = {"merchant_house", "workshop", "estate", "shop", "studio", "shipping", "construction", "service", "other"}
     context = set(_CONTEXT_DEFAULTS) | {"security_inverse"}

@@ -1,0 +1,683 @@
+{
+ "about": "Ordinary businesses at the 1 January 1975 opening, by district (engine/opening_businesses.py). The city has about 1,100,000 residents (the background source at seed); only a named share of its real establishments exist as tracked enterprises at the opening, the rest being the unnamed background the engine already keeps as aggregate. A district's count is its residents x the per-1,000 rate x its mix multiplier x named_share; owners and staff are real people from the background population in that district's name groups.",
+ "mark": "Design proposal",
+ "residents": {
+  "value": 1100000,
+  "source": "the background population source at seed (1,100,000 residents)"
+ },
+ "named_share": {
+  "value": 0.04,
+  "mark": "Design proposal",
+  "note": "unsourced. The share of the city's real establishments that exist as tracked enterprises at the opening: 4 percent, about five hundred. Chosen to keep the opening build under a minute; the rest of the city's shops stay unnamed background."
+ },
+ "rates_per_1000": {
+  "grocery": {
+   "rate": 1.6,
+   "mark": "Design proposal",
+   "source": "County Business Patterns 1975 counted about 220,000 food stores, roughly one per 970 residents nationally; a dense old city has more small corner stores, so 1 per 625 (recalled, rounded)"
+  },
+  "bakery": {
+   "rate": 0.35,
+   "mark": "Design proposal",
+   "source": "unsourced; about one per 2,900 residents, more in the Italian, Polish and Portuguese quarters (see mix)"
+  },
+  "butcher": {
+   "rate": 0.4,
+   "mark": "Design proposal",
+   "source": "unsourced; about one per 2,500 residents"
+  },
+  "bar": {
+   "rate": 1.5,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 90,000 drinking places, one per 2,400 residents nationally; the bible puts thirty pubs in Kerrytown alone, so an older city runs higher (recalled, rounded)"
+  },
+  "diner": {
+   "rate": 0.8,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 250,000 eating places, one per 850 nationally, most of them restaurants outside this list; this is the lunch-counter and diner share"
+  },
+  "pizzeria": {
+   "rate": 0.3,
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  "barber_shop": {
+   "rate": 0.7,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 100,000 barber and beauty shops, one per 2,100 residents; barbers about a third"
+  },
+  "laundromat": {
+   "rate": 0.3,
+   "mark": "Design proposal",
+   "source": "unsourced; about one per 3,300 residents"
+  },
+  "dry_cleaner": {
+   "rate": 0.4,
+   "mark": "Design proposal",
+   "source": "unsourced; about one per 2,500 residents"
+  },
+  "hardware_store": {
+   "rate": 0.35,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 30,000 hardware stores, one per 7,000 nationally; a dense city has more small ones"
+  },
+  "pharmacy": {
+   "rate": 0.3,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 50,000 drug stores, one per 4,300 nationally"
+  },
+  "shoe_repair": {
+   "rate": 0.2,
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  "auto_repair": {
+   "rate": 0.7,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 150,000 automotive repair shops, one per 1,400 nationally; garages of the size the engine models are about half"
+  },
+  "funeral_home": {
+   "rate": 0.07,
+   "mark": "Design proposal",
+   "source": "unsourced; about one per 14,000 residents"
+  },
+  "contractor": {
+   "rate": 1.0,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 350,000 special-trade contractors, one per 600 nationally; the small-firm share of these"
+  },
+  "insurance_agency": {
+   "rate": 0.5,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 120,000 insurance agents and brokers, one per 1,800 nationally"
+  },
+  "law_office": {
+   "rate": 0.8,
+   "mark": "Design proposal",
+   "source": "CBP 1975: about 90,000 law offices, one per 2,400; a city has more than the national figure"
+  },
+  "car_dealership": {
+   "rate": 0.05,
+   "mark": "Design proposal",
+   "source": "unsourced; about one per 20,000 residents"
+  }
+ },
+ "profiles": {
+  "grocery": {
+   "place_kind": "storefront",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.7,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "bakery": {
+   "place_kind": "storefront",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.6,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "butcher": {
+   "place_kind": "storefront",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.9,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "bar": {
+   "place_kind": "bar_room",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.85,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "diner": {
+   "place_kind": "storefront",
+   "staff": [
+    2,
+    4
+   ],
+   "male_owner_share": 0.6,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "pizzeria": {
+   "place_kind": "storefront",
+   "staff": [
+    2,
+    4
+   ],
+   "male_owner_share": 0.85,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "barber_shop": {
+   "place_kind": "storefront",
+   "staff": [
+    1,
+    2
+   ],
+   "male_owner_share": 0.95,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "laundromat": {
+   "place_kind": "storefront",
+   "staff": [
+    0,
+    1
+   ],
+   "male_owner_share": 0.6,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "dry_cleaner": {
+   "place_kind": "storefront",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.7,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "hardware_store": {
+   "place_kind": "storefront",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.9,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "pharmacy": {
+   "place_kind": "storefront",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.85,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "shoe_repair": {
+   "place_kind": "storefront",
+   "staff": [
+    0,
+    1
+   ],
+   "male_owner_share": 0.95,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "auto_repair": {
+   "place_kind": "garage",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.97,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "funeral_home": {
+   "place_kind": "storefront",
+   "staff": [
+    2,
+    4
+   ],
+   "male_owner_share": 0.9,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "contractor": {
+   "place_kind": "office_floor",
+   "staff": [
+    2,
+    6
+   ],
+   "male_owner_share": 0.96,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "insurance_agency": {
+   "place_kind": "office_floor",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.85,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "law_office": {
+   "place_kind": "office_floor",
+   "staff": [
+    1,
+    3
+   ],
+   "male_owner_share": 0.88,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "car_dealership": {
+   "place_kind": "lot",
+   "staff": [
+    3,
+    8
+   ],
+   "male_owner_share": 0.95,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  }
+ },
+ "owner_age": {
+  "min": 24,
+  "max": 68,
+  "mark": "Design proposal",
+  "note": "unsourced"
+ },
+ "staff_age": {
+  "min": 16,
+  "max": 66,
+  "mark": "Design proposal",
+  "note": "unsourced"
+ },
+ "districts": [
+  {
+   "location": "North Hill",
+   "share": 0.07,
+   "groups": {
+    "italian": 0.85,
+    "irish": 0.06,
+    "polish_slavic": 0.03,
+    "old_protestant": 0.03,
+    "jewish": 0.03
+   },
+   "mix": {
+    "bakery": 2,
+    "butcher": 2,
+    "pizzeria": 2,
+    "funeral_home": 2,
+    "grocery": 1.3
+   },
+   "basis": "Part II: older and better off; the main shops, the oldest families"
+  },
+  {
+   "location": "San Lorenzo (the Hill)",
+   "share": 0.06,
+   "groups": {
+    "italian": 0.9,
+    "irish": 0.04,
+    "black": 0.03,
+    "polish_slavic": 0.03
+   },
+   "mix": {
+    "pizzeria": 2,
+    "bakery": 1.8,
+    "butcher": 1.8,
+    "bar": 1.3,
+    "funeral_home": 2
+   },
+   "basis": "the Hill proper; Italian"
+  },
+  {
+   "location": "The East Slope",
+   "share": 0.04,
+   "groups": {
+    "italian": 0.55,
+    "black": 0.3,
+    "irish": 0.1,
+    "puerto_rican_latino": 0.05
+   },
+   "mix": {
+    "auto_repair": 1.6,
+    "bar": 1.5,
+    "contractor": 1.3
+   },
+   "basis": "newer and rougher, bordering Mercer Avenue and the Eastside"
+  },
+  {
+   "location": "Bellacorte",
+   "share": 0.06,
+   "groups": {
+    "italian": 0.8,
+    "old_protestant": 0.08,
+    "jewish": 0.07,
+    "irish": 0.05
+   },
+   "mix": {
+    "law_office": 2.5,
+    "insurance_agency": 2,
+    "pharmacy": 1.5,
+    "funeral_home": 1.5,
+    "bar": 0.6,
+    "auto_repair": 0.6
+   },
+   "basis": "northern Italian professional families on rising ground"
+  },
+  {
+   "location": "Crown Harbor",
+   "share": 0.04,
+   "groups": {
+    "old_protestant": 0.3,
+    "irish": 0.2,
+    "italian": 0.2,
+    "jewish": 0.15,
+    "black": 0.15
+   },
+   "mix": {
+    "law_office": 5,
+    "insurance_agency": 3,
+    "pharmacy": 1.5,
+    "diner": 1.5,
+    "bar": 1.2,
+    "grocery": 0.3,
+    "bakery": 0.5,
+    "butcher": 0.3,
+    "auto_repair": 0.3
+   },
+   "basis": "downtown: banks, law firms, department stores"
+  },
+  {
+   "location": "Killbuck Point",
+   "share": 0.07,
+   "groups": {
+    "irish": 0.3,
+    "italian": 0.3,
+    "portuguese": 0.15,
+    "black": 0.1,
+    "polish_slavic": 0.15
+   },
+   "mix": {
+    "bar": 2.5,
+    "diner": 1.5,
+    "contractor": 1.4,
+    "auto_repair": 1.3
+   },
+   "basis": "the working port; a long strip of seamen's bars"
+  },
+  {
+   "location": "Pescadores Row",
+   "share": 0.01,
+   "groups": {
+    "portuguese": 0.9,
+    "italian": 0.05,
+    "irish": 0.05
+   },
+   "mix": {
+    "bakery": 3,
+    "grocery": 1.5,
+    "bar": 1.5,
+    "butcher": 0.5
+   },
+   "basis": "the old Portuguese fishing quarter: three bakeries, two fish markets, a club"
+  },
+  {
+   "location": "The Eastside",
+   "share": 0.15,
+   "groups": {
+    "black": 0.8,
+    "puerto_rican_latino": 0.1,
+    "italian": 0.04,
+    "irish": 0.03,
+    "jewish": 0.03
+   },
+   "mix": {
+    "grocery": 1.2,
+    "bar": 1.3,
+    "barber_shop": 1.4,
+    "laundromat": 1.5,
+    "auto_repair": 1.2,
+    "pharmacy": 0.7,
+    "law_office": 0.5,
+    "insurance_agency": 0.8
+   },
+   "basis": "the poorest district; public housing, the rail yards"
+  },
+  {
+   "location": "Dunmore Avenue",
+   "share": 0.05,
+   "groups": {
+    "black": 0.95,
+    "puerto_rican_latino": 0.03,
+    "jewish": 0.02
+   },
+   "mix": {
+    "barber_shop": 2.5,
+    "funeral_home": 3,
+    "insurance_agency": 2.5,
+    "bar": 1.5,
+    "law_office": 1.5
+   },
+   "basis": "two miles of Black-owned banks, insurance offices, barbershops, funeral homes"
+  },
+  {
+   "location": "Mercer Avenue (the Strip)",
+   "share": 0.04,
+   "groups": {
+    "italian": 0.25,
+    "irish": 0.2,
+    "black": 0.25,
+    "puerto_rican_latino": 0.15,
+    "old_protestant": 0.15
+   },
+   "mix": {
+    "bar": 3,
+    "diner": 2.5,
+    "pizzeria": 1.5,
+    "car_dealership": 2,
+    "grocery": 0.5,
+    "bakery": 0.4
+   },
+   "basis": "cinemas, supper clubs, boxing gyms, diners, hourly motels and card rooms"
+  },
+  {
+   "location": "Brighton Point",
+   "share": 0.06,
+   "groups": {
+    "jewish": 0.6,
+    "soviet_jewish_emigre": 0.05,
+    "polish_slavic": 0.2,
+    "irish": 0.1,
+    "old_protestant": 0.05
+   },
+   "mix": {
+    "grocery": 1.5,
+    "pharmacy": 1.6,
+    "dry_cleaner": 1.5,
+    "bakery": 1.3,
+    "bar": 0.5
+   },
+   "basis": "elderly Jewish and Eastern European retirees; Soviet emigres arriving"
+  },
+  {
+   "location": "The Heights",
+   "share": 0.03,
+   "groups": {
+    "old_protestant": 0.65,
+    "irish": 0.15,
+    "italian": 0.1,
+    "jewish": 0.1
+   },
+   "mix": {
+    "law_office": 3,
+    "insurance_agency": 2,
+    "dry_cleaner": 1.5,
+    "hardware_store": 1.3,
+    "bar": 0.3,
+    "diner": 0.4,
+    "auto_repair": 0.4,
+    "laundromat": 0.2
+   },
+   "basis": "old-money ridge; mansions and the oldest Protestant churches"
+  },
+  {
+   "location": "Kerrytown",
+   "share": 0.07,
+   "groups": {
+    "irish": 0.85,
+    "italian": 0.05,
+    "old_protestant": 0.05,
+    "polish_slavic": 0.05
+   },
+   "mix": {
+    "bar": 3.5,
+    "funeral_home": 1.5,
+    "grocery": 1.2,
+    "contractor": 1.3
+   },
+   "basis": "corner pubs, parish halls and tenements; thirty pubs"
+  },
+  {
+   "location": "Kosciuszko Park",
+   "share": 0.06,
+   "groups": {
+    "polish_slavic": 0.8,
+    "italian": 0.08,
+    "irish": 0.07,
+    "old_protestant": 0.05
+   },
+   "mix": {
+    "bakery": 2.5,
+    "butcher": 2.5,
+    "grocery": 1.2,
+    "bar": 1.2,
+    "funeral_home": 1.3
+   },
+   "basis": "Polish neighborhood: bakeries and butchers"
+  },
+  {
+   "location": "Fenwick (College Hill)",
+   "share": 0.04,
+   "groups": {
+    "old_protestant": 0.25,
+    "jewish": 0.2,
+    "irish": 0.2,
+    "italian": 0.15,
+    "black": 0.1,
+    "chinese": 0.1
+   },
+   "mix": {
+    "diner": 2,
+    "bar": 2,
+    "pharmacy": 1.3,
+    "barber_shop": 1.0,
+    "hardware_store": 0.8
+   },
+   "basis": "the university district"
+  },
+  {
+   "location": "Greenwood",
+   "share": 0.05,
+   "groups": {
+    "jewish": 0.7,
+    "old_protestant": 0.1,
+    "irish": 0.1,
+    "italian": 0.1
+   },
+   "mix": {
+    "diner": 1.5,
+    "pharmacy": 1.4,
+    "dry_cleaner": 1.6,
+    "insurance_agency": 1.5,
+    "law_office": 1.6,
+    "bar": 0.4
+   },
+   "basis": "Jewish professionals and merchants; delicatessens"
+  },
+  {
+   "location": "The Ironworks",
+   "share": 0.08,
+   "groups": {
+    "polish_slavic": 0.3,
+    "italian": 0.25,
+    "irish": 0.2,
+    "black": 0.15,
+    "puerto_rican_latino": 0.1
+   },
+   "mix": {
+    "bar": 2.2,
+    "auto_repair": 2,
+    "diner": 1.5,
+    "contractor": 1.2,
+    "pharmacy": 0.6,
+    "law_office": 0.4
+   },
+   "basis": "mill, chemical and refinery country"
+  },
+  {
+   "location": "Docks Chinatown",
+   "share": 0.01,
+   "groups": {
+    "chinese": 0.9,
+    "italian": 0.05,
+    "irish": 0.05
+   },
+   "mix": {
+    "laundromat": 3,
+    "diner": 3,
+    "grocery": 1.5,
+    "bar": 0.4
+   },
+   "basis": "Chinese restaurants and laundries; about 1 percent of the city"
+  }
+ ],
+ "domains": {
+  "grocery": "merchant",
+  "bakery": "artisan",
+  "butcher": "artisan",
+  "bar": "hospitality",
+  "diner": "hospitality",
+  "pizzeria": "hospitality",
+  "barber_shop": "artisan",
+  "laundromat": "merchant",
+  "dry_cleaner": "artisan",
+  "hardware_store": "merchant",
+  "pharmacy": "physician",
+  "shoe_repair": "artisan",
+  "auto_repair": "artisan",
+  "funeral_home": "merchant",
+  "contractor": "artisan",
+  "insurance_agency": "clerk",
+  "law_office": "clerk",
+  "car_dealership": "merchant"
+ },
+ "money": {
+  "capital_months_of_revenue": [
+   1.0,
+   3.0
+  ],
+  "cash_months_of_revenue": [
+   0.2,
+   0.8
+  ],
+  "mark": "Design proposal",
+  "note": "unsourced"
+ },
+ "years_open": {
+  "mean": 12.0,
+  "min": 1.0,
+  "mark": "Design proposal",
+  "note": "unsourced; drawn exponentially, never before the owner was 22"
+ },
+ "quality": {
+  "mean": 50,
+  "spread": 12,
+  "mark": "Design proposal",
+  "note": "unsourced"
+ }
+}

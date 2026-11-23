@@ -38,6 +38,7 @@
   "lethality": "lethality.json",
   "presence": "presence.json",
   "business": "business.json",
+  "neighbourhood": "neighbourhood.json",
   "politics": "politics.json",
   "prison": "prison.json",
   "history": "history.json"

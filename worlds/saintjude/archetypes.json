@@ -390,5 +390,178 @@
   "basis": "A family garage doing about 8 jobs a week at roughly 55 a job in 1975 money over 30 days at full utilisation; parts are most of the cost ratio.",
   "assumption": true,
   "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "grocery": {
+  "name": "Neighborhood Grocery",
+  "sector": "retail",
+  "enterprise_kind": "shop",
+  "base_revenue": 18000,
+  "cost_ratio": 0.82,
+  "regulation": 0.04,
+  "weights": {
+   "foot_traffic": 0.35,
+   "disposable_income": 0.2,
+   "reputation_climate": 0.2,
+   "trade_flow": 0.1,
+   "security": 0.15
+  },
+  "price_refs": [],
+  "basis": "A corner grocery taking about 120 dollars a day over 30 days at full utilisation in 1975 money, most of it goods bought in; assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "barber_shop": {
+  "name": "Barber Shop",
+  "sector": "service",
+  "enterprise_kind": "service",
+  "base_revenue": 6000,
+  "cost_ratio": 0.35,
+  "regulation": 0.03,
+  "weights": {
+   "foot_traffic": 0.35,
+   "disposable_income": 0.2,
+   "reputation_climate": 0.2,
+   "trade_flow": 0.1,
+   "security": 0.15
+  },
+  "price_refs": [],
+  "basis": "Two chairs, about 14 cuts a day at roughly 2.50 in 1975 money over 30 days at full utilisation; assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "dry_cleaner": {
+  "name": "Dry Cleaner",
+  "sector": "service",
+  "enterprise_kind": "service",
+  "base_revenue": 9000,
+  "cost_ratio": 0.5,
+  "regulation": 0.06,
+  "weights": {
+   "foot_traffic": 0.35,
+   "disposable_income": 0.2,
+   "reputation_climate": 0.2,
+   "trade_flow": 0.1,
+   "security": 0.15
+  },
+  "price_refs": [],
+  "basis": "A neighborhood cleaner and presser taking about 300 dollars a day-week; assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "hardware_store": {
+  "name": "Hardware Store",
+  "sector": "retail",
+  "enterprise_kind": "shop",
+  "base_revenue": 15000,
+  "cost_ratio": 0.74,
+  "regulation": 0.03,
+  "weights": {
+   "foot_traffic": 0.35,
+   "disposable_income": 0.2,
+   "reputation_climate": 0.2,
+   "trade_flow": 0.1,
+   "security": 0.15
+  },
+  "price_refs": [],
+  "basis": "A neighborhood hardware and paint store at about 500 dollars a day of trade at full utilisation; assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "pharmacy": {
+  "name": "Pharmacy",
+  "sector": "retail",
+  "enterprise_kind": "shop",
+  "base_revenue": 22000,
+  "cost_ratio": 0.78,
+  "regulation": 0.08,
+  "weights": {
+   "foot_traffic": 0.35,
+   "disposable_income": 0.2,
+   "reputation_climate": 0.2,
+   "trade_flow": 0.1,
+   "security": 0.15
+  },
+  "price_refs": [],
+  "basis": "A neighborhood druggist, about 90 prescriptions and sundries a day in 1975 money; assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "shoe_repair": {
+  "name": "Shoe Repair",
+  "sector": "service",
+  "enterprise_kind": "service",
+  "base_revenue": 3000,
+  "cost_ratio": 0.3,
+  "regulation": 0.02,
+  "weights": {
+   "foot_traffic": 0.35,
+   "disposable_income": 0.2,
+   "reputation_climate": 0.2,
+   "trade_flow": 0.1,
+   "security": 0.15
+  },
+  "price_refs": [],
+  "basis": "A one-man cobbler at about 100 a week; assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "contractor": {
+  "name": "Building Trades Contractor",
+  "sector": "construction",
+  "enterprise_kind": "construction",
+  "base_revenue": 24000,
+  "cost_ratio": 0.82,
+  "regulation": 0.1,
+  "weights": {
+   "construction_demand": 0.4,
+   "disposable_income": 0.15,
+   "reputation_climate": 0.25,
+   "trade_flow": 0.1,
+   "security": 0.1
+  },
+  "price_refs": [],
+  "basis": "A small plumbing, electrical or carpentry contractor with a few men, about 24,000 a month at full utilisation; assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "insurance_agency": {
+  "name": "Insurance Agency",
+  "sector": "professional",
+  "enterprise_kind": "service",
+  "base_revenue": 9000,
+  "cost_ratio": 0.5,
+  "regulation": 0.1,
+  "weights": {
+   "reputation_climate": 0.35,
+   "disposable_income": 0.2,
+   "credit_demand": 0.15,
+   "foot_traffic": 0.1,
+   "elite_patronage": 0.1,
+   "security": 0.1
+  },
+  "price_refs": [],
+  "basis": "A neighborhood agent selling life, fire and auto cover for commission; assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
+ },
+ "law_office": {
+  "name": "Law Office",
+  "sector": "professional",
+  "enterprise_kind": "service",
+  "base_revenue": 12000,
+  "cost_ratio": 0.45,
+  "regulation": 0.1,
+  "weights": {
+   "reputation_climate": 0.35,
+   "disposable_income": 0.2,
+   "credit_demand": 0.15,
+   "foot_traffic": 0.1,
+   "elite_patronage": 0.1,
+   "security": 0.1
+  },
+  "price_refs": [],
+  "basis": "A one- or two-lawyer practice (wills, closings, minor criminal and traffic work); assumption.",
+  "assumption": true,
+  "price_refs_note": "bible silent: Part VI 4.4 has no row for this trade"
  }
 }
