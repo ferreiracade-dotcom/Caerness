@@ -824,7 +824,7 @@ def carry_on(conn: sqlite3.Connection, day: int) -> dict:
             if amount < _figure(cfg.get("envelope_floor"), 0.0):
                 continue
             paid = ledger.transfer(conn, ledger.parse_holder(ref, a), ("household", hh), amount, flow_kind=str(cfg.get("flow_kind") or "support"),
-                                   purpose="the outfit looks after a man's family while he is held", allow_partial=True)
+                                   purpose="support for a man's people while he is held", allow_partial=True)
             if paid > 0:
                 out["envelope"] += 1
     return out
