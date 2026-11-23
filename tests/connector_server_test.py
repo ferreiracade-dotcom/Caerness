@@ -31,9 +31,9 @@ def run():
         assert sorted(t.name for t in tools) == ["act", "advance", "author", "lookup", "lore", "note", "resume", "scene"]
         size = len(json.dumps([t.model_dump(by_alias=True, exclude_none=True) for t in tools], ensure_ascii=False))
         print(f"tool definitions: {size} chars")
-        assert size <= 6500, size
+        assert size <= 6700, size  # resume gained save and new_save
 
-        r = server.resume()
+        r = server.resume_current()
         assert "error" not in r and "rulebook" in r, r
         print(f"resume: {len(json.dumps(r, ensure_ascii=False))} chars")
         s = server.scene()
@@ -48,7 +48,7 @@ def run():
 
         # Fresh-chat hint: after 40 calls since resume (then every 10), or after a skip of a week or more.
         from connector import store
-        server.resume()
+        server.resume_current()
         with connect_campaign() as conn:
             assert conn.execute("SELECT value FROM connector_meta WHERE key='calls_since_resume'").fetchone()[0] == "0"
             for _ in range(38):
@@ -56,7 +56,7 @@ def run():
         assert "fresh_chat_hint" not in server.scene()  # call 39
         assert "fresh_chat_hint" in server.scene()      # call 40
         assert "fresh_chat_hint" not in server.scene()  # call 41
-        server.resume()
+        server.resume_current()
         assert "fresh_chat_hint" not in server.scene()
         week = server.advance("s-adv-7", 7, "wait a week")
         assert "error" not in week and week["elapsed_days"] >= 7 and "fresh_chat_hint" in week, week

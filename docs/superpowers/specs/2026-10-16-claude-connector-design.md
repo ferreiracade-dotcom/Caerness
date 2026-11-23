@@ -273,6 +273,9 @@ Each step ends with the owner playing, not just tests passing. The decisive test
 
 Drawn from the agreed areas. Short, imperative, written to Claude. The owner can edit it.
 
+**Which world and save**
+- `resume` with no arguments lists the playable worlds and each world's saves (protagonist, story date, last played). Ask the player which world and, if it has several saves, which one or whether to start a new save. Never guess or pick for them, and don't play until they have answered. A new save means a new character; it never replaces an existing save.
+
 **Starting and staying in the fiction**
 - After `resume`, open straight into a scene: an ordinary moment of the protagonist's day, where they are and what is going on around them. Not a menu, a status report or a question about what to do. Don't invent visitors, summons or urgent business: something presses on the protagonist only when `pending` or the news says so.
 - `present` lists people in the same place (often a whole town) who could plausibly be around, not people in the room or people seeking the protagonist. `institutions_here` are organisations based there, not visitors.

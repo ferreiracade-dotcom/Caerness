@@ -113,28 +113,132 @@ def last_played() -> str | None:
         text = (campaign_dir() / LAST_FILE).read_text(encoding="utf-8").strip()
     except OSError:
         return None
-    return text or None
+    return (text.splitlines() or [""])[0].strip() or None
+
+
+def last_save() -> str | None:
+    """The save name last opened (second line of the last-played file), or None."""
+    try:
+        lines = (campaign_dir() / LAST_FILE).read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+    return lines[1].strip() if len(lines) > 1 and lines[1].strip() else None
 
 
 def remember_last(name: str) -> None:
     (campaign_dir() / LAST_FILE).write_text(name.strip() + "\n", encoding="utf-8")
 
 
-def list_worlds() -> list[dict]:
-    """Every installed world package: its id, display name (from the package), campaign name, and whether that campaign exists."""
-    out = []
+def shelved_worlds() -> set[str]:
+    """World ids that are kept on disk but never offered in play.
+
+    CAERNESS_SHELVED_WORLDS (comma-separated ids; `none` for no shelving) wins when set; otherwise a world is
+    shelved when its package manifest says so (worlds/caerness/world.json does). Nothing is deleted either way.
+    """
+    raw = (os.environ.get("CAERNESS_SHELVED_WORLDS") or "").strip()
+    if raw:
+        return set() if raw.lower() == "none" else {t.strip() for t in raw.split(",") if t.strip()}
+    out = set()
     for pkg_id in list_packages():
         try:
-            p = load_package(pkg_id)
-            display, shelved = p.display_name, p.shelved
-        except Exception:  # a broken package is listed by id; opening it reports the real error
-            display, shelved = pkg_id, False
-        name = campaign_name_for(pkg_id)
-        out.append({"world": pkg_id, "display_name": display, "campaign": name, "exists": (campaign_dir() / f"{name}.db").is_file(), "shelved": shelved})
+            if load_package(pkg_id).shelved:
+                out.add(pkg_id)
+        except Exception:
+            pass
     return out
 
 
-def switch_to(world: str) -> Path:
+def list_worlds() -> list[dict]:
+    """Every installed world package: its id, display name (from the package), campaign name, and whether that campaign exists."""
+    out = []
+    shelved_ids = shelved_worlds()
+    for pkg_id in list_packages():
+        try:
+            display = load_package(pkg_id).display_name
+        except Exception:  # a broken package is listed by id; opening it reports the real error
+            display = pkg_id
+        name = campaign_name_for(pkg_id)
+        out.append({"world": pkg_id, "display_name": display, "campaign": name, "exists": (campaign_dir() / f"{name}.db").is_file(),
+                    "shelved": pkg_id in shelved_ids})
+    return out
+
+
+def _save_info(path: Path) -> dict | None:
+    """One campaign file as a save: name, world id, protagonist, story date, last played. Read-only; None if unreadable."""
+    import datetime
+
+    try:
+        conn = sqlite3.connect(f"{path.resolve().as_uri()}?mode=ro", uri=True, timeout=5)
+    except sqlite3.Error:
+        return None
+    conn.row_factory = sqlite3.Row
+    try:
+        row = conn.execute("SELECT value FROM engine_meta WHERE key='world_package_id'").fetchone()
+        world = str(row[0]) if row and row[0] else DEFAULT_PACKAGE
+        info: dict = {"save": path.stem, "world": world, "protagonist": None, "story_date": None, "last_played": None}
+        try:
+            p = conn.execute("SELECT a.name FROM player_state ps JOIN actors a ON a.id=ps.player_actor_id WHERE ps.id=1").fetchone()
+            info["protagonist"] = p["name"] if p else None
+        except sqlite3.Error:
+            pass
+        try:
+            day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+            from engine import world_calendar
+            info["story_date"] = world_calendar.format_date(load_package(world), day)
+        except Exception:
+            pass
+        stamp = None
+        try:
+            r = conn.execute("SELECT value FROM connector_meta WHERE key='last_resume_at'").fetchone()
+            stamp = r[0] if r else None
+        except sqlite3.Error:
+            pass
+        info["last_played"] = stamp or datetime.datetime.fromtimestamp(path.stat().st_mtime, datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        return info
+    except sqlite3.Error:
+        return None
+    finally:
+        conn.close()
+
+
+def list_saves(world: str) -> list[dict]:
+    """The world's saves (campaign files recorded as that world), the default-named one first, then by name."""
+    default = campaign_name_for(world)
+    out = []
+    for path in sorted(campaign_dir().glob("*.db")):
+        if not _NAME.match(path.stem):
+            continue
+        info = _save_info(path)
+        if info and info["world"] == world:
+            out.append(info)
+    out.sort(key=lambda i: (i["save"] != default, i["save"]))
+    return out
+
+
+def new_save_name(world: str, wanted: str | None = None) -> str:
+    """A name for a new save that does not exist yet (never one that does); `wanted` is used as given or refused."""
+    taken = {p.stem for p in campaign_dir().glob("*.db")}
+    if wanted:
+        if not _NAME.match(wanted):
+            raise ValueError("save name must match [A-Za-z0-9_-]{1,40}")
+        if wanted in taken:
+            raise ValueError(f"a save named '{wanted}' already exists; saves are never overwritten")
+        return wanted
+    base = campaign_name_for(world)
+    if base not in taken:
+        return base
+    n = 2
+    while f"{base}-{n}" in taken:
+        n += 1
+    return f"{base}-{n}"
+
+
+def worlds_and_saves() -> list[dict]:
+    """The playable (not shelved) worlds, each with its saves."""
+    return [{"world": w["world"], "name": w["display_name"], "saves": list_saves(w["world"])} for w in list_worlds() if not w["shelved"]]
+
+
+def switch_to(world: str, save: str | None = None, *, new: bool = False) -> Path:
     """Open (creating from the packaged opening if new) the world's campaign, make it current, and remember it.
 
     An unknown or broken world raises before CAERNESS_DB_PATH changes. The package caches in engine.world_package
@@ -142,10 +246,21 @@ def switch_to(world: str) -> Path:
     """
     if not isinstance(world, str) or world not in list_packages():
         raise ValueError(f"unknown world '{world}'; known: {', '.join(list_packages()) or 'none'}")
+    if world in shelved_worlds():
+        raise ValueError(f"unknown world '{world}'; known: {', '.join(w['world'] for w in list_worlds() if not w['shelved']) or 'none'}")
     load_package(world)
+    existing = {i["save"] for i in list_saves(world)}
+    if new:
+        name = new_save_name(world, save)
+    elif save:
+        if save not in existing:
+            raise ValueError(f"no save '{save}' in {world}; saves: {', '.join(sorted(existing)) or 'none'}")
+        name = save
+    else:
+        name = campaign_name_for(world)
     previous = os.environ.get("CAERNESS_DB_PATH")
     try:
-        path = open_campaign(campaign_name_for(world), package=world)
+        path = open_campaign(name, package=world)
     except Exception:
         if previous is None:
             os.environ.pop("CAERNESS_DB_PATH", None)
@@ -153,15 +268,21 @@ def switch_to(world: str) -> Path:
             os.environ["CAERNESS_DB_PATH"] = previous
         raise
     remember_last(world)
+    (campaign_dir() / LAST_FILE).write_text(f"{world}\n{name}\n", encoding="utf-8")
     return path
+
+
+def _startup_save(world: str) -> str:
+    save = last_save()
+    return save if save and (campaign_dir() / f"{save}.db").is_file() else campaign_name_for(world)
 
 
 def open_startup(default_campaign: str) -> Path:
     """Start-up: the world last played if there is one, else the configured campaign (a new Caerness campaign as before)."""
     world = last_played()
-    if world and world != DEFAULT_PACKAGE and world in list_packages():
+    if world and world not in shelved_worlds() and world in list_packages():
         try:
-            return open_campaign(campaign_name_for(world), package=world)
+            return open_campaign(_startup_save(world), package=world)
         except Exception as e:  # fall back to the configured campaign rather than refuse to start
             print(f"could not reopen last-played world {world!r}: {e}; opening {default_campaign}", file=sys.stderr)
     return open_campaign(default_campaign)

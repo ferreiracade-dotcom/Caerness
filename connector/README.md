@@ -1,6 +1,6 @@
 # Narrative Engine connector
 
-A local MCP server so the Claude desktop app can play the Narrative Engine's worlds (Caerness, Saint Jude). Claude is the game master; the engine is memory and consequence.
+A local MCP server so the Claude desktop app can play the Narrative Engine's worlds. Claude is the game master; the engine is memory and consequence.
 
 1. Install requirements: `python -m pip install -r connector/requirements.txt` (Python 3.13).
 2. Create a campaign and choose the protagonist:
@@ -63,7 +63,7 @@ Restore a snapshot on the VM:
 | Tool times out after 240 s | Lower `CAERNESS_MAX_ADVANCE_DAYS` in `/etc/caerness/caerness.env` (default and hard maximum 30), restart |
 | Signed out after a long time | Refresh tokens last 90 days and rotate on use; sign in again from the connector's settings |
 
-## World packages: Caerness or Saint Jude
+## World packages and saves
 
 A new campaign copies its package's opening world: `data/caerness.db` for Caerness, `data/saintjude.db` for Saint Jude (rebuild with `python tools/build_opening.py --package saintjude`). The server's campaign (`CAERNESS_CAMPAIGN`, default `main`) is created in the package named by `CAERNESS_WORLD_PACKAGE` (unset means Caerness). Once a campaign exists, its package is the one recorded in its database, whatever the variable says. To play Saint Jude on the VM, ship `data/saintjude.db` with the update, set `CAERNESS_WORLD_PACKAGE=saintjude` and a new `CAERNESS_CAMPAIGN` name in `/etc/caerness/caerness.env`, and restart `caerness` (switch the two back to return to the Caerness campaign). Existing Caerness campaigns need nothing.
 

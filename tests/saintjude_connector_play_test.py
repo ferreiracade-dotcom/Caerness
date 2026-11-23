@@ -84,7 +84,7 @@ def setup() -> None:
 @check("1a resume without a character: creation + Saint Jude rulebook, no leak words")
 def c1a():
     from connector import server
-    r = server.resume()
+    r = server.resume_current()
     assert not r.get("error"), r
     assert r.get("needs_character"), list(r)
     rb = r["rulebook"]
@@ -110,7 +110,7 @@ def c1b():
 @check("1c player set and resume now returns a scene")
 def c1c():
     from connector import server
-    r = server.resume()
+    r = server.resume_current()
     assert not r.get("error") and not r.get("needs_character"), dump(r)[:400]
     assert r["protagonist"], r
     return f"protagonist={r['protagonist']}"

@@ -78,7 +78,10 @@ def run():
             names = sorted(t["name"] for t in r.json()["result"]["tools"])
             assert names == ["act", "advance", "author", "lookup", "lore", "note", "resume", "scene"], names
 
-            res = call_tool(client, "resume")
+            asked = call_tool(client, "resume")
+            assert "ask" in asked and "rulebook" not in asked, list(asked)  # bare resume asks which world
+            os.environ["CAERNESS_SHELVED_WORLDS"] = "none"  # this test plays the Caerness fixture campaign
+            res = call_tool(client, "resume", {"world": "caerness", "save": "http"})
             assert "rulebook" in res, list(res)
             who = call_tool(client, "scene")["present"][0]["id"]
             first = call_tool(client, "note", {"call_id": "h-note-1", "subject_kind": "actor",

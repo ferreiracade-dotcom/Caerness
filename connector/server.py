@@ -8,19 +8,10 @@ import threading
 
 from mcp.server.mcpserver import MCPServer
 
-INSTRUCTIONS_TEMPLATE = ("{name} is the user's text role-playing game. When the user says \"resume\", \"play\" or mentions any of them, "
-                         "call the resume tool first and follow the game-master rulebook it returns. "
-                         "resume takes an optional world (its name) to switch to another world's campaign.")
-
-
-def _world_names() -> str:
-    """Every installed world's display name joined with ' or ' (from the packages, never hard-coded)."""
-    try:
-        from connector.campaign import list_worlds
-        names = [w["display_name"] for w in list_worlds() if not w.get("shelved")]
-    except Exception:  # an unreadable package must not stop the server from starting
-        names = []
-    return " or ".join(names) or "Narrative Engine"
+INSTRUCTIONS_TEMPLATE = ("{name} is the user's text role-playing game. When the user says \"resume\" or \"play\", "
+                         "call the resume tool with no arguments first: it lists the playable worlds and their saves. Ask the player which world "
+                         "and, when the world has several saves, which save (or a new one); never choose for them. Then call resume with world and "
+                         "save (new_save=true for a new save) and follow the game-master rulebook it returns.")
 
 
 INSTRUCTIONS = INSTRUCTIONS_TEMPLATE.format(name="Narrative Engine")
@@ -31,19 +22,11 @@ def make_mcp(**kwargs) -> MCPServer:
     from connector import apps_probe
     if apps_probe.enabled():  # opt-in test card; the game tools are unchanged
         kwargs.setdefault("extensions", [apps_probe.make_apps()])
-    return MCPServer("narrative-engine", instructions=INSTRUCTIONS_TEMPLATE.format(name=_world_names()), **kwargs)
-
-
-_DOC_PREFIX = "Narrative Engine game:"
+    return MCPServer("narrative-engine", instructions=INSTRUCTIONS, **kwargs)
 
 
 def register_tools(server: MCPServer) -> MCPServer:
-    name = _world_names()
     for fn in (resume, scene, lookup, lore, act, advance, note, author):
-        original = getattr(fn, "_original_doc", None)
-        if original is None:
-            original = fn._original_doc = fn.__doc__ or ""
-        fn.__doc__ = f"{name} game:" + original[len(_DOC_PREFIX):] if original.startswith(_DOC_PREFIX) else original
         server.tool(structured_output=False)(fn)
     return server
 
@@ -102,8 +85,8 @@ def _snapshot_before_advance() -> None:
         print(f"pre-advance snapshot failed: {e}", file=sys.stderr)
 
 
-def resume(world: str | None = None) -> dict:
-    """Narrative Engine game: call first when the user says resume or wants to play; returns the GM rulebook and current scene. world (optional) is the name of the world to play; omit it to continue the world last played."""
+def resume_current() -> dict:
+    """Continue whichever campaign is open now: the rulebook and scene (a new campaign gets the creation text). Not a tool."""
     from connector.session import resume as _resume
     from connector.session import world_info
 
@@ -111,11 +94,35 @@ def resume(world: str | None = None) -> dict:
         out = _resume(conn)
         return out if "error" in out else {**out, **world_info(conn)}
 
-    before = None
-    if world is not None and str(world).strip():
-        from connector import campaign
-        before = lambda: campaign.switch_to(_resolve_world(str(world)))  # noqa: E731  (resolved inside the lock and try)
-    return _call(go, "resume", before=before)
+    return _call(go, "resume")
+
+
+def resume(world: str | None = None, save: str | None = None, new_save: bool = False) -> dict:
+    """Narrative Engine game: call first. No arguments lists worlds and their saves: ask the player which, then call again with world and save. new_save=true starts a new save. Returns the GM rulebook and scene."""
+    from connector import campaign
+
+    def pick():
+        with _CALL_LOCK, contextlib.redirect_stdout(sys.stderr):
+            try:
+                if world is None or not str(world).strip():
+                    return {"ask": "Ask the player which world to play and, if that world has several saves, which save (or whether to start a new one). "
+                                   "Then call resume again with world and save (new_save=true starts a new save). Do not pick for them and do not play yet.",
+                            "worlds": campaign.worlds_and_saves()}
+                w = _resolve_world(str(world))
+                if w not in {x["world"] for x in campaign.worlds_and_saves()}:
+                    return {"error": f"unknown world '{world}'; playable: {', '.join(x['name'] for x in campaign.worlds_and_saves()) or 'none'}"}
+                saves = campaign.list_saves(w)
+                wanted = str(save).strip() if save is not None and str(save).strip() else None
+                if not new_save and wanted is None and len(saves) > 1:
+                    return {"ask": "This world has several saves: ask the player which one (or whether to start a new one), then call resume with world and save.",
+                            "world": w, "saves": saves}
+                campaign.switch_to(w, wanted, new=bool(new_save))
+            except Exception as e:
+                return {"error": str(e) or type(e).__name__}
+        return None
+
+    early = pick()
+    return early if early is not None else resume_current()
 
 
 def _resolve_world(text: str) -> str:

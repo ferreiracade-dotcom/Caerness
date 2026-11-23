@@ -5,6 +5,7 @@ data/*.db copied by open_campaign, exactly as in production (the packaged files 
 """
 from __future__ import annotations
 
+import contextlib
 import os
 import sys
 import tempfile
@@ -44,7 +45,7 @@ def package_of_current() -> str:
 
 def make_protagonist_if_needed() -> None:
     from connector import server
-    r = server.resume()
+    r = server.resume_current()
     if not r.get("needs_character"):
         return
     prop = {"name": "Danny Ruane", "sex": "male", "age": 28, "place": "Kerrytown", "work": "bartender at a Kerrytown tavern",
@@ -53,15 +54,27 @@ def make_protagonist_if_needed() -> None:
     assert out.get("status") == "created", out
 
 
+@contextlib.contextmanager
+def unshelved():
+    """Caerness is shelved by its package flag; these tests exercise world switching, so turn the shelf off for them."""
+    os.environ["CAERNESS_SHELVED_WORLDS"] = "none"
+    try:
+        yield
+    finally:
+        os.environ.pop("CAERNESS_SHELVED_WORLDS", None)
+
+
 def test_switch_creates_and_resumes_each_world():
     from connector import server
     out = server.resume(world="saintjude")
     assert not out.get("error"), out
     assert out["world"] == "Saint Jude" and "Caerness" not in out["other_worlds"], (out.get("world"), out.get("other_worlds"))
     assert db_name() == "saintjude.db"
-    out = server.resume(world="caerness")
-    assert out["world"] == "Caerness" and "Saint Jude" in out["other_worlds"] and "Caerness" not in out["other_worlds"]
-    assert db_name() == "main.db"
+    assert "error" in server.resume(world="caerness") and db_name() == "saintjude.db"  # shelved: not offered, not opened
+    with unshelved():
+        out = server.resume(world="caerness")
+        assert out["world"] == "Caerness" and "Saint Jude" in out["other_worlds"]
+        assert db_name() == "main.db"
 
 
 def test_round_trip_keeps_each_world():
@@ -74,7 +87,8 @@ def test_round_trip_keeps_each_world():
     moved = day_of_current() - sj_day
     assert moved == int(adv["elapsed_days"]) and moved >= 1, (moved, adv.get("elapsed_days"))
     sj_after = day_of_current()
-    server.resume(world="caerness")
+    with unshelved():
+        server.resume(world="caerness")
     assert package_of_current() == "caerness"
     out = server.lore("Hearth")
     assert out["passages"], out
@@ -95,7 +109,7 @@ def test_resume_without_world_uses_last_played():
     assert campaign.last_played() == "saintjude"
     os.environ["CAERNESS_DB_PATH"] = str(Path(os.environ["CAERNESS_CAMPAIGN_DIR"]) / "main.db")  # simulate a restart elsewhere
     campaign.open_startup("main")  # what start-up does: the last-played world wins over the configured campaign
-    assert server.resume()["world"] == "Saint Jude"
+    assert server.resume_current()["world"] == "Saint Jude"
 
 
 def test_unknown_world_is_an_error_not_a_switch():
@@ -120,14 +134,15 @@ def test_list_worlds_and_names():
 def test_instructions_name_every_playable_world():
     from connector import server
     text = server.make_mcp().instructions
-    assert "Saint Jude" in text and "Caerness" not in text, text  # a shelved world is never offered in play
+    assert "Caerness" not in text and "resume" in text and "which world" in text, text  # a shelved world is never offered in play
 
 
 def test_backup_all_snapshots_every_campaign():
     from connector import backup, campaign, server
     from connector.campaign import campaign_dir
     server.resume(world="saintjude")
-    server.resume(world="caerness")
+    with unshelved():
+        server.resume(world="caerness")
     with tempfile.TemporaryDirectory() as bd:
         os.environ["CAERNESS_BACKUP_DIR"] = bd
         try:
@@ -136,6 +151,57 @@ def test_backup_all_snapshots_every_campaign():
             assert {"main", "saintjude"} <= stems, stems
         finally:
             os.environ.pop("CAERNESS_BACKUP_DIR", None)
+
+
+def test_resume_lists_worlds_and_saves_and_new_save_never_overwrites():
+    from connector import campaign, server
+    out = server.resume()
+    assert "ask" in out and "worlds" not in out.get("error", ""), out
+    assert [w["world"] for w in out["worlds"]] == ["saintjude"], out  # Caerness is shelved: never listed
+    assert "Caerness" not in str(out)
+    # one save (or none yet): straight in
+    first = server.resume(world="saintjude")
+    assert not first.get("error") and "ask" not in first and db_name() == "saintjude.db", first
+    make_protagonist_if_needed()
+    adv = server.advance(cid(), 2, "pass time")
+    assert not adv.get("error"), adv
+    day1 = day_of_current()
+    listed = server.resume()["worlds"][0]["saves"]
+    assert [x["save"] for x in listed] == ["saintjude"] and listed[0]["protagonist"] == "Danny Ruane", listed
+    assert listed[0]["story_date"] and listed[0]["last_played"], listed
+    # a second save with a new character; the first is untouched
+    new = server.resume(world="saintjude", new_save=True)
+    assert new.get("needs_character") and db_name() == "saintjude-2.db", new
+    assert [x["save"] for x in campaign.list_saves("saintjude")] == ["saintjude", "saintjude-2"]
+    named = server.resume(world="saintjude", save="saintjude-2")
+    assert named.get("needs_character") and db_name() == "saintjude-2.db"
+    # several saves and no save named: ask, do not pick
+    ask = server.resume(world="saintjude")
+    assert "ask" in ask and [x["save"] for x in ask["saves"]] == ["saintjude", "saintjude-2"], ask
+    # resume a named save: the first one, where we left it
+    back = server.resume(world="saintjude", save="saintjude")
+    assert not back.get("error") and back["protagonist"]["name"] == "Danny Ruane" and db_name() == "saintjude.db", back
+    assert day_of_current() == day1
+    # never overwrite; unknown save is an error and changes nothing
+    assert "error" in server.resume(world="saintjude", save="saintjude", new_save=True)
+    assert "error" in server.resume(world="saintjude", save="nope") and db_name() == "saintjude.db"
+    assert "error" in server.resume(world="saintjude", save="../x", new_save=True)
+    assert day_of_current() == day1
+    # a named new save
+    mine = server.resume(world="saintjude", save="second-run", new_save=True)
+    assert mine.get("needs_character") and db_name() == "second-run.db"
+
+
+def test_shelving_is_a_setting_not_a_delete():
+    from connector import campaign
+    assert campaign.shelved_worlds() == {"caerness"}
+    os.environ["CAERNESS_SHELVED_WORLDS"] = "saintjude"
+    try:
+        assert campaign.shelved_worlds() == {"saintjude"}
+        assert [w["world"] for w in campaign.worlds_and_saves()] == ["caerness"]
+    finally:
+        os.environ.pop("CAERNESS_SHELVED_WORLDS", None)
+    assert (Path(campaign.__file__).resolve().parent.parent / "worlds" / "caerness" / "world.json").is_file()
 
 
 def run():
