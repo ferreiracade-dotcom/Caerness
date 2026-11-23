@@ -80,3 +80,4 @@ veinborn_training_test
 war01_campaign_battle_world_consequences_test
 world_pkg_caerness_connector_test
 world_pkg_caerness_regression_test
+p1_measures_test

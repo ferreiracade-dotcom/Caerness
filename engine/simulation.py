@@ -22,6 +22,7 @@ from .religion import next_religion_due_day, process_due_religion
 from .ecology import next_ecology_due_day, process_due_ecology
 from .agriculture import next_agriculture_due_day, process_due_agriculture
 from .politics import next_politics_due_day, process_due_politics
+from .civic_tick import next_due_day as next_civic_due_day, process_due as process_due_civic
 from .conflict import next_conflict_due_day, process_due_conflict
 from .organization_lifecycle import next_organization_lifecycle_due_day, process_due_organization_lifecycle
 from .seeking import next_seeking_due_day, process_due_seeking
@@ -491,6 +492,7 @@ def advance_connection_legacy(conn: sqlite3.Connection, days: int) -> list[sqlit
         _instrumented_process(conn, "religion", checkpoint, process_due_religion, conn, checkpoint, event_logger=_world_event_logger(conn))
         _instrumented_process(conn, "patronage", checkpoint, process_due_patronage, conn, checkpoint, event_logger=_world_event_logger(conn))
         _instrumented_process(conn, "politics", checkpoint, process_due_politics, conn, checkpoint, event_logger=_world_event_logger(conn))
+        _instrumented_process(conn, "civic", checkpoint, process_due_civic, conn, checkpoint, event_logger=_world_event_logger(conn))
         _instrumented_process(conn, "organization_lifecycle", checkpoint, process_due_organization_lifecycle, conn, checkpoint, event_logger=_world_event_logger(conn))
         _instrumented_process(conn, "education", checkpoint, process_due_education, conn, checkpoint, event_logger=_world_event_logger(conn))
         _instrumented_process(conn, "cultivation", checkpoint, process_due_cultivation, conn, checkpoint, event_logger=_world_event_logger(conn))
@@ -530,6 +532,7 @@ def advance_connection_legacy(conn: sqlite3.Connection, days: int) -> list[sqlit
     _instrumented_process(conn, "religion", end, process_due_religion, conn, end, event_logger=_world_event_logger(conn))
     _instrumented_process(conn, "patronage", end, process_due_patronage, conn, end, event_logger=_world_event_logger(conn))
     _instrumented_process(conn, "politics", end, process_due_politics, conn, end, event_logger=_world_event_logger(conn))
+    _instrumented_process(conn, "civic", end, process_due_civic, conn, end, event_logger=_world_event_logger(conn))
     _instrumented_process(conn, "organization_lifecycle", end, process_due_organization_lifecycle, conn, end, event_logger=_world_event_logger(conn))
     _instrumented_process(conn, "education", end, process_due_education, conn, end, event_logger=_world_event_logger(conn))
     _instrumented_process(conn, "cultivation", end, process_due_cultivation, conn, end, event_logger=_world_event_logger(conn))
@@ -551,7 +554,7 @@ SYSTEM_PROCESSES = {
     "groundbinding": ("groundbinding",),
     "hollow": ("hollow",),
     "caerness_religions": ("religion",),
-    "outfits": ("outfit_money", "outfit_incidents", "org_lifecycle", "crime_response"),
+    "outfits": ("outfit_money", "outfit_incidents", "org_lifecycle", "crime_response", "civic"),
 }
 
 
@@ -601,6 +604,7 @@ def build_default_process_registry(*, eager_requery: bool = True, disabled: froz
     reg.register(ProcessSpec("hollow", next_hollow_due_day, process_due_hollow))
     reg.register(ProcessSpec("religion", next_religion_due_day, process_due_religion))
     reg.register(ProcessSpec("politics", next_politics_due_day, process_due_politics))
+    reg.register(ProcessSpec("civic", next_civic_due_day, process_due_civic))
     reg.register(ProcessSpec("conflict", next_conflict_due_day, process_due_conflict))
     reg.register(ProcessSpec("organization_lifecycle", next_organization_lifecycle_due_day, process_due_organization_lifecycle))
     reg.register(ProcessSpec("seeking", next_seeking_due_day, process_due_seeking))
@@ -620,7 +624,7 @@ _REGISTRY_BLOCK_A = (
     "resolution", "world", "ecology", "agriculture", "logistics", "merchant", "craft", "civilian", "profession", "service_fulfillment", "growth",
     "underworld", "underworld_medicine", "law", "outfit_money", "outfit_incidents", "held_things", "crime_response", "org_lifecycle", "war", "groundbinding", "health", "psychology", "hollow",
 )
-_REGISTRY_BLOCK_B = ("religion", "patronage", "politics", "conflict", "organization_lifecycle", "seeking", "attention", "education", "cultivation", "tournament", "spectacle", "information", "memory")
+_REGISTRY_BLOCK_B = ("religion", "patronage", "politics", "civic", "conflict", "organization_lifecycle", "seeking", "attention", "education", "cultivation", "tournament", "spectacle", "information", "memory")
 
 
 def _next_scheduler_expiry_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int | None:

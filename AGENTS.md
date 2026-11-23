@@ -18,6 +18,8 @@ The repository folder and the `CAERNESS_*` environment variables, `data/caerness
 
 ## 2. Where work stands
 
+**P1 politics done (2026-11-23):** Saint Jude's city politics at B depth on the generic org core, from `worlds/saintjude/politics.json`: offices and terms, voter groups, races as ventures (primaries, general, fraud), agenda votes, deals, tenders and approvals, appointments through sponsor chains, standing payments with exposure and conviction, vacancy rules, and a field that shifts (weaken, split, end). One weekly tick (`engine/civic_tick.py`, process key `civic`, switched with `outfits`), a `politics` key in the scene/lookup, pushes and skip stops for the protagonist. Five simulated years x 3 seeds: civic tick ~16-18 s in total, slowest civic call ~1.5 s (`tests/p1_measures_test.py`, slow; figures in `runs/p1_measures/`). Nothing in the run starts a standing payment or a fraud on its own yet (they come from acts); see the P1 report.
+
 **BZ1 done (2026-11-22, schema 125):** the shared business layer (drivers, agreement terms, places, ventures, intake makers) runs on the Saint Jude clock from `worlds/saintjude/business.json`; Caerness has no business data and is untouched. Report: `.superpowers/sdd/2026-11-19-saintjude-org-core/task-BZ1-report.md`.
 
 ### Current direction (2026-10-16): play through Claude

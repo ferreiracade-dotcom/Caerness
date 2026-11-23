@@ -315,8 +315,11 @@ def compact_scene(conn) -> dict:
     tex = texture.block(conn, int(me["actor_id"]), here, [int(a["id"]) for a in sampled])
     if tex is not None:
         conn.commit()  # the ledger marks what this call delivers
+    from engine import civic_tick
+    politics = civic_tick.view(conn, int(me["actor_id"]), day) if civic_tick.enabled(conn) else None
     return _drop_none({
         "texture": tex,
+        "politics": politics or None,
         "commitments": [{"what": _clip(c["what"], 100), "kind": c["kind"], "due_in_days": max(0, int(c["due_day"]) - day) if c["due_day"] is not None else None}
                         for c in pending_work] or None,
         "day": day,
@@ -565,6 +568,12 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
         office = facts.office_of(conn, out["id"])
         if office:
             out["office"] = office
+        if me is not None and me == out["id"]:
+            from engine import civic_tick
+            if civic_tick.enabled(conn):
+                pol = civic_tick.view(conn, me, int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0]))
+                if pol:
+                    out["politics"] = pol
     if kind == "actor" and me is not None:  # what he holds of this man, and what he has been shown
         from engine import claims, texture
         if claims.enabled(conn):

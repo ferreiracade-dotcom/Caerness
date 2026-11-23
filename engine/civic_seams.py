@@ -106,6 +106,11 @@ def _register_shape() -> None:
     intake.register_shape(intake.Shape(DATED_FACT, (), (), None, False))
 
 
+def _dated(conn, day: int) -> str:
+    from . import offices
+    return offices.date_of(conn, int(day)).isoformat()
+
+
 def hold_outcome(conn, *, what: str, people: list[int], dates: dict, consequences: list[str], day: int) -> int:
     """A lasting political outcome (a result, an appointment, an ordinance) as one held_things row at depth B. The consequences are
     kept in the row's agenda text: they are words for the GM, not rules a reader must understand (so no depth gap is raised)."""
@@ -114,6 +119,8 @@ def hold_outcome(conn, *, what: str, people: list[int], dates: dict, consequence
         raise ValueError("an outcome needs at least one person")
     _register_shape()
     dates = dict(dates or {})
+    # one outcome per dated happening: the same man winning the same seat twice is two outcomes, not one thing held twice
+    what = f"{what} ({_dated(conn, day)})"
     details = {"what": what, "people": [int(p) for p in people], "legality": "legal", "agenda": "; ".join(consequences)[:300],
                "start_day": int(dates.get("start_day", day)), "source": "politics"}
     for k in ("end_day", "real_date"):
