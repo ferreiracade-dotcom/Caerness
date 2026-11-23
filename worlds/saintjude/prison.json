@@ -390,5 +390,40 @@
    }
   }
  },
+ "outside": {
+  "mark": "Design proposal",
+  "why": "What the outside does while a man is inside (J1.5). Unsourced design proposals, never caps.",
+  "decay_weekly": {
+   "value": 0.02,
+   "mark": "Design proposal",
+   "why": "Share of his standing outside he loses each week with no channel at all; a good channel (grip) holds it: loss = decay * (1 - grip)."
+  },
+  "envelope_weekly": {
+   "value": 60.0,
+   "mark": "Design proposal",
+   "why": "Dollars a week the head of his outfit pays his household at standing 1.0 and the first week held, 1975 prices (the outfit looks after its own)."
+  },
+  "envelope_halflife_weeks": {
+   "value": 52,
+   "mark": "Design proposal",
+   "why": "The envelope halves each this many weeks he is held: the longer, the thinner."
+  },
+  "envelope_floor": {
+   "value": 1.0,
+   "mark": "Design proposal",
+   "why": "Below this many dollars the outfit stops paying."
+  },
+  "flow_kind": "support",
+  "need_weekly": {
+   "value": 45.0,
+   "mark": "Design proposal",
+   "why": "Dollars a week his household needs, 1975 prices."
+  },
+  "cover_weeks": {
+   "value": 8,
+   "mark": "Design proposal",
+   "why": "Weeks of need that savings must cover for the family not to be going without: need = exp(-savings / (cover * weekly need))."
+  }
+ },
  "society": {"kind": "inmate_society", "name_template": "{group} at {facility}"}
 }

@@ -4791,6 +4791,16 @@
    "source": "unsourced",
    "note": "unsourced; loyalty to the head (0..1) cuts the chance of losing the daily review or the seat by this share: a loyal man inside is kept longer"
   },
+  "held_channel_weight": {
+   "default": 0.6,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; J1.5: a man held who can still reach the outside by a good channel cuts the chance of losing the daily review or the seat by this share times his grip (0..1). Design proposal"
+  },
   "held_acting_share": {
    "default": 0.7,
    "range": null,
@@ -14911,6 +14921,16 @@
    "mark": "Design proposal",
    "source": "unsourced",
    "note": "unsourced; Whether the police turn a man who has a case against him: the case, a family to lose, greed, want of loyalty, fear; his loyalty and being a made man against (Part II 6.3, 7.1: informants are the Bureau's best instrument against the families). Weight of the reading `kin_tie`. Design proposal. (B12f: engine/org_informing.py)"
+  },
+  "ib_inf_law_family_need": {
+   "default": 0.3,
+   "range": null,
+   "unit": "weight 0..1",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; J1.5: Whether the police turn a man who has a case against him: weight of the reading `family_need` (his people going without while he is held). Design proposal. (prison.family_need)"
   },
   "ib_inf_law_greed": {
    "default": 0.2,

@@ -500,6 +500,7 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
         out.update(weekly(conn, int(day)))
         from . import prison_channels
         out["channels"] = prison_channels.weekly(conn, int(day))
+        out["outside"] = carry_on(conn, int(day))
     return out
 
 
@@ -758,4 +759,65 @@ def weekly(conn: sqlite3.Connection, day: int) -> dict:
         out["protected"] += _informers(conn, int(day), men)
         out["escapes"] += _escapes(conn, int(day), fac, men, state)
         out["contraband"] += _contraband(conn, int(day), fac, men, state)
+    return out
+
+
+# ---- the outside carries on ----
+
+def _household(conn: sqlite3.Connection, actor_id: int):
+    """The household a man belongs to (its id), where he has one with someone else in it."""
+    r = conn.execute("""SELECT m.household_id FROM household_members m WHERE m.actor_id=? AND m.status IN ('active','absent')
+                        AND EXISTS (SELECT 1 FROM household_members o WHERE o.household_id=m.household_id AND o.actor_id<>m.actor_id AND o.status='active')
+                        ORDER BY m.household_id LIMIT 1""", (int(actor_id),)).fetchone()
+    return int(r[0]) if r else None
+
+
+def family_need(conn: sqlite3.Connection, actor_id: int, day: int) -> float:
+    """How far his people are going without while he is held, 0..1: nothing when he has no household or the data has none, and
+    otherwise exp(-savings / (cover weeks x weekly need)), so an empty household is at 1 and savings that last long are near 0. Read by
+    the weighing of a man held on whether to talk."""
+    cfg = rules(conn).get("outside") or {}
+    if not cfg or conn.execute("SELECT 1 FROM sqlite_master WHERE name='inmate_stays'").fetchone() is None:
+        return 0.0
+    if conn.execute("SELECT 1 FROM inmate_stays WHERE actor_id=? AND status='inside' LIMIT 1", (int(actor_id),)).fetchone() is None:
+        return 0.0
+    hh = _household(conn, actor_id)
+    if hh is None:
+        return 0.0
+    have = conn.execute("SELECT liquidity FROM households WHERE id=?", (hh,)).fetchone()
+    cover = _figure(cfg["need_weekly"]) * _figure(cfg["cover_weeks"])
+    return math.exp(-float(have[0] if have else 0.0) / cover) if cover > 0 else 0.0
+
+
+def carry_on(conn: sqlite3.Connection, day: int) -> dict:
+    """The week outside for each man inside: his seat outside (the org core keeps it, the weighing in `_held_decisions` reads his grip)
+    loses standing by the share of silence (`decay_weekly` x (1 - grip)); and the head of that outfit pays his household an envelope,
+    which shrinks with the weeks he has been held and with his standing, never a fixed sum."""
+    from . import ledger, org_money, orgs, prison_channels
+    cfg = rules(conn).get("outside") or {}
+    out = {"standing": 0, "envelope": 0}
+    if not cfg:
+        return out
+    decay, base, half = _figure(cfg["decay_weekly"]), _figure(cfg["envelope_weekly"]), _figure(cfg["envelope_halflife_weeks"])
+    for st in conn.execute("SELECT * FROM inmate_stays WHERE status='inside' ORDER BY id").fetchall():
+        a = int(st["actor_id"])
+        grip = prison_channels.channel_grip(conn, a)
+        weeks = max(0.0, (int(day) - int(st["since_day"])) / 7.0)
+        for s in conn.execute("""SELECT s.* FROM org_seats s JOIN org_profiles p ON p.org_actor_id=s.org_actor_id
+                                 WHERE s.actor_id=? AND s.status IN ('active','held') AND p.sphere<>'prison' ORDER BY s.id""", (a,)).fetchall():
+            org = int(s["org_actor_id"])
+            conn.execute("UPDATE org_seats SET standing=standing * (1.0 - ? * (1.0 - ?)) WHERE id=?", (decay, grip, int(s["id"])))
+            out["standing"] += 1
+            head = orgs.head_of(conn, org)
+            ref = org_money.purse_ref(conn, org)
+            hh = _household(conn, a)
+            if head is None or head == a or ref is None or hh is None:
+                continue
+            amount = base * float(s["standing"]) * math.pow(0.5, weeks / half)
+            if amount < _figure(cfg.get("envelope_floor"), 0.0):
+                continue
+            paid = ledger.transfer(conn, ledger.parse_holder(ref, a), ("household", hh), amount, flow_kind=str(cfg.get("flow_kind") or "support"),
+                                   purpose="the outfit looks after a man's family while he is held", allow_partial=True)
+            if paid > 0:
+                out["envelope"] += 1
     return out

@@ -50,6 +50,15 @@ def _turnable(conn, man: int, org: int) -> bool:
     return kind is not None and seat["role_key"] in ((idata(conn).get("roles") or {}).get(kind[0]) or [])
 
 
+def _family_need(conn, man: int, day: int) -> float:
+    """How far a held man's people are going without (prison data); 0 where the world has none."""
+    try:
+        from .prison import family_need
+        return family_need(conn, man, day)
+    except sqlite3.OperationalError:
+        return 0.0
+
+
 def _man_factors(conn, man: int, org: int, day: int) -> dict[str, float]:
     from .org_happenings import _arrested, _kin_tie, _open_case, _resentment
     seat = seat_of(conn, man, org)
@@ -58,7 +67,8 @@ def _man_factors(conn, man: int, org: int, day: int) -> dict[str, float]:
             "greed": float(seat["greed"]), "disloyal": 1.0 - om._drive(conn, man, "loyalty"), "loyal": om._drive(conn, man, "loyalty"),
             "resentful": _resentment(conn, man, day, seat, org) if seat["superior_actor_id"] is not None else 0.0,
             "standing": clamp01(float(seat["standing"])), "made": 1.0 if seat["inducted_day"] is not None else 0.0,
-            "afraid": 1.0 - om._drive(conn, man, "risk_tolerance"), "interest": org_heat.own_factor(conn, org, day)}
+            "afraid": 1.0 - om._drive(conn, man, "risk_tolerance"), "interest": org_heat.own_factor(conn, org, day),
+            "family_need": _family_need(conn, man, day)}
 
 
 def _turn(conn, man: int, org: int, by_kind: str, by_id: int | None, day: int) -> int:

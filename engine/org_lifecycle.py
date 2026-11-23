@@ -422,6 +422,15 @@ def _levels_pair(conn: sqlite3.Connection) -> tuple[int, int]:
     return (cad[0][1], cad[1][1]) if len(cad) > 1 else (cad[0][1], cad[0][1])
 
 
+def _channel_grip(conn: sqlite3.Connection, actor_id: int) -> float:
+    """How well a man held can still reach the outside (prison channels); 0 in a world with no prison data."""
+    try:
+        from .prison_channels import channel_grip
+        return channel_grip(conn, int(actor_id))
+    except sqlite3.OperationalError:
+        return 0.0
+
+
 def _held_decisions(conn: sqlite3.Connection, held: dict[int, int], day: int) -> int:
     """Each week, for every active seat whose man is held, the man's superior (the head when he has none) weighs two things.
     Whether to take his daily review away: the longer he has been held, the likelier, less if his sentence is nearly served or
@@ -443,15 +452,16 @@ def _held_decisions(conn: sqlite3.Connection, held: dict[int, int], day: int) ->
         head = orgs.head_of(conn, org)
         loyal = _head_loyalty(conn, a, head)
         lw = _num(conn, dec, "loyalty_weight", 0.0)
+        keep = 1.0 - _num(conn, dec, "channel_weight", 0.0) * _channel_grip(conn, a)  # a man who can still reach the outside is kept longer
         lvl_days, seat_days = _num(conn, lc, "held_level_days"), _num(conn, lc, "held_seat_days")
         if lvl_days and int(s["level"]) == high and role_level(conn, org, s["role_key"]) == high:
             soon = 1.0 if left is None else min(1.0, left / lvl_days)
-            p = _num(conn, dec, "level_week", 0.0) * min(1.0, d / lvl_days) * soon * (1.0 - lw * loyal)
+            p = _num(conn, dec, "level_week", 0.0) * min(1.0, d / lvl_days) * soon * (1.0 - lw * loyal) * keep
             if p > 0 and org_motives._roll(conn, a, int(day), "held_level") < p:
                 orgs.set_level(conn, a, low, int(day), org)
                 n += 1
         if seat_days:
-            p = _num(conn, dec, "seat_week", 0.0) * min(1.0, d / seat_days) * (1.0 - lw * loyal)
+            p = _num(conn, dec, "seat_week", 0.0) * min(1.0, d / seat_days) * (1.0 - lw * loyal) * keep
             if p > 0 and org_motives._roll(conn, a, int(day), "held_seat") < p:
                 rules = orgs.kind_rules(conn, org)
                 if s["role_key"] == rules.get("unit_leader") and s["unit_id"] and org_motives._roll(conn, a, int(day), "held_acting") < _num(conn, dec, "acting_share", 0.0) * loyal:
