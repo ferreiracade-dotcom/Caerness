@@ -633,6 +633,29 @@
   }
  },
  "opening_family": {
-  "marry_adults_on_day0": false
+  "marry_adults_on_day0": false,
+  "kin_in_organisations": {
+   "mark": "Design proposal",
+   "note": "unsourced. The bible makes the outfits family businesses ('Part I: sons, brothers and cousins follow'), so some same-surname members of one outfit are kin. This is the chance that a member is the brother (within sibling_gap_years) or the son (gap 15-45 years) of the next-older same-surname member of his outfit; the surname pools are small, so most such pairs are chance, not kin.",
+   "probability": 0.35,
+   "sibling_gap_years": 14
+  },
+  "marriage_by_group": {
+   "mark": "Design proposal",
+   "note": "Shifts the engine's base first-marriage curve (female median 21, male 24, 93% ever married) by name group, keyed to the community. The base medians match US 1975 (men 23.5, women 21.1, Census). The group shifts are recalled directional tendencies of the 1970 Census (Catholic and southern-European groups marry young and nearly universally; Black adults marry later and less often; Jewish and Old Protestant groups later with more college), not bible figures; each is an assumption for the owner to check.",
+   "groups": {
+    "italian": {"median_shift": -0.5, "share": 0.95},
+    "irish": {"median_shift": 0.5, "share": 0.90},
+    "polish_slavic": {"median_shift": -0.5, "share": 0.95},
+    "portuguese": {"median_shift": -0.5, "share": 0.95},
+    "black": {"median_shift": 1.5, "share": 0.85},
+    "jewish": {"median_shift": 1.5, "share": 0.93},
+    "old_protestant": {"median_shift": 1.0, "share": 0.92},
+    "puerto_rican_latino": {"median_shift": -0.5, "share": 0.90},
+    "greek_lebanese_armenian": {"median_shift": -0.5, "share": 0.95},
+    "soviet_jewish_emigre": {"median_shift": 0.0, "share": 0.93},
+    "chinese": {"median_shift": 1.0, "share": 0.93}
+   }
+  }
  }
 }

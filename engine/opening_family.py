@@ -115,7 +115,32 @@ def marriage_curve_for(conn: sqlite3.Connection, actor_id: int, sex: str, longev
     if str(payload.get("state_sphere") or "").startswith("Greywood"):
         # Greywood's Witness culture "places stronger moral pressure around marriage".
         share = min(0.97, share + 0.03); tags.append("greywood_witness")
+    shift = _group_marriage_shift(conn, actor_id)
+    if shift:
+        group, d = shift
+        median += float(d.get("median_shift", 0.0)); share = float(d.get("share", share)) if "share" in d else share
+        tags.append(f"group:{group}")
     return (median, spread, share), tags
+
+
+_GROUP_SURNAMES: dict[int, dict[str, str]] = {}
+
+
+def _group_marriage_shift(conn: sqlite3.Connection, actor_id: int) -> tuple[str, dict[str, Any]] | None:
+    """The package's marriage shift for the person's name group (by surname), or None when the package gives none."""
+    from .world_package import package_for
+    pkg = package_for(conn)
+    table = (pkg.opening_family.get("marriage_by_group") or {}).get("groups") or {}
+    if not table:
+        return None
+    idx = _GROUP_SURNAMES.get(id(pkg.name_groups))
+    if idx is None:
+        idx = {str(f).lower(): g for g, d in (pkg.name_groups or {}).items() for f in (d.get("family") or [])}
+        _GROUP_SURNAMES.clear(); _GROUP_SURNAMES[id(pkg.name_groups)] = idx
+    r = conn.execute("SELECT name FROM actors WHERE id=?", (actor_id,)).fetchone()
+    parts = str(r[0] if r else "").split()
+    group = idx.get(parts[-1].lower()) if parts else None
+    return (group, table[group]) if group in table else None
 
 
 def _ever_married_share(age: float, curve: Curve) -> float:
@@ -155,13 +180,23 @@ def _weighted(rng: random.Random, table: tuple[tuple[Any, float], ...]) -> Any:
     return table[-1][0]
 
 
-def _draw_spouse(rng: random.Random, person_age: float, sex: str, longevity_class: str, hearth: bool = True) -> dict[str, Any]:
+def _cultivation_on(conn: sqlite3.Connection) -> bool:
+    """Whether the world has the cultivation system; a world without it draws no Core, Stage or hearth for anyone."""
+    from .world_package import system_enabled
+    return system_enabled(conn, "cultivation")
+
+
+def _draw_spouse(rng: random.Random, person_age: float, sex: str, longevity_class: str, hearth: bool = True,
+                 cultivation: bool = True) -> dict[str, Any]:
     """A spouse's sex, age and Core.  Being Veinborn is not being a martial artist: martial families marry
     Veinborn partners more often ("more Open-Core marriages"), but whether that partner ever became a staged
     cultivator follows canon's staging rates, which are sex-weighted (serious martial society is ~70% male)."""
-    from .cultivation import VEINBORN_SHARE, staged_probability
     spouse_sex = "male" if sex == "female" else "female"
     gap = (3.0 if sex == "female" else -3.0) + rng.gauss(0.0, 3.5)
+    if not cultivation:
+        return {"sex": spouse_sex, "age_at_marriage": max(16.0, person_age + gap), "open_core": False,
+                "stage": None, "longevity_class": "ordinary", "union_kind": "marriage"}
+    from .cultivation import VEINBORN_SHARE, staged_probability
     martial = longevity_class in CULTIVATOR_CLASSES
     open_core = rng.random() < ((0.55 if hearth else 0.35) if martial else VEINBORN_SHARE[bool(hearth)])
     stage = None
@@ -172,7 +207,8 @@ def _draw_spouse(rng: random.Random, person_age: float, sex: str, longevity_clas
 
 
 def draw_family_history(key: str, *, age: float, sex: str, longevity_class: str, curve: Curve | None = None,
-                        childhood_multiplier: float = 1.0, hearth: bool = True) -> dict[str, Any]:
+                        childhood_multiplier: float = 1.0, hearth: bool = True,
+                        cultivation: bool = True) -> dict[str, Any]:
     """Deterministic life course up to ``age``: marriages, widowhood, remarriage and children.
 
     Pure: the same key and inputs always yield the same history.  Year by year it walks the person's
@@ -195,7 +231,7 @@ def draw_family_history(key: str, *, age: float, sex: str, longevity_class: str,
             h = first_marriage_hazard(t, curve) if not marriages else (
                 remarriage_hazard(t) if widowed_at is not None and t - widowed_at >= 1.0 else 0.0)
             if rng.random() < h:
-                spouse = _draw_spouse(rng, t, sex, longevity_class, hearth)
+                spouse = _draw_spouse(rng, t, sex, longevity_class, hearth, cultivation)
                 spouse["married_at"] = t
                 marriages.append(spouse)
                 widowed_at = None
@@ -281,10 +317,11 @@ def _reveal_spouse(conn: sqlite3.Connection, person_id: int, spouse: dict[str, A
     configure_health_profile(conn, aid, longevity_class=spouse["longevity_class"])
     # A staged spouse may still practise; most practise less with age.  Unstaged Veinborn do not train
     # now but may take it up later (resolve_cultivation_uptake).
-    from .cultivation import calibrate_revealed_profile
-    practising = bool(spouse["stage"]) and _rng(f"practising:{key}").random() < (
-        0.70 if spouse["age_now"] < 35 else 0.50 if spouse["age_now"] < 50 else 0.30)
-    calibrate_revealed_profile(conn, aid, active=practising)
+    if _cultivation_on(conn):
+        from .cultivation import calibrate_revealed_profile
+        practising = bool(spouse["stage"]) and _rng(f"practising:{key}").random() < (
+            0.70 if spouse["age_now"] < 35 else 0.50 if spouse["age_now"] < 50 else 0.30)
+        calibrate_revealed_profile(conn, aid, active=practising)
     return aid
 
 
@@ -412,8 +449,12 @@ def resolve_family_for(conn: sqlite3.Connection, aid: int, *, key: str | None = 
     curve, tags = marriage_curve_for(conn, aid, sex, lc)
     from .health import childhood_circumstance
     child_mult, child_tags = childhood_circumstance(conn, parent_ids=[aid], location_id=int(p["loc"]) if p["loc"] is not None else None)
-    from .cultivation import location_in_hearth
-    hearth = location_in_hearth(conn, int(p["loc"]) if p["loc"] is not None else None)
+    cultivation = _cultivation_on(conn)
+    if cultivation:
+        from .cultivation import location_in_hearth
+        hearth = location_in_hearth(conn, int(p["loc"]) if p["loc"] is not None else None)
+    else:
+        hearth = False
     cons = constraints or {}
 
     def fits(h: dict[str, Any]) -> bool:
@@ -421,11 +462,11 @@ def resolve_family_for(conn: sqlite3.Connection, aid: int, *, key: str | None = 
         return ((not cons.get("marital") or h["status"] == cons["marital"])
                 and int(cons.get("children_min", 0)) <= alive <= int(cons.get("children_max", 99)))
 
-    hist = draw_family_history(key, age=age, sex=sex, longevity_class=lc, curve=curve, childhood_multiplier=child_mult, hearth=hearth)
+    hist = draw_family_history(key, age=age, sex=sex, longevity_class=lc, curve=curve, childhood_multiplier=child_mult, hearth=hearth, cultivation=cultivation)
     if cons and not fits(hist):
         for i in range(40):
             hist = draw_family_history(f"{key}:try{i}", age=age, sex=sex, longevity_class=lc, curve=curve,
-                                       childhood_multiplier=child_mult, hearth=hearth)
+                                       childhood_multiplier=child_mult, hearth=hearth, cultivation=cultivation)
             if fits(hist):
                 break
         else:
@@ -777,12 +818,15 @@ def reveal_latent_adult_child(conn: sqlite3.Connection, parent_id: int, *, reaso
             continue
         cores = [_core_state(conn, x) for x in parents]
         open_parents = sum(1 for c in cores if c[0])
-        from .cultivation import inherited_open_core_probability, location_in_hearth, staged_probability
-        ploc = conn.execute("SELECT COALESCE(home_location_id,current_location_id) FROM actors WHERE id=?", (int(cons["parent_actor_id"]),)).fetchone()
-        hearth = location_in_hearth(conn, int(ploc[0]) if ploc and ploc[0] is not None else None)
-        open_core = rng.random() < inherited_open_core_probability(open_parents, hearth)
+        cultivation = _cultivation_on(conn)
+        open_core = False
         martial_family = institution_actor_id is not None or any(c[1] for c in cores)
         stage = None
+        if cultivation:
+            from .cultivation import inherited_open_core_probability, location_in_hearth, staged_probability
+            ploc = conn.execute("SELECT COALESCE(home_location_id,current_location_id) FROM actors WHERE id=?", (int(cons["parent_actor_id"]),)).fetchone()
+            hearth = location_in_hearth(conn, int(ploc[0]) if ploc and ploc[0] is not None else None)
+            open_core = rng.random() < inherited_open_core_probability(open_parents, hearth)
         if open_core and rng.random() < staged_probability(sex, hearth, martial_family):
             senior = any(c[1] in {"fifth", "sixth"} for c in cores)
             stage = _weighted(rng, _SENIOR_SPOUSE_STAGES if senior else _OPEN_SPOUSE_STAGES)
@@ -877,9 +921,12 @@ def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logge
         key = f"unnamed-marriage:{seed}:{aid}:{day}"
         if _rng(key).random() >= prob:
             continue
-        from .cultivation import location_in_hearth
-        spouse = _draw_spouse(_rng(f"spouse:{key}"), age, sex, lc,
-                              location_in_hearth(conn, int(p["loc"]) if p["loc"] is not None else None))
+        cultivation = _cultivation_on(conn)
+        hearth = False
+        if cultivation:
+            from .cultivation import location_in_hearth
+            hearth = location_in_hearth(conn, int(p["loc"]) if p["loc"] is not None else None)
+        spouse = _draw_spouse(_rng(f"spouse:{key}"), age, sex, lc, hearth, cultivation)
         spouse["married_at"] = age; spouse["age_now"] = spouse["age_at_marriage"]
         loc = int(p["loc"]) if p["loc"] is not None else None
         spouse_id = _reveal_spouse(conn, aid, spouse, key=key, day=day, location_id=loc, reason="run_time_marriage")

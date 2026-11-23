@@ -1182,6 +1182,8 @@ def activate_existing_loops(conn: sqlite3.Connection, package=None) -> dict[str,
     if system_enabled(conn, "outfits"):
         from .outfit_opening import build as build_outfits
         out.update({f'outfit_opening_{k}': v for k, v in build_outfits(conn).items()})
+        from .opening_households import build as build_households
+        out.update({f'opening_households_{k}': v for k, v in build_households(conn).items()})
     conn.execute(
         "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
         (str(CURRENT_CANON_ACTIVATION_VERSION),),
