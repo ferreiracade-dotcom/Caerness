@@ -1190,6 +1190,8 @@ def activate_existing_loops(conn: sqlite3.Connection, package=None) -> dict[str,
         out.update({f'outfit_past_{k}': v for k, v in build_past(conn).items()})
         from .lived_past import build as build_lived
         out.update({f'lived_past_{k}': v for k, v in build_lived(conn).items()})
+        from .opening_races import build as build_races
+        out.update({f'opening_races_{k}': v for k, v in build_races(conn).items()})
     conn.execute(
         "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
         (str(CURRENT_CANON_ACTIVATION_VERSION),),
