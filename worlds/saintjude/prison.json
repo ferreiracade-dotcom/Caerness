@@ -1,0 +1,88 @@
+{
+ "about": "Saint Jude's prisons (J1). Facilities, who they take, the groups inside, and the figures the inside week, channels and reviews weigh. Bible Part II 8 fixes the county jail (unsentenced and short terms), the federal detention center (federal defendants awaiting trial; name Open), Ironhaven (state felons, long terms) and federal penitentiaries elsewhere (Atlanta, Leavenworth, Lewisburg, Danbury, Marion); which mobster does time where is Open. Every figure is a Design proposal and a calibration target, never a cap.",
+ "mark": "Design proposal",
+ "cadence_days": 7,
+ "fallback_facility": "county_jail",
+ "remand_facility": {"municipal": "county_jail", "county": "county_jail", "state": "county_jail", "federal": "federal_detention_center"},
+ "facilities": {
+  "county_jail": {
+   "name": "the county jail", "level": "jail", "security": "mixed", "off_map": false, "capacity": 420, "headcount": 520,
+   "intake": {"authority": ["municipal", "county", "state"], "sex": "male", "max_term_days": 365, "remand": true},
+   "groups": ["connected", "neighbourhood_north", "neighbourhood_south", "street", "protective", "unaligned"],
+   "character": {"violence": 0.55, "corruption": 0.5, "contraband": 0.5, "crowding": 1.24},
+   "why": "Bible Part II 8: dirty, overcrowded and dangerous; holds the unsentenced and short sentences. Capacity and headcount are Design proposals (headcount above capacity is the bible's overcrowding)."
+  },
+  "county_jail_women": {
+   "name": "the county jail's women's section", "level": "jail", "security": "mixed", "off_map": false, "capacity": 40, "headcount": 34,
+   "intake": {"authority": ["municipal", "county", "state"], "sex": "female", "max_term_days": 365, "remand": true},
+   "groups": ["street", "protective", "unaligned"],
+   "character": {"violence": 0.25, "corruption": 0.35, "contraband": 0.3, "crowding": 0.85},
+   "why": "Women are few and held apart (spec 7.2); a separate small section of the jail. Unsourced."
+  },
+  "federal_detention_center": {
+   "name": "the federal detention center", "level": "detention", "security": "medium", "off_map": false, "capacity": 380, "headcount": 300,
+   "intake": {"authority": ["federal"], "sex": "any", "max_term_days": 365, "remand": true},
+   "groups": ["connected", "street", "protective", "unaligned"],
+   "character": {"violence": 0.15, "corruption": 0.2, "contraband": 0.2, "crowding": 0.79},
+   "why": "Part II 8 and the Federal Complex: fourteen stories downtown, opened 1974, holds federal defendants awaiting trial; name Open (called the federal detention center in the text). Federal staff are out of the Pad's reach, so corruption is low."
+  },
+  "ironhaven": {
+   "name": "Ironhaven", "level": "state_prison", "security": "maximum", "off_map": false, "capacity": 2400, "headcount": 2700,
+   "intake": {"authority": ["municipal", "county", "state"], "sex": "male", "min_term_days": 366, "remand": false},
+   "groups": ["connected", "neighbourhood_north", "neighbourhood_south", "street", "protective", "unaligned"],
+   "character": {"violence": 0.45, "corruption": 0.4, "contraband": 0.45, "crowding": 1.13},
+   "why": "Part II 8: the Ironhaven complex upstate holds state felons for long terms."
+  },
+  "ironhaven_women": {
+   "name": "Ironhaven's women's unit", "level": "state_prison", "security": "medium", "off_map": false, "capacity": 120, "headcount": 100,
+   "intake": {"authority": ["municipal", "county", "state"], "sex": "female", "min_term_days": 366, "remand": false},
+   "groups": ["street", "protective", "unaligned"],
+   "character": {"violence": 0.2, "corruption": 0.3, "contraband": 0.25, "crowding": 0.83},
+   "why": "Open in the bible: women state prisoners are few and held apart; authored as a unit at Ironhaven. Unsourced."
+  },
+  "lewisburg": {
+   "name": "Lewisburg", "level": "federal_penitentiary", "security": "high", "off_map": true, "capacity": 1100, "headcount": 1200,
+   "intake": {"authority": ["federal"], "sex": "male", "min_term_days": 366, "remand": false, "pull": 0.3},
+   "groups": ["connected", "street", "protective", "unaligned"],
+   "character": {"violence": 0.6, "corruption": 0.25, "contraband": 0.3, "crowding": 1.09},
+   "why": "Opened 1932 [verified]; criticised by a federal judge in 1976 for inmate violence, so rough in 1975. `pull` is the relative weight with which a federal man of that class is sent here rather than to the other penitentiaries (which prison holds which man is Open)."
+  },
+  "atlanta": {
+   "name": "Atlanta", "level": "federal_penitentiary", "security": "high", "off_map": true, "capacity": 2200, "headcount": 2300,
+   "intake": {"authority": ["federal"], "sex": "male", "min_term_days": 366, "remand": false, "pull": 0.3},
+   "groups": ["connected", "street", "protective", "unaligned"],
+   "character": {"violence": 0.45, "corruption": 0.3, "contraband": 0.35, "crowding": 1.05},
+   "why": "Opened 1902 [verified]."
+  },
+  "leavenworth": {
+   "name": "Leavenworth", "level": "federal_penitentiary", "security": "high", "off_map": true, "capacity": 1800, "headcount": 1850,
+   "intake": {"authority": ["federal"], "sex": "male", "min_term_days": 366, "remand": false, "pull": 0.2},
+   "groups": ["connected", "street", "protective", "unaligned"],
+   "character": {"violence": 0.45, "corruption": 0.3, "contraband": 0.3, "crowding": 1.03},
+   "why": "Opened 1903 [verified]."
+  },
+  "marion": {
+   "name": "Marion", "level": "federal_penitentiary", "security": "maximum", "off_map": true, "capacity": 450, "headcount": 430,
+   "intake": {"authority": ["federal"], "sex": "male", "min_term_days": 3650, "remand": false, "pull": 0.1},
+   "groups": ["connected", "street", "protective", "unaligned"],
+   "character": {"violence": 0.4, "corruption": 0.15, "contraband": 0.2, "crowding": 0.96},
+   "why": "Opened 1963 [verified]; a penitentiary in 1975, not yet the end of the line (that dates from 1983), so only the longest federal terms."
+  },
+  "danbury": {
+   "name": "Danbury", "level": "federal_camp", "security": "low", "off_map": true, "capacity": 800, "headcount": 760,
+   "intake": {"authority": ["federal"], "sex": "any", "min_term_days": 366, "max_term_days": 1825, "remand": false, "pull": 0.25},
+   "groups": ["connected", "street", "protective", "unaligned"],
+   "character": {"violence": 0.12, "corruption": 0.3, "contraband": 0.25, "crowding": 0.95},
+   "why": "Opened 1940 [verified]; held both men and women in the 1970s and is lower security (exact class Open); takes the shorter federal terms."
+  }
+ },
+ "groups": {
+  "connected": {"share": 0.08, "name": "the connected men", "basis": {"kind": "connected"}, "why": "Share of a facility's headcount, normalised over its groups (Design proposal). Men with a seat in an organisation of the life; a made man expects deference (Part II 8)."},
+  "neighbourhood_north": {"share": 0.28, "name": "the north side crowd", "basis": {"kind": "draw"}, "why": "Prison hierarchy follows race and neighbourhood (Part II 8). The engine has no neighbourhood record per man yet, so the two crowds take the rest by a stable per-man draw; a gap named in the J1 report."},
+  "neighbourhood_south": {"share": 0.28, "name": "the south side crowd", "basis": {"kind": "draw"}, "why": "As above."},
+  "street": {"share": 0.2, "name": "the street crews", "basis": {"kind": "street", "min_harm": 1}, "why": "A man with violence on his record and no seat in an organisation."},
+  "protective": {"share": 0.03, "name": "protective custody", "basis": {"kind": "protective"}, "why": "A man who has informed needs protective custody (spec 7.2)."},
+  "unaligned": {"share": 0.13, "name": "the unaligned", "basis": {"kind": "unaligned"}, "why": "Everyone else."}
+ },
+ "society": {"kind": "inmate_society", "name_template": "{group} at {facility}"}
+}

@@ -338,6 +338,11 @@ def politics_rules(pkg: "WorldPackage") -> dict:
     return _data_json(pkg, "politics")
 
 
+def prison_rules(pkg: "WorldPackage") -> dict:
+    """The package's prison rules (data "prison": facilities, groups, inside figures, channels, reviews); empty when it has none."""
+    return _data_json(pkg, "prison")
+
+
 def law_rules(pkg: "WorldPackage") -> dict:
     """The package's law and enforcement rules (data "law"); empty when it has none."""
     return _data_json(pkg, "law")

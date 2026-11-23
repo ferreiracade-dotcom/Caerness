@@ -280,6 +280,12 @@
               "member": {"ages": [22, 50], "superior": {"role": "officer", "pick": "round_robin"}},
               "prospect": {"ages": [18, 30], "superior": {"role": "officer", "pick": "round_robin"}}}}
   },
+  "inmate_society": {
+   "_doc": "J1: a group of men inside one facility. Seats exist only for the notable inmates; the rest is a headcount in facility_groups. No held_decision (a man inside is not 'held' in his group), no choices and no money flows: the prison process runs it.",
+   "sphere": "prison", "head": "shot_caller", "unit_leader": null, "courtship_scan": false,
+   "lifecycle": {"succession": {"shot_caller": ["member"]}},
+   "labels": {"shot_caller": "Shot caller", "member": "Member"}, "rules": []
+  },
   "handful": {
    "sphere": "underworld", "head": "senior", "unit_leader": null, "courtship_scan": false,
    "lifecycle": {"succession": {"senior": ["man"]}},
