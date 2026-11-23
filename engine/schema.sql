@@ -5365,7 +5365,8 @@ CREATE TABLE IF NOT EXISTS held_things (
     gap_key TEXT,
     call_id TEXT,
     created_day INTEGER NOT NULL,
-    updated_day INTEGER NOT NULL
+    updated_day INTEGER NOT NULL,
+    basis_json TEXT NOT NULL DEFAULT '{}'
 );
 CREATE INDEX IF NOT EXISTS idx_held_things_status ON held_things(status);
 CREATE TABLE IF NOT EXISTS depth_gaps (
@@ -5587,4 +5588,60 @@ CREATE TABLE IF NOT EXISTS sponsorships (
     sponsor_actor_id INTEGER,
     ledger_ref INTEGER,
     day INTEGER NOT NULL
+);
+
+-- R1 real history (schema 127): documented real facts, how the run has departed from them, technology, real figures
+CREATE TABLE IF NOT EXISTS history_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL UNIQUE,
+    class TEXT NOT NULL,
+    what TEXT NOT NULL,
+    real_date TEXT NOT NULL,
+    precision TEXT NOT NULL DEFAULT 'day',
+    run_date TEXT,
+    outcome TEXT NOT NULL DEFAULT 'default' CHECK (outcome IN ('default','on_time','earlier','later','changed','never')),
+    reasons_json TEXT NOT NULL DEFAULT '[]',
+    needs_json TEXT NOT NULL DEFAULT '[]',
+    source TEXT,
+    verify TEXT NOT NULL DEFAULT 'verified',
+    provisional INTEGER NOT NULL DEFAULT 0,
+    effects_json TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'in_force' CHECK (status IN ('foreseen','in_force','never','superseded')),
+    about_json TEXT NOT NULL DEFAULT '[]',
+    proposed_day INTEGER,
+    judged_day INTEGER,
+    call_id TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_history_entries_status ON history_entries(status);
+CREATE TABLE IF NOT EXISTS divergences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject TEXT NOT NULL,
+    field_words TEXT NOT NULL DEFAULT '',
+    day INTEGER NOT NULL,
+    cause TEXT NOT NULL DEFAULT '',
+    text TEXT NOT NULL DEFAULT '',
+    entry_key TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_divergences_subject ON divergences(subject);
+CREATE TABLE IF NOT EXISTS tech_level (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    thing TEXT NOT NULL,
+    exists_date TEXT,
+    available_date TEXT,
+    common_date TEXT,
+    price_band TEXT,
+    source_key TEXT,
+    inventor_actor_id INTEGER
+);
+CREATE TABLE IF NOT EXISTS real_figures (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    name_norm TEXT NOT NULL UNIQUE,
+    actor_id INTEGER,
+    public_roles_json TEXT NOT NULL DEFAULT '[]',
+    record_json TEXT NOT NULL DEFAULT '[]',
+    source TEXT,
+    verify TEXT NOT NULL DEFAULT 'verified',
+    provisional INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'alive'
 );
