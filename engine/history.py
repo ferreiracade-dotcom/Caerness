@@ -82,6 +82,7 @@ def is_major(conn, klass: str) -> bool:
 
 def _tokens(text: str, conn=None) -> set[str]:
     toks = {w for w in re.findall(r"[a-z0-9]+", str(text or "").lower()) if len(w) >= 4 and w not in _STOP}
+    toks |= {w[:-1] for w in toks if w.endswith("s") and len(w) > 4}  # computers = computer
     groups = (rules(conn).get("field_words") or {}) if conn is not None else {}
     for head, syns in groups.items():
         words = {head, *syns}
@@ -411,3 +412,91 @@ def run_status(conn, e: dict, day_iso: str) -> dict:
         return {"status": "never", "run_exists": None, "reason": reasons or "the causes it needed did not hold", "entry": r["key"]}
     run = r["run_date"] or r["real_date"]
     return {"status": "exists" if day_iso >= run else "not_yet", "run_exists": run, "reason": reasons or None, "entry": r["key"]}
+
+
+# ---- technology and the enabler check (5.10), foresight (5.11b) ---------------------------------------------------
+
+def add_tech(conn, thing: str, exists: str, available: str | None = None, common: str | None = None, price_band: str | None = None,
+             source_key: str | None = None, inventor: int | None = None) -> int:
+    return int(conn.execute("INSERT INTO tech_level(thing,exists_date,available_date,common_date,price_band,source_key,inventor_actor_id) VALUES (?,?,?,?,?,?,?)",
+                            (thing, exists, available or exists, common, price_band, source_key, inventor)).lastrowid)
+
+
+def enabler_state(conn, text: str, day_iso: str) -> dict | None:
+    """Whether a named enabler exists in this run on `day_iso`: tech_level first, then the package timeline and history entries.
+    None when nothing here knows the name: history holds by default, so an unknown enabler is not a contradiction."""
+    low = str(text or "").lower()
+    for t in conn.execute("SELECT * FROM tech_level ORDER BY id DESC"):
+        if str(t["thing"]).lower() in low or low in str(t["thing"]).lower():
+            when = t["available_date"] or t["exists_date"]
+            return {"name": t["thing"], "exists": bool(when) and day_iso >= when, "run_exists": when}
+    from .world_package import package_for, timeline_mentions
+    try:
+        for e, _p in timeline_mentions(package_for(conn), str(text)):
+            st = run_status(conn, e, day_iso)
+            return {"name": e["name"], "exists": st["status"] == "exists", "run_exists": st["run_exists"], "never": st["status"] == "never"}
+    except Exception:
+        pass
+    r = _entry(conn, "history:" + slug(text))
+    if r is not None:
+        run = r["run_date"] or r["real_date"]
+        return {"name": r["what"], "exists": r["status"] == "in_force" and day_iso >= run, "run_exists": run, "never": r["status"] == "never"}
+    return None
+
+
+def screen(conn, p):
+    """The intake's history checks on a proposal that is not itself a real fact: enablers (a missing one is a named
+    contradiction), the distance ahead of the run's technology (cost, time and failure odds scale; no ceiling), and foresight (a
+    bet on a foreseen real fact is judged on what the man could know). Returns (proposal, basis)."""
+    from dataclasses import replace
+    today = today_iso(conn)
+    basis: dict = {}
+    if today is None or not rules(conn):
+        return p, basis
+    text = f"{p.what} {p.kind_text} {p.agenda}"
+    for need in p.details.get("needs_tech") or []:
+        st = enabler_state(conn, str(need), today)
+        builds = " ".join(str(b).lower() for b in (p.details.get("builds") or [])) + " " + text.lower()
+        if st and not st["exists"] and str(need).lower() not in builds:
+            when = f"it arrives {st['run_exists']}" if st.get("run_exists") and not st.get("never") else "it never came"
+            raise AuthoringRefused(f"{p.what} needs {need}, which does not exist on {today} in this run ({when}); "
+                                   "someone would have to build that first, and he may set out to", "contradiction")
+    from .world_package import package_for, timeline_mentions
+    ahead = []
+    try:
+        for e, _p in timeline_mentions(package_for(conn), text):
+            if e.get("class") in soft_classes(conn):
+                st = run_status(conn, e, today)
+                if st["status"] == "not_yet" and st.get("run_exists"):
+                    ahead.append((e["name"], (date.fromisoformat(st["run_exists"]) - date.fromisoformat(today)).days))
+    except Exception:
+        pass
+    if ahead:
+        fig = rules(conn).get("distance") or {}
+        years = max(d for _n, d in ahead) / 365.0
+        factor = 1.0 + float(fig.get("cost_per_year", 0.5)) * years
+        odds = 1.0 - (1.0 - float(fig.get("failure_per_year", 0.15))) ** years
+        days = int(round(years * float(fig.get("time_per_year_days", 120))))
+        basis["tech_distance"] = {"items": [n for n, _d in ahead], "years_ahead": round(years, 2), "cost_factor": round(factor, 2),
+                                  "failure_odds": round(odds, 3), "extra_days": days}
+        p = replace(p, start_cost=p.start_cost * factor, ready_in_days=((p.ready_in_days or 0) + days) or None)
+    named = foreseen_named(conn, text + " " + " ".join(str(a) for a in (p.details.get("about") or [])))
+    if named:
+        from . import foreknowledge
+        k = foreknowledge.character_knows(conn, p.owner, " ".join(r["what"] for r in named), _today_day(conn))
+        judged = "informed" if k["level"] == "informed" else "long_shot"
+        basis["foresight"] = {"entries": [r["key"] for r in named], "knows": k["level"], "sources": k["sources"], "judged_as": judged}
+        if judged == "long_shot" and p.income_weekly:
+            p = replace(p, income_weekly=0.0)  # judged on what the character could know, never on what the player does
+            basis["foresight"]["income_not_credited"] = "no income is credited for a bet on the future that he had no way to know"
+    return p, basis
+
+
+def foreseen_named(conn, text: str) -> list[sqlite3.Row]:
+    low = " ".join(re.findall(r"[a-z0-9]+", str(text).lower()))
+    out = []
+    for r in conn.execute("SELECT * FROM history_entries WHERE status='foreseen'"):
+        nm = " ".join(re.findall(r"[a-z0-9]+", r["what"].lower()))
+        if nm and (nm in low or r["key"] in str(text)):
+            out.append(r)
+    return out

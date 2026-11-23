@@ -344,6 +344,10 @@ def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
             return again
     p = normalise(conn, int(me), kind, d)
     _check_facts(conn, p, d)
+    basis: dict = {}
+    if shape.name not in ("history", "real_figure"):  # R1: enablers, distance ahead of the technology, foresight judged on what he could know
+        from . import history
+        p, basis = history.screen(conn, p)
     day = _day(conn)
     conn.execute("SAVEPOINT intake_take")
     try:
@@ -373,12 +377,12 @@ def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
         hid = int(conn.execute(
             """INSERT INTO held_things(name,kind_text,shape,backing_table,backing_id,owner_actor_id,people_json,location_id,place_text,from_ref,
                  start_cost,income_weekly,upkeep_weekly,agenda,start_day,end_day,recurrence_days,legality,knows_json,consequences_json,
-                 readers_json,unmapped_json,source,real_date,depth,status,gap_key,call_id,created_day,updated_day)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'B',?,?,?,?,?)""",
+                 readers_json,unmapped_json,source,real_date,depth,status,gap_key,call_id,created_day,updated_day,basis_json)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'B',?,?,?,?,?,?)""",
             (name, p.kind_text, shape.name, table, bid, p.owner, json.dumps(list(p.people)), p.location_id, p.place_text, p.from_ref,
              p.start_cost, income, upkeep, p.agenda, p.start_day, p.end_day, p.recurrence_days, p.legality, json.dumps(list(p.knows)),
              json.dumps(list(p.consequences)), json.dumps(readers), json.dumps(unmapped), p.source, p.real_date, status, gap,
-             str(call_id), day, day)).lastrowid)
+             str(call_id), day, day, json.dumps(basis))).lastrowid)
         if p.ready_in_days:
             from . import commitments
             commitments.record(conn, int(me), p.what, kind="intake", due_day=day + p.ready_in_days, details={"held_thing_id": hid})
@@ -394,6 +398,8 @@ def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
         raise
     conn.execute("RELEASE SAVEPOINT intake_take")
     out.update({"status": "scaled_down" if scaled else "created", "kind": shape.name, "held_thing_id": hid, "name": name})
+    if basis:
+        out["basis"] = basis
     if scaled:
         out["scaled"] = scaled
     if gap:

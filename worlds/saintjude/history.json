@@ -74,5 +74,12 @@
  "soft_classes": [
   "technology",
   "culture"
- ]
+ ],
+ "distance": {
+  "cost_per_year": 0.5,
+  "failure_per_year": 0.15,
+  "time_per_year_days": 120,
+  "mark": "Design proposal",
+  "note": "unsourced"
+ }
 }
