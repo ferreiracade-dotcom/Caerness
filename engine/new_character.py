@@ -721,7 +721,7 @@ def _family_business(conn, fb: dict, *, me: int, people: dict, loc: int, day: in
         a_age = _age(conn, a, day)
         if a_age < 12:
             continue
-        add_enterprise_staff(conn, eid, a, role="mechanic" if "repair" in trade.lower() or "garage" in trade.lower() else "hand", authority=25)
+        add_enterprise_staff(conn, eid, a, role=str(fb.get("role") or "worker"), authority=25)
         staffed.append(a)
     from .opening_family import _seed_pair
     crew = [owner] + staffed
