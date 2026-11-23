@@ -272,5 +272,7 @@ def override(conn: sqlite3.Connection, key_or_words: str, new_text: str, cause: 
         raise FactRefused(f"{r['key']} is Fixed in the setting; changing it needs a stated cause (say what happened in the world that changes it)")
     conn.execute("INSERT INTO world_fact_overrides(fact_key,old_text,new_text,cause,world_day,call_id) VALUES (?,?,?,?,?,?)",
                  (r["key"], r["text"], new_text, cause[:300] or None, _today(conn), call_id))
-    return {"fact": r["key"], "tag": r["tag"], "overridden": True, **({"cause": cause[:300]} if cause else {}),
+    from . import history
+    hist = history.note_override(conn, r["key"], new_text, cause)
+    return {"fact": r["key"], "tag": r["tag"], "overridden": True, **({"cause": cause[:300]} if cause else {}), **(hist or {}),
             "summary": f"Fact {r['key']} ({r['tag']}) changed" + (f": {cause[:80]}" if cause else "")}

@@ -582,6 +582,8 @@ def mark_actor_deceased(conn: sqlite3.Connection, actor_id: int, *, reason: str 
     location_id = int(loc[0]) if loc and loc[0] is not None else None
     conn.execute("UPDATE actors SET status='deceased' WHERE id=?", (actor_id,))
     conn.execute("UPDATE actor_life_profiles SET life_status='deceased',last_review_day=? WHERE actor_id=?", (day, actor_id))
+    from . import history  # R1: a death that touches real history is a divergence
+    history.note_actor_death(conn, actor_id, day, reason)
     # A dead character has no future autonomous review. Historical resolution metadata is
     # retained elsewhere, but the live scheduler row must disappear immediately.
     conn.execute("DELETE FROM simulation_profiles WHERE actor_id=?", (actor_id,))

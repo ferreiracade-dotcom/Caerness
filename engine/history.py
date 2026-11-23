@@ -21,7 +21,7 @@ from . import facts
 from .authoring import AuthoringRefused
 
 _STOP = frozenset("a an the of for in on at to by with and or from is are was were its his her their company firm corporation "
-                  "business new first group inc".split())
+                  "business new first group inc founded founder opens opened maker makes".split())
 
 
 # ---- data and dates -----------------------------------------------------------------------------------------------
@@ -196,10 +196,19 @@ def _niche(conn, entry: dict, day: int) -> list[sqlite3.Row]:
         return []
     hit = []
     for d in conn.execute("SELECT * FROM divergences WHERE day<=? AND field_words!='' ORDER BY id", (day,)):
-        if d["entry_key"] == entry["key"] or d["subject"].startswith("history:"):
+        if d["subject"].startswith("history:") or d["subject"].startswith("thing:"):
             continue
         if mine & _tokens(d["field_words"], conn):
             hit.append(d)
+    for t in conn.execute("SELECT id,name,kind_text,call_id FROM held_things WHERE status!='ended' AND shape!='history' AND created_day<=?", (day,)):
+        if mine & _tokens(f"{t['name']} {t['kind_text']}", conn):  # a venture the run founded in the same field: recorded now, once
+            subject = f"thing:{t['id']}"
+            row = conn.execute("SELECT * FROM divergences WHERE subject=? AND entry_key=?", (subject, entry["key"])).fetchone()
+            if row is None:
+                did = record_divergence(conn, subject, f"{t['name']} {t['kind_text']}", f"held thing {t['id']}",
+                                        f"{t['name']} already holds this field", entry["key"])
+                row = conn.execute("SELECT * FROM divergences WHERE id=?", (did,)).fetchone()
+            hit.append(row)
     return hit
 
 
@@ -334,3 +343,38 @@ def propose(conn, me: int, p, call_id: str) -> dict:
     out = _view(_entry(conn, key))
     out.update({"backing_table": "history_entries", "backing_id": eid, "links": verdict["links"]})
     return out
+
+
+# ---- what the run does to real history ----------------------------------------------------------------------------
+
+def note_actor_death(conn, actor_id: int, day: int, cause: str) -> None:
+    """A death in the run is a divergence when the dead man is a documented real figure or a named cause of a fact. Mortality
+    decides it; the real date is calibration, never a schedule."""
+    aid = int(actor_id)
+    try:
+        fig = conn.execute("SELECT name FROM real_figures WHERE actor_id=?", (aid,)).fetchone()
+        named = conn.execute("SELECT key FROM history_entries WHERE needs_json LIKE ? OR about_json LIKE ? LIMIT 1",
+                             (f'%"actor:{aid}"%', f'%"actor:{aid}"%')).fetchone()
+    except sqlite3.OperationalError:  # a bare database without the history tables
+        return
+    if fig is None and named is None:
+        return
+    who = fig["name"] if fig else _name(conn, aid)
+    record_divergence(conn, f"actor:{aid}", who, str(cause or "death in the run"), f"{who} died in this run")
+
+
+def note_override(conn, key: str, new_text: str, cause: str | None) -> dict | None:
+    """A change to a Fixed history fact. A source in the cause verifies a provisional entry; any other cause is the run changing
+    history: the divergence is recorded with that cause and the entry marked superseded."""
+    if not str(key).startswith("history:"):
+        return None
+    e = _entry(conn, key)
+    if e is None:
+        return None
+    c = " ".join(str(cause or "").split())
+    if re.search(r"https?://|^source", c, re.I) and e["provisional"]:
+        conn.execute("UPDATE history_entries SET provisional=0,verify='verified',source=? WHERE key=?", (c[:400], key))
+        return {"verified": True, "entry": key}
+    record_divergence(conn, key, e["what"], c[:200], f"{e['what']}: {new_text}"[:300], key)
+    conn.execute("UPDATE history_entries SET status='superseded' WHERE key=?", (key,))
+    return {"diverged": True, "entry": key}
