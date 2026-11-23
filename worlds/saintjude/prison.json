@@ -2,6 +2,7 @@
  "about": "Saint Jude's prisons (J1). Facilities, who they take, the groups inside, and the figures the inside week, channels and reviews weigh. Bible Part II 8 fixes the county jail (unsentenced and short terms), the federal detention center (federal defendants awaiting trial; name Open), Ironhaven (state felons, long terms) and federal penitentiaries elsewhere (Atlanta, Leavenworth, Lewisburg, Danbury, Marion); which mobster does time where is Open. Every figure is a Design proposal and a calibration target, never a cap.",
  "mark": "Design proposal",
  "cadence_days": 7,
+ "entry_standing": {"value": 0.3, "mark": "Design proposal", "why": "Standing inside of a man who held no seat outside (0..1); a man with a seat outside brings his own standing. Unsourced."},
  "fallback_facility": "county_jail",
  "remand_facility": {"municipal": "county_jail", "county": "county_jail", "state": "county_jail", "federal": "federal_detention_center"},
  "facilities": {
