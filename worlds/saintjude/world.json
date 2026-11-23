@@ -38,7 +38,8 @@
   "lethality": "lethality.json",
   "presence": "presence.json",
   "business": "business.json",
-  "politics": "politics.json"
+  "politics": "politics.json",
+  "history": "history.json"
  },
  "name_pools": {
   "male": {

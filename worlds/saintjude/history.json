@@ -1,0 +1,74 @@
+{
+ "about": "Real history on the intake (R1). Words and figures the engine reads for real facts: which classes are major (a memory-sourced major fact is provisional until verified), how a broken or bent cause delays a fact, the lead time an earlier enabler needs, and which classes the advance prompt asks the GM to look up. Every figure is a Design proposal: calibration, never a cap.",
+ "classes": [
+  "technology",
+  "firm",
+  "firm_event",
+  "person_event",
+  "law",
+  "office",
+  "price",
+  "culture",
+  "event"
+ ],
+ "major_classes": [
+  "law",
+  "office",
+  "person_event",
+  "technology",
+  "firm",
+  "firm_event"
+ ],
+ "delay_days": {
+  "central": {
+   "min": 180,
+   "max": 1100,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  },
+  "supporting": {
+   "min": 30,
+   "max": 400,
+   "mark": "Design proposal",
+   "note": "unsourced"
+  }
+ },
+ "lead_days": {
+  "default": 270,
+  "mark": "Design proposal",
+  "note": "unsourced"
+ },
+ "advance_prompt_classes": [
+  "law",
+  "office",
+  "person_event",
+  "technology",
+  "firm_event"
+ ],
+ "field_words": {
+  "computer": [
+   "microcomputer",
+   "personal computer",
+   "minicomputer",
+   "software",
+   "basic interpreter"
+  ],
+  "telephone": [
+   "cellular",
+   "mobile phone",
+   "pager",
+   "payphone"
+  ],
+  "casino": [
+   "gambling",
+   "gaming",
+   "slots"
+  ]
+ },
+ "foreknowledge": {
+  "informed_competence": 0.5,
+  "hint_competence": 0.2,
+  "mark": "Design proposal",
+  "note": "unsourced"
+ }
+}

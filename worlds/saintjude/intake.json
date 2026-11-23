@@ -44,7 +44,9 @@
       "ritual",
       "every year",
       "every sunday"
-    ]
+    ],
+    "history": ["real fact", "historical fact", "statute", "election result", "ipo"],
+    "real_figure": ["real person", "real figure"]
   },
   "readers": {
     "money": [

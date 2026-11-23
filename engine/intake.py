@@ -124,6 +124,8 @@ def shape_for(conn, kind: str, details: dict) -> Shape:
     for s in allshapes:
         if s.name == k:
             return s
+    if d.get("real_date") and any(s.name == "history" for s in allshapes):  # a dated real fact is history whatever it is called
+        return next(s for s in allshapes if s.name == "history")
     for s in allshapes:
         if not s.words:
             continue
@@ -326,6 +328,11 @@ def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
         return {"status": "created", "kind": prior["shape"], "held_thing_id": int(prior["id"]), "name": prior["name"],
                 "replayed": True, **({"gap": prior["gap_key"]} if prior["gap_key"] else {})}
     shape = shape_for(conn, kind, d)
+    if shape.name == "history":  # a fact already judged answers with its recorded outcome (a `never` is not re-proposed)
+        from . import history
+        again = history.recorded(conn, d)
+        if again:
+            return again
     p = normalise(conn, int(me), kind, d)
     _check_facts(conn, p, d)
     day = _day(conn)
@@ -368,7 +375,7 @@ def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
             commitments.record(conn, int(me), p.what, kind="intake", due_day=day + p.ready_in_days, details={"held_thing_id": hid})
         if gap:
             bump_gap(conn, gap, shape.name, hid, unmapped if unmapped else ["a deeper model for this shape"])
-        if p.knows:
+        if p.knows and shape.name != "history":  # nobody knows a fact because the GM proposed it: it reaches people through its effects
             from . import findings
             for k in p.knows:
                 findings.tell(conn, k, [p.what], source=p.owner)
@@ -410,5 +417,7 @@ def adopt_floor(conn, shape_name: str) -> int:
     return n
 
 
+from . import history as _history  # noqa: E402
+register_shape(Shape("history", (), ("real_date",), lambda conn, me, p, cid: _history.propose(conn, me, p, cid), False))
 from . import intake_business  # noqa: E402  (registers the BZ1 makers; the module imports this one, so it comes last)
 intake_business.register()
