@@ -12,7 +12,7 @@ import json
 import math
 import random
 
-from . import civic_field, civic_patronage, civic_seams, design, electorate, offices, races
+from . import civic_field, civic_graft, civic_patronage, civic_seams, design, electorate, offices, races
 from .design import figure
 from .world_package import package_for, politics_rules
 
@@ -356,6 +356,7 @@ def decide_approvals(conn, day: int) -> int:
         iid = open_item(conn, key, "licence" if "licence" in req["approval_kind"] else "zoning_variance",
                         {"sponsor": backer, "title": f"{req['approval_kind']} for venture {req['project_id']}", "request_id": int(req["id"])},
                         vote_day=int(day), day=int(day))
+        civic_graft.consider_item(conn, iid, int(day))  # the backer may pay a member before they vote
         out = decide(conn, iid, day)
         by = None
         for r in conn.execute("SELECT member_actor_id FROM civic_item_votes WHERE item_id=? AND vote='yes' ORDER BY member_actor_id LIMIT 1", (iid,)):

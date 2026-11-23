@@ -20,7 +20,7 @@ WORDS = re.compile(
     r"\b(capos?|soldiers?|boss(?:es)?|underbosses|underboss|consigliere|associates?|pad|made_men|mobs?|mobster|mafia|"
     r"sabatini|pellegrino|ferrante|vannucci|brigades|combine|horsemen|russians|bolita|charlestown|families|family)\b", re.I)
 POLITICS_WORDS = re.compile(r"\b(machine|democrat\w*|republican\w*|tammany|alderm\w+|mayor\w*|wards?)\b", re.I)  # politics modules: offices, parties and wards are package data
-POLITICS_FILES = ("offices.py", "electorate.py", "races.py", "appointments.py", "civic_seams.py", "civic_field.py", "civic_patronage.py", "civic_votes.py", "civic_corruption.py", "civic_shift.py", "civic_tick.py")
+POLITICS_FILES = ("offices.py", "electorate.py", "races.py", "appointments.py", "civic_seams.py", "civic_field.py", "civic_patronage.py", "civic_votes.py", "civic_corruption.py", "civic_shift.py", "civic_tick.py", "civic_graft.py")
 CAERNESS_TABLES = re.compile(r"underworld_(personnel|crews|organizations|leader_wealth)")
 
 

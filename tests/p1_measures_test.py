@@ -81,6 +81,11 @@ def _one(seed: int) -> dict:
         "bribery_reports": n("SELECT COUNT(*) FROM crime_reports WHERE crime_kind='bribery'"),
         "terms_ended_convicted": n("SELECT COUNT(*) FROM office_terms WHERE ended_how='convicted'"),
         "women_ever_in_office": women, "stakes_live": stakes, "stakes_per_holder": round(stakes / holders, 2),
+        "payments_started": n("SELECT COUNT(*) FROM org_arrangements WHERE position_key LIKE 'political:%'"),
+        "payments_by_org": n("SELECT COUNT(*) FROM org_arrangements WHERE position_key LIKE 'political:%' AND payer_kind='org'"),
+        "fraud_acts": sum(len((json.loads(r[0] or "{}")).get("fraud") or []) for r in c.execute("SELECT result_json FROM races")),
+        "fraud_caught": sum(1 for r in c.execute("SELECT result_json FROM races") for x in (json.loads(r[0] or "{}")).get("fraud") or [] if x.get("exposed")),
+        "bribery_sentences": n("SELECT COUNT(*) FROM sentences WHERE crime_kind='bribery'"),
         "seats_filled": n("SELECT COUNT(*) FROM office_terms WHERE end_day IS NULL"),
     }
 

@@ -11,7 +11,7 @@
  "flows": ["take", "associate_earning", "kickup", "executive_share", "pad"],
  "ledger_kinds": {"associate_earning": "wage", "kickup": "tribute", "executive_share": "share"},
  "ledger_purpose": "outfit {flow}",
- "arrangement_kinds": {"envelope": {"flow": "pad", "ledger_kind": "bribe", "purpose": "the Pad"}, "kickback": {"flow": "pad", "ledger_kind": "bribe", "purpose": "a kickback"}},
+ "arrangement_kinds": {"envelope": {"flow": "pad", "ledger_kind": "bribe", "purpose": "the Pad"}, "kickback": {"flow": "pad", "ledger_kind": "bribe", "purpose": "a kickback"}, "retainer": {"flow": "pad", "ledger_kind": "bribe", "purpose": "a retainer"}},
  "kinds": {
   "party": {
    "sphere": "politics",

@@ -16071,6 +16071,256 @@
   "mark": "Design proposal",
   "source": "unsourced",
   "note": "unsourced; How sharply a stake nobody holds goes to the rival that looks best (higher is more even)."
+ },
+ "graft_base": {
+  "default": -5.2,
+  "range": null,
+  "unit": "logit a week",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Baseline chance that a man with a need before an official weighs paying for it. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_w_temper": {
+  "default": 2.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weight of temperament (pragmatism, risk tolerance, low loyalty) in taking the crooked way. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_w_need": {
+  "default": 1.5,
+  "range": null,
+  "unit": "logit per unit need",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weight of the size of the need. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_w_price": {
+  "default": 0.6,
+  "range": null,
+  "unit": "logit per log step",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weight of what the official asks (cheaper is likelier). Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_w_risk": {
+  "default": 4.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weight of the chance of being found out over the horizon. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_horizon_weeks": {
+  "default": 26.0,
+  "range": null,
+  "unit": "weeks",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How far ahead a man counts the risk of exposure. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_tolerance_cut": {
+  "default": 0.7,
+  "range": null,
+  "unit": "share",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a bold man discounts the risk. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_price_per_rank": {
+  "default": 120.0,
+  "range": null,
+  "unit": "usd a week per rank",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; What an official asks a week for each step of his office's rank. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_price_ambition": {
+  "default": 1.0,
+  "range": null,
+  "unit": "factor",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much an ambitious official raises his price. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_accept_base": {
+  "default": -1.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Baseline chance an official takes an offer. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_accept_pragmatism": {
+  "default": 2.5,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much pragmatism makes an official take an offer. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_accept_ambition": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much ambition makes an official take an offer. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_protect_scale": {
+  "default": 1.0,
+  "range": null,
+  "unit": "factor",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Scale of the need from a case against an outfit's men. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_protect_window": {
+  "default": 90.0,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How far back an outfit counts cases against its men. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_need_licence": {
+  "default": 1.0,
+  "range": null,
+  "unit": "need",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Need of a licence before the licensing board. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_need_zoning": {
+  "default": 1.6,
+  "range": null,
+  "unit": "need",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Need of a permit or variance before the zoning board (construction is where the money is). Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_need_ordinance": {
+  "default": 0.8,
+  "range": null,
+  "unit": "need",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Need of an ordinance a man sponsors from outside the council. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_need_budget": {
+  "default": 0.8,
+  "range": null,
+  "unit": "need",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Need of a budget line a man sponsors from outside the council. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_fraud_window": {
+  "default": 28.0,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How long before the count a candidate weighs adding votes. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_fraud_closeness": {
+  "default": 0.06,
+  "range": null,
+  "unit": "vote share",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How close a race must be to press a candidate: the need falls as e^(-gap/this). Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_fraud_share": {
+  "default": 0.03,
+  "range": null,
+  "unit": "share of a group",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How many votes a candidate adds, as a share of the group's size. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_fraud_base": {
+  "default": -6.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Baseline chance a candidate weighs adding votes. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_fraud_w_temper": {
+  "default": 2.5,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weight of temperament in adding votes. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_fraud_w_need": {
+  "default": 3.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weight of a close race. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
+ },
+ "graft_fraud_w_risk": {
+  "default": 3.0,
+  "range": null,
+  "unit": "logit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weight of the chance the added votes are caught. Grounding: 1975 Saint Jude: machine politics with a reformed police after the Dolan Commission (bible Part I 1.3, 'the honest and the corrupt are both everywhere'); calibration is by the run, reported, never tuned to a target."
  }
  },
  "pools": {

@@ -2163,5 +2163,49 @@
    "base": "shift_vacuum_base",
    "pick_temp": "shift_pick_temp"
   }
+ },
+ "graft": {
+  "base": "graft_base",
+  "w_temper": "graft_w_temper",
+  "w_need": "graft_w_need",
+  "w_price": "graft_w_price",
+  "w_risk": "graft_w_risk",
+  "horizon_weeks": "graft_horizon_weeks",
+  "tolerance_cut": "graft_tolerance_cut",
+  "price_per_rank": "graft_price_per_rank",
+  "price_ambition": "graft_price_ambition",
+  "accept_base": "graft_accept_base",
+  "accept_pragmatism": "graft_accept_pragmatism",
+  "accept_ambition": "graft_accept_ambition",
+  "w_protect_scale": "graft_protect_scale",
+  "kind": "kickback",
+  "need": {
+   "licence": "graft_need_licence",
+   "zoning_variance": "graft_need_zoning",
+   "ordinance": "graft_need_ordinance",
+   "budget": "graft_need_budget"
+  },
+  "protection": {
+   "org_kinds": [
+    "family"
+   ],
+   "offices": [
+    "office:county-prosecutor:killbuck-county-prosecutor",
+    "office:sjpd:police-commissioner"
+   ],
+   "window_days": "graft_protect_window",
+   "kind": "retainer"
+  },
+  "fraud": {
+   "kind": "stuffing",
+   "window_days": "graft_fraud_window",
+   "closeness": "graft_fraud_closeness",
+   "share": "graft_fraud_share",
+   "base": "graft_fraud_base",
+   "w_temper": "graft_fraud_w_temper",
+   "w_need": "graft_fraud_w_need",
+   "w_risk": "graft_fraud_w_risk"
+  },
+  "note": "Who weighs paying an official or rigging a count, and over what: a licence, a variance, an ordinance or a budget item before a board the sponsor does not sit in; a case against a family's men put to the prosecutor or the commissioner; a close general election. Every weight is a design figure."
  }
 }

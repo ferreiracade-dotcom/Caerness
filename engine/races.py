@@ -367,6 +367,16 @@ def result_why(conn, race_id: int) -> dict:
 
 # ---- fraud ----------------------------------------------------------------------------------------------------------
 
+def fraud_chance(conn, actor: int, race_id: int, group_id: int, size: int) -> float:
+    """The chance that `size` added votes in one group are caught: the delivery of his rivals there (their poll watchers) and the size."""
+    d = _drivers(conn).get("fraud") or {}
+    mine = party_of(conn, actor)
+    watchers = sum(electorate.delivery(conn, int(group_id), h["holder_kind"], int(h["holder_id"]))
+                   for h in civic_field.holders_of(conn, "delivery", electorate.group(conn, group_id)["group_key"])
+                   if not (h["holder_kind"] == "org" and int(h["holder_id"]) == mine))
+    return _sigmoid(_f(conn, d.get("base")) + _f(conn, d.get("watchers")) * watchers + _f(conn, d.get("size")) * math.log1p(size))
+
+
 def commit_fraud(conn, actor: int, race_id: int, group_id: int, kind: str, size: int, day: int) -> dict:
     """Add `size` votes for a candidate in one group. The chance it is caught rises with the delivery of his rivals there (their
     poll watchers) and with the size; a caught fraud opens a crime report and costs him with the district's groups."""
@@ -375,12 +385,8 @@ def commit_fraud(conn, actor: int, race_id: int, group_id: int, kind: str, size:
     r = _result(conn, race_id)
     if int(actor) not in candidates(conn, race_id):
         raise ValueError("not a candidate")
-    mine = party_of(conn, actor)
-    watchers = sum(electorate.delivery(conn, int(group_id), h["holder_kind"], int(h["holder_id"]))
-                   for h in civic_field.holders_of(conn, "delivery", electorate.group(conn, group_id)["group_key"])
-                   if not (h["holder_kind"] == "org" and int(h["holder_id"]) == mine))
     fl = r.setdefault("fraud", [])
-    p = _sigmoid(_f(conn, d.get("base")) + _f(conn, d.get("watchers")) * watchers + _f(conn, d.get("size")) * math.log1p(size))
+    p = fraud_chance(conn, actor, race_id, group_id, size)
     exposed = _rng(conn, race_id, group_id, actor, "fraud", len(fl)).random() < p
     rec = {"actor": int(actor), "group": int(group_id), "kind": kind, "size": int(size), "day": int(day), "exposed": bool(exposed)}
     out = {"gain": int(size), "exposed": bool(exposed), "chance": p, "report_id": None}

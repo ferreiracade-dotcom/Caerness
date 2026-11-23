@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import sqlite3
 
-from . import civic_corruption, civic_seams, civic_shift, civic_votes, offices, races
+from . import civic_corruption, civic_graft, civic_seams, civic_shift, civic_votes, offices, races
 from .design import figure
 
 CURSOR = "civic_week_cursor"
@@ -86,6 +86,8 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
     weeks = {"exposed": 0, "weakened": 0, "transferred": 0, "taken_up": 0, "walkouts": 0}
     while cur + WEEK <= day:
         cur += WEEK
+        for k, v in civic_graft.weekly(conn, cur).items():
+            weeks[k] = weeks.get(k, 0) + v
         weeks["exposed"] += len(civic_corruption.exposure_check(conn, cur))
         for k, v in civic_shift.weekly_shift(conn, cur).items():
             weeks[k] = weeks.get(k, 0) + v
