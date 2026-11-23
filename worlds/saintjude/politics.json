@@ -2137,5 +2137,31 @@
   ],
   "crime_kind": "bribery",
   "investigator_office": "office:county-prosecutor:killbuck-county-prosecutor"
+ },
+ "field_shift": {
+  "base": "shift_base",
+  "lost": "shift_w_lost",
+  "defeat": "shift_w_defeat",
+  "indicted": "shift_w_indicted",
+  "impression": "shift_w_impression",
+  "delta": "shift_delta",
+  "window_days": "shift_window_days",
+  "rival": {
+   "strength": "shift_rival_w_strength",
+   "regard": "shift_rival_w_regard",
+   "noise_sd": "shift_rival_noise",
+   "start": "shift_rival_start",
+   "take": "shift_rival_take"
+  },
+  "walkout": {
+   "base": "walk_base",
+   "ambition": "walk_w_ambition",
+   "disloyal": "walk_w_disloyal",
+   "pressure": "walk_w_pressure"
+  },
+  "vacuum": {
+   "base": "shift_vacuum_base",
+   "pick_temp": "shift_pick_temp"
+  }
  }
 }

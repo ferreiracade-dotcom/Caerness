@@ -22,6 +22,7 @@
    ],
    "courtship_scan": false,
    "lifecycle": {
+    "split": {"name": "{surname} faction"},
     "succession": {
      "chairman": [
       "treasurer",
@@ -119,6 +120,7 @@
    "unit_leader": null, "purse_roles": ["chair"],
    "courtship_scan": false,
    "lifecycle": {
+    "split": {"name": "{surname} faction"},
     "succession": {
      "chair": [
       "officer"

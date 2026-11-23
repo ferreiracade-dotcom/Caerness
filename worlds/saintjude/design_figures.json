@@ -15891,6 +15891,186 @@
   "mark": "Design proposal",
   "source": "unsourced",
   "note": "unsourced; Days from a special election to the winner taking the seat."
+ },
+ "shift_base": {
+  "default": -5.0,
+  "range": null,
+  "unit": "logit a week",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Baseline weekly chance a holder in the field loses ground on one of its stakes."
+ },
+ "shift_w_lost": {
+  "default": 0.6,
+  "range": null,
+  "unit": "logit per lost line in the window",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Lost patronage lines raise the chance a holder loses ground."
+ },
+ "shift_w_defeat": {
+  "default": 0.9,
+  "range": null,
+  "unit": "logit per lost race in the window",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; A race lost by a candidate the holder backed raises the chance it loses ground."
+ },
+ "shift_w_indicted": {
+  "default": 0.7,
+  "range": null,
+  "unit": "logit per indicted man (log)",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Indictments of the holder's own seat-holders raise the chance it loses ground."
+ },
+ "shift_w_impression": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit per unit of ill regard",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The electorate's ill regard of the holder's head raises the chance it loses ground."
+ },
+ "shift_delta": {
+  "default": 0.25,
+  "range": null,
+  "unit": "strength",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much strength a stake loses when its holder loses ground."
+ },
+ "shift_window_days": {
+  "default": 180,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How far back lost lines, lost races and indictments count."
+ },
+ "shift_rival_w_strength": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit per strength",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a rival's own strength draws a weakened stake to it."
+ },
+ "shift_rival_w_regard": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit per unit of regard",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much the electorate's regard of a rival's head draws a weakened stake to it."
+ },
+ "shift_rival_noise": {
+  "default": 0.3,
+  "range": null,
+  "unit": "logit sd",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Spread in how a weakened stake looks to a rival."
+ },
+ "shift_rival_start": {
+  "default": 0.3,
+  "range": null,
+  "unit": "strength",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; The strength a rival starts with on a stake nobody held."
+ },
+ "shift_rival_take": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit per unit of lead",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much a rival's lead over the holder turns a weakened stake over to it."
+ },
+ "walk_base": {
+  "default": -7.0,
+  "range": null,
+  "unit": "logit a week",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Baseline weekly chance a unit leader walks out with his men and their posts."
+ },
+ "walk_w_ambition": {
+  "default": 1.5,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; His ambition raises the chance he walks out."
+ },
+ "walk_w_disloyal": {
+  "default": 1.0,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Want of loyalty raises the chance he walks out."
+ },
+ "walk_w_pressure": {
+  "default": 0.8,
+  "range": null,
+  "unit": "logit per unit",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; His organisation losing ground raises the chance he walks out."
+ },
+ "shift_vacuum_base": {
+  "default": -3.0,
+  "range": null,
+  "unit": "logit a week",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weekly chance a stake nobody holds is taken up by a rival that looks to it."
+ },
+ "shift_pick_temp": {
+  "default": 1.0,
+  "range": null,
+  "unit": "temperature",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How sharply a stake nobody holds goes to the rival that looks best (higher is more even)."
  }
  },
  "pools": {
