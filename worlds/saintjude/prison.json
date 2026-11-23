@@ -124,5 +124,271 @@
    "standing_loss": {"value": 0.5, "mark": "Design proposal", "why": "A man found to have informed loses this share of his standing in the group he leaves for protective custody (spec 7.2: talking loses it)."}
   }
  },
+ "channels": {
+  "mark": "Design proposal",
+  "why": "Channels between a man inside and the outside (J1.4). Visits and letters happen by a weighed pull, never on a schedule. All figures are unsourced design proposals and calibration targets, never caps.",
+  "kin_pull": {
+   "spouse": {
+    "value": 1.0,
+    "mark": "Design proposal",
+    "why": "Pull of a spouse's tie to visit."
+   },
+   "parent": {
+    "value": 0.8,
+    "mark": "Design proposal",
+    "why": "Pull of a parent."
+   },
+   "child": {
+    "value": 0.7,
+    "mark": "Design proposal",
+    "why": "Pull of a child."
+   },
+   "sibling": {
+    "value": 0.5,
+    "mark": "Design proposal",
+    "why": "Pull of a sibling."
+   },
+   "guardian": {
+    "value": 0.5,
+    "mark": "Design proposal",
+    "why": "Pull of a guardian."
+   },
+   "ward": {
+    "value": 0.5,
+    "mark": "Design proposal",
+    "why": "Pull of a ward."
+   },
+   "adoptive_parent": {
+    "value": 0.7,
+    "mark": "Design proposal",
+    "why": "Pull of an adoptive parent."
+   },
+   "adoptive_child": {
+    "value": 0.6,
+    "mark": "Design proposal",
+    "why": "Pull of an adoptive child."
+   },
+   "other": {
+    "value": 0.2,
+    "mark": "Design proposal",
+    "why": "Pull of other kin."
+   }
+  },
+  "friend_pull": {
+   "value": 0.4,
+   "mark": "Design proposal",
+   "why": "Pull of a friend who feels for him: this times the larger of their affection and trust of him (0..1)."
+  },
+  "friends_considered": {
+   "value": 3,
+   "mark": "Design proposal",
+   "why": "How many of the people who feel most for him are weighed each week (bounds the work; the rest do not come)."
+  },
+  "visit": {
+   "rate": {
+    "value": 0.35,
+    "mark": "Design proposal",
+    "why": "Weekly chance at pull 1.0 and no distance that a person visits: 1 - exp(-rate * pull * distance)."
+   },
+   "far_factor": {
+    "value": 0.25,
+    "mark": "Design proposal",
+    "why": "A facility off the map is far: this multiplies the pull (rarer visits)."
+   },
+   "cost": {
+    "value": 6.0,
+    "mark": "Design proposal",
+    "why": "Dollars a visit costs the visitor (fare and a lost day's work), 1975 prices."
+   },
+   "far_cost": {
+    "value": 3.0,
+    "mark": "Design proposal",
+    "why": "Extra share of the cost when the facility is far (cost * (1 + this))."
+   },
+   "mark": "Design proposal"
+  },
+  "letter": {
+   "rate": {
+    "value": 0.3,
+    "mark": "Design proposal",
+    "why": "Weekly chance at pull 1.0 that he writes or is written to, when no visit happened."
+   },
+   "mark": "Design proposal"
+  },
+  "contact_gain": {
+   "familiarity": {
+    "value": 0.5,
+    "mark": "Design proposal",
+    "why": "Per contact, times the channel quality: familiarity of the two."
+   },
+   "affection": {
+    "value": 0.6,
+    "mark": "Design proposal",
+    "why": "Affection."
+   },
+   "trust": {
+    "value": 0.4,
+    "mark": "Design proposal",
+    "why": "Trust."
+   },
+   "loyalty": {
+    "value": 0.3,
+    "mark": "Design proposal",
+    "why": "Loyalty."
+   }
+  },
+  "orders_share": {
+   "value": 0.4,
+   "mark": "Design proposal",
+   "why": "Share of a seat-holder's contacts that carry orders to his outfit."
+  },
+  "intercept_rate": {
+   "value": 0.35,
+   "mark": "Design proposal",
+   "why": "Chance orders are overheard at watched 1.0: this times the channel's watched share."
+  },
+  "overheard_kind": "racket",
+  "use_rate": {
+   "value": 0.3,
+   "mark": "Design proposal",
+   "why": "Weekly chance a standing channel (trusted man, phone, note, guard, lawyer) is used."
+  },
+  "kinds": {
+   "visit": {
+    "quality": {
+     "value": 0.55,
+     "mark": "Design proposal",
+     "why": "A visit carries a message fairly well."
+    },
+    "watched": {
+     "value": 0.75,
+     "mark": "Design proposal",
+     "why": "Visiting rooms are listened to."
+    }
+   },
+   "letter": {
+    "quality": {
+     "value": 0.3,
+     "mark": "Design proposal",
+     "why": "Slow and thin."
+    },
+    "watched": {
+     "value": 0.85,
+     "mark": "Design proposal",
+     "why": "Mail is read."
+    }
+   },
+   "lawyer": {
+    "quality": {
+     "value": 0.8,
+     "mark": "Design proposal",
+     "why": "A lawyer carries a message and the law's own news."
+    },
+    "watched": {
+     "value": 0.1,
+     "mark": "Design proposal",
+     "why": "Privileged."
+    }
+   },
+   "trusted_man": {
+    "quality": {
+     "value": 0.7,
+     "mark": "Design proposal",
+     "why": "A man of his outfit who visits as a friend."
+    },
+    "watched": {
+     "value": 0.4,
+     "mark": "Design proposal",
+     "why": "Known faces draw attention."
+    },
+    "open_rate": {
+     "value": 0.05,
+     "mark": "Design proposal",
+     "why": "Weekly chance one of his outfit's men takes up the route."
+    }
+   },
+   "phone": {
+    "quality": {
+     "value": 0.6,
+     "mark": "Design proposal",
+     "why": "Quick but short."
+    },
+    "watched": {
+     "value": 0.5,
+     "mark": "Design proposal",
+     "why": "Found in searches."
+    },
+    "cost_weekly": {
+     "value": 15.0,
+     "mark": "Design proposal",
+     "why": "Dollars a week."
+    },
+    "open_rate": {
+     "value": 0.08,
+     "mark": "Design proposal",
+     "why": "Weekly chance at corruption 1.0."
+    },
+    "by": "contraband"
+   },
+   "smuggled_note": {
+    "quality": {
+     "value": 0.4,
+     "mark": "Design proposal",
+     "why": "One way, slow."
+    },
+    "watched": {
+     "value": 0.45,
+     "mark": "Design proposal",
+     "why": "Passed by hand."
+    },
+    "cost_weekly": {
+     "value": 5.0,
+     "mark": "Design proposal",
+     "why": "Dollars a week."
+    },
+    "open_rate": {
+     "value": 0.1,
+     "mark": "Design proposal",
+     "why": "Weekly chance at contraband 1.0."
+    },
+    "by": "contraband"
+   },
+   "bought_guard": {
+    "quality": {
+     "value": 0.85,
+     "mark": "Design proposal",
+     "why": "A guard who carries what he is given."
+    },
+    "watched": {
+     "value": 0.12,
+     "mark": "Design proposal",
+     "why": "The guard is the watch."
+    },
+    "cost_weekly": {
+     "value": 40.0,
+     "mark": "Design proposal",
+     "why": "Dollars a week."
+    },
+    "open_rate": {
+     "value": 0.06,
+     "mark": "Design proposal",
+     "why": "Weekly chance at corruption 1.0."
+    },
+    "by": "corruption"
+   }
+  },
+  "grip": {
+   "watched_weight": {
+    "value": 0.5,
+    "mark": "Design proposal",
+    "why": "How much of a channel's worth a watch takes away: quality * (1 - weight * watched)."
+   },
+   "recency_days": {
+    "value": 60,
+    "mark": "Design proposal",
+    "why": "Half-life of a channel's worth by days since it was last used."
+   }
+  }
+ },
  "society": {"kind": "inmate_society", "name_template": "{group} at {facility}"}
 }

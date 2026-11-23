@@ -423,6 +423,7 @@ def leave(conn: sqlite3.Connection, stay_id: int, day: int, status: str) -> None
         conn.execute("UPDATE org_seats SET status='out', left_day=? WHERE actor_id=? AND org_actor_id=? AND status IN ('active','held')", (int(day), a, int(org)))
         conn.execute("UPDATE institution_memberships SET status='former', left_day=? WHERE institution_actor_id=? AND member_actor_id=?", (int(day), int(org), a))
         conn.execute("UPDATE facility_groups SET headcount=headcount-1 WHERE id=?", (int(st["group_id"]),))
+    conn.execute("UPDATE prison_channels SET status='closed' WHERE stay_id=? AND status='open'", (int(stay_id),))
     conn.execute("UPDATE facilities SET headcount=headcount-1 WHERE id=?", (int(st["facility_id"]),))
     if status not in ("dead", "transferred"):
         try:
@@ -497,6 +498,8 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
     elif int(day) - int(cur[0]) >= cadence:
         conn.execute("UPDATE engine_meta SET value=? WHERE key=?", (str(int(day)), WEEK_KEY))
         out.update(weekly(conn, int(day)))
+        from . import prison_channels
+        out["channels"] = prison_channels.weekly(conn, int(day))
     return out
 
 
