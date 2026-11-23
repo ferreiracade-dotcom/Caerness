@@ -138,14 +138,20 @@ def _gazetteer(conn: sqlite3.Connection) -> dict:
 
 
 def real_person(conn: sqlite3.Connection, name: str | None) -> None:
-    """Refuses a person whose whole name is a real person's (world package gazetteer `real_people`): real people stay offstage."""
+    """A real person's name (world package gazetteer `real_people`) is not free for an invented person. He is brought in
+    documented, with a source, his public roles and his record (author kind "real person"); once he is, the name is taken."""
+    from . import real_figures
     want = norm(name)
-    if not want:
+    if not want or real_figures.allowed(want):
         return
     for r in _gazetteer(conn).get("real_people", []):
         if norm(r.get("name")) == want:
-            raise Contradiction(f"{r['name']} is a real person ({r.get('source', 'the bible')}); real people stay offstage and never act or speak: "
-                                "use a stand-in of this world instead")
+            fig = real_figures.find(conn, name)
+            if fig is not None:
+                raise Contradiction(f"{r['name']} is a real person already in this world (actor {fig['actor_id']}); use him, never a second man of that name")
+            raise Contradiction(f"{r['name']} is a real person ({r.get('source', 'the bible')}): look up who he documentably was and bring him in with "
+                                "author(kind='real person', details {name, source, public_roles, record, age, work}); he acts only in his public roles and "
+                                "wrongdoing only of kinds on his record, so an invented man does anything else")
 
 
 def real_town(conn: sqlite3.Connection, text: Any) -> None:
@@ -172,25 +178,33 @@ def real_town(conn: sqlite3.Connection, text: Any) -> None:
 
 
 def dated_rules(conn: sqlite3.Connection, text: Any) -> None:
-    """Refuses text that names a dated thing of the world package's timeline before it exists on the campaign's current date."""
-    from datetime import date as _d, timedelta
-    from .world_package import not_yet_mentions, package_for
+    """Refuses text that names a law, institution or event of the world package's timeline before it exists in this run.
+    "Exists" is the run's own date (history entries: earlier, later, never), the package's real date as the default. A
+    technology or custom is not refused for being early: the enabler check judges it (engine/history.py)."""
+    from datetime import date as _d
+    from .world_package import package_for, timeline_mentions
+    from . import history
     try:
         pkg = package_for(conn)
         if not pkg.data.get("timeline") or pkg.calendar.get("kind") != "gregorian":
             return
-        day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
-        today = (_d.fromisoformat(pkg.calendar["start"]) + timedelta(days=day))
+        today = _d.fromisoformat(history.today_iso(conn))
     except Exception:
         return
-    for e, phrase in not_yet_mentions(pkg, str(text or ""), today):
-        arrives = _d.fromisoformat(e["exists"])
-        when = f"{arrives.day} {arrives.strftime('%B')} {arrives.year}"
+    for e, phrase in timeline_mentions(pkg, str(text or "")):
+        st = history.run_status(conn, e, today.isoformat())
         label = phrase if phrase.lower() == e["name"].lower() else f"{e['name']} (written as {phrase!r})"
+        if st["status"] == "never":
+            raise Contradiction(f"{label} did not happen in this run: {st['reason']}")
+        if st["status"] != "not_yet" or e.get("class") in history.soft_classes(conn):
+            continue
+        arrives = _d.fromisoformat(st["run_exists"])
+        when = f"{arrives.day} {arrives.strftime('%B')} {arrives.year}"
         src = " ".join(str(e.get("source") or "").split())
         if len(src) > 420:
             src = src[:419] + "…"
-        raise Contradiction(f"{label} does not exist yet: it arrives {when} and today is {today.day} {today.strftime('%B')} {today.year}. {src}")
+        extra = f" ({st['reason']})" if st.get("reason") else ""
+        raise Contradiction(f"{label} does not exist yet: it arrives {when}{extra} and today is {today.day} {today.strftime('%B')} {today.year}. {src}")
 
 
 def _strings(v: Any):
@@ -204,12 +218,13 @@ def _strings(v: Any):
             yield from _strings(x)
 
 
-def check_world_text(conn: sqlite3.Connection, *parts: Any) -> None:
+def check_world_text(conn: sqlite3.Connection, *parts: Any, dated: bool = True) -> None:
     """The world package's text vetoes for free text (an act intent, an authored thing's words): a real town that does not
     exist here, a dated rule not yet in force. Packages without a gazetteer or timeline (Caerness) are unaffected."""
     text = " | ".join(s for p in parts for s in _strings(p))
     real_town(conn, text)
-    dated_rules(conn, text)
+    if dated:
+        dated_rules(conn, text)
 
 
 def name_taken(conn: sqlite3.Connection, name: str | None) -> None:

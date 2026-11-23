@@ -11,7 +11,8 @@
   "mark": "memory",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "law"
  },
  {
   "name": "Title III wiretap",
@@ -28,7 +29,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "New Jersey one-party consent recording",
@@ -43,7 +45,8 @@
   "mark": "verified in outline",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "informant body wire",
@@ -59,7 +62,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "technology"
  },
  {
   "name": "pen register",
@@ -74,7 +78,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "grand jury civil contempt, 18 months at most",
@@ -90,7 +95,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "RICO",
@@ -105,7 +111,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "RICO used against organized crime",
@@ -120,7 +127,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "event"
  },
  {
   "name": "RICO case against a union leader (United States v. Scotto)",
@@ -134,7 +142,8 @@
   "mark": "verified in outline",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "event"
  },
  {
   "name": "RICO prosecution of a Mafia leadership",
@@ -150,7 +159,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "event"
  },
  {
   "name": "Witness Security Program",
@@ -165,7 +175,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "Bank Secrecy Act",
@@ -180,7 +191,8 @@
   "mark": "memory",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "law"
  },
  {
   "name": "Landrum-Griffin Act",
@@ -195,7 +207,8 @@
   "mark": "memory",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "law"
  },
  {
   "name": "union-office bar lengthened to thirteen years",
@@ -210,7 +223,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "federal preventive detention",
@@ -236,7 +250,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "preventive detention upheld by the Supreme Court",
@@ -250,7 +265,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "event"
  },
  {
   "name": "forensic DNA profiling",
@@ -266,7 +282,8 @@
   "mark": "memory",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "undercover infiltration of a Mafia family",
@@ -280,7 +297,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "event"
  },
  {
   "name": "FBI Top Echelon Criminal Informant Program",
@@ -294,7 +312,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "Attorney General guidelines on informants",
@@ -308,7 +327,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "Church Committee",
@@ -322,7 +342,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "Parole Commission",
@@ -336,7 +357,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "DEA",
@@ -350,7 +372,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "ERISA",
@@ -364,7 +387,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "Abscam",
@@ -378,7 +402,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "event"
  },
  {
   "name": "New Jersey death penalty reinstated",
@@ -392,7 +417,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "New Jersey Lottery",
@@ -406,7 +432,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "State daily numbers game (Pick-it)",
@@ -423,7 +450,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "Pennsylvania daily number",
@@ -435,7 +463,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "New Jersey Pick-6",
@@ -449,7 +478,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "New York daily number",
@@ -461,7 +491,8 @@
   "mark": "verified in outline",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "Atlantic City casino gambling referendum",
@@ -475,7 +506,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "event"
  },
  {
   "name": "Atlantic City casino",
@@ -491,7 +523,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "Contraband Cigarette Trafficking Act",
@@ -505,7 +538,8 @@
   "mark": "verified in outline",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "New Jersey income tax",
@@ -519,7 +553,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "law"
  },
  {
   "name": "containerization at Port Newark",
@@ -533,7 +568,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "technology"
  },
  {
   "name": "Elizabeth Marine Terminal",
@@ -545,7 +581,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "Gannet Terminal",
@@ -560,7 +597,8 @@
   "mark": "Anchor model",
   "tag": "Anchor",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "institution"
  },
  {
   "name": "State Commission of Investigation",
@@ -574,7 +612,8 @@
   "mark": "verified",
   "tag": "Fixed",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "institution"
  },
  {
   "name": "Killbuck Waterfront Commission",
@@ -588,7 +627,8 @@
   "mark": "Anchor model",
   "tag": "Anchor",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "institution"
  },
  {
   "name": "Conrail",
@@ -602,7 +642,8 @@
   "mark": "Anchor",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "institution"
  },
  {
   "name": "Motor Carrier Act and Staggers Rail Act",
@@ -616,7 +657,8 @@
   "mark": "Anchor",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "law"
  },
  {
   "name": "cellular phone",
@@ -634,7 +676,8 @@
   "mark": "memory",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "telephone monopoly breakup",
@@ -649,7 +692,8 @@
   "mark": "Anchor",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "event"
  },
  {
   "name": "Pizza Connection",
@@ -664,7 +708,8 @@
   "mark": "verified",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": false
+  "assumption": false,
+  "class": "event"
  },
  {
   "name": "money laundering statute",
@@ -680,7 +725,8 @@
   "mark": "memory, to verify",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "law"
  },
  {
   "name": "crack cocaine",
@@ -696,7 +742,8 @@
   "mark": "memory, to verify",
   "tag": "Weather",
   "from_bible": true,
-  "assumption": true
+  "assumption": true,
+  "class": "culture"
  },
  {
   "name": "car phone",
@@ -711,7 +758,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "pager",
@@ -727,7 +775,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "numeric display pager",
@@ -743,7 +792,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "fax machine",
@@ -759,7 +809,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "videocassette recorder",
@@ -776,7 +827,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "video rental store",
@@ -793,7 +845,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "institution"
  },
  {
   "name": "answering machine",
@@ -807,7 +860,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "answering service",
@@ -821,7 +875,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "institution"
  },
  {
   "name": "portable tape recorder",
@@ -836,7 +891,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "body recorder",
@@ -852,7 +908,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "closed-circuit camera",
@@ -867,7 +924,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "personal computer",
@@ -882,7 +940,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "office photocopier",
@@ -897,7 +956,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "automatic teller machine",
@@ -912,7 +972,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "bank credit card",
@@ -928,7 +989,8 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  },
  {
   "name": "compact disc",
@@ -943,6 +1005,7 @@
   "mark": "not from the bible",
   "tag": null,
   "from_bible": false,
-  "assumption": true
+  "assumption": true,
+  "class": "technology"
  }
 ]

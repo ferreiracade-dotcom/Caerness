@@ -70,5 +70,9 @@
   "hint_competence": 0.2,
   "mark": "Design proposal",
   "note": "unsourced"
- }
+ },
+ "soft_classes": [
+  "technology",
+  "culture"
+ ]
 }

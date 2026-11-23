@@ -699,7 +699,7 @@ def author(conn: sqlite3.Connection, me: int, kind: str, details: dict, call_id:
     through_intake = intake.enabled(conn)
     target = None if through_intake else _kind_of(kind, d)
     try:  # the world package's text vetoes: a real town that is not here, a dated rule not yet in force
-        veto.check_world_text(conn, d)
+        veto.check_world_text(conn, d, dated=not d.get("real_date"))  # a dated real fact is judged by the history check, not walled
     except veto.Contradiction as e:
         raise AuthoringRefused(str(e)) from e
     conn.execute("SAVEPOINT authoring")

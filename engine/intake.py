@@ -126,6 +126,8 @@ def shape_for(conn, kind: str, details: dict) -> Shape:
             return s
     if d.get("real_date") and any(s.name == "history" for s in allshapes):  # a dated real fact is history whatever it is called
         return next(s for s in allshapes if s.name == "history")
+    if (d.get("public_roles") is not None or re.search(r"real (?:person|figure)", k)) and any(s.name == "real_figure" for s in allshapes):
+        return next(s for s in allshapes if s.name == "real_figure")  # a documented real person, not an invented one
     for s in allshapes:
         if not s.words:
             continue
@@ -264,6 +266,8 @@ def _check_facts(conn, p: Proposal, details: dict) -> None:
     loc = details.get("location_id")
     if isinstance(loc, int) and not isinstance(loc, bool) and not conn.execute("SELECT 1 FROM locations WHERE id=?", (loc,)).fetchone():
         raise AuthoringRefused("unknown location")
+    from . import real_figures
+    real_figures.check_acts(conn, (p.owner, *p.people), p.legality, f"{p.kind_text} {p.what} {p.agenda} {' '.join(p.consequences)}")
     want = _norm_name(p.what)
     for r in conn.execute("SELECT id,name FROM held_things WHERE owner_actor_id=? AND status IN ('building','active','failing')", (p.owner,)):
         if _norm_name(r["name"]) == want:
@@ -331,6 +335,11 @@ def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
     if shape.name == "history":  # a fact already judged answers with its recorded outcome (a `never` is not re-proposed)
         from . import history
         again = history.recorded(conn, d)
+        if again:
+            return again
+    if shape.name == "real_figure":
+        from . import real_figures
+        again = real_figures.recorded(conn, d)
         if again:
             return again
     p = normalise(conn, int(me), kind, d)
@@ -419,5 +428,7 @@ def adopt_floor(conn, shape_name: str) -> int:
 
 from . import history as _history  # noqa: E402
 register_shape(Shape("history", (), ("real_date",), lambda conn, me, p, cid: _history.propose(conn, me, p, cid), False))
+from . import real_figures as _real_figures  # noqa: E402
+register_shape(Shape("real_figure", (), ("public_roles",), lambda conn, me, p, cid: _real_figures.propose(conn, me, p, cid), False))
 from . import intake_business  # noqa: E402  (registers the BZ1 makers; the module imports this one, so it comes last)
 intake_business.register()

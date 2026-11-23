@@ -378,3 +378,36 @@ def note_override(conn, key: str, new_text: str, cause: str | None) -> dict | No
     record_divergence(conn, key, e["what"], c[:200], f"{e['what']}: {new_text}"[:300], key)
     conn.execute("UPDATE history_entries SET status='superseded' WHERE key=?", (key,))
     return {"diverged": True, "entry": key}
+
+
+# ---- the package timeline as defaults -----------------------------------------------------------------------------
+
+def soft_classes(conn) -> tuple[str, ...]:
+    return tuple(rules(conn).get("soft_classes") or ("technology", "culture"))
+
+
+def _timeline_keys(e: dict) -> list[str]:
+    return ["history:" + slug(x) for x in [e["name"], *(e.get("aliases") or [])]]
+
+
+def run_entry(conn, e: dict) -> sqlite3.Row | None:
+    """The run's own entry for a timeline item, if play ever proposed it."""
+    for k in _timeline_keys(e):
+        r = _entry(conn, k)
+        if r is not None:
+            return r
+    return None
+
+
+def run_status(conn, e: dict, day_iso: str) -> dict:
+    """Where a timeline item stands in this run on `day_iso`: not_yet | exists | never, with the run's date. The package's real
+    date is the default; a history entry (earlier, later, changed, never) is the run's own answer."""
+    r = run_entry(conn, e)
+    if r is None:
+        exists = str(e.get("exists") or "")
+        return {"status": "exists" if exists and day_iso >= exists else "not_yet", "run_exists": exists or None, "reason": None, "entry": None}
+    reasons = "; ".join(json.loads(r["reasons_json"] or "[]"))
+    if r["status"] == "never" or r["outcome"] == "never":
+        return {"status": "never", "run_exists": None, "reason": reasons or "the causes it needed did not hold", "entry": r["key"]}
+    run = r["run_date"] or r["real_date"]
+    return {"status": "exists" if day_iso >= run else "not_yet", "run_exists": run, "reason": reasons or None, "entry": r["key"]}
