@@ -9,6 +9,7 @@ bail, disposition, `sentences`, `custody`) is unchanged and stays the only write
 from __future__ import annotations
 
 import json
+import math
 import random
 import sqlite3
 
@@ -117,6 +118,7 @@ CREATE TABLE IF NOT EXISTS inmate_ties (
 """
 
 _READY: dict = {"key": None}
+WEEK_KEY = "prison_last_week"
 
 
 def ensure_tables(conn: sqlite3.Connection) -> None:
@@ -363,10 +365,16 @@ def admit(conn: sqlite3.Connection, actor_id: int, day: int, *, sentence_id: int
     term = int(sen["term_days"]) if sen is not None else None
     fid = assign_facility(conn, actor_id, term_days=term, authority=_authority(conn, actor_id, sen), pretrial=sen is None, day=int(day))
     cur = conn.execute("SELECT * FROM inmate_stays WHERE actor_id=? AND status='inside'", (int(actor_id),)).fetchone()
+    if cur is not None and sen is not None and cur["sentence_id"] is not None:  # already serving one: this sentence runs with it
+        conn.execute("UPDATE inmate_stays SET until_day=MAX(COALESCE(until_day,0),?) WHERE id=?", (int(sen["end_day"]), int(cur["id"])))
+        _mark(conn, sen, int(cur["id"]))
+        _name_facility(conn, sen, int(cur["facility_id"]))
+        return int(cur["id"])
     if cur is not None:
         if int(cur["facility_id"]) == fid:
             conn.execute("UPDATE inmate_stays SET sentence_id=?, case_id=COALESCE(?,case_id), until_day=? WHERE id=?",
                          (sentence_id, case_id, int(sen["end_day"]) if sen is not None else None, int(cur["id"])))
+            _mark(conn, sen, int(cur["id"]))
             _name_facility(conn, sen, fid)
             return int(cur["id"])
         leave(conn, int(cur["id"]), int(day), "transferred")
@@ -386,8 +394,15 @@ def admit(conn: sqlite3.Connection, actor_id: int, day: int, *, sentence_id: int
         conn.execute("UPDATE facility_groups SET headcount=headcount+1 WHERE id=?", (gid,))
     conn.execute("UPDATE facilities SET headcount=headcount+1 WHERE id=?", (fid,))
     _move(conn, actor_id, fac["location_id"], int(day))
+    _mark(conn, sen, stay)
     _name_facility(conn, sen, fid)
     return stay
+
+
+def _mark(conn: sqlite3.Connection, sen, stay_id: int) -> None:
+    """The sentence has been placed: its row says which stay holds it."""
+    if sen is not None:
+        conn.execute("UPDATE sentences SET metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.stay_id',?) WHERE id=?", (int(stay_id), int(sen["id"])))
 
 
 def _name_facility(conn: sqlite3.Connection, sen, facility_id: int) -> None:
@@ -429,8 +444,7 @@ def _living(conn: sqlite3.Connection, actor_id: int) -> bool:
 def _unplaced(conn: sqlite3.Connection) -> list:
     """Sentences being served and men held for a case, with no stay (sentence rows first; a man held for trial is a custody row)."""
     out: list = []
-    for s in conn.execute("""SELECT * FROM sentences s WHERE s.status='serving'
-                             AND NOT EXISTS (SELECT 1 FROM inmate_stays t WHERE t.sentence_id=s.id AND t.status='inside') ORDER BY s.id""").fetchall():
+    for s in conn.execute("""SELECT * FROM sentences s WHERE s.status='serving' AND json_extract(s.metadata_json,'$.stay_id') IS NULL ORDER BY s.id""").fetchall():
         out.append(("sentence", s))
     for c in conn.execute("""SELECT * FROM custody c WHERE c.kind='held' AND c.case_id IS NOT NULL
                              AND NOT EXISTS (SELECT 1 FROM inmate_stays t WHERE t.actor_id=c.actor_id AND t.status='inside')
@@ -476,6 +490,13 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
     ensure_facilities(conn)
     out = {"admitted": _admissions(conn, int(day))}
     out["left"] = _departures(conn, int(day))
+    cadence = int(rules(conn).get("cadence_days") or 7)
+    cur = conn.execute("SELECT value FROM engine_meta WHERE key=?", (WEEK_KEY,)).fetchone()
+    if cur is None:
+        conn.execute("INSERT INTO engine_meta(key,value) VALUES (?,?)", (WEEK_KEY, str(int(day))))
+    elif int(day) - int(cur[0]) >= cadence:
+        conn.execute("UPDATE engine_meta SET value=? WHERE key=?", (str(int(day)), WEEK_KEY))
+        out.update(weekly(conn, int(day)))
     return out
 
 
@@ -491,6 +512,247 @@ def next_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int 
         if _unplaced(conn) or conn.execute("""SELECT 1 FROM inmate_stays t WHERE t.status='inside'
                                               AND NOT EXISTS (SELECT 1 FROM custody c WHERE c.actor_id=t.actor_id AND c.kind='held') LIMIT 1""").fetchone():
             return d
-        return None
+        if conn.execute("SELECT 1 FROM inmate_stays WHERE status='inside' LIMIT 1").fetchone() is None:
+            return None
+        cur = conn.execute("SELECT value FROM engine_meta WHERE key=?", (WEEK_KEY,)).fetchone()
+        due = (int(cur[0]) if cur else int(after_day)) + int(rules(conn).get("cadence_days") or 7)
+        return max(d, due) if max(d, due) <= int(end_day) else None
     except sqlite3.OperationalError:
         return None
+
+
+# ---- the inside week ----
+
+def _wk(conn: sqlite3.Connection) -> dict:
+    return rules(conn).get("week") or {}
+
+
+def facility_state(conn: sqlite3.Connection, fac) -> dict:
+    """Crowding, violence, corruption and contraband now: the facility's base figures bent by how full it is. Stored back on the row."""
+    base = (rules(conn)["facilities"].get(fac["key"]) or {}).get("character") or {}
+    cr = _wk(conn).get("crowding") or {}
+    crowd = float(fac["headcount"]) / float(fac["capacity"]) if int(fac["capacity"] or 0) > 0 else 1.0
+    bend = crowd - 1.0
+    state = {"crowding": round(crowd, 4),
+             "violence": float(base.get("violence", 0.0)) * (1.0 + _figure(cr.get("violence_gain"), 0.0) * bend),
+             "corruption": float(base.get("corruption", 0.0)) * (1.0 + _figure(cr.get("corruption_gain"), 0.0) * bend),
+             "contraband": float(base.get("contraband", 0.0))}
+    state = {k: max(0.0, v) for k, v in state.items()}  # a facility cannot have less than none of anything
+    conn.execute("UPDATE facilities SET character_json=? WHERE id=?", (json.dumps(state, sort_keys=True), int(fac["id"])))
+    return state
+
+
+def _outside_orgs(conn: sqlite3.Connection, actor_id: int) -> list[int]:
+    return [int(r[0]) for r in conn.execute(
+        """SELECT s.org_actor_id FROM org_seats s JOIN org_profiles p ON p.org_actor_id=s.org_actor_id
+           WHERE s.actor_id=? AND s.status IN ('active','held') AND p.sphere<>'prison'""", (int(actor_id),))]
+
+
+def _event(conn: sqlite3.Connection, day: int, fac_id: int, kind: str, actor=None, other=None, severity: float = 0.0, summary: str = "") -> int:
+    return int(conn.execute("INSERT INTO prison_events(day,facility_id,actor_id,other_actor_id,kind,severity,summary) VALUES (?,?,?,?,?,?,?)",
+                            (int(day), int(fac_id), actor, other, kind, float(severity), summary)).lastrowid)
+
+
+def _name(conn: sqlite3.Connection, actor_id) -> str:
+    r = conn.execute("SELECT name FROM actors WHERE id=?", (int(actor_id),)).fetchone()
+    return str(r[0]) if r is not None else "someone"
+
+
+def _heat_between(conn: sqlite3.Connection, orgs_a: list[int], orgs_b: list[int], day: int) -> float:
+    from . import org_tension
+    best = 0.0
+    for x in orgs_a:
+        for y in orgs_b:
+            if x != y:
+                best = max(best, org_tension.heat(conn, x, y, int(day)), org_tension.heat(conn, y, x, int(day)))
+    return best
+
+
+def _fights(conn: sqlite3.Connection, day: int, fac, men: list, state: dict) -> int:
+    """A named man is in a fight or an infraction by a weighed chance (the facility's violence); the other man is one of the named men
+    drawn by how his group and his outfit stand to the first (rival outfits meet far more often than strangers) or an unnamed one. A serious
+    fight is recorded as harm with an offender, so the law's chain takes it like any crime; the rest go on his conduct record."""
+    from .harm import record_harm
+    cfg = _wk(conn).get("fight") or {}
+    if not cfg:
+        return 0
+    rate, same_w = _figure(cfg["rate"]), _figure(cfg["same_group_weight"])
+    tscale, unnamed, serious = _figure(cfg["tension_scale"]), _figure(cfg["unnamed_share"]), _figure(cfg["serious_share"])
+    lo, hi = float(cfg["severity"]["low"]), float(cfg["severity"]["high"])
+    methods = {k: float(v) for k, v in cfg["methods"].items() if k != "why"}
+    orgs_of = {int(st["actor_id"]): _outside_orgs(conn, int(st["actor_id"])) for st in men}
+    n = 0
+    p_any = 1.0 - math.exp(-rate * state["violence"])
+    for st in men:
+        a = int(st["actor_id"])
+        rng = _rng(conn, "fight", f"{day}:{a}")
+        if rng.random() >= p_any or not _living(conn, a):
+            continue
+        others = [s2 for s2 in men if int(s2["actor_id"]) != a and _living(conn, int(s2["actor_id"]))]
+        b = None
+        if others and rng.random() >= unnamed:
+            w = [(same_w if s2["group_id"] == st["group_id"] else 1.0) * (1.0 + tscale * _heat_between(conn, orgs_of[a], orgs_of[int(s2["actor_id"])], day)) for s2 in others]
+            b = int(rng.choices(others, weights=w)[0]["actor_id"])
+        started = rng.random() < _figure(cfg["offender_share"])
+        offender, victim = (a, b) if started else (b, a)
+        hard = rng.random() < serious
+        sev = lo + rng.random() * (hi - lo)
+        method = rng.choices(sorted(methods), weights=[methods[k] for k in sorted(methods)])[0]
+        eid = _event(conn, day, int(fac["id"]), "fight", a, b, sev if hard else 0.0, f"{_name(conn, a)} in a fight")
+        if offender is not None:
+            _event(conn, day, int(fac["id"]), "infraction", offender, victim, sev if hard else 0.0, f"{_name(conn, offender)} started a fight")
+        n += 1
+        if hard and victim is not None and _living(conn, victim):
+            meta = {"public": False}
+            if offender is not None:
+                meta["offender_actor_id"] = offender
+            record_harm(conn, victim, source_kind="prison_fight", source_ref_id=eid, severity=sev, intent_class="hostile", method=method,
+                        location_id=fac["location_id"], metadata=meta)
+    return n
+
+
+def _economy(conn: sqlite3.Connection, day: int, men: list) -> int:
+    """Dues to the group's shot caller and the commissary, from each man's own purse; a man who pays gains standing in his group, one who
+    cannot pay loses it."""
+    from . import ledger, orgs
+    cfg = _wk(conn).get("economy") or {}
+    if not cfg:
+        return 0
+    dues, shop = _figure(cfg["dues_weekly"]), _figure(cfg["commissary_weekly"])
+    gain, loss = _figure(cfg["paid_gain"]), _figure(cfg["unpaid_loss"])
+    paying = set(cfg.get("dues_groups") or [])
+    n = 0
+    for st in men:
+        a = int(st["actor_id"])
+        if st["group_id"] is None:
+            continue
+        g = conn.execute("SELECT group_key,org_actor_id FROM facility_groups WHERE id=?", (int(st["group_id"]),)).fetchone()
+        head = orgs.head_of(conn, int(g["org_actor_id"]))
+        try:
+            if shop > 0 and ledger.balance(conn, ("person", a)) > 0:
+                ledger.spend(conn, ("person", a), shop, purpose="the commissary", allow_partial=True)
+            if g["group_key"] in paying and head is not None and head != a:
+                paid = ledger.transfer(conn, ("person", a), ("person", head), dues, flow_kind=str(cfg.get("flow_kind") or "other"), purpose="dues inside", allow_partial=True)
+                ok = paid >= dues - 1e-6
+                conn.execute("UPDATE org_seats SET standing=standing + ? * (1.0 - standing) WHERE actor_id=? AND org_actor_id=?", (gain, a, int(g["org_actor_id"]))) if ok else \
+                    conn.execute("UPDATE org_seats SET standing=standing * (1.0 - ?) WHERE actor_id=? AND org_actor_id=?", (loss, a, int(g["org_actor_id"])))
+                n += 1
+        except (ValueError, KeyError):
+            continue
+    return n
+
+
+def _regroup(conn: sqlite3.Connection, st, group_key: str, day: int, standing_loss: float) -> bool:
+    """Move a man from his group to another of the same facility (protective custody for a man who talked): his standing in the old
+    group is cut, the old seat goes out, and he takes a seat in the new one."""
+    new = conn.execute("SELECT id,org_actor_id FROM facility_groups WHERE facility_id=? AND group_key=?", (int(st["facility_id"]), group_key)).fetchone()
+    if new is None or st["group_id"] == new["id"]:
+        return False
+    a = int(st["actor_id"])
+    old = conn.execute("SELECT org_actor_id FROM facility_groups WHERE id=?", (int(st["group_id"]),)).fetchone() if st["group_id"] is not None else None
+    if old is not None:
+        conn.execute("UPDATE org_seats SET standing=standing * (1.0 - ?), status='out', left_day=? WHERE actor_id=? AND org_actor_id=? AND status IN ('active','held')",
+                     (standing_loss, int(day), a, int(old["org_actor_id"])))
+        conn.execute("UPDATE institution_memberships SET status='former', left_day=? WHERE institution_actor_id=? AND member_actor_id=?", (int(day), int(old["org_actor_id"]), a))
+        conn.execute("UPDATE facility_groups SET headcount=headcount-1 WHERE id=?", (int(st["group_id"]),))
+    conn.execute("UPDATE inmate_stays SET group_id=?, protective=1 WHERE id=?", (int(new["id"]), int(st["id"])))
+    _seat_inside(conn, a, int(new["id"]), int(day))
+    conn.execute("UPDATE facility_groups SET headcount=headcount+1 WHERE id=?", (int(new["id"]),))
+    return True
+
+
+def _informers(conn: sqlite3.Connection, day: int, men: list) -> int:
+    """A man found to have informed while he is inside loses his place in his group and goes to protective custody."""
+    from . import org_informing
+    cfg = _wk(conn).get("informing") or {}
+    n = 0
+    for st in men:
+        if int(st["protective"]):
+            continue
+        a = int(st["actor_id"])
+        if not org_informing.is_informer(conn, a) or _rng(conn, "found", f"{day}:{a}").random() >= _figure(cfg.get("found_rate"), 0.0):
+            continue
+        for g, spec in (rules(conn).get("groups") or {}).items():
+            if (spec.get("basis") or {}).get("kind") == "protective" and _regroup(conn, st, g, int(day), _figure(cfg.get("standing_loss"), 0.0)):
+                _event(conn, day, int(st["facility_id"]), "protective", a, None, 0.0, f"{_name(conn, a)} went into protective custody")
+                n += 1
+                break
+    return n
+
+
+def _escapes(conn: sqlite3.Connection, day: int, fac, men: list, state: dict) -> int:
+    from .crime_response import open_report
+    from .orgs import imposed
+    cfg = _wk(conn).get("escape") or {}
+    if not cfg:
+        return 0
+    sec = float((cfg.get("security") or {}).get(fac["security"], 1.0))
+    p = _figure(cfg["rate"]) * sec * (1.0 + _figure(cfg["corruption_gain"]) * state["corruption"])
+    n = 0
+    for st in men:
+        a = int(st["actor_id"])
+        if _rng(conn, "escape", f"{day}:{a}").random() >= p or not _living(conn, a):
+            continue
+        leave(conn, int(st["id"]), int(day), "escaped")
+        conn.execute("UPDATE sentences SET status='escaped', released_day=? WHERE actor_id=? AND status='serving'", (int(day), a))
+        conn.execute("UPDATE custody SET kind='released', until_day=? WHERE actor_id=? AND kind='held'", (int(day), a))
+        imposed(conn, a)
+        _event(conn, day, int(fac["id"]), "escape", a, None, 1.0, f"{_name(conn, a)} got out")
+        open_report(conn, crime_kind=str(cfg.get("crime_kind") or "escape"), day=int(day), offender_actor_id=a, location_id=fac["location_id"], public=True)
+        n += 1
+    return n
+
+
+def _contraband(conn: sqlite3.Connection, day: int, fac, men: list, state: dict) -> int:
+    cfg = _wk(conn).get("contraband") or {}
+    if not cfg:
+        return 0
+    rng = _rng(conn, "contraband", f"{day}:{fac['id']}")
+    if rng.random() >= 1.0 - math.exp(-_figure(cfg["rate"]) * state["contraband"] * (1.0 + state["corruption"])):
+        return 0
+    caught = None
+    if men and rng.random() < _figure(cfg["caught_share"]):
+        caught = int(rng.choice(men)["actor_id"])
+    _event(conn, day, int(fac["id"]), "contraband", caught, None, 0.0, "contraband turned up" if caught is None else f"{_name(conn, caught)} was caught with contraband")
+    return 1
+
+
+def _heads(conn: sqlite3.Connection, day: int, fac_id: int) -> int:
+    """A group that has men and has never had a shot caller gets one: the man of highest standing in it. (Once a group has had one, the
+    org core's own succession fills the seat when it falls vacant.)"""
+    n = 0
+    for g in conn.execute("SELECT * FROM facility_groups WHERE facility_id=?", (int(fac_id),)).fetchall():
+        org = int(g["org_actor_id"])
+        head_role = (__import__("engine.orgs", fromlist=["kind_rules"]).kind_rules(conn, org) or {}).get("head")
+        if not head_role or conn.execute("SELECT 1 FROM org_seats WHERE org_actor_id=? AND role_key=? LIMIT 1", (org, head_role)).fetchone():
+            continue
+        top = conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' ORDER BY standing DESC, actor_id LIMIT 1", (org,)).fetchone()
+        if top is None:
+            continue
+        a = int(top[0])
+        conn.execute("UPDATE org_seats SET role_key=?, superior_actor_id=NULL WHERE actor_id=? AND org_actor_id=?", (head_role, a, org))
+        conn.execute("UPDATE org_seats SET superior_actor_id=? WHERE org_actor_id=? AND actor_id<>? AND status='active'", (a, org, a))
+        _event(conn, day, int(fac_id), "shot_caller", a, None, 0.0, f"{_name(conn, a)} took the lead of {_name(conn, org)}")
+        n += 1
+    return n
+
+
+def weekly(conn: sqlite3.Connection, day: int) -> dict:
+    """One inside week for every facility: its state, the fights, the economy, men who talked, escapes, contraband, and the lead of each group.
+    The work is per facility and per named man, never per member of the headcount."""
+    out = {"fights": 0, "paid": 0, "protected": 0, "escapes": 0, "contraband": 0, "heads": 0}
+    by_fac: dict[int, list] = {}
+    for st in conn.execute("SELECT * FROM inmate_stays WHERE status='inside' ORDER BY id").fetchall():
+        by_fac.setdefault(int(st["facility_id"]), []).append(st)
+    for fac in conn.execute("SELECT * FROM facilities WHERE status='open' ORDER BY id").fetchall():
+        men = by_fac.get(int(fac["id"]), [])
+        state = facility_state(conn, fac)
+        out["heads"] += _heads(conn, int(day), int(fac["id"]))
+        if not men:
+            continue
+        out["fights"] += _fights(conn, int(day), fac, men, state)
+        out["paid"] += _economy(conn, int(day), men)
+        out["protected"] += _informers(conn, int(day), men)
+        out["escapes"] += _escapes(conn, int(day), fac, men, state)
+        out["contraband"] += _contraband(conn, int(day), fac, men, state)
+    return out

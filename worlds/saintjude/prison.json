@@ -85,5 +85,44 @@
   "protective": {"share": 0.03, "name": "protective custody", "basis": {"kind": "protective"}, "why": "A man who has informed needs protective custody (spec 7.2)."},
   "unaligned": {"share": 0.13, "name": "the unaligned", "basis": {"kind": "unaligned"}, "why": "Everyone else."}
  },
+ "week": {
+  "mark": "Design proposal",
+  "why": "The inside week (J1.3). Each rate is per named man per week and is scaled by the facility's own figures; nothing here is a cap or a quota. All unsourced unless marked.",
+  "crowding": {"violence_gain": {"value": 1.0, "mark": "Design proposal", "why": "Violence rises with crowding: violence = base * (1 + gain * (crowding - 1)), crowding = headcount / capacity (the bible: the county jail is overcrowded and dangerous)."},
+               "corruption_gain": {"value": 0.5, "mark": "Design proposal", "why": "A crowded place is harder to watch: corruption = base * (1 + gain * (crowding - 1))."}},
+  "fight": {
+   "rate": {"value": 0.012, "mark": "Design proposal", "why": "Weekly chance a named man is in a fight or an infraction, at violence 1.0 and no crowding; the facility's violence scales it."},
+   "tension_scale": {"value": 5.0, "mark": "Design proposal", "why": "A counterparty from an outfit his own is at odds with weighs 1 + heat * this (org_tension heat, 0..1), so rival crews meet each other far more often than strangers."},
+   "same_group_weight": {"value": 0.3, "mark": "Design proposal", "why": "A man fights inside his own group less often than outside it."},
+   "unnamed_share": {"value": 0.5, "mark": "Design proposal", "why": "Chance the other man is one of the unnamed headcount: no case, only the conduct record."},
+   "serious_share": {"value": 0.25, "mark": "Design proposal", "why": "Share of fights that are serious enough to be recorded as harm (and so go to the law like any crime); the rest are infractions on his record."},
+   "severity": {"low": 15, "high": 65, "why": "Harm severity of a serious fight, drawn uniformly."},
+   "methods": {"fists": 0.55, "blunt": 0.25, "blade": 0.2, "why": "Weights of the method of a serious fight (the lethality data weighs each)."},
+   "offender_share": {"value": 0.5, "mark": "Design proposal", "why": "Chance the man whose week it is, rather than the other, is the one who started it."},
+   "crime_kind": "assault"
+  },
+  "contraband": {
+   "rate": {"value": 0.15, "mark": "Design proposal", "why": "Weekly chance a facility has a contraband event at contraband 1.0; scaled by the facility figure and by its corruption."},
+   "caught_share": {"value": 0.5, "mark": "Design proposal", "why": "Share of events in which a named man is caught and it goes on his record; the rest pass."}
+  },
+  "economy": {
+   "dues_groups": ["connected", "street", "neighbourhood_north", "neighbourhood_south"],
+   "dues_weekly": {"value": 12.0, "mark": "Design proposal", "why": "Dollars a week a man pays his group's shot caller for protection and standing, 1975 prices (a pack of cigarettes a day was the real currency)."},
+   "commissary_weekly": {"value": 9.0, "mark": "Design proposal", "why": "Dollars a week he spends at the commissary if he has the money."},
+   "flow_kind": "tribute",
+   "paid_gain": {"value": 0.02, "mark": "Design proposal", "why": "A man who pays moves his inside standing this share of the way to 1."},
+   "unpaid_loss": {"value": 0.06, "mark": "Design proposal", "why": "A man who cannot pay loses this share of his inside standing."}
+  },
+  "escape": {
+   "rate": {"value": 0.00015, "mark": "Design proposal", "why": "Weekly chance a named man gets out, at security factor 1.0: rare."},
+   "security": {"low": 4.0, "mixed": 2.0, "medium": 1.0, "high": 0.4, "maximum": 0.15, "why": "How much easier or harder a security class makes it."},
+   "corruption_gain": {"value": 2.0, "mark": "Design proposal", "why": "A bought guard helps: the chance is multiplied by 1 + gain * corruption."},
+   "crime_kind": "escape"
+  },
+  "informing": {
+   "found_rate": {"value": 0.08, "mark": "Design proposal", "why": "Weekly chance that a man who is an active informer is found out by the men inside."},
+   "standing_loss": {"value": 0.5, "mark": "Design proposal", "why": "A man found to have informed loses this share of his standing in the group he leaves for protective custody (spec 7.2: talking loses it)."}
+  }
+ },
  "society": {"kind": "inmate_society", "name_template": "{group} at {facility}"}
 }

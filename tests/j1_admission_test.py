@@ -236,7 +236,8 @@ def test_next_due_day_is_tomorrow_only_when_there_is_work():
     _convict(c, w.soldier, 1000)
     assert prison.next_due_day(c, DAY, DAY + 30) == DAY + 1
     _run(c)
-    assert prison.next_due_day(c, DAY + 1, DAY + 30) is None
+    # men are inside now, so the next work is the inside week (the cadence), not tomorrow
+    assert prison.next_due_day(c, DAY + 1, DAY + 30) == DAY + 1 + prison.rules(c)["cadence_days"]
 
 
 def test_the_module_names_no_player_branch():

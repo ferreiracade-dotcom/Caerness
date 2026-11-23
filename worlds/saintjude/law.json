@@ -195,6 +195,18 @@
   }
  },
  "rules": {
+  "escape": {
+   "evidence_threshold": {
+    "value": 1.0,
+    "mark": "Design proposal",
+    "why": "A man who has escaped is known by name but is not in hand: the chase is above what a first filing gives, so he is at large until the case's reviews catch him (J1; unsourced)"
+   },
+   "review_days": {
+    "value": 14,
+    "mark": "Design proposal",
+    "why": "A manhunt is reviewed every couple of weeks (J1; unsourced)"
+   }
+  },
   "homicide": {
    "evidence_threshold": "evidence_threshold_homicide"
   },
