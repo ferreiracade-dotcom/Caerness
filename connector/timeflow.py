@@ -85,6 +85,10 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
         settled = free_operation.settle_due(conn, me)
         if settled:
             out["settled"] = settled
+        from engine import history
+        due = history.due_prompt(conn, start, end)
+        if due:  # what the real world had coming in these days: the GM looks up what his sphere touches and proposes it
+            out["history_due"] = due
         if interrupted and run["interruptions"]:
             out["interruption"] = _clip(run["interruptions"][0]["reason"], 300)
         if days > end - start:  # an interruption also leaves the rest of the request undone

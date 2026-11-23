@@ -24,7 +24,9 @@ def _rules(conn) -> dict:
 def next_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int | None:
     if not _rules(conn):
         return None
-    if not conn.execute("SELECT 1 FROM held_things WHERE status IN ('active','failing') LIMIT 1").fetchone():
+    from . import history
+    if not conn.execute("SELECT 1 FROM held_things WHERE status IN ('active','failing') AND shape NOT IN ('history','real_figure') LIMIT 1").fetchone() \
+            and not history.next_due(conn):  # a recorded real fact is not a thing that earns; one waiting for its date still needs the weekly pass
         return None
     due = (int(after_day) // WEEK + 1) * WEEK
     return due if due <= int(end_day) else None
@@ -102,7 +104,9 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
         return out
     tick = rules["tick"]
     day = int(day)
-    for row in conn.execute("SELECT * FROM held_things WHERE status IN ('active','failing') ORDER BY id").fetchall():
+    from . import history
+    out["history"] = history.settle_due(conn, int(day), event_logger=event_logger)
+    for row in conn.execute("SELECT * FROM held_things WHERE status IN ('active','failing') AND shape NOT IN ('history','real_figure') ORDER BY id").fetchall():
         owner = row["owner_actor_id"]
         if owner is None or not _living(conn, owner):
             nxt = _new_owner(conn, row)

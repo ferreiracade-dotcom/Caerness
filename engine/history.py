@@ -500,3 +500,113 @@ def foreseen_named(conn, text: str) -> list[sqlite3.Row]:
         if nm and (nm in low or r["key"] in str(text)):
             out.append(r)
     return out
+
+
+# ---- settling: effects at the run date, foreseen facts re-judged, what is due ----------------------------------------
+
+def next_due(conn) -> bool:
+    """True when some fact is waiting for its date (the weekly held tick then runs)."""
+    return conn.execute("SELECT 1 FROM history_entries WHERE status='foreseen' LIMIT 1").fetchone() is not None
+
+
+def apply_effects(conn, e: sqlite3.Row, day: int) -> list[str]:
+    """The accepted fact's effects, by class, into the systems that exist. A class with no reader yet leaves a gap row."""
+    done: list[str] = []
+    run = e["run_date"] or e["real_date"]
+    klass = str(e["class"])
+    effects = json.loads(e["effects_json"] or "[]")
+    if klass == "technology":
+        ex = next((x for x in effects if isinstance(x, dict) and x.get("kind") == "technology"), {})
+        add_tech(conn, e["what"], run, ex.get("available") or run, ex.get("common"), ex.get("price_band"), e["key"], ex.get("inventor"))
+        done.append(f"{e['what']} now exists")
+    for x in effects:
+        if isinstance(x, dict) and x.get("kind") == "holder" and x.get("office_key") and x.get("actor_id") is not None:
+            try:
+                facts.fill_open(conn, str(x["office_key"]), int(x["actor_id"]), e["key"])
+                done.append(f"{_name(conn, int(x['actor_id']))} took {x['office_key']}")
+            except facts.FactRefused as ex_:  # the run already put someone else there: the clash is the history of this run
+                record_divergence(conn, e["key"], e["what"], e["key"], f"the office went another way: {ex_}", e["key"])
+    if klass in ("culture", "event"):
+        from . import authoring
+        from .player import get_player
+        pl = get_player(conn)
+        if pl:
+            try:
+                authoring._rumour(conn, int(pl["player_actor_id"]), {"text": f"{e['what']}"[:300]}, f"history-effect:{e['key']}")
+                done.append("it is being talked about")
+            except Exception:  # no place to start it from: it stays a recorded fact
+                pass
+    if klass in ("firm", "firm_event", "price"):
+        from . import intake
+        held = conn.execute("SELECT id FROM held_things WHERE backing_table='history_entries' AND backing_id=?", (e["id"],)).fetchone()
+        if held is not None:
+            intake.bump_gap(conn, f"history:{klass}", "history", int(held["id"]), [f"a reader for {klass} effects"])
+    return done
+
+
+def settle_due(conn, day: int, *, event_logger=None) -> dict:
+    """Foreseen facts whose date has arrived are judged now, because the run may have changed since the GM foresaw them. On time,
+    earlier, later, changed or not at all; effects apply when the fact is in force; a fact pushed to a later date waits."""
+    out = {"judged": 0, "in_force": 0, "later": 0, "never": 0}
+    today = today_iso(conn)
+    if today is None:
+        return out
+    for e in conn.execute("SELECT * FROM history_entries WHERE status='foreseen' AND COALESCE(run_date,real_date)<=? ORDER BY real_date,id", (today,)).fetchall():
+        entry = {"key": e["key"], "what": e["what"], "real_date": e["real_date"], "needs": json.loads(e["needs_json"] or "[]"),
+                 "about": json.loads(e["about_json"] or "[]")}
+        v = judge(conn, entry, int(day))
+        status = "never" if v["outcome"] == "never" else ("in_force" if v["run_date"] <= today else "foreseen")
+        conn.execute("UPDATE history_entries SET outcome=?,run_date=?,reasons_json=?,status=?,judged_day=? WHERE id=?",
+                     (v["outcome"], v["run_date"], json.dumps(v["reasons"]), status, int(day), e["id"]))
+        out["judged"] += 1
+        if v["outcome"] not in ("on_time", "default") and e["outcome"] != v["outcome"]:
+            record_divergence(conn, e["key"], e["what"], f"judged on its date, day {day}", f"{e['what']} came {v['outcome']}: " + "; ".join(v["reasons"]), e["key"])
+        if status == "in_force":
+            conn.execute("UPDATE world_facts SET start_date=? WHERE key=?", (v["run_date"], e["key"]))
+            apply_effects(conn, conn.execute("SELECT * FROM history_entries WHERE id=?", (e["id"],)).fetchone(), int(day))
+            out["in_force"] += 1
+        elif status == "never":
+            out["never"] += 1
+        else:
+            out["later"] += 1
+    return out
+
+
+def due_prompt(conn, from_day: int, to_day: int) -> list[dict]:
+    """What the real world had coming between two days, for the GM to look up: package-timeline defaults and foreseen facts dated in
+    the interval, of the classes the package asks about, not yet entered. A prompt, never a list the engine acts on."""
+    a, b = today_iso_at(conn, from_day), today_iso_at(conn, to_day)
+    if a is None or not rules(conn):
+        return []
+    classes = set(rules(conn).get("advance_prompt_classes") or [])
+    out = []
+    from .world_package import package_for
+    try:
+        from .world_package import _entries
+        entries = _entries(package_for(conn))
+    except Exception:
+        entries = []
+    for e in entries:
+        if a < str(e.get("exists") or "") <= b and e.get("class") in classes and run_entry(conn, e) is None:
+            out.append({"name": e["name"], "class": e.get("class"), "real_date": e["exists"],
+                        "hint": "look up what really happened; propose it with its source through author if his sphere touches it"})
+    for r in conn.execute("SELECT * FROM history_entries WHERE status='foreseen' AND real_date>? AND real_date<=?", (a, b)):
+        out.append({"name": r["what"], "class": r["class"], "real_date": r["real_date"], "hint": "foreseen; judged now against what the run has done"})
+    return out
+
+
+def today_iso_at(conn, day: int) -> str | None:
+    s = _start(conn)
+    return (s + timedelta(days=int(day))).isoformat() if s else None
+
+
+def view_entries(conn, limit: int = 40) -> list[dict]:
+    """The GM's list: recorded facts, provisional ones first."""
+    rows = conn.execute("SELECT * FROM history_entries ORDER BY provisional DESC, real_date, id LIMIT ?", (int(limit),)).fetchall()
+    return [{"key": r["key"], "what": r["what"], "class": r["class"], "real_date": r["real_date"], "run_date": r["run_date"], "outcome": r["outcome"],
+             "status": r["status"], "provisional": bool(r["provisional"]), "reasons": json.loads(r["reasons_json"] or "[]")} for r in rows]
+
+
+def view_divergences(conn, limit: int = 40) -> list[dict]:
+    return [{"subject": r["subject"], "day": r["day"], "cause": r["cause"], "text": r["text"], "entry": r["entry_key"]}
+            for r in conn.execute("SELECT * FROM divergences ORDER BY id DESC LIMIT ?", (int(limit),))]
