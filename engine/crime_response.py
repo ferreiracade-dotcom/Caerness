@@ -744,8 +744,19 @@ def _dispositions(conn: sqlite3.Connection, day: int) -> int:
     return n
 
 
+def _prison_holds_release(conn: sqlite3.Connection) -> bool:
+    """A world with prison data frees its men through the prison layer's hearings and good time (J1), not at the earliest release day."""
+    try:
+        from . import prison
+        return prison.enabled(conn)
+    except (ImportError, sqlite3.OperationalError):
+        return False
+
+
 def _releases(conn: sqlite3.Connection, day: int) -> int:
     n = 0
+    if _prison_holds_release(conn):
+        return n
     for s in conn.execute("SELECT * FROM sentences WHERE status='serving' AND earliest_release_day<=? ORDER BY id", (int(day),)).fetchall():
         a = int(s["actor_id"])
         if not _living(conn, a):
@@ -776,8 +787,10 @@ def next_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int 
         cur = conn.execute("SELECT value FROM engine_meta WHERE key=?", (CURSOR_KEY,)).fetchone()
         if int(conn.execute("SELECT COALESCE(MAX(id),0) FROM harm_incidents").fetchone()[0]) > (int(cur[0]) if cur else 0):
             due.append(int(after_day) + 1)
-        for sql in ("SELECT MIN(MAX(next_review_day, ?)) FROM law_enforcement_cases WHERE status IN ('monitoring','open','actionable') AND json_extract(metadata_json,'$.crime_report_id') IS NOT NULL",
-                    "SELECT MIN(MAX(earliest_release_day, ?)) FROM sentences WHERE status='serving'"):
+        sqls = ["SELECT MIN(MAX(next_review_day, ?)) FROM law_enforcement_cases WHERE status IN ('monitoring','open','actionable') AND json_extract(metadata_json,'$.crime_report_id') IS NOT NULL"]
+        if not _prison_holds_release(conn):
+            sqls.append("SELECT MIN(MAX(earliest_release_day, ?)) FROM sentences WHERE status='serving'")
+        for sql in sqls:
             r = conn.execute(sql, (int(after_day) + 1,)).fetchone()
             if r is not None and r[0] is not None:
                 due.append(int(r[0]))

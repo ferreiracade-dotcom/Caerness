@@ -490,6 +490,8 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
         return {}
     ensure_facilities(conn)
     out = {"admitted": _admissions(conn, int(day))}
+    from . import prison_review
+    out["reviews"] = prison_review.process(conn, int(day))
     out["left"] = _departures(conn, int(day))
     cadence = int(rules(conn).get("cadence_days") or 7)
     cur = conn.execute("SELECT value FROM engine_meta WHERE key=?", (WEEK_KEY,)).fetchone()
@@ -501,6 +503,7 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
         from . import prison_channels
         out["channels"] = prison_channels.weekly(conn, int(day))
         out["outside"] = carry_on(conn, int(day))
+        out["filings"] = prison_review.weekly(conn, int(day))
     return out
 
 
@@ -513,14 +516,18 @@ def next_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int 
         d = int(after_day) + 1
         if d > int(end_day):
             return None
+        from . import prison_review
+        rd = prison_review.next_due_day(conn, int(after_day), int(end_day))
         if _unplaced(conn) or conn.execute("""SELECT 1 FROM inmate_stays t WHERE t.status='inside'
                                               AND NOT EXISTS (SELECT 1 FROM custody c WHERE c.actor_id=t.actor_id AND c.kind='held') LIMIT 1""").fetchone():
             return d
         if conn.execute("SELECT 1 FROM inmate_stays WHERE status='inside' LIMIT 1").fetchone() is None:
-            return None
+            return rd
         cur = conn.execute("SELECT value FROM engine_meta WHERE key=?", (WEEK_KEY,)).fetchone()
-        due = (int(cur[0]) if cur else int(after_day)) + int(rules(conn).get("cadence_days") or 7)
-        return max(d, due) if max(d, due) <= int(end_day) else None
+        due = max(d, (int(cur[0]) if cur else int(after_day)) + int(rules(conn).get("cadence_days") or 7))
+        if due > int(end_day):
+            due = None
+        return min(x for x in (due, rd) if x is not None) if (due is not None or rd is not None) else None
     except sqlite3.OperationalError:
         return None
 

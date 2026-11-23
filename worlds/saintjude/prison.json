@@ -425,5 +425,272 @@
    "why": "Weeks of need that savings must cover for the family not to be going without: need = exp(-savings / (cover * weekly need))."
   }
  },
+ "reviews": {
+  "mark": "Design proposal",
+  "why": "Parole, appeals, pardons, good time and what a man takes home (J1.6). Each outcome is a logistic of bias + the weighted readings of the man; every figure is an unsourced design proposal and a calibration target, never a cap or a quota.",
+  "infraction_ref": {
+   "value": 3,
+   "mark": "Design proposal",
+   "why": "Infractions inside at which his conduct reading is 1 - 1/e (0.63)."
+  },
+  "lawyer_half_fee": {
+   "value": 2000.0,
+   "mark": "Design proposal",
+   "why": "Dollars of lawyer's fees at which the lawyer reading is one half (fee / (fee + this))."
+  },
+  "age": {
+   "from": {
+    "value": 60,
+    "mark": "Design proposal",
+    "why": "Age at which the age reading starts to rise (pardons)."
+   },
+   "span": {
+    "value": 20,
+    "mark": "Design proposal",
+    "why": "Years over which it rises to 1."
+   }
+  },
+  "offence": {
+   "homicide": {
+    "value": 1.0,
+    "mark": "Design proposal",
+    "why": "Weight of the offence for a board: killing."
+   },
+   "escape": {
+    "value": 1.0,
+    "mark": "Design proposal",
+    "why": "Escape."
+   },
+   "racket": {
+    "value": 0.6,
+    "mark": "Design proposal",
+    "why": "Racketeering."
+   },
+   "robbery": {
+    "value": 0.5,
+    "mark": "Design proposal",
+    "why": "Robbery."
+   },
+   "assault": {
+    "value": 0.4,
+    "mark": "Design proposal",
+    "why": "Assault."
+   },
+   "default": {
+    "value": 0.4,
+    "mark": "Design proposal",
+    "why": "Any other kind."
+   }
+  },
+  "good_time": {
+   "share": {
+    "value": 0.15,
+    "mark": "Design proposal",
+    "why": "Share of the term a man with no infractions has taken off the end of it; each infraction reading takes this away: earned = term * share * (1 - conduct). 1975 federal statutory good time was about 10 days a month, so near a sixth of the term (Design proposal)."
+   }
+  },
+  "parole": {
+   "bias": {
+    "value": -0.3,
+    "mark": "Design proposal",
+    "why": "The board's base lean at a typical hearing (about 4 in 10 granted)."
+   },
+   "reset_days": {
+    "value": 365,
+    "mark": "Design proposal",
+    "why": "A denied man is heard again after this many days."
+   },
+   "weights": {
+    "served": {
+     "value": 1.5,
+     "mark": "Design proposal",
+     "why": "Time served."
+    },
+    "infractions": {
+     "value": -2.0,
+     "mark": "Design proposal",
+     "why": "Conduct inside."
+    },
+    "cooperation": {
+     "value": 1.0,
+     "mark": "Design proposal",
+     "why": "He cooperated (informed)."
+    },
+    "publicity": {
+     "value": -1.5,
+     "mark": "Design proposal",
+     "why": "The offence was in the papers."
+    },
+    "offence": {
+     "value": -1.5,
+     "mark": "Design proposal",
+     "why": "The kind of offence."
+    },
+    "association": {
+     "value": -1.0,
+     "mark": "Design proposal",
+     "why": "He sits in an outfit outside: boards did not want mobsters meeting."
+    },
+    "lawyer": {
+     "value": 0.6,
+     "mark": "Design proposal",
+     "why": "A lawyer worked for him."
+    }
+   }
+  },
+  "appeal": {
+   "bias": {
+    "value": -4.0,
+    "mark": "Design proposal",
+    "why": "An appeal is hard to win: a lean well against, so about 1 in 20 without a lawyer."
+   },
+   "hearing_days": {
+    "value": 120,
+    "mark": "Design proposal",
+    "why": "Days from filing to the ruling."
+   },
+   "retrial_days": {
+    "value": 60,
+    "mark": "Design proposal",
+    "why": "Days from a vacated sentence to the case's new disposition."
+   },
+   "window_days": {
+    "value": 540,
+    "mark": "Design proposal",
+    "why": "An appeal can be filed this long after sentence."
+   },
+   "file_rate": {
+    "value": 0.02,
+    "mark": "Design proposal",
+    "why": "Weekly chance a man files: 1 - exp(-rate * (1 + lawyer_gain * lawyer))."
+   },
+   "lawyer_gain": {
+    "value": 4.0,
+    "mark": "Design proposal",
+    "why": "A paid lawyer files more."
+   },
+   "weights": {
+    "lawyer": {
+     "value": 1.5,
+     "mark": "Design proposal",
+     "why": "A lawyer paid."
+    },
+    "verdict": {
+     "value": 0.5,
+     "mark": "Design proposal",
+     "why": "Convicted by verdict, not plea."
+    },
+    "plea": {
+     "value": -1.5,
+     "mark": "Design proposal",
+     "why": "A plea waives most grounds."
+    },
+    "grounds": {
+     "value": 2.0,
+     "mark": "Design proposal",
+     "why": "How good his grounds are (a stable draw per sentence)."
+    },
+    "publicity": {
+     "value": 0.3,
+     "mark": "Design proposal",
+     "why": "A loud case gets a hearing."
+    }
+   }
+  },
+  "pardon": {
+   "bias": {
+    "value": -6.0,
+    "mark": "Design proposal",
+    "why": "A pardon is rarer still."
+   },
+   "hearing_days": {
+    "value": 200,
+    "mark": "Design proposal",
+    "why": "Days from filing to the decision."
+   },
+   "min_served": {
+    "value": 0.25,
+    "mark": "Design proposal",
+    "why": "Share of the term served before one is sought."
+   },
+   "file_rate": {
+    "value": 0.001,
+    "mark": "Design proposal",
+    "why": "Weekly chance of filing."
+   },
+   "standing_gain": {
+    "value": 5.0,
+    "mark": "Design proposal",
+    "why": "A man of standing files more."
+   },
+   "weights": {
+    "standing": {
+     "value": 2.0,
+     "mark": "Design proposal",
+     "why": "Connections outside."
+    },
+    "publicity": {
+     "value": 0.5,
+     "mark": "Design proposal",
+     "why": "Publicity."
+    },
+    "served": {
+     "value": 1.5,
+     "mark": "Design proposal",
+     "why": "Time served."
+    },
+    "age": {
+     "value": 1.0,
+     "mark": "Design proposal",
+     "why": "Old age."
+    },
+    "offence": {
+     "value": -1.0,
+     "mark": "Design proposal",
+     "why": "The kind of offence."
+    }
+   }
+  },
+  "conditions": {
+   "meet_rate": {
+    "value": 0.2,
+    "mark": "Design proposal",
+    "why": "Weekly chance, per log(1 + men of his outfit in the same place), that a man on parole is found sitting with them."
+   },
+   "violation_kind": "racket"
+  },
+  "ties": {
+   "ally_strength": {
+    "value": 0.6,
+    "mark": "Design proposal",
+    "why": "Strength of the tie to the shot caller of his group."
+   },
+   "rival_strength": {
+    "value": 0.7,
+    "mark": "Design proposal",
+    "why": "Strength of the tie to a man he fought."
+   },
+   "ally_affection": {
+    "value": 8,
+    "mark": "Design proposal",
+    "why": "Affection of a man for his group's shot caller on release."
+   },
+   "ally_trust": {
+    "value": 5,
+    "mark": "Design proposal",
+    "why": "Trust."
+   },
+   "rival_resentment": {
+    "value": 10,
+    "mark": "Design proposal",
+    "why": "Resentment of a man he fought."
+   },
+   "rival_stance": {
+    "value": 8,
+    "mark": "Design proposal",
+    "why": "Stance falls toward a man he fought."
+   }
+  }
+ },
  "society": {"kind": "inmate_society", "name_template": "{group} at {facility}"}
 }
