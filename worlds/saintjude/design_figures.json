@@ -1,6 +1,166 @@
 {
  "about": "Design and derived figures the engine draws once per run (kind draw), derives (kind derived, formula over other figure defaults) or holds (kind fixed), from Saint Jude Setting Bible Part VI and the Parts it cites. Dollars are 1975 dollars; *_m keys are USD millions. pools is the Part VI 9.3A allocation table (family shares sum to 100). Checked by tools/check_saintjude_pools.py.",
  "figures": {
+  "op_years_back": {
+   "default": 8,
+   "range": null,
+   "unit": "years",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How far back the opening's ordinary past incidents run (they are dated at random inside this window before 1 January 1975). A man's own record of trouble is mostly the last few years; older things are canon's named events. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_incident_year_associate": {
+   "default": 0.03,
+   "range": null,
+   "unit": "per year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Chance per year that an associate was in a recorded incident (a beating, a squeeze, a fight over a debt) before the opening. A small share of associates ever get into trouble that matters. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_incident_year_soldier": {
+   "default": 0.1,
+   "range": null,
+   "unit": "per year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Chance per year that a soldier was in a recorded incident before the opening; the men who do the work have the most. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_incident_year_capo": {
+   "default": 0.12,
+   "range": null,
+   "unit": "per year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Chance per year that a capo was in a recorded incident before the opening; he has others do most of it. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_incident_year_member": {
+   "default": 0.03,
+   "range": null,
+   "unit": "per year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Chance per year that a rank-and-file member of a club, brigade or crew was in a recorded incident before the opening. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_incident_year_young": {
+   "default": 0.08,
+   "range": null,
+   "unit": "per year",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Chance per year that one of the young men of a brigade or block was in a recorded incident before the opening. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_victim_same_org": {
+   "default": 0.55,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Share of past incidents whose victim is a man of the offender's own outfit (a discipline, a short count) rather than of another outfit. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_heat_incident_violence": {
+   "default": 1.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Violence heat one recorded past incident wrote on the offender's outfit when it happened; it has faded by the opening at the run's heat half-life. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_heat_incident_investigative": {
+   "default": 0.6,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Investigative heat one recorded past incident wrote on the offender's outfit. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_heat_incident_public": {
+   "default": 0.5,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Public heat one recorded past incident wrote on the offender's outfit. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_heat_canon_event_scale": {
+   "default": 6.0,
+   "range": null,
+   "unit": "x",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; How many ordinary incidents' worth of heat one named canon event (a massacre, a split) wrote when it happened. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_resentment_lo": {
+   "default": 30.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Lowest resentment a victim of a past incident holds toward the man who did it (relationships run -100 to 100). Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_resentment_hi": {
+   "default": 70.0,
+   "range": null,
+   "unit": "points",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Highest resentment a victim of a past incident holds toward the man who did it. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_obligation_share": {
+   "default": 0.08,
+   "range": null,
+   "unit": "share",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Share of seated men who at the opening owe the man above them a favour done before it (a bail fronted, a job found); it is a standing obligation, not money. Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_debt_lo": {
+   "default": 4000.0,
+   "range": null,
+   "unit": "usd",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Lowest amount of an old money debt between two outfits at the opening (canon names the quarrels, not sums). Design proposal. (L1: engine/outfit_past.py)"
+  },
+  "op_debt_hi": {
+   "default": 40000.0,
+   "range": null,
+   "unit": "usd",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; Highest amount of an old money debt between two outfits at the opening. Design proposal. (L1: engine/outfit_past.py)"
+  },
  "rival_agreed_keep": {
     "default": 0.45,
     "range": null,

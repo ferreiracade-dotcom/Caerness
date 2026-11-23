@@ -4056,5 +4056,89 @@
     "aggression": "ib_drift_rising_aggression"
    }
   }
+ },
+ "opening_past": {
+  "note": "What the outfits and their men carry into 1 January 1975 (engine/outfit_past.py). Canon first: the named quarrels of the bible are dated events and old debts here; every rate is a Design proposal in design_figures.json (the op_* figures). The incidents are inert records (done, not raised); they write heat and personal resentment and are the stuff careers and memories are seeded from.",
+  "years_back": "op_years_back",
+  "incident_year": {
+   "associate": "op_incident_year_associate",
+   "soldier": "op_incident_year_soldier",
+   "capo": "op_incident_year_capo",
+   "member": "op_incident_year_member",
+   "young": "op_incident_year_young"
+  },
+  "victim_same_org": "op_victim_same_org",
+  "heat": {
+   "violence": "op_heat_incident_violence",
+   "investigative": "op_heat_incident_investigative",
+   "public": "op_heat_incident_public",
+   "canon_scale": "op_heat_canon_event_scale"
+  },
+  "resentment": [
+   "op_resentment_lo",
+   "op_resentment_hi"
+  ],
+  "obligation": {
+   "share": "op_obligation_share",
+   "reasons": [
+    "a bail he fronted",
+    "a job he found for him",
+    "a debt he covered",
+    "a wedding he paid for",
+    "a beating he took in his place",
+    "a word he put in with the boss",
+    "a son's trouble he made go away"
+   ]
+  },
+  "debts": {
+   "lo": "op_debt_lo",
+   "hi": "op_debt_hi",
+   "pairs": [
+    {
+     "creditor": "Vannucci Family",
+     "debtor": "The Eastside Combine",
+     "origin": "the tribute the Combine is behind on for working the Strip (bible 5.2: the arrangement is resented)",
+     "basis": "direction from bible 5.2; sum unsourced"
+    },
+    {
+     "creditor": "Iron Horsemen MC",
+     "debtor": "Vannucci Family",
+     "origin": "muscle the Vannuccis used and have not paid for (bible 5.4: used as muscle and disposable)",
+     "basis": "direction from bible 5.4; sum unsourced"
+    },
+    {
+     "creditor": "Charlestown Brigades",
+     "debtor": "Pellegrino Family",
+     "origin": "the Brigades' share of the South Piers the Pellegrinos have held back (bible 4.2: a long, bitter, partly cooperative history)",
+     "basis": "direction from bible 4.2; sum unsourced"
+    }
+   ]
+  },
+  "canon_events": [
+   {
+    "year": 1958,
+    "kind": "split",
+    "offender_org": "Ferrante Family",
+    "against_org": "Sabatini Family",
+    "text": "The Ferrante Schism of 1958: the Ferrantes took back the Racks they hold the Sabatini stole.",
+    "basis": "bible Part III 4.3-4.5"
+   },
+   {
+    "year": 1967,
+    "kind": "split",
+    "offender_org": "Vannucci Family",
+    "against_org": "Pellegrino Family",
+    "text": "The Vannucci Split of 1967: the Vannuccis broke from the Pellegrinos.",
+    "basis": "bible Part III 4.4"
+   },
+   {
+    "year": 1973,
+    "kind": "killing",
+    "offender_org": "Pellegrino Family",
+    "against_org": "Charlestown Brigades",
+    "text": "The 1973 massacre of the independent strikers on the South Piers, which left a lasting hatred in Kerrytown.",
+    "basis": "bible Part III 4.2"
+   }
+  ]
  }
 }
