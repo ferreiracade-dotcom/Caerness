@@ -679,5 +679,102 @@
   "spread": 12,
   "mark": "Design proposal",
   "note": "unsourced"
+ },
+ "lived_past": {
+  "mark": "Design proposal",
+  "note": "unsourced. What people at the 1 January 1975 opening already know and remember (engine/lived_past.py). Tiers by what a person holds: the leaders of an organisation know the most, then its members, then the keepers of businesses, then their staff. Counts are inclusive ranges of facts drawn from what exists in the world: the district's own description, the neighbours' businesses, the people above and around them, the organisation's quarrels, the incidents and favours in their past, their marriage and their work.",
+  "leader_roles": [
+   "boss",
+   "underboss",
+   "consigliere",
+   "capo",
+   "officer",
+   "ward_leader",
+   "chair",
+   "president",
+   "director",
+   "principal",
+   "elder",
+   "banker",
+   "controller"
+  ],
+  "depth": {
+   "leader": [
+    10,
+    18
+   ],
+   "member": [
+    3,
+    6
+   ],
+   "owner": [
+    3,
+    6
+   ],
+   "staff": [
+    1,
+    3
+   ]
+  },
+  "memories": {
+   "leader": [
+    3,
+    6
+   ],
+   "member": [
+    1,
+    4
+   ],
+   "owner": [
+    1,
+    4
+   ],
+   "staff": [
+    1,
+    2
+   ]
+  },
+  "working_age": 16,
+  "career_stages": [
+   [
+    "entry",
+    "Learning the work",
+    0
+   ],
+   [
+    "regular",
+    "Working the trade",
+    4
+   ],
+   [
+    "senior",
+    "A senior hand",
+    14
+   ]
+  ],
+  "templates": {
+   "district": "{district}: {note}",
+   "business": "{name} trades in {district}, kept by {owner}.",
+   "superior": "Answers to {superior}.",
+   "quarrel": "{org} and {rival} are at odds: {history}",
+   "ground": "{org} works {ground}.",
+   "colleague": "{other} works the same side of the business.",
+   "spouse": "Married to {other}.",
+   "owner_of": "Keeps {name} in {district}.",
+   "boss_of": "Works at {name}, which {owner} keeps.",
+   "incident_offender": "In {year} roughed up {other}; it has not been forgotten.",
+   "incident_victim": "In {year} was roughed up by {other} and has not forgotten it.",
+   "obligation": "Owes a favour: {what}.",
+   "event": "Was there when it happened: {history}",
+   "married": "Married {other} in {year}.",
+   "children": "Has {n} {child_word} at home or grown.",
+   "opened": "Opened {name} in {year}; the first years were thin.",
+   "worked": "Has worked {years} years at it, since {year}."
+  },
+  "words": {
+   "child_word_one": "child",
+   "child_word_many": "children"
+  },
+  "default_domain": "work"
  }
 }
