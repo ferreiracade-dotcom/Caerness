@@ -455,6 +455,29 @@ def _gaps_view(conn) -> dict:
                                                      "missing": json.loads(g["missing_json"])} for g in rows]}
 
 
+def _history_lookup(conn, q: str) -> dict:
+    """Real history as the run has it: recorded facts (provisional ones first), how the run departed from them, and documented real people."""
+    from engine import history, real_figures, veto
+    low = q.lower()
+    if low in ("diverged", "divergences"):
+        return {"found": True, "kind": "divergences", "divergences": history.view_divergences(conn),
+                "note": "how this world has gone differently from the real one, and why"}
+    if low.startswith("real:"):
+        name = q.split(":", 1)[1].strip()
+        fig = real_figures.find(conn, name)
+        if fig is None:
+            known = any(veto.norm(r.get("name")) == veto.norm(name) for r in veto._gazetteer(conn).get("real_people", []))
+            return {"found": False, "kind": "real_figure", "name": name, "real_person_named_by_the_setting": known,
+                    "hint": "look up who he documentably was, then bring him in with author(kind='real person', details {name, source, public_roles, record, age, work})"}
+        a = conn.execute("SELECT status FROM actors WHERE id=?", (fig["actor_id"],)).fetchone() if fig["actor_id"] is not None else None
+        return {"found": True, "kind": "real_figure", "name": fig["name"], "actor_id": fig["actor_id"], "public_roles": json.loads(fig["public_roles_json"]),
+                "record": json.loads(fig["record_json"]), "source": fig["source"], "verify": fig["verify"], "provisional": bool(fig["provisional"]),
+                "alive": a is not None and str(a[0]) not in ("deceased", "dead")}
+    rows = history.view_entries(conn)
+    return {"found": True, "kind": "history", "entries": rows, "to_verify": sum(1 for r in rows if r["provisional"]),
+            "note": "a provisional entry was proposed from memory about something major; verify it with note(kind='fact', field=<key>, text, cause='source <url> <quote>')"}
+
+
 def lookup(conn, query: str, offset: int = 0) -> dict:
     """Find what the protagonist knows of a person, place, business, outfit, household, crew, institution or role.
     `offset` pages the older known facts and notes (the newest come first); the reply says how many more there are."""
@@ -466,6 +489,9 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
         return {"found": False, "candidates": []}
     if q.lower() == "gaps":  # what the GM keeps reaching for that nothing deeper models yet
         return _gaps_view(conn)
+    low = q.lower()
+    if low in ("history", "real history", "diverged", "divergences") or low.startswith("real:"):
+        return _history_lookup(conn, q)
     pl0 = get_player(conn)
     me0 = int(pl0["player_actor_id"]) if pl0 else None
     kinds = [("actor", _find(conn, "actors", q)), ("location", _find(conn, "locations", q)), ("business", _find(conn, "civilian_enterprises", q)),
