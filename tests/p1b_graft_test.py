@@ -55,7 +55,7 @@ def test_a_need_before_a_board_sometimes_becomes_a_payment_and_not_always():
     iid = civic_votes.open_item(c, ZONING, "zoning_variance", {"sponsor": w.soldier, "title": "a variance"}, vote_day=60, day=10)
     c.execute("INSERT OR REPLACE INTO actor_drives(actor_id,aggression,risk_tolerance,patience,loyalty,ambition,pragmatism) VALUES (?,0.5,0.9,0.5,0.1,0.5,0.9)", (w.soldier,))
     got = []
-    for s in range(1, 200):
+    for s in range(1, 1500):  # a payment is rare by design (about 0.5% a try), so many tries show it happens and not always
         def go():
             c.execute("UPDATE civic_items SET subject_json=? WHERE id=?", ('{"sponsor": %d, "title": "a variance"}' % w.soldier, iid))
             return civic_graft.consider_item(c, iid, 10)

@@ -23,9 +23,9 @@ def test_build_time_and_size():
     prior = {n: os.environ.get(n) for n in names}
     try:
         db = tmp / "b.db"
-        t0 = time.time()
+        t0 = time.process_time()
         build_opening(db, package="saintjude")
-        secs = time.time() - t0
+        secs = time.process_time() - t0  # CPU time: a loaded machine (the suite runs jobs side by side) must not fail it
         mb = db.stat().st_size / 1048576
         print(f"build {secs:.1f}s, {mb:.1f} MB")
         assert secs < BUILD_SECONDS, secs
