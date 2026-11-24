@@ -281,6 +281,13 @@ def _spouse_name(conn: sqlite3.Connection, key: str, sex: str) -> str:
         name = f"{pk[0]} {pk[1]}" if pk else f"{rng.choice(given)} {rng.choice(_SPOUSE_SURNAMES)}"
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
             return name
+    # every common name pair is in use (a crowded city): a middle initial, as the city's own families do
+    for letter in "ABCDEFGHJKLMNPRSTW":
+        pk = package_person_name(conn, _rng(f"name:{key}:i"), sex)
+        first, last = (pk[0], pk[1]) if pk else (rng.choice(given), rng.choice(_SPOUSE_SURNAMES))
+        name = f"{first} {letter}. {last}"
+        if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
+            return name
     raise RuntimeError("could not produce a unique spouse name")
 
 
