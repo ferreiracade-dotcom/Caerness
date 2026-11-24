@@ -1,66 +1,6 @@
 {
  "about": "Design and derived figures the engine draws once per run (kind draw), derives (kind derived, formula over other figure defaults) or holds (kind fixed), from Saint Jude Setting Bible Part VI and the Parts it cites. Dollars are 1975 dollars; *_m keys are USD millions. pools is the Part VI 9.3A allocation table (family shares sum to 100). Checked by tools/check_saintjude_pools.py.",
  "figures": {
-  "band_share": {
-   "default": 0.15,
-   "range": null,
-   "unit": "share",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; How far either side of its canon figure an organisation's count of inducted men is left to drift on its own (the band); where the bible gives a range that range is the band instead. Assumption: the bible fixes the figures, not the spread. Design proposal. (L1b)"
-  },
-  "band_min_width": {
-   "default": 2,
-   "range": null,
-   "unit": "men",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; The least width of that band either side of the figure, so a small family still has room to move by chance. Design proposal. (L1b)"
-  },
-  "band_span": {
-   "default": 0.1,
-   "range": null,
-   "unit": "share",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; How far outside its band (as a share of the figure) a count has to be before the lean back toward the band is full. Design proposal. (L1b)"
-  },
-  "books_w_band": {
-   "default": 0.8,
-   "range": null,
-   "unit": "weight",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; How strongly a head under the band is drawn to open the books for it (damped by any cause from the run: a war, open cases). Design proposal. (L1b)"
-  },
-  "make_w_band": {
-   "default": 0.8,
-   "range": null,
-   "unit": "weight",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; How strongly a head under the band is drawn to make the man put forward. Design proposal. (L1b)"
-  },
-  "make_w_above": {
-   "default": 0.6,
-   "range": null,
-   "unit": "weight",
-   "tag": "Design",
-   "kind": "fixed",
-   "mark": "Design proposal",
-   "source": "unsourced",
-   "note": "unsourced; How much a head over the band leans to turn a man down (damped by any cause from the run). Design proposal. (L1b)"
-  },
   "op_resentment_half_life_years": {
    "default": 2.0,
    "range": null,
@@ -13364,13 +13304,16 @@
   },
   "made_men_decavalcante": {
    "default": 20,
-   "range": null,
+   "range": [
+    17,
+    23
+   ],
    "unit": "men",
    "tag": "Design",
-   "kind": "fixed",
+   "kind": "draw",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The DeCavalcante Family (Elizabeth), a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
+   "note": "unsourced; Made men simulated for The DeCavalcante Family (Elizabeth), a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); the opening count lands inside a small band round the figure (15%%, at least 2 men each way: an assumption, the bible gives the count not a spread), so it differs between playthroughs; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_decavalcante": {
    "default": 0.5,
@@ -13384,13 +13327,16 @@
   },
   "made_men_genovesenj": {
    "default": 24,
-   "range": null,
+   "range": [
+    20,
+    28
+   ],
    "unit": "men",
    "tag": "Design",
-   "kind": "fixed",
+   "kind": "draw",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The Genovese New Jersey Faction, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
+   "note": "unsourced; Made men simulated for The Genovese New Jersey Faction, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); the opening count lands inside a small band round the figure (15%%, at least 2 men each way: an assumption, the bible gives the count not a spread), so it differs between playthroughs; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_genovesenj": {
    "default": 0.5,
@@ -13404,13 +13350,16 @@
   },
   "made_men_lucchesenj": {
    "default": 20,
-   "range": null,
+   "range": [
+    17,
+    23
+   ],
    "unit": "men",
    "tag": "Design",
-   "kind": "fixed",
+   "kind": "draw",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The Lucchese New Jersey Crew, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
+   "note": "unsourced; Made men simulated for The Lucchese New Jersey Crew, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); the opening count lands inside a small band round the figure (15%%, at least 2 men each way: an assumption, the bible gives the count not a spread), so it differs between playthroughs; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_lucchesenj": {
    "default": 0.5,
@@ -13424,13 +13373,16 @@
   },
   "made_men_philadelphia": {
    "default": 26,
-   "range": null,
+   "range": [
+    22,
+    30
+   ],
    "unit": "men",
    "tag": "Design",
-   "kind": "fixed",
+   "kind": "draw",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The Philadelphia Family, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
+   "note": "unsourced; Made men simulated for The Philadelphia Family, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); the opening count lands inside a small band round the figure (15%%, at least 2 men each way: an assumption, the bible gives the count not a spread), so it differs between playthroughs; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_philadelphia": {
    "default": 0.5,
@@ -13444,13 +13396,16 @@
   },
   "made_men_gambino": {
    "default": 22,
-   "range": null,
+   "range": [
+    19,
+    25
+   ],
    "unit": "men",
    "tag": "Design",
-   "kind": "fixed",
+   "kind": "draw",
    "mark": "Design proposal",
    "source": "unsourced",
-   "note": "unsourced; Made men simulated for The Gambino Presence, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
+   "note": "unsourced; Made men simulated for The Gambino Presence, a reduced count (B depth): the outer ring acts only where it touches Saint Jude. The real family is larger [memory]; the number is a Design proposal that keeps the weekly work small. (B12e: engine/org_tension.py); the opening count lands inside a small band round the figure (15%%, at least 2 men each way: an assumption, the bible gives the count not a spread), so it differs between playthroughs; a starting calibration for 1975, not a bound: a family can grow or shrink far past it through its own drivers (recruiting, taking over another family, expanding outside Saint Jude, losses, prison)"
   },
   "associates_per_man_gambino": {
    "default": 0.5,
