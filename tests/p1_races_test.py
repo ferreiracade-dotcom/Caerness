@@ -49,10 +49,18 @@ def _setup_close_race(c, key=WARD2, n=2, day=0):
     loc = int(c.execute("SELECT location_id FROM voter_groups WHERE group_key LIKE 'ward-2:%' ORDER BY id LIMIT 1").fetchone()[0])
     ids = [int(r[0]) for r in c.execute("SELECT a.id FROM actors a JOIN actor_life_profiles p ON p.actor_id=a.id WHERE a.actor_type='character' AND a.status='active' "
                                         "AND p.birth_day<=-9500 AND a.id NOT IN (SELECT actor_id FROM org_seats) AND a.id NOT IN (SELECT actor_id FROM office_terms) "
-                                        "AND a.id NOT IN (SELECT actor_id FROM sentences) ORDER BY a.id LIMIT ?", (n,))]
+                                        "AND a.id NOT IN (SELECT actor_id FROM sentences) AND a.id NOT IN (SELECT actor_id FROM enterprise_staff) "
+                                        "AND a.id NOT IN (SELECT owner_actor_id FROM civilian_enterprises WHERE owner_actor_id IS NOT NULL) "
+                                        "AND a.id NOT IN (SELECT actor_id FROM household_members) "
+                                        "AND a.id NOT IN (SELECT actor_a_id FROM social_contact_links UNION SELECT actor_b_id FROM social_contact_links "
+                                        "UNION SELECT actor_a_id FROM relationships UNION SELECT actor_b_id FROM relationships) ORDER BY a.id LIMIT ?", (n,))]
     for a in ids:
         c.execute("INSERT INTO race_candidates(race_id,actor_id,party_org_id,filed_day) VALUES (?,?,NULL,?)", (rid, a, day))
         c.execute("UPDATE actors SET home_location_id=? WHERE id=?", (loc, a))
+    for a in ids:  # equal drivers means equal: nobody in the district already regards either of them (the opening is full of people now)
+        c.execute("DELETE FROM relationships WHERE actor_a_id=? OR actor_b_id=?", (a, a))
+        c.execute("DELETE FROM social_contact_links WHERE actor_a_id=? OR actor_b_id=?", (a, a))
+        c.execute("DELETE FROM claims WHERE subject_actor_id=?", (a,))
     return rid, ids
 
 

@@ -195,10 +195,11 @@ def test_heat_is_read_from_org_heat_and_fades():
     from engine import org_heat, org_happenings as oh
     w = open_world()
     c = w.conn
-    assert org_heat.own_factor(c, w.org, DAY) == 0.0
+    base = org_heat.own_factor(c, w.org, DAY)  # the opening's past incidents have left a little (L1), faded by now
+    assert base < 0.5, base
     org_heat.add(c, w.org, DAY, public=30.0, investigative=20.0, violence=30.0)
     f1 = org_heat.own_factor(c, w.org, DAY)
-    assert f1 > 0.5
+    assert f1 > base + 0.3, (f1, base)
     assert org_heat.own_factor(c, w.org, DAY + 400) < f1 / 2
     other = int(c.execute("SELECT org_actor_id FROM org_profiles WHERE org_actor_id<>? AND org_kind='family' LIMIT 1", (w.org,)).fetchone()[0])
     cf = oh._cost_factors(c, w.boss, w.org, other, DAY, 1)

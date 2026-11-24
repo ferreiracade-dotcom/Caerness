@@ -131,6 +131,7 @@ def test_caerness_resolver_skips_ventures():
     c = w.conn
     d0 = _day_of(c, "1977-04-01")
     pid = _start(w, d0)
+    c.execute("UPDATE world_state SET current_day=? WHERE id=1", (d0 + 20,))  # the clock is where the call says (the opening has families with births due)
     civilian.process_due_civilian(c, d0 + 20)  # before the first venture event, so only the Caerness resolver could touch it
     r = c.execute("SELECT progress,last_resolved_day,status FROM civilian_projects WHERE id=?", (pid,)).fetchone()
     assert r["progress"] == 0 and r["last_resolved_day"] == d0 and r["status"] == "active"

@@ -245,6 +245,8 @@ def test_circle_reactions_and_how_they_reach_him(conn):
     other_rows = 0
     for who in (caps[0], caps[1]):    # the protagonist and the same act on someone else
         wife, child = assoc[0 if who == caps[0] else 2], assoc[1 if who == caps[0] else 3]
+        conn.execute("DELETE FROM kinship_links WHERE actor_a_id=? OR actor_b_id=?", (who, who))
+        conn.execute("UPDATE household_members SET status='former' WHERE actor_id=? OR household_id IN (SELECT household_id FROM household_members WHERE actor_id=?)", (who, who))  # the opening gives him a real family; this test wants only the two it names
         for p, k in ((wife, "spouse"), (child, "child")):
             conn.execute("INSERT INTO kinship_links(actor_a_id,actor_b_id,kin_kind,started_day) VALUES (?,?,?,0)", (who, p, k))
         shops = int(conn.execute("SELECT id FROM locations WHERE kind IN ('club','bar','restaurant') ORDER BY id LIMIT 1").fetchone()[0])

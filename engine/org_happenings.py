@@ -884,7 +884,7 @@ def respond_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> l
     aggr = om._drive(conn, actor_id, "aggression")
     ohead = head_of(conn, int(meta["offender_org"])) if meta.get("offender_org") else None
     xs = {"sit_down": float(figure(conn, "hap_resp_sit")) if ohead not in (None, actor_id) else 0.0,
-          "kill_offender": float(figure(conn, "hap_resp_kill")) * (0.25 + aggr),
+          "kill_offender": float(figure(conn, "hap_resp_kill")) * (0.25 + aggr) if off != int(actor_id) else 0.0,  # a man does not have himself dealt with
           "let_it_go": float(figure(conn, "hap_resp_let")) * (1.25 - aggr)}
     payload = {**meta, "incident_id": int(meta["incident"])}
     why = {"sit_down": f"Asks {_name(conn, ohead)} to sit down over {_name(conn, off)}.", "kill_offender": f"Has {_name(conn, off)} dealt with.",
