@@ -739,6 +739,13 @@ def _resolve_social_contacts(conn: sqlite3.Connection, day: int) -> int:
         changed+=1
 
     # At most one new institutional contact per single eligible actor per annual review window.
+    # S1: looking for new contacts is a weekly pass for everyone (it was daily and the costliest scan in the household layer).
+    from . import tiers
+    if tiers.batching(conn):
+        last = conn.execute("SELECT value FROM runtime_flags WHERE key='social_scan_day'").fetchone()
+        if last is not None and day - int(last[0]) < tiers.BATCH_DAYS:
+            return changed
+        conn.execute("INSERT OR REPLACE INTO runtime_flags(key,value,updated_at) VALUES ('social_scan_day',?,CURRENT_TIMESTAMP)", (str(int(day)),))
     from .world_package import org_rules, package_for
     scan_kinds=[k for k,v in (org_rules(package_for(conn)).get("kinds") or {}).items() if v.get("courtship_scan")]
     candidates=conn.execute("""SELECT lp.actor_id,lp.birth_day,im.institution_actor_id,a.current_location_id
@@ -797,7 +804,18 @@ def _resolve_social_contacts(conn: sqlite3.Connection, day: int) -> int:
 
 def _review_profiles(conn: sqlite3.Connection, day: int, event_logger: Callable[..., int] | None) -> int:
     count = 0
-    rows = conn.execute("SELECT * FROM actor_life_profiles WHERE life_status='living' AND last_review_day<?", (day,)).fetchall()
+    from . import tiers
+    if tiers.batching(conn):
+        # S1: stage and eligibility follow the calendar, so a quiet person is brought up to date weekly, or on the day he crosses a
+        # stage boundary; a rising person daily. (Same boundary constants as next_household_life_due_day.)
+        rows = conn.execute(
+            f"""SELECT * FROM actor_life_profiles WHERE life_status='living' AND last_review_day<?
+                AND (last_review_day<=? OR actor_id IN ({tiers.sql_ids(conn, day)})
+                     OR (birth_day IS NOT NULL AND ((life_stage='infant' AND birth_day+?<=?) OR (life_stage='child' AND birth_day+?<=?)
+                          OR (life_stage='youth' AND birth_day+?<=?) OR (life_stage='adult' AND birth_day+?<=?))))""",
+            (day, day - tiers.BATCH_DAYS, 2 * 365, day, 13 * 365, day, 18 * 365, day, 60 * 365, day)).fetchall()
+    else:
+        rows = conn.execute("SELECT * FROM actor_life_profiles WHERE life_status='living' AND last_review_day<?", (day,)).fetchall()
     for row in rows:
         old = str(row["life_stage"])
         new = _stage_for_age(max(0, day - int(row["birth_day"]))) if row["birth_day"] is not None else old
@@ -820,7 +838,14 @@ def _review_profiles(conn: sqlite3.Connection, day: int, event_logger: Callable[
 
 def _resolve_planned_births(conn: sqlite3.Connection, day: int, event_logger: Callable[..., int] | None) -> int:
     count = 0
-    for u in conn.execute("SELECT * FROM household_unions WHERE status='active'").fetchall():
+    # Only unions whose plan has come due are read (the same expression next_household_life_due_day schedules on): a daily pass over
+    # every union parsed every plan to find none due.
+    due_unions = conn.execute(
+        """SELECT * FROM household_unions WHERE status='active'
+           AND COALESCE(json_extract(family_plan_json,'$.auto_children'),0) NOT IN (0,'',0.0)
+           AND COALESCE(json_extract(family_plan_json,'$.earliest_next_child_day'),
+                        started_day + COALESCE(json_extract(family_plan_json,'$.spacing_days'), 730)) <= ?""", (day,)).fetchall()
+    for u in due_unions:
         plan = json.loads(u["family_plan_json"] or "{}")
         if not plan.get("auto_children"):
             continue
@@ -1107,6 +1132,11 @@ def next_household_life_due_day(conn: sqlite3.Connection, after_day: int, end_da
         (2 * 365, 13 * 365, 18 * 365, 60 * 365, after_day, end_day)).fetchone()[0]
     if r is not None:
         vals.append(int(r))
+    from . import tiers
+    if tiers.batching(conn):
+        r = conn.execute("SELECT value FROM runtime_flags WHERE key='social_scan_day'").fetchone()
+        if r is not None and after_day < int(r[0]) + tiers.BATCH_DAYS <= end_day:
+            vals.append(int(r[0]) + tiers.BATCH_DAYS)
     # Profiles without an exact upcoming boundary still receive a bounded periodic review.
     if conn.execute("SELECT 1 FROM actor_life_profiles WHERE life_status='living' LIMIT 1").fetchone():
         d = ((after_day // 30) + 1) * 30

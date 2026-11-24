@@ -362,7 +362,15 @@ def resolve_auction(conn: sqlite3.Connection, auction_id: int, *, event_logger: 
 
 
 def _resolve_households(conn: sqlite3.Connection, day: int) -> None:
-    for h in conn.execute("SELECT * FROM households WHERE status IN ('active','declining')").fetchall():
+    from . import tiers
+    if tiers.batching(conn):
+        # S1: a quiet household's money is brought up to date weekly (income, wages and upkeep all integrate the days since);
+        # one whose head is rising stays daily.
+        due = conn.execute(f"""SELECT * FROM households WHERE status IN ('active','declining')
+                               AND (updated_day<=? OR head_actor_id IN ({tiers.sql_ids(conn, day)}))""", (day - tiers.BATCH_DAYS,)).fetchall()
+    else:
+        due = conn.execute("SELECT * FROM households WHERE status IN ('active','declining')").fetchall()
+    for h in due:
         metadata = json.loads(h["metadata_json"] or "{}")
         # A structurally known household with unquantified canon finances is not a zero-money household.
         # Keep it persistent, but do not invent a budget simply to feed the economic resolver.
