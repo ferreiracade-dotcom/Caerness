@@ -5645,3 +5645,102 @@ CREATE TABLE IF NOT EXISTS real_figures (
     provisional INTEGER NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'alive'
 );
+
+-- J1 prison (schema 128): facilities, inside groups, stays, channels, contacts, events, reviews, ties
+CREATE TABLE IF NOT EXISTS facilities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL UNIQUE,
+    institution_actor_id INTEGER NOT NULL REFERENCES actors(id),
+    location_id INTEGER,
+    name TEXT NOT NULL,
+    level TEXT NOT NULL,
+    security TEXT NOT NULL,
+    capacity INTEGER NOT NULL DEFAULT 0,
+    headcount INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'open',
+    character_json TEXT NOT NULL DEFAULT '{}',
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS facility_groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_id INTEGER NOT NULL REFERENCES facilities(id) ON DELETE CASCADE,
+    group_key TEXT NOT NULL,
+    org_actor_id INTEGER NOT NULL REFERENCES actors(id),
+    headcount INTEGER NOT NULL DEFAULT 0,
+    character_json TEXT NOT NULL DEFAULT '{}',
+    UNIQUE(facility_id, group_key)
+);
+CREATE TABLE IF NOT EXISTS inmate_stays (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor_id INTEGER NOT NULL REFERENCES actors(id),
+    facility_id INTEGER NOT NULL REFERENCES facilities(id),
+    group_id INTEGER,
+    sentence_id INTEGER,
+    case_id INTEGER,
+    since_day INTEGER NOT NULL,
+    until_day INTEGER,
+    status TEXT NOT NULL DEFAULT 'inside',
+    protective INTEGER NOT NULL DEFAULT 0,
+    block_key TEXT,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_inmate_stays_actor ON inmate_stays(actor_id, status);
+CREATE INDEX IF NOT EXISTS idx_inmate_stays_facility ON inmate_stays(facility_id, status);
+CREATE TABLE IF NOT EXISTS prison_channels (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stay_id INTEGER NOT NULL REFERENCES inmate_stays(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    outside_actor_id INTEGER,
+    quality REAL NOT NULL DEFAULT 0.5,
+    watched REAL NOT NULL DEFAULT 0.5,
+    cost_weekly REAL NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'open',
+    since_day INTEGER NOT NULL DEFAULT 0,
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_prison_channels_stay ON prison_channels(stay_id, status);
+CREATE TABLE IF NOT EXISTS prison_contacts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    stay_id INTEGER NOT NULL,
+    channel_id INTEGER,
+    kind TEXT NOT NULL,
+    from_actor_id INTEGER,
+    to_actor_id INTEGER,
+    summary TEXT NOT NULL DEFAULT '',
+    intercepted INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_prison_contacts_stay ON prison_contacts(stay_id, day);
+CREATE TABLE IF NOT EXISTS prison_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    facility_id INTEGER NOT NULL,
+    actor_id INTEGER,
+    other_actor_id INTEGER,
+    kind TEXT NOT NULL,
+    severity REAL NOT NULL DEFAULT 0,
+    summary TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_prison_events_actor ON prison_events(actor_id, day);
+CREATE TABLE IF NOT EXISTS law_reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind TEXT NOT NULL,
+    sentence_id INTEGER NOT NULL,
+    actor_id INTEGER NOT NULL,
+    filed_day INTEGER NOT NULL,
+    hearing_day INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    outcome TEXT,
+    factors_json TEXT NOT NULL DEFAULT '{}',
+    metadata_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_law_reviews_due ON law_reviews(status, hearing_day);
+CREATE TABLE IF NOT EXISTS inmate_ties (
+    actor_a_id INTEGER NOT NULL,
+    actor_b_id INTEGER NOT NULL,
+    facility_id INTEGER NOT NULL,
+    since_day INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    strength REAL NOT NULL DEFAULT 0,
+    PRIMARY KEY (actor_a_id, actor_b_id, facility_id)
+);

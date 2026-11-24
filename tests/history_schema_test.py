@@ -21,7 +21,7 @@ TABLES = ("history_entries", "divergences", "tech_level", "real_figures")
 def test_fresh_opening_has_the_tables():
     from engine.db import SCHEMA_VERSION
     c = _open_world().conn
-    assert SCHEMA_VERSION == 127
+    assert SCHEMA_VERSION == 128
     for t in TABLES:
         assert c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (t,)).fetchone(), t
     assert "basis_json" in {r[1] for r in c.execute("PRAGMA table_info(held_things)")}
@@ -42,7 +42,8 @@ def test_a_126_save_migrates_and_keeps_rows():
     c.close()
     init_db()
     c2 = connect()
-    assert c2.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == 127
+    from engine.db import SCHEMA_VERSION
+    assert c2.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION
     for t in TABLES:
         assert c2.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (t,)).fetchone(), t
     assert c2.execute("SELECT COUNT(*) FROM actors").fetchone()[0] == actors
