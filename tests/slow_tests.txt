@@ -83,3 +83,4 @@ world_pkg_caerness_regression_test
 p1_measures_test
 p1b_five_years_test
 j1_chain_test
+saintjude_population_test

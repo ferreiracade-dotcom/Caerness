@@ -218,7 +218,9 @@ def proposal():
                  ({"affiliation": {"name": "Stone Boars", "role": "boss"}}, "already has its leader", {"affiliation": {"name": "Stone Boars", "role": "member"}}),
                  ({"family": {"parents": [{"name": dead}]}}, "dead", {"family": {"parents": "gone"}}),
                  ({"family": {"spouse": "a husband"}}, "same-sex", {"family": {"spouse": "a wife"}})]
-        whos = {nc.create_protagonist(c, {**base, "draw": d}, f"d{d}")["summary"]["who"] for d in range(4)}
+        # a stated age, sex, place and work are canon and fix who can be him (here the place has one such lamp-lighter); what is left unsaid is what the draw varies
+        loose = {k: v for k, v in base.items() if k != "work"}
+        whos = {nc.create_protagonist(c, {**loose, "draw": d}, f"d{d}")["summary"]["who"] for d in range(4)}
         assert len(whos) >= 2, "another draw gives another person"
         for bad, needle, fix in cases:
             r = nc.create_protagonist(c, {**base, **bad}, "r1")

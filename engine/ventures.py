@@ -225,7 +225,7 @@ def venture(conn: sqlite3.Connection, project_id: int) -> dict | None:
     why = list(business_drivers.why(conn, "venture", int(project_id)))
     for a in out["approvals"]:
         if a["status"] == "pending":
-            why.append(f"approval {a['approval_kind']} pending: politics not built")
+            why.append(f"approval {a['approval_kind']} pending with the city")
     if state.get("_stall_reason") and v["outcome"] is None:
         why.append(f"stalled: {state['_stall_reason']}")
     if state.get("_late_reason") and v["outcome"] is None:

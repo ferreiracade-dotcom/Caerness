@@ -73,7 +73,7 @@ def run():
     bsvc = unit("caerness-backup.service")["Service"]
     assert bsvc["Type"] == "oneshot" and bsvc["User"] == "caerness"
     assert bsvc["EnvironmentFile"] == "/etc/caerness/caerness.env"
-    m = re.search(r"-m (connector\.backup)\b.*--campaign \$\{CAERNESS_CAMPAIGN\}.*--label daily", bsvc["ExecStart"])
+    m = re.search(r"-m (connector\.backup)\b.*--all.*--label daily", bsvc["ExecStart"])
     assert m, bsvc["ExecStart"]
     importlib.import_module(m.group(1))
     timer = unit("caerness-backup.timer")

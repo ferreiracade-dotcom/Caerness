@@ -32,7 +32,7 @@ def run():
 
         # Let the production scheduler perform the first physiological review. The persisted
         # mortality pressure is deliberately a derived health value, not precomputed at insert.
-        advance_connection(c,30)
+        advance_connection(c,181)  # first reviews are spread over 30 to 180 days after the profile is made
         row=c.execute("SELECT status FROM actors WHERE id=?",(aid,)).fetchone()
         died_day=None
         if row and row['status']=='deceased':

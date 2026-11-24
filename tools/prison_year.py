@@ -43,6 +43,7 @@ def read(conn) -> dict:
     bad: dict = {}
     bad["two_inside_stays"] = conn.execute("SELECT COUNT(*) FROM (SELECT actor_id FROM inmate_stays WHERE status='inside' GROUP BY 1 HAVING COUNT(*)>1)").fetchone()[0]
     bad["serving_without_stay"] = conn.execute("""SELECT COUNT(*) FROM sentences s WHERE s.status='serving'
+        AND EXISTS (SELECT 1 FROM actors x WHERE x.id=s.actor_id AND x.status='active')  -- a dead man's sentence is the case chain's to close, not a stay
         AND NOT EXISTS (SELECT 1 FROM inmate_stays t WHERE t.actor_id=s.actor_id AND t.status='inside')""").fetchone()[0]
     bad["inside_without_sentence_or_held"] = conn.execute("""SELECT COUNT(*) FROM inmate_stays t WHERE t.status='inside'
         AND NOT EXISTS (SELECT 1 FROM sentences s WHERE s.actor_id=t.actor_id AND s.status='serving')
@@ -50,6 +51,12 @@ def read(conn) -> dict:
     bad["inside_seat_not_inside"] = conn.execute("""SELECT COUNT(*) FROM org_seats o JOIN facility_groups g ON g.org_actor_id=o.org_actor_id
         WHERE o.status='active' AND NOT EXISTS (SELECT 1 FROM inmate_stays t WHERE t.actor_id=o.actor_id AND t.status='inside' AND t.group_id=g.id)""").fetchone()[0]
     out["inconsistent"] = bad
+    if bad["serving_without_stay"]:
+        out["serving_without_stay_rows"] = [dict(r) for r in conn.execute("""SELECT s.id,s.actor_id,s.case_id,s.term_days,s.start_day,s.status,s.metadata_json,a.status AS actor_status,
+            (SELECT group_concat(t.status||'@'||t.since_day||'-'||COALESCE(t.until_day,'')) FROM inmate_stays t WHERE t.actor_id=s.actor_id) AS stays,
+            (SELECT group_concat(c.kind||'@'||c.since_day) FROM custody c WHERE c.actor_id=s.actor_id) AS custody,
+            (SELECT current_day FROM world_state) AS today FROM sentences s JOIN actors a ON a.id=s.actor_id WHERE s.status='serving'
+            AND EXISTS (SELECT 1 FROM actors x WHERE x.id=s.actor_id AND x.status='active') AND NOT EXISTS (SELECT 1 FROM inmate_stays t WHERE t.actor_id=s.actor_id AND t.status='inside')""")]
     out["integrity"] = conn.execute("PRAGMA integrity_check").fetchone()[0]
     out["fk_violations"] = len(conn.execute("PRAGMA foreign_key_check").fetchall())
     return out

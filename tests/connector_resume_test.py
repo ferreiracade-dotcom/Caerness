@@ -52,7 +52,7 @@ def run():
             assert r["how_to_play"].count("\n") == 4 and r["how_to_play"].startswith("1. Check established facts")
             assert r["scene"]["manners"] and len(r["scene"]["manners"]) <= 300
             print("resume bytes", len(json.dumps(r, ensure_ascii=False)))
-            assert len(json.dumps(r, ensure_ascii=False)) <= 13500
+            assert len(json.dumps(r, ensure_ascii=False)) <= 14000  # the creation note and the prison section added to the rulebook
             assert conn.execute("SELECT value FROM connector_meta WHERE key='last_resume_at'").fetchone()
             # Nothing stored yet: no story, and the GM is asked to draft the sheet.
             assert "story" not in r and "sheet_missing" in r, r.keys()
@@ -84,7 +84,7 @@ def run():
             conn.commit()
             size = len(json.dumps(resume(conn), ensure_ascii=False))
             print("full resume bytes", size)
-            assert size <= 21400, size  # world-and-save asking about 400; rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
+            assert size <= 21800, size  # the creation note and the prison section about 450; world-and-save asking about 400; rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
     print("connector_resume_test passed")
 
 

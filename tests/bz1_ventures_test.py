@@ -108,7 +108,7 @@ def test_pending_approval_does_not_block_but_is_said():
     _run(c, d0, 4)
     v = ventures.venture(c, pid)
     assert v["stage_key"] != "fit_out" or v["outcome"] is not None, v["stage_key"]
-    assert any("building_permit pending: politics not built" in line for line in v["why"]), v["why"]
+    assert any("building_permit pending with the city" in line for line in v["why"]), v["why"]
 
 
 def test_refused_approval_fails():

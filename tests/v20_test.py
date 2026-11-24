@@ -34,7 +34,7 @@ def run():
         master=_actor(c,'Fifth Elder',-70*365,loc)
         configure_health_profile(c,ordinary,longevity_class='ordinary')
         configure_health_profile(c,master,longevity_class='fifth')
-        advance_connection(c,31)
+        advance_connection(c,181)  # first reviews are spread over 30 to 180 days after the profile is made
         po=c.execute("SELECT aging_phase,recovery_capacity FROM actor_health_profiles WHERE actor_id=?",(ordinary,)).fetchone()
         pm=c.execute("SELECT aging_phase,recovery_capacity FROM actor_health_profiles WHERE actor_id=?",(master,)).fetchone()
         assert po['aging_phase']=='late_decline'
@@ -63,7 +63,7 @@ def run():
 
         # Disability is persistent capacity state rather than an unresolved injury alias.
         add_disability(c,a,'Permanent limp',mobility_impact=35,stamina_impact=10,capacity_impact=10)
-        advance_connection(c,31)
+        advance_connection(c,181)  # first reviews are spread over 30 to 180 days after the profile is made
         hs=health_summary(c,a)
         assert hs['profile']['mobility'] < 100
         assert hs['disabilities'][0]['status'] in ('active','adapted')

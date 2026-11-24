@@ -385,7 +385,9 @@ def run_simulation():
 
         os.environ.pop("CAERNESS_WORLDS_DIR", None)
         conn = _fresh(tmp, "caerness_sim")
-        assert disabled_process_keys(conn) == frozenset()  # absent package id means Caerness: nothing gated
+        from engine.simulation import SYSTEM_PROCESSES
+        # absent package id means Caerness: it has no organisation layer, so only that layer's processes are gated; every Caerness process runs
+        assert disabled_process_keys(conn) == frozenset(SYSTEM_PROCESSES["outfits"]), sorted(disabled_process_keys(conn))
         conn.close()
     print("world_activation_switches simulation passed")
 
