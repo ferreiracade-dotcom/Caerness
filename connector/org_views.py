@@ -171,7 +171,49 @@ def custody_view(conn, actor_id: int, me: int | None) -> dict | None:
         return None
     if charge:
         out["charge"] = cw["charge"].format(charge=charge)
+    _inside(conn, int(actor_id), me, cw, out, day)
     return out
+
+
+def _inside(conn, actor_id: int, me: int | None, cw: dict, out: dict, day: int) -> None:
+    """Where a man is held and, for the man himself only, what he knows of the place: his group, the channels he has to the outside, the
+    next hearing and who has lately visited. What another man's channels or hearings are is not known to a stranger."""
+    iw = cw.get("inside")
+    if not iw:
+        return
+    try:
+        st = conn.execute("SELECT * FROM inmate_stays WHERE actor_id=? AND status='inside' ORDER BY id DESC LIMIT 1", (actor_id,)).fetchone()
+    except sqlite3.OperationalError:
+        return
+    if st is None:
+        return
+    fac = conn.execute("SELECT name FROM facilities WHERE id=?", (int(st["facility_id"]),)).fetchone()
+    out["facility"] = iw["facility"].format(facility=fac[0] if fac else "prison")
+    if me != actor_id:
+        return
+    if st["group_id"] is not None:
+        g = conn.execute("SELECT group_key FROM facility_groups WHERE id=?", (int(st["group_id"]),)).fetchone()
+        gname = ((iw.get("groups") or {}).get(g[0]) if g else None)
+        if gname:
+            out["group"] = iw["group"].format(group=gname)
+    chans = []
+    for ch in conn.execute("SELECT kind,quality,outside_actor_id FROM prison_channels WHERE stay_id=? AND status='open' ORDER BY id", (int(st["id"]),)):
+        word = next((w for lim, w in iw["quality"] if float(ch["quality"]) <= lim), iw["quality"][-1][1])
+        kind = (iw.get("kinds") or {}).get(ch["kind"], str(ch["kind"]).replace("_", " "))
+        who = _name(conn, int(ch["outside_actor_id"])) if ch["outside_actor_id"] is not None else None
+        chans.append(f"{kind}{' with ' + who if who else ''}: {word}")
+    if chans:
+        out["channels"] = chans
+    rv = conn.execute("""SELECT kind,hearing_day FROM law_reviews WHERE actor_id=? AND status='pending' ORDER BY hearing_day LIMIT 1""", (actor_id,)).fetchone()
+    if rv is not None:
+        out["next_hearing"] = iw["hearing"].format(kind=(iw.get("hearing_kinds") or {}).get(rv["kind"], rv["kind"]), when=_span(conn, max(0, int(rv["hearing_day"]) - day)))
+    vis = []
+    for v in conn.execute("""SELECT t.day,t.from_actor_id,t.to_actor_id,t.kind FROM prison_contacts t JOIN prison_channels h ON h.id=t.channel_id
+                             WHERE t.stay_id=? AND h.kind IN ('visit','letter') ORDER BY t.id DESC LIMIT ?""", (int(st["id"]), int(iw.get("recent_visits", 3)))):
+        other = int(v["from_actor_id"]) if int(v["to_actor_id"]) == actor_id else int(v["to_actor_id"])
+        vis.append(iw["visit"].format(who=_name(conn, other) or "someone", when=_ago(conn, day - int(v["day"]))))
+    if vis:
+        out["visits"] = vis
 
 
 def _lines(conn, actor_id: int, me: int | None) -> list[str]:

@@ -36,7 +36,18 @@
     "serving": "doing {term} at {facility}, out in about {out}",
     "home": "did {term} at {facility}, home since {when}",
     "charge": "charged with {charge}",
-    "term_units": {"year": 365, "month": 30}
+    "term_units": {"year": 365, "month": 30},
+    "inside": {
+      "facility": "held at {facility}",
+      "group": "keeps with {group}",
+      "groups": {"connected": "the connected men", "neighbourhood_north": "the north side crowd", "neighbourhood_south": "the south side crowd", "street": "the street crews", "protective": "the men in protective custody", "unaligned": "the ones who keep to themselves"},
+      "quality": [[0.35, "a thin line"], [0.65, "a fair line"], [99, "a sure line"]],
+      "kinds": {"visit": "visits", "letter": "letters", "lawyer": "his lawyer", "trusted_man": "a man of his own outfit", "phone": "a phone", "smuggled_note": "notes passed by hand", "bought_guard": "a guard in his pocket"},
+      "hearing": "a {kind} hearing in about {when}",
+      "hearing_kinds": {"parole": "parole", "appeal": "appeal", "pardon": "pardon"},
+      "visit": "{who} came {when}",
+      "recent_visits": 3
+    }
   },
   "air": {
     "war": [[0.7, ""], [99, "there is trouble between the families that men talk about"]],
