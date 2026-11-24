@@ -109,14 +109,53 @@ def preferred(conn: sqlite3.Connection, org: int) -> int:
     return 0 if sp is None else int(round(_num(conn, sp["figure"])))
 
 
+def band(conn: sqlite3.Connection, org: int) -> tuple[float, float]:
+    """The small band the organisation's canon figure lives in: the figure's own range when the package gives one, otherwise the
+    figure give or take the package's `band.share` (at least `band.min_width` men each way; an assumption where the bible gives
+    no range). A target with a band round it, not a cap: counts leave it only for a cause from the run."""
+    sp = _spec(conn, org)
+    if sp is None:
+        return (0.0, 1e9)
+    rng, _ext = _cache(conn)["ranges"].get(sp["figure"], (None, None))
+    if isinstance(rng, list) and len(rng) == 2:
+        return float(rng[0]), float(rng[1])
+    b = (_data(conn).get("band") or {})
+    t = _num(conn, sp["figure"])
+    w = max(_v(conn, b.get("min_width"), 2.0), t * _v(conn, b.get("share"), 0.15))
+    return t - w, t + w
+
+
+def run_cause(conn: sqlite3.Connection, org: int, day: int) -> float:
+    """0 to 1: how much of a run's own doing is working on the count right now (killings that reached the organisation in the last
+    half year, open cases against its inducted men). A drift with such a cause is left alone; without one it leans back to the band."""
+    w = (_data(conn).get("books") or {}).get("weigh") or {}
+    war = conn.execute("SELECT COUNT(*) FROM org_incidents WHERE kind='killing' AND raised_to_org_actor_id=? AND day>?", (int(org), int(day) - 180)).fetchone()[0]
+    heat = conn.execute("SELECT COUNT(*) FROM crime_reports r JOIN org_seats s ON s.actor_id=r.offender_actor_id WHERE r.status='open' AND s.org_actor_id=? AND s.inducted_day IS NOT NULL", (int(org),)).fetchone()[0]
+    return clamp01(max(war / max(1e-9, _v(conn, w.get("war_scale"), 3.0)), heat / max(1e-9, _v(conn, w.get("heat_scale"), 6.0))))
+
+
+def band_lean(conn: sqlite3.Connection, org: int, day: int) -> float:
+    """Signed lean back toward the band: positive below it (more reason to make men), negative above it (less), scaled by how far
+    outside and by how little a run cause is working against it. 0 inside the band."""
+    sp = _spec(conn, org)
+    if sp is None:
+        return 0.0
+    lo, hi = band(conn, org)
+    n = made_count(conn, org)
+    span = max(1.0, _v(conn, (_data(conn).get("band") or {}).get("span"), 0.1) * max(1, preferred(conn, org)))
+    off = (lo - n) if n < lo else (-(n - hi) if n > hi else 0.0)
+    return clamp01(abs(off) / span) * (1.0 if off > 0 else -1.0) * (1.0 - run_cause(conn, org, day))
+
+
 def flag_unusual(conn: sqlite3.Connection, day: int) -> int:
     """A count outside the figure's range is not refused; it is written to the design log as unusual (needs a cause), once per
     new count, so the GM sees it."""
     n = 0
     for org, sp in _orgs(conn):
-        rng, _ext = _cache(conn)["ranges"].get(sp["figure"], (None, None))
+        lo, hi = band(conn, org)
+        rng = [round(lo), round(hi)]
         count = made_count(conn, org)
-        if not isinstance(rng, list) or float(rng[0]) <= count <= float(rng[1]):
+        if lo <= count <= hi:
             continue
         last = conn.execute("SELECT new_value FROM design_figure_log WHERE key=? AND cause LIKE 'unusual:%' ORDER BY id DESC LIMIT 1", (sp["figure"],)).fetchone()
         if last is not None and int(last[0]) == count:
@@ -256,7 +295,7 @@ def books_pressure(conn: sqlite3.Connection, org: int, day: int, head: int) -> f
                            (int(org), sp["dependent"], _v(conn, w.get("waiting_standing"), 0.5))).fetchone()[0]
     war = conn.execute("SELECT COUNT(*) FROM org_incidents WHERE kind='killing' AND raised_to_org_actor_id=? AND day>?", (int(org), int(day) - 180)).fetchone()[0]
     heat = conn.execute("SELECT COUNT(*) FROM crime_reports r JOIN org_seats s ON s.actor_id=r.offender_actor_id WHERE r.status='open' AND s.org_actor_id=? AND s.inducted_day IS NOT NULL", (int(org),)).fetchone()[0]
-    parts = {"short": _short(conn, org), "waiting": clamp01(waiting / max(1e-9, _v(conn, w.get("waiting_scale"), 10.0))),
+    parts = {"band": max(0.0, band_lean(conn, org, int(day))), "short": _short(conn, org), "waiting": clamp01(waiting / max(1e-9, _v(conn, w.get("waiting_scale"), 10.0))),
              "money": clamp01(ledger.balance(conn, ("person", int(head))) / max(1e-9, _v(conn, w.get("money_scale"), 1.0))),
              "war": clamp01(war / max(1e-9, _v(conn, w.get("war_scale"), 3.0))), "ambition": _drive(conn, int(head), "ambition")}
     rest = 1.0
@@ -381,10 +420,11 @@ def make_offers(conn: sqlite3.Connection, actor_id: int, item, day: int) -> list
     standing = clamp01(sc if sc is not None else 0.0)
     pull = 1.0 - ((1.0 - _v(conn, mk.get("w_short")) * _short(conn, org)) * (1.0 - _v(conn, mk.get("w_standing")) * standing)
                   * (1.0 - _v(conn, mk.get("w_ambition")) * _drive(conn, int(actor_id), "ambition") * standing)
-                  * (1.0 - _v(conn, mk.get("w_pressure")) * books_pressure(conn, org, int(day), int(actor_id))))
+                  * (1.0 - _v(conn, mk.get("w_pressure")) * books_pressure(conn, org, int(day), int(actor_id)))
+                  * (1.0 - _v(conn, mk.get("w_band")) * max(0.0, band_lean(conn, org, int(day)))))
     return [{"kind": "make_member", "utility": _utility(conn, pull), "target_actor_id": cand,
              "rationale": f"Makes {_name(conn, cand)}, put forward by {_name(conn, proposer)}.", "payload": payload},
-            {"kind": "decline_member", "utility": _utility(conn, _v(conn, mk.get("threshold"), 0.5)), "rationale": f"Turns down {_name(conn, cand)} for now.", "payload": payload}]
+            {"kind": "decline_member", "utility": _utility(conn, clamp01(_v(conn, mk.get("threshold"), 0.5) + _v(conn, mk.get("w_above")) * max(0.0, -band_lean(conn, org, int(day))))), "rationale": f"Turns down {_name(conn, cand)} for now.", "payload": payload}]
 
 
 def execute_decline_member(conn, actor_id, kind, payload, day):

@@ -120,7 +120,8 @@ def build(conn: sqlite3.Connection) -> dict[str, int]:
         if victim is not None:
             r = _rng(conn, f"resent:{d}:{off}:{victim}")
             before = int(conn.execute("SELECT COUNT(*) FROM relationships WHERE actor_a_id=? AND actor_b_id=?", (victim, off)).fetchone()[0])
-            ensure_relationship(conn, victim, off, d, started_day=d, familiarity=r.uniform(40, 70), resentment=r.uniform(lo, hi),
+            cool = 0.5 ** (max(0, day0 - d) / 365.0 / max(0.1, _v(conn, cfg.get("resentment_half_life_years"), 2.0)))  # an old grudge has cooled
+            ensure_relationship(conn, victim, off, d, started_day=d, familiarity=r.uniform(40, 70), resentment=r.uniform(lo, hi) * cool,
                                 stance=-r.uniform(15, 45), trust=-r.uniform(5, 35))
             made["resentments"] += 1 - before
 

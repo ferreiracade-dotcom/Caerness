@@ -716,8 +716,9 @@
   "books": {"delay_days": "seat_fill_delay_days", "retry_days": "books_retry_days",
             "weigh": {"rate_week": "books_rate_week", "short_span": "books_short_span", "w_short": "books_w_short", "w_waiting": "books_w_waiting", "waiting_scale": "books_waiting_scale",
                       "waiting_standing": "books_waiting_standing", "w_money": "books_w_money", "money_scale": "books_money_scale", "w_war": "books_w_war", "war_scale": "books_war_scale",
-                      "w_ambition": "books_w_ambition", "w_heat": "books_w_heat", "heat_scale": "books_heat_scale"},
-            "make": {"w_short": "make_w_short", "w_standing": "make_w_standing", "w_ambition": "make_w_ambition", "w_pressure": "make_w_pressure", "threshold": "make_threshold"}},
+                      "w_ambition": "books_w_ambition", "w_heat": "books_w_heat", "heat_scale": "books_heat_scale", "w_band": "books_w_band"},
+            "make": {"w_short": "make_w_short", "w_standing": "make_w_standing", "w_ambition": "make_w_ambition", "w_pressure": "make_w_pressure", "threshold": "make_threshold", "w_band": "make_w_band", "w_above": "make_w_above"}},
+  "band": {"share": "band_share", "min_width": "band_min_width", "span": "band_span"},
   "replacement": {"chance_week": "dependant_replace_week", "ages": [17, 30]},
   "standing_growth": "dependant_standing_growth_week",
   "standing": {"years_cap": "standing_years_cap", "w_years": "standing_w_years", "w_role": "standing_w_role", "w_earn": "standing_w_earn", "earn_scale": "standing_earn_scale",
@@ -4078,6 +4079,7 @@
    "op_resentment_lo",
    "op_resentment_hi"
   ],
+  "resentment_half_life_years": "op_resentment_half_life_years",
   "obligation": {
    "share": "op_obligation_share",
    "reasons": [
