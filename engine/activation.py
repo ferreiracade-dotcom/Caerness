@@ -1179,21 +1179,23 @@ def activate_existing_loops(conn: sqlite3.Connection, package=None) -> dict[str,
     out.update(resolve_opening_history(conn))
     # The outfits as people (Saint Jude): needs the seeded members, the background population and opening relationships.
     from .world_package import system_enabled
-    if system_enabled(conn, "outfits"):
-        from .outfit_opening import build as build_outfits
-        out.update({f'outfit_opening_{k}': v for k, v in build_outfits(conn).items()})
-        from .opening_households import build as build_households
-        out.update({f'opening_households_{k}': v for k, v in build_households(conn).items()})
-        from .opening_businesses import build as build_businesses
-        out.update({f'opening_businesses_{k}': v for k, v in build_businesses(conn).items()})
-        from .outfit_past import build as build_past
-        out.update({f'outfit_past_{k}': v for k, v in build_past(conn).items()})
-        from .lived_past import build as build_lived
-        out.update({f'lived_past_{k}': v for k, v in build_lived(conn).items()})
-        from .opening_races import build as build_races
-        out.update({f'opening_races_{k}': v for k, v in build_races(conn).items()})
-        from .opening_ties import build as build_ties
-        out.update({f'opening_ties_{k}': v for k, v in build_ties(conn).items()})
+    from .world_package import package_pass
+    with package_pass():  # the package's files do not change while the opening is built
+        if system_enabled(conn, "outfits"):
+            from .outfit_opening import build as build_outfits
+            out.update({f'outfit_opening_{k}': v for k, v in build_outfits(conn).items()})
+            from .opening_households import build as build_households
+            out.update({f'opening_households_{k}': v for k, v in build_households(conn).items()})
+            from .opening_businesses import build as build_businesses
+            out.update({f'opening_businesses_{k}': v for k, v in build_businesses(conn).items()})
+            from .outfit_past import build as build_past
+            out.update({f'outfit_past_{k}': v for k, v in build_past(conn).items()})
+            from .lived_past import build as build_lived
+            out.update({f'lived_past_{k}': v for k, v in build_lived(conn).items()})
+            from .opening_races import build as build_races
+            out.update({f'opening_races_{k}': v for k, v in build_races(conn).items()})
+            from .opening_ties import build as build_ties
+            out.update({f'opening_ties_{k}': v for k, v in build_ties(conn).items()})
     conn.execute(
         "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
         (str(CURRENT_CANON_ACTIVATION_VERSION),),
