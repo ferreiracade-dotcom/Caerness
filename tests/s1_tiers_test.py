@@ -36,7 +36,7 @@ def test_signals_ignore_distance_and_new_signals_count_next_day():
         conn, tiers = _open(tmp)
         day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
         rising = tiers.rising_actor_ids(conn, day)
-        seated = {r[0] for r in conn.execute("SELECT actor_id FROM org_seats WHERE status='active'")}
+        seated = {r[0] for r in conn.execute("SELECT actor_id FROM simulation_profiles WHERE cadence_days<=1")}
         assert seated and seated <= rising
         quiet = [r[0] for r in conn.execute("SELECT id FROM actors WHERE actor_type='character' AND status='active' ORDER BY id") if r[0] not in rising]
         assert len(quiet) > 1000, "most of the city is quiet"

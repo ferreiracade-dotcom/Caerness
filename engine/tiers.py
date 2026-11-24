@@ -5,7 +5,7 @@ courtship contacts) does not need to run for every person every day. A *quiet* p
 BATCH_DAYS on the row's own stamp (the load spreads, and every scan already integrates `elapsed`, so no time is lost). A *rising*
 person's rows stay on the daily clock.
 
-Who is rising is read from live state, never from where anyone is or how far he is from the player: a seat in an organisation, a
+Who is rising is read from live state, never from where anyone is or how far he is from the player: a daily-reviewed seat in an organisation, a
 party to a venture, the owner of an enterprise, a candidate in an open race, an office holder, a person who owes or is owed on a
 standing agreement, a person harmed in the last month, a person forced to a faster tier. Because it is derived at the moment a scan
 runs, a man who gains any of these is on the daily clock the next time the scan runs: nobody has to call anything to promote him.
@@ -34,7 +34,11 @@ def _ids(conn: sqlite3.Connection, sql: str, *args) -> set[int]:
 
 def _compute(conn: sqlite3.Connection, day: int) -> frozenset[int]:
     out: set[int] = set()
-    out |= _ids(conn, "SELECT actor_id FROM org_seats WHERE status IN ('active','held')")
+    # An organisation seat alone is not a reason: its holder's own advancement (induction, promotion, a line, a challenge) runs on the
+    # organisation's clocks, which S1 does not touch. What puts him here is the engine's own daily tier (a man whose level is reviewed daily)
+    # and the held seats that are in play (a seat with nobody above it, or a vacancy-bound one).
+    out |= _ids(conn, "SELECT actor_id FROM simulation_profiles WHERE cadence_days<=1")
+    out |= _ids(conn, "SELECT actor_id FROM org_seats WHERE status='held'")
     out |= _ids(conn, "SELECT CAST(substr(party_ref,8) AS INTEGER) FROM venture_parties vp JOIN civilian_projects p ON p.id=vp.project_id "
                       "WHERE vp.party_ref LIKE 'person:%' AND p.status='active'")
     out |= _ids(conn, "SELECT owner_actor_id FROM civilian_enterprises WHERE status IN ('active','strained','insolvent') AND owner_actor_id IS NOT NULL")
