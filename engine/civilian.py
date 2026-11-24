@@ -582,6 +582,15 @@ def next_civilian_due_day(conn: sqlite3.Connection, after_day: int, end_day: int
         except sqlite3.OperationalError:  # a database made before the business layer's tables
             v = None
         if v is not None: vals.append(int(v))
+    from . import tiers
+    if tiers.batching(conn):
+        try:
+            r = conn.execute("""SELECT MIN(json_extract(experience_json,'$.next_review_day')) FROM actor_careers WHERE status='active'
+                                AND json_extract(experience_json,'$.next_review_day')>? AND json_extract(experience_json,'$.next_review_day')<=?""",
+                             (after_day, end_day)).fetchone()[0]
+        except sqlite3.OperationalError:
+            r = None
+        if r is not None: vals.append(int(r))
     # Active civilian systems are updated at a coarse 30-day cadence; exact scheduled events still interrupt earlier.
     next_month = ((after_day // 30) + 1) * 30
     if next_month <= end_day and conn.execute(
@@ -689,8 +698,22 @@ def start_career(conn: sqlite3.Connection, actor_id: int, track_id: int, *, stag
 
 def review_careers(conn: sqlite3.Connection, day: int, *, event_logger: Callable[..., int] | None = None) -> int:
     reviewed = 0
-    for c in conn.execute("SELECT * FROM actor_careers WHERE status='active'").fetchall():
+    from . import tiers
+    batching = tiers.batching(conn)
+    if batching:
+        # S1: a quiet person's career is brought up to date on its own weekly stamp (it integrates the days since, so nothing is
+        # lost) or on the exact day its next stage's time gate opens; a rising person's career is reviewed daily.
+        rising = tiers.sql_ids(conn, day)
+        rows = conn.execute(
+            f"""SELECT * FROM actor_careers WHERE status='active'
+                AND (COALESCE(json_extract(experience_json,'$.next_review_day'),0)<=? OR actor_id IN ({rising}))""", (day,)).fetchall()
+        rising_set = tiers.rising_actor_ids(conn, day)
+    else:
+        rows = conn.execute("SELECT * FROM actor_careers WHERE status='active'").fetchall()
+        rising_set = frozenset()
+    for c in rows:
         exp = json.loads(c["experience_json"] or "{}")
+        first_time = "next_review_day" not in exp
         base_last = c["stage_started_day"] if c["stage_started_day"] is not None else (c["started_day"] if c["started_day"] is not None else day)
         last = int(exp.get("last_review_day", base_last))
         elapsed = max(0, day - last)
@@ -700,6 +723,8 @@ def review_careers(conn: sqlite3.Connection, day: int, *, event_logger: Callable
         exp["days_in_career"] = int(exp.get("days_in_career", 0)) + elapsed
         exp["days_in_stage"] = int(exp.get("days_in_stage", 0)) + elapsed
         exp["last_review_day"] = day
+        if batching:
+            exp["next_review_day"] = day + 1 if int(c["actor_id"]) in rising_set else day + (1 + int(c["id"]) % tiers.BATCH_DAYS if first_time else tiers.BATCH_DAYS)
         current = conn.execute("SELECT * FROM career_stages WHERE id=?", (c["current_stage_id"],)).fetchone() if c["current_stage_id"] else None
         next_stage = None
         if current:
@@ -709,6 +734,10 @@ def review_careers(conn: sqlite3.Connection, day: int, *, event_logger: Callable
             req = json.loads(next_stage["entry_requirements_json"] or "{}")
             min_days = int(req.get("min_days_in_stage", 0))
             eligible = int(exp.get("days_in_stage", 0)) >= min_days
+            if batching and not eligible:
+                remaining = min_days - int(exp.get("days_in_stage", 0))
+                if remaining < int(exp["next_review_day"]) - day:
+                    exp["next_review_day"] = day + remaining  # the exact day the time gate opens
             domain = req.get("competence_domain")
             min_score = float(req.get("min_competence", 0))
             if domain:
@@ -719,7 +748,7 @@ def review_careers(conn: sqlite3.Connection, day: int, *, event_logger: Callable
                 exp["eligible_since_day"] = exp.get("eligible_since_day", day)
                 if bool(req.get("auto_advance", False)):
                     conn.execute("UPDATE actor_careers SET current_stage_id=?,stage_started_day=?,experience_json=? WHERE id=?",
-                                 (next_stage["id"], day, json.dumps({**exp, "days_in_stage":0, "last_review_day":day}, sort_keys=True), c["id"]))
+                                 (next_stage["id"], day, json.dumps({**exp, "days_in_stage":0, "last_review_day":day, "next_review_day": day + 1}, sort_keys=True), c["id"]))
                     if event_logger:
                         actor = conn.execute("SELECT name,current_location_id FROM actors WHERE id=?", (c["actor_id"],)).fetchone()
                         event_logger(day=day,event_type="civilian:career_advance",title=f"Career advancement: {actor['name']}",
