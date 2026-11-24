@@ -356,14 +356,15 @@ def _is_protective_group(conn: sqlite3.Connection, group_id) -> bool:
     return ((rules(conn).get("groups") or {}).get(key) or {}).get("basis", {}).get("kind") == "protective"
 
 
-def admit(conn: sqlite3.Connection, actor_id: int, day: int, *, sentence_id: int | None = None, case_id: int | None = None) -> int:
+def admit(conn: sqlite3.Connection, actor_id: int, day: int, *, sentence_id: int | None = None, case_id: int | None = None,
+          term_days: int | None = None, until_day: int | None = None) -> int:
     """Place a man: the facility the intake rules name (remand while he awaits trial, a facility for his term once sentenced), his group,
     and, as a man of the case chain, a seat in that group. Returns the stay id. A man already inside who is sentenced stays in the
     same stay when the same facility takes him, else the old stay closes as `transferred`."""
     ensure_facilities(conn)
     sen = conn.execute("SELECT * FROM sentences WHERE id=?", (int(sentence_id),)).fetchone() if sentence_id is not None else None
-    term = int(sen["term_days"]) if sen is not None else None
-    fid = assign_facility(conn, actor_id, term_days=term, authority=_authority(conn, actor_id, sen), pretrial=sen is None, day=int(day))
+    term = int(sen["term_days"]) if sen is not None else term_days
+    fid = assign_facility(conn, actor_id, term_days=term, authority=_authority(conn, actor_id, sen), pretrial=term is None, day=int(day))
     cur = conn.execute("SELECT * FROM inmate_stays WHERE actor_id=? AND status='inside'", (int(actor_id),)).fetchone()
     if cur is not None and sen is not None and cur["sentence_id"] is not None:  # already serving one: this sentence runs with it
         conn.execute("UPDATE inmate_stays SET until_day=MAX(COALESCE(until_day,0),?) WHERE id=?", (int(sen["end_day"]), int(cur["id"])))
@@ -387,7 +388,7 @@ def admit(conn: sqlite3.Connection, actor_id: int, day: int, *, sentence_id: int
     stay = int(conn.execute(
         """INSERT INTO inmate_stays(actor_id,facility_id,group_id,sentence_id,case_id,since_day,until_day,status,protective,metadata_json)
            VALUES (?,?,?,?,?,?,?, 'inside', ?, ?)""",
-        (int(actor_id), fid, gid, sentence_id, case_id, int(day), int(sen["end_day"]) if sen is not None else None,
+        (int(actor_id), fid, gid, sentence_id, case_id, int(day), int(sen["end_day"]) if sen is not None else until_day,
          1 if _is_protective_group(conn, gid) else 0, json.dumps({"from_location_id": came_from}, sort_keys=True))).lastrowid)
     if gid is not None:
         _seat_inside(conn, actor_id, gid, int(day))
@@ -447,7 +448,7 @@ def _unplaced(conn: sqlite3.Connection) -> list:
     out: list = []
     for s in conn.execute("""SELECT * FROM sentences s WHERE s.status='serving' AND json_extract(s.metadata_json,'$.stay_id') IS NULL ORDER BY s.id""").fetchall():
         out.append(("sentence", s))
-    for c in conn.execute("""SELECT * FROM custody c WHERE c.kind='held' AND c.case_id IS NOT NULL
+    for c in conn.execute("""SELECT * FROM custody c WHERE c.kind='held'
                              AND NOT EXISTS (SELECT 1 FROM inmate_stays t WHERE t.actor_id=c.actor_id AND t.status='inside')
                              AND NOT EXISTS (SELECT 1 FROM sentences s WHERE s.actor_id=c.actor_id AND s.status='serving') ORDER BY c.id""").fetchall():
         out.append(("remand", c))
@@ -462,8 +463,9 @@ def _admissions(conn: sqlite3.Connection, day: int) -> int:
             continue
         if kind == "sentence":
             admit(conn, a, int(day), sentence_id=int(row["id"]), case_id=row["case_id"])
-        else:
-            admit(conn, a, int(day), case_id=int(row["case_id"]))
+        else:  # held with a case (awaiting trial), or held by an arrest that carries no case: one with a known end is a term to be served
+            term = (int(row["until_day"]) - int(row["since_day"])) if row["case_id"] is None and row["until_day"] is not None else None
+            admit(conn, a, int(day), case_id=row["case_id"], term_days=term, until_day=row["until_day"] if term is not None else None)
         n += 1
     return n
 

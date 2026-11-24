@@ -82,3 +82,4 @@ world_pkg_caerness_connector_test
 world_pkg_caerness_regression_test
 p1_measures_test
 p1b_five_years_test
+j1_chain_test

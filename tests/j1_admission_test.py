@@ -77,7 +77,7 @@ def test_conviction_admits_to_the_facility_the_data_names():
             _as_protagonist(c, a)
         sid = _convict(c, a, 1000)
         out = _run(c)
-        assert out["admitted"] == 1, out
+        assert out["admitted"] >= 1 and _stay(c, a) is not None, out  # the lived opening already holds a man
         st = _stay(c, a)
         fac = _fac(c, st)
         assert fac["key"] == "ironhaven", dict(fac)  # a state felony term over a year goes to the state prison
@@ -112,7 +112,7 @@ def test_pretrial_man_goes_to_remand_and_federal_remand_to_the_detention_center(
     _remand(c, a, "municipal")
     _remand(c, b, "federal")
     out = _run(c)
-    assert out["admitted"] == 2, out
+    assert out["admitted"] >= 2 and _stay(c, a) and _stay(c, b), out  # the lived opening already holds a man
     assert _fac(c, _stay(c, a))["key"] == "county_jail"
     assert _fac(c, _stay(c, b))["key"] == "federal_detention_center"
     assert _stay(c, a)["sentence_id"] is None
@@ -228,10 +228,32 @@ def test_release_closes_the_stay_and_sends_him_back():
         assert _stay(c, a) is not None and orgs.seat_of(c, a, grp["org_actor_id"])["status"] == "active"
 
 
+def test_a_hold_with_no_case_is_a_term_by_its_length():
+    """The lived opening holds a man for a sentence he began before the game, and an organisation's arrests hold men for days: neither has a case row."""
+    for protagonist in (False, True):
+        w = open_world()
+        c = w.conn
+        prison.ensure_facilities(c)
+        a, b = _men(c, 2)
+        if protagonist:
+            _as_protagonist(c, a)
+        c.execute("DELETE FROM custody")
+        c.execute("INSERT INTO custody(actor_id,case_id,kind,charge,since_day,until_day) VALUES (?,NULL,'held','x',?,?)", (a, DAY - 365, DAY + 600))
+        c.execute("INSERT INTO custody(actor_id,case_id,kind,charge,since_day,until_day) VALUES (?,NULL,'held','x',?,?)", (b, DAY, DAY + 20))
+        _run(c)
+        assert _fac(c, _stay(c, a))["key"] == "ironhaven"  # a term of nearly three years
+        assert _fac(c, _stay(c, b))["key"] == "county_jail"  # a few weeks
+        assert _stay(c, a)["until_day"] == DAY + 600
+        c.execute("UPDATE custody SET kind='released' WHERE actor_id=?", (b,))
+        _run(c, DAY + 25)
+        assert _stay(c, b) is None and _stay(c, a) is not None
+
+
 def test_next_due_day_is_tomorrow_only_when_there_is_work():
     w = open_world()
     c = w.conn
     prison.ensure_facilities(c)
+    c.execute("UPDATE custody SET kind='released' WHERE kind='held'")  # the lived opening's man held at the start is not what this is about
     assert prison.next_due_day(c, DAY, DAY + 30) is None
     _convict(c, w.soldier, 1000)
     assert prison.next_due_day(c, DAY, DAY + 30) == DAY + 1
