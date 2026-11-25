@@ -401,9 +401,19 @@ def _found(conn, me, intent, f, res, targets, committed, days, call_id) -> dict:
 
 def _travel(conn, me, intent, f, res, targets, committed, days, call_id) -> dict:
     loc = next((i for k, i, _ in targets if k == "location"), None)
+    who = None
+    if loc is None:  # going to see somebody, or to a business: it goes where they are
+        who = _actor_target(targets)
+        if who is not None:
+            loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (who,)).fetchone()[0]
+        else:
+            shop = next((i for k, i, _ in targets if k == "business"), None)
+            if shop is not None:
+                row = conn.execute("SELECT location_id,owner_actor_id FROM civilian_enterprises WHERE id=?", (shop,)).fetchone()
+                loc, who = row[0], row[1]
     if loc is None:
-        raise _Gap("Say where: a location among the targets.")
-    return {"status": "delegate", "delegate": "travel", "target_location_id": loc, "summary": ""}
+        raise _Gap("Say where: a location, person or business among the targets.")
+    return {"status": "delegate", "delegate": "travel", "target_location_id": loc, "target_actor_id": who, "summary": ""}
 
 
 def _message(conn, me, intent, f, res, targets, committed, days, call_id) -> dict:

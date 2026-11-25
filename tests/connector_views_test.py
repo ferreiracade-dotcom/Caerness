@@ -146,8 +146,8 @@ def run():
             base = compact_scene(conn)
             assert base["manners"] and len(base["manners"]) <= 300, base.get("manners")
             others = [p for p in base["present"] if p["id"] != me]
-            kin_p = others[0]
-            stranger = next(p for p in others[1:] if "knows" not in p)
+            stranger = next(p for p in others if "knows" not in p)  # household at home is always in the room, and may be it
+            kin_p = next(p for p in others if p is not stranger)
             for q in (me, kin_p["id"]):
                 conn.execute("DELETE FROM kinship_links WHERE ? IN (actor_a_id,actor_b_id) AND kin_kind IN ('parent','child')", (q,))
             conn.execute("UPDATE actor_life_profiles SET demographic_sex='male' WHERE actor_id=?", (kin_p["id"],))

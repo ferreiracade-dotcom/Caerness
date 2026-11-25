@@ -49,7 +49,9 @@ def author(conn, call_id: str, kind: str, details: dict | None = None) -> dict:
         try:
             out = engine_author(conn, int(player["player_actor_id"]), kind, details or {}, call_id)
         except AuthoringRefused as e:
-            return {"status": "refused", "kind": str(kind), "reason": str(e), "reason_kind": getattr(e, "reason_kind", "contradiction")}
+            places = getattr(e, "accepted_places", None)
+            return {"status": "refused", "kind": str(kind), "reason": str(e), "reason_kind": getattr(e, "reason_kind", "contradiction"),
+                    **({"accepted_places": places} if places else {})}
         for key, table in _ENTITY:
             if key in out:
                 conn.execute("INSERT INTO authored_entities(call_id,kind,entity_table,entity_id,world_day) VALUES (?,?,?,?,?)",

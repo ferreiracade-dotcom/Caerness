@@ -11,7 +11,7 @@ import re
 import sqlite3
 from typing import Any, Callable
 
-from . import ledger
+from . import company, ledger
 from .interactions import InteractionResult, _capacity, _log_event, create_interaction, resolve_interaction
 from .relationships import adjust_relationship_pair
 
@@ -55,7 +55,9 @@ def _living(conn, actor_id: int | None) -> bool:
 def _same_place(conn, a: int, b: int) -> bool:
     rows = conn.execute("SELECT current_location_id FROM actors WHERE id IN (?,?)", (a, b)).fetchall()
     locs = {r[0] for r in rows}
-    return len(rows) == 2 and None not in locs and len(locs) == 1
+    if len(rows) == 2 and None not in locs and len(locs) == 1:
+        return True
+    return company.is_with(conn, a, b)  # the protagonist also reaches whoever is with them
 
 
 def _holder_label(conn, h: ledger.Holder, me: int) -> str:

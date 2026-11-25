@@ -6,7 +6,7 @@ import re
 from connector import store
 from engine.actions import PlayerActionProposal, explain_no_route, nearest_on, shortest_route
 from engine.player import get_player, sync_player_location
-from engine.presence import actor_is_present_candidate
+from engine import company
 from engine.turns import resolve_turn_state
 
 OPERATION_TYPES = ("pay", "hire", "lend", "demand", "attack", "trade", "order")
@@ -68,15 +68,63 @@ class StructuredActionProvider:
         base = dict(target_actor_id=int(actor["id"]), target_actor_name=str(actor["name"]), purpose=raw_text)
         if t == "investigate":
             return PlayerActionProposal(raw_text, "investigate", 1.0, duration_days=max(1, int(self.duration_days or 1)), **base)
-        # speak: same presence rule as the engine's heuristic provider
+        # speak: whoever the scene shows, or who is with them, can be spoken to
         if here is None:
             ok = False
         elif actor["actor_type"] == "institution":
             ok = actor["current_location_id"] is not None and int(actor["current_location_id"]) == here
         else:
-            ok = actor_is_present_candidate(conn, int(actor["id"]), here, purpose=f"player_speak:{pid}:{int(actor['id'])}")
+            ok = company.in_earshot(conn, pid, int(actor["id"]))
         return PlayerActionProposal(raw_text, "speak", 1.0, needs_interpretation=not ok,
                                     note="" if ok else "Target is not plausibly present for a direct conversation here.", **base)
+
+
+def _destination(conn, actor, location, details) -> tuple[int | None, tuple[int, ...]]:
+    """Where a journey goes and who is met there: a place, else the business named, else where a person is."""
+    if location is not None:
+        return int(location), ()
+    raw = str((details or {}).get("business") or "").strip()
+    if raw:
+        ref = raw.partition(":")[2] if raw.startswith("business:") else raw
+        row = conn.execute("""SELECT id,location_id,owner_actor_id FROM civilian_enterprises
+                              WHERE (CAST(id AS TEXT)=? OR lower(name)=lower(?)) AND status IN ('active','strained','insolvent')
+                              ORDER BY id LIMIT 1""", (ref, ref)).fetchone()
+        if row is None or row["location_id"] is None:
+            return None, ()
+        there = [r[0] for r in conn.execute("SELECT actor_id FROM enterprise_staff WHERE enterprise_id=? AND status='active'", (row["id"],))]
+        return int(row["location_id"]), tuple(int(x) for x in (row["owner_actor_id"], *there) if x is not None)
+    if actor is not None:
+        row = conn.execute("SELECT current_location_id,home_location_id FROM actors WHERE id=? AND status='active'", (actor,)).fetchone()
+        if row:
+            at = row[0] if row[0] is not None else row[1]
+            return (int(at) if at is not None else None), (int(actor),)
+    return None, ()
+
+
+def _companions(details) -> list[int | None]:
+    got = (details or {}).get("with") or []
+    got = got if isinstance(got, list) else [got]
+    out: list[int | None] = []
+    for x in got:
+        raw = str(x).partition(":")[2] if str(x).startswith("actor:") else str(x)
+        out.append(int(raw) if raw.isdigit() else None)
+    return out
+
+
+def _travel(conn, me: int, call_id: str, intent: str, dest, met, details) -> dict:
+    """The journey; those travelling together arrive together, and whoever it was made to see is there."""
+    with_them = [x for x in _companions(details) if x is not None and x != me]
+    res = _named(conn, me, call_id, "travel", intent, None, dest, None, None, 0, details)
+    if res.get("status") != "applied":
+        return res
+    company.leave_all(conn)
+    arrived = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()[0]
+    for other in with_them:
+        conn.execute("UPDATE actors SET current_location_id=? WHERE id=?", (arrived, other))
+    waiting = [x for x in met if conn.execute("SELECT 1 FROM actors WHERE id=? AND current_location_id=?", (x, arrived)).fetchone()
+               or (details or {}).get("business")]
+    company.join(conn, [*with_them, *waiting])
+    return res
 
 
 def _day(conn) -> int:
@@ -104,8 +152,13 @@ def _validate(conn, action_type, intent, target_actor_id, target_location_id, in
         if target_actor_id is None and target_location_id is None and not has_subject:
             return "Say what is looked into: target_actor_id, target_location_id, or details.subject (a question, business or outfit)."
     if action_type == "travel":
-        if target_location_id is None or not conn.execute("SELECT 1 FROM locations WHERE id=?", (target_location_id,)).fetchone():
-            return "Unknown target_location_id."
+        dest, _ = _destination(conn, target_actor_id, target_location_id, details)
+        if dest is None or not conn.execute("SELECT 1 FROM locations WHERE id=?", (dest,)).fetchone():
+            return "Unknown destination: give target_location_id, or target_actor_id or details.business to go to them."
+        me = int(player["player_actor_id"])
+        for other in _companions(details):
+            if other is None or not company.in_earshot(conn, me, other):
+                return "details.with must be a list of actor ids of people who are here now."
     if action_type == "respond":
         if response_choice not in RESPONSES:
             return "response_choice must be accept, reject or counter."
@@ -146,6 +199,9 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
         if problem:
             return _refuse(action_type, problem, call_id)
         me = int(get_player(conn)["player_actor_id"])
+        dest, met = target_location_id, ()
+        if action_type == "travel":
+            dest, met = _destination(conn, target_actor_id, target_location_id, details)
         try:  # the world package's text vetoes: a real town that does not exist here, a dated rule not yet in force
             from engine import veto
             veto.check_world_text(conn, intent, details or {})
@@ -158,9 +214,13 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
             res = {k: v for k, v in out.items() if v is not None and k != "summary"}
             res.update({"status": out["status"], "action_type": action_type, "summary": _clip(out.get("summary")),
                         "elapsed_days": 0, "day_started": _day(conn), "day_ended": _day(conn), "operation_id": call_id})
+            if out["status"] != "refused" and target_actor_id is not None and company.in_earshot(conn, me, target_actor_id):
+                company.join(conn, [target_actor_id])
             return _classify(res)
         if action_type not in ACT_TYPES:
             return _free(conn, me, call_id, action_type, intent, target_actor_id, target_location_id, details)
+        if action_type == "travel":
+            return _travel(conn, me, call_id, intent, dest, met, details)
         return _named(conn, me, call_id, action_type, intent, target_actor_id, target_location_id, interaction_id,
                       response_choice, duration_days, details)
 
@@ -178,7 +238,8 @@ def _free(conn, me, call_id, action_type, intent, target_actor_id, target_locati
     hint = f.get("kind") or (action_type if action_type not in ("operation", "do", "act") else None)
     out = free_operation.run(conn, me, intent.strip(), f, call_id, hint)
     if out.get("status") == "delegate" and out.get("delegate") == "travel":
-        return _named(conn, me, call_id, "travel", intent, None, out["target_location_id"], None, None, 0, details)
+        met = (out["target_actor_id"],) if out.get("target_actor_id") else ()
+        return _travel(conn, me, call_id, intent, out["target_location_id"], met, details)
     res = {k: v for k, v in out.items() if v is not None and k != "summary"}
     res.update({"action_type": "operation", "summary": _clip(out.get("summary")), "elapsed_days": 0, "day_started": _day(conn),
                 "day_ended": _day(conn), "operation_id": call_id})
@@ -208,6 +269,7 @@ def _named(conn, me, call_id, action_type, intent, target_actor_id, target_locat
     if provider.arrival_note:
         out["destination_note"] = provider.arrival_note
     if action_type == "speak" and res["status"] == "applied":
+        company.join(conn, [target_actor_id])
         out.update(_spoken(conn, me, target_actor_id, d, call_id))
     if action_type == "investigate" and res["status"] == "applied":
         out.update(_investigated(conn, me, target_actor_id, target_location_id, d, max(1, int(duration_days or 1)), call_id))

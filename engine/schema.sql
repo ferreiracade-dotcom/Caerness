@@ -5839,3 +5839,10 @@ CREATE TABLE IF NOT EXISTS money_news (
     deal_id INTEGER,
     text TEXT NOT NULL
 );
+
+-- Schema 129: who is with the protagonist where they stand (travel companions, those dealt with today).
+CREATE TABLE IF NOT EXISTS company (
+    actor_id INTEGER PRIMARY KEY REFERENCES actors(id),
+    location_id INTEGER NOT NULL,
+    day INTEGER NOT NULL
+);

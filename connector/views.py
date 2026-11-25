@@ -85,8 +85,11 @@ def _town_sample(conn, people: list, me: int, limit: int) -> list:
     house = {r[0] for r in conn.execute(
         """SELECT m.actor_id FROM household_members m WHERE m.status='active' AND m.household_id IN
            (SELECT household_id FROM household_members WHERE actor_id=? AND status='active')""", (me,))}
+    from engine import company
+    beside = company.with_player(conn)
     close = mine | known | house
-    people = sorted(people, key=lambda a: a["id"] not in close)  # his own people, kin and acquaintances come first (stable otherwise)
+    # their own people, kin and acquaintances come first, then whoever is already with them (stable otherwise)
+    people = sorted(people, key=lambda a: (a["id"] not in close, a["id"] not in beside))
     if not crim.intersection(a["id"] for a in people):
         return people[:limit]
     out, strangers = [], 0
@@ -284,6 +287,9 @@ def compact_scene(conn) -> dict:
     here = loc["id"]
     present = []
     sampled = _town_sample(conn, people, int(me["actor_id"]), _LIMITS["present"])
+    from engine import company
+    company.join(conn, [a["id"] for a in sampled])  # whoever the scene shows is there for the rest of the day
+    conn.commit()
     for a in sampled:
         who, member = _who(conn, a), "; ".join(_member_of(conn, a["id"])) or None
         present.append(_drop_none({"id": a["id"], "name": a["name"], "sex": _sex(conn, a["id"], day), "who": who,

@@ -169,8 +169,12 @@ _SETTLED = re.compile(r"settlement|pass|port|quay|city|inn|waystone|district|for
 _UNSETTLED = re.compile(r"region|area|sea|river|lake$|range|isles|island|country|approach|frontier|basin|sphere", re.I)
 
 
+_IN_TOWN = re.compile(r"\b(city|town)\b", re.I)
+
+
 def nearest_on(conn: sqlite3.Connection, start_location_id: int | None, target_location_id: int) -> tuple[int, str] | None:
     """A region, sea, river, lake or range cannot be walked to: the nearest settlement, pass or port on it can.
+    Every other place, and any place inside a city, is gone to as itself.
 
     Returns (location id, how it was chosen) or None when the target is a place one can simply go to, or nothing on it is reachable."""
     row = conn.execute("SELECT name,kind FROM locations WHERE id=?", (target_location_id,)).fetchone()
@@ -193,8 +197,12 @@ def nearest_on(conn: sqlite3.Connection, start_location_id: int | None, target_l
         up.add(int(cur))
     if int(start_location_id) in chain or target_location_id in up:
         return None
-    if _SETTLED.search(kind) and not _UNSETTLED.search(kind.replace("mountain pass", "pass")):
+    if not _UNSETTLED.search(kind.replace("mountain pass", "pass")):
         return None
+    for parent in chain:
+        r = conn.execute("SELECT kind FROM locations WHERE id=?", (parent,)).fetchone()
+        if r and _IN_TOWN.search(str(r[0] or "")):
+            return None
     kids: set[int] = set()
     frontier = [target_location_id]
     while frontier:

@@ -8,6 +8,7 @@ proportion to the place, paid from his own purse.
 """
 from __future__ import annotations
 
+import difflib
 import json
 import math
 import random
@@ -25,16 +26,17 @@ class AuthoringRefused(ValueError):
     """The world has no such thing here; the message says why. reason_kind: `contradiction` (a fact of the world or a canon rule
     clashes: show it as story) or `input_gap` (the request was malformed: rephrase and retry)."""
 
-    def __init__(self, msg: str, reason_kind: str = "contradiction"):
+    def __init__(self, msg: str, reason_kind: str = "contradiction", accepted_places: list[str] | None = None):
         super().__init__(msg)
         self.reason_kind = reason_kind
+        self.accepted_places = accepted_places  # for a refusal about a place: places that would be accepted
 
 
 STAGE_NAMES = ("First", "Temper", "Third", "Breach", "Fifth", "Sixth")
 
 
-def _no(msg: str, kind: str = "contradiction"):
-    raise AuthoringRefused(msg, kind)
+def _no(msg: str, kind: str = "contradiction", places: list[str] | None = None):
+    raise AuthoringRefused(msg, kind, places)
 
 
 def _domain(fn, *a, **k):
@@ -83,14 +85,41 @@ def _lives_in(conn, aid: int, loc: int) -> bool:
     return False
 
 
+def surrounds(conn, loc: int) -> int | None:
+    """The settlement a place draws its people from: its own (a district counts by its parent city), or for a place nobody
+    is recorded in, the nearest settlement by road."""
+    s = veto.settlement_of(conn, loc)
+    if s is not None:
+        return s
+    from .actions import shortest_route
+    near = []
+    for r in conn.execute("SELECT DISTINCT location_id FROM background_population_sources WHERE population_estimate>0 AND location_id IS NOT NULL ORDER BY location_id"):
+        got = shortest_route(conn, int(loc), int(r[0]))
+        if got:
+            near.append((got[0], int(r[0])))
+    return min(near)[1] if near else None
+
+
+def _names(conn, ids) -> list[str]:
+    out = []
+    for i in ids:
+        r = conn.execute("SELECT name FROM locations WHERE id=?", (i,)).fetchone() if i is not None else None
+        if r and r[0] not in out:
+            out.append(str(r[0]))
+    return out
+
+
 def _settled(conn, loc: int, who: int, what: str) -> int:
-    """Somebody lives at the place (a district counts by its parent city), and the owner/leader is one of them."""
-    pop = _population(conn, loc)
-    if pop <= 0:
-        _no("nobody lives there")
-    if not _lives_in(conn, who, loc):
-        _no(f"{what} must live there")
-    return pop
+    """The owner or leader lives at the place or in the settlement around it. Returns that settlement, whose scale the
+    place is measured by."""
+    base = surrounds(conn, loc)
+    if base is None or _population(conn, base) <= 0:
+        _no("nobody lives there", places=_names(conn, [r[0] for r in conn.execute(
+            "SELECT DISTINCT location_id FROM background_population_sources WHERE population_estimate>0 AND location_id IS NOT NULL ORDER BY location_id LIMIT 15")]))
+    if not (_lives_in(conn, who, loc) or _lives_in(conn, who, base)):
+        theirs = conn.execute("SELECT home_location_id,current_location_id FROM actors WHERE id=?", (who,)).fetchone()
+        _no(f"{what} must live there", places=_names(conn, [theirs[0], theirs[1], veto.settlement_of(conn, theirs[0] or theirs[1] or loc)]))
+    return base
 
 
 def _day(conn) -> int:
@@ -109,7 +138,11 @@ def _place(conn, me: int, d: dict) -> int:
     if loc is None and d.get("place"):
         loc = veto.find_location(conn, d.get("place"))
         if loc is None:
-            _no(f"there is no place called {d.get('place')!r}")
+            every = [str(r[0]) for r in conn.execute("SELECT name FROM locations ORDER BY id")]
+            near = difflib.get_close_matches(str(d.get("place")), every, 5, 0.4)
+            mine = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (int(me),)).fetchone()[0]
+            _no(f"there is no place called {d.get('place')!r}",
+                places=list(dict.fromkeys([*near, *_names(conn, [mine]), *every]))[:15])
     if loc is None:
         loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (int(me),)).fetchone()[0]
     if loc is None or not conn.execute("SELECT 1 FROM locations WHERE id=?", (int(loc),)).fetchone():
@@ -210,7 +243,7 @@ def materialise_person(conn, *, loc, sex, age, work_domain, stage, elsewhere, na
                        growth_batches: int | None = None) -> int:
     """Pick one pre-existing identity of the place, reveal it, relocate an outsider, make it TRACKED and present there."""
     day = _day(conn)
-    pool = pool_loc if pool_loc is not None else veto.settlement_of(conn, loc)
+    pool = pool_loc if pool_loc is not None else surrounds(conn, loc)
     pick = pick or _pick_args(loc=pool if pool is not None else loc, sex=sex, age=age, work_domain=work_domain, stage=stage,
                               elsewhere=elsewhere, retired=retired, exact_stage=exact_stage, window=window)
     aid = resolve_background_person(conn, reason=reason, demand_kind="authoring", subtype=f"authored_{work_domain or 'person'}",
@@ -288,7 +321,7 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
                 _no(f"note {n} is not a general note that can be attached")
 
     day = _day(conn)
-    pool = veto.settlement_of(conn, loc)
+    pool = surrounds(conn, loc)
     pick = _pick_args(loc=pool if pool is not None else loc, sex=sex, age=age, work_domain=work, stage=stage, elsewhere=elsewhere, retired=retired)
     # A wife or a man's sibling/child carries his family name; the given name still comes from the identity.
     if full is None:
@@ -473,8 +506,8 @@ def _business(conn, me: int, d: dict, call_id: str) -> dict:
         _not_his(conn, me, owner, "the owner")
     if conn.execute("SELECT 1 FROM civilian_enterprises WHERE name=? AND location_id=?", (name, loc)).fetchone():
         _no(f"a business called {name} already stands here")
-    _settled(conn, loc, owner, "the owner")
-    sc = veto.place_scale(conn, loc)
+    base = _settled(conn, loc, owner, "the owner")
+    sc = veto.place_scale(conn, base)
     cap_new = max(1, math.ceil(veto.PROPORTION["business_share"] * max(sc["enterprises"], sc["population"] / 1000.0)))
     if _authored_count(conn, loc, "enterprise") >= cap_new:
         _no("the town has no room for another business of that kind")
@@ -487,7 +520,7 @@ def _business(conn, me: int, d: dict, call_id: str) -> dict:
             _no(str(e), "input_gap")
     else:
         asked = round(2.0 * max(0.5, _owner_means(conn, owner) / 50.0), 2)  # a modest start for the owner's means
-    adj, down = veto.holdings_in_proportion(conn, loc, [{"kind": trade, "name": name, "amount": asked}],
+    adj, down = veto.holdings_in_proportion(conn, base, [{"kind": trade, "name": name, "amount": asked}],
                                             prior_wealth=_founded_capital(conn, me) if founding else 0.0)
     if not adj:  # nothing can be given: zero is a valid answer
         _no("the town has no room for another business of that kind")
@@ -582,24 +615,24 @@ def _organisation(conn, me: int, d: dict, call_id: str) -> dict:
         _no("that person already heads another body")
     if conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone() or conn.execute("SELECT 1 FROM underworld_organizations WHERE name=?", (name,)).fetchone():
         _no(f"the name {name} is already in use")
-    _settled(conn, loc, leader, "the leader")
-    sc = veto.place_scale(conn, loc)
+    base = _settled(conn, loc, leader, "the leader")
+    sc = veto.place_scale(conn, base)
     from .underworld import ORG_TYPES
     if _OUTFIT_WORDS.search(typ):
         org_type = "crew" if "crew" in typ else "gang"
         cap_new = max(1, math.ceil(veto.PROPORTION["outfit_share"] * sc["outfits"]))
         if _authored_count(conn, loc, "outfit") >= cap_new:
             _no("the town has no room for another outfit")
-        scale = _outfit_scale(conn, loc)
+        scale = _outfit_scale(conn, base)
         asked = d.get("members")
         if asked is None:
             asked = max(1, round(scale["avg_members"] * random.Random(f"{call_id}:size").uniform(0.25, 0.6)))
         elif isinstance(asked, bool) or not isinstance(asked, (int, float)) or asked < 1:
             _no("members must be a number of at least 1", "input_gap")
         prior = sum(float(r[0]) for r in conn.execute(
-            f"SELECT member_count_estimate FROM underworld_organizations WHERE primary_location_id IN ({','.join('?' * len(_scope(conn, loc)))}) "
-            "AND json_extract(metadata_json,'$.authored')=1 AND status IN ('active','strained','fragmented')", _scope(conn, loc)))
-        adj, down = veto.holdings_in_proportion(conn, loc, [{"kind": "outfit", "members": int(asked)}], prior_members=prior)
+            f"SELECT member_count_estimate FROM underworld_organizations WHERE primary_location_id IN ({','.join('?' * len(_scope(conn, base)))}) "
+            "AND json_extract(metadata_json,'$.authored')=1 AND status IN ('active','strained','fragmented')", _scope(conn, base)))
+        adj, down = veto.holdings_in_proportion(conn, base, [{"kind": "outfit", "members": int(asked)}], prior_members=prior)
         members = int(adj[0]["members"])
         from .underworld import create_underworld_organization, ensure_underworld_membership_profile
         from .underworld_rebuild import create_personnel, ensure_heat_profile

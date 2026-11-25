@@ -4,6 +4,7 @@ import json
 import sqlite3
 from typing import Any
 
+from . import company
 from .canon import search_canon
 from .information import hear_local_rumours, learn_public_events_at_location, process_information
 from .competence import active_matters, pending_attention, process_competence
@@ -127,7 +128,9 @@ def _present_actors(conn: sqlite3.Connection, player_actor_id: int, location_id:
     if location_id is None:
         return []
     day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
-    ids = [aid for aid in actors_plausibly_present(conn, location_id, day=day, purpose=f"scene:{player_actor_id}") if aid != player_actor_id]
+    with_them = company.with_player(conn, location_id)
+    ids = [aid for aid in actors_plausibly_present(conn, location_id, day=day, purpose=f"scene:{player_actor_id}",
+                                                   exact_present_actor_ids=with_them) if aid != player_actor_id]
     rows = []
     if ids:
         marks = ",".join("?" for _ in ids)
