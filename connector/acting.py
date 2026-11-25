@@ -270,6 +270,7 @@ def _named(conn, me, call_id, action_type, intent, target_actor_id, target_locat
         out["destination_note"] = provider.arrival_note
     if action_type == "speak" and res["status"] == "applied":
         company.join(conn, [target_actor_id])
+        out["them"] = _them(conn, me, target_actor_id)  # before the talk adds to what they know
         out.update(_spoken(conn, me, target_actor_id, d, call_id))
     if action_type == "investigate" and res["status"] == "applied":
         out.update(_investigated(conn, me, target_actor_id, target_location_id, d, max(1, int(duration_days or 1)), call_id))
@@ -299,6 +300,49 @@ def _spoken(conn, me, target, d, call_id) -> dict:
             out["answers"] = []
             out["note"] = "He has nothing to say on that; anything he says beyond it is the GM's to invent and note."
     return out
+
+
+def _feeling(conn, who, me) -> str:
+    """How one person stands toward another, in plain words."""
+    from engine.relationships import relationship_view
+    r = relationship_view(conn, who, me)
+    said = [word for hit, word in (
+        (r["stance"] >= 30, "warm to you"), (10 <= r["stance"] < 30, "friendly"), (-30 < r["stance"] <= -10, "cool toward you"),
+        (r["stance"] <= -30, "hostile"), (r["trust"] >= 30, "trusts you"), (r["trust"] <= -20, "does not trust you"),
+        (r["respect"] >= 30, "respects you"), (r["resentment"] >= 30, "resents you"), (r["fear"] >= 30, "is afraid of you"),
+        (r["obligation"] >= 20, "feels in your debt")) if hit]
+    if r["familiarity"] < 15:
+        said.insert(0, "hardly knows you")
+    return ", ".join(said) or "knows you, with no strong feeling either way"
+
+
+def _them(conn, me, target) -> dict:
+    """What the other person brings to the talk: their feeling toward the protagonist, what they want, what they have heard
+    of the protagonist, and what stands open between the two."""
+    mine = conn.execute("SELECT name FROM actors WHERE id=?", (me,)).fetchone()[0]
+    wants = [str(r[0]) for r in conn.execute(
+        "SELECT description FROM goals WHERE actor_id=? AND status='active' ORDER BY priority DESC,id LIMIT 3", (target,))]
+    heard = [_clip(r[0], 200) for r in conn.execute(
+        """SELECT belief_text FROM knowledge WHERE knower_actor_id=? AND instr(belief_text,?)>0 AND learned_day>=?
+           AND belief_text NOT LIKE '%approach.' ORDER BY learned_day DESC,id DESC LIMIT 3""",
+        (target, str(mine).split()[0], _day(conn) - 180))]
+    pair = (me, target, target, me)
+    owed = (f"person:{me}", f"person:{target}", f"person:{target}", f"person:{me}")
+    open_between = [f"awaiting an answer: {_clip(r[0], 160)}" for r in conn.execute(
+        """SELECT i.interaction_type||' from '||a.name FROM interactions i JOIN actors a ON a.id=i.proposer_actor_id
+           WHERE i.status='pending' AND ((i.proposer_actor_id=? AND i.recipient_actor_id=?) OR (i.proposer_actor_id=? AND i.recipient_actor_id=?))""", pair)]
+    open_between += [_clip(r[0], 160) for r in conn.execute(
+        """SELECT summary FROM life_matters WHERE status='open' AND summary<>'' AND
+           ((subject_actor_id=? AND other_actor_id=?) OR (subject_actor_id=? AND other_actor_id=?)) LIMIT 3""", pair)]
+    from engine.money_records import fmt
+    open_between += [f"{r[0]}: {fmt(conn, r[1])}, not settled" for r in conn.execute(
+        """SELECT job,quote FROM deals WHERE status IN ('quoted','open') AND
+           ((customer_ref=? AND provider_ref=?) OR (customer_ref=? AND provider_ref=?)) LIMIT 3""", owed)]
+    open_between += [str(r[0]) for r in conn.execute(
+        """SELECT description FROM obligations WHERE status='active' AND
+           ((actor_id=? AND counterparty_actor_id=?) OR (actor_id=? AND counterparty_actor_id=?)) LIMIT 3""", pair)]
+    return {"toward_you": _feeling(conn, target, me), **({"wants": wants} if wants else {}),
+            **({"has_heard": heard} if heard else {}), **({"open_between": open_between} if open_between else {})}
 
 
 def _investigated(conn, me, actor, location, d, days, call_id) -> dict:

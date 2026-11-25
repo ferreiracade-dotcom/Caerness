@@ -283,6 +283,14 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
         _no(f"a {work} at that Stage is unheard of unless a retired master (aged 45 or more)")
     _domain(veto.stage_plausible, age if age is not None else 45, work or "soldier", stage)
     slot = _office_slot(conn, d.get("holds"))
+    if work_text and d.get("location_id") is None and not d.get("place"):  # the work may say where they are
+        there, pointed = veto.place_in_text(conn, work_text)
+        if there is not None:
+            d = {**d, "location_id": there}
+        elif pointed:
+            mine = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (int(me),)).fetchone()[0]
+            _no("the work says which side of town they are on: name the place", "input_gap",
+                places=list(dict.fromkeys([*_names(conn, [mine]), *[str(r[0]) for r in conn.execute("SELECT name FROM locations ORDER BY id")]]))[:15])
     loc = _place(conn, me, d)
     elsewhere = bool(d.get("from_elsewhere", False))
     wants = _text(d["wants"], "wants", 200) if d.get("wants") is not None else None
@@ -394,11 +402,19 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
         conn.execute("INSERT INTO goals(actor_id,description,priority,progress,status,created_day) VALUES (?,?,50,0,'active',?)", (aid, wants, day))
     for n in notes:
         conn.execute("UPDATE gm_notes SET subject_kind='actor',subject_id=? WHERE id=?", (aid, n))
+    said = " ".join(str(work_text or "").split())[:80]
+    if said and veto.norm(said) != work:  # what they do is as said: it is their trade and how they are described
+        conn.execute("UPDATE background_person_profiles SET occupation_domain=? WHERE actor_id=?", (work, aid))
+        conn.execute("UPDATE actors SET subtype=? WHERE id=?", (said, aid))
+        prof = conn.execute("SELECT * FROM background_person_profiles WHERE actor_id=?", (aid,)).fetchone()
+        down = []
+    else:
+        said = ""
     name = conn.execute("SELECT name FROM actors WHERE id=?", (aid,)).fetchone()[0]
     held = _hold_office(conn, slot, aid, day, call_id) if slot is not None else None
     return {"status": "created", "kind": "person", "actor_id": aid, "name": name, "sex": sex, "age": me_age,
             **({"named": named} if named else {}),
-            "work": held or prof["occupation_domain"], **({"work_domain": prof["occupation_domain"]} if held else {}), "location": conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0],
+            "work": held or prof["occupation_domain"], **({"work_domain": prof["occupation_domain"]} if held else {}), **({"role": said} if said else {}), "location": conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0],
             "from": origin, **({"holds": held} if held else {}), **({"scaled_down": down} if down else {}),
             "as_stated": [x for x in ({"field": "age", "value": str(age), "reason": age_set["why"] if age_set else "exactly as said"} if age is not None else None,
                                       {"field": "sex", "value": sex, "reason": "as said or as the name says"} if not sex_drawn else None) if x]}

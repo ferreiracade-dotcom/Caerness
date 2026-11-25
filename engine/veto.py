@@ -29,18 +29,19 @@ _KEYWORDS = (
                  "swordsman", "duelist", "lancer", "archer", "general", "garrison", "cadet",
                  "police", "constable", "sheriff", "deputy", "detective", "patrolm", "trooper")),
     ("criminal", ("thief", "smuggl", "gang", "mobster", "crime", "thug", "gangster", "racket", "fence", "pimp", "bandit", "outlaw", "criminal", "brothel", "gambl", "enforcer",
-                  "cutpurse", "underworld", "crime boss", "extortion")),
+                  "cutpurse", "underworld", "crime boss", "extortion", "social club", "go between", "loan shark", "bookie")),
     ("clerk", ("clerk", "scribe", "notary", "accountant", "bookkeep", "secretary", "steward", "registrar", "archivist", "official",
                "magistrate", "bailiff", "tax", "reeve",
                "mayor", "judge", "prosecutor", "alderman", "councilman", "councillor", "senator", "governor")),
     ("teacher", ("teacher", "tutor", "scholar", "professor", "priest", "monk", "abbot", "instructor", "lecturer", "sage", "preacher")),
-    ("hospitality", ("innkeep", "tavern", "inn", "cook", "brewer", "servant", "maid", "butler", "host", "baker", "kitchen", "barkeep", "caterer")),
+    ("hospitality", ("innkeep", "tavern", "inn", "cook", "brewer", "servant", "maid", "butler", "host", "baker", "kitchen", "barkeep", "caterer",
+                     "restaurant", "diner", "cafe", "pizzeria", "bartender", "waiter", "waitress", "nightclub", "hotel")),
     ("transport", ("carter", "sailor", "ferry", "courier", "driver", "boatman", "teamster", "navigator", "caravan", "coachman", "porter",
                    "bargeman", "shipmaster", "rider", "messenger")),
     ("artist", ("painter", "poet", "musician", "singer", "actor", "dancer", "bard", "sculpt", "playwright", "performer", "illustrator", "minstrel")),
     ("merchant", ("merchant", "trader", "shop", "peddler", "broker", "dealer", "vendor", "banker", "money", "financ", "wholesal", "factor",
                   "moneylend", "lender", "importer", "chandler", "grocer", "stallholder", "collector")),
-    ("artisan", ("smith", "carpent", "mason", "cooper", "potter", "weaver", "tailor", "cobbler", "tanner", "glass", "joiner", "craft",
+    ("artisan", ("mechanic", "barber", "smith", "carpent", "mason", "cooper", "potter", "weaver", "tailor", "cobbler", "tanner", "glass", "joiner", "craft",
                  "wright", "dyer", "jeweler", "jeweller", "lamp", "chandler", "saddler", "fletcher", "cutler", "engraver")),
     ("labor", ("labor", "dock", "farm", "miner", "sweep", "hand", "digger", "woodcutter", "shepherd", "herder", "fisher", "navvy")),
 )
@@ -73,6 +74,22 @@ def categorise(text: Any, hint: str | None = None) -> str:
 
 def norm(text: Any) -> str:
     return re.sub(r"[^a-z0-9]+", " ", str(text or "").lower()).strip()
+
+
+_SIDE = re.compile(r"\b(north|south|east|west) ?(side|end)\b")
+
+
+def place_in_text(conn: sqlite3.Connection, text: Any) -> tuple[int | None, bool]:
+    """A place named inside free text, however it is spaced ("on the east side" finds a place called Eastside), and whether
+    the text points at a side of town at all."""
+    said = norm(text)
+    run = said.replace(" ", "")
+    best: tuple[int, int | None] = (0, None)
+    for r in conn.execute("SELECT id,name FROM locations ORDER BY id"):
+        name = re.sub(r"^the ", "", norm(r["name"])).replace(" ", "")
+        if len(name) >= 6 and name in run and len(name) > best[0]:
+            best = (len(name), int(r["id"]))
+    return best[1], bool(_SIDE.search(said))
 
 
 def find_location(conn: sqlite3.Connection, ref: Any) -> int | None:
