@@ -16937,6 +16937,26 @@
   "source": "unsourced",
   "note": "unsourced; Most weeks of living money someone nobody has counted has on hand (drawn from half a week up). Design proposal. (P2.5: engine/money_records.py)"
  },
+ "money_start_week_usd": {
+  "default": 150,
+  "range": null,
+  "unit": "dollars",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; A week of a trade wage, 1975, for a new protagonist's savings. Design proposal. (P2.9: engine/new_character.py)"
+ },
+ "money_start_weeks_per_year": {
+  "default": 0.6,
+  "range": null,
+  "unit": "weeks",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Weeks of pay a working person has put by for each year since fifteen. Design proposal. (P2.9: engine/new_character.py)"
+ },
  "money_retry_days": {
   "default": 7,
   "range": null,

@@ -69,7 +69,7 @@ def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: st
     if name:
         veto.canon_figure(conn, name)
         veto.real_person(conn, name)
-        veto.name_taken(conn, name)
+        name = veto.free_full_name(conn, name)
     for _ in range(400):
         if name:
             break
@@ -454,6 +454,157 @@ def fill_lived_past(conn: sqlite3.Connection, aid: int, *, key: str, proposal: d
             "spouse": fam["spouse"], "children": fam["children"]}
 
 
+# ---------------------------------------------------------------- the people the player names
+
+_TIES = (("rival", r"rival|enemy|grudge|can't stand"), ("friend", r"friend|\bpal\b|buddy|\bmate\b|like a brother"),
+         ("mentor", r"mentor|taught him|teacher"),
+         ("colleague", r"mechanic|colleague|co-?worker|works|employee|hand\b|foreman|business partner|crew|boss"),
+         ("kin_extended", r"uncle|aunt|cousin|nephew|niece|grand|in-law"), ("family", r"father|mother|brother|sister|\bson\b|daughter|wife|husband"))
+
+
+def _tie_of(relation: str) -> str:
+    t = relation.lower()
+    return next((kind for kind, words in _TIES if re.search(words, t)), "acquaintance")
+
+
+def _read_people(conn, p: dict) -> list[dict]:
+    """`people`: those he names, each {name?, relation, age?, sex?, work?, since?, works?}. A `ties` entry naming nobody who exists
+    is one of them too. His close family belongs under `family`."""
+    given = p.get("people") or []
+    given = [given] if isinstance(given, (dict, str)) else list(given)
+    for t in p.get("ties") or []:
+        who = t.get("who") if isinstance(t, dict) else None
+        if who and not conn.execute("SELECT 1 FROM actors WHERE name=?", (who,)).fetchone():
+            given.append({**t, "name": who})
+    if len(given) > 12:
+        raise Contradiction("name at most twelve people here; the rest can be added once he exists")
+    out = []
+    for x in given:
+        x = {"name": x} if isinstance(x, str) else dict(x)
+        relation = str(x.get("relation") or x.get("as") or "someone he knows")[:80]
+        kind = _tie_of(relation)
+        if kind == "family":
+            raise Contradiction(f"{x.get('name') or relation} is close family: put them under `family`")
+        out.append({**x, "name": str(x.get("name") or x.get("who") or "").strip() or None, "relation": relation, "kind": kind})
+    return out
+
+
+def _tie_numbers(kind: str, rng: random.Random, relation: str) -> dict[str, float]:
+    def u(lo: float, hi: float) -> float:
+        return lo + (hi - lo) * rng.random()
+    if kind == "friend":
+        extra = 8.0 if re.search(r"best|closest|oldest|like a brother", relation.lower()) else 0.0
+        v = {"familiarity": u(85, 96), "affection": u(55, 75) + extra, "trust": u(55, 75) + extra, "loyalty": u(50, 70) + extra,
+             "respect": u(25, 50), "obligation": 25.0}
+    elif kind == "colleague":
+        v = {"familiarity": u(65, 85), "affection": u(10, 40), "trust": u(25, 55), "respect": u(20, 45), "loyalty": u(15, 40)}
+    elif kind == "rival":
+        v = {"familiarity": u(50, 75), "affection": u(-40, -10), "trust": u(-40, -10), "resentment": u(30, 60), "respect": u(-10, 25)}
+    else:
+        from .opening_family import _tie_values
+        return _tie_values("kin_extended" if kind == "kin_extended" else "acquaintance", rng)
+    v["stance"] = (v["affection"] + v["trust"]) / 2.0
+    return v
+
+
+def _tie_start(rng: random.Random, since: Any, mine: int, theirs: int, day: int) -> int:
+    t = str(since or "").lower()
+    num = re.search(r"\d+", t)
+    if re.search(r"boyhood|girlhood|childhood|\bkids?\b|children|school|always|grew up", t):
+        start = mine + 9 * 365
+    elif num and "year" in t and "old" not in t:
+        start = day - int(num.group()) * 365
+    elif num and int(num.group()) < 80:
+        start = mine + int(num.group()) * 365
+    else:
+        start = day - rng.randint(300, 1500)
+    return int(min(day, max(start, mine + 4 * 365, theirs + 4 * 365)))
+
+
+def _named_people(conn, listed: list[dict], *, me: int, loc: int, age: int, sex: str, key: str, call_id: str, day: int,
+                  group: str | None, shop: int | None, acct: list, made: list) -> None:
+    """Each person the player named is made now, tied to him as said, and put to work in the business where said."""
+    from .merchant import add_enterprise_staff
+    from .opening_family import _seed_pair
+    from .relationships import ensure_relationship
+    his = "his" if sex == "male" else "her"
+    mine = int(conn.execute("SELECT birth_day FROM actor_life_profiles WHERE actor_id=?", (me,)).fetchone()[0])
+    for i, x in enumerate(listed):
+        k = f"{key}:person{i}"
+        rng = _rng(k)
+        relation, kind = x["relation"], x["kind"]
+        word = f"{relation} {x.get('since') or ''}".lower()
+        years = x.get("age") if isinstance(x.get("age"), int) else None
+        if years is None:
+            if re.search(r"\bold(er)?\b|veteran", relation.lower()) or kind == "mentor":
+                years = age + rng.randint(16, 30)
+            elif "younger" in relation.lower():
+                years = max(16, age - rng.randint(2, 6))
+            else:
+                years = max(8, age + rng.randint(-2, 2))
+        his_sex = x.get("sex") if x.get("sex") in ("male", "female") else veto.name_sex(x["name"], None, conn)
+        if his_sex is None:
+            his_sex = "female" if re.search(r"girl|woman|\blady\b", word) else "male" if re.search(r"\bguy\b|\bman\b|\bboy", word) else sex
+        name, apart = x["name"], False
+        if name:
+            veto.canon_figure(conn, name)
+            fresh = veto.free_full_name(conn, name)
+            name, apart = fresh, fresh != name
+        work = x.get("work")
+        who = {"name": name, "work": work, "from_elsewhere": True}
+        pid, _ = _materialise_exact(conn, who, loc=loc, sex=his_sex, age=years, cat=veto.categorise(work, None), stage=None, key=k,
+                                    call_id=f"{call_id}:p{i}", got={}, window=3, group=group, day=day)
+        name = _name(conn, pid)
+        theirs = int(conn.execute("SELECT birth_day FROM actor_life_profiles WHERE actor_id=?", (pid,)).fetchone()[0])
+        start = _tie_start(rng, x.get("since"), mine, theirs, day)
+        ensure_relationship(conn, me, pid, day, started_day=start, **_tie_numbers(kind, _rng(f"{k}:mine"), relation))
+        ensure_relationship(conn, pid, me, day, started_day=start, **_tie_numbers(kind, _rng(f"{k}:theirs"), relation))
+        since = f", {x['since']}" if x.get("since") else ""
+        for knower, text in ((me, f"{name} is {his} {relation}{since}."), (pid, f"{_name(conn, me)}: {relation} to each other{since}.")):
+            conn.execute("INSERT OR IGNORE INTO knowledge(knower_actor_id,fact_key,belief_text,confidence,truth_event_id,learned_day) "
+                         "VALUES (?,?,?,1.0,NULL,?)", (knower, f"lived:tie:{me}:{pid}", text, start))
+        conn.execute("""INSERT OR IGNORE INTO actor_memories(actor_id,memory_key,summary,valence,significance,source_kind,source_id,created_day,last_reinforced_day)
+                        VALUES (?,?,?,?,?,'admin',0,?,?)""",
+                     (me, f"lived:tie:{pid}", f"{name}: {relation}{since}.", -0.3 if kind == "rival" else 0.5, 0.7, start, day))
+        at_work = ""
+        wants = x.get("works") or x.get("_works")
+        if wants and shop is not None:
+            for r in conn.execute("SELECT actor_id FROM enterprise_staff WHERE enterprise_id=? AND status='active' AND actor_id NOT IN (?,?)",
+                                  (shop, me, pid)).fetchall():
+                _seed_pair(conn, pid, int(r[0]), "colleague", key=f"{k}:crew:{r[0]}", started_day=day - rng.randint(200, 2000))
+            add_enterprise_staff(conn, shop, pid, role=str(work or "worker")[:60], authority=25)
+            at_work = ", works at " + str(conn.execute("SELECT name FROM civilian_enterprises WHERE id=?", (shop,)).fetchone()[0])
+        elif wants:
+            at_work = ", no business of his or his family's for them to work in yet"
+        acct.append({"field": "person", "status": "stated", "value": f"{name}, {relation}, {years}{at_work}",
+                     "reason": "as you said; a real person from now on" + ("" if x["name"] else "; name filled") +
+                     ("; somebody else has that exact name, so a middle initial sets this one apart" if apart else "")})
+        made.append(f"knows {name}")
+
+
+def _stated_cash(p: dict) -> float | None:
+    """The sum of money the player gave as a number, or None when none was said."""
+    total, said = 0.0, False
+    for h in p.get("holdings") or []:
+        if not isinstance(h, dict) or not any(w in str(h.get("kind") or h.get("name") or "").lower() for w in _CASH):
+            continue
+        raw = h.get("amount")
+        found = re.search(r"\d[\d,]*(\.\d+)?", str(raw)) if raw is not None else None
+        if found:
+            total, said = total + float(found.group().replace(",", "")), True
+    return total if said else None
+
+
+def _savings(conn, key: str, age: int, means: float) -> float:
+    """What a working person has put by, in the package's money: weeks of a trade wage, more with the years and the family's means."""
+    from . import design
+    if age < 16:
+        return 0.0
+    weeks = min(age - 15, 30) * float(design.figure(conn, "money_start_weeks_per_year", 0.0))
+    spread = _rng(f"{key}:savings").uniform(0.7, 1.3) * max(0.4, min(2.0, means / 50.0))
+    return float(round(weeks * spread * float(design.figure(conn, "money_start_week_usd", 0.0))))
+
+
 # ================================================================ proposal -> protagonist
 
 _VIOLENT = ("gang", "crew", "outfit", "mob", "syndicate", "thieves", "racket", "enforcer", "smuggl", "cutthroat", "bandit")
@@ -507,7 +658,8 @@ def resolve_sex(conn, proposal: dict, key: str) -> tuple[str, bool]:
 def _key(conn, proposal: dict) -> str:
     import hashlib
     seed = int(conn.execute("SELECT rng_seed FROM world_state WHERE id=1").fetchone()[0])
-    core = {k: proposal.get(k) for k in ("name", "sex", "age", "place", "work", "category", "stage", "family", "affiliation", "holdings", "ties", "from_elsewhere")}
+    # Only what fixes who can be him: adding or rewording anything else between preview and accept redraws nothing already shown.
+    core = {k: proposal.get(k) for k in ("age", "place", "from_elsewhere")}
     blob = json.dumps([seed, int(proposal.get("draw", 0) or 0), core], sort_keys=True, default=str)
     return "newchar:" + hashlib.sha1(blob.encode()).hexdigest()[:16]
 
@@ -775,6 +927,13 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
         p["affiliation"] = None
         p["family_business"] = None
     group = _name_group(conn, p)
+    apart = None
+    if p.get("name"):
+        veto.canon_figure(conn, p["name"])
+        fresh = veto.free_full_name(conn, p["name"])
+        if fresh != " ".join(str(p["name"]).split()):
+            apart, p = fresh, {**p, "name": fresh}
+    listed = _read_people(conn, p)
     prop = {**p, "sex": sex, "_exact": True, "_name_group": group}
     try:
         facts = veto.check_proposal(conn, prop)
@@ -798,6 +957,9 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
     aid, off = _materialise_exact(conn, p, loc=loc, sex=sex, age=age, cat=cat, stage=stage, key=key, call_id=call_id, got=got,
                                   window=facts["window"], group=group, day=day)
     acct: list[dict] = []
+    if apart:
+        acct.append({"field": "name", "status": "filled", "value": apart,
+                     "reason": "somebody else already has that exact name, so a middle initial sets him apart"})
     acct.append({"field": "age", "status": "stated", "value": str(age),
                  "reason": "exactly as you said" + (f"; the person drawn from the city's people was {abs(off)} year{'s' if abs(off) > 1 else ''} "
                                                     f"{'younger' if off < 0 else 'older'}, so his birth date was set to make it so" if off else "")})
@@ -813,7 +975,13 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
     means, _tags = _family_means(conn, [aid])
     start = round(0.5 * 4.0 * (means / 50.0) ** 3 * max(0.4, min(1.2, age / 45.0)), 2) if age >= 16 else 0.0
     set_player(conn, aid, campaign_name or _campaign_name())
-    funds = start + cash  # what he founds is paid in just before it is founded (below), never more than becomes capital
+    from . import money_records
+    money = money_records.currency(conn)
+    said_cash = _stated_cash(p) if money else None
+    if money:  # real money: what he said he has, else a working person's savings
+        funds = said_cash if said_cash is not None else _savings(conn, key, age, means)
+    else:
+        funds = start + cash  # what he founds is paid in just before it is founded (below), never more than becomes capital
     if funds > 0:
         ledger._credit(conn, ("person", aid), funds)
     hid = None
@@ -827,6 +995,7 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
     made: list[str] = []
     outfit_ids: list[int] = []
     holds = 0
+    shops: list[int] = []
     aff_resolved = None
     aff = p.get("affiliation") or {}
     oname = aff.get("name") or aff.get("text")
@@ -849,6 +1018,7 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
             elif any(w in text for w in _BIZ):
                 b = authoring._business(conn, aid, {"name": oname, "trade": atype or str(oname), "location_id": loc}, call_id + ":b")
                 down += b.get("scaled_down", [])
+                shops.append(b["enterprise_id"])
                 made.append(f"keeps {oname}")
                 holds += 1
             else:
@@ -880,6 +1050,7 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
         if paid_in - capital > 1e-9:  # the town bore less than was paid in: the rest goes back, he keeps nothing unearned
             ledger._debit(conn, ("person", aid), paid_in - capital)
         down += b.get("scaled_down", [])
+        shops.append(b["enterprise_id"])
         made.append(f"owns {b['name']}")
         holds += 1
     for h in plan["rackets"]:
@@ -905,18 +1076,25 @@ def _build(conn, p: dict, call_id: str, campaign_name: str | None) -> dict:
     for t in p.get("ties") or []:
         who = t.get("who") if isinstance(t, dict) else None
         other = conn.execute("SELECT id FROM actors WHERE name=? AND actor_type='character' AND status='active'", (who,)).fetchone() if who else None
-        if other:
+        if other and not any(x["name"] == who for x in listed):
             _seed_pair(conn, aid, int(other[0]), "acquaintance", key=f"{key}:tie:{who}", started_day=day - 700)
     past = fill_lived_past(conn, aid, key=key, proposal={**p, "_affiliation": aff_resolved, "_holds": holds})
     acct += past.get("acct", [])
     fbiz = p.get("_family_business")
     if fbiz is not None:
-        _family_business(conn, fbiz, me=aid, people=past.get("people", {}), loc=loc, day=day, key=key, call_id=call_id, acct=acct, made=made)
+        family_shop = _family_business(conn, fbiz, me=aid, people=past.get("people", {}), loc=loc, day=day, key=key, call_id=call_id,
+                                       acct=acct, made=made)
+        shops.insert(0, family_shop["enterprise_id"])
+        for x in listed:  # named among those who work there
+            x["_works"] = bool(x["name"]) and x["name"].lower() in fbiz["works"]
+    _named_people(conn, listed, me=aid, loc=loc, age=age, sex=sex, key=key, call_id=call_id, day=day, group=group,
+                  shop=shops[0] if shops else None, acct=acct, made=made)
     acct.append({"field": "leads", "status": "stated" if (fbiz or not (aff_resolved or outfit_ids)) else "stated", "value": ", ".join(
         m for m in made if m.startswith(("leads", "heads", "keeps", "owns"))) or "nothing",
         "reason": "as you said" if fbiz else "only what you gave him to lead or own"})
-    acct.append({"field": "money", "status": "filled", "value": ledger.scale_word(max(start, 0.01)),
-                 "reason": "not said; savings follow his family's means and his years"})
+    acct.append({"field": "money", "status": "stated" if said_cash is not None else "filled",
+                 "value": money_records.fmt(conn, funds) if money else ledger.scale_word(max(start, 0.01)),
+                 "reason": "as you said" if said_cash is not None else "not said; savings follow his family's means and his years"})
     acct.append({"field": "neighbours, colleagues, local knowledge, memories", "status": "filled",
                  "value": f"{past['digest'].get('neighbours', 0)} neighbours, {past['digest'].get('colleagues', 0)} colleagues",
                  "reason": "not said; the city's people and what a man of that age and trade would know"})

@@ -62,7 +62,7 @@ def main() -> None:
             assert out.get("actor_id"), out
             return out["actor_id"]
 
-        sam, rocco, frank = person("Samuel Harris"), person("Rocco Ferrante"), person("Frank Amato")
+        sam, rocco, frank = person("Samuel Harrow"), person("Rocco Ferrante"), person("Frank Amato")
 
         money("set_cash", holder="me", amount="$200", reason="his savings")
         s = server.scene()
@@ -85,7 +85,7 @@ def main() -> None:
         out = skip(8)
         assert cash(sam) == 150 and cash(frank) >= 25, (cash(sam), cash(frank))
         said = " | ".join(out["money"])
-        assert "Samuel Harris paid $175" in said and "Rocco Ferrante" in said and "still owes" in said, said
+        assert "Samuel Harrow paid $175" in said and "Rocco Ferrante" in said and "still owes" in said, said
         listed = money("show")
         owing = {d["deal_id"]: d for d in listed["owed_to_him"]}
         assert deal["deal_id"] not in owing, listed  # paid in full: closed, and the papers went back

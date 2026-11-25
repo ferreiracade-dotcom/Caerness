@@ -232,6 +232,21 @@ def name_taken(conn: sqlite3.Connection, name: str | None) -> None:
         raise Contradiction(f"the name {name} is already in use")
 
 
+def free_full_name(conn: sqlite3.Connection, name: str) -> str:
+    """The name as asked, or, when somebody else carries that full name, the same name set apart by a middle initial.
+    A single name cannot be set apart and is refused."""
+    name = " ".join(str(name).split())
+    if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
+        return name
+    first, _, rest = name.partition(" ")
+    for init in "JMAEFRTWCDGHLPS" if rest else "":
+        cand = f"{first} {init}. {rest}"
+        if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
+            return cand
+    name_taken(conn, name)
+    return name
+
+
 def name_sex(name: str | None, sex: str | None, conn: sqlite3.Connection | None = None) -> str | None:
     """Names follow sex. Returns the sex the name implies (or None if the given name is unlisted, as single names may be);
     raises if it belongs to the other sex than the one stated."""

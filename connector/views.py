@@ -88,8 +88,8 @@ def _town_sample(conn, people: list, me: int, limit: int) -> list:
     from engine import company
     beside = company.with_player(conn)
     close = mine | known | house
-    # their own people, kin and acquaintances come first, then whoever is already with them (stable otherwise)
-    people = sorted(people, key=lambda a: (a["id"] not in close, a["id"] not in beside))
+    # the household they are with comes first, then their own people, kin and acquaintances, then whoever is already with them
+    people = sorted(people, key=lambda a: (not (a["id"] in house and a["id"] in beside), a["id"] not in close, a["id"] not in beside))
     if not crim.intersection(a["id"] for a in people):
         return people[:limit]
     out, strangers = [], 0

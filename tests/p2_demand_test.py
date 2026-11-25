@@ -52,7 +52,7 @@ def main() -> None:
             with connect() as conn:
                 return conn.execute(sql, args).fetchone()[0]
 
-        sam, rocco, lou = person("Samuel Harris"), person("Rocco Ferrante"), person("Louie Marchetti")
+        sam, rocco, lou = person("Samuel Harrow"), person("Rocco Ferrante"), person("Louie Marchetti")
         server.money(cid(), "set_cash", {"holder": sam, "amount": 40, "reason": "in his pocket"})
         server.money(cid(), "set_cash", {"holder": rocco, "amount": 40, "reason": "in his pocket"})
         one = server.money(cid(), "deal", {"customer": sam, "job": "Camaro", "quote": 25, "due_in_days": 2})["deal_id"]

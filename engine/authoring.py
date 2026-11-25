@@ -287,10 +287,11 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     elsewhere = bool(d.get("from_elsewhere", False))
     wants = _text(d["wants"], "wants", 200) if d.get("wants") is not None else None
     full = None
+    named = None
     if d.get("name") is not None:
         full = _text(d["name"], "name", 60)  # a single name ("Brother Tam") is a name
         _domain(veto.canon_figure, conn, full)
-        _domain(veto.name_taken, conn, full)
+        full, named = _set_apart(conn, me, full)
         implied = _domain(veto.name_sex, full, sex, conn)
         sex = sex or implied
     sex_drawn = sex is None
@@ -396,10 +397,33 @@ def _person(conn, me: int, d: dict, call_id: str) -> dict:
     name = conn.execute("SELECT name FROM actors WHERE id=?", (aid,)).fetchone()[0]
     held = _hold_office(conn, slot, aid, day, call_id) if slot is not None else None
     return {"status": "created", "kind": "person", "actor_id": aid, "name": name, "sex": sex, "age": me_age,
+            **({"named": named} if named else {}),
             "work": held or prof["occupation_domain"], **({"work_domain": prof["occupation_domain"]} if held else {}), "location": conn.execute("SELECT name FROM locations WHERE id=?", (loc,)).fetchone()[0],
             "from": origin, **({"holds": held} if held else {}), **({"scaled_down": down} if down else {}),
             "as_stated": [x for x in ({"field": "age", "value": str(age), "reason": age_set["why"] if age_set else "exactly as said"} if age is not None else None,
                                       {"field": "sex", "value": sex, "reason": "as said or as the name says"} if not sex_drawn else None) if x]}
+
+
+def _set_apart(conn, me: int, full: str) -> tuple[str, str | None]:
+    """The name for a new person, and a note when it had to change. Somebody the protagonist knows, or the GM already made, is
+    never made twice; a stranger who merely carries the same full name does not take it from the new person."""
+    row = conn.execute("SELECT id FROM actors WHERE name=?", (full,)).fetchone()
+    if row is None:
+        return full, None
+    other = int(row[0])
+    first, _, rest = full.partition(" ")
+    listed = bool(conn.execute("SELECT 1 FROM sqlite_master WHERE name='authored_entities'").fetchone())  # the connector's own list
+    same = [int(r[0]) for r in conn.execute("SELECT id FROM actors WHERE name=? OR name LIKE ? ORDER BY name<>?,id",
+                                            (full, f"{first} _. {rest}", full))]
+    for who in same:  # the one of that name, set apart or not, who is already part of his life
+        ours = who == me or conn.execute("SELECT 1 FROM relationships WHERE (actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?)",
+                                         (me, who, who, me)).fetchone()
+        if not ours and listed:
+            ours = conn.execute("SELECT 1 FROM authored_entities WHERE entity_table='actors' AND entity_id=?", (who,)).fetchone()
+        if ours or not rest:
+            _no(f"the name {full} is already in use by actor {who}: if you mean that person, use that id; otherwise give another name")
+    fresh = _domain(veto.free_full_name, conn, full)
+    return fresh, f"actor {other}, somebody else, already carries the name {full}, so this one is {fresh}"
 
 
 def _office_slot(conn, holds: Any):
