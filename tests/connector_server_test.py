@@ -37,7 +37,7 @@ def run():
         assert sorted(t.name for t in tools) == ["act", "advance", "author", "correct", "lookup", "lore", "money", "note", "resume", "scene"]
         size = len(json.dumps([t.model_dump(by_alias=True, exclude_none=True) for t in tools], ensure_ascii=False))
         print(f"tool definitions: {size} chars")
-        assert size <= 9400, size  # resume gained save and new_save; advance gained from_day, undo and confirm; the money tool; the scene note; correct
+        assert size <= 9650, size  # resume gained save and new_save; advance gained from_day, undo and confirm; the money tool; the scene note; correct; want and chance notes
 
         r = server.resume_current()
         assert "error" not in r and "rulebook" in r, r

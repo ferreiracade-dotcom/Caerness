@@ -1,0 +1,1439 @@
+{
+ "about": "What things cost, in the dollars of the opening year, for the game master and for what people want. Each figure is Sourced (with where it comes from) or a Design proposal. Rows with ref take their figure from the price table.",
+ "year": 1975,
+ "index": "cpi_multiplier_{year}",
+ "purchase_words": [
+  "buy",
+  "buys",
+  "buying",
+  "bought",
+  "price",
+  "priced",
+  "cost",
+  "costs",
+  "afford",
+  "pay for",
+  "paying for",
+  "how much",
+  "for sale",
+  "lease",
+  "leases",
+  "leasing",
+  "rent",
+  "rents",
+  "renting",
+  "order a",
+  "shopping",
+  "saving for",
+  "save for",
+  "deposit",
+  "asking"
+ ],
+ "items": [
+  {
+   "key": "room_furnished_week",
+   "name": "Furnished room with a shared bath",
+   "words": [
+    "room",
+    "furnished room",
+    "rooming house",
+    "boarding house",
+    "board",
+    "rent"
+   ],
+   "price": 25,
+   "low": 18,
+   "high": 35,
+   "group": "rent",
+   "per": "a week",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "rent_one_bedroom",
+   "name": "One-bedroom apartment, working district",
+   "words": [
+    "one bedroom",
+    "one-bedroom",
+    "apartment",
+    "flat",
+    "rent",
+    "own place"
+   ],
+   "price": 125,
+   "low": 95,
+   "high": 175,
+   "group": "rent",
+   "per": "a month",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "rent_two_bedroom_walkup",
+   "name": "Two-bedroom walk-up apartment",
+   "words": [
+    "two bedroom",
+    "two-bedroom",
+    "walk-up",
+    "walkup",
+    "apartment",
+    "flat",
+    "rent"
+   ],
+   "ref": "rent_eastside_walkup_2br",
+   "group": "rent",
+   "per": "a month"
+  },
+  {
+   "key": "rent_apartment_better",
+   "name": "Apartment in a better working-class block",
+   "words": [
+    "apartment",
+    "flat",
+    "rent"
+   ],
+   "ref": "rent_workingclass_apartment",
+   "group": "rent",
+   "per": "a month"
+  },
+  {
+   "key": "rent_house",
+   "name": "Small house, rented",
+   "words": [
+    "house rent",
+    "rented house",
+    "rent a house",
+    "house to rent",
+    "rent"
+   ],
+   "price": 260,
+   "low": 180,
+   "high": 380,
+   "group": "rent",
+   "per": "a month",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "house_row",
+   "name": "Row house in an old district, to buy",
+   "words": [
+    "house",
+    "row house",
+    "buy a house",
+    "mortgage"
+   ],
+   "ref": "house_row_charlestown_eastside",
+   "group": "house"
+  },
+  {
+   "key": "house_suburb",
+   "name": "Single-family suburban house, to buy",
+   "words": [
+    "house",
+    "suburban house",
+    "buy a house",
+    "mortgage"
+   ],
+   "ref": "house_single_family_suburb",
+   "group": "house"
+  },
+  {
+   "key": "house_down_payment",
+   "name": "Down payment on a modest house",
+   "words": [
+    "down payment",
+    "buy a house",
+    "mortgage"
+   ],
+   "price": 3500,
+   "low": 1500,
+   "high": 8000,
+   "group": "house",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "car_new_economy",
+   "name": "New economy car (Vega class)",
+   "words": [
+    "new car",
+    "car",
+    "economy car",
+    "compact",
+    "vega",
+    "pinto"
+   ],
+   "price": 2786,
+   "low": 2700,
+   "high": 3400,
+   "group": "new car",
+   "mark": "Sourced",
+   "source": "1975 Chevrolet Vega coupe base price (one secondary source, a VIN decoder page)",
+   "url": "https://decodethis.com/web/vin/1V77B5U242750"
+  },
+  {
+   "key": "car_new_compact",
+   "name": "New compact sedan (Nova or Maverick class)",
+   "words": [
+    "new car",
+    "car",
+    "compact",
+    "sedan",
+    "nova",
+    "maverick"
+   ],
+   "price": 3600,
+   "low": 3200,
+   "high": 4300,
+   "group": "new car",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "car_new_average",
+   "name": "New car, the average sale",
+   "words": [
+    "new car",
+    "car",
+    "average car"
+   ],
+   "price": 4961,
+   "low": 4200,
+   "high": 5800,
+   "group": "new car",
+   "mark": "Sourced",
+   "source": "Average US new-car price in 1975, as given by Jalopnik",
+   "url": "https://www.jalopnik.com/2209848/heres-how-much-gap-between-american-income-car-prices-increased-55-years/"
+  },
+  {
+   "key": "car_new_full",
+   "name": "New full-size car (Impala class)",
+   "words": [
+    "new car",
+    "car",
+    "full-size",
+    "impala",
+    "sedan",
+    "coupe"
+   ],
+   "price": 4575,
+   "low": 4400,
+   "high": 5600,
+   "group": "new car",
+   "mark": "Sourced",
+   "source": "J.D. Power, original MSRP of the 1975 Chevrolet Impala sport coupe",
+   "url": "https://www.jdpower.com/cars/1975/chevrolet/impala/2-door-sport-coupe"
+  },
+  {
+   "key": "car_new_luxury",
+   "name": "New luxury car (Cadillac De Ville)",
+   "words": [
+    "new car",
+    "car",
+    "cadillac",
+    "lincoln",
+    "luxury car"
+   ],
+   "price": 8600,
+   "low": 8600,
+   "high": 10500,
+   "group": "new car",
+   "mark": "Sourced",
+   "source": "J.D. Power, original MSRP of the 1975 Cadillac De Ville coupe",
+   "url": "https://www.jdpower.com/cars/1975/cadillac/deville/2-door-coupe"
+  },
+  {
+   "key": "car_used_beater",
+   "name": "Used car, eight or ten years old, runs",
+   "words": [
+    "used car",
+    "car",
+    "beater",
+    "cheap car",
+    "old car",
+    "secondhand car",
+    "second-hand car"
+   ],
+   "price": 450,
+   "low": 200,
+   "high": 800,
+   "group": "used car",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "car_used_decent",
+   "name": "Used sedan, three to five years old",
+   "words": [
+    "used car",
+    "car",
+    "sedan",
+    "secondhand car",
+    "second-hand car"
+   ],
+   "price": 1600,
+   "low": 900,
+   "high": 2400,
+   "group": "used car",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "car_used_late",
+   "name": "Used car, one or two years old",
+   "words": [
+    "used car",
+    "car",
+    "late model",
+    "secondhand car",
+    "second-hand car"
+   ],
+   "price": 2900,
+   "low": 2200,
+   "high": 3800,
+   "group": "used car",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "car_used_muscle",
+   "name": "Used muscle car, late 1960s",
+   "words": [
+    "used car",
+    "car",
+    "muscle car",
+    "camaro",
+    "mustang",
+    "gto",
+    "chevelle",
+    "hot rod"
+   ],
+   "price": 1800,
+   "low": 1000,
+   "high": 3200,
+   "group": "used car",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "truck_used",
+   "name": "Used pickup or van",
+   "words": [
+    "used truck",
+    "truck",
+    "pickup",
+    "van"
+   ],
+   "price": 1500,
+   "low": 800,
+   "high": 2600,
+   "group": "used car",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "motorcycle_used",
+   "name": "Used motorcycle",
+   "words": [
+    "motorcycle",
+    "motorbike",
+    "bike",
+    "harley"
+   ],
+   "price": 650,
+   "low": 350,
+   "high": 1200,
+   "group": "used car",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "suit_good",
+   "name": "Good wool suit",
+   "words": [
+    "suit",
+    "good suit",
+    "wool suit"
+   ],
+   "price": 143,
+   "low": 110,
+   "high": 200,
+   "group": "clothes",
+   "mark": "Sourced",
+   "source": "Saint Laurie suit advertisement, New York magazine, 29 Dec 1975",
+   "url": "https://www.bionicdisco.com/2014/03/02/daily-70s-ad-the-saint-laurie-suit-1975/"
+  },
+  {
+   "key": "suit_cheap",
+   "name": "Cheap polyester leisure suit",
+   "words": [
+    "suit",
+    "cheap suit",
+    "leisure suit"
+   ],
+   "price": 39.9,
+   "low": 39.9,
+   "high": 60,
+   "group": "clothes",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, lowest-priced item, as quoted by D. Boudreaux, Cafe Hayek, 28 Dec 2012",
+   "url": "https://cafehayek.com/2012/12/cataloging-our-progress-mens-business-wear-1975-2012.html"
+  },
+  {
+   "key": "suit_tailored",
+   "name": "Suit made to measure by a neighbourhood tailor",
+   "words": [
+    "suit",
+    "tailor",
+    "tailored suit",
+    "custom suit"
+   ],
+   "price": 240,
+   "low": 180,
+   "high": 400,
+   "group": "clothes",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "jacket_leather",
+   "name": "Leather jacket",
+   "words": [
+    "jacket",
+    "leather jacket",
+    "coat"
+   ],
+   "price": 80,
+   "low": 55,
+   "high": 130,
+   "group": "clothes",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "jacket_cloth",
+   "name": "Cloth or work jacket",
+   "words": [
+    "jacket",
+    "windbreaker",
+    "work jacket"
+   ],
+   "price": 22,
+   "low": 14,
+   "high": 38,
+   "group": "clothes",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "raincoat",
+   "name": "Raincoat",
+   "words": [
+    "raincoat",
+    "overcoat",
+    "coat"
+   ],
+   "price": 26.88,
+   "low": 26.88,
+   "high": 55,
+   "group": "clothes",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, lowest-priced item, as quoted by D. Boudreaux, Cafe Hayek, 28 Dec 2012",
+   "url": "https://cafehayek.com/2012/12/cataloging-our-progress-mens-business-wear-1975-2012.html"
+  },
+  {
+   "key": "shoes_cheap",
+   "name": "Cheap dress shoes",
+   "words": [
+    "shoes",
+    "dress shoes",
+    "cheap shoes"
+   ],
+   "price": 14.99,
+   "low": 14.99,
+   "high": 20,
+   "group": "clothes",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, lowest-priced item, as quoted by D. Boudreaux, Cafe Hayek, 28 Dec 2012",
+   "url": "https://cafehayek.com/2012/12/cataloging-our-progress-mens-business-wear-1975-2012.html"
+  },
+  {
+   "key": "shoes_good",
+   "name": "Good leather shoes",
+   "words": [
+    "shoes",
+    "dress shoes",
+    "good shoes",
+    "loafers"
+   ],
+   "price": 32,
+   "low": 22,
+   "high": 55,
+   "group": "clothes",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "boots_work",
+   "name": "Work boots",
+   "words": [
+    "boots",
+    "work boots",
+    "shoes"
+   ],
+   "price": 28,
+   "low": 18,
+   "high": 40,
+   "group": "clothes",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "shirt_dress",
+   "name": "Dress shirt",
+   "words": [
+    "shirt",
+    "dress shirt"
+   ],
+   "price": 4.99,
+   "low": 4.99,
+   "high": 14,
+   "group": "clothes",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, lowest-priced item, as quoted by D. Boudreaux, Cafe Hayek, 28 Dec 2012",
+   "url": "https://cafehayek.com/2012/12/cataloging-our-progress-mens-business-wear-1975-2012.html"
+  },
+  {
+   "key": "necktie",
+   "name": "Necktie",
+   "words": [
+    "tie",
+    "necktie"
+   ],
+   "price": 3.5,
+   "low": 3.5,
+   "high": 10,
+   "group": "clothes",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, lowest-priced item, as quoted by D. Boudreaux, Cafe Hayek, 28 Dec 2012",
+   "url": "https://cafehayek.com/2012/12/cataloging-our-progress-mens-business-wear-1975-2012.html"
+  },
+  {
+   "key": "belt_leather",
+   "name": "Leather belt",
+   "words": [
+    "belt"
+   ],
+   "price": 5.0,
+   "low": 5.0,
+   "high": 12,
+   "group": "clothes",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, lowest-priced item, as quoted by D. Boudreaux, Cafe Hayek, 28 Dec 2012",
+   "url": "https://cafehayek.com/2012/12/cataloging-our-progress-mens-business-wear-1975-2012.html"
+  },
+  {
+   "key": "dress_woman",
+   "name": "Woman's dress",
+   "words": [
+    "dress",
+    "gown",
+    "frock"
+   ],
+   "price": 22,
+   "low": 12,
+   "high": 45,
+   "group": "clothes",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "movie_ticket",
+   "name": "Movie ticket",
+   "words": [
+    "movie",
+    "movies",
+    "picture show",
+    "cinema",
+    "night out"
+   ],
+   "price": 2.03,
+   "low": 1.5,
+   "high": 3.0,
+   "group": "night out",
+   "mark": "Sourced",
+   "source": "National Association of Theatre Owners average ticket price, 1975, as quoted by Cheapism",
+   "url": "https://www.cheapism.com/cost-movie-ticket-year-you-were-born"
+  },
+  {
+   "key": "beer_draft",
+   "name": "Draft beer at a neighbourhood bar",
+   "words": [
+    "beer",
+    "draft beer",
+    "drink",
+    "bar",
+    "tavern",
+    "night out"
+   ],
+   "price": 0.5,
+   "low": 0.35,
+   "high": 0.75,
+   "group": "night out",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "drink_mixed",
+   "name": "Mixed drink",
+   "words": [
+    "drink",
+    "cocktail",
+    "whiskey",
+    "bar",
+    "night out"
+   ],
+   "price": 1.25,
+   "low": 0.9,
+   "high": 2.0,
+   "group": "night out",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "dinner_two_plain",
+   "name": "Dinner for two at a neighbourhood restaurant",
+   "words": [
+    "dinner",
+    "supper",
+    "restaurant",
+    "date",
+    "meal",
+    "night out"
+   ],
+   "price": 14,
+   "low": 9,
+   "high": 22,
+   "group": "night out",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "dinner_two_good",
+   "name": "Dinner for two at a good restaurant",
+   "words": [
+    "dinner",
+    "good restaurant",
+    "steakhouse",
+    "supper club",
+    "night out"
+   ],
+   "price": 35,
+   "low": 25,
+   "high": 60,
+   "group": "night out",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "dance_cover",
+   "name": "Admission to a dance or club",
+   "words": [
+    "dance",
+    "dancing",
+    "disco",
+    "cover charge",
+    "ballroom",
+    "night out"
+   ],
+   "price": 3,
+   "low": 1,
+   "high": 6,
+   "group": "night out",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "night_out_two",
+   "name": "An evening out for two: dinner, drinks and dancing",
+   "words": [
+    "night out",
+    "date",
+    "evening out",
+    "dance",
+    "dancing"
+   ],
+   "price": 32,
+   "low": 18,
+   "high": 60,
+   "group": "night out",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "ring_engagement",
+   "name": "Diamond engagement ring, small stone",
+   "words": [
+    "ring",
+    "engagement ring",
+    "diamond"
+   ],
+   "price": 300,
+   "low": 150,
+   "high": 700,
+   "group": "jewellery",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "ring_wedding",
+   "name": "Plain gold wedding band",
+   "words": [
+    "ring",
+    "wedding band",
+    "wedding ring"
+   ],
+   "price": 50,
+   "low": 25,
+   "high": 100,
+   "group": "jewellery",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "ring_signet",
+   "name": "Man's gold signet or pinky ring",
+   "words": [
+    "ring",
+    "pinky ring",
+    "signet"
+   ],
+   "price": 85,
+   "low": 40,
+   "high": 200,
+   "group": "jewellery",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "watch_wrist",
+   "name": "Good wristwatch",
+   "words": [
+    "a watch",
+    "wristwatch",
+    "gift"
+   ],
+   "price": 75,
+   "low": 30,
+   "high": 200,
+   "group": "jewellery",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "gift_necklace",
+   "name": "Gold chain or necklace, a present",
+   "words": [
+    "gift",
+    "present",
+    "necklace",
+    "chain",
+    "locket"
+   ],
+   "price": 40,
+   "low": 20,
+   "high": 100,
+   "group": "gift",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "gift_flowers",
+   "name": "Bunch of flowers or a dozen roses",
+   "words": [
+    "gift",
+    "present",
+    "flowers",
+    "roses",
+    "bouquet"
+   ],
+   "price": 9,
+   "low": 4,
+   "high": 18,
+   "group": "gift",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "gift_perfume",
+   "name": "Bottle of perfume",
+   "words": [
+    "gift",
+    "present",
+    "perfume",
+    "cologne"
+   ],
+   "price": 12,
+   "low": 6,
+   "high": 30,
+   "group": "gift",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "gift_record",
+   "name": "Record album",
+   "words": [
+    "gift",
+    "present",
+    "record album",
+    "album"
+   ],
+   "price": 5,
+   "low": 4,
+   "high": 7,
+   "group": "gift",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "gift_candy",
+   "name": "Box of chocolates",
+   "words": [
+    "gift",
+    "present",
+    "candy",
+    "chocolates"
+   ],
+   "price": 4,
+   "low": 2,
+   "high": 8,
+   "group": "gift",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "gift_radio",
+   "name": "Transistor radio",
+   "words": [
+    "gift",
+    "present",
+    "radio",
+    "transistor"
+   ],
+   "price": 20,
+   "low": 12,
+   "high": 45,
+   "group": "gift",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "sofa",
+   "name": "Sofa",
+   "words": [
+    "furniture",
+    "sofa",
+    "couch"
+   ],
+   "price": 250,
+   "low": 150,
+   "high": 450,
+   "group": "furniture",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "bedroom_set",
+   "name": "Bedroom set",
+   "words": [
+    "furniture",
+    "bedroom set",
+    "dresser"
+   ],
+   "price": 450,
+   "low": 250,
+   "high": 800,
+   "group": "furniture",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "bed_mattress",
+   "name": "Bed and mattress",
+   "words": [
+    "furniture",
+    "bed",
+    "mattress"
+   ],
+   "price": 140,
+   "low": 80,
+   "high": 250,
+   "group": "furniture",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "kitchen_table",
+   "name": "Kitchen table and chairs",
+   "words": [
+    "furniture",
+    "table",
+    "chairs",
+    "dinette"
+   ],
+   "price": 120,
+   "low": 70,
+   "high": 220,
+   "group": "furniture",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "refrigerator",
+   "name": "Refrigerator",
+   "words": [
+    "refrigerator",
+    "fridge",
+    "icebox",
+    "appliance"
+   ],
+   "price": 350,
+   "low": 250,
+   "high": 520,
+   "group": "furniture",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "range_kitchen",
+   "name": "Kitchen range, the catalog's best",
+   "words": [
+    "kitchen range",
+    "stove",
+    "oven",
+    "appliance"
+   ],
+   "price": 589.95,
+   "low": 220,
+   "high": 589.95,
+   "group": "furniture",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, as quoted by D. Boudreaux, Cafe Hayek, 26 Jan 2006 (read through a search summary)",
+   "url": "https://www.cafehayek.com/2006/01/a_1975_sears_ca.html"
+  },
+  {
+   "key": "microwave",
+   "name": "Microwave oven",
+   "words": [
+    "microwave",
+    "appliance"
+   ],
+   "price": 189.95,
+   "low": 189.95,
+   "high": 439.95,
+   "group": "furniture",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, as quoted by D. Boudreaux, Cafe Hayek, 26 Jan 2006 (read through a search summary)",
+   "url": "https://www.cafehayek.com/2006/01/a_1975_sears_ca.html"
+  },
+  {
+   "key": "tv_color_console",
+   "name": "Colour television, the catalog's best",
+   "words": [
+    "television",
+    "tv",
+    "colour tv",
+    "color tv",
+    "console"
+   ],
+   "price": 749.95,
+   "low": 450,
+   "high": 749.95,
+   "group": "tv",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, as quoted by D. Boudreaux, Cafe Hayek, 26 Jan 2006 (read through a search summary)",
+   "url": "https://www.cafehayek.com/2006/01/a_1975_sears_ca.html"
+  },
+  {
+   "key": "tv_color_19",
+   "name": "19-inch colour television",
+   "words": [
+    "television",
+    "tv",
+    "colour tv",
+    "color tv"
+   ],
+   "price": 400,
+   "low": 320,
+   "high": 500,
+   "group": "tv",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "Sears listed a 19-inch set at $369.95 in 1977; the 1975 figure is a proposal"
+  },
+  {
+   "key": "tv_black_white",
+   "name": "Black-and-white television",
+   "words": [
+    "television",
+    "tv",
+    "black and white"
+   ],
+   "price": 137.95,
+   "low": 80,
+   "high": 170,
+   "group": "tv",
+   "mark": "Sourced",
+   "source": "Sears Fall/Winter 1975 catalog, as quoted by D. Boudreaux, Cafe Hayek, 26 Jan 2006 (read through a search summary)",
+   "url": "https://www.cafehayek.com/2006/01/a_1975_sears_ca.html"
+  },
+  {
+   "key": "tools_hand_set",
+   "name": "Mechanic's hand tool set with chest",
+   "words": [
+    "tools",
+    "tool set",
+    "tool chest",
+    "wrenches",
+    "sockets"
+   ],
+   "price": 180,
+   "low": 100,
+   "high": 350,
+   "group": "tools",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "tools_floor_jack",
+   "name": "Two-ton floor jack",
+   "words": [
+    "floor jack",
+    "tools",
+    "shop equipment"
+   ],
+   "price": 90,
+   "low": 60,
+   "high": 150,
+   "group": "tools",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "tools_engine_hoist",
+   "name": "Engine hoist",
+   "words": [
+    "engine hoist",
+    "hoist",
+    "shop equipment",
+    "tools"
+   ],
+   "price": 220,
+   "low": 150,
+   "high": 350,
+   "group": "tools",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "tools_welder",
+   "name": "Electric arc welder",
+   "words": [
+    "welder",
+    "welding",
+    "tools",
+    "shop equipment"
+   ],
+   "price": 180,
+   "low": 120,
+   "high": 360,
+   "group": "tools",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "tools_compressor",
+   "name": "Shop air compressor",
+   "words": [
+    "compressor",
+    "shop equipment",
+    "tools"
+   ],
+   "price": 450,
+   "low": 250,
+   "high": 800,
+   "group": "tools",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "tools_lift",
+   "name": "Two-post car lift, installed",
+   "words": [
+    "car lift",
+    "hydraulic lift",
+    "shop equipment",
+    "garage equipment"
+   ],
+   "price": 2200,
+   "low": 1500,
+   "high": 3500,
+   "group": "tools",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "tools_analyzer",
+   "name": "Engine analyzer for tuning",
+   "words": [
+    "analyzer",
+    "analyser",
+    "tune-up",
+    "shop equipment"
+   ],
+   "price": 1800,
+   "low": 900,
+   "high": 3500,
+   "group": "tools",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "lease_storefront",
+   "name": "Small storefront, leased",
+   "words": [
+    "storefront",
+    "store lease",
+    "lease",
+    "shop rent",
+    "commercial"
+   ],
+   "price": 200,
+   "low": 120,
+   "high": 350,
+   "group": "commercial",
+   "per": "a month",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "lease_garage",
+   "name": "Two-bay garage, leased",
+   "words": [
+    "garage lease",
+    "lease",
+    "bays",
+    "own shop",
+    "commercial"
+   ],
+   "price": 350,
+   "low": 220,
+   "high": 600,
+   "group": "commercial",
+   "per": "a month",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "buy_storefront",
+   "name": "Small shop building with a flat above, to buy",
+   "words": [
+    "buy a shop",
+    "shop building",
+    "building",
+    "storefront",
+    "commercial"
+   ],
+   "price": 28000,
+   "low": 18000,
+   "high": 45000,
+   "group": "commercial",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "buy_garage",
+   "name": "Small garage with its lot, to buy",
+   "words": [
+    "buy a garage",
+    "garage",
+    "shop building",
+    "building",
+    "commercial"
+   ],
+   "price": 38000,
+   "low": 22000,
+   "high": 70000,
+   "group": "commercial",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "open_shop_fit",
+   "name": "Fixtures, stock and papers to open a small shop",
+   "words": [
+    "open a shop",
+    "own shop",
+    "fixtures",
+    "stock"
+   ],
+   "price": 3000,
+   "low": 1200,
+   "high": 8000,
+   "group": "commercial",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "electric_month",
+   "name": "Electricity for an apartment",
+   "words": [
+    "electricity",
+    "electric",
+    "light bill",
+    "utilities"
+   ],
+   "price": 18,
+   "low": 10,
+   "high": 32,
+   "group": "utilities",
+   "per": "a month",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "gas_month",
+   "name": "Cooking gas for an apartment",
+   "words": [
+    "gas bill",
+    "cooking gas",
+    "utilities"
+   ],
+   "price": 9,
+   "low": 5,
+   "high": 18,
+   "group": "utilities",
+   "per": "a month",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "heating_oil_gallon",
+   "name": "Heating oil",
+   "words": [
+    "heating oil",
+    "utilities"
+   ],
+   "price": 0.38,
+   "low": 0.35,
+   "high": 0.44,
+   "group": "utilities",
+   "per": "a gallon",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "EIA series give about 37.7 cents for 1975; the table itself was not checked"
+  },
+  {
+   "key": "heating_winter_month",
+   "name": "Heating a small house through a winter month",
+   "words": [
+    "heating",
+    "heating bill",
+    "utilities"
+   ],
+   "price": 48,
+   "low": 30,
+   "high": 90,
+   "group": "utilities",
+   "per": "a month",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "phone_month",
+   "name": "Telephone line, residential",
+   "words": [
+    "phone",
+    "telephone",
+    "phone line"
+   ],
+   "price": 9,
+   "low": 6,
+   "high": 13,
+   "group": "phone",
+   "per": "a month",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "phone_install",
+   "name": "Installing a telephone line",
+   "words": [
+    "phone",
+    "telephone",
+    "phone line",
+    "hookup",
+    "installation"
+   ],
+   "price": 25,
+   "low": 15,
+   "high": 40,
+   "group": "phone",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "insurance_car",
+   "name": "Car insurance, a settled driver",
+   "words": [
+    "insurance",
+    "car insurance"
+   ],
+   "price": 260,
+   "low": 160,
+   "high": 450,
+   "group": "insurance",
+   "per": "a year",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "insurance_car_young",
+   "name": "Car insurance, an unmarried man under 25",
+   "words": [
+    "insurance",
+    "car insurance"
+   ],
+   "price": 520,
+   "low": 350,
+   "high": 850,
+   "group": "insurance",
+   "per": "a year",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "insurance_tenant",
+   "name": "Renter's insurance",
+   "words": [
+    "insurance",
+    "renter's insurance",
+    "contents"
+   ],
+   "price": 60,
+   "low": 40,
+   "high": 110,
+   "group": "insurance",
+   "per": "a year",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "insurance_life",
+   "name": "Small life policy, a young adult",
+   "words": [
+    "insurance",
+    "life insurance",
+    "policy"
+   ],
+   "price": 120,
+   "low": 60,
+   "high": 250,
+   "group": "insurance",
+   "per": "a year",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "insurance_shop",
+   "name": "Fire and liability cover for a small shop",
+   "words": [
+    "insurance",
+    "shop insurance",
+    "liability"
+   ],
+   "price": 600,
+   "low": 300,
+   "high": 1300,
+   "group": "insurance",
+   "per": "a year",
+   "mark": "Design proposal",
+   "source": "unsourced"
+  },
+  {
+   "key": "gasoline",
+   "name": "Gasoline",
+   "words": [
+    "gasoline",
+    "gas",
+    "fuel"
+   ],
+   "ref": "gasoline_gallon",
+   "group": "everyday",
+   "per": "a gallon"
+  },
+  {
+   "key": "cigarettes",
+   "name": "Pack of cigarettes",
+   "words": [
+    "cigarettes",
+    "smokes",
+    "pack"
+   ],
+   "ref": "cigarettes_pack",
+   "group": "everyday"
+  },
+  {
+   "key": "breakfast",
+   "name": "Diner breakfast",
+   "words": [
+    "breakfast",
+    "diner"
+   ],
+   "ref": "diner_breakfast",
+   "group": "everyday"
+  },
+  {
+   "key": "bread",
+   "name": "Loaf of bread",
+   "words": [
+    "bread",
+    "groceries"
+   ],
+   "ref": "bread_loaf",
+   "group": "everyday"
+  },
+  {
+   "key": "milk",
+   "name": "Gallon of milk",
+   "words": [
+    "milk",
+    "groceries"
+   ],
+   "ref": "milk_gallon",
+   "group": "everyday"
+  },
+  {
+   "key": "newspaper",
+   "name": "Daily newspaper",
+   "words": [
+    "newspaper",
+    "paper"
+   ],
+   "ref": "newspaper_daily",
+   "group": "everyday"
+  },
+  {
+   "key": "funeral",
+   "name": "Ordinary adult funeral",
+   "words": [
+    "funeral",
+    "burial"
+   ],
+   "ref": "funeral_ordinary",
+   "group": "everyday"
+  }
+ ]
+}

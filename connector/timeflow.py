@@ -108,6 +108,9 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
                                    interruption_policy="meaningful" if interrupt in (None, SOMETHING) else interrupt,
                                    max_chunk_days=7 if interrupt == SOMETHING else 30)
         heard = money_records.last_news(conn)
+        from engine import temptations
+        offered = temptations.last_id(conn)
+        offered_from = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
         run = resolve_time_skip(conn, run_id)
         start, end = int(run["start_day"]), int(run["actual_end_day"])
         interrupted = run["status"] == "interrupted"
@@ -130,6 +133,12 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
             out["money"] = paid[:20]
             if len(paid) > 20:
                 out["money_more"] = len(paid) - 20
+        chances = temptations.open_for(conn, me, offered)
+        if chances:  # new in these days and still open
+            out["chances"] = chances
+        gone = temptations.gone_for(conn, me, offered_from + 1)
+        if gone:
+            out["chances_gone"] = gone
         from engine import history
         due = history.due_prompt(conn, start, end)
         if due:  # what the real world had coming in these days: the GM looks up what his sphere touches and proposes it

@@ -43,6 +43,8 @@
   "prison": "prison.json",
   "history": "history.json",
   "money": "money.json",
+  "price_book": "prices.json",
+  "wants": "wants.json",
   "matters": "matters.json"
  },
  "name_pools": {

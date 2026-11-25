@@ -24,7 +24,7 @@ def _has(c, t):
 def test_fresh_opening_has_the_tables_without_ensure():
     from engine.db import SCHEMA_VERSION
     c = open_world().conn
-    assert SCHEMA_VERSION == 130
+    assert SCHEMA_VERSION == 131
     for t in TABLES:
         assert _has(c, t), t
 
@@ -53,7 +53,7 @@ def test_a_127_save_migrates_keeps_rows_and_money():
     init_db()
     c2 = connect()
     from engine.db import SCHEMA_VERSION
-    assert c2.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION == 130
+    assert c2.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION == 131
     for t in TABLES:
         assert _has(c2, t), t
         assert c2.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] == 0

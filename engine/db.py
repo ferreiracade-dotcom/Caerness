@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 130
+SCHEMA_VERSION = 131
 
 
 def _running_tests() -> bool:
@@ -4728,6 +4728,19 @@ def _migration_127(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE held_things ADD COLUMN basis_json TEXT NOT NULL DEFAULT '{}'")
 
 
+def _migration_131(conn: sqlite3.Connection) -> None:
+    """G1: the new tables come from schema.sql. Going quiet (news choices) sets a bearing mark 'quiet', which the table's
+    check refused, so the table is rebuilt with it allowed; every row is kept."""
+    row = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='bearing_marks'").fetchone()
+    if row is None or "'quiet'" in row[0]:
+        return
+    conn.execute("ALTER TABLE bearing_marks RENAME TO bearing_marks_old")
+    conn.execute(row[0].replace("('active','gone')", "('active','gone','quiet')"))
+    conn.execute("INSERT INTO bearing_marks SELECT * FROM bearing_marks_old")
+    conn.execute("DROP TABLE bearing_marks_old")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_bearing_marks_actor ON bearing_marks(actor_id, status, kind)")
+
+
 def _migration_117(conn: sqlite3.Connection) -> None:
     """Organisation core: the outfit tables become organisation tables (every row kept, the old tables dropped).
 
@@ -4909,6 +4922,7 @@ _MIGRATIONS: dict[int, Migration] = {
     124: ("intake_core", "One intake: held things at B depth and the depth gaps they flag (held_things, depth_gaps)", None),
     125: ("business_layer", "BZ1 shared business layer: driver readings, ventures with parties and approvals, places, agreement terms and breaches (driver_readings, venture_details, venture_parties, venture_approvals, place_details, agreement_terms, agreement_breaches)", None),
     127: ("real_history", "R1 real history: documented real facts with the run's outcome, divergences, technology levels, real figures (history_entries, divergences, tech_level, real_figures; held_things.basis_json)", _migration_127),
+    131: ("wants_temptations", "G1: what people want and the chances the world puts before the protagonist (wants, temptations; tables from schema.sql); bearing marks may be quiet", _migration_131),
     130: ("gm_corrections", "G1: what the game master corrected on the player's word (corrections; table from schema.sql)", None),
     129: ("p2_playtest", "P2: ordinary-life matters and their steps (life_matters, life_matter_steps, life_matter_clock; tables from schema.sql)", None),
     128: ("prison_j1", "J1 prison: facilities, inside groups, inmate stays, channels, contacts, events, law reviews, inmate ties (facilities, facility_groups, inmate_stays, prison_channels, prison_contacts, prison_events, law_reviews, inmate_ties)", None),

@@ -5224,7 +5224,7 @@ CREATE TABLE IF NOT EXISTS bearing_marks (
     source TEXT NOT NULL DEFAULT 'proposed' CHECK (source IN ('proposed','derived')),
     beyond_means INTEGER NOT NULL DEFAULT 0,
     recorded_day INTEGER NOT NULL,
-    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','gone')),
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','gone','quiet')),
     UNIQUE(actor_id, kind, text)
 );
 CREATE INDEX IF NOT EXISTS idx_bearing_marks_actor ON bearing_marks(actor_id, status, kind);
@@ -5866,3 +5866,40 @@ CREATE TABLE IF NOT EXISTS corrections (
     call_id TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Schema 131: what people want (wants) and the concrete chances the world puts in the protagonist's way (temptations).
+CREATE TABLE IF NOT EXISTS wants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    key TEXT NOT NULL,
+    item TEXT,
+    what TEXT NOT NULL,
+    reason TEXT NOT NULL DEFAULT '',
+    price REAL,
+    per TEXT,
+    strength REAL NOT NULL DEFAULT 0.5,
+    other_actor_id INTEGER,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','matters','dropped','met','passed')),
+    source TEXT NOT NULL DEFAULT 'derived' CHECK (source IN ('derived','said')),
+    created_day INTEGER NOT NULL DEFAULT 0,
+    updated_day INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(actor_id, key)
+);
+CREATE TABLE IF NOT EXISTS temptations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    actor_id INTEGER NOT NULL REFERENCES actors(id) ON DELETE CASCADE,
+    want_id INTEGER,
+    want_key TEXT NOT NULL,
+    text TEXT NOT NULL,
+    price REAL NOT NULL,
+    per TEXT,
+    carrier_actor_id INTEGER,
+    business_id INTEGER,
+    location_id INTEGER,
+    opened_day INTEGER NOT NULL,
+    expires_day INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','taken','refused','lapsed','gone')),
+    taker_actor_id INTEGER,
+    updated_day INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_temptations_actor ON temptations(actor_id, status);

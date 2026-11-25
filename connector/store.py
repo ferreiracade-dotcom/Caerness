@@ -107,7 +107,7 @@ def notes_count(conn, subject_kind: str, subject_id: int) -> int:
     return int(conn.execute("SELECT COUNT(*) FROM gm_notes WHERE subject_kind=? AND subject_id=?", (subject_kind, int(subject_id))).fetchone()[0])
 
 
-NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact", "bearing", "form", "claim", "scene")
+NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact", "bearing", "form", "claim", "scene", "want", "chance")
 SHEET_FIELDS = ("appearance", "voice", "temperament", "ambitions", "habits", "history", "standing")
 _CLIP = {"recap": 600, "thread": 160, "error": 500}  # the sheet, standing rules and the last scene are kept whole
 MAX_THREADS = 8
@@ -222,6 +222,12 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
         return add_note(conn, subject_kind, subject_id, text, call_id)
     if kind == "claim":
         return _claim_note(conn, text, subject_id, field)
+    if kind == "want":  # field = matters|drop|met, subject_id = the want's id; without one, text is a wish in his words
+        from connector import market
+        return market.want_note(conn, field, subject_id, text)
+    if kind == "chance":  # field = taken|refused, subject_id = the chance's id
+        from connector import market
+        return market.chance_note(conn, field, subject_id)
     if kind in ("bearing", "form"):
         return _presence_note(conn, kind, text, subject_id, field)
     if kind == "scene":

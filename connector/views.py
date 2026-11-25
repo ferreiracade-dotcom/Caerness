@@ -331,7 +331,9 @@ def compact_scene(conn) -> dict:
         conn.commit()  # the ledger marks what this call delivers
     from engine import civic_tick
     politics = civic_tick.view(conn, int(me["actor_id"]), day) if civic_tick.enabled(conn) else None
+    from connector import market
     return _drop_none({
+        "market": market.scene_block(conn, int(me["actor_id"])),
         "texture": tex,
         "politics": politics or None,
         "commitments": [{"what": _clip(c["what"], 100), "kind": c["kind"], "due_in_days": max(0, int(c["due_day"]) - day) if c["due_day"] is not None else None}
@@ -509,6 +511,12 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
         return _history_lookup(conn, q)
     pl0 = get_player(conn)
     me0 = int(pl0["player_actor_id"]) if pl0 else None
+    if low == "prices" or low.startswith("prices "):
+        from engine import price_book
+        return price_book.lookup(conn, q[len("prices"):], me0)
+    if low == "wants" or low.startswith("wants "):
+        from connector import market
+        return market.wants_of(conn, q[len("wants"):].strip(), me0)
     kinds = [("actor", _find(conn, "actors", q)), ("location", _find(conn, "locations", q)), ("business", _find(conn, "civilian_enterprises", q)),
              ("outfit", [o for o in _find(conn, "underworld_organizations", q) if _knows_of(conn, me0, "outfit", o)]),
              ("household", [h for h in _find(conn, "households", q) if _knows_of(conn, me0, "household", h)]),

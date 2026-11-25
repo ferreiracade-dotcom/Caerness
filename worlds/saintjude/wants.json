@@ -1,0 +1,109 @@
+{
+ "about": "What a person in this world may want, when it applies to them, what it costs (an item of the price book, or weeks of living) and why. Conditions and weights are Design proposals. The words in chances are how a concrete offer reaches the protagonist: {carrier} someone he knows, {business} and {place} from the save, {price} the asking figure, {days} how long it stands. `comes` is how many chances a week a want of full strength draws for someone of ordinary reach, `contest` the weekly odds somebody else gets there, `lasts_days` how long having it quiets the want, `gives` what having it shows of a person. `others` is how everybody else takes chances: only for a want at or above the threshold, looked at once in `every_weeks`.",
+ "others": {"threshold": 0.5, "every_weeks": 26, "reach": 0.3},
+ "wants": [
+  {"key": "own_place", "comes": 0.2, "contest": 0.2, "lasts_days": 1095, "what": "a place of {his} own", "why": "{age} and still under {head}'s roof",
+   "items": ["rent_one_bedroom", "room_furnished_week"], "when": {"age": [18, 40], "under_head": true}, "strength": 0.65, "drives": {"ambition": 0.3},
+   "chances": [
+    {"from": "contact", "days": [6, 14], "text": "{carrier} knows of rooms coming free in {place}: {price}, if someone takes them within {days} days"},
+    {"from": "passing", "days": [5, 12], "text": "A card in a window in {place}: rooms to let, {price}, ask within"}
+   ]},
+  {"key": "own_shop_garage", "comes": 0.08, "contest": 0.12, "lasts_days": 3650, "what": "a garage of {his} own", "why": "the skill is {his}; the shop and the takings are someone else's",
+   "items": ["lease_garage"], "when": {"age": [20, 55], "work": ["mechanic", "garage", "auto repair", "body shop", "engine", "machinist"], "owns_business": false},
+   "strength": 0.55, "drives": {"ambition": 0.6, "risk_tolerance": 0.3},
+   "chances": [
+    {"from": "contact", "business": ["construction", "service"], "days": [10, 28], "text": "{carrier} says the lease by {business} in {place} is coming up: two bays at {price}, and the landlord wants an answer inside {days} days"},
+    {"from": "passing", "business": ["construction", "service", "shop"], "days": [8, 21], "text": "A for-lease sign has gone up on a bay near {business} in {place}: {price}, with {days} days before it goes to the next caller"}
+   ]},
+  {"key": "own_shop_store", "comes": 0.08, "contest": 0.12, "lasts_days": 3650, "what": "a shop of {his} own", "why": "the skill is {his}; the shop and the takings are someone else's",
+   "items": ["lease_storefront"], "when": {"age": [20, 60], "work": ["barber", "tailor", "butcher", "baker", "grocer", "cook", "bartender", "florist", "shoemaker", "jeweller", "jeweler", "pharmacist", "printer", "seamstress", "hairdresser", "shopkeeper"], "owns_business": false},
+   "strength": 0.5, "drives": {"ambition": 0.6, "risk_tolerance": 0.3},
+   "chances": [
+    {"from": "contact", "business": ["shop", "service"], "days": [10, 28], "text": "{carrier} says the storefront next to {business} in {place} is coming empty: {price}, and the landlord wants an answer inside {days} days"},
+    {"from": "passing", "business": ["shop", "service"], "days": [8, 21], "text": "A for-lease sign is up on a storefront near {business} in {place}: {price}, with {days} days before it goes"}
+   ]},
+  {"key": "car", "comes": 0.2, "contest": 0.25, "lasts_days": 1095, "gives": {"kind": "drives", "text": "a used car"}, "what": "a car", "why": "no car of {his} own: the bus, a borrowed ride, or walking",
+   "items": ["car_used_late", "car_used_decent", "car_used_beater"], "when": {"age": [17, 65]},
+   "lacks": {"marks": ["drives", "car"], "things": ["car", "truck", "van", "sedan", "coupe"]}, "strength": 0.55, "drives": {"ambition": 0.2},
+   "chances": [
+    {"from": "contact", "days": [4, 12], "text": "{carrier} knows someone in {place} letting a car go cheap: {price}, gone within {days} days"},
+    {"from": "passing", "days": [3, 10], "text": "A car with a sign in the windshield sits at the kerb in {place}: {price}, and it will not sit there past {days} days"},
+    {"from": "passing", "business": ["shop"], "names": ["Car Dealership"], "days": [5, 14], "text": "{business} in {place} has one at the front of the lot: {price}, held at that for {days} days"}
+   ]},
+  {"key": "show_car", "comes": 0.06, "contest": 0.2, "lasts_days": 1095, "gives": {"kind": "drives", "text": "a fast used car"}, "what": "a car worth being seen in", "why": "{age} is the age for a car that turns heads",
+   "items": ["car_used_muscle"], "when": {"age": [17, 32], "sex": "male"}, "strength": 0.3, "drives": {"risk_tolerance": 0.5, "ambition": 0.3},
+   "chances": [
+    {"from": "contact", "days": [4, 12], "text": "{carrier} says a fast car is going in {place}, somebody needs money: {price}, within {days} days"}
+   ]},
+  {"key": "tools", "comes": 0.1, "contest": 0.15, "lasts_days": 730, "what": "better tools of {his} own", "why": "good tools would earn their price at the bench",
+   "items": ["tools_hand_set"], "when": {"age": [16, 65], "work": ["mechanic", "garage", "machinist", "welder", "carpenter", "electrician", "plumber", "body shop"]},
+   "strength": 0.45, "drives": {"patience": 0.2, "ambition": 0.2},
+   "chances": [
+    {"from": "contact", "business": ["construction", "shop"], "names": ["Auto Repair", "Building Trades"], "days": [5, 14], "text": "{carrier} says a man leaving {business} in {place} will sell his whole chest for {price} if it is taken within {days} days"},
+    {"from": "passing", "business": ["construction", "shop"], "names": ["Auto Repair", "Building Trades", "Hardware"], "days": [4, 10], "text": "{business} in {place} is clearing out its back room: a set of tools at {price}, for {days} days"}
+   ]},
+  {"key": "going_out_clothes", "comes": 0.12, "contest": 0.1, "lasts_days": 365, "what": "sharp clothes for going out", "why": "something good to wear when the work shirt comes off",
+   "items": ["suit_good", "suit_cheap"], "when": {"age": [16, 45], "sex": "male"}, "strength": 0.4, "drives": {"ambition": 0.3},
+   "chances": [
+    {"from": "passing", "business": ["service"], "names": ["Dry Cleaner"], "days": [4, 12], "text": "A good suit nobody came back for hangs at {business} in {place}: {price}, for {days} days"},
+    {"from": "contact", "days": [4, 12], "text": "{carrier} knows a tailor's cutter in {place} with a suit a customer left on his hands: {price}, within {days} days"}
+   ]},
+  {"key": "going_out_dress", "comes": 0.12, "contest": 0.1, "lasts_days": 365, "what": "a dress for going out", "why": "something good to wear when the work day is over",
+   "items": ["dress_woman"], "when": {"age": [16, 45], "sex": "female"}, "strength": 0.4, "drives": {"ambition": 0.3},
+   "chances": [
+    {"from": "passing", "business": ["service"], "names": ["Dry Cleaner"], "days": [4, 12], "text": "A good dress nobody came back for hangs at {business} in {place}: {price}, for {days} days"},
+    {"from": "contact", "days": [4, 12], "text": "{carrier} knows a seamstress in {place} with a dress a customer left on her hands: {price}, within {days} days"}
+   ]},
+  {"key": "leather_jacket", "comes": 0.08, "contest": 0.1, "lasts_days": 730, "what": "a leather jacket", "why": "it is what people {his} age are wearing",
+   "items": ["jacket_leather"], "when": {"age": [15, 28]}, "strength": 0.25, "drives": {"risk_tolerance": 0.4},
+   "chances": [
+    {"from": "passing", "business": ["service"], "names": ["Dry Cleaner", "Shoe Repair"], "days": [4, 12], "text": "A leather jacket nobody came back for hangs at {business} in {place}: {price}, for {days} days"},
+    {"from": "contact", "days": [4, 12], "text": "{carrier} says a leather jacket is going cheap in {place}: {price}, within {days} days"}
+   ]},
+  {"key": "night_out", "comes": 0.25, "contest": 0.0, "lasts_days": 14, "what": "a night out", "why": "an evening that is neither work nor home",
+   "items": ["night_out_two"], "when": {"age": [17, 35], "sweetheart": false}, "strength": 0.35, "drives": {"risk_tolerance": 0.3, "patience": -0.2},
+   "chances": [
+    {"from": "contact", "days": [2, 6], "text": "{carrier} is getting people together for a night out around {place}: about {price} for two, any time in the next {days} days"}
+   ]},
+  {"key": "sweetheart_night", "comes": 0.2, "contest": 0.0, "lasts_days": 14, "what": "to take {other} out properly", "why": "{other} deserves better than standing around",
+   "items": ["night_out_two"], "when": {"age": [16, 70], "sweetheart": true}, "strength": 0.55, "drives": {},
+   "chances": [
+    {"from": "contact", "days": [3, 9], "text": "{carrier} has word of a dance near {place} worth taking someone to: {price} for the evening, within {days} days"}
+   ]},
+  {"key": "sweetheart_gift", "comes": 0.1, "contest": 0.0, "lasts_days": 60, "what": "something to give {other}", "why": "a present would say what is hard to say",
+   "items": ["gift_necklace", "gift_flowers"], "when": {"age": [16, 80], "sweetheart": true}, "strength": 0.5, "drives": {},
+   "chances": [
+    {"from": "contact", "days": [3, 9], "text": "{carrier} knows of a gold chain going in {place}: {price}, within {days} days"}
+   ]},
+  {"key": "ring", "comes": 0.06, "contest": 0.08, "lasts_days": 3650, "what": "a ring for {other}", "why": "things with {other} are getting serious",
+   "items": ["ring_engagement"], "when": {"age": [19, 50], "serious": true, "married": false}, "strength": 0.5, "drives": {"patience": -0.3, "loyalty": 0.3},
+   "chances": [
+    {"from": "contact", "days": [7, 20], "text": "{carrier} knows someone in {place} who will let a stone go for {price}, if it is settled inside {days} days"}
+   ]},
+  {"key": "help_family", "lasts_days": 60, "what": "to help {other} out", "why": "{other} is short of money",
+   "price_weeks": 2, "when": {"age": [18, 80], "kin_short": true}, "strength": 0.6, "drives": {"loyalty": 0.6}},
+  {"key": "house", "comes": 0.05, "contest": 0.1, "lasts_days": 3650, "gives": {"kind": "house", "text": "a house of their own"}, "what": "a house of {his} own", "why": "children at home and no house of {his} own",
+   "items": ["house_down_payment"], "when": {"age": [23, 55], "married": true, "child": true},
+   "lacks": {"marks": ["house"], "things": ["house", "home"]}, "strength": 0.45, "drives": {"patience": 0.3, "ambition": 0.3},
+   "chances": [
+    {"from": "contact", "days": [14, 35], "text": "{carrier} says a family in {place} must sell: {price} down would hold the house, for {days} days"}
+   ]},
+  {"key": "furniture", "comes": 0.08, "contest": 0.15, "lasts_days": 1095, "what": "something decent to furnish the place", "why": "the rooms are thin",
+   "items": ["sofa", "kitchen_table"], "when": {"age": [20, 60], "head": true, "married": true}, "strength": 0.3, "drives": {},
+   "chances": [
+    {"from": "contact", "days": [5, 15], "text": "{carrier} knows of a household in {place} breaking up: good furniture for {price}, within {days} days"}
+   ]},
+  {"key": "television", "comes": 0.08, "contest": 0.1, "lasts_days": 2555, "gives": {"kind": "television", "text": "a television set"}, "what": "a television", "why": "no set in the house",
+   "items": ["tv_color_19", "tv_black_white"], "when": {"age": [20, 80], "head": true}, "lacks": {"marks": ["television"], "things": ["television", "tv"]},
+   "strength": 0.25, "drives": {},
+   "chances": [
+    {"from": "passing", "business": ["shop"], "names": ["Hardware"], "days": [4, 12], "text": "{business} in {place} has a floor model set going for {price}, for {days} days"},
+    {"from": "contact", "days": [4, 12], "text": "{carrier} knows of a set going in {place}: {price}, within {days} days"}
+   ]},
+  {"key": "watch", "comes": 0.04, "contest": 0.08, "lasts_days": 1825, "what": "a good watch", "why": "a good watch shows a person doing well",
+   "items": ["watch_wrist"], "when": {"age": [18, 70]}, "strength": 0.1, "drives": {"ambition": 0.5},
+   "chances": [
+    {"from": "contact", "days": [3, 9], "text": "{carrier} is holding a good watch that needs a new owner, no papers asked about: {price}, within {days} days"}
+   ]}
+ ]
+}
