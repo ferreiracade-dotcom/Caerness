@@ -168,7 +168,7 @@ def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None
 
 def advance(call_id: str, days: int, purpose: str, domain: str | None = None, delegate: dict | None = None,
             interrupt: str | None = None, from_day: int | None = None, undo: bool = False, confirm: bool = False) -> dict:
-    """Let days pass (max 30 per call); stops early at real interruptions. from_day (required): the scene's current day, so no skip runs twice. purpose is kept and practised (domain optional); delegate {to, obligations, interaction_types, everything_routine} minds matters; interrupt: all|meaningful|critical_only. undo=true shows what taking back the last skip loses; with confirm=true does it."""
+    """Let days pass (max 30 per call); stops early at real interruptions. from_day (required): the scene's current day, so no skip runs twice. purpose is kept and practised (domain optional); delegate {to, obligations, interaction_types, everything_routine} minds matters; interrupt: something (stops at the first thing worth playing; for "skip until something happens") | all|meaningful|critical_only. material = what reached them and by whom. undo=true shows what taking back the last skip loses; with confirm=true does it."""
     from connector.timeflow import advance as _advance
 
     def go(conn):

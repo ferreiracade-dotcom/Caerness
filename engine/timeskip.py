@@ -130,11 +130,17 @@ def _find_interruptions(
                 "metadata": {"event_type": e["event_type"]},
             })
 
+    # "something": the caller wants the next thing worth playing, so lesser offers count too, and so do matters that reach him
+    something = _load(run["delegation_json"], {}).get("stop_on") == "something"
+    if something:
+        from . import hearsay
+        found.extend(hearsay.stops(conn, actor_id, start_day, end_day))
+
     interactions = conn.execute(
         """SELECT * FROM interactions
            WHERE id>? AND recipient_actor_id=? AND created_day>? AND created_day<=? AND status='pending' AND stakes>=?
            ORDER BY created_day,id""",
-        (interaction_floor, actor_id, start_day, end_day, threshold),
+        (interaction_floor, actor_id, start_day, end_day, min(threshold, 2) if something else threshold),
     ).fetchall()
     for i in interactions:
         if _delegated(run, "interaction", int(i["id"]), str(i["interaction_type"])):

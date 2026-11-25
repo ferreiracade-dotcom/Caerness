@@ -16638,7 +16638,7 @@
   "note": "unsourced; Base willingness to lend, before closeness and feeling. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_money_year_short": {
-  "default": 0.5,
+  "default": 1.2,
   "range": null,
   "unit": "per year",
   "tag": "Design",
@@ -16648,7 +16648,7 @@
   "note": "unsourced; Chance a year that money trouble comes to a head for someone whose purse is short. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_money_year_base": {
-  "default": 0.03,
+  "default": 0.12,
   "range": null,
   "unit": "per year",
   "tag": "Design",
@@ -16658,7 +16658,7 @@
   "note": "unsourced; Chance a year of sudden money trouble for someone who is not short. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_romance_year": {
-  "default": 0.35,
+  "default": 0.8,
   "range": null,
   "unit": "per year",
   "tag": "Design",
@@ -16718,7 +16718,7 @@
   "note": "unsourced; Chance a courtship turns serious rather than breaking off. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_quarrel_year": {
-  "default": 0.08,
+  "default": 0.35,
   "range": null,
   "unit": "per year",
   "tag": "Design",
@@ -16738,7 +16738,7 @@
   "note": "unsourced; Resentment that doubles the chance of a quarrel. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_blows_chance": {
-  "default": 0.15,
+  "default": 0.08,
   "range": null,
   "unit": "chance",
   "tag": "Design",
@@ -16778,7 +16778,7 @@
   "note": "unsourced; Chance a quarrel that did not come to blows is made up. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_illness_year": {
-  "default": 0.04,
+  "default": 0.1,
   "range": null,
   "unit": "per year",
   "tag": "Design",
@@ -16818,7 +16818,7 @@
   "note": "unsourced; Severity from which an illness is talked of as bad. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_rivalry_year": {
-  "default": 0.08,
+  "default": 0.15,
   "range": null,
   "unit": "per year",
   "tag": "Design",
@@ -16848,7 +16848,7 @@
   "note": "unsourced; Reputation moved when custom changes hands. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_work_year": {
-  "default": 1.0,
+  "default": 1.8,
   "range": null,
   "unit": "per year",
   "tag": "Design",
@@ -16878,7 +16878,7 @@
   "note": "unsourced; Chance an asked job goes ahead. Design proposal. (P2.1: engine/life_matters.py)"
  },
  "lm_police_year": {
-  "default": 0.12,
+  "default": 0.2,
   "range": null,
   "unit": "per year",
   "tag": "Design",
@@ -16996,6 +16996,76 @@
   "mark": "Design proposal",
   "source": "unsourced",
   "note": "unsourced; Chance a stop turns into continued interest. Design proposal. (P2.1: engine/life_matters.py)"
+ },
+ "lm_news_own": {
+  "default": 0.9,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance someone close tells their own news, times how close they are. Design proposal. (P2: engine/life_matters.py, engine/hearsay.py)"
+ },
+ "lm_news_secondhand": {
+  "default": 0.6,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance someone close who knows the person passes it on, times both closenesses. Design proposal. (P2: engine/life_matters.py, engine/hearsay.py)"
+ },
+ "lm_news_confidence": {
+  "default": 0.8,
+  "range": null,
+  "unit": "belief",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How sure he is of what he was only told. Design proposal. (P2: engine/life_matters.py, engine/hearsay.py)"
+ },
+ "lm_news_weight": {
+  "default": 2,
+  "range": null,
+  "unit": "severity",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How heavily such news weighs among what waits to reach him. Design proposal. (P2: engine/life_matters.py, engine/hearsay.py)"
+ },
+ "lm_friend_affection": {
+  "default": 30,
+  "range": null,
+  "unit": "points",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Feeling above which a tie is called a friend, or bad blood. Design proposal. (P2: engine/life_matters.py, engine/hearsay.py)"
+ },
+ "lm_stop_closeness": {
+  "default": 0.7,
+  "range": null,
+  "unit": "closeness",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How close someone must be for their matter to stop a skip. Design proposal. (P2: engine/life_matters.py, engine/hearsay.py)"
+ },
+ "lm_material_items": {
+  "default": 8,
+  "range": null,
+  "unit": "items",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How many pieces of news one advance spells out; the rest are counted. Design proposal. (P2: engine/life_matters.py, engine/hearsay.py)"
  }
  },
  "pools": {

@@ -625,4 +625,7 @@ def weekly(conn: sqlite3.Connection, day: int) -> dict:
             before = conn.total_changes
             OPENERS[kind](p, aid, random.Random(f"{p.seed}:life_open:{kind}:{day}:{aid}"))
             opened += 1 if conn.total_changes > before else 0
+    if p.me is not None:  # delivery only: what of this week reaches him
+        from . import hearsay
+        hearsay.reach(conn, p.me, day)
     return {"life_matters_opened": opened, "life_matters_moved": moved}

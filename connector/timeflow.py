@@ -12,6 +12,7 @@ from engine.timeskip import prepare_time_skip, resolve_time_skip
 
 MAX_ADVANCE_DAYS = 30  # hard ceiling; CAERNESS_MAX_ADVANCE_DAYS can only lower it
 POLICIES = ("all", "meaningful", "critical_only")
+SOMETHING = "something"  # stop at the first thing worth playing
 
 
 def max_advance_days() -> int:
@@ -91,8 +92,8 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
             interrupt: str | None = None, from_day: int | None = None) -> dict:
     if not isinstance(days, int) or days < 1:
         raise ValueError("days must be an integer >= 1")
-    if interrupt is not None and interrupt not in POLICIES:
-        raise ValueError(f"interrupt must be one of {POLICIES}")
+    if interrupt is not None and interrupt not in (*POLICIES, SOMETHING):
+        raise ValueError(f"interrupt must be one of {(*POLICIES, SOMETHING)}")
 
     def go() -> dict:
         player = get_player(conn)
@@ -100,8 +101,12 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
             raise ValueError("No protagonist is set.")
         me = int(player["player_actor_id"])
         run_days = min(days, max_advance_days())
-        run_id = prepare_time_skip(conn, me, run_days, focus=_focus(conn, purpose, focus, domain),
-                                   delegation=_delegation(conn, me, purpose, delegate), interruption_policy=interrupt or "meaningful")
+        delegation = _delegation(conn, me, purpose, delegate)
+        if interrupt == SOMETHING:
+            delegation["stop_on"] = SOMETHING
+        run_id = prepare_time_skip(conn, me, run_days, focus=_focus(conn, purpose, focus, domain), delegation=delegation,
+                                   interruption_policy="meaningful" if interrupt in (None, SOMETHING) else interrupt,
+                                   max_chunk_days=7 if interrupt == SOMETHING else 30)
         heard = money_records.last_news(conn)
         run = resolve_time_skip(conn, run_id)
         start, end = int(run["start_day"]), int(run["actual_end_day"])
@@ -133,6 +138,13 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
             out["interruption"] = _clip(run["interruptions"][0]["reason"], 300)
         if days > end - start:  # an interruption also leaves the rest of the request undone
             out["remaining_days"] = days - (end - start)
+        from engine import hearsay
+        out.update(hearsay.material(conn, me, start, end))  # who it happened to, who told him, what is at stake, what is open
+        waiting = hearsay.waiting(conn, me)
+        if waiting:
+            out["waiting_on_you"] = waiting
+        if interrupt == SOMETHING and not interrupted:
+            out["quiet"] = "Nothing worth stopping for reached them in these days."
         from engine import texture
         loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (me,)).fetchone()
         tex = texture.block(conn, me, loc[0] if loc else None, [])

@@ -12,7 +12,7 @@ from __future__ import annotations
 import sqlite3
 
 from . import bearing as B
-from .design import run_seed  # noqa: F401  (kept for streams)
+from .design import figure, run_seed  # noqa: F401  (run_seed kept for streams)
 
 
 def enabled(conn: sqlite3.Connection) -> bool:
@@ -29,7 +29,8 @@ def _clip(text, n: int) -> str:
 
 
 def circle(conn, me: int) -> dict[int, float]:
-    """The people close to him and how close: kin, household, the men above and below him, people he has dealt with."""
+    """The people close to him and how close: kin, household, the men above and below him, workmates, friends, people he knows
+    and people he has money open with."""
     out: dict[int, float] = {}
 
     def put(i, w):
@@ -48,6 +49,22 @@ def circle(conn, me: int) -> dict[int, float]:
         put(m[0], 0.6)
     for i, f in conn.execute("SELECT actor_b_id,familiarity FROM relationships WHERE actor_a_id=? AND familiarity>=20", (me,)):
         put(i, 0.5 * float(f) / 100.0)
+    from . import life_matters
+    if life_matters.enabled(conn):
+        for i, w in life_matters.contacts(conn, me).items():
+            put(i, min(w, 0.7))
+        for (i,) in conn.execute("""SELECT b.actor_id FROM enterprise_staff a JOIN enterprise_staff b ON b.enterprise_id=a.enterprise_id
+                                    WHERE a.actor_id=? AND a.status='active' AND b.status='active'
+                                    UNION SELECT e.owner_actor_id FROM enterprise_staff a JOIN civilian_enterprises e ON e.id=a.enterprise_id
+                                    WHERE a.actor_id=? AND a.status='active'
+                                    UNION SELECT s.actor_id FROM civilian_enterprises e JOIN enterprise_staff s ON s.enterprise_id=e.id
+                                    WHERE e.owner_actor_id=? AND s.status='active'""", (me, me, me)).fetchall():
+            put(i, 0.6)
+        mine = f"person:{me}"
+        for a, b in conn.execute("SELECT customer_ref,provider_ref FROM deals WHERE status='open' AND (customer_ref=? OR provider_ref=?)", (mine, mine)):
+            kind, _, raw = str(b if a == mine else a).partition(":")
+            if kind == "person":
+                put(int(raw), 0.6)
     return out
 
 
@@ -97,7 +114,16 @@ def ingest(conn, me: int, place: int | None, day: int) -> None:
     habit = conn.execute("SELECT text FROM bearing_marks WHERE actor_id=? AND kind='habit' AND status='active' ORDER BY id DESC LIMIT 1", (me,)).fetchone()
     habit = str(habit[0]) if habit else None
     # what he learned (about himself and about others)
-    for k in conn.execute("SELECT id,belief_text,truth_event_id FROM knowledge WHERE knower_actor_id=? AND id>? ORDER BY id", (me, cur["knowledge_id"])).fetchall():
+    for k in conn.execute("SELECT id,fact_key,belief_text,truth_event_id FROM knowledge WHERE knower_actor_id=? AND id>? ORDER BY id", (me, cur["knowledge_id"])).fetchall():
+        if str(k["fact_key"]).startswith("step:"):  # another's life, brought by someone: the row says who
+            from . import hearsay
+            step, carrier = hearsay.parse(conn, k["fact_key"])
+            if step is None:
+                continue
+            ids = {int(x) for x in str(step["actors"]).split(",") if x}
+            sig = _significance(conn, me, circ, public=False, severity=int(figure(conn, "lm_news_weight")), ids=ids)
+            _enter(conn, me, k["fact_key"], "about_him" if me in ids else "news", k["belief_text"], hearsay.via(conn, me, carrier), sig, day)
+            continue
         ev = conn.execute("SELECT e.event_type,e.severity,e.source_actor_id,ei.visibility FROM events e LEFT JOIN event_information ei ON ei.event_id=e.id WHERE e.id=?",
                           (int(k["truth_event_id"]),)).fetchone() if k["truth_event_id"] is not None else None
         ids = {int(r[0]) for r in conn.execute("SELECT actor_id FROM event_targets WHERE event_id=?", (int(k["truth_event_id"]),))} if ev else set()
