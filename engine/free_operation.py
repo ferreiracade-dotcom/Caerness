@@ -29,12 +29,15 @@ _KINDS = (  # first match wins; the GM's own `kind` hint beats all of them
     ("project", r"\b(build|construct|repair|fortify|rebuild|raise a (?:wall|tower|bridge|granary|market)|garrison|pave)\b"),
     ("attack", r"\b(attack|assault|raid|rob|ambush|burn|arson|set fire|kidnap|abduct|capture|kill|murder|assassinate|shoot|gun down|beat|thrash|drive off|loot|sack)\b"),
     ("trade", r"\b(buy|sell|purchase)\b.*\b(business|shop|stall|house of|inn|mill|forge)\b"),
-    ("demand", r"\b(demand|extort|threaten|tribute|truce|alliance|ally|treaty|ultimatum|expel|force .* to|make .* stop|make .* tell)\b"),
+    ("demand", r"(?<!\bin )(?<!\bon )(?<!\bthe )(?<!\bsupply and )\bdemand(?:s|ing)?\b(?! for\b)"
+               r"|\b(extort|threaten|tribute|truce|alliance|treaty|ultimatum|expel)\b"),
     ("lend", r"\b(lend|loan)\b"),
     ("hire", r"\b(hire|recruit|enlist|muster|employ|engage|take on|conscript|levy|raise (?:a |an )?(?:company|force|band|men|troops|army)|dismiss|fire|promote)\b"),
     ("pay", r"\b(bribe|pay|donate|gift|fund|spend|tithe|endow|sponsor|grease|buy off|feast)\b"),
     ("order", r"\b(order|instruct|command|tell .* to|have .* (?:do|go|watch|guard))\b"),
 )
+_COLLECT = re.compile(r"\bcollect\b|\bwhat (?:he|she|they) owes?\b|\bowes? me\b|\bpay (?:up\b|what\b|me\b|the (?:rest|balance)\b)"
+                      r"|\b(?:rest|balance|remainder) of (?:the |his |her )?(?:money|bill|price)\b")
 _FOUND = re.compile(r"\b(found|establish|open|start|set up|create)\b.*\b(business|shop|stall|outfit|gang|school|company|guild|house|household|sect|inn|firm)\b")
 
 
@@ -171,6 +174,12 @@ def run(conn: sqlite3.Connection, me: int, intent: str, f: dict, call_id: str, h
     days = parse_time(f.get("time"))
     kind = classify(intent, hint)
     low = intent.lower()
+    if (hint or "").lower().strip() in ("", "demand", "collect", "operation") and _COLLECT.search(low):
+        from . import money_records
+        who = _actor_target(targets)
+        if who is not None and money_records.owed_by(conn, who):  # he owes it already: asking for it is collecting, not extorting
+            kind = "demand"
+            f["details"] = {**(f.get("details") or {}), "what": "payment"}
     base = {"mapped_to": kind}
     handler = {"travel": _travel, "duel": _duel, "battle": _battle, "message": _message, "treat": _treat, "train": _train,
                "craft": _craft, "project": _project, "found": _found}.get(kind)

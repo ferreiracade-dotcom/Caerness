@@ -392,6 +392,11 @@ def _standing_term(conn: sqlite3.Connection, proposer: int, recipient: int, kind
     return max(-_STANDING_CAP, min(_STANDING_CAP, t))
 
 
+def _protagonist_in(conn: sqlite3.Connection, *actors: int) -> bool:
+    row = conn.execute("SELECT player_actor_id FROM player_state WHERE id=1").fetchone()
+    return bool(row) and row[0] is not None and int(row[0]) in actors
+
+
 def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: int) -> InteractionResult:
     proposer = int(interaction["proposer_actor_id"])
     recipient = int(interaction["recipient_actor_id"])
@@ -438,6 +443,20 @@ def _social_response(conn: sqlite3.Connection, interaction: sqlite3.Row, day: in
     proposer_name = _name(conn, proposer)
     recipient_name = _name(conn, recipient)
     depth = _depth(conn, interaction)
+
+    # A man the protagonist talks with answers, warmly or not; only real hostility turns the talk down.
+    answered = (kind == "conversation" and score < 1.0 and _protagonist_in(conn, proposer, recipient)
+                and rel["resentment"] < 40 and rel["trust"] > -40 and rel["stance"] > -40)
+    if answered:
+        summary = f"{recipient_name} answered {proposer_name}, without much warmth."
+        _record_action(conn, int(interaction["id"]), day, recipient, "accept", summary)
+        conn.execute("UPDATE interactions SET status='accepted',resolved_day=?,resolution_summary=? WHERE id=?",
+                     (day, summary, interaction["id"]))
+        record_relationship_pair_effect(
+            conn, proposer, recipient, day, source_kind="interaction", source_id=int(interaction["id"]),
+            a_to_b={"familiarity_delta": 1.0}, b_to_a={"familiarity_delta": 1.0}, summary_a="A short exchange.",
+            summary_b="A short exchange.", metadata={"interaction_type": kind, "outcome": "answered"})
+        return InteractionResult(int(interaction["id"]), "accepted", "accept", summary)
 
     if score >= 1.0:
         response = "accept" if kind not in {"demand", "threat"} else "comply"

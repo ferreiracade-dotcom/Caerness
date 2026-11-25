@@ -294,6 +294,51 @@ def _collect(conn, debtor: str, debts: list, day: int) -> None:
                 (debtor, d["provider_ref"]), d["id"])
 
 
+def owed_by(conn: sqlite3.Connection, actor_id: int) -> list[sqlite3.Row]:
+    """The open deals and IOUs on which this person owes the protagonist (himself or a business of his), oldest first."""
+    if currency(conn) is None:
+        return []
+    refs = mine(conn)
+    if not refs:
+        return []
+    marks = ",".join("?" for _ in refs)
+    return conn.execute(f"""SELECT * FROM deals WHERE status='open' AND customer_ref=? AND provider_ref IN ({marks})
+                            ORDER BY COALESCE(due_day,1e12),id""", (f"person:{int(actor_id)}", *refs)).fetchall()
+
+
+def collect(conn: sqlite3.Connection, actor_id: int, asked: float | None, pressed: bool, day: int) -> dict | None:
+    """Money already owed, asked for to the debtor's face: no haggling and no dice. He hands over what he can spare, all he
+    has if he is pressed. None when he owes nothing on record."""
+    debts = owed_by(conn, actor_id)
+    if not debts:
+        return None
+    ref = f"person:{int(actor_id)}"
+    ensure_purse(conn, ref)
+    total = sum(owing(conn, d) for d in debts)
+    want = total if asked is None else min(float(asked), total)
+    have = cash(conn, ref)
+    spare = want if have + _CENT >= want else max(0.0, have - (0.0 if pressed else float(design.figure(conn, "money_living_week_usd", 0.0))))
+    left = min(want, math.floor(spare * 100 + 1e-6) / 100)
+    paid = 0.0
+    for d in debts:
+        if left < _CENT:
+            break
+        got = pay_deal(conn, d["id"], min(left, owing(conn, d)), day, "collected")
+        left, paid = left - got, paid + got
+    for d in debts:  # what is still owed comes round again
+        conn.execute("UPDATE deals SET next_try_day=? WHERE id=? AND status='open' AND next_try_day IS NULL",
+                     (int(day) + int(design.figure(conn, "money_retry_days", 7)), d["id"]))
+    who, rest = name_of(conn, ref), total - paid
+    if paid < _CENT:
+        said = f"{who} has nothing to spare today; {fmt(conn, rest)} stays owed."
+    elif rest < _CENT:
+        said = f"{who} pays {fmt(conn, paid)}; nothing more is owed."
+    else:
+        said = f"{who} pays {fmt(conn, paid)} of the {fmt(conn, total)} owed; {fmt(conn, rest)} stays owed."
+    return {"status": "applied" if paid + _CENT >= want else "partial", "summary": said, "paid": fmt(conn, paid),
+            "owing": fmt(conn, rest)}
+
+
 # ---- wages ----
 
 def term_paid(conn: sqlite3.Connection, debtor: str, creditor: str, paid: float, short: float, purpose: str, day: int) -> None:

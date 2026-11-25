@@ -775,6 +775,22 @@ def coercion(conn, proposer: int, backers: list, recipient: int) -> float:
     return min(3.0, max(0.0, 1.5 * math.log2(max(ratio, 1e-9)) + 1.0))
 
 
+def _collect(conn, me: int, target: int, d: dict) -> dict | None:
+    """Money the other already owes on a recorded job or IOU is collected, not demanded; None when there is none."""
+    from . import money_records
+    if d.get("_principal") is not None or not money_records.owed_by(conn, target):
+        return None
+    asked = None
+    if d.get("amount") not in (None, ""):
+        asked = ledger.amount_of(d["amount"], sum(money_records.owing(conn, x) for x in money_records.owed_by(conn, target)))
+    pressed = bool(d.get("open") or d.get("men") or d.get("with") or d.get("crew"))
+    out = money_records.collect(conn, target, asked, pressed, _day(conn))
+    if pressed:
+        adjust_relationship_pair(conn, target, me, _day(conn), a_to_b={"fear_delta": 4.0, "resentment_delta": 3.0, "trust_delta": -2.0})
+    _record(conn, me, "Debt collected", out["summary"], targets=(target,))
+    return out
+
+
 def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
     if target is None or not _living(conn, target) or target == me:
         return _refuse("There is no living person named to make the demand of.")
@@ -784,6 +800,10 @@ def _demand(conn, me: int, target: int | None, d: dict, intent: str) -> dict:
         return _refuse(f"What is demanded must be one of {', '.join(DEMAND_KINDS)}.")
     if not _same_place(conn, me, target):
         return _refuse(f"{name} is not here.")
+    if what in ("payment", "debt"):
+        owed = _collect(conn, me, target, d)
+        if owed is not None:
+            return owed
     amount = None
     if what == "payment":
         try:
