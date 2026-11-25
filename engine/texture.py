@@ -4,8 +4,10 @@ Every scene, advance and resume carries a texture block: bearing, the room read,
 that reaches him (about himself and about other people, through his habits and his people). Nothing here waits to be asked.
 
 The ledger keeps what has been delivered. A happening that reaches him is entered once; an item not yet delivered is returned again on
-the next call (nothing is dropped); a delivered one is never repeated. How much one call carries follows the weight of what is waiting
-(its significance, growing as it waits): there is no threshold between "full wave" and "nothing", and no tier table.
+the next call; a delivered one is never repeated. How much one call carries follows the weight of what is waiting
+(its significance, growing as it waits): there is no threshold between "full wave" and "nothing", and no tier table. Where the package
+sets how long news stays news, what has waited longer (other than what concerns him) is dropped; where people have ordinary-life
+matters, news of others comes from someone he knows (or a habit of his), or not at all.
 """
 from __future__ import annotations
 
@@ -98,6 +100,22 @@ def _via(conn, kind: str, key: str, habit: str | None) -> str:
     return words[sum(map(ord, key)) % len(words)] if words else kind
 
 
+def _bringer(conn, me: int, circ: dict[int, float], ids: set[int], known: dict, place: int | None = None) -> str | None:
+    """Who of the people he knows brings him this: one it happened to, one who knows them, or (for talk where he is) one who is
+    there. The words saying so, or None when nobody does. `known` is filled once and shared by the items of one call."""
+    from . import hearsay, life_matters
+    near = {i: circ[i] for i in ids if i in circ}
+    if not near and ids:
+        if "by" not in known:
+            known["by"] = life_matters.known_by(conn, sorted(circ))
+        near = {c: circ[c] for i in ids for c in known["by"].get(i, {})}
+    if not near and place is not None and circ:
+        marks = ",".join("?" * len(circ))
+        for (i,) in conn.execute(f"SELECT id FROM actors WHERE current_location_id=? AND id IN ({marks})", (place, *sorted(circ))):
+            near[int(i)] = circ[int(i)]
+    return hearsay.via(conn, me, max(sorted(near), key=near.get)) if near else None
+
+
 def _enter(conn, me, key, kind, text, via, sig, day) -> None:
     conn.execute("INSERT OR IGNORE INTO delivery_ledger(viewer_actor_id,item_key,kind,text,via,significance,first_day) VALUES (?,?,?,?,?,?,?)",
                  (me, key, kind, _clip(text, 170), via, float(sig), day))
@@ -113,8 +131,11 @@ def ingest(conn, me: int, place: int | None, day: int) -> None:
     my_name = B.name_of(conn, me)
     habit = conn.execute("SELECT text FROM bearing_marks WHERE actor_id=? AND kind='habit' AND status='active' ORDER BY id DESC LIMIT 1", (me,)).fetchone()
     habit = str(habit[0]) if habit else None
+    from . import life_matters
+    named = life_matters.enabled(conn)  # here news comes from a person he knows (or a habit of his), or not at all
+    known: dict = {}
     # what he learned (about himself and about others)
-    for k in conn.execute("SELECT id,fact_key,belief_text,truth_event_id FROM knowledge WHERE knower_actor_id=? AND id>? ORDER BY id", (me, cur["knowledge_id"])).fetchall():
+    for k in conn.execute("SELECT id,fact_key,belief_text,truth_event_id,learned_day FROM knowledge WHERE knower_actor_id=? AND id>? ORDER BY id", (me, cur["knowledge_id"])).fetchall():
         if str(k["fact_key"]).startswith("step:"):  # another's life, brought by someone: the row says who
             from . import hearsay
             step, carrier = hearsay.parse(conn, k["fact_key"])
@@ -122,7 +143,7 @@ def ingest(conn, me: int, place: int | None, day: int) -> None:
                 continue
             ids = {int(x) for x in str(step["actors"]).split(",") if x}
             sig = _significance(conn, me, circ, public=False, severity=int(figure(conn, "lm_news_weight")), ids=ids)
-            _enter(conn, me, k["fact_key"], "about_him" if me in ids else "news", k["belief_text"], hearsay.via(conn, me, carrier), sig, day)
+            _enter(conn, me, k["fact_key"], "about_him" if me in ids else "news", k["belief_text"], hearsay.via(conn, me, carrier), sig, int(k["learned_day"]))
             continue
         ev = conn.execute("SELECT e.event_type,e.severity,e.source_actor_id,ei.visibility FROM events e LEFT JOIN event_information ei ON ei.event_id=e.id WHERE e.id=?",
                           (int(k["truth_event_id"]),)).fetchone() if k["truth_event_id"] is not None else None
@@ -133,7 +154,13 @@ def ingest(conn, me: int, place: int | None, day: int) -> None:
         kind = "about_him" if me in ids or my_name in str(k["belief_text"]) else "news"
         sig = _significance(conn, me, circ, public=bool(ev and ev["visibility"] == "public"), severity=int(ev["severity"]) if ev else 1, ids=ids,
                             event_type=str(ev["event_type"]) if ev else "", mentions_him=my_name in str(k["belief_text"]))
-        _enter(conn, me, key, kind, k["belief_text"], _via(conn, "told", key, None), sig, day)
+        via = _via(conn, "told", key, None)
+        if named and kind == "news" and ids and not conn.execute("SELECT 1 FROM event_witnesses WHERE event_id=? AND actor_id=?",
+                                                                 (int(k["truth_event_id"]), me)).fetchone():
+            via = _bringer(conn, me, circ, ids, known)
+            if via is None:
+                continue
+        _enter(conn, me, key, kind, k["belief_text"], via, sig, int(k["learned_day"]))
     # public happenings that reach him through his habits and his people
     for e in conn.execute("""SELECT e.id,e.day,e.event_type,e.title,e.summary,e.severity,e.source_actor_id FROM events e JOIN event_information ei ON ei.event_id=e.id
                              WHERE e.id>? AND ei.visibility='public' ORDER BY e.id""", (cur["event_id"],)).fetchall():
@@ -147,8 +174,13 @@ def ingest(conn, me: int, place: int | None, day: int) -> None:
             continue
         key = f"event:{e['id']}"
         sig = _significance(conn, me, circ, public=True, severity=int(e["severity"]), ids=ids, event_type=str(e["event_type"]))
+        via = _via(conn, "read", key, habit)
+        if named and not habit and me not in ids:
+            via = _bringer(conn, me, circ, ids, known)
+            if via is None:
+                continue
         _enter(conn, me, key, "about_him" if me in ids else "news", f"{e['title']}: {e['summary']}" if e["summary"] and e["summary"] != e["title"] else e["title"],
-               _via(conn, "read", key, habit), sig, int(e["day"]))
+               via, sig, int(e["day"]))
     # talk running where he is
     if place is not None:
         for r in conn.execute("""SELECT r.id,r.text,r.truth_event_id,rl.prevalence FROM rumours r JOIN rumour_locations rl ON rl.rumour_id=r.id AND rl.location_id=?
@@ -157,7 +189,9 @@ def ingest(conn, me: int, place: int | None, day: int) -> None:
                 continue
             key = f"rumour:{r['id']}"
             sig = B.fig(conn, "sig_base") + B.fig(conn, "sig_public") * float(r["prevalence"]) + (B.fig(conn, "sig_him") if my_name in str(r["text"]) else 0.0)
-            _enter(conn, me, key, "talk", r["text"], _via(conn, "talk", key, None), sig, day)
+            via = _bringer(conn, me, circ, set(), known, place) if named else _via(conn, "talk", key, None)
+            if via is not None:
+                _enter(conn, me, key, "talk", r["text"], via, sig, day)
     # what came home: his own people hearing of him
     kin = [i for i, w in circ.items() if w >= 0.8]
     if kin:
@@ -179,6 +213,10 @@ def ingest(conn, me: int, place: int | None, day: int) -> None:
 def deliver(conn, me: int, day: int) -> list[dict]:
     """What waits, heaviest first, until the call's attention is used (always at least the heaviest). What is not taken stays
     pending and grows heavier each day it waits; what is taken is marked delivered and never returned."""
+    stale = figure(conn, "news_stale_days")
+    if stale:  # what has gone round too long without reaching him is no longer news
+        conn.execute("DELETE FROM delivery_ledger WHERE viewer_actor_id=? AND delivered_day IS NULL AND kind<>'about_him' AND first_day<?",
+                     (me, day - int(stale)))
     rows = conn.execute("SELECT * FROM delivery_ledger WHERE viewer_actor_id=? AND delivered_day IS NULL", (me,)).fetchall()
     gain = B.fig(conn, "push_age_gain")
     weighed = sorted(rows, key=lambda r: -(float(r["significance"]) * (1.0 + gain * max(0, day - int(r["first_day"])))))

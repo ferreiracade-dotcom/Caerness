@@ -17397,7 +17397,17 @@
   "source": "unsourced",
   "note": "unsourced; Openness lost when the one approached is spoken for. Design proposal. (P2.23: engine/outings.py)"
  },
- "lm_serious_breaks": {
+ "news_stale_days": {
+   "default": 14,
+   "range": null,
+   "unit": "days",
+   "tag": "Design",
+   "kind": "fixed",
+   "mark": "Design proposal",
+   "source": "unsourced",
+   "note": "unsourced; news older than this is dropped instead of delivered. Design proposal. (P2.28: engine/texture.py)"
+  },
+  "lm_serious_breaks": {
   "default": 0.3,
   "range": null,
   "unit": "chance",
