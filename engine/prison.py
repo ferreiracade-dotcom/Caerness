@@ -327,6 +327,9 @@ def _low_level(conn: sqlite3.Connection) -> int:
 
 def _seat_inside(conn: sqlite3.Connection, actor_id: int, group_id: int, day: int) -> None:
     from . import orgs
+    from .player import protagonist_id
+    if int(actor_id) == protagonist_id(conn):
+        return  # housed with a group, but joining it is the protagonist's own choice
     org = int(conn.execute("SELECT org_actor_id FROM facility_groups WHERE id=?", (int(group_id),)).fetchone()[0])
     standing = _outside_standing(conn, actor_id)
     standing = _figure(rules(conn).get("entry_standing"), 0.3) if standing is None else standing

@@ -443,6 +443,10 @@ def _household_migration_option(conn: sqlite3.Connection, actor_id: int, day: in
     if meta.get('economic_resolution')=='STRUCTURAL_ONLY' or meta.get('economic_state')=='NOT_SEPARATELY_QUANTIFIED':
         return None
     hid=int(row['id']); origin=int(row['location_id'])
+    from .player import protagonist_id
+    if conn.execute("SELECT 1 FROM household_members WHERE household_id=? AND actor_id=? AND status='active'",
+                    (hid, protagonist_id(conn))).fetchone():
+        return None  # moving house is the protagonist's choice: no one else's decision carries them off
     if conn.execute("SELECT 1 FROM household_migration_plans WHERE household_id=? AND status IN ('planned','in_transit')",(hid,)).fetchone():
         return None
     octx=conn.execute("SELECT * FROM location_commercial_context WHERE location_id=?",(origin,)).fetchone()

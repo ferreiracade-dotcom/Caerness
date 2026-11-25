@@ -169,6 +169,8 @@ def eligible(conn: sqlite3.Connection, org: int, unit_id: int, day: int) -> list
     sp = _spec(conn, org)
     if sp is None:
         return []
+    from .player import protagonist_id
+    me = protagonist_id(conn)  # joining is their own choice, never put forward for them
     rows = conn.execute(
         """SELECT s.actor_id,s.standing,a.name,lp.birth_day FROM org_seats s JOIN actors a ON a.id=s.actor_id LEFT JOIN actor_life_profiles lp ON lp.actor_id=s.actor_id
            WHERE s.org_actor_id=? AND s.unit_id=? AND s.role_key=? AND s.status='active' AND s.inducted_day IS NULL
@@ -176,7 +178,7 @@ def eligible(conn: sqlite3.Connection, org: int, unit_id: int, day: int) -> list
     scored = []
     for r in rows:
         sc = _nomination(conn, sp, r["standing"], r["name"], r["birth_day"], day)
-        if sc is not None and is_living(conn, int(r["actor_id"])):
+        if sc is not None and int(r["actor_id"]) != me and is_living(conn, int(r["actor_id"])):
             scored.append((-sc, int(r["actor_id"])))
     return [a for _sc, a in sorted(scored)]
 

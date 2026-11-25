@@ -48,6 +48,13 @@ def get_player(conn: sqlite3.Connection) -> sqlite3.Row | None:
     ).fetchone()
 
 
+def protagonist_id(conn: sqlite3.Connection) -> int | None:
+    """The actor the player plays, or None. The engine makes no choice of partner, employer, move or household for them:
+    those come up in play."""
+    r = conn.execute("SELECT player_actor_id FROM player_state WHERE id=1").fetchone()
+    return int(r[0]) if r and r[0] is not None else None
+
+
 def sync_player_location(conn: sqlite3.Connection) -> int | None:
     row = conn.execute(
         """SELECT ps.player_actor_id,a.current_location_id

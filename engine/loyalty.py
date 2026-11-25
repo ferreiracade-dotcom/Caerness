@@ -427,8 +427,12 @@ def household_morale(conn: sqlite3.Connection, hid: int, months_behind: int, day
     cb = culture_bond(conn, hh["location_id"]) if hh else 0.45
     k = max(0.0, min(1.5, elapsed_days / 30.0))  # the books close every few days, not every month
     left = 0
+    from .player import protagonist_id
+    me = protagonist_id(conn)
     for t in conn.execute("SELECT * FROM household_service_terms WHERE household_id=? AND status='active' ORDER BY id", (hid,)).fetchall():
         aid = int(t["actor_id"])
+        if aid == me:
+            continue  # whether the protagonist walks out is their own choice
         service = 1.0 - math.exp(-max(0.0, day - int(t["start_day"])) / 365.0 / 4.0)
         bond = max(0.0, min(1.0, 0.35 * cb + 0.35 * HOUSE_TIE.get(str(t["service_role"]), 0.3) + 0.15 * service + _spread(aid)))
         harmed = household_mistreated(conn, hid, aid, day)

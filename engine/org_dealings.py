@@ -177,6 +177,9 @@ def change_side(conn: sqlite3.Connection, man: int, old: int, new: int, how: str
     old organisation is aggrieved at the new one by his rank and by what he earned."""
     from . import orgs, outfit_money
     from .org_lifecycle import leave_life
+    from .player import protagonist_id
+    if int(man) == protagonist_id(conn):
+        return False  # which side the protagonist is on is their own choice
     old_seat = seat_of(conn, man, old)
     role = role or dependent_role(conn, new)
     if old_seat is None or role is None or seat_of(conn, man, new) is not None:
@@ -220,10 +223,12 @@ def _poach_target(conn, F: int, T: int) -> int | None:
     """The best earner of T who can be reached: a seated man with lines, not its head, not already of F."""
     hT = head_of(conn, T)
     best, who = 0.0, None
+    from .player import protagonist_id
+    me = protagonist_id(conn)
     for r in conn.execute("SELECT l.holder_actor_id a,SUM(l.weekly_take) w FROM org_lines l JOIN org_holdings h ON h.id=l.holding_id WHERE h.org_actor_id=? AND l.status='active' "
                           "AND l.holder_actor_id IS NOT NULL GROUP BY 1 ORDER BY 2 DESC,1", (int(T),)).fetchall():
         a = int(r[0])
-        if a != hT and ot._free(conn, a) and seat_of(conn, a, T) is not None and seat_of(conn, a, F) is None and float(r[1] or 0.0) > best:
+        if a != hT and a != me and ot._free(conn, a) and seat_of(conn, a, T) is not None and seat_of(conn, a, F) is None and float(r[1] or 0.0) > best:
             best, who = float(r[1]), a
             break
     return who

@@ -906,8 +906,12 @@ def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logge
     elapsed = MARRIAGE_GRID_DAYS
     seed = _world_seed(conn)
     formed = 0
+    from .player import protagonist_id
+    me = protagonist_id(conn)  # their marriage is a choice made in play, never drawn
     for p in _person_rows(conn, day):
         aid = int(p["id"])
+        if aid == me:
+            continue
         if conn.execute("SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?)", (aid, aid)).fetchone():
             continue
         meta = json.loads(p["metadata_json"] or "{}")
