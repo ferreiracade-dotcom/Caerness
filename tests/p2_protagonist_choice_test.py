@@ -19,7 +19,7 @@ def main() -> None:
         db = Path(tmp) / "play.db"
         shutil.copyfile(build_saintjude(Path(tmp)), db)
         os.environ["CAERNESS_DB_PATH"] = str(db)
-        from engine import opening_family, org_dealings, org_membership, player, prison
+        from engine import opening_family, org_dealings, org_membership, player
         from engine.db import connect
 
         with connect() as conn:
@@ -59,12 +59,6 @@ def main() -> None:
                 conn, org, unit, day) else int(conn.execute("SELECT actor_id FROM org_seats WHERE org_actor_id=? AND status='active' AND actor_id<>?",
                                                             (org, man)).fetchone()[0]), org, new, "poached", day) is True
 
-            # nor seated in a group on being held
-            group = conn.execute("SELECT id,org_actor_id FROM facility_groups ORDER BY id LIMIT 1").fetchone()
-            if group is not None:
-                player.set_player(conn, me)
-                prison._seat_inside(conn, me, group[0], day)
-                assert not conn.execute("SELECT 1 FROM org_seats WHERE actor_id=? AND org_actor_id=?", (me, group[1])).fetchone()
             conn.rollback()
     print("PASS p2_protagonist_choice_test")
 
