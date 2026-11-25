@@ -64,6 +64,7 @@ class _Pass:
     """What one weekly pass reads once: figures, and the state that says who is open to what."""
 
     def __init__(self, conn: sqlite3.Connection, day: int):
+        self.told: set[int] | None = None
         self.conn, self.day = conn, int(day)
         self.me = _player(conn)
         self.words = data(conn)
@@ -273,6 +274,9 @@ def _single_candidates(p: _Pass, s: int) -> dict[int, float]:
             continue
         if conn.execute("SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?)", (i, i)).fetchone():
             continue
+        if conn.execute("SELECT 1 FROM life_matters WHERE kind='romance' AND status='open' AND (subject_actor_id=? OR other_actor_id=?)",
+                        (i, i)).fetchone():
+            continue
         if conn.execute("SELECT 1 FROM kinship_links WHERE ended_day IS NULL AND ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))", (s, i, i, s)).fetchone():
             continue
         out[i] = max(0.05, w) * max(0.1, 1.0 - gap / (p.f("lm_romance_gap_years") + 1))
@@ -292,28 +296,156 @@ def _open_romance(p: _Pass, s: int, rng) -> None:
     return _step(p, m, "interest", next_days=_span(p, m, "lm_stage_days"))
 
 
+def _later(p: _Pass, m: dict, days: float) -> None:
+    """Nothing new to tell yet: look again later."""
+    p.conn.execute("UPDATE life_matters SET next_day=? WHERE id=?", (p.day + max(1, int(round(days))), m["id"]))
+
+
 def _step_romance(p: _Pass, m: dict) -> None:
     conn, s, o = p.conn, m["subject_actor_id"], m["other_actor_id"]
     if o is None or not _living(conn, o):
         return _step(p, m, "ended", close=True)
+    if m["stage"] == "engaged":
+        return _step_engaged(p, m)
+    if p.me in (s, o) and m["stage"] != "interest":
+        return _later(p, m, p.f("lm_stage_days"))  # his own courtship moves only by what he does
     view = rel.relationship_view(conn, o, s)
     if m["stage"] == "interest":
         if m["rng"].random() < p.f("lm_romance_return") + (view["affection"] - view["resentment"]) / 200.0:
             _effect(p, m["id"], o, s, "returned the interest", affection_delta=12, familiarity_delta=8)
             conn.execute("""UPDATE social_contact_links SET affinity=MIN(100,affinity+15) WHERE status='active'
                             AND ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))""", (s, o, o, s))
+            m["data"]["since"] = p.day
             return _step(p, m, "courting", next_days=_span(p, m, "lm_courting_days"))
         _effect(p, m["id"], s, o, "was turned down", affection_delta=-8, resentment_delta=4)
         return _step(p, m, "turned_down", close=True)
-    if m["rng"].random() < p.f("lm_romance_keeps"):
+    if m["data"].get("match"):  # a courtship that is heading to marriage: it lasts its time, then an engagement, unless it ends
+        due = int(m["data"].get("since", p.day)) + int(m["data"]["wait"])
+        if p.day < due:
+            return _later(p, m, due - p.day)
+        if m["rng"].random() >= p.f("lm_match_breaks"):
+            return _engage(p, m)
+        return _break_off(p, m, "broke_off")
+    if m["stage"] == "courting":
+        if m["rng"].random() >= p.f("lm_romance_keeps"):
+            return _break_off(p, m, "broke_off")
         rel.adjust_relationship_pair(conn, s, o, p.day, symmetric={"affection_delta": 15.0, "trust_delta": 8.0})
         _effect(p, m["id"], s, o, "grew serious", affection_delta=5)
         conn.execute("""UPDATE social_contact_links SET affinity=MIN(100,affinity+20) WHERE status='active'
                         AND ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))""", (s, o, o, s))
-        return _step(p, m, "serious", close=True)
+        return _step(p, m, "serious", next_days=_span(p, m, "lm_serious_days"))
+    if m["rng"].random() < p.f("lm_serious_breaks"):
+        return _break_off(p, m, "broke_off")
+    return _later(p, m, _span(p, m, "lm_serious_days"))
+
+
+def _break_off(p: _Pass, m: dict, stage: str) -> None:
+    s, o = m["subject_actor_id"], m["other_actor_id"]
     _effect(p, m["id"], s, o, "broke it off", affection_delta=-20, resentment_delta=8)
     _effect(p, m["id"], o, s, "broke it off", affection_delta=-20, resentment_delta=8)
-    return _step(p, m, "broke_off", close=True)
+    _step(p, m, stage, close=True)
+
+
+def told(conn: sqlite3.Connection, me: int) -> set[int]:
+    """Family, friends and workmates: whose courtship, engagement and wedding always reach him."""
+    from . import texture
+    near = float(figure(conn, "lm_told_closeness", 0.55))
+    return {i for i, w in texture.circle(conn, me).items() if w >= near}
+
+
+def _engage(p: _Pass, m: dict) -> None:
+    from . import world_calendar
+    s, o = m["subject_actor_id"], m["other_actor_id"]
+    wait = int(round(_span(p, m, "lm_engaged_days")))
+    date = world_calendar.format_date(package_for(p.conn), p.day + wait)
+    m["data"]["wed_day"] = p.day + wait
+    _effect(p, m["id"], s, o, "got engaged", affection_delta=10, trust_delta=8)
+    _effect(p, m["id"], o, s, "got engaged", affection_delta=10, trust_delta=8)
+    _step(p, m, "engaged", next_days=wait, date=date)
+    if p.me is None or p.me in (s, o):
+        return
+    if p.told is None:
+        p.told = told(p.conn, p.me)
+    if s in p.told or o in p.told:
+        text = (p.words.get("texts") or {}).get("romance.invited")
+        if text:
+            p.conn.execute("INSERT INTO life_matter_steps(matter_id,day,stage,text,actors) VALUES (?,?,'invited',?,?)",
+                           (m["id"], p.day, text.format(s=_name(p.conn, s), o=_name(p.conn, o), date=date), f"{s},{o},{p.me}"))
+
+
+def _step_engaged(p: _Pass, m: dict) -> None:
+    conn, s, o = p.conn, m["subject_actor_id"], m["other_actor_id"]
+    if p.day < int(m["data"].get("wed_day", p.day)):
+        return _later(p, m, int(m["data"]["wed_day"]) - p.day)
+    if conn.execute("SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id IN (?,?) OR actor_b_id IN (?,?))",
+                    (s, o, s, o)).fetchone():
+        return _break_off(p, m, "engagement_off")
+    if p.me not in (s, o) and m["rng"].random() < p.f("lm_match_breaks"):  # his own engagement is his to break
+        return _break_off(p, m, "engagement_off")
+    from .opening_family import wed_courtship
+    first, second = (o, s) if o == p.me else (s, o)  # whoever moves in joins the first one's home; he is never moved by it
+    try:
+        wed_courtship(conn, p.day, first, second)
+    except ValueError:
+        return _break_off(p, m, "engagement_off")
+    return _step(p, m, "wed", close=True)
+
+
+def courtship(conn: sqlite3.Connection, a: int, b: int) -> sqlite3.Row | None:
+    """The open courtship between two people, if there is one."""
+    return conn.execute("""SELECT * FROM life_matters WHERE kind='romance' AND status='open' AND
+                           ((subject_actor_id=? AND other_actor_id=?) OR (subject_actor_id=? AND other_actor_id=?)) ORDER BY id DESC LIMIT 1""",
+                        (a, b, b, a)).fetchone()
+
+
+def open_courtships(conn: sqlite3.Connection) -> dict[int, sqlite3.Row]:
+    """Everyone now in an open courtship, with it."""
+    out: dict[int, sqlite3.Row] = {}
+    for r in conn.execute("SELECT * FROM life_matters WHERE kind='romance' AND status='open' ORDER BY id"):
+        for a in (r["subject_actor_id"], r["other_actor_id"]):
+            if a is not None:
+                out[int(a)] = r
+    return out
+
+
+def begin_courtship(conn: sqlite3.Connection, day: int, subject: int, other: int, *, match: bool = False, since: int | None = None) -> int:
+    """Two people start going together. `match` marks a courtship that is heading to marriage."""
+    p = _Pass(conn, day)
+    m = _open(p, "romance", subject, other, random.Random(f"{p.seed}:courtship:{subject}:{other}:{day}"))
+    m["data"]["since"] = int(day if since is None else since)
+    if match:
+        m["data"].update(match=1, wait=int(round(_span(p, m, "lm_match_courting_days"))))
+    _effect(p, m["id"], subject, other, "started courting", affection_delta=25, familiarity_delta=30)
+    _effect(p, m["id"], other, subject, "started courting", affection_delta=25, familiarity_delta=30)
+    _step(p, m, "courting", next_days=m["data"]["wait"] if match else _span(p, m, "lm_courting_days"))
+    return m["id"]
+
+
+def make_match(conn: sqlite3.Connection, day: int, row: sqlite3.Row) -> None:
+    """An existing courtship is now heading to marriage: after its time it leads to an engagement."""
+    data_ = json.loads(row["data_json"] or "{}")
+    if data_.get("match"):
+        return
+    p = _Pass(conn, day)
+    m = _load_matter(p, row)
+    m["data"].setdefault("since", int(row["stage_day"] or day))
+    m["data"].update(match=1, wait=int(round(_span(p, m, "lm_match_courting_days"))))
+    conn.execute("UPDATE life_matters SET data_json=?,next_day=? WHERE id=?",
+                 (json.dumps(m["data"], sort_keys=True), max(day + WEEK, m["data"]["since"] + m["data"]["wait"]), m["id"]))
+
+
+def engage_pair(conn: sqlite3.Connection, day: int, a: int, b: int) -> int:
+    """An accepted proposal: they are engaged, and the wedding follows on its date."""
+    if conn.execute("SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id IN (?,?) OR actor_b_id IN (?,?))",
+                    (a, b, a, b)).fetchone():
+        raise ValueError("one or both actors are already in an active union")
+    row = courtship(conn, a, b)
+    mid = int(row["id"]) if row is not None else begin_courtship(conn, day, a, b)
+    row = conn.execute("SELECT * FROM life_matters WHERE id=?", (mid,)).fetchone()
+    if row["stage"] != "engaged":
+        p = _Pass(conn, day)
+        _engage(p, _load_matter(p, row))
+    return mid
 
 
 # ---- quarrels -----------------------------------------------------------------------------------------------------------
@@ -509,14 +641,18 @@ STEPS = {"money": _step_money, "romance": _step_romance, "quarrel": _step_quarre
 
 # ---- the weekly pass -------------------------------------------------------------------------------------------------
 
+def _load_matter(p: _Pass, r: sqlite3.Row) -> dict:
+    return {"id": int(r["id"]), "kind": r["kind"], "subject_actor_id": int(r["subject_actor_id"]),
+            "other_actor_id": None if r["other_actor_id"] is None else int(r["other_actor_id"]), "stage": r["stage"], "amount": r["amount"],
+            "data": json.loads(r["data_json"] or "{}"), "awaiting": False,
+            "rng": random.Random(f"{p.seed}:life_step:{r['id']}:{p.day}")}
+
+
 def _advance_open(p: _Pass) -> int:
     rows = p.conn.execute("SELECT * FROM life_matters WHERE status='open' AND next_day<=? ORDER BY id", (p.day,)).fetchall()
     n = 0
     for r in rows:
-        m = {"id": int(r["id"]), "kind": r["kind"], "subject_actor_id": int(r["subject_actor_id"]),
-             "other_actor_id": None if r["other_actor_id"] is None else int(r["other_actor_id"]), "stage": r["stage"], "amount": r["amount"],
-             "data": json.loads(r["data_json"] or "{}"), "awaiting": False,
-             "rng": random.Random(f"{p.seed}:life_step:{r['id']}:{p.day}")}
+        m = _load_matter(p, r)
         if r["awaiting"]:  # nothing was done about it
             if m["other_actor_id"] is not None and m["other_actor_id"] != p.me and p.me is not None:
                 _effect(p, m["id"], m["other_actor_id"], p.me, "heard nothing back", resentment_delta=3)
@@ -565,6 +701,7 @@ def _rates(p: _Pass):
     cash = p.cash()
     short_below = p.f("lm_short_weeks") * p.f("lm_living_week_usd")
     taken = {int(x) for r in conn.execute("SELECT actor_a_id,actor_b_id FROM household_unions WHERE status='active'") for x in r}
+    taken |= set(open_courtships(conn))
     profile = {int(r[0]): ((day - int(r[1])) / YEAR, int(r[2] or 0)) for r in conn.execute(
         "SELECT actor_id,birth_day,family_formation_eligible FROM actor_life_profiles WHERE life_status='living'")}
     resent = {int(r[0]): float(r[1]) for r in conn.execute("SELECT actor_a_id,MAX(resentment) FROM relationships GROUP BY actor_a_id")}

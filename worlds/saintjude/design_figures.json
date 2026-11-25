@@ -17066,6 +17066,66 @@
   "mark": "Design proposal",
   "source": "unsourced",
   "note": "unsourced; How many pieces of news one advance spells out; the rest are counted. Design proposal. (P2: engine/life_matters.py, engine/hearsay.py)"
+ },
+ "lm_match_courting_days": {
+  "default": 270,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How long a courtship heading to marriage usually lasts before the engagement. Design proposal. (P2.21: engine/life_matters.py, engine/opening_family.py)"
+ },
+ "lm_engaged_days": {
+  "default": 180,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How long an engagement usually lasts before the wedding. Design proposal. (P2.21: engine/life_matters.py, engine/opening_family.py)"
+ },
+ "lm_match_breaks": {
+  "default": 0.12,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance a courtship heading to marriage, and then its engagement, ends instead. Design proposal. (P2.21: engine/life_matters.py, engine/opening_family.py)"
+ },
+ "lm_serious_days": {
+  "default": 180,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How often a serious courtship that is not heading to marriage is looked at again. Design proposal. (P2.21: engine/life_matters.py, engine/opening_family.py)"
+ },
+ "lm_serious_breaks": {
+  "default": 0.3,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance such a serious courtship has ended when looked at. Design proposal. (P2.21: engine/life_matters.py, engine/opening_family.py)"
+ },
+ "lm_told_closeness": {
+  "default": 0.55,
+  "range": null,
+  "unit": "closeness",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How close someone must be for their courtship and wedding always to reach him. Design proposal. (P2.21: engine/life_matters.py, engine/opening_family.py)"
  }
  },
  "pools": {

@@ -19,7 +19,7 @@ def main() -> None:
         db = Path(tmp) / "play.db"
         shutil.copyfile(build_saintjude(Path(tmp)), db)
         os.environ["CAERNESS_DB_PATH"] = str(db)
-        from engine import opening_family, org_dealings, org_membership, player
+        from engine import life_matters, opening_family, org_dealings, org_membership, player
         from engine.db import connect
 
         with connect() as conn:
@@ -36,9 +36,8 @@ def main() -> None:
             opening_family._person_rows = lambda c, d: single
             opening_family.first_marriage_hazard = lambda age, curve: 1.0
             assert opening_family.resolve_unnamed_marriages(conn, grid) == 1
-            married = {int(r[0]) for r in conn.execute("SELECT actor_a_id FROM household_unions WHERE status='active' UNION "
-                                                       "SELECT actor_b_id FROM household_unions WHERE status='active'")}
-            assert other in married and me not in married, (me, other)
+            courting = life_matters.open_courtships(conn)  # the draw sets a courtship on the road to marriage (P2.21)
+            assert other in courting and me not in courting, (me, other, sorted(courting))
 
             # a dependant who could be put forward is not, once they are the protagonist
             found = None

@@ -58,11 +58,15 @@ def relation(conn: sqlite3.Connection, me: int, other: int) -> str:
     return "acquaintance"
 
 
-def _path(conn, me: int, close: dict[int, float], actors: list[int], rng: random.Random) -> int | None:
-    """Who brings it to him: 0 when it happened to him, a carrier's id, or None when it does not reach him."""
+def _path(conn, me: int, close: dict[int, float], actors: list[int], rng: random.Random, sure: set[int] = frozenset()) -> int | None:
+    """Who brings it to him: 0 when it happened to him, a carrier's id, or None when it does not reach him. People in `sure` always
+    tell this themselves."""
     if me in actors:
         return 0
     own = {a: close[a] for a in actors if a in close}
+    always = sorted(a for a in own if a in sure)
+    if always:
+        return max(always, key=own.get)
     if own:
         who = max(sorted(own), key=own.get)
         if rng.random() < float(figure(conn, "lm_news_own")) * own[who]:
@@ -83,14 +87,17 @@ def reach(conn: sqlite3.Connection, me: int, day: int) -> int:
     """Enter what reaches him of the steps taken since the last pass. Returns how many."""
     row = conn.execute("SELECT value FROM engine_meta WHERE key='hearsay_step'").fetchone()
     last = int(row[0]) if row else 0
-    steps = conn.execute("SELECT id,text,actors FROM life_matter_steps WHERE id>? ORDER BY id", (last,)).fetchall()
+    steps = conn.execute("""SELECT s.id,s.text,s.actors,m.kind FROM life_matter_steps s JOIN life_matters m ON m.id=s.matter_id
+                            WHERE s.id>? ORDER BY s.id""", (last,)).fetchall()
     if not steps:
         return 0
     close = texture.circle(conn, me)
+    told = life_matters.told(conn, me)
     seed = run_seed(conn)
     n = 0
     for s in steps:
-        carrier = _path(conn, me, close, _ids(s["actors"]), random.Random(f"{seed}:hearsay:{me}:{s['id']}"))
+        carrier = _path(conn, me, close, _ids(s["actors"]), random.Random(f"{seed}:hearsay:{me}:{s['id']}"),
+                        told if s["kind"] == "romance" else frozenset())
         if carrier is None:
             continue
         conn.execute("INSERT OR IGNORE INTO knowledge(knower_actor_id,fact_key,belief_text,confidence,learned_day) VALUES (?,?,?,?,?)",
@@ -198,12 +205,13 @@ def stops(conn: sqlite3.Connection, me: int, start: int, end: int) -> list[dict]
     if life_matters.enabled(conn):
         close = texture.circle(conn, me)
         near = float(figure(conn, "lm_stop_closeness"))
+        told = life_matters.told(conn, me)
         for k in _known(conn, me, start, end):
             s, _ = parse(conn, k["fact_key"])
             if s is None:
                 continue
             ids = _ids(s["actors"])
-            if me in ids or any(close.get(a, 0.0) >= near for a in ids):
+            if me in ids or any(close.get(a, 0.0) >= near or (s["kind"] == "romance" and a in told) for a in ids):
                 found.append({"day": int(k["learned_day"]), "source_kind": "system", "source_id": int(s["step_id"]), "severity": 4 if me in ids else 3,
                               "reason": str(k["belief_text"]), "metadata": {"what": "matter", "kind": s["kind"]}})
     # a deal paid or due, or pay that did not come; ordinary paydays go by

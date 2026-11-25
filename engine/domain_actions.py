@@ -7,6 +7,9 @@ import sqlite3
 from dataclasses import dataclass
 from typing import Any
 
+from . import life_matters
+from .design import figure
+
 
 @dataclass(frozen=True)
 class DomainActionOption:
@@ -276,6 +279,13 @@ def _union_option(conn: sqlite3.Connection, actor_id: int, day: int) -> DomainAc
         from .household_life import prohibited_union_kinship_reason
         if prohibited_union_kinship_reason(conn, actor_id, partner):
             continue
+        if life_matters.enabled(conn):  # a proposal comes out of a courtship that has lasted
+            row = life_matters.courtship(conn, actor_id, partner)
+            if row is None or row["stage"] not in ("courting", "serious"):
+                continue
+            since = int(_loads(row["data_json"], {}).get("since", row["stage_day"]))
+            if day - since < float(figure(conn, "lm_match_courting_days", 270.0)) * 0.5:
+                continue
         return DomainActionOption(
             "propose_union", 6.0 + min(2.5, (float(r["trust"]) + float(r["stance"])) / 80.0),
             f"Propose household formation to {_name(conn, partner)} after an established positive relationship.",
@@ -1056,6 +1066,12 @@ def apply_accepted_interaction_domain_action(conn: sqlite3.Connection, interacti
                                 quality=55, adherence=70,
                                 metadata={"authority":"ENGINE_DERIVED", "accepted_interaction_id":int(interaction["id"])})
             result = {"treatment_id": tid, "condition_id": cid, "provider_actor_id": recipient}
+
+        elif kind == "propose_union" and life_matters.enabled(conn):  # yes means engaged; the wedding comes on its date
+            partner = int(payload.get("partner_actor_id") or recipient)
+            if partner != recipient:
+                raise ValueError("accepted recipient does not match proposed partner")
+            result = {"courtship_matter_id": life_matters.engage_pair(conn, day, initiator, partner), "partner_actor_id": partner}
 
         elif kind == "propose_union":
             from .household_life import create_union

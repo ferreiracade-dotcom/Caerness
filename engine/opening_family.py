@@ -29,6 +29,7 @@ import random
 import sqlite3
 from typing import Any
 
+from .design import figure
 from .health import natural_annual_hazard
 
 AUTHORITY = "OPENING_FAMILY_RESOLUTION_V1"
@@ -292,8 +293,8 @@ def _spouse_name(conn: sqlite3.Connection, key: str, sex: str) -> str:
 
 
 def _reveal_spouse(conn: sqlite3.Connection, person_id: int, spouse: dict[str, Any], *, key: str, day: int,
-                   location_id: int | None, reason: str) -> int:
-    """Materialize an already-existing spouse through the latent-person path, at low attention."""
+                   location_id: int | None, reason: str, married: bool = True) -> int:
+    """Materialize an already-existing spouse (or, not `married`, someone to court) through the latent-person path, at low attention."""
     from .continuity import set_resolution
     from .resolution_controller import _materialize_latent_person, _sync_sim_tier
     birth_day = day - int(round(spouse["age_now"] * 365.0)) - _rng(f"birthday:{key}").randrange(365)
@@ -318,8 +319,9 @@ def _reveal_spouse(conn: sqlite3.Connection, person_id: int, spouse: dict[str, A
                    source_kind="engine", review_cadence_days=365, next_review_day=day + 365,
                    metadata={"latent_entity_id": int(latent["id"]), "authority": AUTHORITY})
     _sync_sim_tier(conn, aid, "STRUCTURAL", day)
-    conn.execute("UPDATE actor_life_profiles SET metadata_json=json_patch(metadata_json,?) WHERE actor_id=?",
-                 (_j({"marital_status": "married", "marital_status_basis": reason, "marital_status_authority": AUTHORITY}), aid))
+    if married:
+        conn.execute("UPDATE actor_life_profiles SET metadata_json=json_patch(metadata_json,?) WHERE actor_id=?",
+                     (_j({"marital_status": "married", "marital_status_basis": reason, "marital_status_authority": AUTHORITY}), aid))
     from .health import configure_health_profile
     configure_health_profile(conn, aid, longevity_class=spouse["longevity_class"])
     # A staged spouse may still practise; most practise less with age.  Unstaged Veinborn do not train
@@ -894,8 +896,37 @@ def reveal_latent_adult_child(conn: sqlite3.Connection, parent_id: int, *, reaso
 MARRIAGE_GRID_DAYS = 30  # the household-life clock always fires on this grid
 
 
+def wed_courtship(conn: sqlite3.Connection, day: int, person_id: int, spouse_id: int, *, event_logger=None) -> int:
+    """The wedding at the end of an engagement: `spouse_id` joins `person_id`'s home, and the couple's family plan begins."""
+    from .household_life import resolved_biological_birth_parent
+    if event_logger is None:
+        from .interactions import _log_event
+        event_logger = lambda **k: _log_event(conn, k["day"], k["event_type"], k["title"], k["summary"], k["severity"],
+                                              k["source_actor_id"], k["target_actor_ids"])
+    rows = {int(r["id"]): r for r in conn.execute(_PERSON_SQL + " WHERE a.id IN (?,?)", (person_id, spouse_id))}
+    p, q = rows[int(person_id)], rows[int(spouse_id)]
+    if p["birth_day"] is None or q["birth_day"] is None:
+        raise ValueError("a wedding needs both ages")
+    key = f"wedding:{_world_seed(conn)}:{person_id}:{spouse_id}:{day}"
+    history = {"children": [], "desired_children": _weighted(_rng(f"desired:{key}"), _DESIRED_CHILDREN), "last_birth_at": None}
+    plan = _family_plan(history, sex=str(p["demographic_sex"]), person_age=(day - int(p["birth_day"])) / 365.0,
+                        spouse_age=(day - int(q["birth_day"])) / 365.0, day=day, key=key,
+                        birth_parent_id=resolved_biological_birth_parent(conn, person_id, spouse_id),
+                        mode="RUN_TIME_MARRIAGE_FAMILY_CONTINUITY", married_day=day)
+    uid = _form_revealed_union(conn, person_id, spouse_id, married_day=day, day=day, family_plan=plan, basis="run_time_marriage")
+    for a, b in ((person_id, spouse_id), (spouse_id, person_id)):
+        _mark(conn, a, {"marital_status": "married", "marital_status_basis": "run_time_marriage", "spouse_actor_id": b})
+    event_logger(day=day, event_type="life:union", title=f"Marriage: {p['name']} and {q['name']}",
+                 summary=f"{p['name']} married {q['name']}.", severity=1, source_actor_id=person_id, target_actor_ids=(spouse_id,),
+                 location_id=int(p["loc"]) if p["loc"] is not None else None)
+    return uid
+
+
 def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logger=None) -> int:
     """Single named adults marry people from the unnamed population at the world's marriage rates.
+
+    Where ordinary-life matters run, the draw does not marry anyone: it sets a courtship on the road to marriage (one they are
+    already in, or a new one with someone from the neighbourhood), which ends in an engagement and a wedding months later.
 
     Draws happen only on the fixed 30-day grid (never on other household-life passes), so results
     do not depend on how a run is split into steps.  The partner already existed in the local
@@ -908,6 +939,10 @@ def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logge
     formed = 0
     from .player import protagonist_id
     me = protagonist_id(conn)  # their marriage is a choice made in play, never drawn
+    from . import life_matters
+    by_courtship = life_matters.enabled(conn)
+    courting = life_matters.open_courtships(conn) if by_courtship else {}
+    survive = (1.0 - float(figure(conn, "lm_match_breaks", 0.12))) ** 2 if by_courtship else 1.0  # some matches end first
     for p in _person_rows(conn, day):
         aid = int(p["id"])
         if aid == me:
@@ -928,9 +963,17 @@ def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logge
             annual = remarriage_hazard(age) if day - widowed_day >= 365 else 0.0
         else:
             annual = first_marriage_hazard(age, marriage_curve_for(conn, aid, sex, lc)[0])
+        annual = min(1.0, annual / survive)
         prob = 1.0 - (1.0 - annual) ** (elapsed / 365.0)
         key = f"unnamed-marriage:{seed}:{aid}:{day}"
         if _rng(key).random() >= prob:
+            continue
+        match = courting.get(aid)
+        if match is not None:
+            pair = (match["subject_actor_id"], match["other_actor_id"])
+            if me not in pair and match["stage"] in ("courting", "serious"):
+                life_matters.make_match(conn, day, match)
+                formed += 1
             continue
         cultivation = _cultivation_on(conn)
         hearth = False
@@ -940,6 +983,12 @@ def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logge
         spouse = _draw_spouse(_rng(f"spouse:{key}"), age, sex, lc, hearth, cultivation)
         spouse["married_at"] = age; spouse["age_now"] = spouse["age_at_marriage"]
         loc = int(p["loc"]) if p["loc"] is not None else None
+        if by_courtship:
+            partner = _reveal_spouse(conn, aid, spouse, key=key, day=day, location_id=loc, reason="courtship", married=False)
+            mid = life_matters.begin_courtship(conn, day, aid, partner, match=True)
+            courting[aid] = courting[partner] = conn.execute("SELECT * FROM life_matters WHERE id=?", (mid,)).fetchone()
+            formed += 1
+            continue
         spouse_id = _reveal_spouse(conn, aid, spouse, key=key, day=day, location_id=loc, reason="run_time_marriage")
         from .household_life import resolved_biological_birth_parent
         hist = {"children": [], "desired_children": _weighted(_rng(f"desired:{key}"), _DESIRED_CHILDREN), "last_birth_at": None}
