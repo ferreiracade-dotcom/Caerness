@@ -1,19 +1,25 @@
 {
-  "version": "p2-dominic-1",
+  "version": "p2-dominic-2",
   "protagonist": "Dominic Basile",
   "business": "Basile & Sons Auto Repair",
   "payday": "Friday",
-  "cash": {"amount": 1249, "reason": "the purse agreed in play: sideline jobs, eleven weeks and more of saving, less the tools"},
+  "player_said": "Make the record match the story as we played it.",
+  "unmarry": [{"spouse": "Lucia Fernandes", "player_said": "Dominic never married her. Take it back."}],
+  "people": [
+    {"person": "Paul Ricci", "work": "Owner of a busy restaurant on the east side", "location": "The Eastside"},
+    {"person": "Tullio Bruni", "work": "Collector and go-between for the Pellegrino social club"}
+  ],
+  "cash": {"amount": 2512, "reason": "as of 19 July 1975: 2,253 saved and 259 at home"},
   "till": {"amount": 1500, "reason": "a week or two of the shop's takings in hand"},
   "wages": [
     {"worker": "Gennaro", "weekly": 150},
-    {"worker": "Dominic Basile", "weekly": 125},
+    {"worker": "Dominic Basile", "weekly": 55},
     {"worker": "Stanley", "weekly": 110},
     {"worker": "Vincent", "weekly": 105},
     {"worker": "Anthony", "weekly": 35}
   ],
-  "board": {"to": "Josephine", "weekly": 30, "what": "board to his mother"},
-  "living": {"weekly": 40, "what": "the Tap, pizza, gas and clothes"},
+  "board": {"to": "Josephine", "weekly": 0, "what": "board to his mother"},
+  "living": {"weekly": 0, "what": "the Tap, pizza, gas and clothes"},
   "shares": [
     {"to": "business", "share": 0.1, "applies": "all", "note": "the shop's share, written in Louis's book"},
     {"to": "Frank Amato", "share": 0.1, "applies": "referred", "note": "customers he brings; cash men only"},
@@ -49,9 +55,27 @@
     {
       "customer": "Gerald Orsini", "job": "GTO modification, third tier", "quote": 1900, "parts": 750, "created": "25 April 1975",
       "referrer": "Vincent", "status": "declined", "note": "Quoted; he cannot pay for it now. Not closed to him."
+    },
+    {
+      "customer": "Paul Ricci", "job": "Camaro, stage two", "quote": 900, "created": "19 July 1975",
+      "payments": [["19 July 1975", 900]], "note": "Done. Dated to the latest sheet."
+    },
+    {
+      "customer": "Tullio Bruni", "job": "Stage two on a Pellegrino club car, the first", "quote": 900, "created": "19 July 1975",
+      "payments": [["19 July 1975", 900]], "note": "Done. The club's car, recorded under its go-between. Dated to the latest sheet."
+    },
+    {
+      "customer": "Tullio Bruni", "job": "Stage two on a Pellegrino club car, the second", "quote": 900, "created": "19 July 1975",
+      "payments": [["19 July 1975", 900]], "note": "Done. The club's car, recorded under its go-between. Dated to the latest sheet."
+    },
+    {
+      "customer": "Paul Ricci", "job": "Stage one for Paul Ricci's brother-in-law", "quote": 350, "created": "19 July 1975",
+      "payments": [["19 July 1975", 350]], "note": "Done. Recorded under Paul, who brought him. Dated to the latest sheet."
     }
   ],
   "rules": [
+    "Reserve: Dominic keeps 1,000 dollars of his money untouched.",
+    "The crew owns a '67 Mustang, bought for 350 dollars as the learning car; Dominic also put 280 dollars of kit into the shop bay. Both are already out of his cash.",
     "Premise: a Peaky Blinders kind of story with brothers and a close best friend, an Italian family on South Hill and a garage. Honest doesn't mean completely opposed. Hidden compartments are only a possible future direction.",
     "Pricing: fair, never cheap. Dominic holds his number when a customer winces. Half up front for parts, the balance on delivery, cash, no credit.",
     "Short payment: \"I don't do half jobs so I don't want half pay.\" He may hold the car until paid, or release it against collateral such as the papers. A favour comes with terms: silence about the debt, and the story told is that it was paid on time.",
@@ -70,5 +94,5 @@
     {"event_type": "interaction:demand:rejected", "from": "5 February 1975", "to": "28 February 1975",
      "reason": "logged by a doubled skip; no demand was made in the story"}
   ],
-  "settle_errors": ["careful man", "demand"]
+  "settle_errors": ["careful man", "demand", "married", "marriage", "Lucia"]
 }

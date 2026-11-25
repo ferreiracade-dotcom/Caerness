@@ -1,5 +1,7 @@
 """Write a save's agreed facts into it: cash, wages, standing payments, shares, past jobs, standing rules, and the clean-up
-of records the first playthrough logged wrongly. The facts are data (tools/saves/dominic.json).
+of records the playthrough logged wrongly: a marriage the player never made, people recorded with the wrong work or place,
+things nobody holds, sheets cut short, and epithet or numbered names. The facts are data (tools/saves/dominic.json): correct
+a figure there; bump "version" to apply a corrected file to a save that already took an earlier one.
 
     python tools/p2_dominic_facts.py <save.db>                              dry run on a throwaway copy
     python tools/p2_dominic_facts.py <save.db> --apply --backup <new.db>    back the save up, then write
@@ -94,6 +96,86 @@ class Writer:
         i = self.person(who)
         return None if i is None else f"person:{i}"
 
+    # ---- people ----
+
+    def names_straight(self) -> None:
+        from engine import name_repair
+
+        changed = name_repair.repair_names(self.conn)
+        if changed:
+            self.say(f"names repaired: {len(changed)}, e.g. " + "; ".join(f"{a} -> {b}" for a, b in list(changed.items())[:3]))
+
+    def unmarry(self) -> None:
+        """A marriage the engine made offstage is taken back: ties, home, feelings and the news of it."""
+        from engine import civilian, corrections
+
+        c, me = self.conn, self.me
+        for m in self.facts.get("unmarry", []):
+            found = c.execute(
+                """SELECT a.id,a.name,u.started_day FROM household_unions u
+                   JOIN actors a ON a.id=CASE WHEN u.actor_a_id=? THEN u.actor_b_id ELSE u.actor_a_id END
+                   WHERE (u.actor_a_id=? OR u.actor_b_id=?) AND a.name=?""", (me, me, me, m["spouse"])).fetchall()
+            if not found:
+                self.say(f"MISSING: no marriage to {m['spouse']} on the record")
+                continue
+            her, name, day = int(found[0]["id"]), found[0]["name"], int(found[0]["started_day"])
+            pair = (me, her, her, me)
+            words = next((r[0] for r in c.execute("SELECT text FROM error_reports WHERE status='open' ORDER BY id DESC")
+                          if name.split()[0] in r[0]), m["player_said"])
+            reverse = [{"table": "relationships", "action": "delete", "where": {"actor_a_id": r[0], "actor_b_id": r[1]}}
+                       for r in c.execute("""SELECT actor_a_id,actor_b_id FROM relationships WHERE started_day=? AND
+                           ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))""", (day, *pair)).fetchall()]
+            news = [int(r[0]) for r in c.execute(
+                """SELECT DISTINCT e.id FROM events e JOIN event_targets t ON t.event_id=e.id WHERE e.event_type='life:union' AND e.day=?
+                   AND ((e.source_actor_id=? AND t.actor_id=?) OR (e.source_actor_id=? AND t.actor_id=?))""", (day, *pair)).fetchall()]
+            corrections.apply(c, "undo_event", words, {"actors": [me, her], "day": day, "reverse": reverse}, self.call)
+            for event in news:
+                corrections.apply(c, "undo_event", words, {"event_id": event}, self.call)
+            c.execute("""UPDATE actor_life_profiles SET metadata_json=json_patch(COALESCE(metadata_json,'{}'),
+                         '{"marital_status":"single","marital_status_basis":null,"spouse_actor_id":null}') WHERE actor_id IN (?,?)""", (me, her))
+            home = c.execute("SELECT household_id FROM household_members WHERE actor_id=? AND status='active'", (her,)).fetchone()
+            if home is None:
+                at = c.execute("SELECT current_location_id FROM actors WHERE id=?", (her,)).fetchone()[0]
+                home = (civilian.create_household(c, f"{name}'s household", head_actor_id=her, location_id=at),)
+            c.execute("UPDATE actor_life_profiles SET current_household_id=? WHERE actor_id=?", (home[0], her))
+            self.say(f"marriage taken back: {name}, {self.calendar.format_date(self.pkg, day)}; {len(reverse)} tie rows removed, "
+                     f"{len(news)} news entries voided, they have their own household")
+
+    def people(self) -> None:
+        """Work and place as the story had them, and no held thing for a person."""
+        from engine import corrections
+
+        c = self.conn
+        for p in self.facts.get("people", []):
+            who = self.person(p["person"])
+            if who is None:
+                continue
+            want = {k: v for k, v in p.items() if k != "person"}
+            if want:
+                try:
+                    corrections.apply(c, "person", self.facts["player_said"], {"person": who, **want}, self.call)
+                    self.say(f"corrected: {p['person']}: " + ", ".join(f"{k} {v}" for k, v in want.items()))
+                except corrections.Refused as e:
+                    self.say(f"unchanged: {p['person']}: {e}")
+            for r in c.execute("SELECT id,name FROM held_things WHERE status!='ended' AND (owner_actor_id=? OR name=?)",
+                               (who, p["person"])).fetchall():
+                c.execute("UPDATE held_things SET status='ended',ended_reason='not something anyone holds',end_day=?,updated_day=? WHERE id=?",
+                          (self.day, self.day, r["id"]))
+                self.say(f"no longer held: {r['name']} (held thing {r['id']})")
+
+    def sheets(self) -> None:
+        """A sheet cut short when it was saved is put back whole from the call that saved it."""
+        latest: dict[str, str] = {}
+        for r in self.conn.execute("SELECT request_json FROM connector_calls WHERE tool='note' ORDER BY rowid"):
+            asked = json.loads(r[0])
+            if asked.get("kind") == "sheet":
+                latest[asked.get("field")] = " ".join(str(asked.get("text") or "").split())
+        for field, whole in latest.items():
+            row = self.conn.execute("SELECT text FROM character_sheet WHERE field=?", (field,)).fetchone()
+            if row and len(row[0]) < len(whole) and whole.startswith(row[0].rstrip("…").rstrip()):
+                self.conn.execute("UPDATE character_sheet SET text=? WHERE field=?", (whole, field))
+                self.say(f"sheet restored whole: {field}: {whole}")
+
     # ---- money ----
 
     def money(self) -> None:
@@ -114,6 +196,8 @@ class Writer:
                          f"shop, first on {self.calendar.format_date(self.pkg, first)}")
         for kind in ("board", "living"):
             f = self.facts[kind]
+            if f["weekly"] <= 0:
+                continue
             to = me if kind == "living" else self.ref(f["to"])
             if not to:
                 continue
@@ -149,7 +233,7 @@ class Writer:
             referrer = self.person(d["referrer"]) if d.get("referrer") else None
             status = d.get("status", "open")
             deal = money_records.add_deal(
-                self.conn, customer=customer, provider=me, job=d["job"], quote=d["quote"], parts=d["parts"], referrer=referrer,
+                self.conn, customer=customer, provider=me, job=d["job"], quote=d["quote"], parts=d.get("parts", 0), referrer=referrer,
                 note=d.get("note", ""), status=status, day=self.date(d["created"]))
             for on, amount in d.get("payments", []):  # history: the cash figure above already includes it, so nothing moves
                 self.conn.execute("INSERT INTO deal_payments(deal_id,day,amount_usd,source) VALUES (?,?,?,'recorded')",
@@ -212,7 +296,8 @@ class Writer:
                 self.say(f"no longer held: {r['name']}")
 
     def run(self) -> dict:
-        for step in (self.money, self.shares, self.deals, self.rules, self.clean):
+        for step in (self.names_straight, self.unmarry, self.people, self.sheets, self.money, self.shares, self.deals, self.rules,
+                     self.clean):
             step()
         return {"summary": "The agreed facts were written into the save.", "report": self.report}
 
