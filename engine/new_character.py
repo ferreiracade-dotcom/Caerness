@@ -77,7 +77,12 @@ def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: st
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (cand,)).fetchone():
             name = cand
             break
-    if name is None:  # the family's common given names are all in use: a middle initial, as a crowded city's families do
+    if name is None:  # the family's common given names are all in use: a further one of its community
+        from .demographic_sex import package_namesake_pool
+        more = package_namesake_pool(conn, sex, family)
+        rng.shuffle(more)
+        name = next((f"{g} {family}" for g in more if not conn.execute("SELECT 1 FROM actors WHERE name=?", (f"{g} {family}",)).fetchone()), None)
+    if name is None:  # still none free (or no further names): a middle initial, as a crowded city's families do
         for init in "JMAEFRTWCDGHLPS":
             for g in sorted(given):
                 cand = f"{g} {init}. {family}"

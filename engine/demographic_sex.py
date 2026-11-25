@@ -110,6 +110,7 @@ def _package_names(conn: sqlite3.Connection | None):
     female: set[str] = set()
     for g in (pkg.name_groups or {}).values():
         male.update(g.get("male", ())); female.update(g.get("female", ()))
+        male.update(g.get("male_more", ())); female.update(g.get("female_more", ()))
     pools = pkg.name_pools or {}
     male.update(pools.get("male") or ()); female.update(pools.get("female") or ())
     return (male, female) if male or female else None
@@ -153,6 +154,15 @@ def package_given_pool(conn: sqlite3.Connection, sex: str, family: str | None = 
     if not names:
         names = list((pkg.name_pools or {}).get(key) or ())
     return sorted(dict.fromkeys(names)) or None
+
+
+def package_namesake_pool(conn: sqlite3.Connection, sex: str, family: str | None = None) -> list[str]:
+    """Further given names of this sex in the family's group, drawn on only when its ordinary ones are all borne."""
+    from .world_package import package_for
+    key = "female_more" if sex == "female" else "male_more"
+    groups = package_for(conn).name_groups or {}
+    home = family_home_groups(conn, groups, family)
+    return sorted(dict.fromkeys(n for g in (home or groups.values()) for n in g.get(key, ())))
 
 
 def package_person_name(conn: sqlite3.Connection, rng, sex: str) -> tuple[str, str] | None:

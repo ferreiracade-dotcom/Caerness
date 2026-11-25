@@ -1,16 +1,20 @@
-"""Repair names an older namer spoiled: a descriptive tag or a number stuck onto a person's name. The given name is kept; a
-middle initial tells two namesakes apart. Worlds without their own name pools use such tags on purpose and are left alone."""
+"""Repair names an older namer spoiled: a descriptive tag or a number stuck onto a person's name, or a middle initial added
+only to tell two namesakes apart. The family name is kept; where the plain name is already borne, the person takes another
+given name of the same sex and community. Worlds without their own name pools use such tags on purpose and are left alone."""
 from __future__ import annotations
 
+import random
 import re
 import sqlite3
 
+from . import demographic_sex
 from .person_ecology import _EPITHETS
 from .world_package import package_for
 
 _TAGS = tuple(sorted(_EPITHETS, key=len, reverse=True))
 _TAILS = frozenset(t.split()[-1] for t in _TAGS)  # what a tag leaves as the "family name" of a child
 _NUMBERED = re.compile(r"( \d+)+$")
+_INITIALS = re.compile(r"^(\S+)(?: [A-Z]\.)+ (\S.*)$")
 
 
 def _strip(name: str) -> str:
@@ -21,19 +25,34 @@ def _strip(name: str) -> str:
     return out
 
 
-def _free(conn: sqlite3.Connection, actor_id: int, base: str) -> str:
+def _free(conn: sqlite3.Connection, actor_id: int, base: str) -> str | None:
+    """`base` when nobody else bears it, else another given name of the same sex and community with the same family name,
+    else another family name of that community; None when every such name is borne."""
     taken = lambda n: conn.execute("SELECT 1 FROM actors WHERE name=? AND id<>?", (n, actor_id)).fetchone()
     if not taken(base):
         return base
     given, _, rest = base.partition(" ")
-    rest = re.sub(r"^[A-Z]\. ", "", rest)
-    for k in range(26 * 26):
-        a, b = divmod(actor_id + k, 26)
-        mark = chr(65 + b) + "." if k < 26 else f"{chr(65 + b)}. {chr(65 + a % 26)}."
-        name = f"{given} {mark} {rest}"
-        if not taken(name):
-            return name
-    return base
+    rest = re.sub(r"^(?:[A-Z]\. )+", "", rest)
+    row = conn.execute("SELECT demographic_sex FROM actor_life_profiles WHERE actor_id=?", (actor_id,)).fetchone()
+    sex = row[0] if row and row[0] in ("female", "male") else demographic_sex._given_name_sex(base, conn)
+    if not sex:
+        return None
+    rng = random.Random(f"namesake:{actor_id}")
+    usual = list(demographic_sex.package_given_pool(conn, sex, rest) or ())
+    further = demographic_sex.package_namesake_pool(conn, sex, rest)
+    for pool in (usual, further):
+        rng.shuffle(pool)
+        for other in pool:
+            if not taken(f"{other} {rest}"):
+                return f"{other} {rest}"
+    groups = demographic_sex.family_home_groups(conn, package_for(conn).name_groups or {}, rest)
+    families = sorted({n for g in groups for n in g.get("family", ())})
+    rng.shuffle(families)
+    for family in families:
+        for other in [given] + usual + further:
+            if not taken(f"{other} {family}"):
+                return f"{other} {family}"
+    return None
 
 
 def _parent_family(conn: sqlite3.Connection, actor_id: int) -> str | None:
@@ -57,6 +76,33 @@ def _spoiled(conn: sqlite3.Connection) -> list[tuple[int, str, str]]:
                 base = " ".join(words[:-1] + [family])
         if base != name and len(base.split()) >= 2:
             out.append((aid, name, base))
+    return out
+
+
+def _named_in_play(conn: sqlite3.Connection) -> set[int]:
+    """Whoever the player or the GM named for himself: a middle initial there is the name they have been told."""
+    out = {int(r[0]) for r in conn.execute("""SELECT actor_id FROM actor_life_profiles
+                                             WHERE json_extract(metadata_json,'$.source')='new_character'""")}
+    out |= {int(str(r[0]).rsplit(":", 1)[1]) for r in conn.execute("SELECT fact_key FROM knowledge WHERE fact_key LIKE 'lived:tie:%'")}
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE name='authored_entities'").fetchone():  # the connector's own list
+        out |= {int(r[0]) for r in conn.execute("SELECT entity_id FROM authored_entities WHERE entity_table='actors'")}
+    return out
+
+
+def _doubled(conn: sqlite3.Connection) -> list[tuple[int, str, str]]:
+    """People set apart from a namesake only by a middle initial (never the protagonist, anyone named in play, or a real
+    figure of history)."""
+    out = []
+    named = _named_in_play(conn)
+    for r in conn.execute("""SELECT id,name FROM actors WHERE actor_type='character' AND name LIKE '% _. %'
+                             AND id NOT IN (SELECT player_actor_id FROM player_state WHERE player_actor_id IS NOT NULL)
+                             AND id NOT IN (SELECT actor_id FROM real_figures WHERE actor_id IS NOT NULL) ORDER BY id""").fetchall():
+        m = _INITIALS.match(str(r[1]))
+        if not m or int(r[0]) in named:
+            continue
+        base = f"{m[1]} {m[2]}"
+        if conn.execute("SELECT 1 FROM actors WHERE name=? AND id<>?", (base, int(r[0]))).fetchone():
+            out.append((int(r[0]), str(r[1]), base))
     return out
 
 
@@ -84,10 +130,14 @@ def repair_names(conn: sqlite3.Connection) -> dict[str, str]:
     if not package_for(conn).name_pools:
         return {}
     changed: dict[str, str] = {}
-    for aid, old, base in _spoiled(conn):
-        new = _free(conn, aid, base)
-        conn.execute("UPDATE actors SET name=? WHERE id=?", (new, aid))
-        changed[old] = new
+    for find in (_spoiled, _doubled):  # the second looks at the names as the first leaves them
+        for aid, old, base in find(conn):
+            new = _free(conn, aid, base)
+            if new is None or new == old:
+                continue
+            conn.execute("UPDATE actors SET name=? WHERE id=?", (new, aid))
+            first = next((k for k, v in changed.items() if v == old), old)  # stored copies still carry the first name
+            changed[first] = new
     # the background identities a tag was split into
     for r in conn.execute("SELECT partition_id,local_uid,family_name FROM background_person_profiles WHERE family_name LIKE '% %'").fetchall():
         for tag in _TAGS:
@@ -105,7 +155,7 @@ def repair_names(conn: sqlite3.Connection) -> dict[str, str]:
 
 
 def _rewrite_copies(conn: sqlite3.Connection, changed: dict[str, str]) -> None:
-    # every old name ends in a tag word or a number: look for those words, then check what stands before each one
+    # old names share few last words (a tag, a number, a family name): look for those, then check what stands before each one
     by_last: dict[str, list[str]] = {}
     for old in sorted(changed, key=len, reverse=True):
         by_last.setdefault(old.split()[-1], []).append(old)

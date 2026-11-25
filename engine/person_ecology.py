@@ -348,6 +348,10 @@ def _free_name(conn: sqlite3.Connection, given: str, family: str, sex: str | Non
     for g in ((given,) if given not in names else ()) + names[start:] + names[:start]:
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (f"{g} {family}",)).fetchone():
             return f"{g} {family}"
+    from .demographic_sex import package_namesake_pool
+    for g in package_namesake_pool(conn, key, family):
+        if not conn.execute("SELECT 1 FROM actors WHERE name=?", (f"{g} {family}",)).fetchone():
+            return f"{g} {family}"
     # Every first name of this family is taken: a world with its own names tells them apart by a middle initial, otherwise
     # an epithet does; never a number in the name.
     marks = [f"{given} {chr(65 + (suffix + k) % 26)}. {family}" for k in range(26)] if pkg.name_pools else [
