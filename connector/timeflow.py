@@ -1,9 +1,11 @@
 """advance: pass time through the engine's time-skip runner, capped per call."""
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 
-from connector import store
+from connector import store, undo
 from engine.player import get_player
 from engine.timeskip import prepare_time_skip, resolve_time_skip
 
@@ -53,8 +55,39 @@ def _delegation(conn, me: int, purpose: str, delegate) -> dict:
     return out
 
 
+def recent(conn, limit: int = 3) -> list[dict]:
+    """The latest skips, oldest first: what days have already passed and what they were spent on."""
+    from engine import world_calendar
+    from engine.world_package import current_package
+
+    pkg = current_package(conn)
+    rows = conn.execute("SELECT call_id,request_json,result_json FROM connector_calls WHERE tool='advance' ORDER BY rowid DESC LIMIT ?", (limit,))
+    out = []
+    for r in reversed(rows.fetchall()):
+        req, res = json.loads(r["request_json"]), json.loads(r["result_json"])
+        out.append({"call_id": r["call_id"], "from_day": res["day_started"], "to_day": res["day_ended"],
+                    "to_date": world_calendar.format_date(pkg, res["day_ended"]), "purpose": _clip(req.get("purpose"), 120)})
+    return out
+
+
+def _db_file(conn) -> Path:
+    return Path(conn.execute("PRAGMA database_list").fetchone()[2])
+
+
+def _moved(conn, from_day: int, today: int) -> dict:
+    """The refusal for a skip asked from a day the clock has left, with what already passed from there."""
+    out = {"status": "refused", "reason": f"The clock has already moved: it is day {today}, not day {from_day}. Nothing was advanced.",
+           "recent_advances": recent(conn)}
+    for r in conn.execute("SELECT result_json FROM connector_calls WHERE tool='advance' ORDER BY rowid DESC"):
+        done = json.loads(r[0])
+        if done.get("day_started") == from_day:
+            out["already_advanced"] = {k: done[k] for k in ("operation_id", "day_started", "day_ended", "summary", "noticed") if k in done}
+            break
+    return out
+
+
 def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: str | None = None, delegate=None,
-            interrupt: str | None = None) -> dict:
+            interrupt: str | None = None, from_day: int | None = None) -> dict:
     if not isinstance(days, int) or days < 1:
         raise ValueError("days must be an integer >= 1")
     if interrupt is not None and interrupt not in POLICIES:
@@ -100,5 +133,17 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
             out["texture"] = tex
         return out
 
-    return store.run_once(conn, call_id, "advance", {"days": days, "purpose": purpose, "focus": focus, "domain": domain,
-                                                     "delegate": delegate, "interrupt": interrupt}, go)
+    point = None
+    if not conn.execute("SELECT 1 FROM connector_calls WHERE call_id=?", (call_id,)).fetchone():  # a new skip, not a retry
+        today = store._day(conn)
+        if from_day is not None and int(from_day) != today:
+            return _moved(conn, int(from_day), today)
+        conn.commit()
+        point = undo.take(_db_file(conn))
+    try:
+        return store.run_once(conn, call_id, "advance", {"days": days, "purpose": purpose, "focus": focus, "domain": domain,
+                                                         "delegate": delegate, "interrupt": interrupt}, go)
+    except BaseException:
+        if point is not None:
+            point.unlink(missing_ok=True)
+        raise

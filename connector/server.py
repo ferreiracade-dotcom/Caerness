@@ -164,13 +164,20 @@ def act(call_id: str, action_type: str, intent: str, target_actor_id: int | None
 
 
 def advance(call_id: str, days: int, purpose: str, domain: str | None = None, delegate: dict | None = None,
-            interrupt: str | None = None) -> dict:
-    """Let days pass (max 30 per call); stops early at real interruptions. purpose is kept and practised (domain optional); delegate {to, obligations, interaction_types, everything_routine} names who minds matters meanwhile; interrupt: all|meaningful|critical_only."""
+            interrupt: str | None = None, from_day: int | None = None, undo: bool = False, confirm: bool = False) -> dict:
+    """Let days pass (max 30 per call); stops early at real interruptions. from_day (required): the scene's current day, so no skip runs twice. purpose is kept and practised (domain optional); delegate {to, obligations, interaction_types, everything_routine} minds matters; interrupt: all|meaningful|critical_only. undo=true shows what taking back the last skip loses; with confirm=true does it."""
     from connector.timeflow import advance as _advance
 
     def go(conn):
+        if undo:
+            from connector import undo as points
+            from engine.db import database_path
+            return points.undo(conn, database_path(), call_id, confirm)
+        if from_day is None:
+            from connector.store import _day
+            return {"error": f"from_day is required: the current day on the scene (now {_day(conn)}), so that a skip is never applied twice."}
         _snapshot_before_advance()
-        return _advance(conn, call_id, days, purpose, domain=domain, delegate=delegate, interrupt=interrupt)
+        return _advance(conn, call_id, days, purpose, domain=domain, delegate=delegate, interrupt=interrupt, from_day=from_day)
     return _call(go, "advance")
 
 

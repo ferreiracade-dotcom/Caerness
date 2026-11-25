@@ -128,10 +128,10 @@ def run():
         os.environ["CAERNESS_BACKUP_DIR"] = str(snaps_dir)
         try:
             with TestClient(build_app(Settings.from_env({}), allowed_hosts=[HOST]), base_url="https://" + HOST) as client:
-                r1 = call_tool(client, "advance", {"call_id": "h-adv-1", "days": 1, "purpose": "wait"})
+                r1 = call_tool(client, "advance", {"call_id": "h-adv-1", "days": 1, "purpose": "wait", "from_day": call_tool(client, "scene", None, 90)["day"]})
                 assert "error" not in r1, r1
                 assert len(list(snaps_dir.glob("*-preadvance.db"))) == 1
-                r2 = call_tool(client, "advance", {"call_id": "h-adv-2", "days": 1, "purpose": "wait"})
+                r2 = call_tool(client, "advance", {"call_id": "h-adv-2", "days": 1, "purpose": "wait", "from_day": r1["day_ended"]})
                 assert "error" not in r2, r2
                 assert len(list(snaps_dir.glob("*-preadvance.db"))) == 1
         finally:

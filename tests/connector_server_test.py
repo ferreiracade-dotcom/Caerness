@@ -13,6 +13,12 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 
+def today() -> int:
+    from connector.campaign import connect_campaign
+    with contextlib.closing(connect_campaign()) as c:
+        return int(c.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
+
+
 def run():
     with tempfile.TemporaryDirectory() as tmp:
         os.environ["CAERNESS_CAMPAIGN_DIR"] = tmp
@@ -31,7 +37,7 @@ def run():
         assert sorted(t.name for t in tools) == ["act", "advance", "author", "lookup", "lore", "note", "resume", "scene"]
         size = len(json.dumps([t.model_dump(by_alias=True, exclude_none=True) for t in tools], ensure_ascii=False))
         print(f"tool definitions: {size} chars")
-        assert size <= 6700, size  # resume gained save and new_save
+        assert size <= 7100, size  # resume gained save and new_save; advance gained from_day, undo and confirm
 
         r = server.resume_current()
         assert "error" not in r and "rulebook" in r, r
@@ -42,7 +48,7 @@ def run():
         assert "error" not in server.lookup(who["name"])
         a = server.act("s-act-1", "observe", "I take stock.")
         assert "error" not in a and a["status"] == "applied", a
-        adv = server.advance("s-adv-1", 1, "wait")
+        adv = server.advance("s-adv-1", 1, "wait", from_day=today())
         assert "error" not in adv, adv
         assert "fresh_chat_hint" not in adv
 
@@ -58,7 +64,7 @@ def run():
         assert "fresh_chat_hint" not in server.scene()  # call 41
         server.resume_current()
         assert "fresh_chat_hint" not in server.scene()
-        week = server.advance("s-adv-7", 7, "wait a week")
+        week = server.advance("s-adv-7", 7, "wait a week", from_day=today())
         assert "error" not in week and week["elapsed_days"] >= 7 and "fresh_chat_hint" in week, week
         n = server.note("s-note-1", "keeps a limp", subject_kind="actor", subject_id=who["id"])
         assert "error" not in n, n
@@ -70,7 +76,7 @@ def run():
 
         # Errors become dicts, not exceptions.
         assert "error" in server.note("s-note-2", "ghost", subject_kind="actor", subject_id=99999999)
-        assert "error" in server.advance("s-adv-2", 0, "nothing")
+        assert "error" in server.advance("s-adv-2", 0, "nothing", from_day=today())
         assert "error" in server.note("s-note-1", "different text", subject_kind="actor", subject_id=who["id"])  # call_id reuse
 
         # The same tools through the MCP layer return JSON text.

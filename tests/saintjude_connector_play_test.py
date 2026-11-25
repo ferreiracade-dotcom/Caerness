@@ -162,7 +162,7 @@ def c1f():
 def c1g():
     from connector import server
     t0 = time.time()
-    out = server.advance(cid(), 30, "work the bar and keep my head down")
+    out = server.advance(cid(), 30, "work the bar and keep my head down", from_day=server.scene()["day"])
     dt = time.time() - t0
     STATE["adv30_s"] = dt
     assert not out.get("error"), out
@@ -210,7 +210,7 @@ def case_d():
     l1 = server.lookup(q)
     lines.append(f"lookup after: {dump(l1)[:300]}")
     assert l1.get("found") and "Brennan" in str(l1.get("name")), l1
-    adv = server.advance(cid(), 30, "go about my business")
+    adv = server.advance(cid(), 30, "go about my business", from_day=server.scene()["day"])
     assert not adv.get("error"), adv
     l2 = server.lookup(q)
     lines.append(f"lookup after advance: {dump(l2)[:200]}")
@@ -234,7 +234,7 @@ def case_a():
             break
         if "1979" in scene["date"]:
             break
-        out = server.advance(cid("adv"), 30, "get on with ordinary life")
+        out = server.advance(cid("adv"), 30, "get on with ordinary life", from_day=scene["day"])
         assert not out.get("error"), out
         done += int(out.get("elapsed_days") or 0)
         scene = server.scene()
@@ -297,7 +297,7 @@ def case_c():
             c.commit()
         out = server.act(cid(), "operation", f"I shoot {name} dead in broad daylight on a crowded Kerrytown street", target_actor_id=int(rid_))
         print("act: " + dump(out)[:300])
-        server.advance(cid(), 2, "lie low")
+        server.advance(cid(), 2, "lie low", from_day=server.scene()["day"])
     with contextlib.closing(sqlite3.connect(str(STATE["db"]))) as c:
         c.row_factory = sqlite3.Row
         reps = c.execute("SELECT * FROM crime_reports WHERE offender_actor_id=? AND victim_actor_id IN (%s)" % ",".join("?" * len(rivals)),

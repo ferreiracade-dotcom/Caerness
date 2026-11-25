@@ -82,7 +82,7 @@ def test_round_trip_keeps_each_world():
     server.resume(world="saintjude")
     make_protagonist_if_needed()
     sj_day = day_of_current()
-    adv = server.advance(cid(), 3, "pass time")
+    adv = server.advance(cid(), 3, "pass time", from_day=server.scene()["day"])
     assert not adv.get("error"), adv
     moved = day_of_current() - sj_day
     assert moved == int(adv["elapsed_days"]) and moved >= 1, (moved, adv.get("elapsed_days"))
@@ -163,7 +163,7 @@ def test_resume_lists_worlds_and_saves_and_new_save_never_overwrites():
     first = server.resume(world="saintjude")
     assert not first.get("error") and "ask" not in first and db_name() == "saintjude.db", first
     make_protagonist_if_needed()
-    adv = server.advance(cid(), 2, "pass time")
+    adv = server.advance(cid(), 2, "pass time", from_day=server.scene()["day"])
     assert not adv.get("error"), adv
     day1 = day_of_current()
     listed = server.resume()["worlds"][0]["saves"]

@@ -61,6 +61,10 @@ def resume(conn) -> dict:
     conn.commit()
     out = {"rulebook": load_rulebook(conn), "campaign": player["campaign_name"], "protagonist": scene["protagonist"],
            "scene": scene, "how_to_play": HOW_TO_PLAY}
+    from connector.timeflow import recent
+    passed = recent(conn)
+    if passed:
+        out["recent_advances"] = passed
     story = store.continuity(conn)
     if story:
         out["story"] = story
