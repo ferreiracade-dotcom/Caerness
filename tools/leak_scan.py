@@ -41,6 +41,8 @@ _FIXED: tuple[tuple[str, str], ...] = (
     (r"Salt Road", "Salt Road"),
     (r"Aldergate", "Aldergate"),
     (r"Caerness", "Caerness"),
+    (r"\b(?:Redhand|Longstride|Greycloak|Shortfinger|Oneeye|Swiftfoot|Blackhand|Hardhead|Ironknee)\b", "fantasy epithet"),
+    (r"\bof the Quay\b", "fantasy epithet"),
 )
 
 # Known false positives. (regex, reason). A hit is discarded if its span lies inside an ALLOW match.
