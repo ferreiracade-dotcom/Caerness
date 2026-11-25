@@ -26,7 +26,7 @@ def run():
             assert needle in rb or needle.lower() in rb.lower(), needle
         # Owner play check 2026-10-16: silence in the engine is not emptiness; no engine talk in the fiction.
         for needle in ("Where the engine is silent, invent", "lived history", "Never mention the engine",
-                       "open straight into a scene", "through `lore`", "Don't invent visitors", "comes up in a chat", "No engine figure ever appears in the prose",
+                       "open straight into a scene", "through `lore`", "Move open threads without being asked", "comes up in a chat", "No engine figure ever appears in the prose",
                        "The engine decides whether it works",
                        "Standing and manners", "kinship is not kindness", "fear tightens formality"):
             assert needle in rb, needle
@@ -52,7 +52,7 @@ def run():
             assert r["how_to_play"].count("\n") == 4 and r["how_to_play"].startswith("1. Check established facts")
             assert r["scene"]["manners"] and len(r["scene"]["manners"]) <= 300
             print("resume bytes", len(json.dumps(r, ensure_ascii=False)))
-            assert len(json.dumps(r, ensure_ascii=False)) <= 14000  # the creation note and the prison section added to the rulebook
+            assert len(json.dumps(r, ensure_ascii=False)) <= 16200  # the creation note and the prison section added to the rulebook; P2 playtest rules about 2200
             assert conn.execute("SELECT value FROM connector_meta WHERE key='last_resume_at'").fetchone()
             # Nothing stored yet: no story, and the GM is asked to draft the sheet.
             assert "story" not in r and "sheet_missing" in r, r.keys()
@@ -73,7 +73,7 @@ def run():
             store.record(conn, "error", "The ferry note names a gang that no longer exists.", "rr5", field="fixed")
             conn.commit()
             assert "corrections" not in resume(conn)["story"]
-            assert len(json.dumps(r, ensure_ascii=False)) <= 15500
+            assert len(json.dumps(r, ensure_ascii=False)) <= 17700
             # Fully loaded continuity stays inside the resume budget.
             for i in range(3):
                 store.record(conn, "recap", "r" * 900, f"full-r{i}", threads=["t" * 300] * 12)
@@ -85,7 +85,7 @@ def run():
             size = len(json.dumps(resume(conn), ensure_ascii=False))
             print("full resume bytes", size)
             whole = 20 * 901 + len(store.SHEET_FIELDS) * 900  # every standing rule and sheet field now comes back uncut
-            assert size - whole <= 17500, size  # the creation note and the prison section about 450; world-and-save asking about 400; rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
+            assert size - whole <= 19700, size  # P2 playtest rules (turns, threads, voice, record checks, standing rules) about 2200; the creation note and the prison section about 450; world-and-save asking about 400; rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
     print("connector_resume_test passed")
 
 
