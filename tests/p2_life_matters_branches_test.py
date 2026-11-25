@@ -32,7 +32,7 @@ def main() -> None:
             for a in rng.sample(adults, 1500):  # money in pockets, so loans and jobs can happen
                 conn.execute("INSERT OR IGNORE INTO resources(actor_id,resource_type,amount) VALUES (?,'cash',?)", (a, rng.uniform(0, 600)))
             traders = [int(r[0]) for r in conn.execute("SELECT actor_id FROM enterprise_staff WHERE status='active' ORDER BY actor_id")]
-            me = traders[0]
+            me = next(a for a in traders if a not in lm.open_courtships(conn))  # nobody he is already courting
             conn.execute("DELETE FROM resources WHERE actor_id=? AND resource_type='cash'", (me,))
             conn.execute("INSERT INTO resources(actor_id,resource_type,amount) VALUES (?,'cash',5000)", (me,))  # someone can be asked
             conn.execute("DELETE FROM player_state")
@@ -83,6 +83,22 @@ def main() -> None:
             assert not conn.execute("SELECT 1 FROM life_matters WHERE other_actor_id=? AND kind='work'", (me,)).fetchone()
             # but things happen to him too
             assert conn.execute("SELECT 1 FROM life_matters WHERE kind='illness' AND subject_actor_id=?", (me,)).fetchone()
+            # the circle-outwards view of who knows whom says what the person-by-person view says
+            those = sorted(lm.contacts(conn, me))[:20]
+            back = lm.known_by(conn, those)
+            for a in sorted(set(back) | set(those))[:150]:
+                assert back.get(a, {}) == {c: w for c, w in lm.contacts(conn, a).items() if c in those}, a
+            assert back, "someone knows the circle"
+            # a quarrel with him is never made up (or held as settled) for him
+            his = {r[0] for r in conn.execute("""SELECT s.stage FROM life_matter_steps s JOIN life_matters m ON m.id=s.matter_id
+                                                 WHERE m.kind='quarrel' AND m.other_actor_id=?""", (me,))}
+            assert "let_stand" in his and not his & {"made_up", "grudge"}, his
+            # what two people fall out over follows what they are to each other: a parent and child never over a bar insult
+            pair = conn.execute("""SELECT actor_a_id,actor_b_id FROM kinship_links WHERE kin_kind IN ('parent','child')
+                                   AND ended_day IS NULL ORDER BY id LIMIT 1""").fetchone()
+            p = lm._Pass(conn, day)
+            drawn = {lm._topic(p, pair[0], pair[1], random.Random(n)) for n in range(120)}
+            assert drawn <= set(lm.data(conn)["quarrel_topics"]["parent_child"]) and len(drawn) > 3, drawn
         finally:
             conn.close()
     print("PASS p2_life_matters_branches_test")

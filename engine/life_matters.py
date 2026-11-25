@@ -148,6 +148,37 @@ def contacts(conn: sqlite3.Connection, a: int) -> dict[int, float]:
     return out
 
 
+def known_by(conn: sqlite3.Connection, those: list[int]) -> dict[int, dict[int, float]]:
+    """`contacts` the other way round, for a few people at once: for each person who has any of `those` in their life, who and how close."""
+    out: dict[int, dict[int, float]] = {}
+    if not those:
+        return out
+    marks, ids = ",".join("?" * len(those)), [int(i) for i in those]
+    alive = {int(r[0]) for r in conn.execute(
+        f"""SELECT a.id FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.id IN ({marks})
+            AND lp.life_status='living' AND lower(COALESCE(a.status,'active')) NOT IN ('dead','deceased')""", ids)}
+
+    def put(a, c, w):
+        a, c = int(a), int(c)
+        if a != c and w > 0 and c in alive:  # as in `contacts`: no tie without weight
+            d = out.setdefault(a, {})
+            d[c] = max(d.get(c, 0.0), w)
+    for x, y in conn.execute(f"""SELECT actor_a_id,actor_b_id FROM kinship_links WHERE ended_day IS NULL
+                                 AND (actor_a_id IN ({marks}) OR actor_b_id IN ({marks}))""", ids + ids):
+        put(x, y, 1.0)
+        put(y, x, 1.0)
+    for a, c in conn.execute(f"""SELECT h1.actor_id,h2.actor_id FROM household_members h2 JOIN household_members h1
+                                 ON h1.household_id=h2.household_id WHERE h2.actor_id IN ({marks}) AND h1.status='active' AND h2.status='active'""", ids):
+        put(a, c, 0.9)
+    for a, c, fam in conn.execute(f"SELECT actor_a_id,actor_b_id,familiarity FROM relationships WHERE actor_b_id IN ({marks})", ids):
+        put(a, c, min(0.8, float(fam or 0) / 100.0))
+    for x, y, aff in conn.execute(f"""SELECT actor_a_id,actor_b_id,affinity FROM social_contact_links WHERE status='active'
+                                      AND (actor_a_id IN ({marks}) OR actor_b_id IN ({marks}))""", ids + ids):
+        put(x, y, min(0.7, float(aff or 0) / 100.0))
+        put(y, x, min(0.7, float(aff or 0) / 100.0))
+    return out
+
+
 def _pick(rng: random.Random, weighted: dict[int, float]) -> int | None:
     items = sorted((k, v) for k, v in weighted.items() if v > 0)
     if not items:
@@ -199,6 +230,7 @@ def _open(p: _Pass, kind: str, subject: int, other: int | None, rng: random.Rand
 def _wait(p: _Pass, m: dict, stage: str, **words) -> None:
     """The next move is the protagonist's: the matter waits for it."""
     m["awaiting"] = True
+    m.setdefault("data", {})["asked_day"] = p.day  # the day it turned to him: an ordinary skip stops there
     _step(p, m, stage, next_days=p.f("lm_lapse_days"), **words)
 
 
@@ -346,17 +378,17 @@ def _break_off(p: _Pass, m: dict, stage: str) -> None:
     _step(p, m, stage, close=True)
 
 
-def told(conn: sqlite3.Connection, me: int) -> set[int]:
+def told(conn: sqlite3.Connection, me: int, close: dict[int, float] | None = None) -> set[int]:
     """Family, friends and workmates: what happens to them they tell him themselves."""
     from . import texture
     near = float(figure(conn, "lm_told_closeness", 0.55))
-    return {i for i, w in texture.circle(conn, me).items() if w >= near}
+    return {i for i, w in (texture.circle(conn, me) if close is None else close).items() if w >= near}
 
 
-def _engage(p: _Pass, m: dict) -> None:
+def _engage(p: _Pass, m: dict, wait: int | None = None) -> None:
     from . import world_calendar
     s, o = m["subject_actor_id"], m["other_actor_id"]
-    wait = int(round(_span(p, m, "lm_engaged_days")))
+    wait = int(round(_span(p, m, "lm_engaged_days"))) if wait is None else wait
     date = world_calendar.format_date(package_for(p.conn), p.day + wait)
     m["data"]["wed_day"] = p.day + wait
     _effect(p, m["id"], s, o, "got engaged", affection_delta=10, trust_delta=8)
@@ -408,17 +440,28 @@ def open_courtships(conn: sqlite3.Connection) -> dict[int, sqlite3.Row]:
     return out
 
 
-def begin_courtship(conn: sqlite3.Connection, day: int, subject: int, other: int, *, match: bool = False, since: int | None = None) -> int:
+def begin_courtship(conn: sqlite3.Connection, day: int, subject: int, other: int, *, match: bool = False, since: int | None = None,
+                    wait: int | None = None) -> int:
     """Two people start going together. `match` marks a courtship that is heading to marriage."""
     p = _Pass(conn, day)
     m = _open(p, "romance", subject, other, random.Random(f"{p.seed}:courtship:{subject}:{other}:{day}"))
     m["data"]["since"] = int(day if since is None else since)
     if match:
-        m["data"].update(match=1, wait=int(round(_span(p, m, "lm_match_courting_days"))))
+        m["data"].update(match=1, wait=int(round(_span(p, m, "lm_match_courting_days"))) if wait is None else wait)
     _effect(p, m["id"], subject, other, "started courting", affection_delta=25, familiarity_delta=30)
     _effect(p, m["id"], other, subject, "started courting", affection_delta=25, familiarity_delta=30)
     _step(p, m, "courting", next_days=m["data"]["wait"] if match else _span(p, m, "lm_courting_days"))
     return m["id"]
+
+
+def seed_match(conn: sqlite3.Connection, subject: int, other: int, *, since: int, wait: int, engaged: int | None = None) -> int:
+    """A courtship heading to marriage that was already under way when it is written down, at the stage it had reached: courting
+    since `since` for `wait` days, then (when `engaged` is given) engaged for that many days up to the wedding."""
+    mid = begin_courtship(conn, since, subject, other, match=True, wait=wait)
+    if engaged is not None:
+        p = _Pass(conn, since + wait)
+        _engage(p, _load_matter(p, conn.execute("SELECT * FROM life_matters WHERE id=?", (mid,)).fetchone()), wait=engaged)
+    return mid
 
 
 def make_match(conn: sqlite3.Connection, day: int, row: sqlite3.Row) -> None:
@@ -450,6 +493,47 @@ def engage_pair(conn: sqlite3.Connection, day: int, a: int, b: int) -> int:
 
 # ---- quarrels -----------------------------------------------------------------------------------------------------------
 
+def footing(conn: sqlite3.Connection, a: int, b: int) -> str:
+    """What two people mainly are to each other: the key under which the package keeps what such a pair falls out over."""
+    kinds = {str(r[0]) for r in conn.execute("""SELECT kin_kind FROM kinship_links WHERE ended_day IS NULL
+                 AND ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))""", (a, b, b, a))}
+    if kinds & {"parent", "child"}:
+        return "parent_child"
+    if "sibling" in kinds:
+        return "siblings"
+    if "spouse" in kinds or courtship(conn, a, b) or conn.execute(
+            """SELECT 1 FROM household_unions WHERE status='active' AND ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))""",
+            (a, b, b, a)).fetchone():
+        return "couple"
+    if kinds:
+        return "family"
+    if conn.execute("""SELECT 1 FROM household_members x JOIN household_members y ON y.household_id=x.household_id
+                       WHERE x.actor_id=? AND y.actor_id=? AND x.status='active' AND y.status='active'""", (a, b)).fetchone():
+        return "home"
+    if conn.execute("""SELECT 1 FROM enterprise_staff x JOIN enterprise_staff y ON y.enterprise_id=x.enterprise_id
+                       WHERE x.actor_id=? AND y.actor_id=? AND x.status='active' AND y.status='active'""", (a, b)).fetchone():
+        return "work"
+    v = rel.relationship_view(conn, a, b)
+    return "friends" if v["affection"] >= float(figure(conn, "lm_friend_affection", 30.0)) else "others"
+
+
+def _meets(p: _Pass, need: str, a: int, b: int) -> bool:
+    if need == "of_age":  # something only grown people who go out could fall out over
+        oldest = p.day - int(p.f("out_age_min") * YEAR)
+        return p.conn.execute("SELECT COUNT(*) FROM actor_life_profiles WHERE actor_id IN (?,?) AND birth_day<=?", (a, b, oldest)).fetchone()[0] == 2
+    if need == "debt":
+        return bool(p.conn.execute("""SELECT 1 FROM life_matters WHERE kind='money' AND status='open'
+                      AND ((subject_actor_id=? AND other_actor_id=?) OR (subject_actor_id=? AND other_actor_id=?))""", (a, b, b, a)).fetchone())
+    return False
+
+
+def _topic(p: _Pass, a: int, b: int, rng) -> str:
+    book = p.words.get("quarrel_topics") or {}
+    if isinstance(book, dict):
+        book = book.get(footing(p.conn, a, b)) or book.get("others") or []
+    fit = [t if isinstance(t, str) else t["text"] for t in book if isinstance(t, str) or _meets(p, str(t.get("needs")), a, b)]
+    return fit[rng.randrange(len(fit))] if fit else "something"
+
 def _open_quarrel(p: _Pass, s: int, rng) -> None:
     ties = p.ties(s)
     weights = {}
@@ -462,10 +546,11 @@ def _open_quarrel(p: _Pass, s: int, rng) -> None:
     if s == p.me:  # someone picks it with him
         s, o = o, s
     m = _open(p, "quarrel", s, o, rng)
-    topics = (p.words.get("quarrel_topics") or ["something"])
-    m["data"] = {"topic": topics[rng.randrange(len(topics))]}
+    m["data"] = {"topic": _topic(p, s, o, rng)}
     _effect(p, m["id"], s, o, "quarrelled", resentment_delta=8, trust_delta=-4)
     _effect(p, m["id"], o, s, "quarrelled", resentment_delta=6, trust_delta=-3)
+    if o == p.me:  # how it ends is partly his to settle
+        return _wait(p, m, "words")
     return _step(p, m, "words", next_days=_span(p, m, "lm_quarrel_days"))
 
 
@@ -493,6 +578,9 @@ def _step_quarrel(p: _Pass, m: dict) -> None:
         _effect(p, m["id"], victim, striker, "was struck", resentment_delta=25, fear_delta=10, trust_delta=-15)
         return _step(p, m, "killed" if res.get("outcome") == "fatal" else "blows", close=True,
                      hitter=_name(conn, striker), hurt=_name(conn, victim))
+    if o == p.me:  # he has not answered: it is not made up for him
+        _effect(p, m["id"], s, o, "heard nothing back", resentment_delta=6)
+        return _step(p, m, "let_stand", close=True)
     if rng.random() < p.f("lm_quarrel_makes_up"):
         _effect(p, m["id"], s, o, "made it up", resentment_delta=-8, trust_delta=3)
         if o != p.me:
@@ -653,7 +741,7 @@ def _advance_open(p: _Pass) -> int:
     n = 0
     for r in rows:
         m = _load_matter(p, r)
-        if r["awaiting"] and m["kind"] != "scuffle":  # nothing was done about it
+        if r["awaiting"] and m["kind"] not in ("scuffle", "quarrel"):  # nothing was done about it (a challenge or quarrel moves on)
             if m["other_actor_id"] is not None and m["other_actor_id"] != p.me and p.me is not None:
                 _effect(p, m["id"], m["other_actor_id"], p.me, "heard nothing back", resentment_delta=3)
             ending = "let_ride" if m["stage"] == "short_self" else "faded" if m["kind"] == "fling" else "lapsed"

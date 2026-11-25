@@ -35,7 +35,9 @@ def main() -> None:
             day = int(conn.execute("SELECT current_day FROM world_state WHERE id=1").fetchone()[0])
 
         stopped, told, heard = 0, 0, []
-        for n in range(6):
+        for n in range(12):  # under a year; whether the few near him do anything in a given month is a draw
+            if n >= 6 and stopped >= 2 and told >= 2:
+                break
             got = server.advance(f"s{n}", 30, "work at the garage and see people", interrupt="something", from_day=day)
             assert "error" not in got and got["elapsed_days"] >= 1, got
             day = got["day_ended"]

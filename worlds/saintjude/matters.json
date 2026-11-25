@@ -3,16 +3,16 @@
  "illness_note": "Design proposal (unsourced): for each illness, how often it comes (weight), its opening severity range, the severity it sheds in 30 days (recovery), and how much it can kill the old (deadliness).",
  "currency_symbol": "$",
  "police_sphere": "underworld",
- "quarrel_topics": [
-  "money owed",
-  "a parking space",
-  "an insult at a bar",
-  "a girl",
-  "family business",
-  "a bet",
-  "something said about their people",
-  "a borrowed car"
- ],
+ "quarrel_topics": {
+  "parent_child": ["the hours being kept", "church", "money for the house", "who is being seen", "drinking", "work and what comes next", "the way a parent was spoken to"],
+  "siblings": ["money", "family business", "a borrowed car", "who looks after the folks", "something said at the table"],
+  "couple": ["money", "the hours being kept", "each other's families", "jealousy", "drinking", "what comes next"],
+  "family": ["family business", "an old grievance", "money", "something said about their people"],
+  "home": ["the rent", "the noise at night", "the housework"],
+  "work": ["the pay", "who does what", "the hours", "a mistake on the job"],
+  "friends": [{"text": "money owed", "needs": "debt"}, "a bet", "someone one of them is seeing", "a borrowed car", "a broken promise"],
+  "others": [{"text": "money owed", "needs": "debt"}, "a parking space", "the noise at night", {"text": "an insult at a bar", "needs": "of_age"}, "something said about their people", "a bet"]
+ },
  "police_matters": [
   "a fight on the corner",
   "stolen goods",
@@ -213,6 +213,7 @@
   "romance.broke_off": "{s} and {o} have broken it off",
   "romance.ended": "It has ended between {s} and {o}",
   "romance.lapsed": "{s} has given up waiting for an answer from {o}",
+  "quarrel.let_stand": "Nothing more was said between {s} and {o}, and it still rankles",
   "quarrel.words": "{s} and {o} had words over {topic}",
   "quarrel.blows": "{hitter} struck {hurt} over {topic}, and {hurt} was hurt",
   "quarrel.killed": "{hitter} killed {hurt} in a fight over {topic}",

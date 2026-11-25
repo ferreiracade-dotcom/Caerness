@@ -132,9 +132,11 @@ def _find_interruptions(
 
     # "something": the caller wants the next thing worth playing, so lesser offers count too, and so do matters that reach him
     something = _load(run["delegation_json"], {}).get("stop_on") == "something"
+    from . import hearsay
     if something:
-        from . import hearsay
         found.extend(hearsay.stops(conn, actor_id, start_day, end_day))
+    elif str(run["interruption_policy"]) != "critical_only":
+        found.extend(hearsay.asks(conn, actor_id, start_day, end_day))
 
     interactions = conn.execute(
         """SELECT * FROM interactions

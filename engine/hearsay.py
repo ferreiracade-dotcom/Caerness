@@ -58,7 +58,8 @@ def relation(conn: sqlite3.Connection, me: int, other: int) -> str:
     return "acquaintance"
 
 
-def _path(conn, me: int, close: dict[int, float], actors: list[int], rng: random.Random, sure: set[int] = frozenset()) -> int | None:
+def _path(conn, me: int, close: dict[int, float], known: dict[int, dict[int, float]], actors: list[int], rng: random.Random,
+          sure: set[int] = frozenset()) -> int | None:
     """Who brings it to him: 0 when it happened to him, a carrier's id, or None when it does not reach him. People in `sure` always
     tell this themselves."""
     if me in actors:
@@ -73,8 +74,8 @@ def _path(conn, me: int, close: dict[int, float], actors: list[int], rng: random
             return who
     second: dict[int, float] = {}
     for a in actors:
-        for c, w in life_matters.contacts(conn, a).items():
-            if c in close and c not in actors:
+        for c, w in known.get(a, {}).items():
+            if c not in actors:
                 second[c] = max(second.get(c, 0.0), close[c] * w)
     if second:
         who = max(sorted(second), key=second.get)
@@ -87,15 +88,19 @@ def reach(conn: sqlite3.Connection, me: int, day: int) -> int:
     """Enter what reaches him of the steps taken since the last pass. Returns how many."""
     row = conn.execute("SELECT value FROM engine_meta WHERE key='hearsay_step'").fetchone()
     last = int(row[0]) if row else 0
-    steps = conn.execute("SELECT id,text,actors FROM life_matter_steps WHERE id>? ORDER BY id", (last,)).fetchall()
+    steps = conn.execute("SELECT id,day,text,actors FROM life_matter_steps WHERE id>? ORDER BY id", (last,)).fetchall()
     if not steps:
         return 0
     close = texture.circle(conn, me)
-    told = life_matters.told(conn, me)
+    told = life_matters.told(conn, me, close)
+    known = life_matters.known_by(conn, sorted(close))  # once a pass: who has someone of his circle in their life
     seed = run_seed(conn)
+    stale = figure(conn, "news_stale_days")
     n = 0
     for s in steps:
-        carrier = _path(conn, me, close, _ids(s["actors"]), random.Random(f"{seed}:hearsay:{me}:{s['id']}"), told)
+        if stale and int(s["day"]) < int(day) - int(stale):  # written down as past (a courtship already under way): history, not news
+            continue
+        carrier = _path(conn, me, close, known, _ids(s["actors"]), random.Random(f"{seed}:hearsay:{me}:{s['id']}"), told)
         if carrier is None:
             continue
         conn.execute("INSERT OR IGNORE INTO knowledge(knower_actor_id,fact_key,belief_text,confidence,learned_day) VALUES (?,?,?,?,?)",
@@ -194,6 +199,17 @@ def waiting(conn: sqlite3.Connection, me: int) -> list[str]:
         return []
     return [str(r[0]) for r in conn.execute("""SELECT summary FROM life_matters WHERE status='open' AND awaiting=1
                 AND (subject_actor_id=? OR other_actor_id=?) AND summary IS NOT NULL ORDER BY opened_day""", (me, me))]
+
+
+def asks(conn: sqlite3.Connection, me: int, start: int, end: int) -> list[dict]:
+    """The matters that turned to him in `start`..`end`: any skip short of a critical-only one stops there, while they are open."""
+    if not life_matters.enabled(conn):
+        return []
+    rows = conn.execute("""SELECT MAX(s.id) step_id,s.day,s.text,m.kind FROM life_matters m JOIN life_matter_steps s
+                             ON s.matter_id=m.id AND s.day=json_extract(m.data_json,'$.asked_day')
+                           WHERE (m.subject_actor_id=? OR m.other_actor_id=?) AND s.day>? AND s.day<=? GROUP BY m.id""", (me, me, start, end))
+    return [{"day": int(r["day"]), "source_kind": "system", "source_id": int(r["step_id"]), "severity": 4, "reason": str(r["text"]),
+             "metadata": {"what": "matter", "kind": r["kind"]}} for r in rows]
 
 
 def stops(conn: sqlite3.Connection, me: int, start: int, end: int) -> list[dict]:
