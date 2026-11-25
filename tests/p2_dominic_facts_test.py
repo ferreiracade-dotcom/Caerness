@@ -96,6 +96,10 @@ def main() -> None:
                         conn.execute("SELECT COUNT(*) FROM standing_rules").fetchone()[0])
 
         before = state()
+        facts = json.loads(tool.FACTS.read_text(encoding="utf-8"))  # the figures are corrected there, so expectations follow it
+        cash = facts["cash"]["amount"]
+        wage = next(w["weekly"] for w in facts["wages"] if w["worker"] == "Dominic Basile")
+        weekly = wage - facts["board"]["weekly"] - facts["living"]["weekly"]
         assert tool.main([str(save)]) == 0
         assert state() == before, ("a dry run wrote", before, state())
         assert tool.main([str(save), "--apply"]) != 0 and state() == before, "applied without a backup"
@@ -103,18 +107,20 @@ def main() -> None:
         assert tool.main([str(save), "--apply", "--backup", str(backup)]) == 0
         assert backup.exists() and os.environ["CAERNESS_DB_PATH"] == str(save)
         after = state()
-        assert after[0] == 2512, after
+        assert after[0] == cash, after
         assert tool.main([str(save), "--apply", "--backup", str(Path(tmp) / "again.db")]) == 0
         assert state() == after, ("a second apply wrote", after, state())
 
         with connect() as conn:
             deals = {r["job"]: (r["status"], r["quote"], money_records.paid_on(conn, r["id"]))
                      for r in conn.execute("SELECT * FROM deals")}
-            assert sorted(v[1] for v in deals.values() if v[0] == "paid" and v[1] == v[2]) == [85, 120, 350, 350, 900, 900, 900], deals
-            assert sorted(v[1] for v in deals.values() if v[0] == "declined") == [350, 900, 1900], deals
+            wanted = {d["job"]: (d.get("status") or ("paid" if sum(p[1] for p in d.get("payments", [])) >= d["quote"] else "open"),
+                                 d["quote"], sum(p[1] for p in d.get("payments", []))) for d in facts["deals"]}
+            assert deals == wanted, (deals, wanted)
             assert conn.execute("SELECT status FROM deal_collateral").fetchone()[0] == "returned"
-            assert conn.execute("SELECT SUM(amount_usd) FROM share_payments").fetchone()[0] == 16
-            assert conn.execute("SELECT COUNT(*) FROM share_rules WHERE status='active'").fetchone()[0] == 4
+            shared = sum(s["amount"] for d in facts["deals"] for s in d.get("shares", []))
+            assert conn.execute("SELECT SUM(amount_usd) FROM share_payments").fetchone()[0] == shared
+            assert conn.execute("SELECT COUNT(*) FROM share_rules WHERE status='active'").fetchone()[0] == len(facts["shares"])
             assert not conn.execute("SELECT 1 FROM knowledge WHERE truth_event_id=?", (ev,)).fetchone()
             assert conn.execute("SELECT title FROM events WHERE id=?", (ev,)).fetchone()[0].startswith("[never happened]")
             assert not conn.execute("SELECT 1 FROM error_reports WHERE status='open'").fetchone()
@@ -140,13 +146,13 @@ def main() -> None:
             out = server.advance(cid(), 7, "work at the garage", from_day=server.scene()["day"])
             assert "error" not in out, out
         with connect() as conn:
-            # four paydays at the agreed wage
-            assert money_records.cash(conn, f"person:{me}") == 2512 + 4 * 55, money_records.cash(conn, f"person:{me}")
+            # four paydays: the agreed wage in, board and his own spending out
+            assert money_records.cash(conn, f"person:{me}") == cash + 4 * weekly, money_records.cash(conn, f"person:{me}")
             short = conn.execute("SELECT creditor_ref,owed_usd FROM agreement_terms WHERE ref_kind='wage' AND (owed_usd>0 OR status!='active')").fetchall()
             assert not short, [tuple(r) for r in short]
             paid = conn.execute("SELECT SUM(amount) FROM economic_flows WHERE flow_kind='wage' AND source_enterprise_id IS NOT NULL AND day>?",
                                 (day,)).fetchone()[0]
-            assert paid >= 4 * 455, paid
+            assert paid >= 4 * sum(w["weekly"] for w in facts["wages"]), paid
     print("PASS p2_dominic_facts_test")
 
 
