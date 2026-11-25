@@ -409,7 +409,20 @@ def _fill_headless(conn: sqlite3.Connection, day: int) -> int:
             n += 1
         elif head_role in (_lc(conn, org).get("succession") or {}) and fill_post(conn, org, head_role, int(day)) is not None:
             n += 1
+        elif last["status"] in ("dead", "out") and _take_over(conn, org, int(day)) is not None:
+            n += 1
     return n
+
+
+def _take_over(conn: sqlite3.Connection, org: int, day: int) -> int | None:
+    """Nobody the data names can stand or succeed (a small splinter group): the best member left, an inducted one when there is
+    one, takes the head's seat, so no group is left answering to a dead man."""
+    from .org_succession import install_head
+    pool = [r for r in orgs.members(conn, org) if orgs.is_living(conn, int(r["actor_id"]))]
+    pool = [r for r in pool if r["inducted_day"] is not None] or pool
+    if not pool:
+        return None
+    return install_head(conn, org, int(_best(conn, pool, None, day)["actor_id"]), day, "last_resort")
 
 
 def _custody_held(conn: sqlite3.Connection) -> dict[int, int]:
