@@ -92,6 +92,9 @@ def resolve_ref(conn: sqlite3.Connection, ref) -> tuple[str, int, str]:
         found += [(kind, int(r[0]), str(r[1])) for r in rows]
     if len(found) == 1:
         return found[0]
+    person = [x for x in found if x[0] == "actor" and x[2].casefold() == text.casefold()]
+    if len(person) == 1:  # a person's own name is that person, whatever else (a household, a business) carries it
+        return person[0]
     if not found:
         raise ValueError(f"nothing is known by the name {text!r}; use an id from scene or lookup")
     raise ValueError("more than one thing fits " + repr(text) + ": " + ", ".join(f"{k}:{i} {n}" for k, i, n in found[:5]))
