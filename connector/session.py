@@ -65,6 +65,10 @@ def resume(conn) -> dict:
     passed = recent(conn)
     if passed:
         out["recent_advances"] = passed
+    from engine import corrections
+    fixed = corrections.recent(conn)
+    if fixed:
+        out["recent_corrections"] = fixed
     left_off = store.last_scene(conn)
     if left_off:
         out["last_scene"] = left_off

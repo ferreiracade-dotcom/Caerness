@@ -73,7 +73,7 @@ def run():
         os.environ["CAERNESS_DB_PATH"] = str(db)
 
         # schema 117 (tables of 116 renamed)
-        assert SCHEMA_VERSION == 129
+        assert SCHEMA_VERSION == 130
         assert TABLES <= tables(sj), TABLES - tables(sj)
         assert "quiet_routine" in columns(sj, "simulation_profiles")
         idx = {r[0] for r in sj.execute("SELECT name FROM sqlite_master WHERE type='index'")}

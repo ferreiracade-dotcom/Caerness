@@ -26,7 +26,7 @@ def make_mcp(**kwargs) -> MCPServer:
 
 
 def register_tools(server: MCPServer) -> MCPServer:
-    for fn in (resume, scene, lookup, lore, act, advance, note, author, money):
+    for fn in (resume, scene, lookup, lore, act, advance, note, author, money, correct):
         server.tool(structured_output=False)(fn)
     return server
 
@@ -209,6 +209,12 @@ def money(call_id: str, op: str, details: dict | None = None) -> dict:
     """Narrative Engine game: money in the world's currency; people are an id, "me" or a name. op and details: set_cash {holder, amount, reason}; deal {customer, job, quote, deposit, parts, due_in_days, referrer, collateral, provider, status quoted}; owe {debtor, creditor, amount, what, due_in_days}; pay {deal_id, amount} or {to, amount, what, from}; collateral {deal_id, what, status held|returned|kept}; close {deal_id, status declined|written_off|void, reason}; wage {worker, business, weekly}; share {to, share, applies all|referred|tag:x, basis profit|gross, from}; show. Others pay what falls due from what they have; his own debts he pays."""
     from connector.money import money as _money
     return _call(lambda c: _money(c, call_id, op, details), "money")
+
+
+def correct(call_id: str, op: str, player_said: str = "", details: dict | None = None) -> dict:
+    """Narrative Engine game: fix a wrong record, only on the player's explicit yes (player_said quotes it). People: id, "me" or name. op {details}: preview {as undo_event}; undo_event {actors, day | event_id | life_event_id | interaction_id; reverse [{table, id|where, action delete|set, values}] for untraced effects}; person {person, work, business, role, location, home, age, birth_day, sex}; relationship {from, to, values {trust..}, both}; kinship {a, b, change add|end|remove, kind: what a is to b}; household {person, household, change join|leave}; cash {holder, amount}; any takes cause (needed against a Fixed canon fact)."""
+    from connector.correct import correct as _correct
+    return _call(lambda c: _correct(c, call_id, op, player_said, details), "correct")
 
 
 mcp = register_tools(make_mcp())  # the stdio server

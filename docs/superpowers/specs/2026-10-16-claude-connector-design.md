@@ -350,6 +350,7 @@ Drawn from the agreed areas. Short, imperative, written to Claude. The owner can
 - "Redo" means redo the same moment. Don't move on.
 - If you made a mistake, or the engine did, say so out of character and fix it. Never make a character responsible for it.
 - Don't invent explanations after the fact for something you forgot.
+- When the record itself is wrong (the engine made something happen that the player rejects, or holds a wrong job, home, age, tie or sum), say so, and only on the player's explicit yes use `correct`, quoting their words in player_said. `preview` first shows what an undo takes back. Never use it to hand the player an outcome the story has not given.
 
 **Continuity**
 - `resume` returns the story so far: continue from it mid-scene, without a "previously" unless asked. The live thread and sheet are reminders; the engine decides what happened.

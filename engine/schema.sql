@@ -5853,3 +5853,16 @@ CREATE TABLE IF NOT EXISTS company (
     location_id INTEGER NOT NULL,
     day INTEGER NOT NULL
 );
+
+-- Schema 130: what the game master corrected on the player's word.
+CREATE TABLE IF NOT EXISTS corrections (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    op TEXT NOT NULL,
+    target TEXT NOT NULL,
+    changes_json TEXT NOT NULL DEFAULT '[]',
+    player_said TEXT NOT NULL,
+    cause TEXT,
+    call_id TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

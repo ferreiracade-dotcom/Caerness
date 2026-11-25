@@ -76,7 +76,7 @@ def run():
             r = rpc(client, "tools/list")
             assert r.status_code == 200, r.text
             names = sorted(t["name"] for t in r.json()["result"]["tools"])
-            assert names == ["act", "advance", "author", "lookup", "lore", "money", "note", "resume", "scene"], names
+            assert names == ["act", "advance", "author", "correct", "lookup", "lore", "money", "note", "resume", "scene"], names
 
             asked = call_tool(client, "resume")
             assert "ask" in asked and "rulebook" not in asked, list(asked)  # bare resume asks which world

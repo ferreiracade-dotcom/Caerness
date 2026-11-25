@@ -21,7 +21,7 @@ TABLES = ("history_entries", "divergences", "tech_level", "real_figures")
 def test_fresh_opening_has_the_tables():
     from engine.db import SCHEMA_VERSION
     c = _open_world().conn
-    assert SCHEMA_VERSION == 129
+    assert SCHEMA_VERSION == 130
     for t in TABLES:
         assert c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (t,)).fetchone(), t
     assert "basis_json" in {r[1] for r in c.execute("PRAGMA table_info(held_things)")}

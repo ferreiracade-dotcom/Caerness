@@ -48,7 +48,7 @@ def _actor(conn, name: str, kind: str = "character") -> int:
 def test_fresh_db_has_org_tables():
     from engine.db import SCHEMA_VERSION
     conn = fresh_db()
-    assert SCHEMA_VERSION == 129
+    assert SCHEMA_VERSION == 130
     assert conn.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION
     for t in ORG_TABLES:
         assert table_exists(conn, t), t
@@ -149,7 +149,7 @@ def test_116_saintjude_opening_survives_117():
     assert before["seats"] == 8 and before["money"] == 7 and before["arr"] == 3
     _apply_migrations(conn, 116)
     conn.commit()
-    assert conn.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION == 129
+    assert conn.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION == 130
     for t in OLD_TABLES:
         assert not table_exists(conn, t), t
     after = {
