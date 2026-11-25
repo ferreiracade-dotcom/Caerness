@@ -5744,3 +5744,38 @@ CREATE TABLE IF NOT EXISTS inmate_ties (
     strength REAL NOT NULL DEFAULT 0,
     PRIMARY KEY (actor_a_id, actor_b_id, facility_id)
 );
+-- P2: ordinary-life matters (engine/life_matters.py): a thread of something happening to a person, its steps, and when each person was last looked at.
+CREATE TABLE IF NOT EXISTS life_matters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind TEXT NOT NULL,
+    subject_actor_id INTEGER NOT NULL,
+    other_actor_id INTEGER,
+    location_id INTEGER,
+    stage TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',
+    opened_day INTEGER NOT NULL,
+    stage_day INTEGER NOT NULL,
+    next_day INTEGER,
+    awaiting INTEGER NOT NULL DEFAULT 0,
+    amount REAL,
+    summary TEXT NOT NULL DEFAULT '',
+    data_json TEXT NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_life_matters_due ON life_matters(status, next_day);
+CREATE INDEX IF NOT EXISTS idx_life_matters_subject ON life_matters(subject_actor_id, status);
+CREATE INDEX IF NOT EXISTS idx_life_matters_other ON life_matters(other_actor_id, status);
+CREATE TABLE IF NOT EXISTS life_matter_steps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    matter_id INTEGER NOT NULL REFERENCES life_matters(id) ON DELETE CASCADE,
+    day INTEGER NOT NULL,
+    stage TEXT NOT NULL,
+    text TEXT NOT NULL,
+    actors TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_life_matter_steps_day ON life_matter_steps(day);
+CREATE INDEX IF NOT EXISTS idx_social_contacts_b ON social_contact_links(actor_b_id, status);
+CREATE INDEX IF NOT EXISTS idx_life_matter_steps_matter ON life_matter_steps(matter_id);
+CREATE TABLE IF NOT EXISTS life_matter_clock (
+    actor_id INTEGER PRIMARY KEY,
+    day INTEGER NOT NULL
+);

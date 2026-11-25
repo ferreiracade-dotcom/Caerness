@@ -601,3 +601,7 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
         for key, v in (fn(conn, int(day)) or {}).items():
             out[key] = out.get(key, 0) + v
     return out
+
+
+from . import life_matters  # noqa: E402  (registers the weekly ordinary-life pass)
+on_week(life_matters.weekly)

@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 128
+SCHEMA_VERSION = 129
 
 
 def _running_tests() -> bool:
@@ -4909,6 +4909,7 @@ _MIGRATIONS: dict[int, Migration] = {
     124: ("intake_core", "One intake: held things at B depth and the depth gaps they flag (held_things, depth_gaps)", None),
     125: ("business_layer", "BZ1 shared business layer: driver readings, ventures with parties and approvals, places, agreement terms and breaches (driver_readings, venture_details, venture_parties, venture_approvals, place_details, agreement_terms, agreement_breaches)", None),
     127: ("real_history", "R1 real history: documented real facts with the run's outcome, divergences, technology levels, real figures (history_entries, divergences, tech_level, real_figures; held_things.basis_json)", _migration_127),
+    129: ("p2_playtest", "P2: ordinary-life matters and their steps (life_matters, life_matter_steps, life_matter_clock; tables from schema.sql)", None),
     128: ("prison_j1", "J1 prison: facilities, inside groups, inmate stays, channels, contacts, events, law reviews, inmate ties (facilities, facility_groups, inmate_stays, prison_channels, prison_contacts, prison_events, law_reviews, inmate_ties)", None),
     126: ("politics_p1", "Politics P1: offices, terms, vacancies, field holdings, voter groups, races, civic items and effects, sponsorships (offices, office_terms, office_vacancies, field_holdings, voter_groups, races, race_candidates, civic_items, civic_item_votes, civic_effects, sponsorships)", None),
     117: ("organisation_core", "Outfit tables become organisation tables (org_profiles, units, seats, holdings, lines, money, agenda, incidents, arrangements)", _migration_117),

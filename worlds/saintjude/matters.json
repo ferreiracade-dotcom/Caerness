@@ -1,0 +1,194 @@
+{
+ "about": "Words of the ordinary-life layer (engine/life_matters.py): what happens to people. Figures are in design_figures.json (lm_*).",
+ "illness_note": "Design proposal (unsourced): for each illness, how often it comes (weight), its opening severity range, the severity it sheds in 30 days (recovery), and how much it can kill the old (deadliness).",
+ "currency_symbol": "$",
+ "police_sphere": "underworld",
+ "quarrel_topics": [
+  "money owed",
+  "a parking space",
+  "an insult at a bar",
+  "a girl",
+  "family business",
+  "a bet",
+  "something said about their people",
+  "a borrowed car"
+ ],
+ "police_matters": [
+  "a fight on the corner",
+  "stolen goods",
+  "numbers slips",
+  "a car with no papers",
+  "a break-in on the block",
+  "who they were seen drinking with"
+ ],
+ "illnesses": [
+  {
+   "label": "influenza",
+   "weight": 5,
+   "severity": [
+    20,
+    55
+   ],
+   "body_system": "respiratory",
+   "deadliness": 0.15,
+   "recovery": 60
+  },
+  {
+   "label": "bronchitis",
+   "weight": 3,
+   "severity": [
+    15,
+    45
+   ],
+   "body_system": "respiratory",
+   "deadliness": 0.1,
+   "recovery": 45
+  },
+  {
+   "label": "pneumonia",
+   "weight": 1.2,
+   "severity": [
+    40,
+    80
+   ],
+   "body_system": "respiratory",
+   "deadliness": 0.35,
+   "recovery": 40
+  },
+  {
+   "label": "a bad back",
+   "weight": 3,
+   "severity": [
+    15,
+    50
+   ],
+   "body_system": "musculoskeletal",
+   "deadliness": 0.0,
+   "recovery": 25
+  },
+  {
+   "label": "a stomach ulcer",
+   "weight": 1.2,
+   "severity": [
+    25,
+    55
+   ],
+   "body_system": "digestive",
+   "deadliness": 0.1,
+   "recovery": 15
+  },
+  {
+   "label": "kidney stones",
+   "weight": 0.6,
+   "severity": [
+    35,
+    65
+   ],
+   "body_system": "urinary",
+   "deadliness": 0.05,
+   "recovery": 45
+  },
+  {
+   "label": "appendicitis",
+   "weight": 0.3,
+   "severity": [
+    55,
+    80
+   ],
+   "body_system": "digestive",
+   "deadliness": 0.15,
+   "recovery": 45
+  },
+  {
+   "label": "hepatitis",
+   "weight": 0.5,
+   "severity": [
+    35,
+    70
+   ],
+   "body_system": "digestive",
+   "deadliness": 0.15,
+   "recovery": 20
+  },
+  {
+   "label": "heart trouble",
+   "weight": 2,
+   "from_age": 45,
+   "severity": [
+    40,
+    80
+   ],
+   "body_system": "cardiac",
+   "deadliness": 0.5,
+   "recovery": 12
+  },
+  {
+   "label": "a stroke",
+   "weight": 0.7,
+   "from_age": 55,
+   "severity": [
+    55,
+    90
+   ],
+   "body_system": "neurological",
+   "deadliness": 0.6,
+   "recovery": 10
+  },
+  {
+   "label": "a growth the doctors do not like",
+   "weight": 0.8,
+   "from_age": 45,
+   "severity": [
+    45,
+    80
+   ],
+   "body_system": "systemic",
+   "deadliness": 0.7,
+   "recovery": 2
+  }
+ ],
+ "texts": {
+  "money.short_self": "Money is running short for {s}: about {amount} would cover what is due",
+  "money.asks": "{s} asks {o} for a loan of {amount}",
+  "money.behind": "{s} has fallen behind by about {amount} and has no one to borrow it from",
+  "money.borrowed": "{s} borrowed {amount} from {o}",
+  "money.refused": "{o} turned {s} down for a loan of {amount}",
+  "money.asked_time": "{s} has not paid {o} back and is asking for more time",
+  "money.repaid": "{s} paid {o} back the {amount}",
+  "money.soured": "{s} still has not paid {o} the {amount}, and it has turned sour",
+  "money.written_off": "The {amount} {s} owed will not be collected",
+  "money.caught_up": "{s} has caught up on what was due",
+  "money.worse": "{s} has fallen further behind",
+  "money.let_ride": "{s} let the shortfall ride",
+  "money.lapsed": "{s} has stopped asking {o} for the money",
+  "romance.interest_in_him": "{s} has taken a liking to {o} and is not hiding it",
+  "romance.interest": "{s} has taken a liking to {o}",
+  "romance.courting": "{s} and {o} are going out together",
+  "romance.turned_down": "{o} turned {s} down",
+  "romance.serious": "{s} and {o} are serious now, and people expect an engagement",
+  "romance.broke_off": "{s} and {o} have broken it off",
+  "romance.ended": "It has ended between {s} and {o}",
+  "romance.lapsed": "{s} has given up waiting for an answer from {o}",
+  "quarrel.words": "{s} and {o} had words over {topic}",
+  "quarrel.blows": "{hitter} struck {hurt} over {topic}, and {hurt} was hurt",
+  "quarrel.killed": "{hitter} killed {hurt} in a fight over {topic}",
+  "quarrel.made_up": "{s} and {o} have made it up",
+  "quarrel.grudge": "{s} is still holding {topic} against {o}",
+  "illness.ill": "{s} is down with {label}",
+  "illness.badly_ill": "{s} is badly ill with {label}",
+  "illness.recovered": "{s} is over {label}",
+  "illness.died": "{s} has died after {label}",
+  "rivalry.undercutting": "{s} is going after the custom of {business}, which {o} runs",
+  "rivalry.gains": "{s} has taken custom from {business}",
+  "rivalry.fizzled": "{s} has let {business} alone",
+  "rivalry.bad_blood": "It is open bad blood now between {s} and {o}",
+  "work.asked": "{o} wants {s} for a job ({trade}), worth about {amount}",
+  "work.done": "{s} did the job for {o} and was paid {amount}",
+  "work.could_not_pay": "{o} could not find the {amount} for the job {s} was to do",
+  "work.fell_through": "The job {o} had for {s} fell through",
+  "work.lapsed": "{o} took the job somewhere else",
+  "police.stopped": "Police stopped {s} and asked about {matter}",
+  "police.watched": "Police are keeping an eye on {s} over {matter}",
+  "police.dropped": "Police have let {s} alone about {matter}"
+ }
+}
