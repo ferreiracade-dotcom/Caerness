@@ -27,7 +27,8 @@ def main() -> None:
             grid = (day // 30 + 1) * 30
 
             # marriage into the unnamed population: two single adults, both certain to marry; only the other one does
-            rows = opening_family._person_rows(conn, grid)
+            taken = life_matters.open_courtships(conn)  # play opens with some already courting
+            rows = [r for r in opening_family._person_rows(conn, grid) if r["id"] not in taken]
             single = [r for r in rows if 22 <= (grid - r["birth_day"]) / 365 <= 35 and not conn.execute(
                 "SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?)", (r["id"], r["id"])).fetchone()
                 and "canon_partial" not in (r["metadata_json"] or "")][:2]

@@ -65,6 +65,9 @@ def main() -> None:
             conn.commit()
 
         extra = {}
+        with connect() as conn:  # the opening may hold somebody of the same name; the save's own people are the ones meant
+            conn.execute("UPDATE actors SET name=name||' of elsewhere' WHERE name IN ('Lucia Fernandes','Paul Ricci','Tullio Bruni')")
+            conn.commit()
         for name, sex in (("Lucia Fernandes", "female"), ("Paul Ricci", "male"), ("Tullio Bruni", "male")):
             out = server.author(cid(), "person", {"name": name, "sex": sex, "age": 24, "place": "South Hill", "from_elsewhere": True})
             assert out.get("actor_id"), out

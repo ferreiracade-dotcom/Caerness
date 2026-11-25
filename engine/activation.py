@@ -1196,6 +1196,8 @@ def activate_existing_loops(conn: sqlite3.Connection, package=None) -> dict[str,
             out.update({f'opening_races_{k}': v for k, v in build_races(conn).items()})
             from .opening_ties import build as build_ties
             out.update({f'opening_ties_{k}': v for k, v in build_ties(conn).items()})
+        from .opening_family import seed_lived_courtships
+        out.update(seed_lived_courtships(conn))  # who is courting or engaged when play begins
     conn.execute(
         "INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('current_canon_activation_version',?)",
         (str(CURRENT_CANON_ACTIVATION_VERSION),),

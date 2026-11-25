@@ -282,7 +282,15 @@ def _spouse_name(conn: sqlite3.Connection, key: str, sex: str) -> str:
         name = f"{pk[0]} {pk[1]}" if pk else f"{rng.choice(given)} {rng.choice(_SPOUSE_SURNAMES)}"
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
             return name
-    # every common name pair is in use (a crowded city): a middle initial, as the city's own families do
+    from .demographic_sex import package_namesake_pool
+    for _ in range(400):  # every usual pair is in use (a crowded city): a further given name of the family's community
+        pk = package_person_name(conn, rng, sex)
+        more = package_namesake_pool(conn, sex, pk[1]) if pk else []
+        if more:
+            name = f"{rng.choice(more)} {pk[1]}"
+            if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
+                return name
+    # still none free (or no further names): a middle initial, as the city's own families do
     for letter in "ABCDEFGHJKLMNPRSTW":
         pk = package_person_name(conn, _rng(f"name:{key}:i"), sex)
         first, last = (pk[0], pk[1]) if pk else (rng.choice(given), rng.choice(_SPOUSE_SURNAMES))
@@ -922,6 +930,84 @@ def wed_courtship(conn: sqlite3.Connection, day: int, person_id: int, spouse_id:
     return uid
 
 
+def _marry_rate(conn: sqlite3.Connection, p: sqlite3.Row, day: int) -> tuple[float, float, str, str] | None:
+    """(yearly chance of marrying, age, sex, longevity class) of a named adult free to marry; None for one the draws leave alone."""
+    aid = int(p["id"])
+    if conn.execute("SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?)", (aid, aid)).fetchone():
+        return None
+    meta = json.loads(p["metadata_json"] or "{}")
+    if meta.get("marital_status_basis") == "canon_partial":
+        return None
+    age = (day - int(p["birth_day"])) / 365.0
+    if age > 70.0:
+        return None
+    sex = str(p["demographic_sex"]); lc = str(p["lc"])
+    ended = conn.execute("SELECT MAX(ended_day) FROM household_unions WHERE status<>'active' AND (actor_a_id=? OR actor_b_id=?)",
+                         (aid, aid)).fetchone()[0]
+    if meta.get("marital_status") == "widowed" or ended is not None:
+        widowed_day = int(ended if ended is not None else (meta.get("widowed_day") or day - 365))
+        return remarriage_hazard(age) if day - widowed_day >= 365 else 0.0, age, sex, lc
+    return first_marriage_hazard(age, marriage_curve_for(conn, aid, sex, lc)[0]), age, sex, lc
+
+
+def _draw_partner(conn: sqlite3.Connection, p: sqlite3.Row, age: float, sex: str, lc: str, key: str) -> dict[str, Any]:
+    """Whom this person would pair with: someone of the neighbourhood, not yet described."""
+    cultivation = _cultivation_on(conn)
+    hearth = False
+    if cultivation:
+        from .cultivation import location_in_hearth
+        hearth = location_in_hearth(conn, int(p["loc"]) if p["loc"] is not None else None)
+    spouse = _draw_spouse(_rng(f"spouse:{key}"), age, sex, lc, hearth, cultivation)
+    spouse["married_at"] = age; spouse["age_now"] = spouse["age_at_marriage"]
+    return spouse
+
+
+def seed_lived_courtships(conn: sqlite3.Connection) -> dict[str, int]:
+    """The courtships and engagements already under way (once per world), so that weddings come at the world's rate from the first
+    day instead of only after a courtship's length. Where ordinary-life matters run: each free named adult's draws on the 30-day
+    grid are replayed backwards over the longest a courtship and engagement can last, and one still under way is written down at
+    the stage it has reached, with someone from the neighbourhood. Never the protagonist."""
+    from . import life_matters
+    from .player import protagonist_id
+    if not life_matters.enabled(conn) or conn.execute("SELECT 1 FROM engine_meta WHERE key='lived_courtships_version'").fetchone():
+        return {}
+    day, seed, me = _day(conn), _world_seed(conn), protagonist_id(conn)
+    survive = 1.0 - float(figure(conn, "lm_match_breaks", 0.12))
+    courting_days = float(figure(conn, "lm_match_courting_days"))
+    engaged_days = float(figure(conn, "lm_engaged_days"))
+    steps = int(1.5 * (courting_days + engaged_days)) // MARRIAGE_GRID_DAYS + 1
+    taken = set(life_matters.open_courtships(conn))
+    out = {"courting": 0, "engaged": 0}
+    for p in _person_rows(conn, day):
+        aid = int(p["id"])
+        rate = None if aid == me or aid in taken else _marry_rate(conn, p, day)
+        if rate is None or rate[0] <= 0:
+            continue
+        annual, age, sex, lc = rate
+        started = min(1.0, annual / survive ** 2) * MARRIAGE_GRID_DAYS / 365.0
+        rng = _rng(f"lived-courtship:{seed}:{aid}")
+        for step in range(steps):
+            if rng.random() >= started:
+                continue
+            since = day - step * MARRIAGE_GRID_DAYS - 1 - rng.randrange(MARRIAGE_GRID_DAYS)
+            wait = int(round(courting_days * (0.5 + rng.random())))
+            engaged = None
+            if since + wait <= day:
+                if rng.random() >= survive:
+                    continue  # it ended before any engagement
+                engaged = int(round(engaged_days * (0.5 + rng.random())))
+                if since + wait + engaged <= day:
+                    continue  # over before now
+            key = f"lived-courtship:{seed}:{aid}:{since}"
+            partner = _reveal_spouse(conn, aid, _draw_partner(conn, p, age, sex, lc, key), key=key, day=day,
+                                     location_id=int(p["loc"]) if p["loc"] is not None else None, reason="courtship", married=False)
+            life_matters.seed_match(conn, aid, partner, since=since, wait=wait, engaged=engaged)
+            out["courting" if engaged is None else "engaged"] += 1
+            break
+    conn.execute("INSERT OR REPLACE INTO engine_meta(key,value) VALUES ('lived_courtships_version','1')")
+    return {f"lived_courtships_{k}": v for k, v in out.items()}
+
+
 def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logger=None) -> int:
     """Single named adults marry people from the unnamed population at the world's marriage rates.
 
@@ -947,22 +1033,10 @@ def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logge
         aid = int(p["id"])
         if aid == me:
             continue
-        if conn.execute("SELECT 1 FROM household_unions WHERE status='active' AND (actor_a_id=? OR actor_b_id=?)", (aid, aid)).fetchone():
+        rate = _marry_rate(conn, p, day)
+        if rate is None:
             continue
-        meta = json.loads(p["metadata_json"] or "{}")
-        if meta.get("marital_status_basis") == "canon_partial":
-            continue
-        age = (day - int(p["birth_day"])) / 365.0
-        if age > 70.0:
-            continue
-        sex = str(p["demographic_sex"]); lc = str(p["lc"])
-        ended = conn.execute("SELECT MAX(ended_day) FROM household_unions WHERE status<>'active' AND (actor_a_id=? OR actor_b_id=?)",
-                             (aid, aid)).fetchone()[0]
-        if meta.get("marital_status") == "widowed" or ended is not None:
-            widowed_day = int(ended if ended is not None else (meta.get("widowed_day") or day - 365))
-            annual = remarriage_hazard(age) if day - widowed_day >= 365 else 0.0
-        else:
-            annual = first_marriage_hazard(age, marriage_curve_for(conn, aid, sex, lc)[0])
+        annual, age, sex, lc = rate
         annual = min(1.0, annual / survive)
         prob = 1.0 - (1.0 - annual) ** (elapsed / 365.0)
         key = f"unnamed-marriage:{seed}:{aid}:{day}"
@@ -975,13 +1049,7 @@ def resolve_unnamed_marriages(conn: sqlite3.Connection, day: int, *, event_logge
                 life_matters.make_match(conn, day, match)
                 formed += 1
             continue
-        cultivation = _cultivation_on(conn)
-        hearth = False
-        if cultivation:
-            from .cultivation import location_in_hearth
-            hearth = location_in_hearth(conn, int(p["loc"]) if p["loc"] is not None else None)
-        spouse = _draw_spouse(_rng(f"spouse:{key}"), age, sex, lc, hearth, cultivation)
-        spouse["married_at"] = age; spouse["age_now"] = spouse["age_at_marriage"]
+        spouse = _draw_partner(conn, p, age, sex, lc, key)
         loc = int(p["loc"]) if p["loc"] is not None else None
         if by_courtship:
             partner = _reveal_spouse(conn, aid, spouse, key=key, day=day, location_id=loc, reason="courtship", married=False)

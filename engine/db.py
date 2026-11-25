@@ -18,7 +18,7 @@ DB_PATH = DEFAULT_DB_PATH
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 DEFAULT_BACKUP_DIR = ROOT / "game" / "campaign_01" / "backups"
 ENGINE_VERSION = "0.60.0"
-SCHEMA_VERSION = 131
+SCHEMA_VERSION = 132
 
 
 def _running_tests() -> bool:
@@ -4741,6 +4741,17 @@ def _migration_131(conn: sqlite3.Connection) -> None:
     conn.execute("CREATE INDEX IF NOT EXISTS idx_bearing_marks_actor ON bearing_marks(actor_id, status, kind)")
 
 
+def _migration_132(conn: sqlite3.Connection) -> None:
+    """P2: people set apart from a namesake only by a middle initial take another given name, and a save made before openings
+    held courtships under way is given them. Both do nothing in a world without name pools or ordinary-life matters."""
+    if not (_has_table(conn, "actor_life_profiles") and conn.execute("SELECT 1 FROM actors WHERE actor_type='character' LIMIT 1").fetchone()):
+        return
+    from .name_repair import repair_names
+    from .opening_family import seed_lived_courtships
+    repair_names(conn)
+    seed_lived_courtships(conn)
+
+
 def _migration_117(conn: sqlite3.Connection) -> None:
     """Organisation core: the outfit tables become organisation tables (every row kept, the old tables dropped).
 
@@ -4923,6 +4934,7 @@ _MIGRATIONS: dict[int, Migration] = {
     125: ("business_layer", "BZ1 shared business layer: driver readings, ventures with parties and approvals, places, agreement terms and breaches (driver_readings, venture_details, venture_parties, venture_approvals, place_details, agreement_terms, agreement_breaches)", None),
     127: ("real_history", "R1 real history: documented real facts with the run's outcome, divergences, technology levels, real figures (history_entries, divergences, tech_level, real_figures; held_things.basis_json)", _migration_127),
     131: ("wants_temptations", "G1: what people want and the chances the world puts before the protagonist (wants, temptations; tables from schema.sql); bearing marks may be quiet", _migration_131),
+    132: ("p2_names_courtships", "P2: initialled namesakes take another given name; courtships and engagements already under way are written into a world that runs ordinary-life matters", _migration_132),
     130: ("gm_corrections", "G1: what the game master corrected on the player's word (corrections; table from schema.sql)", None),
     129: ("p2_playtest", "P2: ordinary-life matters and their steps (life_matters, life_matter_steps, life_matter_clock; tables from schema.sql)", None),
     128: ("prison_j1", "J1 prison: facilities, inside groups, inmate stays, channels, contacts, events, law reviews, inmate ties (facilities, facility_groups, inmate_stays, prison_channels, prison_contacts, prison_events, law_reviews, inmate_ties)", None),

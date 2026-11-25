@@ -28,7 +28,7 @@ def _fresh():
 def test_schema_119_has_the_law_tables():
     from engine.db import SCHEMA_VERSION
     conn = _fresh()
-    assert SCHEMA_VERSION == 131
+    assert SCHEMA_VERSION == 132
     assert conn.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == SCHEMA_VERSION
     for t in ("public_attention", "case_dispositions", "sentences"):
         assert conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (t,)).fetchone() is not None, t

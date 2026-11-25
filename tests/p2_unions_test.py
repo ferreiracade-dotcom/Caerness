@@ -34,10 +34,12 @@ def main() -> None:
             day0 = int(conn.execute("SELECT current_day FROM world_state").fetchone()[0])
 
             def singles(sex: str, young: int, old: int) -> list[int]:
-                return [int(r[0]) for r in conn.execute(SINGLE, (sex, day0 - old * 365, day0 - young * 365))]
+                taken = lm.open_courtships(conn)  # play opens with some already courting
+                return [int(r[0]) for r in conn.execute(SINGLE, (sex, day0 - old * 365, day0 - young * 365)) if int(r[0]) not in taken]
 
             men, women = singles("male", 22, 32), singles("female", 20, 30)
-            me = int(conn.execute("SELECT actor_id FROM enterprise_staff WHERE status='active' ORDER BY actor_id").fetchone()[0])
+            me = next(int(r[0]) for r in conn.execute("SELECT actor_id FROM enterprise_staff WHERE status='active' ORDER BY actor_id")
+                      if int(r[0]) not in lm.open_courtships(conn))
             men, women = [m for m in men if m != me], [w for w in women if w != me]
             friends = men[:4]
             conn.execute("DELETE FROM player_state")
