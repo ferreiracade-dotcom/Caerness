@@ -17107,6 +17107,296 @@
   "source": "unsourced",
   "note": "unsourced; How often a serious courtship that is not heading to marriage is looked at again. Design proposal. (P2.21: engine/life_matters.py, engine/opening_family.py)"
  },
+ "out_age_min": {
+  "default": 18,
+  "range": null,
+  "unit": "years",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Youngest age met out of an evening, and for flings and scuffles. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_age_peak": {
+  "default": 30,
+  "range": null,
+  "unit": "years",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Up to this age people are as likely out as their habits make them. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_age_max": {
+  "default": 55,
+  "range": null,
+  "unit": "years",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Older than this are not drawn into a night's crowd. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_women_weight": {
+  "default": 0.6,
+  "range": null,
+  "unit": "weight",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; A woman's weight in a bar crowd against a man's. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_friend_pull": {
+  "default": 3.0,
+  "range": null,
+  "unit": "weight",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much closeness to him makes a friend likelier to be where he goes. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_crowd_min": {
+  "default": 6,
+  "range": null,
+  "unit": "people",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Fewest patrons worth naming of an evening. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_crowd_max": {
+  "default": 16,
+  "range": null,
+  "unit": "people",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Most patrons named of an evening. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_regard_base": {
+  "default": 0.35,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How open a stranger starts to him. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_regard_gap": {
+  "default": 0.02,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Openness lost for each year of age between them. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_regard_spread": {
+  "default": 0.7,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How much one evening's mood moves openness either way. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_keen": {
+  "default": 0.55,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Openness from which someone shows interest. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_open": {
+  "default": 0.3,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Openness from which someone would not mind company. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_offers": {
+  "default": 3,
+  "range": null,
+  "unit": "people",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How many people to approach an evening brings to notice. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_talk": {
+  "default": 0.15,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Openness needed to stay and talk. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_dance_ease": {
+  "default": 0.2,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; A dance is easier to get than a number. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_night_reserve": {
+  "default": 0.15,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Leaving together the same night is harder to get than a number. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_dance_warms": {
+  "default": 0.15,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; A dance earlier the same evening raises the chance of leaving together. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_trouble": {
+  "default": 0.18,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance of trouble an evening, times half plus the roughest patron's aggression. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_trouble_at_him": {
+  "default": 0.35,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Share of trouble aimed at him when nobody there holds anything against him. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "lm_fling_year": {
+  "default": 0.5,
+  "range": null,
+  "unit": "per year",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Yearly chance a young single person takes to someone on a night out. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "lm_fling_days": {
+  "default": 14,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How long a night out's attraction takes to go somewhere or fade. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "lm_fling_night": {
+  "default": 0.45,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance such an attraction leads to a night together. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "lm_fling_courts": {
+  "default": 0.25,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance a night together goes on into a courtship. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "lm_scuffle_year": {
+  "default": 0.15,
+  "range": null,
+  "unit": "per year",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Yearly chance of a bar scuffle for a young man of middling temper. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "lm_scuffle_fight": {
+  "default": 0.3,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance words in a bar come to blows, times half plus the starter's aggression. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "lm_scuffle_police": {
+  "default": 0.15,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance the police break up bar trouble that stops short of blows. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_friend_along": {
+  "default": 0.6,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Chance, times closeness, that a close friend nearby is out with him. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_friends_most": {
+  "default": 3,
+  "range": null,
+  "unit": "people",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Most friends out with him of an evening. Design proposal. (P2.23: engine/outings.py)"
+ },
+ "out_taken_cost": {
+  "default": 0.35,
+  "range": null,
+  "unit": "chance",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Openness lost when the one approached is spoken for. Design proposal. (P2.23: engine/outings.py)"
+ },
  "lm_serious_breaks": {
   "default": 0.3,
   "range": null,

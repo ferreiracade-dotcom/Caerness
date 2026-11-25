@@ -54,7 +54,7 @@ def main() -> None:
                     assert alive and alive[0] in ("living", "dead"), item
             if got["interrupted"]:
                 stopped += 1
-                assert got["interruption"] and got["remaining_days"] > 0 or got["elapsed_days"] == 30, got
+                assert got["interruption"] and (got.get("remaining_days", 0) > 0 or got["elapsed_days"] == 30), got
             else:
                 assert got["quiet"], got
         print(f"{stopped} stops, {len(heard)} pieces of news, {told} brought by someone")

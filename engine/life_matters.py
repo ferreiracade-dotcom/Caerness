@@ -347,7 +347,7 @@ def _break_off(p: _Pass, m: dict, stage: str) -> None:
 
 
 def told(conn: sqlite3.Connection, me: int) -> set[int]:
-    """Family, friends and workmates: whose courtship, engagement and wedding always reach him."""
+    """Family, friends and workmates: what happens to them they tell him themselves."""
     from . import texture
     near = float(figure(conn, "lm_told_closeness", 0.55))
     return {i for i, w in texture.circle(conn, me).items() if w >= near}
@@ -653,10 +653,11 @@ def _advance_open(p: _Pass) -> int:
     n = 0
     for r in rows:
         m = _load_matter(p, r)
-        if r["awaiting"]:  # nothing was done about it
+        if r["awaiting"] and m["kind"] != "scuffle":  # nothing was done about it
             if m["other_actor_id"] is not None and m["other_actor_id"] != p.me and p.me is not None:
                 _effect(p, m["id"], m["other_actor_id"], p.me, "heard nothing back", resentment_delta=3)
-            _step(p, m, "let_ride" if m["stage"] == "short_self" else "lapsed", close=True)
+            ending = "let_ride" if m["stage"] == "short_self" else "faded" if m["kind"] == "fling" else "lapsed"
+            _step(p, m, ending, close=True)
         elif not _living(p.conn, m["subject_actor_id"]):
             _step(p, m, "died" if m["kind"] == "illness" else "ended", close=True)
         else:
@@ -702,8 +703,8 @@ def _rates(p: _Pass):
     short_below = p.f("lm_short_weeks") * p.f("lm_living_week_usd")
     taken = {int(x) for r in conn.execute("SELECT actor_a_id,actor_b_id FROM household_unions WHERE status='active'") for x in r}
     taken |= set(open_courtships(conn))
-    profile = {int(r[0]): ((day - int(r[1])) / YEAR, int(r[2] or 0)) for r in conn.execute(
-        "SELECT actor_id,birth_day,family_formation_eligible FROM actor_life_profiles WHERE life_status='living'")}
+    profile = {int(r[0]): ((day - int(r[1])) / YEAR, int(r[2] or 0), r[3]) for r in conn.execute(
+        "SELECT actor_id,birth_day,family_formation_eligible,demographic_sex FROM actor_life_profiles WHERE life_status='living'")}
     resent = {int(r[0]): float(r[1]) for r in conn.execute("SELECT actor_a_id,MAX(resentment) FROM relationships GROUP BY actor_a_id")}
     temper = {int(r[0]): float(r[1]) for r in conn.execute("SELECT actor_id,aggression FROM actor_drives")}
     traders = {int(r[0]) for r in conn.execute("SELECT actor_id FROM enterprise_staff WHERE status='active'")}
@@ -717,10 +718,12 @@ def _rates(p: _Pass):
     inside = {int(r[0]) for r in conn.execute("SELECT actor_id FROM inmate_stays WHERE until_day IS NULL OR until_day>?", (day,))}
 
     g = {k: p.f(f"lm_{k}") for k in ("frail_age", "illness_year", "illness_year_per_age", "money_year_short", "money_year_base", "romance_age_min",
-                                       "romance_year", "romance_age_span", "quarrel_year", "resent_scale", "rivalry_year", "work_year", "police_year")}
+                                       "romance_year", "romance_age_span", "quarrel_year", "resent_scale", "rivalry_year", "work_year", "police_year",
+                                       "fling_year", "scuffle_year")}
+    out_min, out_max = p.f("out_age_min"), p.f("out_age_max")
 
     def rates(a: int) -> list[tuple[str, float]]:
-        age, eligible = profile.get(a, (30.0, 0))
+        age, eligible, sex = profile.get(a, (30.0, 0, None))
         frail = max(0.0, age - g["frail_age"])
         out = [("illness", g["illness_year"] + frail * g["illness_year_per_age"])]
         if a in inside:
@@ -737,6 +740,12 @@ def _rates(p: _Pass):
             out.append(("work", g["work_year"]))
         if a in crime:
             out.append(("police", g["police_year"]))
+        if out_min <= age <= out_max:  # who goes out, and so who flirts and scuffles, thins with age
+            nights = max(0.0, 1.0 - (age - out_min) / (out_max - out_min))
+            if eligible and a not in taken:
+                out.append(("fling", g["fling_year"] * nights))
+            if sex == "male":
+                out.append(("scuffle", g["scuffle_year"] * nights * (0.5 + temper.get(a, 0.5))))
         return out
     return rates
 
@@ -766,3 +775,6 @@ def weekly(conn: sqlite3.Connection, day: int) -> dict:
         from . import hearsay
         hearsay.reach(conn, p.me, day)
     return {"life_matters_opened": opened, "life_matters_moved": moved}
+
+
+from . import outings  # noqa: E402,F401  (nights out: the fling and scuffle matters)

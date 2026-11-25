@@ -217,6 +217,10 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
             if out["status"] != "refused" and target_actor_id is not None and company.in_earshot(conn, me, target_actor_id):
                 company.join(conn, [target_actor_id])
             return _classify(res)
+        if action_type == "outing":
+            from engine import outings
+            if outings.venues(conn):
+                return _outing(conn, me, call_id, target_actor_id, details or {})
         if action_type not in ACT_TYPES:
             return _free(conn, me, call_id, action_type, intent, target_actor_id, target_location_id, details)
         if action_type == "travel":
@@ -225,6 +229,23 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
                       response_choice, duration_days, details)
 
     return store.run_once(conn, call_id, "act", request, go)
+
+
+def _outing(conn, me, call_id, target_actor_id, details) -> dict:
+    """An evening out where he is, or his move toward someone who is there (details.move): settled the same evening."""
+    from engine import outings
+    day = _day(conn)
+    try:
+        if target_actor_id is not None:
+            out = outings.approach(conn, me, target_actor_id, str(details.get("move") or "talk"), day, details.get("venue"))
+            said = out.pop("what")
+        else:
+            out = outings.go_out(conn, me, day, details.get("venue_id"))
+            said = f"An evening at {out['venue']}. " + " ".join(h["what"] for h in out["happenings"])
+    except ValueError as e:
+        return _refuse("outing", str(e), call_id)
+    return {**out, "status": "applied", "action_type": "outing", "summary": _clip(said), "elapsed_days": 0, "day_started": day,
+            "day_ended": day, "operation_id": call_id}
 
 
 def _free(conn, me, call_id, action_type, intent, target_actor_id, target_location_id, details) -> dict:
