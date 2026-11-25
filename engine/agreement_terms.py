@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import sqlite3
 
-from . import business_data, ledger, org_dealings, org_money, org_tension, orgs, relationships
+from . import business_data, ledger, money_records, org_dealings, org_money, org_tension, orgs, relationships
 
 _STOP = 1e-9
 
@@ -109,7 +109,8 @@ def end_term(conn: sqlite3.Connection, term_id: int, day: int, reason: str) -> N
 def next_terms_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int | None:
     r = conn.execute("SELECT MIN(next_due_day) FROM agreement_terms WHERE status='active' AND next_due_day>? AND next_due_day<=?",
                      (int(after_day), int(end_day))).fetchone()
-    return int(r[0]) if r and r[0] is not None else None
+    days = [d for d in (r[0] if r else None, money_records.next_due_day(conn, after_day, end_day)) if d is not None]
+    return int(min(days)) if days else None
 
 
 def _orphan(conn: sqlite3.Connection, t: sqlite3.Row, day: int, why: str) -> None:
@@ -131,8 +132,10 @@ def _settle(conn: sqlite3.Connection, t: sqlite3.Row, due: int) -> None:
     paid = 0.0
     if owe > _STOP and ledger.balance(conn, ledger.parse_holder(debtor, 0)) > _STOP:
         paid = float(ledger.transfer(conn, ledger.parse_holder(debtor, 0), ledger.parse_holder(creditor, 0), owe,
-                                     flow_kind="other", purpose=t["purpose"], allow_partial=True) or 0.0)
+                                     flow_kind="wage" if t["ref_kind"] == "wage" else "other", purpose=t["purpose"],
+                                     allow_partial=True) or 0.0)
     short = owe - paid
+    money_records.term_paid(conn, debtor, creditor, paid, max(0.0, short), t["purpose"], due)
     missed, since = int(t["missed_count"]), t["unpaid_since_day"]
     if short > _STOP:
         missed += 1
@@ -166,6 +169,7 @@ def process_due_terms(conn: sqlite3.Connection, day: int) -> dict:
         t = conn.execute("""SELECT * FROM agreement_terms WHERE status='active' AND next_due_day<=?
                             ORDER BY next_due_day, id LIMIT 1""", (int(day),)).fetchone()
         if t is None:
+            money_records.process(conn, day)  # after the terms, so a debtor paid his wage today can pay with it
             return done
         _settle(conn, t, int(t["next_due_day"]))
         done[int(t["id"])] = done.get(int(t["id"]), 0) + 1

@@ -139,7 +139,9 @@ def run_business_payroll(conn: sqlite3.Connection, eid: int, operating_cost: flo
     from . import ledger
     from .underworld_rebuild import _record_economic_flow
     day = _day(conn) if day is None else day
-    named = business_staff(conn, eid)
+    from .money_records import on_agreed_wage
+    agreed = on_agreed_wage(conn, eid)
+    named = [a for a in business_staff(conn, eid) if a not in agreed]
     cap = conn.execute("SELECT capacity FROM enterprise_business_profiles WHERE enterprise_id=?", (eid,)).fetchone()
     anon = max(1, round(float(cap[0]) / 15.0)) if cap else 1
     labour = LABOUR_SHARE * max(0.0, operating_cost)

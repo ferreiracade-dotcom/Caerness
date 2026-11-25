@@ -34,10 +34,10 @@ def run():
             conn.commit()
 
         tools = asyncio.run(server.mcp.list_tools())
-        assert sorted(t.name for t in tools) == ["act", "advance", "author", "lookup", "lore", "note", "resume", "scene"]
+        assert sorted(t.name for t in tools) == ["act", "advance", "author", "lookup", "lore", "money", "note", "resume", "scene"]
         size = len(json.dumps([t.model_dump(by_alias=True, exclude_none=True) for t in tools], ensure_ascii=False))
         print(f"tool definitions: {size} chars")
-        assert size <= 7100, size  # resume gained save and new_save; advance gained from_day, undo and confirm
+        assert size <= 8100, size  # resume gained save and new_save; advance gained from_day, undo and confirm; the money tool
 
         r = server.resume_current()
         assert "error" not in r and "rulebook" in r, r

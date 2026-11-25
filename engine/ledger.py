@@ -4,6 +4,7 @@ from __future__ import annotations
 import math
 import re
 import sqlite3
+import unicodedata
 from typing import Any
 
 from .underworld_rebuild import _record_economic_flow
@@ -175,6 +176,9 @@ def amount_of(word, base: float | None = None) -> float:
             raise ValueError("amount must be positive")
         return float(word)
     key = str(word).strip().lower()
+    if key and unicodedata.category(key[0]) == "Sc":  # a currency mark in front: the number follows
+        key = key[1:].strip()
+    key = re.sub(r"(?<=\d),(?=\d{3}(?!\d))", "", key)
     if key in SCALES:
         return SCALES[key]
     m = re.match(r"^(\d+(?:\.\d+)?)\s*%", key)

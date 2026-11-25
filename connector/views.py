@@ -248,11 +248,19 @@ def _holdings(conn, me: int) -> dict:
     top_org = conn.execute(
         "SELECT organization_id FROM underworld_personnel WHERE actor_id=? AND status='active' AND role_kind IN ('boss','underboss') LIMIT 1",
         (me,)).fetchone()
-    spend = {"purse": scale_word(balance(conn, ("person", me)))}
+    from engine import money_records
+    if money_records.currency(conn):  # a world that counts in money says the figure
+        scale = None
+
+        def said(x: float) -> str:
+            return money_records.fmt(conn, x)
+    else:
+        said = scale_word
+    spend = {"purse": said(balance(conn, ("person", me)))}
     if top_org:
-        spend["outfit_treasury"] = scale_word(balance(conn, ("outfit", int(top_org[0]))))
+        spend["outfit_treasury"] = said(balance(conn, ("outfit", int(top_org[0]))))
     if businesses:
-        spend["business_cash"] = {b["name"]: scale_word(float(b.get("cash") or 0)) for b in businesses}
+        spend["business_cash"] = {b["name"]: said(float(b.get("cash") or 0)) for b in businesses}
     hh_more = int(conn.execute("SELECT COUNT(*) FROM households WHERE head_actor_id=? AND status='active'", (me,)).fetchone()[0]) - (1 if household else 0)
     return _drop_none({"money_scale": scale, "means": spend, "businesses": businesses or None,
                        "businesses_more": biz_more or None, "organisations": orgs or None,
@@ -310,7 +318,7 @@ def compact_scene(conn) -> dict:
         notes_more += max(0, store.notes_count(conn, kind, int(sid)) - 2)
     notes_more += max(0, len(notes) - _LIMITS["notes"])
     desc = "; ".join(x for x in (loc.get("kind"), loc.get("notes"), loc.get("political_owner")) if x)
-    from engine import commitments, texture
+    from engine import commitments, money_records, texture
     pending_work = commitments.active(conn, int(me["actor_id"]), 5)
     tex = texture.block(conn, int(me["actor_id"]), here, [int(a["id"]) for a in sampled])
     if tex is not None:
@@ -340,6 +348,7 @@ def compact_scene(conn) -> dict:
         "competence": _competence(p["professional_context"]),
         "condition": _condition(p["health_context"]),
         "holdings": _holdings(conn, int(me["actor_id"])),
+        "money": money_records.view(conn),
         "notes": notes[: _LIMITS["notes"]],
         "notes_more": notes_more or None,
         "recent_operations": store.recent_operations(conn),

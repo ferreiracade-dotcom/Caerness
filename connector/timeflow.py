@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 from connector import store, undo
+from engine import money_records
 from engine.player import get_player
 from engine.timeskip import prepare_time_skip, resolve_time_skip
 
@@ -101,6 +102,7 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
         run_days = min(days, max_advance_days())
         run_id = prepare_time_skip(conn, me, run_days, focus=_focus(conn, purpose, focus, domain),
                                    delegation=_delegation(conn, me, purpose, delegate), interruption_policy=interrupt or "meaningful")
+        heard = money_records.last_news(conn)
         run = resolve_time_skip(conn, run_id)
         start, end = int(run["start_day"]), int(run["actual_end_day"])
         interrupted = run["status"] == "interrupted"
@@ -118,6 +120,11 @@ def advance(conn, call_id: str, days: int, purpose: str, *, focus=None, domain: 
         settled = free_operation.settle_due(conn, me)
         if settled:
             out["settled"] = settled
+        paid = money_records.news_since(conn, heard)
+        if paid:  # money that moved, or fell due, among what is his
+            out["money"] = paid[:20]
+            if len(paid) > 20:
+                out["money_more"] = len(paid) - 20
         from engine import history
         due = history.due_prompt(conn, start, end)
         if due:  # what the real world had coming in these days: the GM looks up what his sphere touches and proposes it

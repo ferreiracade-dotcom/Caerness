@@ -5779,3 +5779,63 @@ CREATE TABLE IF NOT EXISTS life_matter_clock (
     actor_id INTEGER PRIMARY KEY,
     day INTEGER NOT NULL
 );
+
+-- P2: money records in a real currency (engine/money_records.py): jobs and IOUs, their payments and collateral, shares, money news.
+CREATE TABLE IF NOT EXISTS deals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind TEXT NOT NULL DEFAULT 'job' CHECK (kind IN ('job','iou')),
+    customer_ref TEXT NOT NULL,
+    provider_ref TEXT NOT NULL,
+    job TEXT NOT NULL,
+    quote REAL NOT NULL CHECK (quote > 0),
+    parts REAL NOT NULL DEFAULT 0,
+    due_day INTEGER,
+    next_try_day INTEGER,
+    tries INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('quoted','open','paid','declined','written_off','void')),
+    referrer_actor_id INTEGER,
+    tags_json TEXT NOT NULL DEFAULT '[]',
+    note TEXT NOT NULL DEFAULT '',
+    created_day INTEGER NOT NULL,
+    updated_day INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_deals_due ON deals(status, next_try_day);
+CREATE TABLE IF NOT EXISTS deal_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    deal_id INTEGER NOT NULL REFERENCES deals(id) ON DELETE CASCADE,
+    day INTEGER NOT NULL,
+    amount_usd REAL NOT NULL,
+    source TEXT NOT NULL DEFAULT 'recorded'
+);
+CREATE INDEX IF NOT EXISTS idx_deal_payments_deal ON deal_payments(deal_id);
+CREATE TABLE IF NOT EXISTS deal_collateral (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    deal_id INTEGER NOT NULL REFERENCES deals(id) ON DELETE CASCADE,
+    what TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'held' CHECK (status IN ('held','returned','kept')),
+    day INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS share_rules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    recipient_ref TEXT NOT NULL,
+    source_ref TEXT NOT NULL,
+    basis TEXT NOT NULL DEFAULT 'profit' CHECK (basis IN ('profit','gross')),
+    share REAL NOT NULL CHECK (share > 0 AND share <= 1),
+    applies TEXT NOT NULL DEFAULT 'all',
+    note TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','ended')),
+    created_day INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS share_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    rule_id INTEGER REFERENCES share_rules(id) ON DELETE SET NULL,
+    deal_id INTEGER NOT NULL REFERENCES deals(id) ON DELETE CASCADE,
+    day INTEGER NOT NULL,
+    amount_usd REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS money_news (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    day INTEGER NOT NULL,
+    deal_id INTEGER,
+    text TEXT NOT NULL
+);

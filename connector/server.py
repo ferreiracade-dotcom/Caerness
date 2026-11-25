@@ -1,4 +1,4 @@
-"""Narrative Engine MCP server (stdio). Six tools; every call opens and closes its own connection."""
+"""Narrative Engine MCP server (stdio). A few tools; every call opens and closes its own connection."""
 from __future__ import annotations
 
 import contextlib
@@ -26,7 +26,7 @@ def make_mcp(**kwargs) -> MCPServer:
 
 
 def register_tools(server: MCPServer) -> MCPServer:
-    for fn in (resume, scene, lookup, lore, act, advance, note, author):
+    for fn in (resume, scene, lookup, lore, act, advance, note, author, money):
         server.tool(structured_output=False)(fn)
     return server
 
@@ -200,6 +200,12 @@ def author(call_id: str, kind: str, details: dict | None = None) -> dict:
     """Narrative Engine game: make something new real. kind is free text: anything lasting the world has no mechanism for is still held (owners, money {start, income, upkeep, from}, agenda, place, dates, legality, knows, consequences) and flagged for deeper build; person (age, work, name, stage, ties as {actor_id, as: relation in words}, wants, from_elsewhere; sex optional; holds = an Open office taken, once only), business (name, trade, amount), organisation (name, type, members), rumour (text, spread) protagonist (a whole proposal when the campaign has none; see the creation text) and entry (details date; accept=true runs up to a year toward it) keep their fields. The engine only vetoes contradictions, scales down what the place cannot supply (scaled_down) and fills the rest; a refusal names the clash and has a reason_kind."""
     from connector.authoring import author as _author
     return _call(lambda c: _author(c, call_id, kind, details), "author")
+
+
+def money(call_id: str, op: str, details: dict | None = None) -> dict:
+    """Narrative Engine game: money in the world's currency; people are an id, "me" or a name. op and details: set_cash {holder, amount, reason}; deal {customer, job, quote, deposit, parts, due_in_days, referrer, collateral, provider, status quoted}; owe {debtor, creditor, amount, what, due_in_days}; pay {deal_id, amount} or {to, amount, what, from}; collateral {deal_id, what, status held|returned|kept}; close {deal_id, status declined|written_off|void, reason}; wage {worker, business, weekly}; share {to, share, applies all|referred|tag:x, basis profit|gross, from}; show. Others pay what falls due from what they have; his own debts he pays."""
+    from connector.money import money as _money
+    return _call(lambda c: _money(c, call_id, op, details), "money")
 
 
 mcp = register_tools(make_mcp())  # the stdio server

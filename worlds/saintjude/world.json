@@ -41,7 +41,8 @@
   "neighbourhood": "neighbourhood.json",
   "politics": "politics.json",
   "prison": "prison.json",
-  "history": "history.json"
+  "history": "history.json",
+  "money": "money.json"
  },
  "name_pools": {
   "male": {

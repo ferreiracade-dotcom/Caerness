@@ -16907,6 +16907,56 @@
   "source": "unsourced",
   "note": "unsourced; Investigative heat an outfit takes when one of its people is questioned. Design proposal. (P2.1: engine/life_matters.py)"
  },
+ "money_living_week_usd": {
+  "default": 25,
+  "range": null,
+  "unit": "dollars",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; What a person keeps back to live on for a week when paying what he owes, 1975. Design proposal. (P2.5: engine/money_records.py)"
+ },
+ "money_week_surplus_usd": {
+  "default": 40,
+  "range": null,
+  "unit": "dollars",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; What a person with no modelled wage can put by in a week toward what he owes. Design proposal. (P2.5: engine/money_records.py)"
+ },
+ "money_pocket_weeks": {
+  "default": 8,
+  "range": null,
+  "unit": "weeks",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; Most weeks of living money someone nobody has counted has on hand (drawn from half a week up). Design proposal. (P2.5: engine/money_records.py)"
+ },
+ "money_retry_days": {
+  "default": 7,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How soon an unpaid job or debt is collected again. Design proposal. (P2.5: engine/money_records.py)"
+ },
+ "money_wage_grace_days": {
+  "default": 28,
+  "range": null,
+  "unit": "days",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; How long a weekly wage can go unpaid before the arrangement breaks. Design proposal. (P2.5: engine/money_records.py)"
+ },
  "lm_police_watches": {
   "default": 0.25,
   "range": null,
