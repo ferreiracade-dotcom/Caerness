@@ -4,78 +4,362 @@
   "business": "Basile & Sons Auto Repair",
   "payday": "Friday",
   "player_said": "Make the record match the story as we played it.",
-  "unmarry": [{"spouse": "Lucia Fernandes", "player_said": "Dominic never married her. Take it back."}],
+  "unmarry": [
+    {
+      "spouse": "Lucia Fernandes",
+      "player_said": "Dominic never married her. Take it back."
+    }
+  ],
   "people": [
-    {"person": "Paul Ricci", "work": "Owner of a busy restaurant on the east side", "location": "The Eastside"},
-    {"person": "Tullio Bruni", "work": "Collector and go-between for the Pellegrino social club"}
+    {
+      "person": "Paul Ricci",
+      "work": "Owner of a busy restaurant on the east side",
+      "location": "The Eastside"
+    },
+    {
+      "person": "Tullio Bruni",
+      "work": "Collector and go-between for the Pellegrino social club"
+    }
   ],
-  "cash": {"amount": 2512, "reason": "as of 19 July 1975: 2,253 saved and 259 at home"},
-  "till": {"amount": 1500, "reason": "a week or two of the shop's takings in hand"},
+  "cash": {
+    "amount": 2512,
+    "reason": "as of 19 July 1975: 2,253 saved and 259 at home"
+  },
+  "till": {
+    "amount": 1500,
+    "reason": "a week or two of the shop's takings in hand"
+  },
   "wages": [
-    {"worker": "Gennaro", "weekly": 150},
-    {"worker": "Dominic Basile", "weekly": 55},
-    {"worker": "Stanley", "weekly": 110},
-    {"worker": "Vincent", "weekly": 105},
-    {"worker": "Anthony", "weekly": 35}
+    {
+      "worker": "Gennaro",
+      "weekly": 150
+    },
+    {
+      "worker": "Dominic Basile",
+      "weekly": 125
+    },
+    {
+      "worker": "Stanley",
+      "weekly": 110
+    },
+    {
+      "worker": "Vincent",
+      "weekly": 105
+    },
+    {
+      "worker": "Anthony",
+      "weekly": 35
+    }
   ],
-  "board": {"to": "Josephine", "weekly": 0, "what": "board to his mother"},
-  "living": {"weekly": 0, "what": "the Tap, pizza, gas and clothes"},
+  "board": {
+    "to": "Josephine",
+    "weekly": 30,
+    "what": "board to his mother"
+  },
+  "living": {
+    "weekly": 40,
+    "what": "the Tap, pizza, gas and clothes"
+  },
   "shares": [
-    {"to": "business", "share": 0.1, "applies": "all", "note": "the shop's share, written in Louis's book"},
-    {"to": "Frank Amato", "share": 0.1, "applies": "referred", "note": "customers he brings; cash men only"},
-    {"to": "Vincent", "share": 0.1, "applies": "referred", "note": "customers he brings; cash men only"},
-    {"to": "Anthony", "share": 0.1, "applies": "referred", "note": "customers he brings; cash men only"}
+    {
+      "to": "business",
+      "share": 0.1,
+      "applies": "all",
+      "note": "the shop's share, written in Louis's book"
+    },
+    {
+      "to": "Frank Amato",
+      "share": 0.1,
+      "applies": "referred",
+      "note": "customers he brings; cash men only"
+    },
+    {
+      "to": "Vincent",
+      "share": 0.1,
+      "applies": "referred",
+      "note": "customers he brings; cash men only"
+    },
+    {
+      "to": "Anthony",
+      "share": 0.1,
+      "applies": "referred",
+      "note": "customers he brings; cash men only"
+    }
   ],
   "deals": [
     {
-      "customer": "Samuel Harris", "job": "Camaro tune and head work", "quote": 350, "parts": 175, "created": "31 January 1975",
-      "payments": [["31 January 1975", 175], ["7 February 1975", 150], ["14 February 1975", 15], ["21 February 1975", 10]],
-      "collateral": [{"what": "the Camaro's registration and title", "status": "returned", "day": "21 February 1975"}]
+      "customer": "Samuel Harris",
+      "job": "Camaro tune and head work",
+      "quote": 350,
+      "parts": 175,
+      "created": "31 January 1975",
+      "payments": [
+        [
+          "31 January 1975",
+          175
+        ],
+        [
+          "7 February 1975",
+          150
+        ],
+        [
+          "14 February 1975",
+          15
+        ],
+        [
+          "21 February 1975",
+          10
+        ]
+      ],
+      "collateral": [
+        {
+          "what": "the Camaro's registration and title",
+          "status": "returned",
+          "day": "21 February 1975"
+        }
+      ]
     },
     {
-      "customer": "Rocco", "job": "Tune on his cousin Paulie's Nova", "quote": 85, "parts": 45, "created": "18 March 1975",
+      "customer": "Rocco",
+      "job": "Tune on his cousin Paulie's Nova",
+      "quote": 85,
+      "parts": 45,
+      "created": "18 March 1975",
       "referrer": "Samuel Harris",
-      "payments": [["18 March 1975", 45], ["21 March 1975", 25], ["24 March 1975", 15]],
-      "shares": [{"to": "business", "amount": 4, "day": "28 March 1975"}]
+      "payments": [
+        [
+          "18 March 1975",
+          45
+        ],
+        [
+          "21 March 1975",
+          25
+        ],
+        [
+          "24 March 1975",
+          15
+        ]
+      ],
+      "shares": [
+        {
+          "to": "business",
+          "amount": 4,
+          "day": "28 March 1975"
+        }
+      ]
     },
     {
-      "customer": "Gerald Orsini", "job": "GTO stage one tune", "quote": 120, "parts": 60, "created": "26 March 1975",
+      "customer": "Gerald Orsini",
+      "job": "GTO stage one tune",
+      "quote": 120,
+      "parts": 60,
+      "created": "26 March 1975",
       "referrer": "Vincent",
-      "payments": [["26 March 1975", 60], ["28 March 1975", 60]],
-      "shares": [{"to": "business", "amount": 6, "day": "28 March 1975"}, {"to": "Vincent", "amount": 6, "day": "28 March 1975"}]
+      "payments": [
+        [
+          "26 March 1975",
+          60
+        ],
+        [
+          "28 March 1975",
+          60
+        ]
+      ],
+      "shares": [
+        {
+          "to": "business",
+          "amount": 6,
+          "day": "28 March 1975"
+        },
+        {
+          "to": "Vincent",
+          "amount": 6,
+          "day": "28 March 1975"
+        }
+      ]
     },
     {
-      "customer": "Gerald Orsini", "job": "GTO modification, first tier", "quote": 350, "parts": 180, "created": "25 April 1975",
-      "referrer": "Vincent", "status": "declined", "note": "Quoted; he cannot pay for it now. Not closed to him."
+      "customer": "Gerald Orsini",
+      "job": "GTO modification, first tier",
+      "quote": 350,
+      "parts": 180,
+      "created": "25 April 1975",
+      "referrer": "Vincent",
+      "status": "declined",
+      "note": "Quoted; he cannot pay for it now. Not closed to him."
     },
     {
-      "customer": "Gerald Orsini", "job": "GTO modification, second tier", "quote": 900, "parts": 400, "created": "25 April 1975",
-      "referrer": "Vincent", "status": "declined", "note": "Quoted; he cannot pay for it now. Not closed to him."
+      "customer": "Gerald Orsini",
+      "job": "GTO modification, second tier",
+      "quote": 900,
+      "parts": 400,
+      "created": "25 April 1975",
+      "referrer": "Vincent",
+      "status": "declined",
+      "note": "Quoted; he cannot pay for it now. Not closed to him."
     },
     {
-      "customer": "Gerald Orsini", "job": "GTO modification, third tier", "quote": 1900, "parts": 750, "created": "25 April 1975",
-      "referrer": "Vincent", "status": "declined", "note": "Quoted; he cannot pay for it now. Not closed to him."
+      "customer": "Gerald Orsini",
+      "job": "GTO modification, third tier",
+      "quote": 1900,
+      "parts": 750,
+      "created": "25 April 1975",
+      "referrer": "Vincent",
+      "status": "declined",
+      "note": "Quoted; he cannot pay for it now. Not closed to him."
     },
     {
-      "customer": "Paul Ricci", "job": "Camaro, stage two", "quote": 900, "created": "19 July 1975",
-      "payments": [["19 July 1975", 900]], "note": "Done. Dated to the latest sheet."
+      "customer": "Paul Ricci",
+      "job": "Camaro, stage two",
+      "quote": 900,
+      "created": "12 June 1975",
+      "payments": [
+        [
+          "12 June 1975",
+          450
+        ],
+        [
+          "20 June 1975",
+          450
+        ]
+      ],
+      "note": "Done. Referred by Nick Fontana (no cut to him; a thank-you detail). Helpers paid for their work on it.",
+      "parts": 360,
+      "shares": [
+        {
+          "to": "business",
+          "amount": 95,
+          "day": "20 June 1975"
+        },
+        {
+          "to": "Frank Amato",
+          "amount": 40,
+          "day": "20 June 1975"
+        },
+        {
+          "to": "Vincent",
+          "amount": 30,
+          "day": "20 June 1975"
+        },
+        {
+          "to": "Anthony",
+          "amount": 30,
+          "day": "20 June 1975"
+        }
+      ]
     },
     {
-      "customer": "Tullio Bruni", "job": "Stage two on a Pellegrino club car, the first", "quote": 900, "created": "19 July 1975",
-      "payments": [["19 July 1975", 900]], "note": "Done. The club's car, recorded under its go-between. Dated to the latest sheet."
+      "customer": "Tullio Bruni",
+      "job": "Stage two on a Pellegrino club car, the first",
+      "quote": 900,
+      "created": "28 June 1975",
+      "payments": [
+        [
+          "11 July 1975",
+          900
+        ]
+      ],
+      "note": "Done. The club's car, recorded under its go-between, at normal prices.",
+      "parts": 380,
+      "shares": [
+        {
+          "to": "business",
+          "amount": 91,
+          "day": "11 July 1975"
+        },
+        {
+          "to": "Frank Amato",
+          "amount": 40,
+          "day": "11 July 1975"
+        },
+        {
+          "to": "Vincent",
+          "amount": 30,
+          "day": "11 July 1975"
+        },
+        {
+          "to": "Anthony",
+          "amount": 30,
+          "day": "11 July 1975"
+        }
+      ]
     },
     {
-      "customer": "Tullio Bruni", "job": "Stage two on a Pellegrino club car, the second", "quote": 900, "created": "19 July 1975",
-      "payments": [["19 July 1975", 900]], "note": "Done. The club's car, recorded under its go-between. Dated to the latest sheet."
+      "customer": "Tullio Bruni",
+      "job": "Stage two on a Pellegrino club car, the second",
+      "quote": 900,
+      "created": "28 June 1975",
+      "payments": [
+        [
+          "18 July 1975",
+          900
+        ]
+      ],
+      "note": "Done. The club's car, recorded under its go-between, at normal prices.",
+      "parts": 380,
+      "shares": [
+        {
+          "to": "business",
+          "amount": 91,
+          "day": "18 July 1975"
+        },
+        {
+          "to": "Frank Amato",
+          "amount": 40,
+          "day": "18 July 1975"
+        },
+        {
+          "to": "Vincent",
+          "amount": 30,
+          "day": "18 July 1975"
+        },
+        {
+          "to": "Anthony",
+          "amount": 30,
+          "day": "18 July 1975"
+        }
+      ]
     },
     {
-      "customer": "Paul Ricci", "job": "Stage one for Paul Ricci's brother-in-law", "quote": 350, "created": "19 July 1975",
-      "payments": [["19 July 1975", 350]], "note": "Done. Recorded under Paul, who brought him. Dated to the latest sheet."
+      "customer": "Paul Ricci",
+      "job": "Stage one for Paul Ricci's brother-in-law",
+      "quote": 350,
+      "created": "5 July 1975",
+      "payments": [
+        [
+          "18 July 1975",
+          350
+        ]
+      ],
+      "note": "Done. Recorded under Paul, who brought him. Parts and cuts estimated so that Dominic nets $100, as on his sheet.",
+      "parts": 200,
+      "shares": [
+        {
+          "to": "business",
+          "amount": 15,
+          "day": "18 July 1975"
+        },
+        {
+          "to": "Frank Amato",
+          "amount": 15,
+          "day": "18 July 1975"
+        },
+        {
+          "to": "Vincent",
+          "amount": 10,
+          "day": "18 July 1975"
+        },
+        {
+          "to": "Anthony",
+          "amount": 10,
+          "day": "18 July 1975"
+        }
+      ]
     }
   ],
   "rules": [
     "Reserve: Dominic keeps 1,000 dollars of his money untouched.",
-    "The crew owns a '67 Mustang, bought for 350 dollars as the learning car; Dominic also put 280 dollars of kit into the shop bay. Both are already out of his cash.",
+    "The crew owns a '67 Mustang, bought for 350 dollars as the learning car, plus 120 dollars of rebuild kit and panels; Dominic also put 280 dollars of kit into the shop bay. All are already out of his cash.",
     "Premise: a Peaky Blinders kind of story with brothers and a close best friend, an Italian family on South Hill and a garage. Honest doesn't mean completely opposed. Hidden compartments are only a possible future direction.",
     "Pricing: fair, never cheap. Dominic holds his number when a customer winces. Half up front for parts, the balance on delivery, cash, no credit.",
     "Short payment: \"I don't do half jobs so I don't want half pay.\" He may hold the car until paid, or release it against collateral such as the papers. A favour comes with terms: silence about the debt, and the story told is that it was paid on time.",
@@ -91,8 +375,18 @@
     "Point of view is third person, \"Dominic\". Decide rather than ask: no menus or permission questions. Out-of-character notes are only for plausibility pushback and consequences, in plain words."
   ],
   "void": [
-    {"event_type": "interaction:demand:rejected", "from": "5 February 1975", "to": "28 February 1975",
-     "reason": "logged by a doubled skip; no demand was made in the story"}
+    {
+      "event_type": "interaction:demand:rejected",
+      "from": "5 February 1975",
+      "to": "28 February 1975",
+      "reason": "logged by a doubled skip; no demand was made in the story"
+    }
   ],
-  "settle_errors": ["careful man", "demand", "married", "marriage", "Lucia"]
+  "settle_errors": [
+    "careful man",
+    "demand",
+    "married",
+    "marriage",
+    "Lucia"
+  ]
 }
