@@ -37,7 +37,7 @@ def run():
         assert sorted(t.name for t in tools) == ["act", "advance", "author", "lookup", "lore", "money", "note", "resume", "scene"]
         size = len(json.dumps([t.model_dump(by_alias=True, exclude_none=True) for t in tools], ensure_ascii=False))
         print(f"tool definitions: {size} chars")
-        assert size <= 8100, size  # resume gained save and new_save; advance gained from_day, undo and confirm; the money tool
+        assert size <= 8300, size  # resume gained save and new_save; advance gained from_day, undo and confirm; the money tool; the scene note
 
         r = server.resume_current()
         assert "error" not in r and "rulebook" in r, r
@@ -52,7 +52,7 @@ def run():
         assert "error" not in adv, adv
         assert "fresh_chat_hint" not in adv
 
-        # Fresh-chat hint: after 40 calls since resume (then every 10), or after a skip of a week or more.
+        # Fresh-chat hint: only when a scene is closed with a recap in a long chat.
         from connector import store
         server.resume_current()
         with connect_campaign() as conn:
@@ -60,12 +60,12 @@ def run():
             for _ in range(38):
                 store.bump_calls(conn, "scene")
         assert "fresh_chat_hint" not in server.scene()  # call 39
-        assert "fresh_chat_hint" in server.scene()      # call 40
-        assert "fresh_chat_hint" not in server.scene()  # call 41
+        assert "fresh_chat_hint" not in server.scene()  # call 40
+        assert "fresh_chat_hint" in server.note("s-recap-1", "A long evening ends.", kind="recap")
         server.resume_current()
-        assert "fresh_chat_hint" not in server.scene()
+        assert "fresh_chat_hint" not in server.note("s-recap-2", "A short one.", kind="recap")
         week = server.advance("s-adv-7", 7, "wait a week", from_day=today())
-        assert "error" not in week and week["elapsed_days"] >= 7 and "fresh_chat_hint" in week, week
+        assert "error" not in week and week["elapsed_days"] >= 7 and "fresh_chat_hint" not in week, week
         n = server.note("s-note-1", "keeps a limp", subject_kind="actor", subject_id=who["id"])
         assert "error" not in n, n
 

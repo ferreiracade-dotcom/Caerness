@@ -107,11 +107,10 @@ def notes_count(conn, subject_kind: str, subject_id: int) -> int:
     return int(conn.execute("SELECT COUNT(*) FROM gm_notes WHERE subject_kind=? AND subject_id=?", (subject_kind, int(subject_id))).fetchone()[0])
 
 
-NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact", "bearing", "form", "claim")
+NOTE_TYPES = ("detail", "recap", "rule", "sheet", "error", "fact", "bearing", "form", "claim", "scene")
 SHEET_FIELDS = ("appearance", "voice", "temperament", "ambitions", "habits", "history", "standing")
-_CLIP = {"recap": 600, "thread": 160, "sheet": 300, "rule": 300, "error": 500}
+_CLIP = {"recap": 600, "thread": 160, "error": 500}  # the sheet, standing rules and the last scene are kept whole
 MAX_THREADS = 8
-MAX_RULES = 8  # newest active rules returned by resume
 MAX_CORRECTIONS = 5  # newest open error reports returned by resume
 
 
@@ -161,8 +160,53 @@ def _claim_note(conn, text: str, subject_id, field) -> dict:
                           force=num("force", 0.0), costly=kv.get("costly", "0") not in ("0", "false", "no"), truth_event_id=int(kv["event"]) if "event" in kv else None)
 
 
+def _scene_note(conn, text: str, present) -> dict:
+    """scene: where things stand and the last words, and who is there. Those named who are there stay with the protagonist."""
+    from engine import company, veto
+    from engine.player import get_player
+    pl = get_player(conn)
+    if not pl:
+        raise ValueError("no protagonist is set")
+    body = " ".join(str(text or "").split())
+    if not body:
+        raise ValueError("text must not be empty")
+    me = int(pl["player_actor_id"])
+    here = conn.execute("SELECT l.id,l.name FROM actors a JOIN locations l ON l.id=a.current_location_id WHERE a.id=?", (me,)).fetchone()
+    town = veto.settlement_of(conn, here["id"]) if here else None
+    there, not_here = [], []
+    for ref in present or []:
+        raw = str(ref).partition(":")[2] if str(ref).startswith("actor:") else str(ref).strip()
+        row = conn.execute("SELECT id,name,current_location_id FROM actors WHERE status='active' AND actor_type='character' AND "
+                           + ("id=?" if raw.isdigit() else "lower(name)=lower(?)"), (int(raw) if raw.isdigit() else raw,)).fetchone()
+        near = row is not None and int(row["id"]) != me and here is not None and (
+            company.in_earshot(conn, me, row["id"])
+            or (town is not None and row["current_location_id"] is not None and veto.settlement_of(conn, row["current_location_id"]) == town))
+        if near:
+            there.append({"id": int(row["id"]), "name": str(row["name"])})
+        else:
+            not_here.append(ref)
+    company.join(conn, [p["id"] for p in there])
+    kept = {"day": _day(conn), "place": str(here["name"]) if here else None, "present": there, "text": body}
+    conn.execute("INSERT INTO connector_meta(key,value) VALUES ('last_scene',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                 (json.dumps(kept, ensure_ascii=False),))
+    out = {"saved": "scene", "place": kept["place"], "present": [p["name"] for p in there], "summary": f"Scene recorded: {body[:80]}"}
+    return {**out, **({"not_here": not_here} if not_here else {})}
+
+
+def last_scene(conn) -> dict | None:
+    """The scene as last recorded, with how many days have passed since."""
+    row = conn.execute("SELECT value FROM connector_meta WHERE key='last_scene'").fetchone()
+    if not row:
+        return None
+    kept = json.loads(row[0])
+    since = _day(conn) - int(kept.pop("day"))
+    kept["present"] = [p["name"] for p in kept["present"]]
+    return {**kept, **({"days_since": since} if since > 0 else {})}
+
+
 def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "general", subject_id: int | None = None,
-           threads: list[str] | None = None, field: str | None = None, cause: str | None = None) -> dict:
+           threads: list[str] | None = None, field: str | None = None, cause: str | None = None,
+           present: list | None = None) -> dict:
     """Record something that should last across chats. Does not commit: callers run it inside run_once."""
     if kind not in NOTE_TYPES:
         raise ValueError(f"kind must be one of {NOTE_TYPES}")
@@ -180,10 +224,13 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
         return _claim_note(conn, text, subject_id, field)
     if kind in ("bearing", "form"):
         return _presence_note(conn, kind, text, subject_id, field)
-    body = _clip(text, _CLIP[kind])
+    if kind == "scene":
+        return _scene_note(conn, text, present)
+    limit = _CLIP.get(kind)
+    body = _clip(text, limit) if limit else " ".join(str(text or "").split())
     if not body:
         raise ValueError("text must not be empty")
-    clipped = {"clipped": f"{kind} text was cut to {_CLIP[kind]} characters"} if len(" ".join(str(text).split())) > _CLIP[kind] else {}
+    clipped = {"clipped": f"{kind} text was cut to {limit} characters"} if limit and len(" ".join(str(text).split())) > limit else {}
     day = _day(conn)
     if kind == "recap":
         wanted = [t for t in (threads or []) if str(t or "").strip()]
@@ -207,7 +254,7 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
             raise ValueError("no active rule matches that text exactly")
         conn.execute("UPDATE standing_rules SET status='retired' WHERE id=?", (int(row[0]),))
         return {"saved": "rule", "retired": True, "summary": f"Rule retired: {body[:80]}"}
-    if kind == "error" and field == "fixed":
+    if kind == "error" and field in ("fixed", "settled"):
         rows = conn.execute("SELECT id,text FROM error_reports WHERE status='open' ORDER BY id DESC").fetchall()
         row = next((r for r in rows if (body.isdigit() and r["id"] == int(body)) or r["text"] == body), None)
         if not row:
@@ -235,12 +282,9 @@ def continuity(conn) -> dict:
     sheet = {r["field"]: r["text"] for r in conn.execute("SELECT field,text FROM character_sheet")}
     if sheet:
         out["character_sheet"] = {**{f: sheet[f] for f in SHEET_FIELDS if f in sheet}, **{f: t for f, t in sheet.items() if f not in SHEET_FIELDS}}
-    rules = [r["text"] for r in conn.execute("SELECT text FROM standing_rules WHERE status='active' ORDER BY id DESC LIMIT ?", (MAX_RULES,))][::-1]
+    rules = [r["text"] for r in conn.execute("SELECT text FROM standing_rules WHERE status='active' ORDER BY id")]
     if rules:
         out["standing_rules"] = rules
-        total = int(conn.execute("SELECT COUNT(*) FROM standing_rules WHERE status='active'").fetchone()[0])
-        if total > len(rules):
-            out["standing_rules_more"] = total - len(rules)
     open_errors = [r["text"] for r in conn.execute("SELECT text FROM error_reports WHERE status='open' ORDER BY id DESC LIMIT ?", (MAX_CORRECTIONS,))]
     if open_errors:
         out["corrections"] = open_errors

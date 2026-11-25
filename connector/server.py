@@ -9,8 +9,8 @@ import threading
 from mcp.server.mcpserver import MCPServer
 
 INSTRUCTIONS_TEMPLATE = ("{name} is the user's text role-playing game. When the user says \"resume\" or \"play\", "
-                         "call the resume tool with no arguments first: it lists the playable worlds and their saves. Ask the player which world "
-                         "and, when the world has several saves, which save (or a new one); never choose for them. Then call resume with world and "
+                         "call the resume tool with no arguments first: it loads the only save, or lists the playable worlds and their saves. When it lists "
+                         "them, ask the player which world and which save (or a new one); never choose for them. Then call resume with world and "
                          "save (new_save=true for a new save) and follow the game-master rulebook it returns.")
 
 
@@ -54,8 +54,7 @@ def _call(fn, tool: str, before=None) -> dict:
                 result = fn(conn)
                 if isinstance(result, dict) and "error" not in result:
                     n = store.bump_calls(conn, tool)
-                    long_chat = n >= store.HINT_AFTER_CALLS and n % 10 == 0
-                    if long_chat or (tool == "advance" and int(result.get("elapsed_days") or 0) >= 7):
+                    if tool == "note" and result.get("saved") == "recap" and n >= store.HINT_AFTER_CALLS:  # between scenes only
                         result["fresh_chat_hint"] = FRESH_CHAT_HINT
                 return result
             finally:
@@ -98,13 +97,17 @@ def resume_current() -> dict:
 
 
 def resume(world: str | None = None, save: str | None = None, new_save: bool = False) -> dict:
-    """Narrative Engine game: call first. No arguments lists worlds and their saves: ask the player which, then call again with world and save. new_save=true starts a new save. Returns the GM rulebook and scene."""
+    """Narrative Engine game: call first. No arguments loads the only save, else lists worlds and their saves: ask the player which, then call again with world and save. new_save=true starts a new save. Returns the GM rulebook and scene."""
     from connector import campaign
 
     def pick():
         with _CALL_LOCK, contextlib.redirect_stdout(sys.stderr):
             try:
                 if world is None or not str(world).strip():
+                    kept = [(x["world"], s["save"]) for x in campaign.worlds_and_saves() for s in x["saves"]]
+                    if len(kept) == 1 and not new_save:  # one save only: there is nothing to choose
+                        campaign.switch_to(*kept[0])
+                        return None
                     return {"ask": "Ask the player which world to play and, if that world has several saves, which save (or whether to start a new one). "
                                    "Then call resume again with world and save (new_save=true starts a new save). Do not pick for them and do not play yet.",
                             "worlds": campaign.worlds_and_saves()}
@@ -182,17 +185,17 @@ def advance(call_id: str, days: int, purpose: str, domain: str | None = None, de
 
 
 def note(call_id: str, text: str, kind: str = "detail", subject_kind: str = "general", subject_id: int | None = None,
-         threads: list[str] | None = None, field: str | None = None, cause: str | None = None) -> dict:
-    """Narrative Engine game: record what should last. kind=detail (a fact about an actor/location/business/outfit/household/crew/institution/general), recap (after a meaningful moment; threads = open threads), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake; field=fixed with a `corrections` entry's text or id marks it done), fact (change a tagged world fact: field = its key or name from lookup, text = new value; a Fixed fact needs `cause`, the event that changed it)."""
+         threads: list[str] | None = None, field: str | None = None, cause: str | None = None, present: list | None = None) -> dict:
+    """Narrative Engine game: record what should last. kind=detail (a fact about an actor/location/business/outfit/household/crew/institution/general), recap (after a meaningful moment; threads = open threads), scene (before telling a scene: where it stands and the last words; present = who is there, ids or names), rule (a standing rule the player approved; field=retire with its exact text retires it), sheet (protagonist's field), error (an engine or GM mistake; field=settled with a `corrections` entry's text or id closes it), fact (change a tagged world fact: field = its key or name from lookup, text = new value; a Fixed fact needs `cause`, the event that changed it)."""
     from connector import store
 
     request = {"kind": kind, "text": text, "subject_kind": subject_kind, "subject_id": subject_id,
-               "threads": threads, "field": field, **({"cause": cause} if cause else {})}
+               "threads": threads, "field": field, **({"cause": cause} if cause else {}), **({"present": present} if present else {})}
 
     def go(conn):
         return store.run_once(conn, call_id, "note", request,
                               lambda: store.record(conn, kind, text, call_id, subject_kind=subject_kind,
-                                                   subject_id=subject_id, threads=threads, field=field, cause=cause))
+                                                   subject_id=subject_id, threads=threads, field=field, cause=cause, present=present))
     return _call(go, "note")
 
 

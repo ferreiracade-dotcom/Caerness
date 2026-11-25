@@ -84,7 +84,8 @@ def run():
             conn.commit()
             size = len(json.dumps(resume(conn), ensure_ascii=False))
             print("full resume bytes", size)
-            assert size <= 21800, size  # the creation note and the prison section about 450; world-and-save asking about 400; rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
+            whole = 20 * 901 + len(store.SHEET_FIELDS) * 900  # every standing rule and sheet field now comes back uncut
+            assert size - whole <= 17500, size  # the creation note and the prison section about 450; world-and-save asking about 400; rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
     print("connector_resume_test passed")
 
 

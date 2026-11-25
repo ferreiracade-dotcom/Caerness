@@ -155,10 +155,9 @@ def test_backup_all_snapshots_every_campaign():
 
 def test_resume_lists_worlds_and_saves_and_new_save_never_overwrites():
     from connector import campaign, server
-    out = server.resume()
-    assert "ask" in out and "worlds" not in out.get("error", ""), out
-    assert [w["world"] for w in out["worlds"]] == ["saintjude"], out  # Caerness is shelved: never listed
-    assert "Caerness" not in str(out)
+    out = server.resume()  # one save among the playable worlds: straight into it, with nothing to choose
+    assert not out.get("error") and "ask" not in out and db_name() == "saintjude.db", out
+    assert "Caerness" not in str(out)  # shelved: never listed
     # one save (or none yet): straight in
     first = server.resume(world="saintjude")
     assert not first.get("error") and "ask" not in first and db_name() == "saintjude.db", first
@@ -166,7 +165,7 @@ def test_resume_lists_worlds_and_saves_and_new_save_never_overwrites():
     adv = server.advance(cid(), 2, "pass time", from_day=server.scene()["day"])
     assert not adv.get("error"), adv
     day1 = day_of_current()
-    listed = server.resume()["worlds"][0]["saves"]
+    listed = campaign.worlds_and_saves()[0]["saves"]
     assert [x["save"] for x in listed] == ["saintjude"] and listed[0]["protagonist"] == "Danny Ruane", listed
     assert listed[0]["story_date"] and listed[0]["last_played"], listed
     # a second save with a new character; the first is untouched

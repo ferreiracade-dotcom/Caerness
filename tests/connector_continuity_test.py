@@ -45,7 +45,7 @@ def run():
             assert store.continuity(conn)["character_sheet"] == {"appearance": "Heavy-set, close-cropped grey hair."}
             store.record(conn, "rule", "Never ask me to name subordinates.", "u1")
             assert store.continuity(conn)["standing_rules"] == ["Never ask me to name subordinates."]
-            # Rules can be retired, and at most the 8 newest are returned.
+            # Rules can be retired, and every active one is returned.
             store.record(conn, "rule", "Never ask me to name subordinates.", "u1r", field="retire")
             assert "standing_rules" not in store.continuity(conn)
             try:
@@ -54,8 +54,8 @@ def run():
                 assert "no active rule" in str(e), e
             for i in range(11):
                 store.record(conn, "rule", f"rule {i}", f"u{i+10}")
-            assert store.continuity(conn)["standing_rules"] == [f"rule {i}" for i in range(3, 11)]
-            assert len(store.record(conn, "sheet", "z" * 900, "s3", field="voice") and store.continuity(conn)["character_sheet"]["voice"]) <= 300
+            assert store.continuity(conn)["standing_rules"] == [f"rule {i}" for i in range(11)]
+            assert len(store.record(conn, "sheet", "z" * 900, "s3", field="voice") and store.continuity(conn)["character_sheet"]["voice"]) == 900
             store.record(conn, "error", "Engine placed Vera in Rivermoor.", "e1")
             assert conn.execute("SELECT status FROM error_reports").fetchone()[0] == "open"
             # Review 3: open error reports reach the GM as `corrections` (newest first, at most 5, text only), and note closes them.

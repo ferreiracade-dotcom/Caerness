@@ -65,6 +65,9 @@ def resume(conn) -> dict:
     passed = recent(conn)
     if passed:
         out["recent_advances"] = passed
+    left_off = store.last_scene(conn)
+    if left_off:
+        out["last_scene"] = left_off
     story = store.continuity(conn)
     if story:
         out["story"] = story
