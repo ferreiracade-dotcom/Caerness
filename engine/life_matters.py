@@ -137,7 +137,7 @@ def contacts(conn: sqlite3.Connection, a: int) -> dict[int, float]:
     for i, fam in conn.execute("SELECT actor_b_id,familiarity FROM relationships WHERE actor_a_id=?", (a,)):
         put(i, min(0.8, float(fam or 0) / 100.0))
     for x, y, aff in conn.execute("""SELECT actor_a_id,actor_b_id,affinity FROM social_contact_links
-                                     WHERE (actor_a_id=? OR actor_b_id=?) AND status='active'""", (a, a)):
+                                     WHERE (actor_a_id=? OR actor_b_id=?) AND +status='active'""", (a, a)):  # + : by the two ends
         put(y if int(x) == a else x, min(0.7, float(aff or 0) / 100.0))
     if out:
         marks = ",".join("?" * len(out))
@@ -172,7 +172,7 @@ def known_by(conn: sqlite3.Connection, those: list[int]) -> dict[int, dict[int, 
         put(a, c, 0.9)
     for a, c, fam in conn.execute(f"SELECT actor_a_id,actor_b_id,familiarity FROM relationships WHERE actor_b_id IN ({marks})", ids):
         put(a, c, min(0.8, float(fam or 0) / 100.0))
-    for x, y, aff in conn.execute(f"""SELECT actor_a_id,actor_b_id,affinity FROM social_contact_links WHERE status='active'
+    for x, y, aff in conn.execute(f"""SELECT actor_a_id,actor_b_id,affinity FROM social_contact_links WHERE +status='active'
                                       AND (actor_a_id IN ({marks}) OR actor_b_id IN ({marks}))""", ids + ids):
         put(x, y, min(0.7, float(aff or 0) / 100.0))
         put(y, x, min(0.7, float(aff or 0) / 100.0))
