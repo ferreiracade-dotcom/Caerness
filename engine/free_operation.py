@@ -439,6 +439,8 @@ def _hold_settled(conn, me: int, r, d: dict, kind) -> tuple[int | None, str]:
             return None, ""
         conn.execute("UPDATE held_things SET status='active',updated_day=? WHERE id=? AND status='building'", (day, row["id"]))
         return int(row["id"]), f" It now stands as {row['name']}."
+    if not intake.founds(conn, r["description"]):  # an errand or a talk is done and gone
+        return None, ""
     details = {"what": r["description"], "people": [int(x) for x in (d.get("people") or [])], "money": {"start": 0},
                "consequences": [r["description"]], "start_day": day}
     if r["target_location_id"] is not None:

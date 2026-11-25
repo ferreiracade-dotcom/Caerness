@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Callable
 
 from . import authoring, ledger
@@ -297,6 +297,12 @@ def _readers(rules: dict, p: Proposal) -> tuple[list[str], list[str]]:
     return readers, unmapped
 
 
+def founds(conn, text: str) -> bool:
+    """Whether an act that was carried out made something that stays held (the package's words for founding or acquiring)."""
+    t = str(text).lower()
+    return any(_has_word(t, w) for w in _rules(conn).get("lasting_words", []))
+
+
 def bump_gap(conn, gap_key: str, shape: str, held_id: int, missing: list[str]) -> None:
     day = _day(conn)
     row = conn.execute("SELECT examples_json,missing_json FROM depth_gaps WHERE gap_key=?", (gap_key,)).fetchone()
@@ -343,6 +349,9 @@ def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
         if again:
             return again
     p = normalise(conn, int(me), kind, d)
+    leader = d.get("leader_actor_id")
+    if shape.name == "organisation" and isinstance(leader, int) and d.get("owner_actor_id", d.get("owner")) is None:
+        p = replace(p, owner=leader)  # a body another leads is theirs
     _check_facts(conn, p, d)
     basis: dict = {}
     if shape.name not in ("history", "real_figure"):  # R1: enablers, distance ahead of the technology, foresight judged on what he could know
@@ -368,6 +377,13 @@ def take_in(conn, me: int, kind: str, details: dict, call_id: str) -> dict:
         out: dict[str, Any] = {}
         if shape.make is not None:
             out = dict(shape.make(conn, int(me), p, str(call_id)) or {})
+        if shape.name in ("person", "rumour"):  # people and talk are made real, never held
+            for k in p.knows:
+                from . import findings
+                findings.tell(conn, k, [p.what], source=p.owner)
+            conn.execute("RELEASE SAVEPOINT intake_take")
+            return {**out, "status": "scaled_down" if scaled else "created", "kind": shape.name,
+                    **({"name": p.what[:80]} if "name" not in out else {}), **({"scaled": scaled} if scaled else {})}
         table, bid = _backing(out)
         readers, unmapped = _readers(rules, p)
         name = (str(d.get("name") or "").strip() or str(out.get("name") or "") or p.what)[:80]

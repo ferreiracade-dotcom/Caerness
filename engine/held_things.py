@@ -14,6 +14,8 @@ from .org_succession import v
 
 WEEK = 7
 LIVE = ("active", "failing")
+# Not holdings the weekly tick moves: recorded facts, and people or talk (older saves held a row for them).
+NOT_HOLDINGS = "('history','real_figure','person','rumour')"
 
 
 def _rules(conn) -> dict:
@@ -25,7 +27,7 @@ def next_due_day(conn: sqlite3.Connection, after_day: int, end_day: int) -> int 
     if not _rules(conn):
         return None
     from . import history
-    if not conn.execute("SELECT 1 FROM held_things WHERE status IN ('active','failing') AND shape NOT IN ('history','real_figure') LIMIT 1").fetchone() \
+    if not conn.execute(f"SELECT 1 FROM held_things WHERE status IN ('active','failing') AND shape NOT IN {NOT_HOLDINGS} LIMIT 1").fetchone() \
             and not history.next_due(conn):  # a recorded real fact is not a thing that earns; one waiting for its date still needs the weekly pass
         return None
     due = (int(after_day) // WEEK + 1) * WEEK
@@ -106,7 +108,10 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
     day = int(day)
     from . import history
     out["history"] = history.settle_due(conn, int(day), event_logger=event_logger)
-    for row in conn.execute("SELECT * FROM held_things WHERE status IN ('active','failing') AND shape NOT IN ('history','real_figure') ORDER BY id").fetchall():
+    from .player import get_player
+    p = get_player(conn)
+    me = None if p is None else int(p["player_actor_id"])
+    for row in conn.execute(f"SELECT * FROM held_things WHERE status IN ('active','failing') AND shape NOT IN {NOT_HOLDINGS} ORDER BY id").fetchall():
         owner = row["owner_actor_id"]
         if owner is None or not _living(conn, owner):
             nxt = _new_owner(conn, row)
@@ -123,6 +128,8 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
             _end(conn, row, day, "its time ran out")
             out["ended"] += 1
             continue
+        if not (row["income_weekly"] > 0 or row["upkeep_weekly"] > 0 or row["legality"] == "illegal" or row["recurrence_days"]):
+            continue  # nothing is earned, spent, risked or kept: nothing happens to it
         if row["recurrence_days"]:  # a custom acts on its own day: its readers (money, heat) act then, once
             if day - int(row["updated_day"]) < int(row["recurrence_days"]):
                 continue
@@ -144,6 +151,8 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
         rng = random.Random(f"held:{row['id']}:{day}")
         if rng.random() < v(conn, tick["happening_week_rate"]):
             which = rng.randrange(3)
+            if which < 2 and row["income_weekly"] <= 0:
+                continue
             if which == 0:
                 conn.execute("UPDATE held_things SET income_weekly=income_weekly*(1+?) WHERE id=?", (v(conn, tick["grow_share"]), row["id"]))
                 title, summary = f"{row['name']} grew", f"{row['name']} is bringing in more."
@@ -151,9 +160,9 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
                 conn.execute("UPDATE held_things SET income_weekly=income_weekly*(1-?) WHERE id=?", (v(conn, tick["shrink_share"]), row["id"]))
                 title, summary = f"{row['name']} shrank", f"{row['name']} is bringing in less."
             else:
-                findings.tell(conn, owner, [f"{row['name']} drew notice"], source=owner)
                 _heat(conn, row, owner, day, tick)
                 title, summary = f"{row['name']} drew notice", f"{row['name']} was noticed by people it would rather not have been."
             out["happenings"] += 1
-            _log(conn, event_logger, row, owner, day, title, summary)
+            if which < 2 or owner != me:  # being watched is not something the protagonist hears of by itself
+                _log(conn, event_logger, row, owner, day, title, summary)
     return out
