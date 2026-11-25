@@ -1,0 +1,134 @@
+"""Repair names an older namer spoiled: a descriptive tag or a number stuck onto a person's name. The given name is kept; a
+middle initial tells two namesakes apart. Worlds without their own name pools use such tags on purpose and are left alone."""
+from __future__ import annotations
+
+import re
+import sqlite3
+
+from .person_ecology import _EPITHETS
+from .world_package import package_for
+
+_TAGS = tuple(sorted(_EPITHETS, key=len, reverse=True))
+_TAILS = frozenset(t.split()[-1] for t in _TAGS)  # what a tag leaves as the "family name" of a child
+_NUMBERED = re.compile(r"( \d+)+$")
+
+
+def _strip(name: str) -> str:
+    out = _NUMBERED.sub("", name)
+    for tag in _TAGS:
+        if out.endswith(" " + tag) and len(out[: -len(tag) - 1].split()) >= 2:
+            return out[: -len(tag) - 1]
+    return out
+
+
+def _free(conn: sqlite3.Connection, actor_id: int, base: str) -> str:
+    taken = lambda n: conn.execute("SELECT 1 FROM actors WHERE name=? AND id<>?", (n, actor_id)).fetchone()
+    if not taken(base):
+        return base
+    given, _, rest = base.partition(" ")
+    rest = re.sub(r"^[A-Z]\. ", "", rest)
+    for k in range(26 * 26):
+        a, b = divmod(actor_id + k, 26)
+        mark = chr(65 + b) + "." if k < 26 else f"{chr(65 + b)}. {chr(65 + a % 26)}."
+        name = f"{given} {mark} {rest}"
+        if not taken(name):
+            return name
+    return base
+
+
+def _parent_family(conn: sqlite3.Connection, actor_id: int) -> str | None:
+    for r in conn.execute("""SELECT a.name FROM kinship_links k JOIN actors a ON a.id=k.actor_a_id
+                             WHERE k.actor_b_id=? AND k.kin_kind IN ('parent','mother','father') ORDER BY a.id""", (actor_id,)):
+        words = _strip(str(r[0])).split()
+        if len(words) >= 2 and words[-1] not in _TAILS:
+            return words[-1]
+    return None
+
+
+def _spoiled(conn: sqlite3.Connection) -> list[tuple[int, str, str]]:
+    out = []
+    for r in conn.execute("SELECT id,name FROM actors WHERE actor_type='character' ORDER BY id").fetchall():
+        aid, name = int(r[0]), str(r[1])
+        base = _strip(name)
+        words = base.split()
+        if len(words) >= 2 and words[-1] in _TAILS:  # born to a tagged parent
+            family = _parent_family(conn, aid)
+            if family:
+                base = " ".join(words[:-1] + [family])
+        if base != name and len(base.split()) >= 2:
+            out.append((aid, name, base))
+    return out
+
+
+def _spoiled_businesses(conn: sqlite3.Connection) -> list[tuple[int, str, str]]:
+    """Businesses called after a tag the namer read as the owner's family name ("<tag>'s Bar"): they take the owner's own."""
+    out, claimed = [], set()
+    for r in conn.execute("SELECT e.id,e.name,a.name,e.location_id FROM civilian_enterprises e JOIN actors a ON a.id=e.owner_actor_id "
+                          "ORDER BY e.id").fetchall():
+        head, mark, rest = str(r[1]).partition("'s ")
+        owner = _strip(str(r[2]))
+        family = owner.split()[-1]
+        if not (mark and head in _TAILS and family not in _TAILS):
+            continue
+        for new in (f"{family}'s {rest}", f"{owner}'s {rest}"):  # two of one name in one place: the owner's whole name
+            if (new, r[3]) not in claimed and not conn.execute("SELECT 1 FROM civilian_enterprises WHERE name=? AND location_id IS ?",
+                                                              (new, r[3])).fetchone():
+                claimed.add((new, r[3]))
+                out.append((int(r[0]), str(r[1]), new))
+                break
+    return out
+
+
+def repair_names(conn: sqlite3.Connection) -> dict[str, str]:
+    """Rename every spoiled person and every stored copy of the old name. Returns {old: new}; a second call finds nothing."""
+    if not package_for(conn).name_pools:
+        return {}
+    changed: dict[str, str] = {}
+    for aid, old, base in _spoiled(conn):
+        new = _free(conn, aid, base)
+        conn.execute("UPDATE actors SET name=? WHERE id=?", (new, aid))
+        changed[old] = new
+    # the background identities a tag was split into
+    for r in conn.execute("SELECT partition_id,local_uid,family_name FROM background_person_profiles WHERE family_name LIKE '% %'").fetchall():
+        for tag in _TAGS:
+            fam = str(r[2])
+            if fam.endswith(" " + tag):
+                conn.execute("UPDATE background_person_profiles SET family_name=? WHERE partition_id=? AND local_uid=?",
+                             (fam[: -len(tag) - 1], r[0], r[1]))
+                break
+    for eid, old, new in _spoiled_businesses(conn):
+        conn.execute("UPDATE civilian_enterprises SET name=? WHERE id=?", (new, eid))  # `new` was checked free at that place
+        changed.setdefault(old, new)
+    if changed:
+        _rewrite_copies(conn, changed)
+    return changed
+
+
+def _rewrite_copies(conn: sqlite3.Connection, changed: dict[str, str]) -> None:
+    # every old name ends in a tag word or a number: look for those words, then check what stands before each one
+    by_last: dict[str, list[str]] = {}
+    for old in sorted(changed, key=len, reverse=True):
+        by_last.setdefault(old.split()[-1], []).append(old)
+    ends = re.compile(r"(?<!\w)(?:" + "|".join(re.escape(k) for k in by_last) + r")(?!\w)(?! \d)")  # "<name> <digits>" is someone else
+
+    def fix(text: str) -> str:
+        for m in reversed(list(ends.finditer(text))):
+            for old in by_last[m.group(0)]:
+                at = m.end() - len(old)
+                if at >= 0 and text.startswith(old, at) and (at == 0 or not text[at - 1].isalnum()):
+                    text = text[:at] + changed[old] + text[m.end():]
+                    break
+        return text
+
+    tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' "
+                                         "AND sql NOT LIKE '%WITHOUT ROWID%' AND sql NOT LIKE 'CREATE VIRTUAL%'")]
+    for t in tables:
+        for c in [r[1] for r in conn.execute(f'PRAGMA table_info("{t}")') if "TEXT" in (r[2] or "").upper()]:
+            updates = []
+            for rid, text in conn.execute(f'SELECT rowid,"{c}" FROM "{t}" WHERE "{c}" IS NOT NULL'):
+                if isinstance(text, str):
+                    fixed = fix(text)
+                    if fixed != text:
+                        updates.append((fixed, rid))
+            if updates:
+                conn.executemany(f'UPDATE OR IGNORE "{t}" SET "{c}"=? WHERE rowid=?', updates)

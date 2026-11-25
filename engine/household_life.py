@@ -315,12 +315,8 @@ def _newborn_name(conn: sqlite3.Connection, father: int, mother: int, sex: str, 
         name = f"{given} {family}" if family else given
         if not conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():
             return name
-    base = f"{pool[start]} {family or ''} {key.rsplit(':', 3)[-3]}".replace("  ", " ").strip()
-    name, n = base, 1
-    while conn.execute("SELECT 1 FROM actors WHERE name=?", (name,)).fetchone():  # every given name of the family is taken, and so is this one
-        n += 1
-        name = f"{base} {n}"
-    return name
+    from .person_ecology import _free_name  # every given name of the family is taken: tell them apart, never by a number
+    return _free_name(conn, pool[start], family or "", sex, int(hashlib.sha256(key.encode()).hexdigest()[:6], 16)).strip()
 
 
 def register_birth(conn: sqlite3.Connection, union_id: int, *, child_name: str | None = None,

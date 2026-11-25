@@ -43,6 +43,8 @@ _FIXED: tuple[tuple[str, str], ...] = (
     (r"Caerness", "Caerness"),
     (r"\b(?:Redhand|Longstride|Greycloak|Shortfinger|Oneeye|Swiftfoot|Blackhand|Hardhead|Ironknee)\b", "fantasy epithet"),
     (r"\bof the Quay\b", "fantasy epithet"),
+    (r"\b[A-Z][A-Za-z'\-]+ (?:the (?:Younger|Elder|Lame|Quiet|Broad|Tall|Fair|Dark|Stout|Careful|Ginger|Thin|Singer|Pale|Lucky|Warden's)"
+     r"|of the (?:Mill|Row|Gate|Lane))\b", "epithet name"),
 )
 
 # Known false positives. (regex, reason). A hit is discarded if its span lies inside an ALLOW match.
@@ -371,6 +373,9 @@ def scan(db_path) -> list[Leak]:
                             hits = memo[v] = find_hits(v)
                         for matched, kind, ex in hits:
                             leaks.append(Leak(t, c, rid if has_rowid else None, matched, kind, ex))
+        for rid, name in conn.execute("SELECT id, name FROM actors WHERE actor_type='character'"):
+            if re.search(r" \d+$", name or ""):
+                leaks.append(Leak("actors", "name", rid, "numbered name", "caerness", name))
     finally:
         conn.close()
     return leaks
