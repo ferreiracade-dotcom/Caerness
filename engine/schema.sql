@@ -5840,6 +5840,13 @@ CREATE TABLE IF NOT EXISTS money_news (
     text TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS business_takings (
+    enterprise_id INTEGER NOT NULL REFERENCES civilian_enterprises(id) ON DELETE CASCADE,
+    day INTEGER NOT NULL,
+    amount_usd REAL NOT NULL,
+    PRIMARY KEY (enterprise_id, day)
+);
+
 -- Schema 129: who is with the protagonist where they stand (travel companions, those dealt with today).
 CREATE TABLE IF NOT EXISTS company (
     actor_id INTEGER PRIMARY KEY REFERENCES actors(id),

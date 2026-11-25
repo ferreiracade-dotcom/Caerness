@@ -16927,6 +16927,16 @@
   "source": "unsourced",
   "note": "unsourced; What a person with no modelled wage can put by in a week toward what he owes. Design proposal. (P2.5: engine/money_records.py)"
  },
+ "money_takings_over_wages": {
+  "default": {"active": [0.95, 1.35], "strained": [0.6, 1.1]},
+  "range": null,
+  "unit": "times the week's wage bill",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; What a business paying agreed weekly wages takes in each pay week, as a multiple of those wages, by its condition. Design proposal. (P2.10: engine/money_records.py)"
+ },
  "money_pocket_weeks": {
   "default": 8,
   "range": null,

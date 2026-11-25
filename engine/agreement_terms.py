@@ -130,6 +130,12 @@ def _settle(conn: sqlite3.Connection, t: sqlite3.Row, due: int) -> None:
         conn.execute("UPDATE agreement_terms SET debtor_ref=?,creditor_ref=? WHERE id=?", (debtor, creditor, tid))
     owe = float(t["amount_usd"]) + float(t["owed_usd"])
     paid = 0.0
+    if t["ref_kind"] == "living":  # a person's own upkeep: spent, owed to nobody, and never carried over
+        h = ledger.parse_holder(debtor, 0)
+        if owe > _STOP and ledger.balance(conn, h) > _STOP:
+            ledger.spend(conn, h, float(t["amount_usd"]), purpose=t["purpose"], allow_partial=True)
+        conn.execute("UPDATE agreement_terms SET owed_usd=0,next_due_day=? WHERE id=?", (int(due) + int(t["every_days"]), tid))
+        return
     if owe > _STOP and ledger.balance(conn, ledger.parse_holder(debtor, 0)) > _STOP:
         paid = float(ledger.transfer(conn, ledger.parse_holder(debtor, 0), ledger.parse_holder(creditor, 0), owe,
                                      flow_kind="wage" if t["ref_kind"] == "wage" else "other", purpose=t["purpose"],
@@ -171,6 +177,8 @@ def process_due_terms(conn: sqlite3.Connection, day: int) -> dict:
         if t is None:
             money_records.process(conn, day)  # after the terms, so a debtor paid his wage today can pay with it
             return done
+        if t["ref_kind"] == "wage":
+            money_records.takings(conn, t["debtor_ref"], int(t["next_due_day"]))
         _settle(conn, t, int(t["next_due_day"]))
         done[int(t["id"])] = done.get(int(t["id"]), 0) + 1
 

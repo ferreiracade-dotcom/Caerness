@@ -374,6 +374,27 @@ def on_agreed_wage(conn: sqlite3.Connection, enterprise_id: int) -> set[int]:
         return set()
 
 
+def takings(conn: sqlite3.Connection, business: str, day: int) -> float:
+    """A business that pays agreed weekly wages takes in the week's custom first, once per pay day. Its books are not kept
+    in this currency, so what comes in is read from the wage bill due and the state it is in: a poor week can leave it
+    short, and one that has failed takes in nothing."""
+    bands = design.figure(conn, "money_takings_over_wages", None) if currency(conn) else None
+    kind, i = _holder(business)
+    if not bands or kind != "business" or conn.execute("SELECT 1 FROM business_takings WHERE enterprise_id=? AND day=?",
+                                                      (i, int(day))).fetchone():
+        return 0.0
+    r = conn.execute("SELECT status FROM civilian_enterprises WHERE id=?", (i,)).fetchone()
+    band = bands.get(str(r[0])) if r else None
+    bill = float(conn.execute("""SELECT COALESCE(SUM(amount_usd),0) FROM agreement_terms WHERE ref_kind='wage' AND status='active'
+                                 AND debtor_ref=? AND next_due_day=?""", (business, int(day))).fetchone()[0])
+    if not band or bill <= 0:
+        return 0.0
+    got = round(bill * random.Random(f"{design.run_seed(conn)}:takings:{i}:{int(day)}").uniform(*band), 2)
+    ledger.receive(conn, (kind, i), got, purpose="the week's custom")
+    conn.execute("INSERT INTO business_takings(enterprise_id,day,amount_usd) VALUES (?,?,?)", (i, int(day), got))
+    return got
+
+
 # ---- what he sees ----
 
 def _item(conn, d: sqlite3.Row, other: str) -> dict:

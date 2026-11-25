@@ -1,0 +1,74 @@
+{
+  "version": "p2-dominic-1",
+  "protagonist": "Dominic Basile",
+  "business": "Basile & Sons Auto Repair",
+  "payday": "Friday",
+  "cash": {"amount": 1249, "reason": "the purse agreed in play: sideline jobs, eleven weeks and more of saving, less the tools"},
+  "till": {"amount": 1500, "reason": "a week or two of the shop's takings in hand"},
+  "wages": [
+    {"worker": "Gennaro", "weekly": 150},
+    {"worker": "Dominic Basile", "weekly": 125},
+    {"worker": "Stanley", "weekly": 110},
+    {"worker": "Vincent", "weekly": 105},
+    {"worker": "Anthony", "weekly": 35}
+  ],
+  "board": {"to": "Josephine", "weekly": 30, "what": "board to his mother"},
+  "living": {"weekly": 40, "what": "the Tap, pizza, gas and clothes"},
+  "shares": [
+    {"to": "business", "share": 0.1, "applies": "all", "note": "the shop's share, written in Louis's book"},
+    {"to": "Frank Amato", "share": 0.1, "applies": "referred", "note": "customers he brings; cash men only"},
+    {"to": "Vincent", "share": 0.1, "applies": "referred", "note": "customers he brings; cash men only"},
+    {"to": "Anthony", "share": 0.1, "applies": "referred", "note": "customers he brings; cash men only"}
+  ],
+  "deals": [
+    {
+      "customer": "Samuel Harris", "job": "Camaro tune and head work", "quote": 350, "parts": 175, "created": "31 January 1975",
+      "payments": [["31 January 1975", 175], ["7 February 1975", 150], ["14 February 1975", 15], ["21 February 1975", 10]],
+      "collateral": [{"what": "the Camaro's registration and title", "status": "returned", "day": "21 February 1975"}]
+    },
+    {
+      "customer": "Rocco", "job": "Tune on his cousin Paulie's Nova", "quote": 85, "parts": 45, "created": "18 March 1975",
+      "referrer": "Samuel Harris",
+      "payments": [["18 March 1975", 45], ["21 March 1975", 25], ["24 March 1975", 15]],
+      "shares": [{"to": "business", "amount": 4, "day": "28 March 1975"}]
+    },
+    {
+      "customer": "Gerald Orsini", "job": "GTO stage one tune", "quote": 120, "parts": 60, "created": "26 March 1975",
+      "referrer": "Vincent",
+      "payments": [["26 March 1975", 60], ["28 March 1975", 60]],
+      "shares": [{"to": "business", "amount": 6, "day": "28 March 1975"}, {"to": "Vincent", "amount": 6, "day": "28 March 1975"}]
+    },
+    {
+      "customer": "Gerald Orsini", "job": "GTO modification, first tier", "quote": 350, "parts": 180, "created": "25 April 1975",
+      "referrer": "Vincent", "status": "declined", "note": "Quoted; he cannot pay for it now. Not closed to him."
+    },
+    {
+      "customer": "Gerald Orsini", "job": "GTO modification, second tier", "quote": 900, "parts": 400, "created": "25 April 1975",
+      "referrer": "Vincent", "status": "declined", "note": "Quoted; he cannot pay for it now. Not closed to him."
+    },
+    {
+      "customer": "Gerald Orsini", "job": "GTO modification, third tier", "quote": 1900, "parts": 750, "created": "25 April 1975",
+      "referrer": "Vincent", "status": "declined", "note": "Quoted; he cannot pay for it now. Not closed to him."
+    }
+  ],
+  "rules": [
+    "Premise: a Peaky Blinders kind of story with brothers and a close best friend, an Italian family on South Hill and a garage. Honest doesn't mean completely opposed. Hidden compartments are only a possible future direction.",
+    "Pricing: fair, never cheap. Dominic holds his number when a customer winces. Half up front for parts, the balance on delivery, cash, no credit.",
+    "Short payment: \"I don't do half jobs so I don't want half pay.\" He may hold the car until paid, or release it against collateral such as the papers. A favour comes with terms: silence about the debt, and the story told is that it was paid on time.",
+    "Every job gets a free hand wash and wax, the engine bay cleaned and a settings sheet in the visor. The brothers can do this work.",
+    "Cuts: Frank, Vincent and Anthony get 10% of the profit on paying customers they bring, so more on bigger jobs, cash men only, paid when the customer has paid in full; nothing goes to Josephine. The shop gets 10% of the profit. Profit is the price less parts.",
+    "Work done on shop hours, which Louis allows so jobs move faster, gives the shop 25% of the profit for those hours only: at most half a job's hours, paying customers first, every hour logged in Louis's ledger.",
+    "Louis's ledger keeps everything plain: dates, names, sums. Louis hears about each new customer or shop matter from Dominic before it comes into the shop.",
+    "Pricing bigger work: profit must rise with the work. Labour is about $12 an hour, $10 an hour on the biggest tier.",
+    "Dominic buys his own tools with his own money, kept apart from the shop and marked with his initials. Later he would like a cheap wreck with clean papers to rebuild as a showpiece.",
+    "Money is kept by the engine: wages, board and spending run through time skips. Use the money tool for jobs and payments, and read prices and cash from the record, never from memory or the sheet.",
+    "Offscreen reactions, such as a customer showing off the car or a race, are wanted when clearly labelled as outside Dominic's knowledge. Dominic knows neighbourhood-level things only.",
+    "Keep: period plausibility pushback given out of character and then play goes on; a short list of workable options with a recommendation when blocked; Louis's specific in-character terms; Gennaro as mentor and risk-spotter; the texture of family nights; consequences flagged without a veto; the correction and void mechanism; the brothers-and-Frank banter.",
+    "Point of view is third person, \"Dominic\". Decide rather than ask: no menus or permission questions. Out-of-character notes are only for plausibility pushback and consequences, in plain words."
+  ],
+  "void": [
+    {"event_type": "interaction:demand:rejected", "from": "5 February 1975", "to": "28 February 1975",
+     "reason": "logged by a doubled skip; no demand was made in the story"}
+  ],
+  "settle_errors": ["careful man", "demand"]
+}
