@@ -131,6 +131,25 @@ def injury_shows(conn, physique, who: int) -> None:
     assert physique.force(conn, who) < before, "an injury still healing takes strength"
 
 
+def the_live_save_wording(conn, physique) -> None:
+    """The ways a narrator really writes an appearance."""
+    d = physique.data(conn)
+    carla = physique.parse_stated(d, "23, about 5'6\", slim, a small scar through one eyebrow. Wears plain blouses.", "appearance")
+    assert carla["height_in"] == 66 and "looks_z" not in carla and "marks" in carla["fields"], carla
+    quick = physique.parse_stated(d, "Lean and quick, strong from the shop, less heavy than his cousin.", "appearance")
+    assert quick["set"]["flesh"] < 0, quick
+    young = physique.parse_stated(d, "Still filling out, wide through the shoulders and big-handed.", "appearance")
+    assert young["set"]["frame"] > 0 and "build" in young["fields"], young
+    nose = physique.parse_stated(d, "A straight nose with a small bump from an old break, a crooked front tooth.", "appearance")
+    assert "marks" in nose["fields"], nose
+    who = men(conn, 22, 30)[7]
+    whole = "Strikingly good-looking in an unshowy way. Reads as a 8 out of 10, more for bearing than any one feature."
+    assert physique.apply_note(conn, "actor", who, "Attractiveness: " + whole)
+    assert whole.rstrip(".") in physique.describe(conn, who)
+    physique.set_stated(conn, who, "8/10", label="looks")
+    assert "8/10" not in physique.describe(conn, who)
+
+
 def switched_off(conn, physique, a: int, b: int) -> None:
     os.environ["CAERNESS_PHYSIQUE"] = "off"
     try:
@@ -220,6 +239,7 @@ def main() -> None:
             reads_do_not_write(conn, physique, a)
             lived(conn, physique, b)
             injury_shows(conn, physique, c)
+            the_live_save_wording(conn, physique)
             switched_off(conn, physique, a, b)
             conn.commit()
         finally:

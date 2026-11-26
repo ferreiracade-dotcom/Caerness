@@ -238,7 +238,7 @@
  },
  "stated": {
   "labels": ["appearance", "attractiveness", "looks", "physique", "build", "height"],
-  "negations": ["not", "no", "never", "isn't", "hardly", "without"],
+  "negations": ["not", "no", "never", "isn't", "hardly", "without", "less"],
   "height_words": [
    {"words": ["very tall", "towering", "huge"], "z": 2.2},
    {"words": ["very short", "tiny", "diminutive"], "z": -2.2},
@@ -247,9 +247,10 @@
   ],
   "build_words": [
    {"words": ["heavily muscled", "powerfully built", "massive", "brawny", "burly"], "set": {"muscle": 1.6, "frame": 0.9}},
+   {"words": ["wide through the shoulders", "wide-shouldered", "wide shoulders", "big-handed"], "set": {"muscle": 0.6, "frame": 0.8}},
    {"words": ["muscular", "well-built", "well built", "broad-shouldered", "broad shoulders", "broad through the shoulders", "heavy through the shoulders", "thick arms", "strongly built", "athletic"], "set": {"muscle": 1.2}},
    {"words": ["solid", "sturdy", "solidly built"], "set": {"muscle": 0.5, "frame": 0.5}},
-   {"words": ["stocky", "thickset", "thick-set", "barrel-chested"], "set": {"frame": 1.2, "flesh": 0.4}},
+   {"words": ["stocky", "thickset", "thick-set", "barrel-chested", "heavily built"], "set": {"frame": 1.2, "flesh": 0.4}},
    {"words": ["fat", "obese", "very heavy", "overweight"], "set": {"flesh": 2.0}},
    {"words": ["heavyset", "heavy-set", "heavy", "plump", "chubby", "full-figured", "curvy"], "unless_next": ["through", "brows", "eyebrows", "lids"], "set": {"flesh": 1.0, "frame": 0.3}},
    {"words": ["big-framed", "big man", "big guy", "big woman", "large frame"], "set": {"frame": 1.3}},
@@ -269,11 +270,11 @@
    {"words": ["beautiful", "gorgeous", "stunning", "very handsome", "very good-looking", "very attractive", "very pretty"], "z": 1.9},
    {"words": ["handsome", "good-looking", "good looking", "attractive", "pretty", "striking"], "unless_next": ["much", "tall", "short", "big", "strong", "heavy", "thin", "plain", "ordinary", "average", "solid", "well"], "z": 1.0},
    {"words": ["average-looking", "ordinary-looking", "unremarkable"], "z": 0.0},
-   {"words": ["plain", "unattractive"], "unless_next": ["shirt", "dress", "clothes", "suit", "talk"], "z": -1.0},
+   {"words": ["plain-looking", "plain looking", "plain-faced", "plain face", "plain-featured", "rather plain", "very plain", "is plain", "plain girl", "plain woman", "plain man", "unattractive"], "z": -1.0},
    {"words": ["ugly", "homely"], "z": -1.8}
   ],
   "rating": {"labels": ["attractiveness", "looks"], "scale": 10, "middle": 5.5, "per_sd": 1.6},
-  "marks_words": ["scar", "scars", "scarred", "tattoo", "tattoos", "tattooed", "mole", "birthmark", "glasses", "spectacles", "limp", "freckles", "mustache", "moustache", "beard", "bearded", "dimple", "dimples", "missing a", "gap between", "broken nose", "crooked nose"],
+  "marks_words": ["scar", "scars", "scarred", "tattoo", "tattoos", "tattooed", "mole", "birthmark", "glasses", "spectacles", "limp", "freckles", "mustache", "moustache", "beard", "bearded", "dimple", "dimples", "missing a", "gap between", "broken nose", "crooked nose", "old break", "crooked tooth", "crooked front tooth", "chipped tooth", "pockmarked"],
   "hair_words": ["hair", "haired", "bald", "balding", "blond", "blonde", "brunette", "redhead", "crew cut", "ponytail"],
   "eyes_words": ["eyes", "eyed"],
   "complexion_words": ["complexion", "skin", "skinned", "olive-skinned", "pale", "tanned"]

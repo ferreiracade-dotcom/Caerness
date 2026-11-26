@@ -564,11 +564,11 @@ def parse_stated(d: dict, text: str, label: str | None = None) -> dict:
 
 
 def _shown(d: dict, item: dict) -> str:
-    """The stated words as the narrator may repeat them: a score out of ten is a measure, not a description."""
+    """The stated words as the narrator may repeat them, whole; a bare score is a measure, not a description."""
     scale = int(((d.get("stated") or {}).get("rating") or {}).get("scale", 10))
-    text = re.sub(r"\(?(?<![\d.])\d+(?:\.\d+)?\s*(?:/|out of)\s*(?:%d|ten)\b\)?" % scale, "", item["text"], flags=re.I)
-    text = re.sub(r"\s{2,}", " ", text).strip(" ,;:.-—–")
-    return "" if re.fullmatch(r"[\d.\s]*", text) else text
+    text = item["text"].strip(" ,;:.-\u2014\u2013")
+    alone = r"[\d.\s]*(?:(?:/|out of)\s*(?:%d|ten))?" % scale
+    return "" if re.fullmatch(alone, text, re.I) else text
 
 
 def set_stated(conn: sqlite3.Connection, actor_id: int, stated, *, label: str | None = None) -> bool:
