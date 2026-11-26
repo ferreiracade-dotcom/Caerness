@@ -1,4 +1,4 @@
-# Three simulation resolutions, the GM as storyteller, and the link between them (design, 2026-11-26, revision 3)
+# Three simulation resolutions, the GM as storyteller, and the link between them (design, 2026-11-26, revision 3.1)
 
 Status: for the owner's approval. Nothing has been built.
 
@@ -483,6 +483,89 @@ scored against the sheet. Because it costs tokens, it runs on rulebook changes a
 8. Promotion by demonstrated significance; careful demotion; obligations through life changes.
 
 Each step ends in play or a test bench run, not only in passing tests.
+
+## 11. Amendments (revision 3.1, from Gemini's second review; these override the sections above where they differ)
+1. **Resolution is stored on each person.** A `resolution` value takes one of three forms:
+   - `materialized_minor` (a full row with no systemic role: most of the roughly 5,600 today);
+   - `notable` (true level 2);
+   - `active` (level 3).
+
+   `life_matters` runs on unprotected `materialized_minor` and `notable` people. Organisation and systemic logic
+   targets `notable` and `active`. Counting against the aggregate is simple subtraction (full rows are about 0.5% of
+   1.1 million); the real double-counting risk is causal, and section 5 already handles that.
+2. **The protection lock works both ways and expires.**
+   - It blocks `life_matters` events where a protected person is either the actor *or* the target.
+   - A lock from a scene alone is released after a quiet window (about 30 to 60 game days) with no concern and no
+     obligation, so the bartender who poured one beer isn't frozen for ever.
+3. **Record standing uses three states, not five.**
+   - `confirmed` carries a true or false value: "checked the safe and it is empty" is not ignorance.
+   - `inferred` covers background filled in on promotion.
+   - A missing row means `unknown`.
+4. **Three stages from pressure to act, not five:**
+   - **pressure**: a numeric accumulator per area of life, invisible until it crosses that person's varied threshold,
+     or until it settles into adaptation;
+   - **concern**: a named motive with an origin and strength, which shapes choices and appears in scene briefs. A
+     concern whose latest weighing came out as "do nothing" is simply waiting;
+   - **decision**: a committed plan with an action, a target, a reason and a trigger or due date. It can be dropped
+     if circumstances change, and becomes an **act** when it fires.
+5. **Exposure channels are derived from existing links**, such as employer, organisation, residence, workplace and
+   routine places, as indexed queries rather than a parallel subscription table. A small explicit `dependencies`
+   table holds only links with no existing structure: debts, suppliers, protection.
+6. **After an absence, news stays with whoever heard it.** During a skip, only what reached the protagonist himself
+   goes into his news: the newspaper, the radio, mail, what he saw. What his family, friends or crew learned while he
+   was away stays in *their* knowledge, and he hears it when he talks to them. This resolves the clash with the
+   absence-return test.
+7. **The gate has two tests: path and relevance.** Attention is not a third test. It only ranks lower-priority items
+   inside the read budget, with a floor that is never dropped: direct danger, active obligations, close kin.
+8. **Routines are worked out when needed, not run every day.** Each level-3 person has a baseline schedule plus
+   active exceptions (illness, travel, special events). The question "where is he now?" is resolved only when a scene
+   opens, a lookup runs, or a shock hits a place-based channel. The "Daily" row in section 6 becomes "on demand".
+9. **The scene close works from a ledger of stamps.** Stamps ride on calls the GM already makes, plus a cheap
+   `note(kind="stamp")` for speech-only beats (a lie, a walkout, a promise). At `close_scene`, the engine echoes the
+   scene's stamps back, and the GM sends four short fields:
+   1. **participants**, with simple `joined_late` or `left_early` markers relative to stamped beats;
+   2. **stamp amendments**, which confirm or patch the ledger instead of restating it;
+   3. **knowledge exceptions**: lies, secrets, who missed what;
+   4. **tie nudges and open threads**: each with a one-line cause, plus promises or decisions not already stamped.
+
+   This replaces the twelve-part table in section 4. That table now describes what the engine holds, not what the GM
+   writes.
+10. **Sessions can end mid-scene.** `resume` returns to an open scene without closing it. `close_scene(mode="from_stamps")`
+    commits whatever was stamped if a scene is abandoned. A new chat never has to make up a scene record to unlock
+    `advance`.
+11. **GM turning events have their own path.**
+    - **One call:** they go through `author(kind="turning_event")` with a scope (local, ward or city), the affected
+      channels and a summary. They never go only into prose or a plain fact.
+    - **Checks on entry:** the engine checks against territory, ownership and recent shocks on those channels. A
+      contradiction is vetoed; a strained rhythm gets a consequence note.
+    - **The engine owns what follows:** once committed, it publishes the shock to the channels, and all downstream
+      effects are the engine's. The GM supplies the spark.
+    - **Two measures on the scoring sheet:** how often GM turning events happen compared with engine-originated ones;
+      and **protagonist-convenience bias**, meaning how often a GM turning event happens to resolve or force an
+      active thread right in front of him.
+12. **A reason can come with the change.** Record-changing calls (`act`, `money`, `author`) take an optional
+    `rationale`, so the GM states up front why someone is acting against type, without a second call.
+13. **Undo and correction cascade.** Every record derived during a scene or a turning event carries a
+    `source_scene_id` or `causal_chain_id`: beliefs, deeds, obligations, shocks, scheduled effects. Undo and
+    correction then revert everything that came from it, with no ghost rumours or orphaned delayed effects. This
+    goes into the data model in step 2.
+14. **Build-order changes.**
+    - Step 1 writes the scoring sheet and gathers test prompts. The test-bench *harness* is coded once step 2 has
+      fixed the tool and scene-record contracts.
+    - The bench runs on **6 to 10 small fixed test saves**, each 4 to 6 turns, built from situations in the
+      transcripts: lies, walkouts, quiet evenings, moralizing traps, ambiguous details. It doesn't replay old
+      transcripts end to end, because those depend on old state.
+    - Slice 2b starts gradual build-up with **one or two simple pressures** taken from existing values, such as cash
+      strain and restlessness in a job. The rest comes with step 6.
+15. **The first artifact of step 2** is a one-page specification of the schema and tool signatures. It covers:
+    - `resolution`;
+    - the pressure, concern and decision tables;
+    - the rollback keys;
+    - standing;
+    - the stamp payload;
+    - `close_scene`;
+    - `author(kind="turning_event")`;
+    - the `rationale` parameter.
 
 ## Left to the builder
 - the table shapes, within the data model settled in step 2;
