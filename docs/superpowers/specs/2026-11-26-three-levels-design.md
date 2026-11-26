@@ -1,6 +1,6 @@
 # Three simulation resolutions, the GM as storyteller, and the link between them (design, 2026-11-26, revision 3.1)
 
-Status: for the owner's approval. Nothing has been built.
+Status: approved by the owner on 2026-11-26 (revision 3.1). Build plan: `docs/superpowers/plans/2026-11-26-three-levels-build.md`.
 
 Background:
 - `docs/research/2026-11-26-three-layers-map.md`: what the code does today.
