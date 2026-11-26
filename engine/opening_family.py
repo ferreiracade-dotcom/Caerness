@@ -555,13 +555,19 @@ def resolve_opening_family(conn: sqlite3.Connection) -> dict[str, int]:
     return counts
 
 
+YOUNGEST_FATHER = 18  # the youngest a drawn (never a stated) father is at a child's birth
+
+
 def draw_origin_family(key: str, *, age: float, sex: str, hearth: bool = True, childhood_multiplier: float = 1.0) -> dict[str, Any]:
     """Deterministic family a person grew up in: two parents (ages, survival to now) and brothers and sisters (ages, sexes,
     survival), from the engine's own mortality, desired-children and birth-interval models. Pure."""
     rng = _rng(f"origin:{key}")
     m_at = int(min(40, max(17, round(rng.gauss(26, 4.5)))))
     mother_age = age + m_at
-    father_age = mother_age + int(min(12, max(-2, round(rng.gauss(3, 3.5)))))
+    older_by = int(min(12, max(-2, round(rng.gauss(3, 3.5)))))
+    while m_at + older_by < YOUNGEST_FATHER:  # he was a grown man when the child was born
+        older_by = int(min(12, max(-2, round(rng.gauss(3, 3.5)))))
+    father_age = mother_age + older_by
 
     def lives(a_now: float, a_then: float, cls: str = "ordinary", mult: float = 1.0) -> bool:
         t = a_then
@@ -581,7 +587,7 @@ def draw_origin_family(key: str, *, age: float, sex: str, hearth: bool = True, c
         if i < older:
             gap = (_birth_interval_days(rng)) / 365.0
             gap_age -= gap
-            if gap_age < 16.0:
+            if gap_age < 16.0 or gap_age + older_by < YOUNGEST_FATHER:
                 break
             sib_age = age + (m_at - gap_age)
         else:

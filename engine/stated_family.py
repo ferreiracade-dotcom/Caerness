@@ -199,6 +199,9 @@ def read_business(proposal: dict) -> dict | None:
     return None
 
 
+DRAWN_MOTHER_AT = 17
+
+
 def unsaid_ages(rng: random.Random, age: int, parents: dict, sibs: list[dict]) -> None:
     """Fill the ages the player left unsaid, in place, so that each mother's age at each birth is one she can bear a child at.
     A draw inside the window; never a clamp of a stated age."""
@@ -217,20 +220,29 @@ def unsaid_ages(rng: random.Random, age: int, parents: dict, sibs: list[dict]) -
         s["age_filled"] = True
         s["age"] = age + gap if older else max(0, age - gap) if (s.get("younger") or rng.random() < 0.55) else age + gap
         kids.append(s["age"])
+    from .opening_family import YOUNGEST_FATHER
     lo_m, hi_m = max(kids) + MOTHER_BIRTH[0], min(kids) + MOTHER_BIRTH[1]
     mother = parents["mother"]
     if mother is not None and mother["age"] is None and mother["alive"] is not False:
+        grown = max(lo_m, min(max(kids) + DRAWN_MOTHER_AT, hi_m))  # a drawn mother was no child at her eldest's birth
         for _ in range(60):
             cand = min(kids) + int(round(rng.gauss(27, 4.5)))
-            if lo_m <= cand <= hi_m:
+            if grown <= cand <= hi_m:
                 break
         else:
-            cand = (lo_m + hi_m) // 2
+            cand = (grown + hi_m) // 2
         mother["age"] = cand
     father = parents["father"]
     if father is not None and father["age"] is None and father["alive"] is not False:
         base = mother["age"] if mother and mother["age"] is not None else min(kids) + 28
-        father["age"] = max(max(kids) + FATHER_BIRTH[0], base + int(round(rng.gauss(3, 3.5))))
+        grown = max(kids) + YOUNGEST_FATHER
+        for _ in range(60):
+            cand = base + int(round(rng.gauss(3, 3.5)))
+            if cand >= grown:
+                break
+        else:
+            cand = grown + rng.randrange(6)
+        father["age"] = cand
 
 
 def check(age: int, parents: dict, sibs: list[dict], business: dict | None) -> None:

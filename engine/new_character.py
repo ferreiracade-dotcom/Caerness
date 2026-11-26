@@ -10,6 +10,7 @@ import json
 import random
 import re
 import sqlite3
+from difflib import SequenceMatcher
 from typing import Any
 
 from . import ledger, veto
@@ -56,8 +57,13 @@ def _mark_actor(conn, aid: int, patch: dict) -> None:
 
 # ---------------------------------------------------------------- revealing kin
 
+def too_alike(a: str, b: str) -> bool:
+    """Two given names that read as one at a table (Dominic and Domenic, Ann and Anna)."""
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio() >= 0.8
+
+
 def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: str, day: int, reason: str, name: str | None = None,
-                   work: str | None = None) -> int:
+                   work: str | None = None, borne: tuple = ()) -> int:
     """Reveal an already-existing relative through the latent-person route, at low attention, named for his sex (or by the name the
     player gave). The age is exact: the birth day is set so that the whole years are what was said."""
     from .demographic_sex import FEMALE_GIVEN_NAMES, MALE_GIVEN_NAMES, package_given_pool
@@ -66,6 +72,11 @@ def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: st
     from .world_package import system_enabled
     rng = _rng(f"reveal:{key}")
     given = package_given_pool(conn, sex, family) or sorted(FEMALE_GIVEN_NAMES if sex == "female" else MALE_GIVEN_NAMES)
+
+    def apart(g: str) -> bool:  # not a name, or nearly one, that somebody in the family already goes by
+        return not any(too_alike(g, other) for other in borne)
+
+    given = [g for g in given if apart(g)] or given
     if name:
         veto.canon_figure(conn, name)
         veto.real_person(conn, name)
@@ -79,7 +90,7 @@ def _reveal_person(conn, *, key: str, sex: str, age: float, loc: int, family: st
             break
     if name is None:  # the family's common given names are all in use: a further one of its community
         from .demographic_sex import package_namesake_pool
-        more = package_namesake_pool(conn, sex, family)
+        more = [g for g in package_namesake_pool(conn, sex, family) if apart(g)]
         rng.shuffle(more)
         name = next((f"{g} {family}" for g in more if not conn.execute("SELECT 1 FROM actors WHERE name=?", (f"{g} {family}",)).fetchone()), None)
     if name is None:  # still none free (or no further names): a middle initial, as a crowded city's families do
@@ -188,6 +199,12 @@ def _family(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex
     return out
 
 
+def _borne(conn, actor_ids: list[int], said: list[dict | None]) -> tuple:
+    """The given names a family already goes by: those of its people made so far and those the player has said."""
+    names = [_name(conn, a) for a in actor_ids] + [str(s["name"]) for s in said if s and s.get("name")]
+    return tuple(n.split()[0] for n in names if n.split())
+
+
 def _origin(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex: str, age: int, family_name: str, stated: dict) -> dict:
     """His origin family. What the player said is taken as said: each parent alive or dead, each sibling with the age and sex given,
     all revealed as real people tied to him by kinship. What he left unsaid is drawn from the engine's own mortality and
@@ -218,7 +235,8 @@ def _origin(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex
         if how == "stated" or rng.random() < 0.7:
             nm = (said or {}).get("name")
             people[who] = _reveal_person(conn, key=f"{key}:{who}", sex=sx, age=age_now, loc=loc, family=family_name, day=day,
-                                         reason="parent of a new protagonist", name=nm, work=(said or {}).get("work"))
+                                         reason="parent of a new protagonist", name=nm, work=(said or {}).get("work"),
+                                         borne=_borne(conn, [aid, *people.values()], [*sp.values(), *(sibs or [])]))
             _kin(conn, people[who], aid, "parent", birth, f"{key}:{who}")
             revealed["parents"].append(people[who])
             acct.append({"field": who, "status": how, "value": f"alive, {_name(conn, people[who])}, {int(age_now)}",
@@ -252,7 +270,8 @@ def _origin(conn, aid: int, *, key: str, proposal: dict, day: int, loc: int, sex
             counts["siblings_alive"] += 1
             continue
         sid = _reveal_person(conn, key=f"{key}:sib{i}", sex=sx, age=float(s["age"]), loc=loc, family=family_name, day=day,
-                             reason="sibling of a new protagonist", name=s["name"], work=s["work"])
+                             reason="sibling of a new protagonist", name=s["name"], work=s["work"],
+                             borne=_borne(conn, [aid, *people.values()], [*sp.values(), *plan]))
         _kin(conn, aid, sid, "sibling", day - int(min(float(s["age"]), age) * 365), f"{key}:sib{i}")
         for par in people.values():
             _kin(conn, par, sid, "parent", day - int(float(s["age"]) * 365), f"{key}:{par}:{sid}")
