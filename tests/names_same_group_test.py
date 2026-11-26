@@ -53,9 +53,15 @@ def run():
         out = _free_name(conn, taken[0], fam, "male", 5)
         g = out.split(" ", 1)[0]
         assert out.endswith(fam) and g in groups["italian"]["male"] and g not in taken, out
-        # Every first name of the family taken: a middle initial tells them apart, never a nickname or a number.
+        # Every usual first name of the family taken: a further one of its community, still no initial.
         pooled = {n for grp in groups.values() for n in grp["male"]} | set(load_package("saintjude").name_pools["male"])
         for n in pooled:
+            conn.execute("INSERT OR IGNORE INTO actors(name,actor_type,status) VALUES (?,'character','active')", (f"{n} {fam}",))
+        out = _free_name(conn, taken[0], fam, "male", 5)
+        further = groups["italian"]["male_more"]
+        assert out.endswith(fam) and out[: -len(fam) - 1] in further, out
+        # Those taken too: a middle initial tells them apart, never a nickname or a number.
+        for n in further:
             conn.execute("INSERT OR IGNORE INTO actors(name,actor_type,status) VALUES (?,'character','active')", (f"{n} {fam}",))
         out = _free_name(conn, taken[0], fam, "male", 5)
         assert re.fullmatch(rf"{taken[0]} [A-Z]\. {fam}", out), out
