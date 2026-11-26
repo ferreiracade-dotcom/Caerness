@@ -145,7 +145,10 @@ def _item(conn, me: int, k) -> dict | None:
     if s["amount"]:
         out["stakes"] = life_matters.money(life_matters.data(conn), float(s["amount"]))
     if s["status"] == "open":
-        out["open"] = "waits on your answer" if s["awaiting"] and me in _ids(s["actors"]) else "not settled"
+        mine = bool(s["awaiting"]) and me in _ids(s["actors"])
+        out["open"] = "waits on your answer" if mine else "not settled"
+        if mine:
+            out["matter"] = int(s["matter_id"])  # the number his answer is given under
     # the thread so far: earlier steps of this matter, and of earlier matters of the same kind between the same two
     before = conn.execute("""SELECT s.day,s.text FROM life_matter_steps s JOIN life_matters m ON m.id=s.matter_id
                              WHERE s.id<? AND m.kind=? AND (s.matter_id=? OR (m.subject_actor_id=? AND m.other_actor_id=?)
@@ -193,12 +196,13 @@ def material(conn: sqlite3.Connection, me: int, start: int, end: int) -> dict:
     return out
 
 
-def waiting(conn: sqlite3.Connection, me: int) -> list[str]:
-    """The matters whose next move is his, in their latest words."""
+def waiting(conn: sqlite3.Connection, me: int) -> list[dict]:
+    """The matters whose next move is his, in their latest words, each with the number his answer is given under."""
     if not life_matters.enabled(conn):
         return []
-    return [str(r[0]) for r in conn.execute("""SELECT summary FROM life_matters WHERE status='open' AND awaiting=1
-                AND (subject_actor_id=? OR other_actor_id=?) AND summary IS NOT NULL ORDER BY opened_day""", (me, me))]
+    return [{"matter": int(r["id"]), "about": r["kind"], "what": str(r["summary"])} for r in conn.execute(
+        """SELECT id,kind,summary FROM life_matters WHERE status='open' AND awaiting=1
+           AND (subject_actor_id=? OR other_actor_id=?) AND summary IS NOT NULL ORDER BY opened_day,id""", (me, me))]
 
 
 def asks(conn: sqlite3.Connection, me: int, start: int, end: int, *, every: bool = False) -> list[dict]:

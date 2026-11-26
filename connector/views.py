@@ -290,9 +290,11 @@ def compact_scene(conn) -> dict:
     from engine import company
     company.join(conn, [a["id"] for a in sampled])  # whoever the scene shows is there for the rest of the day
     conn.commit()
+    from engine import physique
     for a in sampled:
         who, member = _who(conn, a), "; ".join(_member_of(conn, a["id"])) or None
         present.append(_drop_none({"id": a["id"], "name": a["name"], "sex": _sex(conn, a["id"], day), "who": who,
+                                   "looks": physique.describe(conn, a["id"]),
                                    "member_of": member, "organisations": org_views.record_view(conn, a["id"], int(me["actor_id"])) or None,
                                    **_words(conn, int(me["actor_id"]), a["id"], here, f"{who} {member or ''}")}))
     from engine.manners_canon import manners_for
@@ -324,7 +326,7 @@ def compact_scene(conn) -> dict:
         notes_more += max(0, store.notes_count(conn, kind, int(sid)) - 2)
     notes_more += max(0, len(notes) - _LIMITS["notes"])
     desc = "; ".join(x for x in (loc.get("kind"), loc.get("notes"), loc.get("political_owner")) if x)
-    from engine import commitments, money_records, texture
+    from engine import commitments, hearsay, money_records, texture
     pending_work = commitments.active(conn, int(me["actor_id"]), 5)
     tex = texture.block(conn, int(me["actor_id"]), here, [int(a["id"]) for a in sampled])
     if tex is not None:
@@ -343,6 +345,7 @@ def compact_scene(conn) -> dict:
         "season": world_calendar.season(pkg, day),
         "location": {"id": loc["id"], "name": loc["name"], "description": _clip(desc, 140)},
         "protagonist": _drop_none({"id": me["actor_id"], "name": me["name"], "age": _age(conn, me["actor_id"], day),
+                                   "looks": physique.describe(conn, me["actor_id"]),
                                    "role": _clip(me.get("subtype") or me.get("actor_type"), 100)}),
         "present": present,
         "in_the_air": org_views.in_the_air(conn, int(me["actor_id"])) or None,
@@ -350,6 +353,7 @@ def compact_scene(conn) -> dict:
         "you_here": you_here or None,
         "institutions_here": institutions,
         "pending": [_pending(i) for i in p["pending_player_interactions"][:5]],
+        "waiting_on_you": hearsay.waiting(conn, int(me["actor_id"]))[:6] or None,  # answered with act "answer"
         "news": _drop_none({"events": events, "rumours": rumours, "more": more_news or None}),
         "present_more": (len(people) - len(sampled)) or None,
         "institutions_more": (inst_total - len(institutions)) or None,
@@ -602,6 +606,10 @@ def lookup(conn, query: str, offset: int = 0) -> dict:
             if cm:
                 out["commitments"] = [{"what": _clip(c["what"], 140), "kind": c["kind"], "due_day": c["due_day"]} for c in cm]
     if kind == "actor":
+        from engine import physique
+        shows = physique.appearance(conn, out["id"], me)  # how they look, and against the protagonist
+        if shows:
+            out["appearance"] = shows
         recs = org_views.record_view(conn, out["id"], me)
         if recs:
             out["organisations"] = recs

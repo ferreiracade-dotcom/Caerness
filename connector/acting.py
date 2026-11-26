@@ -11,6 +11,7 @@ from engine.turns import resolve_turn_state
 
 OPERATION_TYPES = ("pay", "hire", "lend", "demand", "attack", "trade", "order")
 ACT_TYPES = ("observe", "speak", "investigate", "respond", "travel") + OPERATION_TYPES
+SAID = {"accept": "yes", "reject": "no", "refuse": "no"}  # other words for an answer
 RESPONSES = ("accept", "reject", "counter")
 MAX_INTENT = 1000
 _FORMAT = re.compile(r"must be|Say |Name |not understood|give a number|holder must|unknown (business|crew|outfit|household|person|institution|polity|actor)|"
@@ -199,6 +200,8 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
         if problem:
             return _refuse(action_type, problem, call_id)
         me = int(get_player(conn)["player_actor_id"])
+        if action_type == "answer":
+            return _answer(conn, me, call_id, details or {}, response_choice)
         dest, met = target_location_id, ()
         if action_type == "travel":
             dest, met = _destination(conn, target_actor_id, target_location_id, details)
@@ -216,6 +219,11 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
                         "elapsed_days": 0, "day_started": _day(conn), "day_ended": _day(conn), "operation_id": call_id})
             if out["status"] != "refused" and target_actor_id is not None and company.in_earshot(conn, me, target_actor_id):
                 company.join(conn, [target_actor_id])
+            if out["status"] != "refused":
+                from engine import life_matters
+                closed = life_matters.acted(conn, me, action_type, target_actor_id, _day(conn))
+                if closed:
+                    res["answered"] = closed
             return _classify(res)
         if action_type == "outing":
             from engine import outings
@@ -229,6 +237,26 @@ def act(conn, call_id: str, action_type: str, intent: str, *, target_actor_id: i
                       response_choice, duration_days, details)
 
     return store.run_once(conn, call_id, "act", request, go)
+
+
+def _answer(conn, me, call_id, details, response_choice) -> dict:
+    """His answer to something waiting on him (details.matter, details.answer yes|no|settled, details.how)."""
+    from engine import life_matters
+    word = str(details.get("answer") or response_choice or "").strip().lower()
+    matter = details.get("matter")
+    if not isinstance(matter, int) or isinstance(matter, bool):
+        return _refuse("answer", "details.matter must be the number of something waiting on you (waiting_on_you).", call_id)
+    day = _day(conn)
+    conn.execute("SAVEPOINT answering")
+    try:
+        got = life_matters.answer(conn, me, matter, SAID.get(word, word), day, details.get("how"))
+    except ValueError as e:
+        conn.execute("ROLLBACK TO answering")
+        conn.execute("RELEASE answering")
+        return _refuse("answer", str(e), call_id, "input_gap" if "must be" in str(e) else "contradiction")
+    conn.execute("RELEASE answering")
+    return {**got, "status": "applied", "action_type": "answer", "elapsed_days": 0, "day_started": day, "day_ended": day,
+            "summary": _clip(got["summary"]), "operation_id": call_id}
 
 
 def _outing(conn, me, call_id, target_actor_id, details) -> dict:

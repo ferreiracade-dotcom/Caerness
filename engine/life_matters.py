@@ -225,16 +225,17 @@ def _effect(p: _Pass, matter: int, a: int, b: int, summary: str, **deltas) -> No
     rel.record_relationship_effect(p.conn, a, b, p.day, source_kind=SOURCE, source_id=matter, summary=summary, **deltas)
 
 
-def _step(p: _Pass, m: dict, stage: str, *, close: bool = False, next_days: float | None = None, **words) -> None:
-    """Record where the matter now stands, in the package's words."""
+def _step(p: _Pass, m: dict, stage: str, *, close: bool = False, next_days: float | None = None, said: str | None = None,
+          **words) -> None:
+    """Record where the matter now stands, in the package's words (or in `said`)."""
     conn = p.conn
-    tmpl = (p.words.get("texts") or {}).get(f"{m['kind']}.{stage}")
+    tmpl = (p.words.get("texts") or {}).get(f"{m['kind']}.{stage}") or (p.words.get("texts") or {}).get(stage)
     awaiting = int(bool(m.get("awaiting")))
     text = None
-    if tmpl:
+    if tmpl or said:
         fields = {"s": _name(conn, m["subject_actor_id"]), "o": _name(conn, m["other_actor_id"]),
                   "amount": money(p.words, m["amount"]) if m.get("amount") else "", **m.get("data", {}), **words}
-        text = tmpl.format(**fields)
+        text = said or tmpl.format(**fields)
         actors = [x for x in (m["subject_actor_id"], m["other_actor_id"]) if x is not None]
         conn.execute("INSERT INTO life_matter_steps(matter_id,day,stage,text,actors) VALUES (?,?,?,?,?)",
                      (m["id"], p.day, stage, text, ",".join(str(int(x)) for x in actors)))
@@ -747,7 +748,7 @@ def _step_work(p: _Pass, m: dict) -> None:
     if o is None or not _living(conn, o) or not _living(conn, s):
         return _step(p, m, "fell_through", close=True)
     amount = float(m["amount"] or 0)
-    if m["rng"].random() >= p.f("lm_work_goes_ahead"):
+    if not m["data"].get("accepted") and m["rng"].random() >= p.f("lm_work_goes_ahead"):  # a job he took on goes ahead
         return _step(p, m, "fell_through", close=True)
     if p.purse(o) < amount:
         _effect(p, m["id"], s, o, "could not pay for the work", trust_delta=-5)
@@ -776,6 +777,98 @@ OPENERS = {"money": _open_money, "romance": _open_romance, "quarrel": _open_quar
            "rivalry": _open_rivalry, "work": _open_work, "police": _open_police}
 STEPS = {"money": _step_money, "romance": _step_romance, "quarrel": _step_quarrel, "illness": _step_illness,
          "rivalry": _step_rivalry, "work": _step_work, "police": _step_police}
+
+
+# ---- his answers ------------------------------------------------------------------------------------------------------
+
+ANSWERS = ("yes", "no", "settled")
+
+
+def answer(conn: sqlite3.Connection, me: int, matter_id: int, word: str, day: int, how: str | None = None) -> dict:
+    """The protagonist's answer, given in play, to a matter waiting on him. "yes" and "no" move it on as that kind of matter goes;
+    "settled" closes it as it was dealt with in the scene (`how` records it), moving nothing. ValueError names what stands in the way."""
+    if word not in ANSWERS:
+        raise ValueError("the answer must be yes, no or settled")
+    r = conn.execute("""SELECT * FROM life_matters WHERE id=? AND status='open' AND awaiting=1
+                        AND (subject_actor_id=? OR other_actor_id=?)""", (int(matter_id), me, me)).fetchone()
+    if r is None:
+        raise ValueError(f"Nothing of number {matter_id} is waiting on your answer; it may be closed already.")
+    p = _Pass(conn, day)
+    m = _load_matter(p, r)
+    s, o = m["subject_actor_id"], m["other_actor_id"]
+    other = o if s == me else s
+    yes, kind, stage = word == "yes", m["kind"], m["stage"]
+    if word == "settled":
+        _step(p, m, "settled", close=True, said=" ".join(str(how or "").split())[:300] or None)
+    elif kind == "romance" and stage == "interest_in_him":
+        if yes:
+            _effect(p, m["id"], s, o, "was welcomed", affection_delta=12, familiarity_delta=8)
+            conn.execute("""UPDATE social_contact_links SET affinity=MIN(100,affinity+15) WHERE status='active'
+                            AND ((actor_a_id=? AND actor_b_id=?) OR (actor_a_id=? AND actor_b_id=?))""", (s, o, o, s))
+            m["data"]["since"] = p.day
+            _step(p, m, "courting", next_days=_span(p, m, "lm_courting_days"))
+        else:
+            _effect(p, m["id"], s, o, "was turned down", affection_delta=-8, resentment_delta=4)
+            _step(p, m, "turned_down", close=True)
+    elif kind == "quarrel":
+        if yes:
+            _effect(p, m["id"], s, o, "made it up", resentment_delta=-8, trust_delta=3)
+        else:
+            _effect(p, m["id"], s, o, "held on to it", resentment_delta=6)
+        _step(p, m, "made_up" if yes else "grudge", close=True)
+    elif kind == "money" and stage == "asks":
+        if yes:
+            amount = float(m["amount"] or 0)
+            have = ledger.balance(conn, ("person", me))
+            if have < amount:
+                raise ValueError(f"You have {money(p.words, have)}; {_name(conn, other)} asked for {money(p.words, amount)}. "
+                                 "Answer no, or settle it another way and say how.")
+            p.pay(("person", me), ("person", other), amount, f"personal loan (matter {m['id']})")
+            _effect(p, m["id"], other, me, "borrowed money", obligation_delta=10, trust_delta=3)
+            _step(p, m, "borrowed", next_days=_span(p, m, "lm_debt_days"))
+        else:
+            _effect(p, m["id"], other, me, "was turned down for a loan", resentment_delta=5)
+            _step(p, m, "refused", close=True)
+    elif kind == "money":
+        _step(p, m, "settled_self" if yes else "let_ride", close=True)
+    elif kind == "work":
+        if yes:
+            m["data"]["accepted"] = 1
+            _effect(p, m["id"], other, me, "has his word on the job", trust_delta=3)
+            _step(p, m, "agreed", next_days=_span(p, m, "lm_stage_days"))
+        else:
+            _step(p, m, "turned_away", close=True)
+    elif kind == "fling":
+        _effect(p, m["id"], other, me, "was welcomed" if yes else "was turned down", affection_delta=8 if yes else -6)
+        _step(p, m, ("taken_up" if stage == "spark_him" else "seen_again") if yes else "faded", close=True)
+    elif kind == "scuffle":
+        if yes:
+            outings._blows(p, m, m["rng"])
+        else:
+            _step(p, m, "lapsed", close=True)
+    else:
+        _step(p, m, "settled", close=True, said=" ".join(str(how or "").split())[:300] or None)
+    from . import hearsay
+    hearsay.reach(conn, me, day)  # he knows what he has just answered: it is not news to him later
+    now = conn.execute("SELECT stage,status,summary FROM life_matters WHERE id=?", (m["id"],)).fetchone()
+    return {"matter": m["id"], "stage": now["stage"], "closed": now["status"] == "closed", "summary": now["summary"]}
+
+
+def acted(conn: sqlite3.Connection, me: int, action: str, target: int | None, day: int) -> list[dict]:
+    """A deed of his that is itself an answer: coming to blows with somebody who squared up or quarrelled, or handing money to
+    somebody who asked to borrow it. The matter is closed as settled; the deed's own effects are already recorded."""
+    if target is None or not enabled(conn):
+        return []
+    kinds = {"attack": ("quarrel", "scuffle"), "lend": ("money",), "pay": ("money",)}.get(action)
+    if not kinds:
+        return []
+    marks = ",".join("?" * len(kinds))
+    rows = conn.execute(f"""SELECT id FROM life_matters WHERE status='open' AND awaiting=1 AND kind IN ({marks}) AND stage<>'short_self'
+                            AND ((subject_actor_id=? AND other_actor_id=?) OR (subject_actor_id=? AND other_actor_id=?))""",
+                        (*kinds, me, int(target), int(target), me)).fetchall()
+    text = (data(conn).get("texts") or {}).get("answered_" + ("blows" if action == "attack" else "money"))
+    how = text.format(s=_name(conn, me), o=_name(conn, int(target))) if text else None
+    return [answer(conn, me, int(r[0]), "settled", day, how) for r in rows]
 
 
 # ---- the weekly pass -------------------------------------------------------------------------------------------------

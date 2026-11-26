@@ -52,7 +52,7 @@ def run():
             assert r["how_to_play"].count("\n") == 4 and r["how_to_play"].startswith("1. Check established facts")
             assert r["scene"]["manners"] and len(r["scene"]["manners"]) <= 300
             print("resume bytes", len(json.dumps(r, ensure_ascii=False)))
-            assert len(json.dumps(r, ensure_ascii=False)) <= 18600  # the creation note and the prison section added to the rulebook; P2 playtest rules about 2200, second-playtest owner rules about 1850, the market rule about 400
+            assert len(json.dumps(r, ensure_ascii=False)) <= 18850  # the creation note and the prison section added to the rulebook; P2 playtest rules about 2200, second-playtest owner rules about 1850, the market rule about 400, the answer rule about 200
             assert conn.execute("SELECT value FROM connector_meta WHERE key='last_resume_at'").fetchone()
             # Nothing stored yet: no story, and the GM is asked to draft the sheet.
             assert "story" not in r and "sheet_missing" in r, r.keys()
@@ -85,7 +85,7 @@ def run():
             size = len(json.dumps(resume(conn), ensure_ascii=False))
             print("full resume bytes", size)
             whole = 20 * 901 + len(store.SHEET_FIELDS) * 900  # every standing rule and sheet field now comes back uncut
-            assert size - whole <= 22000, size  # the market rule about 400; second-playtest owner rules about 1850; P2 playtest rules (turns, threads, voice, record checks, standing rules) about 2200; the creation note and the prison section about 450; world-and-save asking about 400; rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
+            assert size - whole <= 22250, size  # the answer rule about 200; the market rule about 400; second-playtest owner rules about 1850; P2 playtest rules (turns, threads, voice, record checks, standing rules) about 2200; the creation note and the prison section about 450; world-and-save asking about 400; rulebook rules are not trimmed to fit; culture plan added about 1190, gap 4b about 150, protagonist-only luck clause about 110
     print("connector_resume_test passed")
 
 
