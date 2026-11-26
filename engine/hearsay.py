@@ -201,15 +201,31 @@ def waiting(conn: sqlite3.Connection, me: int) -> list[str]:
                 AND (subject_actor_id=? OR other_actor_id=?) AND summary IS NOT NULL ORDER BY opened_day""", (me, me))]
 
 
-def asks(conn: sqlite3.Connection, me: int, start: int, end: int) -> list[dict]:
-    """The matters that turned to him in `start`..`end`: any skip short of a critical-only one stops there, while they are open."""
+def asks(conn: sqlite3.Connection, me: int, start: int, end: int, *, every: bool = False) -> list[dict]:
+    """What an ordinary skip stops for in `start`..`end`: a matter that turned to him and turns on him personally (the package
+    names the kinds, and those that only count when the money is big), and word of the family events it names. With `every`, any
+    matter that turned to him stops; otherwise the rest waits, open, and is told when the skip ends."""
     if not life_matters.enabled(conn):
         return []
-    rows = conn.execute("""SELECT MAX(s.id) step_id,s.day,s.text,m.kind FROM life_matters m JOIN life_matter_steps s
+    rules = life_matters.data(conn).get("stops") or {}
+    kinds, big = set(rules.get("waiting") or ()), set(rules.get("waiting_big") or ())
+    floor = float(figure(conn, "lm_big_money_usd", 0.0))
+    rows = conn.execute("""SELECT MAX(s.id) step_id,s.day,s.text,m.kind,m.amount FROM life_matters m JOIN life_matter_steps s
                              ON s.matter_id=m.id AND s.day=json_extract(m.data_json,'$.asked_day')
                            WHERE (m.subject_actor_id=? OR m.other_actor_id=?) AND s.day>? AND s.day<=? GROUP BY m.id""", (me, me, start, end))
-    return [{"day": int(r["day"]), "source_kind": "system", "source_id": int(r["step_id"]), "severity": 4, "reason": str(r["text"]),
-             "metadata": {"what": "matter", "kind": r["kind"]}} for r in rows]
+    found = [{"day": int(r["day"]), "source_kind": "system", "source_id": int(r["step_id"]), "severity": 4, "reason": str(r["text"]),
+              "metadata": {"what": "matter", "kind": r["kind"]}} for r in rows
+             if every or not rules or r["kind"] in kinds or (r["kind"] in big and float(r["amount"] or 0) >= floor)]
+    events = set(rules.get("family") or ())
+    if events:
+        family = life_matters.family_of(conn, me)
+        for k in _known(conn, me, start, end):
+            s, _ = parse(conn, k["fact_key"])
+            if s is None or f"{s['kind']}.{s['stage']}" not in events or not family & (set(_ids(s["actors"])) - {me}):
+                continue
+            found.append({"day": int(k["learned_day"]), "source_kind": "system", "source_id": int(s["step_id"]), "severity": 4,
+                          "reason": str(k["belief_text"]), "metadata": {"what": "matter", "kind": s["kind"]}})
+    return found
 
 
 def stops(conn: sqlite3.Connection, me: int, start: int, end: int) -> list[dict]:

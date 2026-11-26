@@ -16887,6 +16887,16 @@
   "source": "unsourced",
   "note": "unsourced; households in a large American city with a car in the mid 1970s, about three in four [memory, approximate]. Design proposal."
  },
+ "lm_big_money_usd": {
+  "default": 500,
+  "range": null,
+  "unit": "USD (1975)",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; the sum from which a loan asked or a job offered is big enough to break into his days: about a month's pay and more in the mid 1970s [memory, approximate]. Design proposal."
+ },
  "lm_police_year": {
   "default": 0.2,
   "range": null,

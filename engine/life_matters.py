@@ -260,6 +260,26 @@ def _wait(p: _Pass, m: dict, stage: str, **words) -> None:
     _step(p, m, stage, next_days=p.f("lm_lapse_days"), **words)
 
 
+def skip_began(conn: sqlite3.Connection, day: int) -> None:
+    """A skip is running from `day`: nothing that turns to him during it runs out before he has been told."""
+    if enabled(conn):
+        conn.execute("INSERT INTO engine_meta(key,value) VALUES ('lm_skip_from',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                     (str(int(day)),))
+
+
+def skip_ended(conn: sqlite3.Connection, me: int, day: int) -> None:
+    """The skip is over and he hears what came up: his time to answer runs from today."""
+    if not enabled(conn):
+        return
+    row = conn.execute("SELECT value FROM engine_meta WHERE key='lm_skip_from'").fetchone()
+    if row is None:
+        return
+    conn.execute("""UPDATE life_matters SET next_day=MAX(next_day,?) WHERE status='open' AND awaiting=1 AND kind<>'scuffle'
+                    AND (subject_actor_id=? OR other_actor_id=?) AND json_extract(data_json,'$.asked_day')>?""",
+                 (day + int(_Pass(conn, day).f("lm_lapse_days")), me, me, int(row[0])))
+    conn.execute("DELETE FROM engine_meta WHERE key='lm_skip_from'")
+
+
 def _span(p: _Pass, m: dict, key: str) -> float:
     return p.f(key) * (0.5 + m["rng"].random())
 
@@ -770,8 +790,12 @@ def _load_matter(p: _Pass, r: sqlite3.Row) -> dict:
 def _advance_open(p: _Pass) -> int:
     rows = p.conn.execute("SELECT * FROM life_matters WHERE status='open' AND next_day<=? ORDER BY id", (p.day,)).fetchall()
     n = 0
+    held = p.conn.execute("SELECT value FROM engine_meta WHERE key='lm_skip_from'").fetchone()
     for r in rows:
         m = _load_matter(p, r)
+        if held and r["awaiting"] and m["kind"] != "scuffle" and int(m["data"].get("asked_day", 0)) > int(held[0]):
+            _later(p, m, p.f("lm_lapse_days"))  # it came up in the skip now running: he has not been told yet
+            continue
         if r["awaiting"] and m["kind"] not in ("scuffle", "quarrel"):  # nothing was done about it (a challenge or quarrel moves on)
             if m["other_actor_id"] is not None and m["other_actor_id"] != p.me and p.me is not None:
                 _effect(p, m["id"], m["other_actor_id"], p.me, "heard nothing back", resentment_delta=3)

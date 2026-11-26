@@ -136,7 +136,7 @@ def _find_interruptions(
     if something:
         found.extend(hearsay.stops(conn, actor_id, start_day, end_day))
     elif str(run["interruption_policy"]) != "critical_only":
-        found.extend(hearsay.asks(conn, actor_id, start_day, end_day))
+        found.extend(hearsay.asks(conn, actor_id, start_day, end_day, every=str(run["interruption_policy"]) == "all"))
 
     interactions = conn.execute(
         """SELECT * FROM interactions
@@ -229,6 +229,8 @@ def _record_interrupt(conn: sqlite3.Connection, run_id: int, item: dict[str, Any
 
 def _finalize(conn: sqlite3.Connection, run: sqlite3.Row, status: str, *, interruption: dict[str, Any] | None = None) -> dict[str, Any]:
     end = current_day(conn)
+    from . import life_matters
+    life_matters.skip_ended(conn, int(run["actor_id"]), end)  # what waits on him is answerable from when he hears of it
     focuses = [dict(r) for r in conn.execute(
         "SELECT focus_key,description,domain_key,career_id,weight,accumulated_days FROM time_skip_focus_progress WHERE run_id=? ORDER BY id",
         (int(run["id"]),),
@@ -270,6 +272,8 @@ def resolve_time_skip(conn: sqlite3.Connection, run_id: int) -> dict[str, Any]:
         raise ValueError("A prepared time skip must begin on the day it was created.")
     conn.execute("UPDATE time_skip_runs SET status='running',updated_at=CURRENT_TIMESTAMP WHERE id=?", (run_id,))
     target = int(run["requested_end_day"])
+    from . import life_matters
+    life_matters.skip_began(conn, int(run["start_day"]))
 
     while current_day(conn) < target:
         now = current_day(conn)

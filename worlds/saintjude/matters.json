@@ -28,6 +28,12 @@
   "dry cleaner": {"for": ["a wedding dress and the suits", "winter coats and drapes"]},
   "hardware store": {"for": ["materials for a repair at home"]}
  },
+ "stops_note": "What stops an ordinary skip: a matter waiting on him of the `waiting` kinds, or of the `waiting_big` kinds when the sum reaches design figure lm_big_money_usd; and word of these things happening in his family. The rest waits and is told when the skip ends.",
+ "stops": {
+  "waiting": ["romance", "fling", "quarrel", "scuffle"],
+  "waiting_big": ["money", "work"],
+  "family": ["illness.badly_ill", "illness.died", "quarrel.killed", "scuffle.killed", "romance.invited", "romance.wed"]
+ },
  "police_matters": [
   "a fight on the corner",
   "stolen goods",
