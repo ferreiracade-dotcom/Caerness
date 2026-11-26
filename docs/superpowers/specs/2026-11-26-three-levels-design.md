@@ -396,7 +396,7 @@ It also tells a missing setting apart from a feature the package deliberately le
     history, locations);
   - the due-queue clock;
   - bodies (B1.1, B1.2, and the appearance-reading fix);
-  - `crystallization` and `tiers.py`;
+  - materializing unnamed people (`_materialize_latent_person`) and `tiers.py`;
   - the knowledge and rumour tables;
   - the connector's correction, undo, money and claim tools.
 - **Replaced, not added to:**
@@ -405,6 +405,13 @@ It also tells a missing setting apart from a feature the package deliberately le
   - the four news feeds in `connector/timeflow.py` become the one gate, built from `hearsay.py`'s path logic and
     `information.py`'s reliability;
   - old paths are switched off first and deleted once the slice is proven.
+  - Added 2026-11-26 from the review of the nearby code (`docs/review/three-levels-adjacent-verdicts.md`):
+    - the old loop's personal choices, the belief mirror and `resolution_controller`'s ladder are switched off
+      in Saint Jude;
+    - every side door into the protagonist's news goes through the gate;
+    - the protection lock covers every background roll on a named person, not only `life_matters`;
+    - the brief shows the GM only what is nearing the protagonist;
+    - `temptations` and `settle_circle` stay.
 - **Reworked:** the held B1 fight work becomes the contest. The P2.32 to P2.37 fixes are reviewed, and whatever
   doesn't fit is dropped.
 - **Not built separately:** the queued playtest fixes. This design covers them.
