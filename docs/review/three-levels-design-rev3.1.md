@@ -36,6 +36,7 @@ replacement, agreed with the owner in a long discussion.
 **This is revision 3.1.** It takes in three rounds of outside review (ChatGPT twice, Gemini twice) and the owner's decisions. Earlier rounds added: people in several groups at once (a mobster can be a legitimate businessman), pressure only through real transmission paths, knowledge kept apart from truth, gradual concerns, three kinds of engine answer, and tests for life as well as for faults.
 
 Revision 3.1 adds section 11, "Amendments", which overrides the earlier sections where they differ: a stored resolution per person, a two-way lock that expires, three-state record standing, three stages from pressure to act, channels derived from existing links, a stamp ledger for closing scenes, a separate path for GM turning events, cascading undo, and changes to the build order.
+
 **What I'd like from the review:**
 - Is the three-level structure sound?
 - Is the link between the levels (pressure down, results up, one news gate) well defined?
