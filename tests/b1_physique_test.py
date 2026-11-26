@@ -143,6 +143,42 @@ def switched_off(conn, physique, a: int, b: int) -> None:
         del os.environ["CAERNESS_PHYSIQUE"]
 
 
+def through_the_connector(tmp: str) -> None:
+    """The GM sees bodies in plain words, and what the story says about somebody is what stays."""
+    os.environ["CAERNESS_CAMPAIGN_DIR"] = str(Path(tmp) / "campaigns")
+    os.environ.pop("CAERNESS_WORLDS_DIR", None)
+    base = build_saintjude(Path(tmp))
+    from connector import campaign, server
+    campaign._packaged_db = lambda pkg_id: base
+    campaign.open_campaign("b1", package="saintjude")
+    proposal = {"name": "Danny Ruane", "sex": "male", "age": 28, "place": "Kerrytown", "work": "mechanic at a family garage",
+                "concept": "a 28-year-old Kerrytown mechanic", "draw": 0, "appearance": "6'2\", red hair, a broken nose"}
+    draft = server.author("b1-1", "protagonist", proposal)
+    assert draft["status"] == "draft" and draft["appearance"]["height"] == "about 6'2\"", draft
+    made = server.author("b1-2", "protagonist", {**proposal, "accept": True})
+    assert made["status"] == "created" and made["appearance"]["line"] == draft["appearance"]["line"], (draft, made)
+    me = int(made["actor_id"])
+    scene = server.scene()
+    assert "red hair" in scene["protagonist"]["looks"], scene["protagonist"]
+    assert scene["present"] and all(p.get("looks") for p in scene["present"]), scene["present"]
+    other = int(scene["present"][0]["id"])
+    seen = server.lookup(str(other))["appearance"]
+    assert seen["line"] == scene["present"][0]["looks"] and seen.get("against_you"), seen
+    noted = server.note("b1-3", "Short and heavyset, dark-haired, very good looking.", subject_kind="actor", subject_id=other,
+                        field="appearance")
+    after = server.lookup(str(other))["appearance"]
+    assert noted["appearance"] == after["line"] and "heavyset" in after["line"] and after["line"] != seen["line"], (noted, after)
+    plain = server.note("b1-4", "Owes the garage for a clutch.", subject_kind="actor", subject_id=other)
+    assert "appearance" not in plain and server.lookup(str(other))["appearance"] == after, plain
+    server.note("b1-5", "Tall and wiry, with a scar over one eye.", kind="sheet", field="appearance")
+    mine = server.lookup(str(me))["appearance"]["line"]
+    assert "wiry" in mine and "scar over one eye" in mine, mine
+    new = server.author("b1-6", "person", {"name": "Rita Calloway", "age": 24, "sex": "female", "work": "waitress",
+                                           "appearance": "tiny, platinum blonde"})
+    assert new.get("actor_id") and "platinum blonde" in new["appearance"], new
+    print(f"connector: {scene['protagonist']['looks']} | {after['line']} | {new['appearance']}")
+
+
 def older_save(db: Path, tmp: str, who: int) -> None:
     from engine import db as engine_db, physique
     conn = connect(db)
@@ -189,6 +225,7 @@ def main() -> None:
         finally:
             conn.close()
         older_save(db, tmp, a)
+        through_the_connector(tmp)
     print("PASS b1_physique_test")
 
 

@@ -133,6 +133,10 @@ def _person(conn, me: int, x: dict) -> dict:
     out = {"id": x["id"], "name": x["name"], "age": x["age"], "sex": x["sex"], "to_you": relation(conn, me, x["id"])}
     if x.get("runs_the_place"):
         out["runs_the_place"] = True
+    from .physique import describe
+    looks = describe(conn, x["id"])
+    if looks:
+        out["looks"] = looks
     return out
 
 

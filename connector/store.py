@@ -219,7 +219,11 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
         except facts.FactRefused as e:
             raise ValueError(str(e)) from e
     if kind == "detail":
-        return add_note(conn, subject_kind, subject_id, text, call_id)
+        out = add_note(conn, subject_kind, subject_id, text, call_id)
+        from engine import physique
+        if physique.apply_note(conn, subject_kind, subject_id, str(text or ""), field):  # how somebody looks, as said
+            out = {**out, "appearance": physique.describe(conn, int(subject_id))}
+        return out
     if kind == "claim":
         return _claim_note(conn, text, subject_id, field)
     if kind == "want":  # field = matters|drop|met, subject_id = the want's id; without one, text is a wish in his words
@@ -253,6 +257,11 @@ def record(conn, kind: str, text: str, call_id: str, *, subject_kind: str = "gen
         conn.execute("INSERT INTO character_sheet(field,text,world_day,call_id) VALUES (?,?,?,?) "
                      "ON CONFLICT(field) DO UPDATE SET text=excluded.text,world_day=excluded.world_day,call_id=excluded.call_id",
                      (field, body, day, call_id))
+        from engine import physique
+        from engine.player import get_player
+        player = get_player(conn)
+        if player:
+            physique.apply_note(conn, "actor", int(player["player_actor_id"]), body, field)
         return {"saved": "sheet", "field": field, "summary": f"Sheet {field} saved", **clipped}
     if kind == "rule" and field == "retire":
         row = conn.execute("SELECT id FROM standing_rules WHERE status='active' AND text=? ORDER BY id DESC LIMIT 1", (body,)).fetchone()

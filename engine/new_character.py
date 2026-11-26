@@ -734,6 +734,11 @@ def create_protagonist(conn: sqlite3.Connection, proposal: dict, call_id: str, *
         conn.execute("ROLLBACK TO SAVEPOINT newchar")
         conn.execute("RELEASE SAVEPOINT newchar")
         raise
+    if out.get("actor_id"):  # the preview shows the body accept will keep; stated appearance is taken as given
+        from . import physique
+        shown = physique.on_authored(conn, int(out["actor_id"]), p.get("appearance"))
+        if shown:
+            out["appearance"] = shown
     if not accept:
         conn.execute("ROLLBACK TO SAVEPOINT newchar")
         conn.execute("RELEASE SAVEPOINT newchar")
