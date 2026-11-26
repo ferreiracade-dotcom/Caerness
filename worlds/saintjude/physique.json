@@ -1,0 +1,289 @@
+{
+ "about": "Bodies in Saint Jude, a 1975 US East Coast city: what people measure, how a life changes it, how it is said, and how much it counts when things turn physical. Read by engine/physique.py.",
+ "mark": "Design proposal",
+ "note": "Only the figures named under 'sources' are published figures. Everything else here (heritage differences, children's build, work loads, wear, words, marks, how much size counts) is a design proposal, unsourced.",
+ "sources": [
+  {"key": "adult_height_weight", "source": "NCHS, Vital and Health Statistics Series 11 No. 211 (1979), Weight and height of adults 18-74 years of age: United States, 1971-74, tables 4, 15, 11 and 22", "url": "https://www.cdc.gov/nchs/data/series/sr_11/sr11_211.pdf", "used_for": "adult mean height and weight by sex and age group, their spread, and the Black-white height difference"},
+  {"key": "child_height", "source": "NCHS growth curves, Vital and Health Statistics Series 11 No. 165 (1977), table 13, smoothed 50th percentile stature", "url": "https://www.cdc.gov/nchs/data/series/sr_11/sr11_165.pdf", "used_for": "height from 2 to 18; the value at birth is unsourced"},
+  {"key": "adult_grip", "source": "Mathiowetz et al., Grip and pinch strength: normative data for adults, Arch Phys Med Rehabil 66 (1985) 69-74, table 2, right hand, pounds", "url": "https://pubmed.ncbi.nlm.nih.gov/3970660/", "used_for": "adult grip strength by sex and age"},
+  {"key": "child_grip", "source": "Ploegmakers et al., Journal of Physiotherapy 59 (2013) 255-261, dominant hand, ages 4-14, converted from kilograms to pounds; ages 15-19 are a straight line to the adult figure (unsourced)", "url": "https://pubmed.ncbi.nlm.nih.gov/24287219/", "used_for": "children's strength"}
+ ],
+ "adult_age": 18,
+ "child_age": 13,
+ "norms": {
+  "male": {
+   "height_in": [[18, 69.7], [21, 69.7], [29.5, 69.6], [39.5, 69.1], [49.5, 68.9], [59.5, 68.3], [69.5, 67.3]],
+   "height_sd_in": 2.8,
+   "weight_lb": [[18, 160], [21, 165], [29.5, 176], [39.5, 178], [49.5, 175], [59.5, 171], [69.5, 164]],
+   "grip_lb": [[4, 12.6], [6, 22.5], [8, 35.1], [10, 43.2], [12, 54.5], [14, 79.4], [22, 121.0], [27, 120.8], [32, 121.8], [37, 119.7], [42, 116.8], [47, 109.9], [52, 113.6], [57, 101.1], [62, 89.7], [67, 91.1], [72, 75.3], [79, 65.7]],
+   "child_height_cm": [[0, 50.5], [2, 86.8], [4, 102.9], [6, 116.1], [8, 127.0], [10, 137.5], [12, 149.7], [14, 163.1], [16, 173.5], [18, 176.8]],
+   "child_bmi": [[0, 13.5], [2, 16.4], [4, 15.6], [6, 15.4], [8, 15.8], [10, 16.6], [12, 17.8], [14, 19.2], [16, 20.8], [18, 21.9]],
+   "prime_grip_lb": 121.0,
+   "reference_weight_lb": 172
+  },
+  "female": {
+   "height_in": [[18, 64.3], [21, 64.3], [29.5, 64.1], [39.5, 64.1], [49.5, 63.6], [59.5, 62.8], [69.5, 62.3]],
+   "height_sd_in": 2.5,
+   "weight_lb": [[18, 126], [21, 132], [29.5, 140], [39.5, 148], [49.5, 149], [59.5, 149], [69.5, 146]],
+   "grip_lb": [[4, 11.2], [6, 19.8], [8, 31.7], [10, 42.1], [12, 53.4], [14, 64.2], [22, 70.4], [27, 74.5], [32, 78.7], [37, 74.1], [42, 70.4], [47, 62.2], [52, 65.8], [57, 57.3], [62, 55.1], [67, 49.6], [72, 49.6], [79, 42.6]],
+   "child_height_cm": [[0, 49.9], [2, 86.8], [4, 101.6], [6, 114.6], [8, 126.4], [10, 138.3], [12, 151.5], [14, 160.4], [16, 162.4], [18, 163.7]],
+   "child_bmi": [[0, 13.3], [2, 16.0], [4, 15.3], [6, 15.2], [8, 15.8], [10, 16.8], [12, 18.2], [14, 19.4], [16, 20.4], [18, 21.2]],
+   "prime_grip_lb": 76.0,
+   "reference_weight_lb": 172
+  }
+ },
+ "body": {
+  "reference_weight_lb": 172,
+  "reference_grip_lb": 121.0,
+  "bmi_spread": 0.17,
+  "bmi_weights": {"flesh": 0.75, "frame": 0.4, "muscle": 0.35},
+  "grip_spread": 0.19,
+  "grip_weights": {"vigour": 0.7, "muscle": 0.6, "frame": 0.35},
+  "height_strength_power": 1.5,
+  "illness_strength_scale": 150,
+  "shrink_from_age": 70,
+  "shrink_in_per_decade": 0.3,
+  "inherit": {"share": 0.8, "looks_share": 0.4}
+ },
+ "life": {
+  "review_days": 91,
+  "muscle_gain": 1.6,
+  "build_years": 2.0,
+  "loss_years": 3.0,
+  "work_from_age": 16,
+  "work_to_age": 65,
+  "response": [0.6, 1.4],
+  "dependency": {"intoxicant": 0.8, "stimulant": 0.6, "chemical_medication": 0.5},
+  "recovering_share": 0.4,
+  "illness_muscle": 2.0,
+  "illness_flesh": 1.5,
+  "recent_harm_days": 21
+ },
+ "work": {
+  "trade_share": {"female": 0.25},
+  "domain_share": {"female": 0.5},
+  "roles": [
+   {"match": ["clerk", "lawyer", "attorney", "accountant", "bookkeeper", "teacher", "secretary", "doctor", "physician", "banker", "broker", "agent", "editor", "reporter", "professor", "pharmacist", "priest", "student"], "load": 0},
+   {"match": ["dock", "docker", "dockworker", "dockhand", "longshore", "longshoreman", "longshoremen", "stevedore", "crane", "pier", "wharf", "freight", "warehouse"], "load": 0.95, "from": "from dock work", "hands": "rough, heavy hands"},
+   {"match": ["construction", "mason", "bricklayer", "ironworker", "roofer", "laborer", "labourer", "demolition", "excavator", "quarry"], "load": 0.9, "from": "from construction work", "hands": "rough, heavy hands"},
+   {"match": ["trucker", "truck driver", "hauler", "hauling", "mover", "teamster", "loader"], "load": 0.7, "from": "from hauling work"},
+   {"match": ["boxer", "prizefighter"], "load": 0.85, "from": "from the gym", "hands": "thickened knuckles"},
+   {"match": ["mechanic", "garage", "body shop", "body-shop"], "load": 0.65, "from": "from garage work", "hands": "grease worked into the knuckles"},
+   {"match": ["welder", "machinist", "boilermaker", "foundry", "steelworker", "shipyard", "plumber", "pipefitter", "carpenter", "electrician", "sheet-metal"], "load": 0.65, "from": "from trade work", "hands": "rough working hands"},
+   {"match": ["butcher", "baker"], "load": 0.45, "from": "from shop work"}
+  ],
+  "trades": {
+   "auto_repair": {"load": 0.65, "from": "from garage work", "hands": "grease worked into the knuckles"},
+   "contractor": {"load": 0.8, "from": "from building work", "hands": "rough, heavy hands"},
+   "butcher": {"load": 0.55, "from": "from butcher's work"},
+   "bakery": {"load": 0.45, "from": "from the bakery"},
+   "hardware_store": {"load": 0.25},
+   "grocery": {"load": 0.3, "from": "from hauling stock"},
+   "pizzeria": {"load": 0.2},
+   "dry_cleaner": {"load": 0.25},
+   "laundromat": {"load": 0.15},
+   "funeral_home": {"load": 0.15},
+   "bar": {"load": 0.15},
+   "diner": {"load": 0.15},
+   "shoe_repair": {"load": 0.1},
+   "car_dealership": {"load": 0.05},
+   "barber_shop": {"load": 0},
+   "pharmacy": {"load": 0},
+   "law_office": {"load": 0},
+   "insurance_agency": {"load": 0}
+  },
+  "domains": {
+   "labor": {"load": 0.8, "from": "from heavy work"},
+   "artisan": {"load": 0.55, "from": "from trade work"},
+   "transport": {"load": 0.5, "from": "from hauling work"},
+   "soldier": {"load": 0.3},
+   "hospitality": {"load": 0.2},
+   "criminal": {"load": 0.15},
+   "merchant": {"load": 0.1},
+   "artist": {"load": 0.05},
+   "clerk": {"load": 0},
+   "physician": {"load": 0},
+   "teacher": {"load": 0}
+  }
+ },
+ "heritage": {
+  "default": {
+   "hair": [["brown", 0.45], ["dark brown", 0.25], ["black", 0.15], ["sandy", 0.1], ["red", 0.05]],
+   "eyes": [["brown", 0.5], ["blue", 0.3], ["hazel", 0.12], ["green", 0.08]],
+   "complexion": [["a fair complexion", 0.5], ["a medium complexion", 0.35], ["a ruddy complexion", 0.15]]
+  },
+  "italian": {
+   "height_in": -1.0,
+   "hair": [["black", 0.45], ["dark brown", 0.45], ["brown", 0.1]],
+   "eyes": [["dark", 0.45], ["brown", 0.4], ["hazel", 0.1], ["blue", 0.05]],
+   "complexion": [["an olive complexion", 0.7], ["a medium complexion", 0.2], ["a fair complexion", 0.1]]
+  },
+  "irish": {
+   "height_in": 0.0,
+   "hair": [["brown", 0.4], ["dark brown", 0.2], ["red", 0.15], ["sandy", 0.15], ["black", 0.1]],
+   "eyes": [["blue", 0.55], ["green", 0.15], ["hazel", 0.12], ["brown", 0.18]],
+   "complexion": [["a fair, freckled complexion", 0.3], ["a fair complexion", 0.45], ["a ruddy complexion", 0.25]]
+  },
+  "polish_slavic": {
+   "height_in": 0.0,
+   "hair": [["brown", 0.4], ["sandy", 0.2], ["fair", 0.2], ["dark brown", 0.2]],
+   "eyes": [["blue", 0.5], ["grey", 0.15], ["brown", 0.25], ["green", 0.1]],
+   "complexion": [["a fair complexion", 0.7], ["a ruddy complexion", 0.3]]
+  },
+  "portuguese": {
+   "height_in": -1.5,
+   "hair": [["black", 0.5], ["dark brown", 0.4], ["brown", 0.1]],
+   "eyes": [["dark", 0.5], ["brown", 0.4], ["hazel", 0.1]],
+   "complexion": [["an olive complexion", 0.6], ["a brown complexion", 0.2], ["a medium complexion", 0.2]]
+  },
+  "black": {
+   "height_in": {"male": -0.5, "female": 0.0},
+   "hair": [["black", 0.9], ["dark brown", 0.1]],
+   "eyes": [["dark brown", 0.75], ["brown", 0.23], ["hazel", 0.02]],
+   "complexion": [["dark brown skin", 0.35], ["brown skin", 0.45], ["light brown skin", 0.2]]
+  },
+  "jewish": {
+   "height_in": -0.5,
+   "hair": [["dark brown", 0.4], ["brown", 0.3], ["black", 0.2], ["red", 0.05], ["sandy", 0.05]],
+   "eyes": [["brown", 0.6], ["hazel", 0.15], ["blue", 0.2], ["green", 0.05]],
+   "complexion": [["a fair complexion", 0.55], ["a medium complexion", 0.45]]
+  },
+  "old_protestant": {
+   "height_in": 0.4,
+   "hair": [["brown", 0.4], ["sandy", 0.2], ["fair", 0.2], ["dark brown", 0.15], ["red", 0.05]],
+   "eyes": [["blue", 0.45], ["grey", 0.1], ["hazel", 0.15], ["brown", 0.25], ["green", 0.05]],
+   "complexion": [["a fair complexion", 0.75], ["a ruddy complexion", 0.25]]
+  },
+  "puerto_rican_latino": {
+   "height_in": -2.0,
+   "hair": [["black", 0.65], ["dark brown", 0.3], ["brown", 0.05]],
+   "eyes": [["dark brown", 0.55], ["brown", 0.4], ["hazel", 0.05]],
+   "complexion": [["light brown skin", 0.4], ["brown skin", 0.35], ["an olive complexion", 0.25]]
+  },
+  "greek_lebanese_armenian": {
+   "height_in": -1.0,
+   "hair": [["black", 0.55], ["dark brown", 0.38], ["brown", 0.07]],
+   "eyes": [["dark", 0.45], ["brown", 0.45], ["hazel", 0.07], ["green", 0.03]],
+   "complexion": [["an olive complexion", 0.75], ["a medium complexion", 0.25]]
+  },
+  "soviet_jewish_emigre": {
+   "height_in": -0.8,
+   "hair": [["dark brown", 0.4], ["brown", 0.35], ["black", 0.15], ["sandy", 0.1]],
+   "eyes": [["brown", 0.5], ["grey", 0.15], ["blue", 0.25], ["hazel", 0.1]],
+   "complexion": [["a fair complexion", 0.7], ["a medium complexion", 0.3]]
+  },
+  "chinese": {
+   "height_in": -3.0,
+   "hair": [["black", 0.97], ["dark brown", 0.03]],
+   "eyes": [["dark brown", 0.9], ["brown", 0.1]],
+   "complexion": [["a medium complexion", 0.6], ["a fair complexion", 0.4]]
+  }
+ },
+ "features": {
+  "greying": {"male": {"mean": 46, "sd": 9}, "female": {"mean": 50, "sd": 9}, "grey_after_years": 15, "greying_word": "greying {hair} hair", "grey_word": "grey hair", "hair_word": "{hair} hair"},
+  "balding": {"male": {"chance": 0.45, "mean": 41, "sd": 11}, "bald_after_years": 14, "thinning_word": "thinning {hair} hair", "bald_word": "bald"},
+  "marks": [
+   {"mark": "wears glasses", "chance": 0.35, "from_age": 10},
+   {"mark": "a small scar through one eyebrow", "chance": 0.05, "from_age": 14, "sex": "male"},
+   {"mark": "a scar on the chin", "chance": 0.03, "from_age": 10},
+   {"mark": "a nose broken once and set crooked", "chance": 0.05, "from_age": 18, "sex": "male"},
+   {"mark": "a tattoo on one forearm", "chance": 0.14, "from_age": 19, "sex": "male"},
+   {"mark": "a mole on one cheek", "chance": 0.05, "from_age": 0},
+   {"mark": "a gap between the front teeth", "chance": 0.05, "from_age": 8},
+   {"mark": "a mustache", "chance": 0.3, "from_age": 20, "sex": "male"},
+   {"mark": "a full beard", "chance": 0.07, "from_age": 20, "sex": "male"}
+  ],
+  "injury_marks": {"fists": "a nose that has been broken", "blunt": "an old gash scar at the hairline", "blade": "a knife scar", "handgun_range": "a bullet scar", "handgun_point_blank": "a bullet scar", "default": "an old injury that shows"},
+  "recent_marks": {"fists": "face still bruised and swollen", "blunt": "still bruised from a recent beating", "blade": "a healing knife cut", "handgun_range": "a fresh gunshot wound", "handgun_point_blank": "a fresh gunshot wound", "default": "visibly hurt"}
+ },
+ "words": {
+  "height": "about {feet}'{inches}\"",
+  "weight": "about {pounds} lb",
+  "short_z": -1.3,
+  "tall_z": 1.3,
+  "tall": "tall",
+  "short": "short",
+  "build": [
+   {"muscle_min": 0.65, "fat_min": 1.12, "word": "big and thick, much of it muscle", "from_work": true},
+   {"muscle_min": 0.65, "word": {"male": "heavy through the shoulders", "female": "strongly built through the arms and shoulders"}, "from_work": true},
+   {"fat_min": 1.28, "word": "heavyset, carrying a lot of weight"},
+   {"fat_min": 1.12, "word": {"male": "thickset", "female": "full-figured"}},
+   {"fat_max": 0.81, "word": "thin"},
+   {"fat_max": 0.89, "word": {"male": "lean", "female": "slim"}},
+   {"muscle_min": 0.3, "word": "solidly built", "from_work": true},
+   {"word": "of ordinary build"}
+  ],
+  "strength": [
+   {"min": 1.3, "word": "very strong"},
+   {"min": 1.12, "word": "strong"},
+   {"min": 0.76, "word": "of ordinary strength", "quiet": true},
+   {"min": 0.57, "word": "not strong"},
+   {"word": "frail"}
+  ],
+  "looks_from_age": 16,
+  "looks": [
+   {"min": 1.5, "word": {"male": "very good-looking", "female": "beautiful"}},
+   {"min": 0.7, "word": {"male": "good-looking", "female": "pretty"}},
+   {"min": -0.7, "word": "ordinary-looking", "quiet": true},
+   {"min": -1.5, "word": "plain"},
+   {"word": "homely"}
+  ],
+  "line_marks": 1,
+  "against": {
+   "height_in": 2.0, "taller": "taller than you", "shorter": "shorter than you", "level": "about your height",
+   "weight_ratio": 1.12, "heavier": "heavier", "lighter": "lighter",
+   "force_ratio": 1.15, "stronger": "looks stronger than you", "weaker": "looks weaker than you", "even": "looks about your match",
+   "join": ", "
+  }
+ },
+ "stated": {
+  "labels": ["appearance", "attractiveness", "looks", "physique", "build", "height"],
+  "negations": ["not", "no", "never", "isn't", "hardly", "without"],
+  "height_words": [
+   {"words": ["very tall", "towering", "huge"], "z": 2.2},
+   {"words": ["very short", "tiny", "diminutive"], "z": -2.2},
+   {"words": ["tall"], "z": 1.4},
+   {"words": ["short"], "unless_next": ["brown", "black", "dark", "blond", "blonde", "red", "grey", "gray", "fair", "sandy", "curly", "hair", "haired", "cropped", "sleeves", "temper", "beard", "legs", "neat"], "z": -1.4}
+  ],
+  "build_words": [
+   {"words": ["heavily muscled", "powerfully built", "massive", "brawny", "burly"], "set": {"muscle": 1.6, "frame": 0.9}},
+   {"words": ["muscular", "well-built", "well built", "broad-shouldered", "broad shoulders", "broad through the shoulders", "heavy through the shoulders", "thick arms", "strongly built", "athletic"], "set": {"muscle": 1.2}},
+   {"words": ["solid", "sturdy", "solidly built"], "set": {"muscle": 0.5, "frame": 0.5}},
+   {"words": ["stocky", "thickset", "thick-set", "barrel-chested"], "set": {"frame": 1.2, "flesh": 0.4}},
+   {"words": ["fat", "obese", "very heavy", "overweight"], "set": {"flesh": 2.0}},
+   {"words": ["heavyset", "heavy-set", "heavy", "plump", "chubby", "full-figured", "curvy"], "unless_next": ["through", "brows", "eyebrows", "lids"], "set": {"flesh": 1.0, "frame": 0.3}},
+   {"words": ["big-framed", "big man", "big guy", "big woman", "large frame"], "set": {"frame": 1.3}},
+   {"words": ["skinny", "gaunt", "very thin", "scrawny"], "set": {"flesh": -1.7, "muscle": -0.4}},
+   {"words": ["thin", "slender", "slim", "slight", "petite"], "unless_next": ["brown", "black", "dark", "blond", "blonde", "red", "grey", "gray", "fair", "sandy", "curly", "hair", "haired", "cropped", "lips", "mustache", "moustache", "eyebrows", "face"], "set": {"flesh": -1.1, "frame": -0.5}},
+   {"words": ["wiry"], "set": {"flesh": -1.0, "muscle": 0.4}},
+   {"words": ["lean", "trim", "rangy"], "unless_next": ["on", "against", "in", "into", "back", "over", "forward"], "set": {"flesh": -0.8}},
+   {"words": ["average build", "medium build", "ordinary build"], "set": {"flesh": 0.0, "frame": 0.0}}
+  ],
+  "strength_words": [
+   {"words": ["very strong", "immensely strong", "powerful", "powerfully built"], "unless_next": ["friends", "family", "connections", "personality", "voice", "presence"], "z": 1.9},
+   {"words": ["strong", "strongly built"], "unless_next": ["accent", "jaw", "chin", "nose", "features", "voice", "will", "opinions", "cologne", "brows"], "z": 1.0},
+   {"words": ["frail", "feeble"], "z": -2.0},
+   {"words": ["weak"], "unless_next": ["chin", "eyes", "voice", "smile"], "z": -1.2}
+  ],
+  "looks_words": [
+   {"words": ["beautiful", "gorgeous", "stunning", "very handsome", "very good-looking", "very attractive", "very pretty"], "z": 1.9},
+   {"words": ["handsome", "good-looking", "good looking", "attractive", "pretty", "striking"], "unless_next": ["much", "tall", "short", "big", "strong", "heavy", "thin", "plain", "ordinary", "average", "solid", "well"], "z": 1.0},
+   {"words": ["average-looking", "ordinary-looking", "unremarkable"], "z": 0.0},
+   {"words": ["plain", "unattractive"], "unless_next": ["shirt", "dress", "clothes", "suit", "talk"], "z": -1.0},
+   {"words": ["ugly", "homely"], "z": -1.8}
+  ],
+  "rating": {"labels": ["attractiveness", "looks"], "scale": 10, "middle": 5.5, "per_sd": 1.6},
+  "marks_words": ["scar", "scars", "scarred", "tattoo", "tattoos", "tattooed", "mole", "birthmark", "glasses", "spectacles", "limp", "freckles", "mustache", "moustache", "beard", "bearded", "dimple", "dimples", "missing a", "gap between", "broken nose", "crooked nose"],
+  "hair_words": ["hair", "haired", "bald", "balding", "blond", "blonde", "brunette", "redhead", "crew cut", "ponytail"],
+  "eyes_words": ["eyes", "eyed"],
+  "complexion_words": ["complexion", "skin", "skinned", "olive-skinned", "pale", "tanned"]
+ },
+ "contest": {
+  "weight_power": 0.6,
+  "exponent": 3.5,
+  "blow_power": 0.35,
+  "standoff_power": 1.0,
+  "capacity_power": 0.35,
+  "methods": {"fists": 1.0, "boots": 1.0, "blunt": 0.6, "blade": 0.35, "improvised": 0.5, "default": 0.0}
+ }
+}

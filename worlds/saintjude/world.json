@@ -45,7 +45,8 @@
   "money": "money.json",
   "price_book": "prices.json",
   "wants": "wants.json",
-  "matters": "matters.json"
+  "matters": "matters.json",
+  "physique": "physique.json"
  },
  "name_pools": {
   "male": {

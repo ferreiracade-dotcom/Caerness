@@ -5903,3 +5903,24 @@ CREATE TABLE IF NOT EXISTS temptations (
     updated_day INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_temptations_actor ON temptations(actor_id, status);
+
+-- B1: a body for every person (engine/physique.py). Heights are the prime adult height; the other figures are deviations
+-- from the package's norms; stated_json keeps what was said about somebody's appearance.
+CREATE TABLE IF NOT EXISTS physical_records (
+    actor_id INTEGER PRIMARY KEY REFERENCES actors(id) ON DELETE CASCADE,
+    heritage TEXT,
+    height_cm REAL NOT NULL,
+    height_z REAL NOT NULL,
+    frame REAL NOT NULL,
+    vigour REAL NOT NULL,
+    flesh REAL NOT NULL,
+    looks REAL NOT NULL,
+    muscle REAL NOT NULL,
+    muscle_base REAL NOT NULL DEFAULT 0,
+    flesh_shift REAL NOT NULL DEFAULT 0,
+    features_json TEXT NOT NULL DEFAULT '{}',
+    stated_json TEXT NOT NULL DEFAULT '{}',
+    work_json TEXT NOT NULL DEFAULT '{}',
+    last_day INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_physical_due ON physical_records(last_day);

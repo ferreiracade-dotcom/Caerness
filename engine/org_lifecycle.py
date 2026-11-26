@@ -618,4 +618,6 @@ def process_due(conn: sqlite3.Connection, day: int, *, event_logger=None) -> dic
 
 from . import life_matters  # noqa: E402  (registers the weekly ordinary-life pass)
 on_week(life_matters.weekly)
+from . import physique  # noqa: E402  (bodies: the newly born get one, a life moves the rest)
+on_week(physique.weekly)
 from . import temptations  # noqa: E402,F401  (registers its own weekly pass: concrete chances tied to wants)
