@@ -13,6 +13,21 @@
   "friends": [{"text": "money owed", "needs": "debt"}, "a bet", "someone one of them is seeing", "a borrowed car", "a broken promise"],
   "others": [{"text": "money owed", "needs": "debt"}, "a parking space", "the noise at night", {"text": "an insult at a bar", "needs": "of_age"}, "something said about their people", "a bet"]
  },
+ "jobs_note": "Which trades take a paid job from somebody outside the worker's family, what the job may be for, and what the customer must have (design figure lm_have_<needs>).",
+ "jobs": {
+  "auto repair garage": {"needs": "car", "for": ["the brakes", "a slipping clutch", "an engine knock", "a tune-up", "a dented fender", "a bad transmission"]},
+  "building trades contractor": {"for": ["a leaking roof", "a back porch", "wiring in the kitchen", "a new bathroom", "the front steps"]},
+  "law office": {"for": ["a will", "trouble with a landlord", "a house closing", "a claim for an injury"]},
+  "insurance agency": {"for": ["a policy on the house", "a policy on the car", "a life policy"]},
+  "butcher": {"for": ["meat for a wedding supper", "a side of beef for the freezer"]},
+  "bakery": {"for": ["a wedding cake", "bread and pastry for a christening"]},
+  "pizzeria": {"for": ["food for a party"]},
+  "diner": {"for": ["the food after a funeral", "a retirement supper"]},
+  "bar": {"for": ["a private party in the back room"]},
+  "neighborhood grocery": {"for": ["the groceries for a family gathering"]},
+  "dry cleaner": {"for": ["a wedding dress and the suits", "winter coats and drapes"]},
+  "hardware store": {"for": ["materials for a repair at home"]}
+ },
  "police_matters": [
   "a fight on the corner",
   "stolen goods",
@@ -227,7 +242,7 @@
   "rivalry.gains": "{s} has taken custom from {business}",
   "rivalry.fizzled": "{s} has let {business} alone",
   "rivalry.bad_blood": "It is open bad blood now between {s} and {o}",
-  "work.asked": "{o} wants {s} for a job ({trade}), worth about {amount}",
+  "work.asked": "{o} wants {s} to take on {job} ({trade}), worth about {amount}",
   "work.done": "{s} did the job for {o} and was paid {amount}",
   "work.could_not_pay": "{o} could not find the {amount} for the job {s} was to do",
   "work.fell_through": "The job {o} had for {s} fell through",

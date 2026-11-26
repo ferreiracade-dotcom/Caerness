@@ -179,6 +179,32 @@ def known_by(conn: sqlite3.Connection, those: list[int]) -> dict[int, dict[int, 
     return out
 
 
+def family_of(conn: sqlite3.Connection, a: int) -> set[int]:
+    """His kin and the people he shares a house with."""
+    return {int(r[0]) for r in conn.execute(
+        """SELECT CASE WHEN actor_a_id=? THEN actor_b_id ELSE actor_a_id END FROM kinship_links
+           WHERE (actor_a_id=? OR actor_b_id=?) AND ended_day IS NULL
+           UNION SELECT h2.actor_id FROM household_members h1 JOIN household_members h2 ON h2.household_id=h1.household_id
+           WHERE h1.actor_id=? AND h2.actor_id<>? AND h1.status='active' AND h2.status='active'""", (a, a, a, a, a))}
+
+
+def has(p: _Pass, a: int, need: str) -> bool:
+    """Whether a person has the thing a job turns on: one on record for him or his household, else the same answer every time from
+    the share of households that have one (figure `lm_have_<need>`)."""
+    conn = p.conn
+    home = [int(r[0]) for r in conn.execute(
+        "SELECT household_id FROM household_members WHERE actor_id=? AND status='active' ORDER BY household_id LIMIT 1", (a,))]
+    folk = [a] + ([int(r[0]) for r in conn.execute(
+        "SELECT actor_id FROM household_members WHERE household_id=? AND status='active'", (home[0],))] if home else [])
+    marks = ",".join("?" * len(folk))
+    if conn.execute(f"""SELECT 1 FROM possessions WHERE holder_actor_id IN ({marks}) AND item_type=? AND status='held'
+                        UNION SELECT 1 FROM bearing_marks WHERE actor_id IN ({marks}) AND kind=? AND status='active'""",
+                    (*folk, need, *folk, need)).fetchone():
+        return True
+    whose = f"home:{home[0]}" if home else f"person:{a}"
+    return random.Random(f"{p.seed}:have:{need}:{whose}").random() < p.f(f"lm_have_{need}")
+
+
 def _pick(rng: random.Random, weighted: dict[int, float]) -> int | None:
     items = sorted((k, v) for k, v in weighted.items() if v > 0)
     if not items:
@@ -675,17 +701,22 @@ def _open_work(p: _Pass, s: int, rng) -> None:
     trade = conn.execute("""SELECT es.enterprise_id, ba.name FROM enterprise_staff es
                             JOIN enterprise_business_profiles bp ON bp.enterprise_id=es.enterprise_id JOIN business_archetypes ba ON ba.id=bp.archetype_id
                             WHERE es.actor_id=? AND es.status='active' ORDER BY es.enterprise_id LIMIT 1""", (s,)).fetchone()
-    if not trade:
+    spec = (p.words.get("jobs") or {}).get(str(trade[1]).lower()) if trade else None
+    if not spec:  # not a trade people bring a job of their own to
         return
     amount = round(p.f("lm_work_price_usd") * math.exp(rng.gauss(0.0, 0.8)))
     staff = {int(r[0]) for r in conn.execute("SELECT actor_id FROM enterprise_staff WHERE enterprise_id=? AND status='active'", (trade[0],))}
-    ties = {i: w for i, w in p.ties(s).items() if i not in staff and i != p.me and p.purse(i) >= amount}
+    own = family_of(conn, s)  # family ask favours; they are not paying customers
+    need = spec.get("needs")
+    ties = {i: w for i, w in p.ties(s).items()
+            if i not in staff and i not in own and i != p.me and p.purse(i) >= amount and (not need or has(p, i, need))}
     o = _pick(rng, ties)
     if o is None:
         return
+    job = spec["for"][rng.randrange(len(spec["for"]))]
     m = _open(p, "work", s, o, rng)
     m["amount"] = amount
-    m["data"] = {"trade": str(trade[1]).lower(), "enterprise_id": int(trade[0])}
+    m["data"] = {"trade": str(trade[1]).lower(), "enterprise_id": int(trade[0]), "job": job}
     if p.me in (s, o):
         return _wait(p, m, "asked")
     return _step(p, m, "asked", next_days=_span(p, m, "lm_stage_days"))

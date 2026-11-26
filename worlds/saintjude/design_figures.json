@@ -16877,6 +16877,16 @@
   "source": "unsourced",
   "note": "unsourced; Chance an asked job goes ahead. Design proposal. (P2.1: engine/life_matters.py)"
  },
+ "lm_have_car": {
+  "default": 0.75,
+  "range": null,
+  "unit": "share of households",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; households in a large American city with a car in the mid 1970s, about three in four [memory, approximate]. Design proposal."
+ },
  "lm_police_year": {
   "default": 0.2,
   "range": null,
