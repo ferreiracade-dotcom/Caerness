@@ -96,6 +96,18 @@ def _earliest_existing_due(conn: sqlite3.Connection, run: sqlite3.Row, from_day:
     return None
 
 
+def _put_to_him(conn: sqlite3.Connection, i: sqlite3.Row) -> str:
+    """Why the skip stopped, in words: who put it, what it is, and the number it is answered by. The proposer's own reasons stay
+    theirs; only what was put (the terms) is said."""
+    who = conn.execute("SELECT name FROM actors WHERE id=?", (i["proposer_actor_id"],)).fetchone()
+    terms = _load(i["terms_json"], {})
+    what = next((str(terms[k]).strip().rstrip(".") for k in ("purpose", "subject", "description") if terms.get(k)), "")
+    kind = str(i["interaction_type"])
+    article = "An" if kind[:1] in "aeio" else "A"
+    return (f"{article} {kind} from {who[0] if who else 'somebody'}{': ' + what if what else ''}. "
+            f"It waits on your answer (interaction {i['id']}).")
+
+
 def _find_interruptions(
     conn: sqlite3.Connection,
     run: sqlite3.Row,
@@ -150,7 +162,7 @@ def _find_interruptions(
         found.append({
             "day": int(i["created_day"]), "source_kind": "interaction", "source_id": int(i["id"]),
             "severity": int(i["stakes"]),
-            "reason": f"A consequential {i['interaction_type']} now requires your attention.",
+            "reason": _put_to_him(conn, i),
             "metadata": {"interaction_type": i["interaction_type"], "proposer_actor_id": i["proposer_actor_id"]},
         })
 
