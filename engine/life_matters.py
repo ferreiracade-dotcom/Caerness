@@ -118,6 +118,10 @@ def _living(conn: sqlite3.Connection, a: int) -> bool:
     return bool(r) and str(r[0] or "active").lower() not in ("dead", "deceased") and str(r[1] or "living") == "living"
 
 
+def _ids_of(text: str) -> list[int]:
+    return [int(x) for x in str(text or "").split(",") if x]
+
+
 def money(words: dict, x: float) -> str:
     return f"{words.get('currency_symbol', '')}{int(round(x)):,}"
 
@@ -608,14 +612,16 @@ def _step_quarrel(p: _Pass, m: dict) -> None:
     drive = {int(r[0]): float(r[1]) for r in conn.execute("SELECT actor_id,aggression FROM actor_drives WHERE actor_id IN (?,?)", (s, o))}
     heat = (drive.get(s, 0.5) + (drive.get(o, 0.5) if o != p.me else 0.0)) / (2 if o != p.me else 1)
     if rng.random() < p.f("lm_blows_chance") * 2 * heat:
+        from .physique import blow, standoff
         if o == p.me:
             striker, victim = s, o
         elif s == p.me:
             striker, victim = o, s
-        else:
-            striker, victim = (s, o) if rng.random() < drive.get(s, 0.5) / max(1e-9, drive.get(s, 0.5) + drive.get(o, 0.5)) else (o, s)
+        else:  # temper decides who swings, and the bigger of the two is readier to
+            ws, wo = drive.get(s, 0.5) * standoff(conn, s, o), drive.get(o, 0.5) * standoff(conn, o, s)
+            striker, victim = (s, o) if rng.random() < ws / max(1e-9, ws + wo) else (o, s)
         from .harm import record_harm
-        severity = max(1.0, rng.expovariate(1.0 / p.f("lm_blows_severity")))
+        severity = max(1.0, rng.expovariate(1.0 / p.f("lm_blows_severity"))) * blow(conn, striker, victim, "fists")
         override = None
         if victim == p.me:  # his survival leans to living; the hurt itself is real
             override = "persistent" if severity >= p.f("lm_blows_lasting") else "transient"
@@ -986,11 +992,52 @@ def _rates(p: _Pass):
     return rates
 
 
+def settle_circle(p: _Pass) -> int:
+    """Give the people near the protagonist something to live with, once for each as he comes near: money on him if nobody has
+    counted any, and, among those who live in one district, some who know each other, so that things happen between them and not
+    only between each of them and him. Returns how many were taken in."""
+    from . import money_records, texture
+    from .opening_family import _seed_pair
+    conn = p.conn
+    row = conn.execute("SELECT value FROM engine_meta WHERE key='lm_circle_settled'").fetchone()
+    done = set(_ids_of(row[0] if row else ""))
+    close = texture.circle(conn, p.me)
+    new = sorted(set(close) - done)
+    if not new:
+        return 0
+    marks = ",".join("?" * len(close))
+    grown = {int(r[0]): r[1] for r in conn.execute(
+        f"""SELECT a.id,a.current_location_id FROM actors a JOIN actor_life_profiles lp ON lp.actor_id=a.id WHERE a.id IN ({marks})
+            AND lp.life_status='living' AND lp.birth_day<=?""", [*sorted(close), p.day - int(p.f("lm_adult_age") * YEAR)])}
+    chance = figure(conn, "lm_circle_acquainted", 0.0)
+    money = money_records.currency(conn)
+    for a in new:
+        if a not in grown:
+            continue
+        if money:  # what a grown person has by him: most are a few weeks or months ahead, a few are not
+            by = random.Random(f"{p.seed}:circle_purse:{a}").uniform(0.0, figure(conn, "lm_circle_savings_weeks", 0.0))
+            money_records.ensure_purse(conn, f"person:{a}", at_least=by * p.f("lm_living_week_usd"))
+        for b in sorted(grown):
+            if b == a or grown[b] != grown[a] or (b in new and b < a):
+                continue
+            key = f"circle:{min(a, b)}:{max(a, b)}"
+            rng = random.Random(f"{p.seed}:{key}")
+            if rng.random() < chance:
+                _seed_pair(conn, a, b, "acquaintance", key=key, started_day=p.day - rng.randint(200, 2500))
+    done |= set(grown)  # a child is taken in when grown
+    conn.execute("INSERT INTO engine_meta(key,value) VALUES ('lm_circle_settled',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                 (",".join(map(str, sorted(done))),))
+    p._cash, p._near = None, {}
+    return len(set(new) & set(grown))
+
+
 def weekly(conn: sqlite3.Connection, day: int) -> dict:
     """One week: open matters move on, and the people due this week may find something new has happened to them."""
     if not enabled(conn):
         return {}
     p = _Pass(conn, day)
+    if p.me is not None:
+        settle_circle(p)
     moved = _advance_open(p)
     rates = _rates(p)
     open_now = {(r[0], int(r[1])) for r in conn.execute("SELECT kind,subject_actor_id FROM life_matters WHERE status='open'")}

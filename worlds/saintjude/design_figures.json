@@ -16877,6 +16877,26 @@
   "source": "unsourced",
   "note": "unsourced; Chance an asked job goes ahead. Design proposal. (P2.1: engine/life_matters.py)"
  },
+ "lm_circle_acquainted": {
+  "default": 0.5,
+  "range": null,
+  "unit": "chance per pair",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; the chance that two adults near the protagonist who live in one district know each other. Neighbourhood life in a mid 1970s city, where most people knew several of those on their own blocks [memory, approximate]. Design proposal."
+ },
+ "lm_circle_savings_weeks": {
+  "default": 30,
+  "range": null,
+  "unit": "weeks of living",
+  "tag": "Design",
+  "kind": "fixed",
+  "mark": "Design proposal",
+  "source": "unsourced",
+  "note": "unsourced; the most weeks of living an adult near the protagonist is likely to have put by, drawn evenly from nothing up to this, so that about one in seven is short [memory, approximate]. Design proposal."
+ },
  "lm_have_car": {
   "default": 0.75,
   "range": null,
