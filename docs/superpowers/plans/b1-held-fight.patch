@@ -1,0 +1,563 @@
+diff --git a/engine/interactions.py b/engine/interactions.py
+index 01cd3ce..9b01ccd 100644
+--- a/engine/interactions.py
++++ b/engine/interactions.py
+@@ -245,7 +245,8 @@ def _capacity(conn: sqlite3.Connection, actor_id: int) -> float:
+     resource_score = sum(math.log1p(max(0.0, float(r[0]))) for r in resources)
+     profile = conn.execute("SELECT agency FROM simulation_profiles WHERE actor_id=?", (actor_id,)).fetchone()
+     agency = float(profile[0]) if profile else 0.5
+-    return 1.0 + resource_score + 4.0 * agency
++    from .physique import capacity_factor
++    return (1.0 + resource_score + 4.0 * agency) * capacity_factor(conn, actor_id)
+ 
+ 
+ def _create_agreement(
+diff --git a/engine/life_matters.py b/engine/life_matters.py
+index 7e3ae8b..fb1f17e 100644
+--- a/engine/life_matters.py
++++ b/engine/life_matters.py
+@@ -238,7 +238,8 @@ def _step(p: _Pass, m: dict, stage: str, *, close: bool = False, next_days: floa
+     text = None
+     if tmpl or said:
+         fields = {"s": _name(conn, m["subject_actor_id"]), "o": _name(conn, m["other_actor_id"]),
+-                  "amount": money(p.words, m["amount"]) if m.get("amount") else "", **m.get("data", {}), **words}
++                  "amount": money(p.words, m["amount"]) if m.get("amount") else "", "backed": "",
++                  "cause": (p.words.get("scuffle_causes") or {}).get("unsaid", ""), **m.get("data", {}), **words}
+         text = said or tmpl.format(**fields)
+         actors = [x for x in (m["subject_actor_id"], m["other_actor_id"]) if x is not None]
+         conn.execute("INSERT INTO life_matter_steps(matter_id,day,stage,text,actors) VALUES (?,?,?,?,?)",
+diff --git a/engine/org_happenings.py b/engine/org_happenings.py
+index 04a5d09..f6d1582 100644
+--- a/engine/org_happenings.py
++++ b/engine/org_happenings.py
+@@ -618,6 +618,8 @@ def _apply_incident(conn, a, org, day, rng, spec, hit, chosen) -> dict:
+     key = conn.execute("SELECT package_key FROM org_profiles WHERE org_actor_id=?", (org,)).fetchone()
+     key = key[0] if key else None
+     sev, method, too_far = lethality.incident_roll(conn, key, _span(conn, spec["harm"][0], spec["harm"][1], rng), rng)
++    from .physique import blow
++    sev *= blow(conn, a, v, method)
+     harm = record_harm(conn, v, source_kind="org_incident", source_ref_id=iid, severity=round(sev, 2), intent_class="hostile", method=method,
+                        location_id=hit["loc"], metadata={"offender_actor_id": a, "public": chosen == "officer", "went_too_far": too_far})
+     if matters:
+diff --git a/engine/org_membership.py b/engine/org_membership.py
+index 4458549..3de8a8c 100644
+--- a/engine/org_membership.py
++++ b/engine/org_membership.py
+@@ -781,7 +781,9 @@ def execute_discipline_pay_back(conn, actor_id, kind, payload, day):
+             conn.execute("INSERT INTO org_money(day,kind,from_actor_id,to_actor_id,line_id,amount,org_actor_id) VALUES (?,?,?,?,?,?,?)",
+                          (int(day), flow, holder, int(actor_id), payload.get("line"), paid, org))
+     loc = conn.execute("SELECT current_location_id FROM actors WHERE id=?", (holder,)).fetchone()
+-    record_harm(conn, holder, source_kind="org_action", source_ref_id=int(day) * 10_000_000 + int(actor_id), severity=_du(conn, "pay_back", "beating"),
++    from .physique import blow
++    record_harm(conn, holder, source_kind="org_action", source_ref_id=int(day) * 10_000_000 + int(actor_id),
++                severity=_du(conn, "pay_back", "beating") * blow(conn, int(actor_id), holder, "fists"),
+                 intent_class="hostile", location_id=loc[0] if loc else None, metadata={"offender_actor_id": int(actor_id), "public": False})
+     _lose_standing(conn, s, _du(conn, "pay_back", "standing_loss"))
+     adjust_relationship(conn, holder, int(actor_id), int(day), resentment_delta=_du(conn, "pay_back", "resentment"), fear_delta=_du(conn, "pay_back", "fear"),
+diff --git a/engine/outings.py b/engine/outings.py
+index f007b76..8da8984 100644
+--- a/engine/outings.py
++++ b/engine/outings.py
+@@ -81,6 +81,26 @@ def _kin(conn: sqlite3.Connection, a: int, b: int) -> bool:
+                                 OR (actor_a_id=? AND actor_b_id=?))""", (a, b, b, a)).fetchone())
+ 
+ 
++def _cause(conn: sqlite3.Connection, a: int, b: int, folk: list[dict], rng: random.Random) -> str:
++    """Why these two are about to fall out: money lent and not settled, what already lies between them, or something that
++    happens this evening. Settled and stored before anybody swings."""
++    causes = lm.data(conn).get("scuffle_causes") or {}
++    both = (a, b, b, a)
++    if conn.execute("""SELECT 1 FROM life_matters WHERE kind='money' AND status='open' AND stage IN ('borrowed','asked_time','soured')
++                       AND ((subject_actor_id=? AND other_actor_id=?) OR (subject_actor_id=? AND other_actor_id=?))""", both).fetchone():
++        return str(causes.get("owed", ""))
++    if max(rel.relationship_view(conn, a, b)["resentment"], rel.relationship_view(conn, b, a)["resentment"]) > 0:
++        return str(causes.get("sore", ""))
++    choices = list(causes.get("moment") or [""])
++    if causes.get("her"):  # somebody's girl is in the room
++        women = {x["id"]: x["name"] for x in folk if x["sex"] == "female"}
++        for woman, in conn.execute("""SELECT CASE WHEN actor_a_id IN (?,?) THEN actor_b_id ELSE actor_a_id END FROM household_unions
++                                      WHERE status='active' AND (actor_a_id IN (?,?) OR actor_b_id IN (?,?))""", (a, b, a, b, a, b)):
++            if woman in women:
++                choices.append(causes["her"].format(her=women[woman]))
++    return str(choices[rng.randrange(len(choices))])
++
++
+ def crowd(conn: sqlite3.Connection, venue: sqlite3.Row, me: int, day: int) -> list[dict]:
+     """Who is there this evening: whoever runs the place, and a draw from the people about, weighted by habit, age, sex and ties."""
+     from .presence import presence_probability_snapshot
+@@ -182,8 +202,16 @@ def go_out(conn: sqlite3.Connection, me: int, day: int, venue_id: int | None = N
+         at_him = sore[who["id"]] > 0 or not others or rng.random() < _f(conn, "out_trouble_at_him")
+         target = None if at_him else others[rng.randrange(len(others))]
+         key = "trouble_you_sore" if at_him and sore[who["id"]] > 0 else "trouble_you" if at_him else "trouble_other"
+-        happenings.append({"kind": "trouble", "id": who["id"], "at_you": at_him,
+-                           "what": words[key].format(who=who["name"], other=target["name"] if target else "")})
++        against = me if at_him else target["id"]
++        before = conn.execute("""SELECT summary FROM relationship_history WHERE source_actor_id=? AND target_actor_id=? AND day=?
++                                 AND source_kind='outing_trouble'""", (who["id"], against, day)).fetchone()
++        if before:
++            cause = str(before[0])
++        else:  # why, kept before anything comes of it
++            cause = _cause(conn, who["id"], against, folk, random.Random(f"{run_seed(conn)}:trouble:{who['id']}:{against}:{day}"))
++            rel.record_relationship_effect(conn, who["id"], against, day, source_kind="outing_trouble", source_id=day, summary=cause)
++        happenings.append({"kind": "trouble", "id": who["id"], "at_you": at_him, "cause": cause,
++                           "what": words[key].format(who=who["name"], other=target["name"] if target else "", cause=cause)})
+     return {"venue": str(venue["name"]), "venue_id": int(venue["id"]), "there": [_person(conn, me, x) for x in folk],
+             "happenings": happenings}
+ 
+@@ -297,12 +325,15 @@ def _step_fling(p, m: dict) -> None:
+ 
+ 
+ def _open_scuffle(p, s: int, rng) -> None:
++    from .physique import standoff, steps_in
+     found = _where(p, s, rng)
+     if found is None:
+         return
+     mine, folk, venue = found
+-    others = {x["id"]: 0.1 + x["aggression"] + max(0.0, rel.relationship_view(p.conn, s, x["id"])["resentment"]) / 20.0
+-              for x in rng.sample(folk, min(12, len(folk))) if x["id"] != s and x["sex"] == "male"
++    there = rng.sample(folk, min(12, len(folk)))
++    others = {x["id"]: (0.1 + x["aggression"] + max(0.0, rel.relationship_view(p.conn, s, x["id"])["resentment"]) / 20.0)
++              * (standoff(p.conn, x["id"], s) if s == p.me else standoff(p.conn, s, x["id"]))  # who squares up to whom
++              for x in there if x["id"] != s and x["sex"] == "male"
+               and abs(x["age"] - mine["age"]) <= p.f("lm_romance_gap_years") * 2 and not _kin(p.conn, s, x["id"])}
+     o = lm._pick(rng, others)
+     if o is None:
+@@ -310,7 +341,16 @@ def _open_scuffle(p, s: int, rng) -> None:
+     if s == p.me:  # someone picks it with him
+         s, o = o, s
+     m = lm._open(p, "scuffle", s, o, rng)
+-    m["data"] = {"venue": venue}
++    own = random.Random(f"{p.seed}:scuffle:{m['id']}")
++    m["data"] = {"venue": venue, "cause": _cause(p.conn, s, o, folk, own)}  # before anything is said or done
++    ties = {s: p.ties(s), o: p.ties(o)}
++    local = {x["id"]: x for x in folk}
++    for i in sorted(set(ties[s]) | set(ties[o])):  # their own people thereabouts, who may be out with them and stand by them
++        x = local.get(i)
++        if x and i not in (s, o) and x["sex"] == "male":
++            side = max((s, o), key=lambda a: ties[a].get(i, 0.0))
++            if ties[side][i] >= p.f("lm_told_closeness") and steps_in(p.conn, x["aggression"], own):
++                m["data"].setdefault(f"with_{side}", []).append(i)
+     lm._effect(p, m["id"], s, o, "squared up", resentment_delta=6)
+     lm._effect(p, m["id"], o, s, "squared up", resentment_delta=6)
+     if o == p.me:  # his to answer this week; the other man does not wait longer than that
+@@ -329,15 +369,21 @@ def _open_scuffle(p, s: int, rng) -> None:
+ def _blows(p, m: dict, rng) -> None:
+     from .harm import record_harm
+     s, o = m["subject_actor_id"], m["other_actor_id"]
+-    winner, loser = (s, o) if rng.random() < 0.5 else (o, s)
+-    severity = max(1.0, rng.expovariate(1.0 / p.f("lm_blows_severity")))
++    from .physique import blow, odds
++    backers = {a: [i for i in m["data"].get(f"with_{a}", []) if lm._living(p.conn, i)] for a in (s, o)}
++    winner, loser = (s, o) if rng.random() < odds(p.conn, s, o, backers[s], backers[o]) else (o, s)
++    severity = max(1.0, rng.expovariate(1.0 / p.f("lm_blows_severity"))) * blow(
++        p.conn, winner, loser, "fists", backers[winner], backers[loser])
+     place = p.conn.execute("SELECT current_location_id FROM actors WHERE id=?", (loser,)).fetchone()
+     override = ("persistent" if severity >= p.f("lm_blows_lasting") else "transient") if loser == p.me else None
+     res = record_harm(p.conn, loser, source_kind=lm.SOURCE, source_ref_id=m["id"], severity=min(100.0, severity), intent_class="hostile",
+                       location_id=place[0] if place else None, metadata={"offender_actor_id": winner}, outcome_override=override)
+     lm._effect(p, m["id"], loser, winner, "was beaten", resentment_delta=15, fear_delta=6)
++    joined = [lm._name(p.conn, i) for a in (s, o) for i in backers[a]]
++    words = (lm.data(p.conn).get("scuffle_causes") or {}).get("joined")
+     return lm._step(p, m, "killed" if res.get("outcome") == "fatal" else "fight", close=True,
+-                    hitter=lm._name(p.conn, winner), hurt=lm._name(p.conn, loser))
++                    hitter=lm._name(p.conn, winner), hurt=lm._name(p.conn, loser),
++                    backed=words.format(who=" and ".join(joined)) if joined and words else "")
+ 
+ 
+ def _step_scuffle(p, m: dict) -> None:
+diff --git a/engine/physique.py b/engine/physique.py
+index fb148e0..ebe709e 100644
+--- a/engine/physique.py
++++ b/engine/physique.py
+@@ -447,9 +447,39 @@ def _body(conn: sqlite3.Connection, actor_id: int | None) -> dict | None:
+ 
+ # ---- how much a body counts ------------------------------------------------------------------------------------------
+ 
++def _skill(conn: sqlite3.Connection, body: dict) -> tuple[float, str | None]:
++    """What his role, and what has been said about him, say he knows about fighting: a factor and the package's word."""
++    cfg = data(conn).get("fighting") or {}
++    r = conn.execute("SELECT COALESCE(subtype,''), COALESCE(notes,'') FROM actors WHERE id=?", (body["id"],)).fetchone()
++    said = [i["text"] for i in json.loads(body["rec"]["stated_json"] or "{}").get("items") or []]
++    hits = _lexicon(". ".join([r[0], r[1], *said]).lower(), cfg.get("skills") or [], cfg.get("negations") or [])
++    if not hits:
++        return 1.0, None
++    best = max(hits, key=lambda h: float(h["factor"]))
++    return float(best["factor"]), str(best["word"])
++
++
++def _ability(conn: sqlite3.Connection, body: dict) -> float:
++    """What somebody brings to a fight with the hands: the body, the skill, and the fights already behind them."""
++    fought = conn.execute("""SELECT COUNT(*) FROM harm_incidents
++                             WHERE json_extract(metadata_json,'$.offender_actor_id')=? AND intent_class='hostile' """,
++                          (body["id"],)).fetchone()[0]
++    seasoned = 1.0 + float((data(conn).get("fighting") or {}).get("per_log_fight", 0.0)) * math.log1p(fought)
++    return body["force"] * _skill(conn, body)[0] * seasoned
++
++
+ def _pair(conn: sqlite3.Connection, a: int | None, b: int | None):
+     x, y = _body(conn, a), _body(conn, b)
+-    return (x["force"], y["force"]) if x and y and x["force"] > 0 and y["force"] > 0 else None
++    return (_ability(conn, x), _ability(conn, y)) if x and y and x["force"] > 0 and y["force"] > 0 else None
++
++
++def _side(conn: sqlite3.Connection, first: float, others) -> float:
++    """One side of a fight: how good its people are on average, raised by how many they are."""
++    held = [first]
++    for other in others:
++        body = _body(conn, other)
++        held.append(_ability(conn, body) if body else 1.0)
++    return sum(held) / len(held) * len(held) ** float(data(conn)["contest"]["numbers_power"])
+ 
+ 
+ def force(conn: sqlite3.Connection, actor_id: int) -> float:
+@@ -458,24 +488,33 @@ def force(conn: sqlite3.Connection, actor_id: int) -> float:
+     return body["force"] if body else 1.0
+ 
+ 
+-def odds(conn: sqlite3.Connection, a: int | None, b: int | None) -> float:
+-    """The chance that `a` gets the better of `b` bare-handed: even when either body is unknown."""
++def odds(conn: sqlite3.Connection, a: int | None, b: int | None, with_a=(), with_b=()) -> float:
++    """The chance that `a`'s side gets the better of `b`'s bare-handed, `with_a` and `with_b` standing by each: even when
++    either body is unknown."""
+     pair = _pair(conn, a, b)
+     if pair is None:
+         return 0.5
+     k = float(data(conn)["contest"]["exponent"])
+-    x, y = pair[0] ** k, pair[1] ** k
++    x, y = _side(conn, pair[0], with_a) ** k, _side(conn, pair[1], with_b) ** k
+     return x / (x + y)
+ 
+ 
+-def blow(conn: sqlite3.Connection, hitter: int | None, victim: int | None, method: str | None) -> float:
+-    """What the two bodies do to the harm of a blow: by how much the weapon leaves to the body."""
++def blow(conn: sqlite3.Connection, hitter: int | None, victim: int | None, method: str | None,
++         with_hitter=(), with_victim=()) -> float:
++    """What the two of them, and the numbers on each side, do to the harm of a blow, by how much the weapon leaves to the
++    people holding it."""
+     pair = _pair(conn, hitter, victim)
+     if pair is None:
+         return 1.0
+     c = data(conn)["contest"]
+     share = float(c["methods"].get(method or "", c["methods"].get("default", 0.0)))
+-    return (pair[0] / pair[1]) ** (float(c["blow_power"]) * share)
++    crowd = ((1 + len(with_hitter)) / (1 + len(with_victim))) ** float(c["numbers_harm"])
++    return ((pair[0] / pair[1]) ** float(c["blow_power"]) * crowd) ** share
++
++
++def steps_in(conn: sqlite3.Connection, aggression: float, rng: random.Random) -> bool:
++    """Whether somebody from the district who is close to one of two fighters is out with them and stands with them."""
++    return enabled(conn) and rng.random() < float(data(conn)["contest"]["backing_chance"]) * aggression
+ 
+ 
+ def standoff(conn: sqlite3.Connection, a: int | None, b: int | None) -> float:
+@@ -487,7 +526,9 @@ def standoff(conn: sqlite3.Connection, a: int | None, b: int | None) -> float:
+ def capacity_factor(conn: sqlite3.Connection, actor_id: int) -> float:
+     """The body's mild share of what somebody can bring to bear on another in person."""
+     body = _body(conn, actor_id)
+-    return 1.0 if body is None else body["force"] ** float(data(conn)["contest"]["capacity_power"])
++    if body is None:
++        return 1.0
++    return (body["force"] * _skill(conn, body)[0]) ** float(data(conn)["contest"]["capacity_power"])
+ 
+ 
+ # ---- stated appearance -----------------------------------------------------------------------------------------------
+@@ -823,6 +864,7 @@ def appearance(conn: sqlite3.Connection, actor_id: int, viewer: int | None = Non
+         if key not in fields:
+             out[key] = p.get(key)
+     out["marks"] = (p["recent"] + ([] if "marks" in fields else p["marks"])) or None
++    out["in_a_fight"] = _skill(conn, body)[1]
+     other = None if viewer in (None, actor_id) else _body(conn, viewer)
+     if other:
+         a = d["words"]["against"]
+diff --git a/engine/prison.py b/engine/prison.py
+index cf4ff21..08824b0 100644
+--- a/engine/prison.py
++++ b/engine/prison.py
+@@ -611,7 +611,16 @@ def _fights(conn: sqlite3.Connection, day: int, fac, men: list, state: dict) ->
+         hard = rng.random() < serious
+         sev = lo + rng.random() * (hi - lo)
+         method = rng.choices(sorted(methods), weights=[methods[k] for k in sorted(methods)])[0]
+-        eid = _event(conn, day, int(fac["id"]), "fight", a, b, sev if hard else 0.0, f"{_name(conn, a)} in a fight")
++        from .physique import blow
++        sev *= blow(conn, offender, victim, method)  # size tells with fists, less with a weapon
++        why = cfg.get("causes") or {}  # why it started, written down with the fight before anybody is hurt
++        if b is not None and _heat_between(conn, orgs_of[a], orgs_of[b], day) > 0:
++            cause = why.get("outfits")
++        else:
++            said = why.get("moment") or []
++            cause = _rng(conn, "fight_cause", f"{day}:{a}").choice(said) if said else None
++        eid = _event(conn, day, int(fac["id"]), "fight", a, b, sev if hard else 0.0,
++                     f"{_name(conn, a)} in a fight" + (f" over {cause}" if cause else ""))
+         if offender is not None:
+             _event(conn, day, int(fac["id"]), "infraction", offender, victim, sev if hard else 0.0, f"{_name(conn, offender)} started a fight")
+         n += 1
+diff --git a/engine/schema.sql b/engine/schema.sql
+index 292e5e0..8b1040c 100644
+--- a/engine/schema.sql
++++ b/engine/schema.sql
+@@ -4852,6 +4852,7 @@ CREATE TABLE IF NOT EXISTS harm_incidents (
+ );
+ CREATE INDEX IF NOT EXISTS idx_harm_actor_day ON harm_incidents(actor_id,day,id);
+ CREATE INDEX IF NOT EXISTS idx_harm_source ON harm_incidents(source_kind,source_ref_id,actor_id);
++CREATE INDEX IF NOT EXISTS idx_harm_offender ON harm_incidents(json_extract(metadata_json,'$.offender_actor_id'),intent_class);
+ 
+ 
+ -- schema 106: WORLDHIST-01A stage 2 social memory, organization pressure, succession.
+diff --git a/tests/b1_physique_test.py b/tests/b1_physique_test.py
+index f0d0c45..dd7e288 100644
+--- a/tests/b1_physique_test.py
++++ b/tests/b1_physique_test.py
+@@ -8,6 +8,7 @@ from __future__ import annotations
+ 
+ import json
+ import os
++import random
+ import sys
+ import tempfile
+ from pathlib import Path
+@@ -131,6 +132,107 @@ def injury_shows(conn, physique, who: int) -> None:
+     assert physique.force(conn, who) < before, "an injury still healing takes strength"
+ 
+ 
++def fights(conn, physique, big: int, small: int) -> None:
++    """In person size and strength weigh on who comes off worse and how badly, and never settle it; a gun ignores them."""
++    from engine import interactions, life_matters as lm, outings
++    conn.execute("SAVEPOINT fights")
++    physique.set_stated(conn, big, "6'3\", 220 lb, very strong")
++    physique.set_stated(conn, small, "5'7\", 140 lb, not strong")
++    ahead = physique.odds(conn, big, small)
++    assert 0.65 < ahead < 0.99 and abs(ahead + physique.odds(conn, small, big) - 1) < 1e-9, ahead
++    fists, blade, gun = (physique.blow(conn, big, small, m) for m in ("fists", "blade", "handgun_range"))
++    assert fists > blade > gun == 1.0 and physique.blow(conn, small, big, "fists") < 1.0, (fists, blade, gun)
++    assert physique.standoff(conn, big, small) > 1.0 > physique.standoff(conn, small, big) > 0.0
++    assert physique.capacity_factor(conn, big) > physique.capacity_factor(conn, small)
++    assert interactions._capacity(conn, big) / physique.capacity_factor(conn, big) > 0
++    third = men(conn, 22, 30)[6]
++    alone, helped = physique.odds(conn, small, big), physique.odds(conn, small, big, with_a=[third])
++    assert helped > alone + 0.2, (alone, helped)
++    assert physique.blow(conn, small, big, "fists", with_hitter=[third]) > physique.blow(conn, small, big, "fists")
++    assert physique.blow(conn, small, big, "handgun_range", with_hitter=[third]) == 1.0
++    physique.set_stated(conn, small, "Boxed Golden Gloves two winters.")
++    skilled = physique.odds(conn, small, big)
++    assert skilled > alone and physique.appearance(conn, small)["in_a_fight"] == "has boxed", (alone, skilled)
++    physique.set_stated(conn, small, "A nose like a boxer.")
++    assert physique.appearance(conn, small).get("in_a_fight") != "has boxed"
++    physique.set_stated(conn, small, "5'7\", 140 lb, not strong")
++    rng_pair, heavier, grown = random.Random(3), [], men(conn, 20, 45)
++    while len(heavier) < 300:
++        x, y = rng_pair.sample(grown, 2)
++        wx, wy = physique._body(conn, x)["weight"], physique._body(conn, y)["weight"]
++        if abs(wx - wy) >= 25:
++            heavier.append(physique.odds(conn, *((x, y) if wx > wy else (y, x))))
++    assert 0.58 < mean(heavier) < 0.75, mean(heavier)
++    p, rng, won = lm._Pass(conn, today(conn)), random.Random(7), 0
++    for i in range(80):
++        conn.execute("SAVEPOINT bout")
++        m = lm._open(p, "scuffle", *((big, small) if i % 2 else (small, big)), rng)
++        m["data"] = {"venue": {}}
++        outings._blows(p, m, rng)
++        hurt = {int(r[0]) for r in conn.execute("SELECT actor_id FROM harm_incidents WHERE source_kind=? AND source_ref_id=?",
++                                               (lm.SOURCE, m["id"]))}
++        won += hurt == {small}
++        conn.execute("ROLLBACK TO SAVEPOINT bout")
++        conn.execute("RELEASE SAVEPOINT bout")
++    assert 40 < won < 80, won
++    conn.execute("ROLLBACK TO SAVEPOINT fights")
++    conn.execute("RELEASE SAVEPOINT fights")
++    print(f"fights: far bigger man {ahead:.2f}, won {won} of 80; 25 lb heavier {mean(heavier):.2f}; the small man alone {alone:.2f}, "
++          f"with a friend {helped:.2f}, having boxed {skilled:.2f}; harm with fists x{fists:.2f}, blade x{blade:.2f}")
++
++
++def causes(conn, physique) -> None:
++    """No scuffle without a reason written down first: the one he is asked about and the one that is fought both name it."""
++    import json as js
++    from engine import life_matters as lm, outings
++    conn.execute("SAVEPOINT causes")
++    p, rng = lm._Pass(conn, today(conn)), random.Random(11)
++    for s in men(conn, 20, 35)[:150]:
++        outings._open_scuffle(p, s, rng)
++    rows = conn.execute("SELECT id,subject_actor_id,other_actor_id,data_json FROM life_matters WHERE kind='scuffle'").fetchall()
++    assert len(rows) > 60, len(rows)
++    fought = 0
++    for r in rows:
++        why = js.loads(r["data_json"])["cause"]
++        texts = [t[0] for t in conn.execute("SELECT text FROM life_matter_steps WHERE matter_id=? ORDER BY id", (r["id"],))]
++        assert why and texts and all(why in t for t in texts), (why, texts)
++        fought += any("scuffle over" in t or "fight over" in t for t in texts)
++    assert fought
++    # a matter left open by an older save has no cause stored: it is still told
++    old = lm._open(p, "scuffle", rows[0]["subject_actor_id"], rows[0]["other_actor_id"], rng)
++    old["data"] = {"venue": "the bar"}
++    lm._step(p, old, "words")
++    backed = sum("with_" in r["data_json"] for r in rows)
++    conn.execute("ROLLBACK TO SAVEPOINT causes")
++    conn.execute("RELEASE SAVEPOINT causes")
++    print(f"causes: {len(rows)} scuffles all had one beforehand, {fought} came to blows, {backed} had others standing by")
++
++
++def live_trouble(db: Path) -> None:
++    """A night out that turns on him says why, and keeps the reason."""
++    from engine import outings
++    conn = connect(db)
++    try:
++        me = int(conn.execute("SELECT player_actor_id FROM player_state WHERE id=1").fetchone()[0])
++        day = today(conn)
++        for later in range(400):
++            conn.execute("SAVEPOINT night")
++            conn.execute("UPDATE world_state SET current_day=? WHERE id=1", (day + later,))
++            found = [h for h in outings.go_out(conn, me, day + later)["happenings"] if h["kind"] == "trouble"]
++            kept = conn.execute("SELECT summary FROM relationship_history WHERE source_kind='outing_trouble' AND day=?",
++                                (day + later,)).fetchall()
++            conn.execute("ROLLBACK TO SAVEPOINT night")
++            conn.execute("RELEASE SAVEPOINT night")
++            if found:
++                assert found[0]["cause"] and found[0]["cause"] in found[0]["what"], found
++                assert [r[0] for r in kept] == [found[0]["cause"]], (found, kept)
++                print(f"night out: {found[0]['what']}")
++                return
++        raise AssertionError("no night out turned to trouble in 400 evenings")
++    finally:
++        conn.close()
++
++
+ def the_live_save_wording(conn, physique) -> None:
+     """The ways a narrator really writes an appearance."""
+     d = physique.data(conn)
+@@ -196,6 +298,7 @@ def through_the_connector(tmp: str) -> None:
+                                            "appearance": "tiny, platinum blonde"})
+     assert new.get("actor_id") and "platinum blonde" in new["appearance"], new
+     print(f"connector: {scene['protagonist']['looks']} | {after['line']} | {new['appearance']}")
++    live_trouble(Path(tmp) / "campaigns" / "b1.db")
+ 
+ 
+ def older_save(db: Path, tmp: str, who: int) -> None:
+@@ -239,6 +342,8 @@ def main() -> None:
+             reads_do_not_write(conn, physique, a)
+             lived(conn, physique, b)
+             injury_shows(conn, physique, c)
++            fights(conn, physique, *men(conn, 22, 30)[3:5])
++            causes(conn, physique)
+             the_live_save_wording(conn, physique)
+             switched_off(conn, physique, a, b)
+             conn.commit()
+diff --git a/tests/slow_tests.txt b/tests/slow_tests.txt
+index b980659..7cb845d 100644
+--- a/tests/slow_tests.txt
++++ b/tests/slow_tests.txt
+@@ -84,3 +84,4 @@ p1_measures_test
+ p1b_five_years_test
+ j1_chain_test
+ saintjude_population_test
++s1_rise_equivalence_test  # S1: six one-year runs, about 25 minutes
+diff --git a/worlds/saintjude/matters.json b/worlds/saintjude/matters.json
+index b9b46be..bd042a9 100644
+--- a/worlds/saintjude/matters.json
++++ b/worlds/saintjude/matters.json
+@@ -176,6 +176,14 @@
+   "restaurant": 0.2,
+   "pizzeria": 0.15
+  },
++ "scuffle_causes": {
++  "owed": "money still owed",
++  "sore": "old bad blood between them",
++  "her": "a pass at {her}",
++  "moment": ["a spilled drink", "a bumped shoulder", "a remark that did not sit right", "a seat at the bar", "what was playing on the jukebox", "a bet on the ball game"],
++  "unsaid": "something said that night",
++  "joined": ", with {who} piling in"
++ },
+  "outing": {
+   "familiar": "{who} is here.",
+   "chance": "You run into {who}.",
+@@ -184,9 +192,9 @@
+   "keen": "{who} keeps looking your way.",
+   "open": "{who} is with friends and would not mind company.",
+   "cool": "{who} has no eyes for you tonight.",
+-  "trouble_you_sore": "{who} has not forgotten, and is making sure you know it.",
+-  "trouble_you": "{who} has been drinking and is looking at you for a quarrel.",
+-  "trouble_other": "{who} is picking a quarrel with {other}.",
++  "trouble_you_sore": "{who} is making sure you know it has not been forgotten: {cause}.",
++  "trouble_you": "{who} has been drinking and is looking at you for a quarrel over {cause}.",
++  "trouble_other": "{who} is picking a quarrel with {other} over {cause}.",
+   "talked": "{who} stays and talks.",
+   "turned_down": "{who} turns you down.",
+   "danced": "{who} dances with you.",
+@@ -201,13 +209,13 @@
+   "fling.faded": "Nothing more came of it between {s} and {o}",
+   "fling.carried_on": "{s} and {o} have gone on seeing each other",
+   "fling.ended": "It is over between {s} and {o}",
+-  "scuffle.at_him": "{s} squared up to {o} at {venue}",
+-  "scuffle.words": "{s} and {o} had words at {venue}",
+-  "scuffle.fight": "{hitter} laid {hurt} out in a scuffle at {venue}",
+-  "scuffle.killed": "{hitter} killed {hurt} in a fight at {venue}",
+-  "scuffle.police": "The police broke up trouble between {s} and {o} at {venue}",
+-  "scuffle.thrown_out": "{s} and {o} were put out of {venue} before it came to more",
+-  "scuffle.lapsed": "{o} let {s}'s challenge at {venue} pass",
++  "scuffle.at_him": "{s} squared up to {o} at {venue} over {cause}",
++  "scuffle.words": "{s} and {o} had words at {venue} over {cause}",
++  "scuffle.fight": "{hitter} laid {hurt} out at {venue} in a scuffle over {cause}{backed}",
++  "scuffle.killed": "{hitter} killed {hurt} at {venue} in a fight over {cause}{backed}",
++  "scuffle.police": "The police broke up trouble between {s} and {o} at {venue} over {cause}",
++  "scuffle.thrown_out": "{s} and {o} were put out of {venue} before {cause} came to more than words",
++  "scuffle.lapsed": "{o} let {s}'s challenge at {venue} over {cause} pass",
+   "scuffle.ended": "The trouble between {s} and {o} is over",
+   "money.short_self": "Money is running short for {s}: about {amount} would cover what is due",
+   "money.asks": "{s} asks {o} for a loan of {amount}",
+diff --git a/worlds/saintjude/physique.json b/worlds/saintjude/physique.json
+index 6d44141..fa0dba9 100644
+--- a/worlds/saintjude/physique.json
++++ b/worlds/saintjude/physique.json
+@@ -279,12 +279,28 @@
+   "eyes_words": ["eyes", "eyed"],
+   "complexion_words": ["complexion", "skin", "skinned", "olive-skinned", "pale", "tanned"]
+  },
++ "fighting": {
++  "basis": "Design proposal: no sourced figure. What somebody knows about using his hands multiplies what his body brings; the words are read from his role and from what was said about him.",
++  "negations": ["not", "no", "never", "isn't", "hardly", "without", "like", "by"],
++  "skills": [
++   {"words": ["golden gloves", "prizefighter", "boxer", "boxers", "boxed", "boxing prospect", "heavyweight", "middleweight", "welterweight"], "factor": 1.35, "word": "has boxed"},
++   {"words": ["street fighter", "brawler", "brawls", "knows how to fight", "handy with his fists", "handy with her fists", "good with his fists", "good with her fists"], "factor": 1.2, "word": "known to be handy in a fight"},
++   {"words": ["bouncer", "bouncers", "enforcer", "strong-arm", "leg breaker", "muscle for"], "factor": 1.15, "word": "used to rough work"},
++   {"words": ["marine", "marines", "paratrooper", "vietnam veteran", "patrolman", "police officer", "prison guard"], "factor": 1.15, "word": "trained to handle people"},
++   {"words": ["soldier"], "factor": 1.1, "word": "used to rough work"},
++   {"words": ["never been in a fight", "cannot fight", "can't fight", "gentle sort"], "factor": 0.8, "word": "no fighter"}
++  ],
++  "per_log_fight": 0.08
++ },
+  "contest": {
+   "weight_power": 0.6,
+-  "exponent": 3.5,
++  "exponent": 2.5,
+   "blow_power": 0.35,
+   "standoff_power": 1.0,
+   "capacity_power": 0.35,
++  "numbers_power": 0.7,
++  "numbers_harm": 0.35,
++  "backing_chance": 0.2,
+   "methods": {"fists": 1.0, "boots": 1.0, "blunt": 0.6, "blade": 0.35, "improvised": 0.5, "default": 0.0}
+  }
+ }
+diff --git a/worlds/saintjude/prison.json b/worlds/saintjude/prison.json
+index 2c1d889..f5e031e 100644
+--- a/worlds/saintjude/prison.json
++++ b/worlds/saintjude/prison.json
+@@ -99,6 +99,7 @@
+    "severity": {"low": 15, "high": 65, "why": "Harm severity of a serious fight, drawn uniformly."},
+    "methods": {"fists": 0.55, "blunt": 0.25, "blade": 0.2, "why": "Weights of the method of a serious fight (the lethality data weighs each)."},
+    "offender_share": {"value": 0.5, "mark": "Design proposal", "why": "Chance the man whose week it is, rather than the other, is the one who started it."},
++   "causes": {"outfits": "bad blood between their people outside", "moment": ["a place in the chow line", "a debt in cigarettes", "a turn at the telephone", "a remark in the yard", "something taken from a cell", "the television"]},
+    "crime_kind": "assault"
+   },
+   "contraband": {
+diff --git a/worlds/saintjude/rulebook_section.md b/worlds/saintjude/rulebook_section.md
+index e6fc48e..fba0c80 100644
+--- a/worlds/saintjude/rulebook_section.md
++++ b/worlds/saintjude/rulebook_section.md
+@@ -31,7 +31,7 @@ The governing principle: you may invent extensively. What is established, and wh
+ - Violence, betrayal, mercy and loyalty come from temperament, cost and what each person stands to lose, not from a script. Not everyone agrees, refuses or betrays on cue, and the protagonist is not first to notice everything.
+ - Unpaid or ill-used people drift, grumble or turn; the engine decides when. Voice `mood`, `wages` and `unpaid` in words.
+ - A man's place in the life shows in a lookup as `organisations[]` (his seat in each family or crew he belongs to, his lines, `standing_words`), with `temperament`, `custody` (held, bailed, doing time, charge) and, for a family or crew, `dealings` (how it stands with the others, its heat, who leads it, what it has lately lost); the scene's `in_the_air` is what the whole city is saying. Narrate these in the period's own speech, as a man of the street would put them ("bad blood since the funeral", "they're squeezing his ground", "hot-headed", "doing four years upstate"); never read out a field name, a level or a number, and never say more than the protagonist could know through his place, his people, the street and the papers. When `organisations[].history_due` is true, write the man's history to fit his record (age, crew, years made) and record it with `note`.
+-- **Bodies.** Everyone has one. `present`, `protagonist` and outing company carry `looks`; `lookup` on a person gives `appearance`, with how they compare to the protagonist. Describe people from it, and let size and strength show in how they treat one another. When the story says how someone looks, record it (`note` with subject_kind actor and field appearance, or `author` details.appearance): what is said stands and the engine fills the rest.
++- **Bodies.** Everyone has one. `present`, `protagonist` and outing company carry `looks`; `lookup` on a person gives `appearance`, with how they compare to the protagonist. Describe people from it, and let size and strength show in how they treat one another. In a fight size, strength, skill (a boxer, a brawler: `in_a_fight`) and numbers weigh on the odds and weapons override them; a fight has a reason on record before the first blow (a trouble's `cause`), so tell that reason and never invent one afterwards. When the story says how someone looks, record it (`note` with subject_kind actor and field appearance, or `author` details.appearance): what is said stands and the engine fills the rest.
+ 
+ **What shows (the `texture` block)**
+ - `texture` rides on every `scene`, `advance` and `resume`. Weave it into the prose: who walks with him, what he wears and arrives in, who stands or looks away, how people address him, what is in the papers or on the street. Never announce it, never list it, and never wait to be asked: a player who has to ask for the crew, the dress, the deference or the news is a miss on your part.
