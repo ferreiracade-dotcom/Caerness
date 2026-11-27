@@ -76,7 +76,7 @@ every start is fully playable soonest.
 | F-11 | His reach into the city's politics (round 3, widened in round 4, split in round 5) | A lawyer who runs for mayor, a hauler who bids on a city contract, an alderman who brings a measure: all are day-one moves, and P1 was built for background people only | One pass that wires what exists to `act`, with nothing new built. Round 4's code check found every P1 piece present and none reachable by him: `races.file` (file in an open race; the office's eligibility and filing window are its vetoes), `civic_votes.add_bid` (his business bids on an open tender), `civic_votes.open_item` (when seated, he brings a measure), `pre_vote_deal` (it records only a pledge agreed in a scene; the GM plays the haggling), `appointments.put_forward` and accepting an appointment (the background `fill` already leaves him out), and `races.commit_fraud` (he rigs if he chooses). `civic_graft.weigh` refuses him as a payer, so his bribes stay a plain `pay` that the official answers as a person. Endorsements already exist as `field_holdings` `delivery`, recorded only when a head's decision or a scene backs him. Campaign money goes in C-10. His own council vote is fixed in Deploy 1 (Task 14c, round 5) | S to M | Rounds 3 to 5: the code checks |
 | F-13 | His own work as an employee (split from F-11 in round 5) | A driver who becomes dispatcher, quits for a rival firm, or gets a raise is an everyday story, and it must land on his post, his pay and his routine | As an owner he can already hire, dismiss, promote and reassign (`player_operations`). Check that as an employee he can quit, take a job elsewhere, and that a raise or promotion his boss gives him lands on his post and wage; wire any missing piece the same way, with nothing new built | S | Round 4: the code check |
 | F-12 | Owning part of a business, and paying over time (round 4) | A dock worker buys a quarter of his boss's trucking firm, two friends open a shop, the mob takes a silent piece of a bar, a retiring owner sells for a down payment: these are the usual ways men come to own things | `enterprise_partners` already holds `ownership_share`, but almost nothing reads it, and `trade` moves a whole business for cash. Add: `trade` can sell a share, written to `enterprise_partners`; it can close on a down payment with the rest held as a debt to the seller, on the existing obligations; and Task 18c's profit is paid to the owners by share. C-3's silent piece and W-7's stake use the same rows. Round 5: partial repayment already works (`make_credit_payment` through `pay`); add changing a debt's terms (amount or due day) once a scene has agreed it, and settling a debt for a share. The majority or managing owner runs the business; a minority share pays its cut and gives the GM leverage to play. No shareholder voting | S | Round 4: the code check |
-| F-14 | His reach into prison, business and the outfit (round 5) | An inmate who files his own appeal, an owner who ends a supplier's contract or closes a failing bar, a soldier who asks for a sit-down: the same background-only gap as P1 | One check and wiring pass, nothing new built. Prison: `prison_review.file_appeal`, `file_parole` and `file_pardon` exist, and no tool calls them, so he files by his own act; he joins or leaves an inside group by his own act (since round 6 the engine doesn't place him; the group approaches him, Task 14c), and write or call out through `prison_channels.open_channel` (visits already work). Business: rent, supply and long projects already reach the engine through the intake's holdings and arrangements; add ending an agreement (`agreement_terms.end_term`) and closing a business. The outfit, for a man who isn't the boss: check that he can ask to join, kick up, step away and ask for a sit-down through the org core's existing offers and choices. The weekly filing of reviews for him is stopped in Deploy 1 (Task 14c) | S to M | Round 5: the code checks |
+| F-14 | His reach into prison, business and the outfit (round 5) | An inmate who files his own appeal, an owner who ends a supplier's contract or closes a failing bar, a soldier who asks for a sit-down: the same background-only gap as P1 | One check and wiring pass, nothing new built. Prison: `prison_review.file_appeal`, `file_parole` and `file_pardon` exist, and no tool calls them, so he files by his own act; he joins or leaves an inside group by his own act (since round 6 the engine doesn't place him; the group approaches him, Task 14c), and write or call out through `prison_channels.open_channel` (visits already work). Business: rent, supply and long projects already reach the engine through the intake's holdings and arrangements; add ending an agreement (`agreement_terms.end_term`) and closing a business. The outfit, for a man who isn't the boss: check that he can ask to join, kick up, step away and ask for a sit-down through the org core's existing offers and choices. The weekly filing of reviews for him is stopped in Deploy 1 (Task 14c). Revision 6.8: the boss's side (his outfit's purse, hiring, promoting, dismissing, truces) was found pointing at the old Caerness tables, empty in Saint Jude, and is fixed in Deploy 1 Task 14d; F-14 keeps the non-boss side | S to M | Round 5: the code checks |
 
 ## Deploy 3b: finish what is built
 
@@ -151,6 +151,7 @@ What makes acts come back. Each item uses machinery that exists and adds a small
 | O-6 | S1 Tasks 4 to 7 | Fast skips are the playing experience | Owner's call to the lead (2026-11-27): wait. Measure skip speed after Deploy 1 and decide then. The untracked S1 files belong to another session and stay untouched | ? |
 | O-7 | The player's sex at creation | Settled | Owner (2026-11-27): male unless the concept says otherwise | S |
 | O-8 | The connector rename | Cosmetic | When convenient | S |
+| O-9 | World words out of `engine/` (code audit, revision 6.6) | Packages are data only; a second world would trip on Saint Jude facts held in the engine | When each file is next touched, move to package data: `underworld.py`'s closed set of organisation types and its "gang-to-Mafia-family" refusal; `temperament.py`'s branch on `mafia_family`; `veto.py`'s list of public-office words; `ledger._LEADER`'s Caerness titles (lord, abbot, abbess, prior, patriarch, steward, warden) and `free_operation`'s Caerness keywords (siege, smith, granary, sect, tithe, guild, "sail to", "march to") (revision 6.7); the year in `civic_field`'s and `civic_patronage`'s keys (`holdings_1975`, `patronage_1975` become `holdings_opening`, `patronage_opening`). No task of its own | S |
 
 ## Already covered
 
@@ -214,12 +215,48 @@ What makes acts come back. Each item uses machinery that exists and adds a small
 - A medieval world on the same core.
 - Caerness renovated after the three games.
 
+## Revision 6.8 (the code audit's third pass)
+
+Looking for systems that do the same job twice found one that breaks play: Saint Jude's outfits run on the org core,
+but every outfit path in his tools (the outfit's purse, hiring, promoting, dismissing, truces, heat, "his outfit")
+reads the old Caerness tables, which are empty in Saint Jude. A boss couldn't pay out of his outfit or take a man on.
+Task 14d now points those paths at the org core and tests it on the boss start. Three deliberate overlaps were looked
+at and kept (how closely someone is simulated, what people think of him, where marriages come from).
+
+## Revision 6.7 (the code audit's second pass)
+
+The first pass ran the city with no protagonist, so the tools the GM calls never ran. The second pass read them and
+found four things, all in the three-levels plan now:
+- His answer to a matter already had a tool (`act` answer); revision 6.5 had added a second. Seat matters now go
+  through the existing one.
+- `act` gave sums as scale words ("a modest sum"), so the GM had to invent figures. Task 11: dollars in the result.
+- An action nothing models was refused. Task 12: it comes back `unmodelled`, with the way to record it.
+- Task 11 deleted `outings.approach`, but `act(outing)` still led there. Task 11 now changes `act` too.
+- Caerness titles and keywords in `ledger` and `free_operation` join O-9.
+
+## Revision 6.6 (the owner's code audit, 2026-11-27)
+
+The owner asked for the code that doesn't fit story first, or is more complicated than the story needs. A profiled
+120-day Saint Jude run (`docs/review/saint-jude-code-audit.md`) found five things the plans didn't cover:
+- Two systems answered "where is this person": the old presence habits and the new routines. Task 3b moves the
+  callers that place named people onto routines; Saint Jude stores no new presence habits.
+- Every Saint Jude baby got a Caerness cultivation Core. Task 2b guards the birth path; Task 3's migration removes
+  the rows; the leak scan checks the table.
+- The psychology process ran in Saint Jude, writing scores nothing reads. Task 2b switches it off (no longer optional).
+- The death check logged every person every month, unread. Task 2b keeps a row only for a death.
+- Saint Jude words and closed lists inside `engine/`. O-9, when each file is next touched.
+
+Looked at and kept: the ten numbers on each relationship (much reads them, and the player meets only how people
+treat him), the outfit motive scoring (the working level-2 layer), `temptations` and `settle_circle`. No hard caps
+were found in the code that runs for Saint Jude.
+
 ## Revision 6.5 (Gemini round 11)
 
 Two Deploy 1 bugs in Task 14, both applied:
 - A fact behind a personal matter (a wrong, a broken promise, a lie, news of another woman) surfaces once. Before,
   a confrontation already played could be nominated again every week.
-- The GM gets a tool path to give his answer to a seat matter (`note(kind="answer")`).
+- The GM gets a tool path to give his answer to a seat matter (`note(kind="answer")`; revision 6.7 uses the
+  existing `act` answer instead).
 
 Gemini then said it has nothing left to raise: the next real bugs will show once Deploy 1 runs and is played.
 

@@ -189,11 +189,29 @@ and a stated decision takes its target from the stamp (Task 4).
 - The outlets: four already exist in the seed, and three are added (Task 3).
 - `standing_here` sits inside `you` (Task 11).
 
+**Revision 6.8 (the code audit's third pass).**
+- Task 14d: in a package that runs the org core, his outfit tools (its purse, hiring, promoting and dismissing, truces,
+  heat, "his outfit") use the org core instead of the old Caerness tables, which are empty in Saint Jude. The boss
+  start's test proves it.
+
+**Revision 6.7 (the code audit's second pass, the paths that run during play).**
+- Task 14c and the contract: his answer to a seat matter goes through the existing `act(action_type="answer")`, which
+  already answers `waiting_on_you`. Revision 6.5's `note(kind="answer")` is dropped: it duplicated that tool.
+- Task 11: `act`'s results give sums in dollars, and `act(outing)` no longer leads to the deleted `outings.approach`.
+- Task 12: an intent `act` can't map comes back `unmodelled` with the way to record it, never refused.
+
+**Revision 6.6 (owner's code audit, 2026-11-27; `docs/review/saint-jude-code-audit.md`).**
+- Task 2b: the psychology process is off in Saint Jude (required, no longer optional tidying); babies get no
+  cultivation Core where the package has no cultivation; the death check stops logging every person every month.
+- Task 3: the schema 134 migration removes the Core rows wrongly given to Saint Jude babies.
+- Task 3b: the callers of `presence.py` that place named people move onto `routines.where`, so one system answers
+  where a person is.
+
 **Revision 6.5 (Gemini round 11).**
 - Task 14b: each nomination from `conduct` names the fact behind it, and a fact that has already produced one, of
   any status, never produces another, so a played-out confrontation isn't nominated again every week.
 - Task 14c and the contract: `note(kind="answer", nomination, choice)` is the connector's way to pass his answer to
-  a seat matter.
+  a seat matter (replaced by revision 6.7: the existing `act(action_type="answer")` does it).
 
 **Revision 6.4 (Gemini round 10: slips in this plan's own text).**
 - Contract and Task 3: `nominations.status` allows `lapsed`.
@@ -317,6 +335,22 @@ switches, so the build is measured against a world where only the outfit choices
 - Modify: `worlds/saintjude/outfits.json` (mark `busted` and `incident` as `"befalls": true`)
 - Modify: `docs/superpowers/specs/2026-11-26-three-levels-contract.md` and the design's section 8 (already done with
   this plan change)
+- Revision 6.6 (code audit):
+  - Modify: `engine/simulation.py` (`SYSTEM_PROCESSES` gains `"psychology": ("psychology",)`, so a package without
+    the switch doesn't run it) and `worlds/caerness/world.json` (`psychology` true). In Saint Jude it wrote grief
+    and trauma scores (`psychological_stressors`) that nothing reads but a coverage count, and revision 5 rules out
+    psychology simulation.
+  - Modify: `engine/household_life.py` (the birth path calls `cultivation.assign_birth_core` only when
+    `system_enabled(conn, "cultivation")`, as `person_ecology` and `resolution_controller` already do; all 56
+    babies of a 120-day Saint Jude run got a `Closed-Core` row) and `tools/leak_scan.py` (flags any
+    `cultivation_profiles` row in a package with cultivation off).
+  - Modify: `engine/health.py` (`mortality_audit` gets a row only for a death, unless the package's
+    `systems.mortality_audit` is true; Caerness sets it true, so its tests are unchanged. Saint Jude wrote about
+    8,500 rows a year that nothing reads.)
+  - Not changed here, but checked by the test: `information_links`, `resolution_transitions` and
+    `actor_context_cache` (no readers) stop growing in Saint Jude as a result of the rumour-broadcast switch
+    (Task 10b), the resolution switch (Task 3) and the skipped actor context (this task). If one still grows after
+    those tasks, the task that owns its writer stops it.
 - Test: `tests/competing_paths_off_test.py`
 
 - [ ] **Step 1: Write the failing test:**
@@ -330,6 +364,11 @@ seat_protagonist_as_associate(conn); run_weeks(conn, 52)
 assert happening_kinds_of(conn, me) <= {"busted", "incident"}
 # Caerness keeps both switches on (its tests are unchanged)
 assert caerness_package().systems["personal_choices"] and caerness_package().systems["belief_mirror"]
+# revision 6.6 (code audit), same 120-day Saint Jude run
+assert count(conn, "psychological_stressors") == 0                       # no psychology simulation
+assert births_in_run(conn) > 0 and count(conn, "cultivation_profiles") == 0  # no Caerness Core on a Saint Jude baby
+assert count(conn, "mortality_audit") == deaths_in_run(conn)              # a row only for a death
+assert caerness_package().systems["psychology"] and caerness_package().systems["mortality_audit"]
 ```
 - [ ] **Step 2: Run it.** Expected: FAIL (209 consolidate decisions in the reference run).
 - [ ] **Step 3: Implement.**
@@ -338,7 +377,8 @@ assert caerness_package().systems["personal_choices"] and caerness_package().sys
 - [ ] **Step 5: Commit** the files above.
 - [ ] Optional tidying, same task, own commit: a `caerness_economy` switch for the Caerness-only processes
   (agriculture, logistics, merchant, craft, growth, war, ecology, education, patronage, seeking, attention,
-  psychology, world). They run on empty tables in Saint Jude, so nothing should change but the run time.
+  world). They run on empty tables in Saint Jude, so nothing should change but the run time. Revision 6.6:
+  `psychology` left this list; it wrote rows in Saint Jude and is switched off in the required part above.
 - Not done here: `org_lifecycle._dormant` still puts a former member back on the full review. With the personal
   choices off he can only hold position, so it is harmless; Task 3's `levels` owns his cadence after that.
 
@@ -347,7 +387,10 @@ assert caerness_package().systems["personal_choices"] and caerness_package().sys
 **Files:**
 - Modify: `engine/schema.sql` (new tables and columns from the contract; append a `-- schema 134` block)
 - Modify: `engine/db.py` (`SCHEMA_VERSION = 134`; migration adds columns with `ALTER TABLE ... ADD COLUMN` guarded by
-  a column check, as the existing migrations do)
+  a column check, as the existing migrations do. Revision 6.6: on a save whose package has cultivation off, the
+  migration deletes its `cultivation_profiles` rows. They were made in error by the birth path, and nothing in such
+  a package reads them. Test: a Saint Jude save with such rows has none after migrating; a Caerness save keeps
+  all of its rows)
 - Create: `engine/levels.py`
 - Create: `engine/rollback.py` (only `current`, the two `log_*` functions and the table-to-key map here; Task 6 adds undo)
 - Create: `worlds/saintjude/levels.json` (every key in the contract's package section. Deploy 1's keys get first
@@ -445,6 +488,20 @@ assert levels.resolution_of(conn, spouse) == "materialized_minor" and quiet_rout
 - Modify: `engine/levels.py` (`refresh` calls `routines.seed` for anyone newly notable or active)
 - Modify: `tools/build_opening.py` (seed routines at the end of the opening build)
 - Modify: `worlds/saintjude/levels.json` (`schedules`)
+- Revision 6.6 (code audit), one answer to "where is he": `presence.py` keeps probabilistic presence habits for
+  everyone (12,469 new rows in 120 days of Saint Jude, about 11% of the engine's own time). Without this step its
+  callers and `routines.where` would answer the same question differently. The callers that place named people
+  move onto `routines.where`, and keep their old presence check only where `where` returns `None` (someone with
+  no routine):
+  - Modify: `engine/company.py` (`in_earshot`: whether someone at his place can overhear him);
+  - Modify: `engine/household_life.py` (where a courting pair can meet, in its courtship scan);
+  - Modify: `engine/authoring.py` (who is at home, line ~722);
+  - `information.py`'s presence snapshot for rumour exposure goes with the rumour-broadcast switch (Task 10b);
+    `player.py`, `turns.py`, `decisions.py` and `model_gateway.py` are the old player layer and are left alone.
+  - Modify: `engine/presence.py` (with a package switch `systems.presence_habits`, false in Saint Jude and true in
+    Caerness, it answers its remaining callers without storing new habit or profile rows).
+  - The nearby-code review said `outings.crowd` was presence's last caller; that was wrong, and this step is
+    the correction.
 - Test: `tests/routines_test.py`
 
 **Interfaces:**
@@ -464,6 +521,12 @@ add_exception(conn, frank, "ill", day, day + 5); assert routines.where(conn, fra
 assert routines.where(conn, unseeded_minor, day, "day") is None              # unknown, not somewhere
 hold_in_custody(conn, frank, day); assert routines.where(conn, frank, day, "day") == custody_location(conn, frank)
 start_travel(conn, frank, day + 10); assert routines.where(conn, frank, day + 11, "day") != garage_location
+# revision 6.6: one answer to "where is he"
+put_me_at(conn, garage_location, weekday, "day"); assert company.in_earshot(conn, me, frank)   # routine says the garage, so does the scene
+put_me_at(conn, bar_location, weekday, "day"); assert not company.in_earshot(conn, me, frank)
+rows = count(conn, "actor_presence_habits") + count(conn, "actor_presence_profiles"); run_days(conn, 120)
+assert count(conn, "actor_presence_habits") + count(conn, "actor_presence_profiles") == rows  # Saint Jude stores no new habits
+# and the S1 ranges (outfit actions, money, incidents) and the courtship rate stay inside the reference run's ranges
 ```
 - [ ] **Step 2 to 5:** run (FAIL), implement, run with `--quick`, commit.
 
@@ -931,6 +994,14 @@ assert claims_moved_for(conn, offscreen_hit_victims_outfit)                  # r
 - Modify: `engine/findings.py` (where the record is silent, `answers` returns `unknown` and the GM may invent)
 - Modify: `connector/views.py` and the tool results it shapes (facts and numbers in fields, not engine-written
   sentences; keep the wording the GM needs to know what a fact is, nothing more)
+- Modify: `engine/player_operations.py` and `connector/acting.py` (revision 6.7: `act` results give every sum as a
+  dollar number in `amount` and `short_of`, with the scale word allowed beside it; the summary becomes plain
+  facts, who paid whom what. The module header's "amounts leave this module only as scale words" goes. Today
+  `act(pay)` returns `"amount": "modest"`, so the GM has to invent the figure the rulebook says must agree with
+  the engine)
+- Modify: `connector/acting.py` and the `act` description in `connector/server.py` (revision 6.7: with
+  `outings.approach` deleted, `act(outing)` with a target puts that person in his company for an ordinary scene;
+  the description loses `details.move talk|dance|number|leave together`)
 - Test: `tests/brief_budget_test.py`
 
 **Interfaces:**
@@ -994,6 +1065,11 @@ circle_reaction_away_from_him(conn, me)                     # grand plan round 2
 r = server.advance("p1", days=1)
 assert r["cutaways"] and "outside his knowledge" in dump(r["cutaways"])
 assert not server.advance("p2", days=1).get("cutaways")     # shown once (its own call id, so no replay)
+# revision 6.7: sums in dollars; no outing approach roll
+r = server.act("q1", "pay", "he pays Frank for the parts", target_actor_id=frank, details={"amount": 120})
+assert r["amount"] == 120 and "modest" not in r["summary"]
+r = server.act("q2", "outing", "he goes over to talk to her", target_actor_id=carla)
+assert r["status"] == "applied" and "outcome" not in r and company.is_with(conn, me, carla)
 injure(conn, me, "broken hand"); owe(conn, me, frank, 200)
 b = brief_full(server); assert "broken hand" in dump(b["you"]) and "200" in dump(b["you"])   # it lingers
 assert "you_may" not in dump(server.act("p1", "go out", {"place": "the Starlite"}))   # no menu of moves
@@ -1010,6 +1086,15 @@ assert prose_share(b) < 0.2                      # fields, not sentences (lead s
   example from `docs/playtests/2026-11-25-dominic-2.txt`, plus how to use scenes, stamps, `close_scene`, canon by kind,
   consequence facts and `owner_notice`. Turning events are taught in Task 15)
 - Modify: `worlds/saintjude/rulebook_section.md` (Saint Jude's own examples, if any principle needs one)
+- Modify: `engine/free_operation.py` and `connector/acting.py` (revision 6.7, the engine side of "never refuse an
+  ambition because nothing models it": `free_operation` sorts an intent into one of 15 kinds by keyword, and
+  today anything that matches none is refused as "not something the engine can carry out yet", with a reason
+  that tells the GM to rephrase. A con, a forged document, a smear in the paper or a rigged fight is then forced
+  into a wrong kind or played unrecorded. It now returns `status: "unmodelled"`, nothing applied, naming the
+  record path: a scene stamp with `known_to` for what was done and who knows, `money` for any sum, `author` for
+  anyone new. The keyword list stays, and the GM's `kind` hint still overrides it. Test: `act("operation", "he
+  has a forger make up a new title deed")` returns `unmodelled` with the record path, not `refused`; the rulebook
+  line under the round 2b rule says to follow it)
 - Test: `tests/connector_resume_test.py` (update the rulebook expectations it pins)
 
 - [ ] **Step 1:** Rewrite. The rulebook holds only:
@@ -1062,7 +1147,7 @@ Revision 5.2 splits this task into three sessions, in this order:
   - `engine/nominations.py`, `engine/levels_tick.py` and `engine/simulation.py`;
   - the life modules listed below;
   - `connector/server.py` (`note(kind="plan")`, `realizes` on `author` and `close_scene`, and seeding a person on
-    `author` or `realize`; revision 6.5: `note(kind="answer", nomination, choice)` is added in 14c);
+    `author` or `realize`; revision 6.7: 14c routes `seat_decision` matters through the existing `act` answer);
   - `connector/brief.py` and `connector/timeflow.py` (fill `nominations`);
   - the `nominations` block of `worlds/saintjude/levels.json`.
 
@@ -1071,7 +1156,8 @@ Revision 5.2 splits this task into three sessions, in this order:
   `engine/levels_tick.py` (register its steps) and the `conduct` block of `levels.json`. Test lines: the revision 4.1
   ones.
 - **14c:** agency guards and seat decisions. Files:
-  - `connector/server.py` (revision 6.5: `note(kind="answer")`);
+  - `connector/acting.py` and `connector/server.py` (revision 6.7: `_answer` sends a `seat_decision` matter to
+    `nominations.realize`; the `act` description says so);
   - `engine/nominations.py` (revision 6.4: `realize` hands a `seat_decision` answer to its path; `apply_overdue`
     lapses one);
   - `engine/org_succession.py`, `engine/org_coup.py` and `engine/crime_response.py`;
@@ -1162,9 +1248,13 @@ engine nominates, the GM realizes and the engine ratifies.
     his `stated` decision (Task 17b). Unanswered by its date, `apply_overdue` decides nothing for him: a vote
     counts him absent, and the seat goes on as it was. Test: a seated councilman answers "no" through
     `realize` and the item's count holds his no; an outfit choice he answers runs the matching handler.
-  - Revision 6.5, the connector path: `note(kind="answer", nomination, choice)` in `connector/server.py` passes
-    `{"choice": choice}` to `nominations.realize`, so the GM can answer straight after a skip or mid-scene. Test:
-    `server.note("a1", kind="answer", nomination=n, choice="no")` and the item's count holds his no.
+  - Revision 6.7, the connector path (replacing 6.5's `note(kind="answer")`): the existing
+    `act(action_type="answer", details={"matter": id, "answer": ..., "how": ...})` already answers any
+    `waiting_on_you` matter through `life_matters.answer`. In `connector/acting.py` `_answer`, a matter that is a
+    `seat_decision` nomination goes instead to `nominations.realize` with `{"choice": how or answer}`, so the GM
+    can answer straight after a skip or mid-scene, in the player's words. Test:
+    `server.act("a1", "answer", "he votes no", details={"matter": n, "answer": "no"})` and the item's count
+    holds his no; a life matter answered the same way still goes to `life_matters.answer`.
   - Routine running goes to his second or manager. If he has none, the seat keeps going as it was. Each such act is
     listed in the skip result as done by them.
 - Revision 4.1:
@@ -1259,6 +1349,25 @@ assert routine_acts_by(conn, his_second(conn, outfit)) and listed_in_skip_result
   present in this save, with the reason recorded. He takes the seat with its people, history and obligations.)
 - Modify: `engine/veto.py` (held seats refused during play as now, allowed only for the opening)
 - Create: `tools/start_check.py` (the four-start check)
+- Revision 6.8 (code audit finding 11), his outfit through the org core. Saint Jude's outfits run on the org core
+  (`org_profiles`, `org_seats`, `org_units`, `org_money`); the old layer (`underworld_organizations`,
+  `underworld_personnel`) is empty there. Yet every outfit path in his tools reads the old layer: checked on a
+  Saint Jude save, `outfit:20` (the Eastside Combine) is refused as "unknown outfit 20". When the package runs the
+  org core (`systems.outfits`), these paths use it; the old layer stays for Caerness:
+  - Modify: `engine/ledger.py` (an `outfit:<id>` holder is an `org_profiles` organisation. Its purse is the one the
+    org core already pays from, `org_money.purse_ref`: the living head's purse. `_check_exists`, `balance`,
+    `_debit` and `can_draw` follow it, so a boss pays out of the outfit's money as the org core does);
+  - Modify: `engine/player_operations.py`:
+    - hiring into an outfit seats the man through `orgs.seat` at the role named, under the boss or the unit
+      leader named;
+    - promoting, retiring and expelling change his `org_seats` row the way the org core's own vacancies do;
+    - `_my_outfit` reads his seat (`orgs.seats_of`);
+    - a truce or alliance lowers the pair's `org_tension` and is recorded with the org core's deal records;
+    - heat goes to `org_heat.add`;
+    - the men behind an attack are his outfit's seated men;
+  - Modify: `connector/store.py`, `connector/authoring.py` and `connector/views.py` (an outfit id is an `org_profiles`
+    organisation; "who is in the life" reads `org_seats`);
+  - the money-flow recorder `underworld_rebuild._record_economic_flow` stays where it is (O-9 moves it later).
 - Test: `tests/start_scale_test.py`
 
 **Interfaces:**
@@ -1301,6 +1410,16 @@ for start in ("mechanic", "businessman", "politician", "boss"):
 league = server.author("p1", "organisation", {"name": "a national league office", "place": "New York"})
 rep = league_representative(conn, league); open_negotiation(server, me, rep, due_in_days=20); run_days(conn, 25)
 assert waiting_on_you_has(server, "league") and levels.resolution_of(conn, rep) != "gone"
+# revision 6.8: the boss runs his outfit through the org core
+boss = start_as("boss"); outfit = his_outfit_id(boss)
+before = org_money_rows(boss); r = server.act("b1", "pay", "he pays Sal for the job", target_actor_id=sal,
+                                           details={"amount": 500, "from": f"outfit:{outfit}"})
+assert r["status"] == "applied" and r["amount"] == 500                     # not "unknown outfit"
+server.act("b2", "hire", "he takes Nicky on as a soldier", target_actor_id=nicky, details={"into": f"outfit:{outfit}", "role": "soldier"})
+assert seat_role(boss, nicky, outfit) == "soldier"                            # an org_seats row, not underworld_personnel
+t0 = tension(boss, outfit, rival); server.act("b3", "demand", "he offers the Greco crew a truce", target_actor_id=greco_head)
+assert tension(boss, outfit, rival) < t0 or waiting_on_you_has(server, "truce")   # agreed, or their answer is pending
+assert count(boss, "underworld_personnel") == 0 and count(boss, "underworld_organizations") == 0
 ```
 - [ ] **Step 2 to 5:** run (FAIL), implement, run the task's test plus touched modules, commit. The lead reads the
   four reports, and `start_check.py` runs again before Deploy 2.

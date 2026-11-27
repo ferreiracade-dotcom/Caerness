@@ -79,7 +79,8 @@ End with any `REQUEST` lines.
 | 6.2 | 5 traps in Deploys 1 and 2 | All 5: `near` without distant movers; answering a seat matter; no neglect from ordinary skips; casual extras undo cleanly; the start test over 120 days | None. All five confirmed against the plan text |
 | 9 | 6 points, 5 requests | All 6 as revision 6.3: life draws for everyone; overdue seat matters lapse; restlessness and strain scoped; C-11 `near`; C-1 explainable money; cutaway guards; L-6 note | None. Point 1 was a real conflict between the plan's overview and Task 14a |
 | 10 | 6 points, drift check | All 6 as revision 6.4, slips in the plan's own text | None |
-| 11 | 2 Task 14 bugs; nothing else to raise | Both as revision 6.5: each conduct fact surfaces once; `note(kind="answer")` for seat matters | None. Review ends here: Gemini is satisfied |
+| 11 | 2 Task 14 bugs; nothing else to raise | Both as revision 6.5: each conduct fact surfaces once; `note(kind="answer")` for seat matters | None. Gemini was satisfied with the plan as it stood |
+| 12 | (this round: the owner's code audit, revisions 6.6 to 6.8) | | |
 
 ## Settled decisions (don't reopen without new evidence)
 
@@ -102,5 +103,20 @@ End with any `REQUEST` lines.
 
 ## Open questions for you this round
 
-1. The corrected text of Tasks 7, 11, 14, 16 and 17b is at the end again. Do the six fixes read right?
-2. Are you satisfied? If you have nothing left to raise, say so plainly.
+The owner had the running code audited against story first, and its findings were added to the plan as
+revisions 6.6 (the city's own clock), 6.7 (the paths that run during play) and 6.8 (systems doing one job
+twice). The audit and the full text of Tasks 2b, 3b, 11, 12, 14 and 14d, and the changed part of Task 3, are at
+the end of this copy.
+
+1. Do the revision 6.6 and 6.7 changes fix what the audit found, without breaking anything that reads the
+   switched-off rows or the changed tool results?
+2. Task 3b keeps the old presence check where `routines.where` returns `None` (someone with no routine). Is that
+   fallback right, or should those callers treat such a person as not placed?
+3. The audit kept the ten numbers on each relationship and the outfit motive scoring. Do you agree, judged by story
+   first?
+4. Did the audit miss a class of code that breaks story first or is heavier than the story needs? Say what to check.
+5. Revision 6.7 drops revision 6.5's `note(kind="answer")` for the existing `act` answer. Does Task 14c's seat
+   decision still work end to end through it?
+6. Revision 6.8 points his outfit tools at the org core, where an outfit's money is its living head's purse
+   (`org_money.purse_ref`). Is that the right purse for a boss paying "from the outfit", and does anything else in
+   his tools still read the old layer?

@@ -155,10 +155,15 @@ political offices and, from revision 5.8, `business_line` (the size of business 
 
 ## Tool contract (connector/server.py)
 - Revision 4: `note(kind="plan", nomination, by_day, text)` sets the GM's timeframe, or with `decline=reason`
-  declines; `author` and `close_scene` take `realizes=<nomination id>`. Revision 6.5: `note(kind="answer",
-  nomination, choice)` gives his answer to a `seat_decision` in the player's own words ("no", "pay him
-  half"); the connector passes `{"choice": choice}` to `nominations.realize`, and the result says what the path
-  recorded, or that the answer became his stated decision. `brief.full` and the skip result list
+  declines; `author` and `close_scene` take `realizes=<nomination id>`. Revision 6.7 (replacing 6.5's
+  `note(kind="answer")`, which duplicated an existing tool): his answer to anything in `waiting_on_you` goes through
+  the existing `act(action_type="answer", details={"matter", "answer", "how"})`. For a `seat_decision` matter
+  the connector passes `{"choice": how or answer}`, the player's own words ("no", "pay him half"), to
+  `nominations.realize`, and the result says what the path recorded, or that the answer became his stated
+  decision. Every other matter goes to `life_matters.answer` as today.
+- Revision 6.7: `act` results give sums as dollar numbers (`amount`, `short_of`), with the scale word only beside
+  them. An intent `act` can't map to anything it models returns `status: "unmodelled"` with the record path
+  (a scene stamp with `known_to`, `money` for any sum, `author` for anyone new), never a refusal. `brief.full` and the skip result list
   `nominations` (new, to remind, overdue, and the small ones applied). `brief.full` has a `you` part. Tool results give facts and numbers in fields, not engine prose.
 - **People are a name or an id everywhere** (`close_scene`, stamps, threads). Names are matched against the open
   scene's people first, then the protagonist's known people. An ambiguous name, such as a first name two people share,
