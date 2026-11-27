@@ -2,6 +2,18 @@
 
 Read this first if you are an agent (or human) picking up the Narrative Engine or one of its worlds. It says what the project is, where work stands, the rules the owner has set, how to run things, and what comes next. It is kept current; `README.md` is the long engine handoff and the many `*_ACCEPTANCE*.md`, `AUDIT_*`, `HANDOFF_*` and `POST_*_ROADMAP` files in the root are **historical evidence**: they do not override this file or README.
 
+## 0. The binding principle (owner, 2026-11-27)
+
+> **The objective is not to build the most sophisticated simulation of a fictional city. It is to create the best
+> possible environment in which to play a believable character-led story.** (owner, 2026-11-27)
+
+Every feature, existing or proposed, must pass one test: does it make the story more believable, more reactive,
+more interesting to play, or more coherent over time? If a simpler mechanism gets the same result, use it. No
+feature is justified because it makes the simulation more complete. Priorities, in order: the playing experience; a
+world that reacts; persistence and continuity; and the machinery, which serves those three and never dictates them.
+This is not a licence to delete working code without the owner's yes. Detail: revision 5 at the top of
+`docs/superpowers/specs/2026-11-26-three-levels-design.md`.
+
 ## 1. What this is
 
 The **Narrative Engine**: a persistent world simulation with a narrative camera inside it. **The world exists and changes without the player; the player is the camera, not the centre of causality.** The engine is world-agnostic; each world is a package under `worlds/`:

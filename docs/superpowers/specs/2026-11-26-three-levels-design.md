@@ -1,6 +1,7 @@
 # Three simulation resolutions, the GM as storyteller, and the link between them (design, 2026-11-26, revision 3.1)
 
-Status: approved by the owner on 2026-11-26 (revision 3.1). Build plan: `docs/superpowers/plans/2026-11-26-three-levels-build.md`.
+Status: approved by the owner on 2026-11-26 (revision 3.1). Section 0 (revision 4) approved by the owner on 2026-11-27. Revision 5 (story first, below) is binding and
+overrides every section. Build plan: `docs/superpowers/plans/2026-11-26-three-levels-build.md`.
 
 Background:
 - `docs/research/2026-11-26-three-layers-map.md`: what the code does today.
@@ -33,6 +34,296 @@ on top of an engine that keeps every fact, sum and relationship in order.
 
 The three levels are **resolutions of simulation, not a ranking of people**. Level 1 isn't less important; it is
 held at less detail.
+
+## Revision 5: story first (binding, owner 2026-11-27; overrides every section below)
+
+> **The objective is not to build the most sophisticated simulation of a fictional city. It is to create the best
+> possible environment in which to play a believable character-led story.** (owner, 2026-11-27)
+
+**The test for every feature, now and later:** does it make the story more believable, more reactive, more
+interesting to play, or more coherent over time? If a simpler mechanism gets the same result, use the simpler one.
+No feature is justified because it makes the simulation more complete.
+
+**Priorities, in order:**
+1. the playing experience;
+2. a world that reacts;
+3. persistence and continuity;
+4. the machinery underneath, which serves 1 to 3 and never dictates them.
+
+**What this changes in the sections below:**
+- **The three levels are a practical tool,** not a project in themselves. Where a level rule adds work without
+  changing what the player meets, it goes.
+- **No psychology simulation.** The engine remembers facts about people (when they last saw him, what he did to
+  them, what he promised, what he lied about, what they are short of) and applies one plain rule to them. It does
+  not model inner states. Out:
+  - pressure accumulators with per-person lognormal thresholds;
+  - cooldowns, adaptation and resignation;
+  - mood from recent deeds;
+  - scored lists of rejected options;
+  - separate build-up formulas for neglect, grievance and jealousy.
+- **Offscreen choice is a short pick:** among the package actions that serve the concern, chosen by temperament and
+  habit with a little noise. The engine stores the action and its reason only.
+- **The engine's answers are facts:** what an act costs, whether it is legal, what obligation it breaks, whose man
+  or ground it touches. Whether an act fits the man is the GM's judgement. The engine is not a narrative critic.
+- **Reuse the city systems that exist** (`claims`, `temptations`, `life_matters`, `money_records`, `org_*`,
+  `crime_response`, `civic_tick`, households, businesses) before adding a table or a module.
+- **Recording stays light.** A scene closes with its participants. Anything more is recorded only when it matters
+  later.
+- **The GM has room to tell the story.** The engine says what is true and what has become likely; the GM chooses how
+  it plays.
+- **The player always has a life.** Kin, friends, romance and ordinary evenings stay present whatever his position,
+  from mechanic to boss to councilman.
+- **This is not a licence to delete working code.** Existing systems are switched off or kept, never removed without
+  the owner's yes.
+
+## Revision 5.1: play anyone (owner, 2026-11-27; binding with revision 5)
+
+The owner's central principle: *"I want to be able to play anyone, in a living Saint Jude, and experience what
+happens."* The owner's brief lists nine priorities, in order:
+1. the freedom to play different characters from different starts;
+2. a convincing personal life suited to the character;
+3. natural conversations and meaningful interactions;
+4. believable people with their own aims;
+5. a world that goes on without him;
+6. real consequences when he acts;
+7. businesses, organisations and institutions that behave plausibly;
+8. continuity, memory, history and time;
+9. a storyteller who makes it engaging.
+
+**What it adds:**
+- **Every start is equally valid:** an ordinary person, a wealthy businessman, a politician (up to the mayor), a crime
+  boss, a member of an established family. These are different ways into the same city, not advanced scenarios. A
+  powerful start has not finished its story.
+- **Starting in a seat someone holds (owner's ruling): he replaces the holder.** The opening gives him the seat
+  before day 0, with a recorded reason. The previous holder is moved aside plausibly: retired, dead, or never
+  present in this save. He inherits the office, outfit or company with its history, people, rivals and obligations,
+  which are not replaced by his arrival.
+- **The decisions of a seat he holds are his.** Where the outfit, business or civic code would choose for a seat
+  holder, it asks him instead: it gives the GM a matter for him to decide. Routine running is done by his people
+  (his second, his manager, his staff), and the GM is told what they did. The engine never decides for his seat in
+  silence.
+- **His importance follows his position.** A boss or a magnate is known where his position reaches. The brief shows
+  him what he runs, and nominations come from his whole circle, within the budget.
+- **No push to rise.** Staying ordinary, holding what he has, or living a quiet life are all valid. Neither the
+  engine nor the GM steers him towards more money, power or conflict.
+- **Judged by playing four starts:** a mechanic, a wealthy businessman, a politician and a crime boss, all in the
+  same city.
+
+## Revision 5.2: Gemini's review, judged by the story-first test (2026-11-27)
+
+The owner asked that every point, Gemini's and the plan's own, pass the test of revision 5 before it is kept.
+- **Kept, because the story fails without them:**
+  - the weekly tick runs nominations from Deploy 1;
+  - a nomination stores its details;
+  - his deeds and his visible success (a booming shop, big spending, public votes) travel as news;
+  - undo catches every write in a scene;
+  - a refusal carries a notice that the GM tells the owner.
+- **Kept, because they make play better at little cost:**
+  - nights out return facts already true about the people there (a regular's worry, a rival crew's man in the room,
+    an open tie), never drawn events;
+  - seat business stays out of personal scenes unless it is urgent or one of his people is there;
+  - the GM can bring a casual extra into a scene on the spot;
+  - holders moved aside at the opening follow plain rules.
+- **Cut, because nothing in play reads them or a simpler way exists:**
+  - the `engine_answers` table and `rationale`: consequence facts come back in the tool's result;
+  - `tie_contexts`, until steps 6 to 8;
+  - routine changes as nominations: they are applied quietly as background life;
+  - the separate mover path for outfits: the kept outfit code acts for outfits, and new code handles personal plans
+    and non-outfit movers only;
+  - the scripted GM bench: the fault checker runs on the owner's real playtest transcripts instead;
+  - level 3 on the daily clock;
+  - the world scorer as its own tool: its three measures join the start check;
+  - drawn paying habits for customers: most people pay on time by the rulebook, and the money record remembers who
+    did not.
+- **Changed by the owner:** his death or a long sentence (Task 18d) is firm in Deploy 2.
+
+**Revision 5.3 (Gemini's second reply, 2026-11-27).**
+- **Late payers:** the existing business code has a `late` status on credit agreements, so the engine may cause them
+  as well as the GM. The business probe measures the late rate first. If it skews late, its existing odds are tuned;
+  no new model is added.
+- **Outfit captains still notice him.** The outfit code owns outfit agendas (collections, rackets, squeezes, hits).
+  Noticing and personal concerns run for every mover, captains included.
+- **GM inventions becoming canon is checked by script:** `gm_check.py --db` compares a save with the session.
+- **Cut, since nothing reads them:**
+  - `record_changes.delta_json`;
+  - `actor_concerns.waiting_on`, `waiting_since` and `ends_day`;
+  - `causal_chains.touches_open_thread`;
+  - `actors.systemic_power` (seats are read directly);
+  - `standing.infer` (until step 8);
+  - the `context` field on scene ties.
+
+**Revision 5.4 (Gemini's third reply, 2026-11-27).**
+- **Decisions stamped in a scene** do not wait forever in Deploy 1. When one passes its due day with nothing to
+  carry it out, the weekly tick makes it a matter for him if it involves him, and otherwise lets it lapse.
+- **Deploy 2's package settings start empty,** and each Deploy 2 task writes its own.
+- **The strength of a worry is used:** it picks the three worries the brief shows about a person, and it is what
+  makes a threat weigh more than good work when a mover notices him.
+- **Cut, since nothing reads them:**
+  - `gm_scenes.close_json`;
+  - `actor_pressures.last_checked_day` and `actor_concerns.last_weighed_day`;
+  - `actor_decisions.trigger_kind` and `outcome_text`;
+  - `knowledge.topic`;
+  - `causal_chains.scope`.
+- **Saint Jude does not run `merchant.py`** (`merchant_houses` is off), so seat decisions hook only into
+  `business.py`.
+
+**Revision 5.5 (Gemini's fourth reply, 2026-11-27): four wiring gaps.**
+- Decision and promise stamps carry a due date.
+- The weekly tick weighs live concerns, so they become decisions.
+- His shop taking work from rivals moves to Task 18c, where demand is built, and Task 15 runs due delayed effects.
+- A worry's strength defaults to 0.5.
+
+**Revision 5.6:** a stamp stores its `due_in_days`, and a stated decision keeps the stamp's target.
+
+**Revision 5.7 (cross-sphere play, 2026-11-27).**
+- Schemes the player invents are settled by the GM with the existing tools. An ordered act puts his men on record
+  and him as the one who ordered it, with the truth held only by those in on it.
+- An organisation he founds counts like any other.
+- The brief says how a place sees him (`standing_here`).
+- His public deeds reach him through his own paper, radio or television.
+- In an outfit, his crew carries the insider version of outfit events.
+- Business ripples are the GM's to play from his business state.
+
+**Revision 5.8 (an ambitious city, 2026-11-27).**
+- The city's big business owners are movers, not only notables.
+- An opportunity opens a worry as strain does: money to spare, or a struggling rival in the same trade.
+- Movers can expand, buy out a struggling business, or propose an alliance. A buy-out changes owners the same way
+  his own purchase through `trade` already does.
+- The canon paper, radio and television outlets are real businesses with owners.
+- The visible steps of someone's plan travel as news; the intent stays with those in on it.
+- Deploy 2 proves at least one ambition pursued outside the outfits.
+
+**Revision 5.9 (Gemini's reply to 5.8, 2026-11-27).**
+- How news reached someone is recorded as a generic kind (saw it, told, talk, media, mail) plus the package's name
+  for the channel. Television, magazines or a parish bulletin are package data, and the engine names no channel.
+- One function writes every paper, radio and television item.
+- An opportunity is acted on once, when it appears. A new one needs a new chance; there is no waiting period.
+- Away from him, an owner accepts a buy-out the way a price is already weighed against value, and an alliance by tie
+  and temperament.
+
+## 0. The split between engine and GM (revision 4, approved 2026-11-27; overrides the sections below where they differ)
+
+Source: the owner's intent brief (`docs/review/saint-jude-intent-brief.md`) and his answers on 2026-11-27.
+
+**The rule.**
+- **The engine** holds state, memory, numbers, time, causes and the bounds of plausibility. It is the authority on
+  what is true.
+- **The GM** writes prose and scenes, and invents people, events and hooks inside what is true. What it invents and
+  the engine accepts becomes canon for that save.
+- **The test for which side owns a thing:** if the GM forgot it by next session, would the story break or turn
+  implausible? If so, it is the engine's. If it is a judgement about what is interesting, it is the GM's, and the
+  engine records it.
+- **No tables where a fact plus the GM's judgement is enough.** Example: the engine holds that dockworkers drink at a
+  bar; the GM decides the night is rough. There are no per-venue fight odds.
+
+**Nominate, realize, ratify.** For developments near the protagonist:
+1. **The engine nominates** what has become likely, with the cause. Example: "Anthony has likely started seeing
+   someone (24, out most weekends, his crowd's courting rate)."
+2. **The GM realizes it.** It decides who, how and when, and gives a timeframe for playing it. The engine may list a
+   few real, free people who fit; the GM may pick one or invent someone new.
+3. **The engine ratifies.** It checks the GM's version for contradictions only, then records it and holds the GM's
+   plan.
+4. **Reminders and fallback.** Within the timeframe, the engine reminds the GM. If the timeframe passes, the engine
+   applies the development itself, in a plain form, and the GM can colour it later.
+
+The owner's four answers:
+- **Scope.** Anything touching his circle, or that he could plausibly come across, is nominated to the GM.
+  Far-off city events (a killing across town, a business failing) the engine applies directly, and they reach him
+  as news through the gate.
+- **The GM's latitude.** Who, how and when (within the timeframe), never whether. A plausible event happens: the
+  owner's "no veto" rule. Declining needs a reason in the record, such as something established in play that makes
+  it implausible.
+- **Who the people are.** The GM picks a real person or invents one, and the engine checks and records them.
+- **Forgetting.** The GM sets the timeframe; the engine reminds within it, then applies.
+
+**What changes in the design below.**
+- **Section 3 (pressure to act):** an offscreen decision by someone near him becomes a nomination, not an engine act.
+  Far-off people's decisions still fire as engine acts.
+- **The protection lock becomes consistency.**
+  - The engine keeps everyone's life going at realistic rates. Near him, its draws go out as nominations.
+  - Nothing the engine applies may contradict what scenes established.
+  - Guards on his agency stay: the engine never pleads, votes, plots or chooses for the protagonist.
+- **Outings and other in-scene drama.** The engine supplies who is really there and the place's character. The GM
+  invents what happens. The happenings dice, menus, cutaways and texture pushes go.
+- **Tool results are facts and numbers, not prose.** That saves tokens and keeps engine wording out of the GM's
+  voice.
+- **Unknown stays unknown.** Where the record is silent, the engine says so, and the GM invents (`findings`
+  included). The engine records the invention unless it contradicts something.
+- **Recording an invention is cheap.** A stamp, or closing the scene from its stamps. The bench checks that a person
+  invented in a scene exists afterwards.
+
+**Engine work the brief needs, kept engine-side:**
+- **Noticing.** Who learned what about him, through whom and when. Each mover has a "waiting on" record, so follow-up
+  is the default and silence is a stored fact with a cause.
+- **Business state.** Each customer's paying habit (drawn once from a realistic spread), what is owed, demand and its
+  causes, and capacity against workload. The GM invents the haggling and what breaks.
+- **Crime and civic events reach the paper and radio.** This is in Deploy 1.
+- **Offices plan.** Political seats count as movers, and politics gets a pressure of its own. That covers a political
+  start.
+- **Skips stop only for something serious.** This is tested.
+
+**Revision 4.1 (owner, 2026-11-27): the personal level and the wider world, both ways.**
+1. **What he does travels outward.**
+   - The gate carries news to anyone, not only to him.
+   - His deeds go from the witnesses through their ties, with delay and some distortion.
+   - They build his standing with people and groups (`claims` impressions) and reach movers, which is what noticing
+     runs on.
+2. **His conduct builds pressure.**
+   - Neglect, grievance, broken promises and jealousy build in the people near him from what the record shows he
+     did.
+   - Past their line they become nominations, and the GM plays how it comes to a head.
+   - A promise broken from a closed scene is a recorded fact with a consequence.
+3. **Lies get found out.** When someone who holds the truth meets someone holding his lie, the engine nominates the
+   discovery.
+4. **Rising has machinery.**
+   - Competitors are an exposure link, so his growth is pressure on rivals.
+   - His businesses and crew are his channels.
+   - A nomination budget: the GM gets the ones that matter, and the engine applies the small ones plainly.
+5. **The brief has a "you" part:** his injuries, police interest, debts, grudges he knows of, and open promises.
+   Consequences linger because the GM is shown them until they resolve.
+6. **People the GM invents go on living.** Ratifying one seeds a routine, a level, a purse and a life, like anyone
+   in the save.
+7. **The protagonist's death or long sentence.**
+   - If both survival and death are plausible, he survives.
+   - If he dies, the city carries on, and the successor is chosen with the GM afterwards.
+
+**Revision 4.2 (from ChatGPT's review, 2026-11-27).**
+1. **Relevance, not proximity.** Sharing a room does not make someone part of his story. A person is near him
+   (nominations, conduct) when they:
+   - have dealt with him;
+   - are involved in an event that affects him;
+   - have a tie or a recurring connection with him;
+   - or are kin or household.
+
+   Strangers in the same bar stay strangers.
+2. **Attention goes to what can become story.** A nomination's weight comes from what it touches: a tie to him,
+   an obligation, his money, business or safety. Routine changes (a new drinking place, a car bought) are recorded
+   and applied quietly.
+3. **Noticing depends on what was learned and who learned it.**
+   - The kind of fact sets how interested the mover is:
+     - good work means mild interest;
+     - unexpected money means an opportunity;
+     - work for a rival means a threat.
+   - The follow-up can be any of several moves: look into him quietly, ask someone who knows him, send someone round,
+     offer legitimate work, invite him somewhere, test him, or leave him alone on purpose because he is more useful
+     that way.
+4. **Business produces decisions.** Being over capacity or losing work comes to him as a matter needing his
+   decision, with its cause discoverable in the world (a rival undercutting him, a job talked about badly), not
+   only as a number.
+5. **The world has atmosphere.** The paper and radio carry a few public items a day whether or not they concern him,
+   as colour. These are marked as atmosphere and limited in number.
+6. **The record stays light.** At `close_scene` only the participants are needed. Ties are recorded only when
+   something meaningful changed. An ordinary evening needs nothing more than a close.
+7. **The GM finds opportunities in what exists.** For example, a rival in trouble can become an offer, a man looking
+   for work, or a desperate competitor. The GM looks for these without inventing their causes. This is a rulebook
+   principle.
+8. **Validation beyond one mover and one start.**
+   - The life test also runs a political start.
+   - The scorer counts chains that cross from one mover's act into another's pressure.
+   - The scoring sheet checks that his personal life stays alive whatever his position.
+
+   Deploy 1 proves that the GM and engine work together. Deploy 2 proves that the world moves. Steps 6 to 8 make the
+   three resolutions complete. None of them is mistaken for the finished design.
 
 ## 1. The three resolutions
 | Level | Who | How things happen |
