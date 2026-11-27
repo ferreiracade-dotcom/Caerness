@@ -26,7 +26,9 @@ argument and module function named below is defined in the contract; read it bef
 - No hard caps, ladders or ceilings: a threshold marks a real change of state, never a points ladder.
 - No world words in `engine/`: every Saint Jude figure, name or list lives in `worlds/saintjude/*.json`.
 - The engine vetoes contradictions only and never hands the GM a menu or a closed list.
-- The protagonist lives under the same rules as everyone else; the engine never chooses for him.
+- The protagonist lives under the same rules as everyone else; the engine never chooses for him. Grand plan round 6:
+  no background tick writes a choice for him. Only three things may: what befalls him, routine upkeep and payroll,
+  and an act by his second or manager, recorded as theirs. Task 14c's hands-off test enforces it.
 - Never write `data/*.db` (only an approved `data/saintjude.db` rebuild). Leave `data/caerness.pre-schema110.db` and
   `game/campaign_01/backups/` alone.
 - B1's held fight work is saved whole in `docs/superpowers/plans/b1-held-fight.patch` (done 2026-11-26, owner's yes).
@@ -181,6 +183,24 @@ and a stated decision takes its target from the stamp (Task 4).
 - The outlets: four already exist in the seed, and three are added (Task 3).
 - `standing_here` sits inside `you` (Task 11).
 
+**Grand plan round 6 (2026-11-27).**
+- Task 14c gains the hands-off test (90 to 120 days with no calls from him, in every role) and a third guard:
+  `prison.assign_group` no longer places him; the group that would take him makes an approach, as a nomination.
+
+**Grand plan round 5 (2026-11-27).**
+- Task 14c names the two places that act for him today: `civic_votes.member_vote` casts his council vote from his
+  lean, and `prison_review.weekly` files appeals and pardons for him by chance.
+
+**Grand plan round 3 (2026-11-27).**
+- Task 7's `gm_check` reports a recap thread with nothing held behind it (former F-6).
+- Office holders seek payments and rig counts as their own decisions (former F-4): two actions in Task 17a, carried
+  out in Task 17b through P1's existing graft and fraud code.
+
+**Grand plan round 2 (2026-11-27).**
+- Cutaways are built in Deploy 1: Task 11 keeps them as their own field on skip and close results, Task 7 reports one
+  used as his knowledge, and Task 12 teaches them.
+- Task 3's `refresh` guard is the whole of careful demotion; a test pins it.
+
 **What each deployment proves (revision 4.2).** Deploy 1 proves that the GM and engine work together. Deploy 2
 proves that the world moves around him. Steps 6 to 8 make the three resolutions complete. Neither deployment
 is reported as the finished design.
@@ -318,7 +338,8 @@ assert caerness_package().systems["personal_choices"] and caerness_package().sys
   `mover_roles`, and a notable otherwise, and its members are attached to it for `channels`. Revision 5.8: the
   owner of a business at or above `mover_roles.business_line` (staff or capital; the package sets it so only
   the city's big businesses and property holdings qualify) is a mover too. Everyone else with a row stays `materialized_minor`. `refresh`
-  never lowers anyone below `notable` while he has a live obligation or a live concern (step 8 does careful demotion).
+  never lowers anyone below `notable` while he has a live obligation or a live concern. Grand plan round 2: this
+  guard is all of careful demotion; nothing later adds to it.
 
 - [ ] **Step 1: Write the failing test** `tests/levels_schema_test.py` with checks:
 ```python
@@ -343,6 +364,9 @@ print(out, active_by_reason(conn))                     # the lead sets the band 
 assert 10 <= out["active"] <= 120 and out["notable"] > 0
 # a captain-level seat holder from mover_roles is active even with no tie to him
 assert levels.resolution_of(conn, a_mover) == "active"
+# grand plan round 2: a mover who loses his seat but still holds a live concern stays notable
+vacate_seat(conn, a_mover); open_live_concern(conn, a_mover); levels.refresh(conn, day)
+assert levels.resolution_of(conn, a_mover) == "notable"
 # revision 5.8: a big-business owner is a mover; a corner-shop owner is notable; the Chronicle is a business row
 assert levels.resolution_of(conn, big_business_owner) == "active"
 assert levels.resolution_of(conn, corner_shop_owner) == "notable"
@@ -608,11 +632,18 @@ Revision 5.2: no scripted bench. The owner's real playtests are the test, and th
     with an `owner_notice` followed by prose that tells the player;
   - revision 5.3, `--db <save.db>` (optional): each closed scene's stamps match the session's calls; every person given
     a part exists as a row; a lie stamped `true: false` left a `holds_true=0` belief with its hearers; anyone who
-    walked out holds no beat after leaving.
+    walked out holds no beat after leaving. Grand plan round 2: a stamp by him that acts on a cutaway he has not
+    been told (a `circle_reactions` row with `cutaway_day` set and `told_day` empty, and no `knowledge` row for him
+    about it) is a hit.
+  - grand plan round 3 (former F-6, the intake design's tripwire, §7.5): with `--db`, each open thread the GM's
+    recap names (a debt, a promise, a meeting, a plan under way) must have something held behind it: an obligation,
+    a concern, a venture, a scheduled effect, a pending decision or a stamp. One with nothing is a hit.
 
 - [ ] **Step 1: Write the failing test** on three canned transcripts: one with a numbered menu (G1 hit), one asking
   the player what the bartender's name is (G2 hit), and one clean (no hits). Add a session where a refusal is
-  swallowed silently (a ledger hit), and a small save where a named extra is missing (a `--db` hit).
+  swallowed silently (a ledger hit), and a small save where a named extra is missing (a `--db` hit). Add a small
+  save where he confronts a man about something he saw only in a cutaway (a `--db` hit), and a recap that
+  promises "Frank's money is due Friday" with no obligation behind it (a `--db` hit).
 - [ ] **Step 2: Run it.** Expected: FAIL.
 - [ ] **Step 3: Implement.**
 - [ ] **Step 4: Run it on `docs/playtests/2026-11-25-dominic-2.txt`.** Expected: hits on the faults the owner named.
@@ -826,8 +857,9 @@ assert claims_moved_for(conn, offscreen_hit_victims_outfit)                  # r
 - Modify: `connector/views.py` (`compact_scene` builds on `brief.full`), `connector/store.py` (`note kind=scene`
   returns `brief.full`), `connector/timeflow.py` (after a skip, return `brief.full` in place of the separate blocks),
   `connector/server.py` (results of `act`, `money`, `note` during an open scene carry `brief.changed`)
-- Modify: `engine/texture.py` (`block` drops `outside_his_knowledge`) and `engine/claims.py` (`cutaways` is no longer
-  shown)
+- Modify: `engine/texture.py` (`block` no longer puts `claims.cutaways` inside `outside_his_knowledge` in the brief)
+  and `connector/timeflow.py`, `connector/server.py` (grand plan round 2: `advance` and `close_scene` results carry
+  a `cutaways` field from `claims.cutaways`)
 - Modify: `engine/outings.py` (`go_out` returns who is really there (`crowd`, built on `routines.where` and the
   place's population) and the place's character. Revision 5.2: plus one to three facts already true about people
   in the crowd: a regular's live concern, a rival crew's man in the room, an open tie to him, payday. The happenings
@@ -859,6 +891,8 @@ assert claims_moved_for(conn, offscreen_hit_victims_outfit)                  # r
     `done_by_his_people` and `history_due`.
   - Revision 5.3: this task defines `nominations`, `done_by_his_people` and the seat-matter filter with empty
     defaults. Tasks 14a and 14c fill them.
+  - Grand plan round 2b: `you` also lists his open ventures (stage, what is pending, who is in it, the next due
+    day), so a long project is visible while it is unfinished. Test: a venture in its approval stage shows in `you`.
   - Revision 5.7: the brief (inside `you`, revision 5.9, so the first three keys stay put) and `outings.go_out`
     carry `standing_here`, one short line on how this place and its
     people see him. It is taken from `claims` impressions for the district or crowd, his public office or seat,
@@ -866,7 +900,11 @@ assert claims_moved_for(conn, offscreen_hit_victims_outfit)                  # r
     `standing_here` names it.
 - Nothing about people not present, and nothing building elsewhere, appears in either. The owner's rule
   (2026-11-26): the GM sees only what is nearing the protagonist (`crossing_your_path`); the old "outside his
-  knowledge" part and the cutaways go.
+  knowledge" part goes. Owner, 2026-11-27: cutaways come back (grand plan F-10, built here since round 2). They
+  are their own field, `cutaways`, on `advance` and `close_scene` results only, never in `brief.full` or
+  `brief.changed` during an open scene. Each is I1a's existing item: what his people met about a significant
+  happening that touches him, which he was not there for and has not been told, with its "outside his knowledge"
+  note. `claims.cutaways` already marks each one shown, so it appears once.
 
 - [ ] **Step 1: Write the failing test:**
 ```python
@@ -875,7 +913,11 @@ assert list(b)[:3] == ["waiting_on_you", "you", "present"]
 assert "Aurelio" in dump(b["present"]) and "Tullio" not in dump(b)        # Tullio's plans aren't in the room
 assert len(dump(server.money("p1", "pay", {...})["changed"])) < 600        # per-call changes stay small
 assert not leak_words(b, ["concern", "pressure", "score", "engine"])       # no machinery
-assert "outside_his_knowledge" not in dump(b) and "cutaway" not in dump(b)
+assert "outside_his_knowledge" not in dump(b) and "cutaway" not in dump(b)       # not in a mid-scene brief
+circle_reaction_away_from_him(conn, me)                     # grand plan round 2: his wife hears of it at church
+r = server.advance("p1", days=1)
+assert r["cutaways"] and "outside his knowledge" in dump(r["cutaways"])
+assert not server.advance("p1", days=1).get("cutaways")     # shown once
 injure(conn, me, "broken hand"); owe(conn, me, frank, 200)
 b = brief_full(server); assert "broken hand" in dump(b["you"]) and "200" in dump(b["you"])   # it lingers
 assert "you_may" not in dump(server.act("p1", "go out", {"place": "the Starlite"}))   # no menu of moves
@@ -910,6 +952,11 @@ assert prose_share(b) < 0.2                      # fields, not sentences (lead s
     stories; his circumstances set the scale of what happens, from rent and friends to rivals and elections;
   - revision 5.2: an `owner_notice` is always told to the player in plain words. Ordinary people behave
     ordinarily: most customers pay on time, and a late or bad payer is an exception with a reason;
+  - grand plan round 2b: never refuse an ambition because nothing models it, and never make it cheap. Ground the
+    obstacles in the era (the market, the money, rival cities, the league's politics), record the real actors,
+    commitments and money, and let the world push back over time;
+  - grand plan round 2: a cutaway is written as a cutaway, marked as away from him, and he acts only on what
+    reaches him through the world;
   - revision 5.7: settle any scheme the player tries with the existing tools (`act`, stamps with `known_to`,
     `author`) without waiting for a special mechanic. Play business ripples (staff poached, suppliers' terms,
     struggling rivals) out of his business state in the brief.
@@ -952,7 +999,14 @@ Revision 5.2 splits this task into three sessions, in this order:
   - `engine/org_choices.py`, `engine/outfit_choices.py`, `engine/org_money.py` and `engine/org_happenings.py`;
   - `engine/business.py` (`process_due_businesses`). `merchant.py` is not hooked: Saint Jude does not run it
     (`merchant_houses` is off; revision 5.4);
-  - `engine/civic_tick.py`;
+  - `engine/civic_tick.py` and `engine/civic_votes.py` (grand plan round 5: `member_vote` and `_count` cast a
+    seated protagonist's vote from his lean today. His vote is a `waiting_on_you` matter before `vote_day`, and
+    with none given he is counted `absent`);
+  - `engine/prison_review.py` (grand plan round 5: `weekly` files appeals and pardons by chance for every serving
+    man; it skips the protagonist, who files by his own act, grand plan F-14);
+  - `engine/prison.py` (grand plan round 6: `admit` calls `assign_group` for every inmate. For him it doesn't
+    place him; the group it would have picked becomes a nomination, an approach the GM plays, and he joins only by
+    his own act, grand plan F-14);
   - `connector/brief.py` (fill `done_by_his_people` and the seat-matter filter);
   - the `delegation` block of `levels.json`.
 
@@ -1054,6 +1108,16 @@ assert life_matters_still_applies_far(conn)                               # far 
 courting_in_scene(conn, me, carla); force_draw(conn, "union", carla, partner="stranger")
 assert not married(conn, carla, "stranger")                               # consistency with the record
 assert protagonist_plea(conn) is None and not voted_for_protagonist(conn)  # agency guards
+seat_him_on_council(conn, me); item = open_item_due(conn, days=3); run_days(conn, 4)   # grand plan round 5
+assert vote_of(conn, item, me) == "absent" and waiting_on_you_had(server, kind="seat_decision")
+sentence_him(conn, me, years=10); run_weeks(conn, 20); assert not reviews_filed_for(conn, me)
+assert inside_group_of(conn, me) is None and nomination_of_kind(conn, me, "inside_approach")   # round 6
+# grand plan round 6, the hands-off test: one save per role (council seat, outfit soldier, business owner,
+# serving inmate), 90 to 120 days with no call from him. Every row written with him as the actor is something
+# that befell him, routine upkeep or payroll, or an act recorded as his second's or manager's
+for role in ("councilman", "soldier", "owner", "inmate"):
+    conn = start_as(role); before = his_rows(conn, me); run_days(conn, 120)
+    assert all(r.kind in ("befell", "upkeep", "payroll", "delegated") for r in his_rows(conn, me) - before), role
 # revision 4.1
 no_scene_with(conn, me, girlfriend, weeks=5); conduct.weekly(conn, day + 35)
 assert nomination_of(conn, girlfriend)["kind"] == "neglect"
@@ -1121,6 +1185,10 @@ for start in ("mechanic", "businessman", "politician", "boss"):
     if start in ("politician", "boss"): assert s["seat_decisions"]
     assert not all_single(s["circle"]["friends"], age_band=(22, 30))  # a plausible opening (5.2)
     assert {"cause_share", "events_per_kind", "never_fired"} <= set(s["measures"])   # never_fired is [] until Task 17a
+# grand plan round 2b: a counterpart outside the city survives refresh, routines and a skip
+league = server.author("p1", "organisation", {"name": "a national league office", "place": "New York"})
+rep = league_representative(conn, league); open_negotiation(server, me, rep, due_in_days=20); run_days(conn, 25)
+assert waiting_on_you_has(server, "league") and levels.resolution_of(conn, rep) != "gone"
 ```
 - [ ] **Step 2 to 5:** run (FAIL), implement, run the task's test plus touched modules, commit. The lead reads the
   four reports, and `start_check.py` runs again before Deploy 2.
@@ -1132,7 +1200,9 @@ for start in ("mechanic", "businessman", "politician", "boss"):
 - Modify: `connector/authoring.py` (`kind="turning_event"`)
 - Modify: `engine/rollback.py` and `connector/correct.py` (`undo_chain`, moved here from Task 6), and
   `connector/rulebook_core.md` (how to use turning events)
-- Modify: `worlds/saintjude/levels.json` (`shocks`)
+- Modify: `worlds/saintjude/levels.json` (`shocks`; grand plan round 2b adds `demand_up`, a good-news shock: a big
+  opening lifts demand at nearby businesses through `exposure_links`, which can open `opportunity` concerns for their
+  owners in Task 16. Test: an opened venture with a large budget lifts a neighbouring bar's demand)
 - Revision 4.1: `exposure_links` gains the kind `competitor` (same trade, same district). His own businesses and his
   crew are channels attached to him, so a shock to them reaches him. Revision 5.5: the shock that moves demand from
   his competitors when his business takes work is built in Task 18c, where demand is built.
@@ -1238,7 +1308,9 @@ assert count_opportunity_concerns(conn, big_business_owner) == 1
 - Modify: `worlds/saintjude/levels.json` (`actions`: first contents `seek_income`, `ask_loan`, `call_in_debt`,
   `avoid`, `confront`, `pressure_business`, `make_offer`, `settle`, `do_nothing`; revision 5.8 adds `expand`,
   `buy_out` and `propose_alliance`, which serve `opportunity` concerns. Revision 5.9: `buy_out` needs a struggling
-  business in the concern; `expand` needs the cash)
+  business in the concern; `expand` needs the cash. Grand plan round 3 (former F-4): `seek_payment`, for an office
+  holder under `cash_strain`, needs an item before his body or an office decision that a business or outfit wants;
+  `rig_count`, for an office holder under `office_threat`, needs his own open race)
 - Test: `tests/offscreen_weigh_test.py`
 
 **Interfaces:**
@@ -1304,6 +1376,14 @@ assert decision(conn, d2)["action"] in ("expand", "buy_out", "propose_alliance",
       against value, more willing the deeper his business is below the struggling line. An alliance is settled
       by the tie between the two and their temperament (`actor_drives`). An offer to him, or by or to someone
       `near` him, goes the existing way: a nomination, or his `waiting_on_you` matter.
+  - Grand plan round 3 (former F-4), officials acting on their own:
+    - `seek_payment` asks the business or outfit for money. The payer answers through `civic_graft.weigh`, and an
+      accepted payment is put on through `civic_corruption.put_on`, so the existing exposure checks and
+      convictions reach it;
+    - `rig_count` adds votes through `races.commit_fraud`. The weekly `civic_graft.fraud_pass` skips a candidate
+      who is a mover, so there is one path per person and no doubled fraud.
+    - Test: an office holder under `cash_strain` with a licence before his body ends the run with an arrangement
+      he started; a mover in a close race rigs through his decision, and `fraud_pass` doesn't touch him.
 
 - [ ] **Step 1: Write the failing test:**
 ```python
@@ -1418,6 +1498,12 @@ assert same_chain(conn, c, d, shock, p, n)                  # one chain from ori
   demand, capacity)
 - Modify: the business modules the probe names (revision 5.2: no drawn paying habits; demand follows reputation, rivals and neglect, with the cause stored; capacity against workload is computed)
 - Modify: `worlds/saintjude/business.json` (demand drivers)
+- Create: `worlds/saintjude/trades.json` (grand plan round 1: the bible's cost structures per trade, so a bar leaves its
+  owner 10 to 20% and a garment shop 3 to 8%; the business state reads it. Test: a bar's month leaves its owner a
+  share inside the bible's range. Grand plan round 2b: it gives default costs, never a closed list. A trade that
+  matches none of it (a sports team, a stadium, a hotel group) takes the capital and running costs the GM sets on the
+  record through `author`, instead of defaulting to a wholesaler (`authoring._archetype`). Test: an authored
+  "basketball franchise" keeps the GM's figures and is not costed as a wholesaler)
 - Revision 5.5: when his business takes work, demand moves from a same-district competitor as a `competitor`
   shock through `channels.publish` (moved here from Task 15). Test: his shop's growth shows up as a demand shock on
   a rival in the same district, and the rival owner has a concern from it.
