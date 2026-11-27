@@ -1,5 +1,10 @@
 # Three levels: build plan (steps 1 to 5)
 
+**Revision 6.0 (2026-11-27).** This is the build text for the grand plan's Deploys 1 and 2
+(`docs/superpowers/plans/2026-11-27-saint-jude-grand-plan.md`). Every change from the grand plan's review rounds
+is already in the task text below; the round blocks after the revision list say which task each one touched.
+Where a task's text and an older revision note differ, the task's text wins.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or
 > superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 > In this repository, tasks run in Sonnet linked sessions, one writer per file set, and the lead reviews every diff.
@@ -8,8 +13,9 @@
 (the GM–engine loop) and slice 2b (a minimal living world), ending in the owner's playtest of a fresh Saint Jude save.
 
 **Architecture:** New engine modules sit beside the city layers and read their existing tables. The connector gains
-scene ledgers, one news gate, engine answers and turning events. `life_matters` keeps running only for unprotected
-people below level 3. One weekly `levels` process carries pressure build-up, offscreen choice, decisions falling due
+scene ledgers, one news gate, engine answers and turning events. Life draws (`life_matters` and the other
+life modules) keep running for everyone; one that touches someone `near` him becomes a nomination (Task 14a;
+revision 6.3 replaces the earlier "only below level 3"). One weekly `levels` process carries pressure build-up, offscreen choice, decisions falling due
 and delayed effects. Old news feeds go behind a flag first and are deleted only after the playtest.
 
 **Tech Stack:** Python 3.13, SQLite, the MCP connector (`connector/server.py`), package JSON under
@@ -183,6 +189,47 @@ and a stated decision takes its target from the stamp (Task 4).
 - The outlets: four already exist in the seed, and three are added (Task 3).
 - `standing_here` sits inside `you` (Task 11).
 
+**Revision 6.5 (Gemini round 11).**
+- Task 14b: each nomination from `conduct` names the fact behind it, and a fact that has already produced one, of
+  any status, never produces another, so a played-out confrontation isn't nominated again every week.
+- Task 14c and the contract: `note(kind="answer", nomination, choice)` is the connector's way to pass his answer to
+  a seat matter.
+
+**Revision 6.4 (Gemini round 10: slips in this plan's own text).**
+- Contract and Task 3: `nominations.status` allows `lapsed`.
+- Task 16: an opportunity is tied to its `actor_pressures` episode, so a fired one isn't reopened while cash stays
+  high; Task 17b marks it `resolved`.
+- Task 7: the cutaway check covers the wider cutaways too.
+- Tasks 14c and 17b: missing files added; Task 17b replaces Task 14a's stated-decision cleanup.
+- Task 11: the test's second `advance` uses its own call id; `levels.json` is in its files; a media item is marked
+  shown on its own row.
+
+**Revision 6.3 (Gemini, owner's yes 2026-11-27).**
+- Architecture and Task 14a: life draws keep running for everyone; one touching someone `near` him becomes a
+  nomination, any other applies under the consistency check and records its cause.
+- Task 14a: `apply_overdue` never acts on a `seat_decision`.
+- Task 16: `work_restless` only for wage earners; `cash_strain` reads the money a man can draw on.
+- Tasks 7 and 11: wider cutaways are marked shown once, have a significance floor, and are not checked as scene people.
+
+**Revision 6.2 (Gemini, owner's yes 2026-11-27).**
+- Task 14: `near` no longer includes a mover with no tie to him, so distant movers act on their own.
+- Task 14c: his answer to a seat matter goes back to the code that asked; unanswered, nothing is decided for him.
+- Task 14b: a skipped day counts as time with whoever his routine puts him with, so a skip doesn't breed neglect.
+- Task 4: a casual extra is recorded like an authored person, so `undo_scene` reverts it cleanly.
+- Task 14d: personal nominations are asserted over 120 days, and only reported at 30.
+
+**Revision 6.0 (Gemini, owner's yes 2026-11-27).**
+- Task 4: a scene has a part of the day, so `routines.where` judges presence for a morning garage scene and an evening
+  bar scene on the same day correctly.
+- Task 11: a cutaway is a reaction to what he did or how he is seen, never a plan aimed at him. Revision 6.1
+  (owner): it covers anyone reacting to what is public or visible about him, not only his circle.
+- The grand plan's changes to Deploys 1 and 2, by task: Task 3 (the `refresh` guard is all of careful demotion), Task
+  4 (part of the day), Task 7 (cutaways used as his knowledge; unheld recap threads), Task 11 (cutaways on skip and
+  close results; his ventures in `you`), Task 12 (cutaways; never refuse an unmodelled ambition), Task 14c (his
+  council vote, his prison filings, his inside group, the hands-off test), Task 14d (an outside counterpart), Task 15
+  (`demand_up`), Tasks 17a and 17b (officials who seek payments and rig counts), Task 18c (`trades.json` as default
+  costs). Each is marked in its task as "grand plan round n".
+
 **Grand plan round 6 (2026-11-27).**
 - Task 14c gains the hands-off test (90 to 120 days with no calls from him, in every role) and a third guard:
   `prison.assign_group` no longer places him; the group that would take him makes an approach, as a nomination.
@@ -352,7 +399,8 @@ assert {"gm_scenes", "scene_stamps", "scene_participants", "causal_chains", "rec
 with rollback.current(conn, scene_id=1):
     rid = insert_concern(conn); rollback.log_insert(conn, "actor_concerns", rid)
 assert logged(conn, "actor_concerns", rid)["source_scene_id"] == 1
-assert {"basis", "path_kind", "channel", "carrier_actor_id", "holds_true", "source_scene_id", "causal_chain_id"} <= cols(conn, "knowledge")
+assert {"basis", "path_kind", "channel", "carrier_actor_id", "holds_true", "source_scene_id", "causal_chain_id", "cutaway_day"} <= cols(conn, "knowledge")
+assert "lapsed" in check_values(conn, "nominations", "status")                                   # revision 6.4
 # revision 5.9: a channel not in news_paths is refused on load; an authored organisation has real rows
 assert knowledge_insert_fails(conn, path_kind="television")          # a channel name is not a kind
 org = server.author("p1", "organisation", {"name": "Harbor Haulers", "members": 4})
@@ -436,9 +484,13 @@ start_travel(conn, frank, day + 10); assert routines.where(conn, frank, day + 11
   protagonist's known people. An ambiguous name is refused with the candidates. Tie changes arrive as steps
   (`-small` and so on) and are mapped through `tie_steps`. Thread kinds are `owed`, `meeting` and `promise`, with
   their direction.
-- `open_scene(conn, call_id, present, text, location=None)`: compared with the open scene's `location_id`. A different place is refused, naming `close_scene`.
+- `open_scene(conn, call_id, present, text, location=None, part=None)`: compared with the open scene's `location_id`. A different place is refused, naming `close_scene`.
+- Revision 6.0, part of the day: `part` is `morning`, `day`, `evening` or `night`, stored on `gm_scenes.part` and
+  passed to `routines.where` when judging who is `not_here`. With none given, the scene takes the part of the last
+  scene opened that day, or `day`. A later scene the same day may name a later part; an earlier one is refused,
+  since time doesn't run back.
 - Produces:
-  - `open_scene(conn, call_id, present: list, text: str) -> dict` (returns `{"scene_id", "present", "not_here"}`;
+  - `open_scene(conn, call_id, present: list, text: str, location=None, part=None) -> dict` (returns `{"scene_id", "present", "not_here"}`;
     reuses the open scene if there is one);
   - `open_scene_id(conn) -> int | None`;
   - `stamp(conn, call_id, kind, text, *, actor_id=None, target_actor_id=None, holds_true=None, ref_table=None, ref_id=None, due_in_days=None) -> dict`
@@ -471,8 +523,10 @@ start_travel(conn, frank, day + 10); assert routines.where(conn, frank, day + 11
     resentment or affection by at least the `levels.json` concern line opens a `resents` or `wants` concern for the
     `from` person, with `origin_kind='scene'` and the cause as `origin_text`.
   - **casual extras (revision 5.2):** a name in `present` or `participants` that matches nobody in the save becomes a
-    new `materialized_minor` person at the scene's place, with no separate `author` call. A name that matches
-    someone who is elsewhere is still `not_here` (Review Focus 2).
+    new `materialized_minor` person at the scene's place, with no separate `author` call. Revision 6.2: it is
+    recorded through the same path as `author(kind="person")`, an `authored_entities` row with the scene's
+    `source_scene_id`, so `undo_scene` marks it reverted (with its routine and profile) instead of deleting a raw
+    `actors` row. A name that matches someone who is elsewhere is still `not_here` (Review Focus 2).
   - **refusals are all or nothing:** if any reference fails (an ambiguous or unknown name, a beat that doesn't exist,
     a participant who wasn't there), `close` commits nothing and leaves the scene open. It returns `refused`, with
     the candidates for each failure.
@@ -512,6 +566,13 @@ assert knowledge_of(conn, ma, sid, beat=1)["confidence"] == 0.1                 
 assert step2 < step1 and not participant(conn, scene2, frank)
 # owed thread direction: Frank owes me, not the reverse
 assert obligation_from(conn, frank, to=me)
+# revision 6.0: part of the day
+frank_at_garage_mornings_bar_evenings(conn)
+assert "Frank Moretti" not in scenes.open_scene(conn, "p1", ["Frank Moretti"], "the bar", part="morning")["present"]
+scenes.close(conn, "p1c", "commit")
+assert "Frank Moretti" in scenes.open_scene(conn, "p2", ["Frank Moretti"], "the bar", part="evening")["present"]
+scenes.close(conn, "p2c", "commit")
+assert scenes.open_scene(conn, "p3", [], "the garage", part="morning").get("refused")   # time doesn't run back
 ```
 - [ ] **Step 2: Run it.** Expected: FAIL (no module `engine.scenes`).
 - [ ] **Step 3: Implement** `engine/scenes.py` and the `relationships.py` change.
@@ -632,9 +693,11 @@ Revision 5.2: no scripted bench. The owner's real playtests are the test, and th
     with an `owner_notice` followed by prose that tells the player;
   - revision 5.3, `--db <save.db>` (optional): each closed scene's stamps match the session's calls; every person given
     a part exists as a row; a lie stamped `true: false` left a `holds_true=0` belief with its hearers; anyone who
-    walked out holds no beat after leaving. Grand plan round 2: a stamp by him that acts on a cutaway he has not
+    walked out holds no beat after leaving. Revision 6.3: people named inside a `cutaways` block are prose, not
+    scene people, and are not checked for rows. Grand plan round 2: a stamp by him that acts on a cutaway he has not
     been told (a `circle_reactions` row with `cutaway_day` set and `told_day` empty, and no `knowledge` row for him
-    about it) is a hit.
+    about it) is a hit. Revision 6.4: the same for the wider cutaways: a `knowledge` row or media item with
+    `cutaway_day` set, about which he holds no `knowledge` row of his own, acted on in his stamp, is a hit.
   - grand plan round 3 (former F-6, the intake design's tripwire, §7.5): with `--db`, each open thread the GM's
     recap names (a debt, a promise, a meeting, a plan under way) must have something held behind it: an obligation,
     a concern, a venture, a scheduled effect, a pending decision or a stamp. One with nothing is a hit.
@@ -857,6 +920,7 @@ assert claims_moved_for(conn, offscreen_hit_victims_outfit)                  # r
 - Modify: `connector/views.py` (`compact_scene` builds on `brief.full`), `connector/store.py` (`note kind=scene`
   returns `brief.full`), `connector/timeflow.py` (after a skip, return `brief.full` in place of the separate blocks),
   `connector/server.py` (results of `act`, `money`, `note` during an open scene carry `brief.changed`)
+- Modify: `worlds/saintjude/levels.json` (revision 6.4: `cutaways.floor`)
 - Modify: `engine/texture.py` (`block` no longer puts `claims.cutaways` inside `outside_his_knowledge` in the brief)
   and `connector/timeflow.py`, `connector/server.py` (grand plan round 2: `advance` and `close_scene` results carry
   a `cutaways` field from `claims.cutaways`)
@@ -904,7 +968,19 @@ assert claims_moved_for(conn, offscreen_hit_victims_outfit)                  # r
   are their own field, `cutaways`, on `advance` and `close_scene` results only, never in `brief.full` or
   `brief.changed` during an open scene. Each is I1a's existing item: what his people met about a significant
   happening that touches him, which he was not there for and has not been told, with its "outside his knowledge"
-  note. `claims.cutaways` already marks each one shown, so it appears once.
+  note. `claims.cutaways` already marks each one shown, so it appears once. Revision 6.0: a cutaway is a
+  reaction to what he did or how he is seen (today `circle_reactions`, which is exactly that), never a pending
+  decision, plan or nomination aimed at him. Test: a rival's pending decision against him never shows in
+  `cutaways`. Revision 6.1 (owner): cutaways are wider than his circle. They also draw on how anyone meets what is
+  public or visible about him: the `spread` rows and `publish_media` items about him (Task 10a) as people take them
+  in, such as strangers seeing him pull up in a sports car with security, a bar watching him on the news, men talking
+  about his sentence or what he is worth. Each `advance` or close result carries the few most significant (by the
+  item's loudness and how near the people are to him), each once. Still reactions only. Test: after a big public
+  purchase and a skip, `cutaways` holds a stranger's reaction to it. Revision 6.3: shown once is held on the
+  `knowledge` row of the person who took the item in (`cutaway_day`, a schema 134 column, Task 3), and for a media
+  item on the row `publish_media` writes (revision 6.4), since a broadcast has no single taker; a package
+  floor (`levels.json` `cutaways.floor`, by loudness) means an ordinary week returns none. Test: a quiet week's
+  skip returns no `cutaways`; a second skip doesn't repeat the purchase.
 
 - [ ] **Step 1: Write the failing test:**
 ```python
@@ -917,7 +993,7 @@ assert "outside_his_knowledge" not in dump(b) and "cutaway" not in dump(b)      
 circle_reaction_away_from_him(conn, me)                     # grand plan round 2: his wife hears of it at church
 r = server.advance("p1", days=1)
 assert r["cutaways"] and "outside his knowledge" in dump(r["cutaways"])
-assert not server.advance("p1", days=1).get("cutaways")     # shown once
+assert not server.advance("p2", days=1).get("cutaways")     # shown once (its own call id, so no replay)
 injure(conn, me, "broken hand"); owe(conn, me, frank, 200)
 b = brief_full(server); assert "broken hand" in dump(b["you"]) and "200" in dump(b["you"])   # it lingers
 assert "you_may" not in dump(server.act("p1", "go out", {"place": "the Starlite"}))   # no menu of moves
@@ -986,7 +1062,7 @@ Revision 5.2 splits this task into three sessions, in this order:
   - `engine/nominations.py`, `engine/levels_tick.py` and `engine/simulation.py`;
   - the life modules listed below;
   - `connector/server.py` (`note(kind="plan")`, `realizes` on `author` and `close_scene`, and seeding a person on
-    `author` or `realize`);
+    `author` or `realize`; revision 6.5: `note(kind="answer", nomination, choice)` is added in 14c);
   - `connector/brief.py` and `connector/timeflow.py` (fill `nominations`);
   - the `nominations` block of `worlds/saintjude/levels.json`.
 
@@ -995,6 +1071,9 @@ Revision 5.2 splits this task into three sessions, in this order:
   `engine/levels_tick.py` (register its steps) and the `conduct` block of `levels.json`. Test lines: the revision 4.1
   ones.
 - **14c:** agency guards and seat decisions. Files:
+  - `connector/server.py` (revision 6.5: `note(kind="answer")`);
+  - `engine/nominations.py` (revision 6.4: `realize` hands a `seat_decision` answer to its path; `apply_overdue`
+    lapses one);
   - `engine/org_succession.py`, `engine/org_coup.py` and `engine/crime_response.py`;
   - `engine/org_choices.py`, `engine/outfit_choices.py`, `engine/org_money.py` and `engine/org_happenings.py`;
   - `engine/business.py` (`process_due_businesses`). `merchant.py` is not hooked: Saint Jude does not run it
@@ -1031,7 +1110,9 @@ engine nominates, the GM realizes and the engine ratifies.
 - Modify: `engine/life_matters.py`, `engine/outings.py` (offscreen flings and scuffles), `engine/opening_family.py`
   (`resolve_unnamed_marriages`), `engine/household_life.py` (planned births), `engine/civilian_life.py` (a grown
   child nobody knew of), `engine/temptations.py` (`_others`), `engine/org_happenings.py`: a draw that touches someone
-  `near` him becomes a nomination; a draw on anyone else applies as today
+  `near` him becomes a nomination; a draw on anyone else applies as today. Revision 6.3: this holds for the active
+  too, close kin and distant movers alike; nothing skips a person for being active. A draw applied directly
+  records its cause (the draw's kind and rate), so C1's "every level-3 event has a cause" holds for them
 - Modify: `engine/org_succession.py`, `engine/org_coup.py`, `engine/crime_response.py` (agency guards: never vote,
   spend, plot, defect or plead for the protagonist)
 - Modify: `connector/server.py` and `connector/brief.py` (`nominations` in `brief.full` and in the skip result;
@@ -1044,8 +1125,9 @@ engine nominates, the GM realizes and the engine ratifies.
 
 **Interfaces:**
 - Produces:
-  - `near(conn, day) -> set[int]` (revision 4.2: relevance, not proximity): the active people, his household and
-    kin, his ties and recurring connections, anyone who dealt with him in a scene within `lock_quiet_days`
+  - `near(conn, day) -> set[int]` (revision 4.2: relevance, not proximity): the people active because they are close
+    to him (`close_rule`; revision 6.2: a mover active only by his seat, with no tie to him, is not near and acts on
+    his own), his household and kin, his ties and recurring connections, anyone who dealt with him in a scene within `lock_quiet_days`
     (named in a stamp or given a part, not merely present), and anyone involved in an event that affects him.
     Someone only at the same place is not near.
   - `nominate(conn, kind, actor_ids, cause: str, payload: dict, chain_id=None) -> int`. `payload` holds what
@@ -1055,7 +1137,10 @@ engine nominates, the GM realizes and the engine ratifies.
   - `realize(conn, nomination_id, change: dict) -> dict` (checked like any authored change; contradictions refused).
   - `due(conn, day) -> {"new": [...], "remind": [...], "overdue": [...]}`.
   - `apply_overdue(conn, day) -> list[int]`: past `by_day` (or the default timeframe if no plan), the engine applies
-    the development in a plain form through the same path the draw would have used.
+    the development in a plain form through the same path the draw would have used. Revision 6.3: never for
+    `kind == 'seat_decision'`. Past its date that matter is marked lapsed and its path told he gave no answer (a
+    vote counts him absent); nothing is done in his name. Test: an overdue seat matter on an outfit hit leaves no
+    hit and the nomination `lapsed`.
 - **Consistency:** nothing the engine applies may contradict what a scene established (`scene_stamps`, recorded
   ties, standing). Where it would, it becomes a nomination instead.
 - **Agency guards:** the engine never chooses the protagonist's acts.
@@ -1069,12 +1154,28 @@ engine nominates, the GM realizes and the engine ratifies.
   - Where it is him, a decision the package marks his own (`delegation` in `levels.json`: money above a share of
     the seat's funds, violence, membership, votes and deals) becomes a `waiting_on_you` matter, with a timeframe
     like a nomination.
+  - Revision 6.2, answering it: the `seat_decision` nomination's payload names the code path that asked and what
+    it needs (the item for a vote, the choice for an outfit or business decision). `realize(nomination_id,
+    {"choice": ...})` hands his answer back to that path: a vote is recorded through `civic_votes`, an outfit or
+    business choice runs through the existing `execute_*` handler or `business` path. The GM sees the matter in
+    plain words and passes what the player said, never a menu. An answer that fits nothing the path holds becomes
+    his `stated` decision (Task 17b). Unanswered by its date, `apply_overdue` decides nothing for him: a vote
+    counts him absent, and the seat goes on as it was. Test: a seated councilman answers "no" through
+    `realize` and the item's count holds his no; an outfit choice he answers runs the matching handler.
+  - Revision 6.5, the connector path: `note(kind="answer", nomination, choice)` in `connector/server.py` passes
+    `{"choice": choice}` to `nominations.realize`, so the GM can answer straight after a skip or mid-scene. Test:
+    `server.note("a1", kind="answer", nomination=n, choice="no")` and the item's count holds his no.
   - Routine running goes to his second or manager. If he has none, the seat keeps going as it was. Each such act is
     listed in the skip result as done by them.
 - Revision 4.1:
   - **`conduct.weekly(conn, day) -> list[int]`** (revision 5: facts and one rule, no build-up maths). For each
     person `near` him it reads facts already on record:
-    - the day they last shared a scene, against the package's quiet days for their closeness (`neglect`);
+    - the day they last shared a scene, against the package's quiet days for their closeness (`neglect`).
+      Revision 6.2: a day skipped with `advance` counts as shared time with whoever his routine puts him with that
+      day (`routines.where` for both at the same place: his household at home, the regulars at his bar), unless an
+      exception keeps him away (travel, custody, a stated long absence). Neglect comes from real absence, or from
+      played scenes that leave someone out. Test: a five-week ordinary skip opens no `neglect` for his mother;
+      five weeks away on a job opens one;
     - a wrong he did them, from a stamp (`wronged`);
     - a promise to them past its date and unmet (`broken_promise`);
     - news they hold of him with another partner (`jealousy`).
@@ -1082,6 +1183,12 @@ engine nominates, the GM realizes and the engine ratifies.
     One rule: a fact still outstanding after its package wait opens one nomination naming that fact. At most one open
     nomination per person; a later fact adds to its cause. How it shows, a sharp word or a cold dinner, is the GM's
     to play.
+    Revision 6.5, each fact surfaces once: the nomination's `payload` lists the source keys of the facts in it
+    (`stamp:<id>` for `wronged`, `obligation:<id>` for `broken_promise`, `knowledge:<id>` for `jealousy` and for
+    `conduct.lies`, and `quiet:<person>:<day of the last shared scene>` for `neglect`). `conduct.weekly` and
+    `conduct.lies` skip any fact whose key is in a nomination of any status, `realized`, `declined`, `applied`
+    and `lapsed` included. A new absence after a shared scene has a new key, so neglect can come back; an old
+    wrong can't.
   - **`conduct.lies(conn, day)`:** for a `holds_true=0` belief that he caused, when a holder of the truth shares a
     household, routine place or scene with the believer, it nominates the discovery.
   - **Budget:** one table and one loop, with no scoring beyond the package weight per kind. Each week the GM gets
@@ -1125,6 +1232,9 @@ promise_in_scene(server, me, to=brother, by=day + 3); run_days(conn, 5)
 assert broken_promise_on_record(conn, me, brother)
 lie_in_scene(server, me, to=mother, truth_known_to=[frank]); same_place(conn, frank_wife, mother); conduct.lies(conn, day)
 assert nomination_of(conn, mother)["kind"] == "lie_found_out"
+# revision 6.5: a fact surfaces once
+n = nomination_of(conn, mother); nominations.realize(conn, n["id"], {"scene": "she confronts him"})
+run_weeks(conn, 3); assert not nomination_of(conn, mother, status="new")   # the played-out lie isn't renominated
 flood_near(conn, people=12); week = nominations.due(conn, day)
 assert len(week["new"]) <= budget(conn) and applied_small(conn)             # the GM isn't buried
 assert nomination_kinds_to_gm(week) >= {"romance"}
@@ -1181,7 +1291,9 @@ assert veto_refuses_during_play(conn, take_held_seat)                           
 for start in ("mechanic", "businessman", "politician", "boss"):
     s = start_check(start, days=30)
     assert s["circle"]["kin"] and s["circle"]["friends"]         # a personal life at every scale
-    assert s["personal_nominations"] and s["city_events"]         # his life moves, and so does the city
+    print(start, len(s["personal_nominations"]))                # revision 6.2: reported at 30 days, a quiet month is normal
+    assert s["city_events"]                                      # the city moves
+    assert start_check(start, days=120)["personal_nominations"]  # his life moves, over the hands-off window
     if start in ("politician", "boss"): assert s["seat_decisions"]
     assert not all_single(s["circle"]["friends"], age_band=(22, 30))  # a plausible opening (5.2)
     assert {"cause_share", "events_per_kind", "never_fired"} <= set(s["measures"])   # never_fired is [] until Task 17a
@@ -1260,8 +1372,11 @@ assert any(a["kind"] == "consequence" for a in server.author("t3", "turning_even
 **Files:**
 - Create: `engine/pressure.py`
 - Modify: `engine/levels_tick.py` (from Task 14a: add `pressure.build` and `channels.run_due_effects`)
-- Modify: `worlds/saintjude/levels.json` (`pressures`: `cash_strain` from cash against weekly household need;
-  `work_restless` from time in the same work at a low wage relative to his trade; `office_threat` for office
+- Modify: `worlds/saintjude/levels.json` (`pressures`: `cash_strain` from cash against weekly household need
+  (revision 6.3: the cash he can draw on, `ledger.can_draw` over his purse and the businesses or holdings he owns,
+  so an owner with a healthy business isn't strained); `work_restless` from time in the same work at a low wage
+  relative to his trade (revision 6.3: only for a man on a wage, never a seat holder or an owner living on profit
+  or tribute); `office_threat` for office
   holders, from a challenger's standing and the next election's date. Revision 5.8: `opportunities`: the cash
   line, as weeks of the business's costs, and the struggling line for a rival)
 - Test: `tests/pressure_buildup_test.py`
@@ -1283,6 +1398,10 @@ assert any(a["kind"] == "consequence" for a in server.author("t3", "turning_even
     itself), and there is at most one live or waiting concern per chance. Once a decision on it fires, the concern
     is `resolved`. A new one opens only for a new chance: another struggling business, or cash that fell below the
     line and rose above it again. No waiting period.
+  - Revision 6.4, how the chance is held: the cash episode is the `actor_pressures` row for the opportunity domain,
+    whose `since_day` is when cash rose above the line; the row is deleted when cash falls below it. No new
+    opportunity concern opens while a concern for that chance, of any status, `resolved` included, has
+    `opened_day >= since_day`. A struggling business is its own chance, keyed by the business.
   - `levels_tick.process_due` (Task 14a) gains `pressure.build` and due `scheduled_effects`. Task 17b adds
     `offscreen.fire_due`.
 
@@ -1343,7 +1462,11 @@ assert decision(conn, d2)["action"] in ("expand", "buy_out", "propose_alliance",
 **Files:**
 - Modify: `engine/offscreen.py` (`fire_due`) and `engine/levels_tick.py` (register it. Revision 5.5: before
   `fire_due`, a weigh pass calls `offscreen.weigh` for every active person other than him who has a `live` concern
-  and no pending decision on it)
+  and no pending decision on it. Revision 6.4: `fire_due` replaces Task 14a's clean-up of past-due stated
+  decisions; remove that step from `levels_tick.py`, keeping its rule that one involving him becomes a
+  `waiting_on_you` matter)
+- Modify: `engine/civic_graft.py` (revision 6.4: `fraud_pass` skips a candidate who is a mover; grand plan F-4)
+  and `engine/civic_corruption.py` (`put_on` for an accepted `seek_payment`)
 - Revision 5.8, plans in motion: when a fired decision has a visible step (a buy-out offer, an expansion, a loan
   sought, staff taken on, an alliance agreed), it starts a spread row about the mover from those who saw it (the
   owner offered, the new staff, the lender). It then travels by `news_gate.spread` to people in that trade or
@@ -1372,6 +1495,7 @@ assert decision(conn, d2)["action"] in ("expand", "buy_out", "propose_alliance",
       debt, as `trade` reckons it). Accepted, it pays and changes owners through the shared function;
     - `propose_alliance` makes an offer to another owner or seat holder, which becomes an obligation if
       accepted.
+    - Revision 6.4: once one of these fires, `fire_due` sets the `opportunity` concern it served to `resolved`.
     - **Who accepts.** Far from him, an owner weighs a buy-out the way the `trade` offer already weighs a price
       against value, more willing the deeper his business is below the struggling line. An alliance is settled
       by the tie between the two and their temperament (`actor_drives`). An offer to him, or by or to someone

@@ -73,7 +73,13 @@ End with any `REQUEST` lines.
 | 3 | 10 points, 3 open answers | All 10: running for office (F-11, the filing code was never called); C-2 merged into C-1; L-6, C-13, C-17 and C-3 shrunk to S; F-6 into Task 7; F-4 into Tasks 17a and 17b; C-11 only for cases near him; W-7 strictly lazy | None. Claude's changes: F-11 sits in Deploy 3 as a fix to what is built, with campaign money in C-10; a site is a `buildings` row of kind `other`, since no land table exists; the owner's replace-before-it-exists path in W-7 is kept as a fact R1 reads |
 | 4 | 4 points, 3 open answers | All 4: F-11 widened to all of P1 plus his own work; F-12 shares and paying over time; L-1 routes his possible death through Task 18d | None. The check found more than assumed: every P1 piece is unreachable by him, and his council vote was cast from his lean, now his own matter |
 | 5 | 6 points, 3 open answers | All 6: his vote fix into Task 14c; F-11 split (F-13 his work); F-14 prison, business and outfit reach; F-12 debt terms and debt for a share, no shareholder voting; C-16 licence on inheritance | None. The check found a second place acting for him: the prison's weekly review filed his appeals and pardons; BZ1 was mostly reachable already through the intake |
-| 6 | 3 points, 3 open answers | All 3: the hands-off test and its rule; Deploy 3 split into 3a (his reach) and 3b; his prison group as an approach, in Task 14c | None. The plan froze after this round |
+| 6 | 3 points, 3 open answers | All 3: the hands-off test and its rule; Deploy 3 split into 3a (his reach) and 3b; his prison group as an approach, in Task 14c | None |
+| 6.0 | 5 points | All 5: L-9 history lookup restored; a scene's part of the day (Task 4); the three-levels plan labelled 6.0; men who flip (C-6); cutaways never show plans (Task 11) | None. The three-levels task text already carried rounds 1 to 6, so only its label changed; cutaways were already reactions only |
+| 6.1 | Owner | Cutaways include anyone reacting to what is public or visible about him | |
+| 6.2 | 5 traps in Deploys 1 and 2 | All 5: `near` without distant movers; answering a seat matter; no neglect from ordinary skips; casual extras undo cleanly; the start test over 120 days | None. All five confirmed against the plan text |
+| 9 | 6 points, 5 requests | All 6 as revision 6.3: life draws for everyone; overdue seat matters lapse; restlessness and strain scoped; C-11 `near`; C-1 explainable money; cutaway guards; L-6 note | None. Point 1 was a real conflict between the plan's overview and Task 14a |
+| 10 | 6 points, drift check | All 6 as revision 6.4, slips in the plan's own text | None |
+| 11 | 2 Task 14 bugs; nothing else to raise | Both as revision 6.5: each conduct fact surfaces once; `note(kind="answer")` for seat matters | None. Review ends here: Gemini is satisfied |
 
 ## Settled decisions (don't reopen without new evidence)
 
@@ -90,10 +96,11 @@ End with any `REQUEST` lines.
 - Cutaways are built in Deploy 1 (round 2) and appear only on skip and close results.
 - Round 3 left Deploy 3 as F-1 to F-3, F-5, F-7, F-8 and F-11; rounds 4 and 5 added F-12 to F-14; round 6 split
   them into Deploy 3a (F-11 to F-14) and 3b.
-- **The plan is frozen (round 6).** The next round comes after Deploy 1 has been played, with its playtest
-  transcripts.
+- **Review continues until you have nothing left to raise** (owner, 2026-11-27). Say so plainly when that is the
+  case; that is the signal the owner waits for.
 - Round 4: the plan is ready to build from. Further rounds refine Deploys 3 to 6 and don't hold up Task 1. Argue for a cut only with a play situation that needs it.
 
 ## Open questions for you this round
 
-None. The plan is frozen until Deploy 1 has been played.
+1. The corrected text of Tasks 7, 11, 14, 16 and 17b is at the end again. Do the six fixes read right?
+2. Are you satisfied? If you have nothing left to raise, say so plainly.

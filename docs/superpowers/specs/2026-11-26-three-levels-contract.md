@@ -16,7 +16,8 @@ is called `exposure_links`.
   (revision 5.3).
 
 **Scenes and stamps**
-- `gm_scenes(id, opened_day, closed_day NULL, location_id NULL, status CHECK IN ('open','closed','abandoned'),
+- `gm_scenes(id, opened_day, closed_day NULL, location_id NULL, part CHECK IN ('morning','day','evening','night')
+  NOT NULL DEFAULT 'day' (revision 6.0), status CHECK IN ('open','closed','abandoned'),
   opened_call_id, closed_call_id NULL)`. At most one row with `status='open'` (partial unique index).
 - `scene_participants(scene_id, actor_id, joined_after_beat INT NULL, left_after_beat INT NULL,
   attention CHECK IN ('involved','attentive','overheard','distracted') DEFAULT 'involved', PRIMARY KEY(scene_id, actor_id))`.
@@ -127,10 +128,11 @@ is called `exposure_links`.
 
 **Nominations (revision 4)**
 - `nominations(id, day, kind, actor_ids_json, cause, causal_chain_id NULL, status CHECK IN
-  ('new','planned','realized','declined','applied'), plan_text NULL, by_day NULL, reminded_day NULL,
+  ('new','planned','realized','declined','applied','lapsed') (revision 6.4: `lapsed`), plan_text NULL, by_day NULL, reminded_day NULL,
   decline_reason NULL, realized_scene_id NULL, applied_day NULL, payload_json)` (`payload_json`: revision 5.2).
 - Revision 4.1:
-  - `knowledge` gains `spread_from_day NULL` (outward spread, Task 10a).
+  - `knowledge` gains `spread_from_day NULL` (outward spread, Task 10a) and `cutaway_day NULL` (revision 6.3: shown
+    once as a cutaway, Task 11).
   - Nomination kinds include `neglect`, `wronged`, `broken_promise`, `jealousy` and `lie_found_out` (revision 5).
   - `nominations` gains `weight REAL` and `applied_small INTEGER DEFAULT 0` (the budget).
 - Revision 5.1: nomination kind `seat_decision` (a decision of a seat he holds, shown in `waiting_on_you`);
@@ -153,12 +155,16 @@ political offices and, from revision 5.8, `business_line` (the size of business 
 
 ## Tool contract (connector/server.py)
 - Revision 4: `note(kind="plan", nomination, by_day, text)` sets the GM's timeframe, or with `decline=reason`
-  declines; `author` and `close_scene` take `realizes=<nomination id>`. `brief.full` and the skip result list
+  declines; `author` and `close_scene` take `realizes=<nomination id>`. Revision 6.5: `note(kind="answer",
+  nomination, choice)` gives his answer to a `seat_decision` in the player's own words ("no", "pay him
+  half"); the connector passes `{"choice": choice}` to `nominations.realize`, and the result says what the path
+  recorded, or that the answer became his stated decision. `brief.full` and the skip result list
   `nominations` (new, to remind, overdue, and the small ones applied). `brief.full` has a `you` part. Tool results give facts and numbers in fields, not engine prose.
 - **People are a name or an id everywhere** (`close_scene`, stamps, threads). Names are matched against the open
   scene's people first, then the protagonist's known people. An ambiguous name, such as a first name two people share,
   is refused with the candidates. "me" is the protagonist.
-- `note(kind="scene", text, present, location=None)`: opens a scene if none is open. `location` is a place name or
+- `note(kind="scene", text, present, location=None, part=None)` (revision 6.0: `part` is the part of the day,
+  `morning`, `day`, `evening` or `night`): opens a scene if none is open. `location` is a place name or
   id; without it, it is the protagonist's stored place. A new scene with a location moves him there, through the
   same check as `act travel`. At the open scene's place, the note updates presence. At a different place while a
   scene is open, it is refused with one line: close the current scene first (`close_scene`, or

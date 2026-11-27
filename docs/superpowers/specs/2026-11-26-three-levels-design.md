@@ -692,7 +692,8 @@ It also tells a missing setting apart from a feature the package deliberately le
   - the connector's correction, undo, money and claim tools.
 - **Replaced, not added to:**
   - `life_matters` stops running for level-3 people and for protected people, and stays for the rest of levels 1
-    and 2;
+    and 2 (replaced by revision 6.3 of the build plan: life draws run for everyone, and one touching someone near
+    him becomes a nomination);
   - the four news feeds in `connector/timeflow.py` become the one gate, built from `hearsay.py`'s path logic and
     `information.py`'s reliability;
   - old paths are switched off first and deleted once the slice is proven.

@@ -2,8 +2,8 @@
 
 Written 2026-11-27, at the owner's request. Its round log is in `docs/review/grand-plan-review-kit.md`.
 
-**Frozen after round 6 (2026-11-27, owner's yes).** The plan doesn't change again until Deploy 1 has been played;
-then the playtests decide what changes.
+**Reviewed until Gemini has nothing left to raise (owner, 2026-11-27).** Each round's points are checked against the
+code, put to the owner, and applied on his yes. Deploy 1's playtests then add their own evidence.
 
 ## What this is
 
@@ -48,11 +48,12 @@ is: **would forgetting it break the story?** If yes, the engine records it. If n
 | One intake (I-1), real history (R1), the lived opening (L1) | Built |
 | Playtest fixes P2, GM correction and price book G1, bodies B1 | Built |
 | S1 tiered background | Tasks 1 to 3 built; Tasks 4 to 7 open (see O-6) |
-| Three levels, Deploys 1 and 2 (Tasks 1 to 19) | Planned to revision 5.9, review copy 13; not started |
+| Three levels, Deploys 1 and 2 (Tasks 1 to 19) | Planned to revision 6.0 (every grand-plan round included); not started |
 
 ## Deploy 1 and Deploy 2 (the three-levels plan)
 
-Detailed in `docs/superpowers/plans/2026-11-26-three-levels-build.md` (revision 5.9). In short:
+Detailed in `docs/superpowers/plans/2026-11-26-three-levels-build.md` (revision 6.0, which already carries every
+change this plan's rounds made to Deploys 1 and 2). In short:
 - **Deploy 1 (Tasks 1 to 14d):** scenes with a record, undo, the GM fault checker, consequence facts, one news gate,
   a brief of facts, nominations, conduct, starts at any scale (play anyone, including a held seat), big business
   owners as movers, the outlets as businesses, cutaways (former F-10, round 2), the unheld-thread check (former
@@ -102,7 +103,8 @@ almost every start.
 | L-2 | Plans carried out by someone's men can go wrong | A capo's plan botched by his men is a story; perfect execution isn't believable | Simplified in round 1: when `fire_due` carries out an offscreen action through a subordinate, one check against his loyalty and competence can make it leak (a `spread` row) or fail (a `failed` decision with a plain cause). Near him, the GM plays it from nominations | S | Design step 7 |
 | L-3 | A small man rising | The nobody who becomes someone is a classic story, and it must happen to NPCs too | Shrunk in round 2: one prominence rule in `levels.refresh`, read from what is already held: wealth at or above the package's line, or wide claims standing (I1b) without a seat, makes someone `notable`. A one-year run must show at least one person with no tie to him rising | S | Design step 8 |
 | L-4 | Obligations through life changes | A debt or a promise shouldn't vanish because a man moves, marries or goes inside | Obligations follow the person through moves, custody and death (passing to heirs where the package says so) | S | Design step 8 |
-| L-6 | Illness before death | A parent's illness is one of the biggest personal stories, and sudden deaths without illness aren't believable | Shrunk in round 3: deaths are already drawn person by person (`health._natural_mortality_check`). For someone `active` (close to him, or a mover), a natural death that falls due becomes an illness first, with a window before the death, and the Gompertz model is unchanged. People further away can still die suddenly | S | Memory: named mortality |
+| L-6 | Illness before death | A parent's illness is one of the biggest personal stories, and sudden deaths without illness aren't believable | Shrunk in round 3: deaths are already drawn person by person (`health._natural_mortality_check`). For someone `active` (close to him, or a mover), a natural death that falls due becomes an illness first, with a window before the death, and the Gompertz model is unchanged. People further away can still die suddenly. Revision 6.3: for someone `near` him the illness comes as a nomination; for a distant mover it applies directly, since a mayor's or a boss's illness is succession drama | S | Memory: named mortality |
+| L-9 | A look back over his history (restored in revision 6.0) | A story over five to twenty years needs its past: why a grudge started, when a deal was struck. A fresh GM session in year four has to find it without the brief growing | The existing `lookup` tool gains a history query over closed scenes' stamps and `causal_chains`, by person or subject, returning dated one-line items. Nothing new is stored. It was deferred to steps 6 to 8 by the three-levels plan and left out when this plan was compiled | S | Three-levels rev 5.1, Gemini rev 6.0 |
 
 ## Deploy 5: consequences that bite
 
@@ -110,16 +112,16 @@ What makes acts come back. Each item uses machinery that exists and adds a small
 
 | ID | Item | Why it passes | Simplest form | Size | Source |
 |---|---|---|---|---|---|
-| C-1 | Two sets of books, tax and the "Capone path" (C-2 merged in round 3) | Fronts, skims and audits are central to mob and business stories, and spending he can't explain is how men like him fall | A business holds one optional declared figure for takings beside the real one; a front's or a skim's difference is the gap. A package tax share applies to declared profit. A periodic check compares his visible spending and purchases (rev 5.2) with his declared income, and a wide gap is a tip to `crime_response` or an audit. An audit, an informing bookkeeper or a suspicious partner reads the gap. No accounting system and no tax filing | S to M | BZ2, intake audit row 11 |
+| C-1 | Two sets of books, tax and the "Capone path" (C-2 merged in round 3) | Fronts, skims and audits are central to mob and business stories, and spending he can't explain is how men like him fall | A business holds one optional declared figure for takings beside the real one; a front's or a skim's difference is the gap. A package tax share applies to declared profit. A periodic check compares his visible spending and purchases (rev 5.2) with money he can explain: declared income plus his starting wealth, recorded loans (C-4) and recorded sales of assets or shares (F-12) (revision 6.3), and a wide gap is a tip to `crime_response` or an audit. An audit, an informing bookkeeper or a suspicious partner reads the gap. No accounting system and no tax filing | S to M | BZ2, intake audit row 11 |
 | C-3 | The mob on a business's books | A bar paying protection, a loan going bad and a bust-out need real books | Shrunk in round 3: protection already moves as tribute through `org_tension`. It and a street debt become cost lines in Task 18c's business upkeep, protection rising with takings. A missed payment feeds the existing tension and absorption code, which walks toward partner, then bust-out. No separate mob bookkeeping. Same for his business | S | BZ3 |
 | C-4 | A bank loan, and the shylock when the bank says no | How a legitimate man ends up owned | A loan request gets an answer (yes, no, terms) weighed from collateral, ties and the owner's standing. A refusal leaves the street lender as the plausible way | S to M | BZ4 |
 | C-5 | Strikes | A walkout at his business or his supplier's is a real story beat | A strike is a shock kind (Task 15) on a business with a union presence, weighed from wages and the union's men. The union is an organisation only where the story needs one | S | BZ4 |
-| C-6 | Investigators with ambition | A prosecutor making his name on him is one of the best threats in this genre | The prosecutors' and federal offices go in `mover_roles`. `noticing` points them at crimes on record and published items. Their actions are `open_investigation` and `seek_indictment` through the case chain | S | P2, prison §7.1b |
+| C-6 | Investigators with ambition | A prosecutor making his name on him is one of the best threats in this genre | The prosecutors' and federal offices go in `mover_roles`. `noticing` points them at crimes on record and published items. Their actions are `open_investigation` and `seek_indictment` through the case chain Revision 6.0, men who flip: `org_informing` already turns a man in custody or facing a case, but he gives up only the man he answers to in his organisation, and not from what he knows. Widen the existing turning to anyone in custody who holds a true `knowledge` row of who ordered his crime (Task 10b's rows), weighed by the same loyalty against the sentence he faces. What he gives the prosecutor comes from that row, and he becomes a C-11 witness. The protagonist is under the same rules | S | P2, prison §7.1b |
 | C-7 | A reporter digging, and a reporter filing | A reporter sniffing around is a threat he can buy, scare or feed; a reporter start needs his stories to land | Each major outlet's lead reporter is in `mover_roles` (round 1), so Tasks 17b and 17c's `noticing` and `weigh` reach him with no second path. His actions are `dig` and `publish`. A reporter protagonist files a story through `act`: an owner or editor with a tie to the subject or an interest in it can spike it, otherwise it runs through `publish_media` and feeds C-10 | S | Information phase 2, round 1 |
 | C-8 | Owning a paper or station matters | If he owns the *Chronicle*, a story about him or his friends is his to run, hold or kill | An item about him or his on an outlet he owns becomes a `seat_decision` through the existing `delegation` key | S | Information phase 2 |
 | C-9 | Old stories come back | His past is a cost: an old story dug up in an election year | Published items are kept with their subject and day; a rival, reporter or investigator acting on him reads them. Nothing new is stored | S | Information §7.4 |
 | C-10 | Public items reach the readers that care | A scandal should move his voters, his lenders and the prosecutor | A published item feeds the existing readers: P1's voter blocs, a lender's answer (C-4), and a case tip (C-6). Each reader is checked in a test. Round 3 checked P1: no war chest, and the vote score has no money term. A donation is a ledger flow to a candidate's campaign purse, and spending from it counts in the race's score as one package-weighted term, for him and background candidates alike (round 1, round 3) | S | Information phase 3 |
-| C-11 | The justice system is people | A jury tampered with, a judge bought, a witness scared off | When a case that involves him, someone `active` around him, or a client of his (C-15) reaches trial, the judge, prosecutor and key witnesses are materialized as people (the jurors as a group). An act he or anyone records against them (a bribe, a threat) weighs in the verdict. Every other trial keeps J1's existing path (round 3) | M | Prison §7.1b, J1 gaps |
+| C-11 | The justice system is people | A jury tampered with, a judge bought, a witness scared off | When a case that involves him, someone `near` him (revision 6.3), or a client of his (C-15) reaches trial, the judge, prosecutor and key witnesses are materialized as people (the jurors as a group). An act he or anyone records against them (a bribe, a threat) weighs in the verdict. Every other trial keeps J1's existing path (round 3) | M | Prison §7.1b, J1 gaps |
 | C-12 | A new name | Cooperating and going into protection is a fully playable path (owner) | An alias on the same actor, with the knowledge firewall hiding the link from those who wouldn't know it | S to M | Prison 8b, intake row 12 |
 | C-13 | Civil matters: divorce, suits, bankruptcy | A divorce is one of the biggest personal stories, and bankruptcy ends many business stories | Shrunk in round 3: a civil filing records the parties, the kind, the amount or terms and its status. It settles through what exists: `money`, `trade`, obligations, `household_unions` for a divorce, and business closure for a bankruptcy. C-11's judge comes in only if the dispute reaches trial | S | Intake audit row 10 |
 | C-14 | Prison changes a man | An old friend who comes out changed is a story; so is he | On release after a long term, temperament (`actor_drives`) moves from what happened inside, by package figures. Contacts made inside are kept as ties | S | Prison §7.4 |
@@ -212,9 +214,58 @@ What makes acts come back. Each item uses machinery that exists and adds a small
 - A medieval world on the same core.
 - Caerness renovated after the three games.
 
+## Revision 6.5 (Gemini round 11)
+
+Two Deploy 1 bugs in Task 14, both applied:
+- A fact behind a personal matter (a wrong, a broken promise, a lie, news of another woman) surfaces once. Before,
+  a confrontation already played could be nominated again every week.
+- The GM gets a tool path to give his answer to a seat matter (`note(kind="answer")`).
+
+Gemini then said it has nothing left to raise: the next real bugs will show once Deploy 1 runs and is played.
+
+## Revision 6.4 (Gemini round 10)
+
+Six slips in the three-levels plan's own text, none architectural: `lapsed` added to the nominations status; an
+opportunity tied to its cash episode so it isn't reopened; the cutaway check covers wider cutaways; missing files
+named in Tasks 11, 14c and 17b; Task 17b replaces Task 14a's stated-decision clean-up; Task 11's test uses a second
+call id. Gemini's drift check found every earlier round landed cleanly.
+
+## Revision 6.3 (Gemini round 9, owner's yes 2026-11-27)
+
+Six points, all applied:
+- Life draws run for everyone, the active included; near him they become nominations. The plan's overview and an
+  older design line said otherwise, and are corrected.
+- Overdue seat matters lapse; nothing is done in his name.
+- Restlessness only for wage earners; money strain reads what a man can draw on.
+- C-11 uses `near`, not `active`. C-1 compares spending with money he can explain.
+- Wider cutaways: shown once, a floor for quiet weeks, not checked as scene people.
+- L-6: illness near him is a nomination; a distant mover's applies directly.
+
+## Revision 6.2 (Gemini, owner's yes 2026-11-27)
+
+Five traps in Deploys 1 and 2, all applied in the three-levels plan:
+- `near` excluded distant movers, so they move the city on their own instead of waiting as his nominations.
+- His answer to a seat matter goes back to the code that asked; unanswered, nothing is decided for him.
+- A skipped day counts as time with whoever his routine puts him with, so skips don't breed neglect.
+- Casual extras are recorded like authored people, so undo reverts them cleanly.
+- The start test asserts his personal life moves over 120 days, and only reports the 30-day count.
+
+## Revision 6.0 (Gemini, owner's yes 2026-11-27)
+
+Five points, all applied:
+- L-9 restored: a look back over his history, lost when this plan was compiled.
+- Task 4: scenes have a part of the day, so presence is judged right for two scenes on one day.
+- The three-levels plan is labelled revision 6.0, with a list of every grand-plan change by task. The task text
+  already carried them.
+- C-6: a man in custody who knows who ordered his crime can flip and give him up.
+- Task 11: a cutaway is a reaction to what he did, never a plan aimed at him. The code already works this way.
+- Owner, the same day (revision 6.1): cutaways are wider than his circle. Anyone reacting to what is public or
+  visible about him counts: strangers seeing him arrive with security, people watching him on the news, talk of his
+  sentence or his wealth. They come from the spread and media items about him, the few most significant per skip.
+
 ## Round 6 (Gemini, owner's yes 2026-11-27)
 
-Three points, all applied, then the plan froze:
+Three points, all applied:
 - A hands-off test in Task 14c: every role runs 90 to 120 days with no call from him, and nothing is written in his
   name except what befell him, upkeep and payroll, or his second's acts. The rule is a global constraint.
 - Deploy 3 split: 3a his reach (F-11 to F-14), 3b the world fixes.
