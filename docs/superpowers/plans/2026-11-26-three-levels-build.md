@@ -46,6 +46,13 @@ argument and module function named below is defined in the contract; read it bef
   temp files.
 - Each tool result stays small: the GM's context per turn is a cost. A new key in a result needs a reason.
 - Never show the machinery: concern lists, scores and engine words go to the GM only as plain-language briefs.
+- **Clean pass before each build session (revision 6.14):** before a task's build session starts, the lead rewrites
+  that task here as one clean text. Every revision and round note that touches it is folded into the task's own
+  files, interfaces and steps; the test block is kept whole; nothing in it needs the revision list to be read. The
+  session gets the clean task, these Global Constraints and the contract sections the task names, nothing else from
+  this plan. Gemini's brief for the task (`docs/review/gemini-drafts/task-briefs.md`) is the checklist: each point in
+  it is either in the clean text or struck with a reason. Where the brief and the plan differ, the plan wins. The lead
+  commits the clean pass before starting the session.
 
 ## Review Focus
 1. A chat ends mid-scene, a new chat calls `resume`, then `advance`: the refusal must name
@@ -75,7 +82,7 @@ argument and module function named below is defined in the contract; read it bef
 ## Delivery and cost (owner-approved 2026-11-26; overrides the task steps where they differ)
 
 **Two deployments.**
-- **Deploy 1, after Task 14d:** Tasks 1 to 13, then Tasks 14a to 14d, then a Task 19-style deploy and playtest. Task 14 is
+- **Deploy 1, after Task 14d:** Tasks 0 to 13, then Tasks 14a to 14d, then a Task 19-style deploy and playtest. Task 14 is
   now nominations, consistency and agency guards (design section 0). Deploy 1 is the GM loop, the news gate with
   every door, and life near him going on through nominations.
 - **Deploy 2:** Tasks 15 to 18d (the living world, noticing, business state, his death or long sentence), then
@@ -189,6 +196,51 @@ and a stated decision takes its target from the stamp (Task 4).
 - The outlets: four already exist in the seed, and three are added (Task 3).
 - `standing_here` sits inside `you` (Task 11).
 
+**Revision 6.14 (Gemini's suite audit and drafts, owner's yes 2026-11-28).**
+- New Task 0, built before Task 1: a quicker `--quick` (the Saint Jude opening built once per run, more jobs at once,
+  Caerness-only, legacy and benchmark tests moved to the full suite, a Saint Jude smoke test) and the list of existing
+  tests that later tasks must update.
+- Global Constraints: a clean pass of each task before its build session.
+- Gemini's drafts are filed under `docs/review/gemini-drafts/`: starting points for Tasks 7 and 12 and a checklist per
+  task, never the source.
+- Gemini round 18: `connector_http_test` joins the tool-list pins (Task 4 is the first tool change); the smoke test
+  gains `actor_beliefs` (Task 2b) and new presence habits (Task 3b), and its save creates a protagonist first.
+
+**Revision 6.12 (Gemini round 15).**
+- Task 14d0: the outfit behind a business is, in order, the outfit its owner sits in, then the outfit whose rackets
+  take the most each week at its location, then none.
+
+**Revision 6.11 (Gemini round 14, two points).**
+- Task 14c: `_answer`'s `decision:` handler for his own stated decisions is built in Deploy 1, where Task 14a starts
+  putting them in `waiting_on_you`; Task 17b adds only the branch for an offer to him.
+- Task 14d0: every helper in `player_operations.py` that reads the old outfit tables moves to the org core (crews
+  are its units; the outfit behind a business is one whose racket runs at its location, or none), and the SQL-watched
+  test runs every outfit action.
+
+**Revision 6.10 (Gemini round 13, three points).**
+- Task 3b: each institution he belongs to (club, supper club, diner, parish) meets one evening a week, the same
+  evening for all its members, and `routines.where` places them there; the courtship scan asks `where` for that
+  evening. Without it, revision 6.9's home-and-work rule would have stopped background courtship.
+- Tasks 14a, 14c, 17b and 18c: `offer:` becomes `decision:`, for any `actor_decisions` row (an offer to him, or his
+  own stated decision due with nothing for the engine to do). A decision of his seat's, including Task 18c's work
+  turned away, is `seat:`. Task 17b gets the `decision:` handler.
+- Task 14d0: the rest of the old-layer reads (`free_operation`'s outfit lookup and attack, `engine/authoring.py`'s
+  "his people" and new outfits, `intake.py`), an outfit with no living head, the test seated directly, and a
+  catch-all SQL watch that fails on any old outfit table.
+
+**Revision 6.9 (Gemini round 12, seven points).**
+- Task 14c and Task 17b: each `waiting_on_you` item's `matter` names its source (`life:`, `seat:`, `offer:`), and
+  `_answer` sends it on by that prefix; a bare number still means a life matter.
+- Task 14d0 (new, split from Task 14d): his outfit through the org core. The outfit's money is the head's purse,
+  shown once, never paid to itself, drawn on by the head only; `institution:<id>` of an outfit reaches the same purse.
+  The start-time reads move too: `veto.held_by_other` finds an outfit's head in the org core (today a claim to lead
+  one is not refused in Saint Jude), and an outfit start's colleagues come from its seats.
+- Task 3b: `routines.where` places someone with no routine from his household and work, worked out on the spot and
+  stored nowhere; the old presence fallback goes.
+- Task 2b: `SYSTEM_KEYS` gains `psychology`, `mortality_audit` and `presence_habits`; the optional `caerness_economy`
+  switch is dropped (0.2 s of 129 s, no rows written).
+- Task 12: `unmodelled` carries no `owner_notice` and is no `gm_check` hit.
+
 **Revision 6.8 (the code audit's third pass).**
 - Task 14d: in a package that runs the org core, his outfit tools (its purse, hiring, promoting and dismissing, truces,
   heat, "his outfit") use the org core instead of the old Caerness tables, which are empty in Saint Jude. The boss
@@ -272,6 +324,61 @@ is reported as the finished design.
 
 ## Phase A: build step 1
 
+### Task 0: A quicker quick suite (revision 6.14, built before Task 1)
+
+Every later task runs `--quick` before it reports, so this one pays for itself first. Today `--quick` runs 224 tests
+four at a time; 130 of them open a Saint Jude world, and each test process builds its own copy of the opening.
+
+**Files:**
+- Modify: `tools/run_suite.py`, `tests/sj_fixture.py`, `tests/outfit_choice_fixture.py`
+- Modify: `tests/slow_tests.txt` (the moved tests join it, under a `# full suite only: not Saint Jude` heading, so
+  `--quick` skips them and the full run keeps them)
+- Modify: the tests that build the default Saint Jude opening themselves, where they need no build arguments of their
+  own: `design_figures_runtime`, `l1_budget`, `saintjude_connector_play`, `saintjude_dated_rules` (its Saint Jude
+  half), `saintjude_facts`, `saintjude_families_opening`, `saintjude_leak_scan`, `saintjude_population` (all `_test`)
+  move onto `sj_fixture.build_saintjude`
+- Create: `tests/saintjude_smoke_test.py`
+
+**Interfaces:**
+- Produces: the environment variable `CAERNESS_SJ_OPENING`, the path of a Saint Jude opening built once for the run.
+  `sj_fixture._cached_build()` uses that file when the variable is set and the file exists, and builds as today
+  otherwise, so a test run on its own still works. Tests copy it and never open it in place.
+- Produces: `tests/saintjude_smoke_test.py`, which Task 2b and Task 11 extend (below).
+
+- [ ] **Step 1: Build the opening once per run.** Before the pool starts, `run_suite.py` builds the Saint Jude opening
+  into `<out>/sj_opening.db` when at least one selected test mentions `saintjude`, `sj_fixture`,
+  `outfit_choice_fixture`, `org_core_fixture` or `history_fixture`, passes its path as `CAERNESS_SJ_OPENING` and
+  removes it when the run ends. `outfit_choice_fixture` takes its world from `sj_fixture` rather than building its own.
+  Check: `--quick --only` with two `sj_fixture` tests builds once; neither test's log has the
+  `sj_fixture: Saint Jude opening built` line.
+- [ ] **Step 2: More at once.** The default `--jobs` becomes `min(8, os.cpu_count() or 4)`. The rule of no more than
+  two long runs, and none beside the quick suite, is unchanged.
+- [ ] **Step 3: Move what Saint Jude never runs.** A test leaves `--quick` only if both hold: it never opens a Saint
+  Jude world, and everything it covers is Caerness-only, a legacy version check (`v08` to `v45`, `schema113`,
+  `schema114`) or a benchmark (`bench_*`). A test of shared engine or connector code stays, even on `caerness.db`:
+  `connector_*`, `ledger`, `veto`, `player_operations`, `new_character`, `smoke`, `decision`, `information`, `action`,
+  `act_freeform`, `world_*` and the like. The candidates are the 94 quick tests that never mention Saint Jude
+  (counted 2026-11-28). The commit message names every moved test with a one-line reason; a doubtful one stays.
+- [ ] **Step 4: A Saint Jude smoke test** under 10 seconds beyond the copy: copy the opening, start a new save through
+  the connector and create its protagonist from a concept, `resume`, `advance` 7 days, then assert the advance
+  succeeded, the protagonist is alive and placed, and `underworld_organizations` and `underworld_personnel` hold no
+  rows. Task 2b adds: no rows in `cultivation_profiles`, `psychological_stressors` or `actor_beliefs`. Task 3b adds:
+  the advance writes no new `actor_presence_habits` rows. Task 11 adds: `brief.full` returns its keys in order.
+  It stays in `--quick`.
+- [ ] **Step 5: Run and report.** `--quick` before and after: report the test count and wall time of both, and the
+  pass set, which differs only by the moved tests. Then run the moved tests with `--only` and report that they pass.
+- [ ] **Step 6: Commit** `tools/run_suite.py`, the fixtures, `tests/slow_tests.txt`, the moved-onto-fixture tests and
+  the smoke test.
+
+**Existing tests later tasks must update** (the clean pass folds each into its task's Files):
+- Task 3: the seven `SCHEMA_VERSION == 133` pins, in `b12f`, `b13b_fixes`, `history_schema`, `j1_migration`,
+  `org_migration` (two lines) and `saintjude_outfits_data` (all `_test`). They stay exact pins and move to 134.
+- Tasks 2b and 3b: `b13d`'s presence and mortality tests run on Saint Jude through `outfit_choice_fixture`. Task 2b
+  (`mortality_audit`, `presence_habits` off) and Task 3b (presence onto `routines.where`) update or remove them.
+- Task 12: `connector_resume_test` pins rulebook text.
+- Every task that adds, removes or renames a tool, an argument or a tool description (at least Tasks 4, 11 and 14a):
+  `connector_server_test` pins the tool list and a size ceiling, and `connector_http_test` pins the same tool list.
+
 ### Task 1: Scoring sheet and playtest situations
 
 **Files:**
@@ -328,8 +435,9 @@ switches, so the build is measured against a world where only the outfit choices
 - Modify: `engine/information.py` (`_upsert_knowledge` calls `belief.mirror_legacy_knowledge` only when
   `systems.belief_mirror` is true)
 - Modify: `engine/world_package.py` (`SYSTEM_KEYS` gains `personal_choices`, `belief_mirror`, `entity_resolution`
-  and `rumour_broadcast`, used here and in Tasks 3 and 10b; `worlds/caerness/world.json` sets all four true, Saint
-  Jude's leaves them out)
+  and `rumour_broadcast`, used here and in Tasks 3 and 10b. Revision 6.9: also `psychology`, `mortality_audit` and
+  `presence_habits` (Task 3b). The engine reads only the switches named in `SYSTEM_KEYS`, so without them all three
+  would read as off in Caerness too. `worlds/caerness/world.json` sets all seven true, Saint Jude's leaves them out)
 - Modify: `engine/org_happenings.py` (the protagonist draws only the happening kinds the package marks
   `"befalls": true`; every other kind is something a man does, and the engine never does it for him)
 - Modify: `worlds/saintjude/outfits.json` (mark `busted` and `incident` as `"befalls": true`)
@@ -375,10 +483,10 @@ assert caerness_package().systems["psychology"] and caerness_package().systems["
 - [ ] **Step 4: Run it**, then `--quick`, and `--only s1_rise_equivalence_test,org_happenings_test,outfit_choices_test`.
   Outfit actions, money and incidents stay inside the S1 ranges; if a range moves, say why in the commit.
 - [ ] **Step 5: Commit** the files above.
-- [ ] Optional tidying, same task, own commit: a `caerness_economy` switch for the Caerness-only processes
-  (agriculture, logistics, merchant, craft, growth, war, ecology, education, patronage, seeking, attention,
-  world). They run on empty tables in Saint Jude, so nothing should change but the run time. Revision 6.6:
-  `psychology` left this list; it wrote rows in Saint Jude and is switched off in the required part above.
+- Revision 6.9: no `caerness_economy` switch; the optional tidying step is dropped. In the 120-day Saint Jude run
+  the twelve Caerness-only processes (agriculture, logistics, merchant, craft, growth, war, ecology, education,
+  patronage, seeking, attention, world) took 0.2 s of 129 s and wrote no rows, so a switch would cost more code
+  than it saves.
 - Not done here: `org_lifecycle._dormant` still puts a former member back on the full review. With the personal
   choices off he can only hold position, so it is harmless; Task 3's `levels` owns his cadence after that.
 
@@ -491,10 +599,11 @@ assert levels.resolution_of(conn, spouse) == "materialized_minor" and quiet_rout
 - Revision 6.6 (code audit), one answer to "where is he": `presence.py` keeps probabilistic presence habits for
   everyone (12,469 new rows in 120 days of Saint Jude, about 11% of the engine's own time). Without this step its
   callers and `routines.where` would answer the same question differently. The callers that place named people
-  move onto `routines.where`, and keep their old presence check only where `where` returns `None` (someone with
-  no routine):
+  move onto `routines.where` alone (revision 6.9: no fallback to the old presence check; `where` places someone
+  with no routine from his household and work, see Interfaces):
   - Modify: `engine/company.py` (`in_earshot`: whether someone at his place can overhear him);
-  - Modify: `engine/household_life.py` (where a courting pair can meet, in its courtship scan);
+  - Modify: `engine/household_life.py` (where a courting pair can meet, in its courtship scan: revision 6.10, it
+    asks `routines.where` for both members on the evening their institution meets);
   - Modify: `engine/authoring.py` (who is at home, line ~722);
   - `information.py`'s presence snapshot for rumour exposure goes with the rumour-broadcast switch (Task 10b);
     `player.py`, `turns.py`, `decisions.py` and `model_gateway.py` are the old player layer and are left alone.
@@ -509,7 +618,14 @@ assert levels.resolution_of(conn, spouse) == "materialized_minor" and quiet_rout
   - `seed(conn, actor_ids=None) -> int`: home from the household, work from the employer or the business he owns,
     schedule from his position;
   - `where(conn, actor_id, day, part) -> int | None`, where `part` is one of `morning`, `day`, `evening` or `night`:
-    an exception first, then the schedule. `where` writes nothing. Exceptions include what other systems already
+    an exception first, then the schedule. `where` writes nothing. Revision 6.9: someone with no stored routine is
+    placed from what is recorded, worked out on the spot and stored nowhere: home from his household, work from his
+    employer or the business he owns, on the default schedule for his position. It returns `None` only for someone
+    with neither home nor work, and every caller treats that as not placed. Revision 6.10: each institution he
+    belongs to (a club, supper club, diner or parish) meets one evening a week, the same evening for all its
+    members, drawn once per institution from its id. On that evening `where` places its members there, with or
+    without a stored routine, unless an exception holds them elsewhere; two on the same evening go to the older
+    membership. This replaces presence's weak institution habit, which the courtship scan relied on. Exceptions include what other systems already
     record: active `custody` of kind `held`, an open `inmate_stays` row, a `sentences` row being served, and
     `travel_plans` that are active or stalled (the check `presence._active_travel` makes today).
 
@@ -518,12 +634,15 @@ assert levels.resolution_of(conn, spouse) == "materialized_minor" and quiet_rout
 assert routines.seed(conn) > 0 and seeded_share_of_notable_and_active(conn) > 0.9
 assert routines.where(conn, frank, weekday, "day") == garage_location
 add_exception(conn, frank, "ill", day, day + 5); assert routines.where(conn, frank, day + 1, "day") == frank_home
-assert routines.where(conn, unseeded_minor, day, "day") is None              # unknown, not somewhere
+assert routines.where(conn, unseeded_minor, weekday, "night") == home_of(conn, unseeded_minor)  # 6.9: from his household
+assert routines.where(conn, no_home_no_work, day, "day") is None              # unknown, not somewhere
 hold_in_custody(conn, frank, day); assert routines.where(conn, frank, day, "day") == custody_location(conn, frank)
 start_travel(conn, frank, day + 10); assert routines.where(conn, frank, day + 11, "day") != garage_location
 # revision 6.6: one answer to "where is he"
 put_me_at(conn, garage_location, weekday, "day"); assert company.in_earshot(conn, me, frank)   # routine says the garage, so does the scene
 put_me_at(conn, bar_location, weekday, "day"); assert not company.in_earshot(conn, me, frank)
+meets = meeting_evening(conn, club)                                          # revision 6.10: the club meets
+assert routines.where(conn, unseeded_member, meets, "evening") == club_location
 rows = count(conn, "actor_presence_habits") + count(conn, "actor_presence_profiles"); run_days(conn, 120)
 assert count(conn, "actor_presence_habits") + count(conn, "actor_presence_profiles") == rows  # Saint Jude stores no new habits
 # and the S1 ranges (outfit actions, money, incidents) and the courtship rate stay inside the reference run's ranges
@@ -1095,6 +1214,10 @@ assert prose_share(b) < 0.2                      # fields, not sentences (lead s
   anyone new. The keyword list stays, and the GM's `kind` hint still overrides it. Test: `act("operation", "he
   has a forger make up a new title deed")` returns `unmodelled` with the record path, not `refused`; the rulebook
   line under the round 2b rule says to follow it)
+- Revision 6.9: `unmodelled` is not a refusal. It carries no `owner_notice` (Task 8), and `gm_check` (Task 7)
+  does not count it as a swallowed refusal (modify `tools/gm_check.py` if its check reads anything but
+  `status: "refused"`). Test: the title-deed call's result has no `owner_notice`, and a session holding it gives
+  no `gm_check` ledger hit.
 - Test: `tests/connector_resume_test.py` (update the rulebook expectations it pins)
 
 - [ ] **Step 1:** Rewrite. The rulebook holds only:
@@ -1192,7 +1315,8 @@ engine nominates, the GM realizes and the engine ratifies.
   `engine/simulation.py` after `life_matters`. `process_due` runs `levels.refresh`, `nominations.apply_overdue`,
   and from 14b `conduct.weekly`, `conduct.lies` and overdue promises. Later tasks add their steps to it.
   Revision 5.4: it also clears stated decisions from scenes once their due day has passed. One that involves him
-  becomes a `waiting_on_you` matter. Any other is marked `lapsed`. Task 17b later fires them instead.)
+  becomes a `waiting_on_you` matter (revision 6.10: under `decision:<id>`). Any other is marked `lapsed`. Task 17b
+  later fires them instead.)
 - Modify: `engine/life_matters.py`, `engine/outings.py` (offscreen flings and scuffles), `engine/opening_family.py`
   (`resolve_unnamed_marriages`), `engine/household_life.py` (planned births), `engine/civilian_life.py` (a grown
   child nobody knew of), `engine/temptations.py` (`_others`), `engine/org_happenings.py`: a draw that touches someone
@@ -1207,6 +1331,7 @@ engine nominates, the GM realizes and the engine ratifies.
 - Modify: `engine/scenes.py` (a thread past its date, unmet, becomes a broken promise on the record)
 - Modify: `worlds/saintjude/levels.json` (`nominations`: default and longest timeframe, reminder lead, weekly
   budget and weight per kind; `conduct`: quiet days by closeness, and how long a wrong waits before it surfaces)
+- Modify: `engine/hearsay.py` (revisions 6.9 and 6.10, in 14c: `waiting` gives each item its reference)
 - Test: `tests/nominations_test.py`
 
 **Interfaces:**
@@ -1253,8 +1378,23 @@ engine nominates, the GM realizes and the engine ratifies.
     `waiting_on_you` matter through `life_matters.answer`. In `connector/acting.py` `_answer`, a matter that is a
     `seat_decision` nomination goes instead to `nominations.realize` with `{"choice": how or answer}`, so the GM
     can answer straight after a skip or mid-scene, in the player's words. Test:
-    `server.act("a1", "answer", "he votes no", details={"matter": n, "answer": "no"})` and the item's count
-    holds his no; a life matter answered the same way still goes to `life_matters.answer`.
+    `server.act("a1", "answer", "he votes no", details={"matter": f"seat:{n}", "answer": "no"})` and the item's
+    count holds his no; a life matter answered the same way still goes to `life_matters.answer`.
+  - Revision 6.9, one reference per waiting item. Life matters, seat decisions and decisions (Task 17b's offers to
+    him, and his own stated decisions) each number their rows from 1, so a bare number can mean two things. `hearsay.waiting` gives each item a `matter`
+    reference that names its source: `life:<id>`, `seat:<nomination id>`, `decision:<decision id>` (revision 6.10; 6.9 said `offer:`). `_answer`
+    sends it on by the prefix: `life:` to `life_matters.answer` (yes, no or settled); `seat:` to
+    `nominations.realize` with `{"choice": how or answer}` in the player's words, with no yes/no check; `decision:`
+    to its handler (his own decisions here, revision 6.11; offers in Task 17b). A bare number still means a life matter. Revision 6.10: a decision of his seat's (a
+    vote, an outfit or business choice, Task 18c's work turned away) is always `seat:`; anything held in
+    `actor_decisions` is `decision:`. Files: `engine/hearsay.py` (`waiting`),
+    `connector/acting.py` (`_answer`) and the `act` description in `connector/server.py`. Test: a life matter and
+    a seat decision with the same row number, each answered by its reference, reach their own paths.
+  - Revision 6.11, his own decisions in Deploy 1: Task 14a puts his past-due stated decisions in `waiting_on_you`
+    as `decision:<id>`, so `_answer`'s `decision:` handler starts here, with the branch for them: yes or settled
+    marks the decision done with `how` recorded (the GM plays what follows), no marks it dropped. Task 17b adds
+    the branch for an offer to him. Test: his stated decision past its day, answered no by `decision:<id>`, is
+    marked dropped and leaves `waiting_on_you`; answered settled, it is done with `how` on record.
   - Routine running goes to his second or manager. If he has none, the seat keeps going as it was. Each such act is
     listed in the skip result as done by them.
 - Revision 4.1:
@@ -1341,15 +1481,13 @@ assert routine_acts_by(conn, his_second(conn, outfit)) and listed_in_skip_result
 ```
 - [ ] **Step 2 to 5:** run (FAIL), implement, run the task's test plus the tests of every modified module, commit.
 
-### Task 14d: Starts at any scale (Deploy 1)
+### Task 14d0: His outfit through the org core (Deploy 1, built before Task 14d)
+
+Revision 6.9 split this out of Task 14d (Gemini round 12): it is a different subsystem from a start in a held seat,
+and Task 14d's boss start needs it working first.
 
 **Files:**
-- Modify: `engine/new_character.py` (a start in a held seat: `veto.held_by_other` no longer refuses it at the
-  opening. The holder is moved aside before day 0 through `real_figures` and the life paths, as retired, dead or not
-  present in this save, with the reason recorded. He takes the seat with its people, history and obligations.)
-- Modify: `engine/veto.py` (held seats refused during play as now, allowed only for the opening)
-- Create: `tools/start_check.py` (the four-start check)
-- Revision 6.8 (code audit finding 11), his outfit through the org core. Saint Jude's outfits run on the org core
+- Revision 6.8 (code audit finding 11). Saint Jude's outfits run on the org core
   (`org_profiles`, `org_seats`, `org_units`, `org_money`); the old layer (`underworld_organizations`,
   `underworld_personnel`) is empty there. Yet every outfit path in his tools reads the old layer: checked on a
   Saint Jude save, `outfit:20` (the Eastside Combine) is refused as "unknown outfit 20". When the package runs the
@@ -1368,6 +1506,114 @@ assert routine_acts_by(conn, his_second(conn, outfit)) and listed_in_skip_result
   - Modify: `connector/store.py`, `connector/authoring.py` and `connector/views.py` (an outfit id is an `org_profiles`
     organisation; "who is in the life" reads `org_seats`);
   - the money-flow recorder `underworld_rebuild._record_economic_flow` stays where it is (O-9 moves it later).
+- Revision 6.9, one purse (Gemini round 12):
+  - `engine/ledger.py`: `institution:<id>` of an org-core organisation reaches the same purse as `outfit:<id>`
+    (today it reaches an empty purse of the organisation's own). A payment whose two ends are the same purse is
+    refused in plain words ("that is already his money"). `can_draw` lets only the head draw on it; his second does
+    not (the old layer let an underboss draw).
+  - `connector/views.py`: for an org-core outfit, the money view says the outfit's money is his purse and shows it
+    once, not as a second figure. Anything that adds up his means (`brief.full`'s money, Task 16's `cash_strain`)
+    counts that purse once.
+- Revision 6.9, the start-time reads (the round 12 check of the old layer):
+  - Modify: `engine/veto.py` (`held_by_other` finds an org-core outfit's holder with `orgs.head_of`. Today it finds
+    the outfit only as an institution and looks for a "head" membership, which none has, so a claim to lead the
+    Eastside Combine during play is not refused. The world measures count org-core outfits and their seated men,
+    not the empty `underworld_organizations`);
+  - Modify: `engine/new_character.py` (an outfit start's colleagues come from his outfit's `org_seats`, nearest
+    roles first, as now from `underworld_personnel`);
+  - left as they are: the opening's district facts from `underworld_zones` give nothing in Saint Jude, where the
+    rackets are citywide shares (`org_holdings`); no wrong fact is written. `connector/money.py`,
+    `connector/correct.py` and the business table were checked and are clean.
+- Revision 6.10 (Gemini round 13), the rest of the old-layer reads:
+  - Modify: `engine/free_operation.py` (`resolve_ref` finds an outfit by name among org-core organisations. An attack
+    on an outfit takes the rival's head from `orgs.head_of`, its strength from its seated men, and its losses as
+    seats vacated, not from `member_count_estimate`);
+  - Modify: `engine/authoring.py` (`_his_person` reads his outfit's seats. Founding an organisation in a package
+    with `systems.outfits` writes an org-core one: `org_profiles`, its first unit and the leader's seat through
+    `orgs.seat`, the kind from the package's org kinds. The outfit counts used for scale read org-core outfits);
+  - Modify: `engine/intake.py` (`_ENTITY_KEYS`: an `outfit_id` is an org-core organisation);
+  - `ledger`: a payment from an outfit with no living head (`purse_ref` is None) is refused in plain words ("the
+    outfit has no living head to pay from");
+  - unchanged: the outfit's own spending. The org core pays purse to purse and never calls `can_draw`, so the
+    head-only rule doesn't stop his second's routine running;
+  - catch-all: the test watches the SQL (`conn.set_trace_callback`) through the boss's calls and fails on any
+    statement naming `underworld_organizations`, `underworld_personnel` or `underworld_crews`.
+- Revision 6.11 (Gemini round 14), all of `engine/player_operations.py`: about twenty helpers read the old outfit
+  tables, not only those listed above. Every one reads the org core in a package with `systems.outfits`:
+  - his place and rank (`_outfit_row`, `_outranks`, `_is_my_person`, `_serves_in`, `_holder_label`) from his seat;
+  - crews (`_hire_many`, `_backer_list`) are the org core's units (`org_units`), and sizes are seated men, not
+    `member_count_estimate` or `size_estimate`;
+  - promoting (`_reassign`), retiring (`_leave_holdings`) and expelling (`_dismiss`) change `org_seats`;
+  - who protects a victim (`_protectors`) is his outfit's seated men;
+  - the outfit behind a person (`_org_behind`) is the one he sits in. Revision 6.12, the outfit behind a business,
+    in order: the outfit its owner sits in (`orgs.seats_of`; none in the opening, but a captain who buys a bar or
+    a capo's restaurant the GM founds counts); then the outfit whose active rackets at its location
+    (`org_lines.location_id`, mostly a neighbourhood or district) take the most each week, since a shop there is
+    on its turf; then none. Saint Jude keeps no per-shop protection, and none is an honest answer, not an
+    invented one;
+  - the trace an act leaves (`_leave_trace`) goes to `org_heat` and `org_tension`, as heat and truces above.
+- Test: `tests/outfit_org_core_test.py`
+
+**Interfaces:**
+- Produces: in a package with `systems.outfits`, `outfit:<id>` and `institution:<id>` of an org-core organisation
+  are one ledger holder, its living head's purse (`org_money.purse_ref`); `veto.held_by_other` reads `orgs.head_of`.
+  Task 14d's boss start and Task 16's `cash_strain` rely on both.
+
+- [ ] **Step 1: Write the failing test:**
+```python
+# revision 6.8: the boss runs his outfit through the org core
+outfit = org_named(conn, "The Eastside Combine"); boss = head_of(conn, outfit)
+make_protagonist(conn, boss)               # revision 6.10: seated directly; Task 14d's starts come later
+seen = watch_sql(conn)                     # revision 6.10: every statement from here on
+before = org_money_rows(boss); r = server.act("b1", "pay", "he pays Sal for the job", target_actor_id=sal,
+                                           details={"amount": 500, "from": f"outfit:{outfit}"})
+assert r["status"] == "applied" and r["amount"] == 500                     # not "unknown outfit"
+server.act("b2", "hire", "he takes Nicky on as a soldier", target_actor_id=nicky, details={"into": f"outfit:{outfit}", "role": "soldier"})
+assert seat_role(boss, nicky, outfit) == "soldier"                            # an org_seats row, not underworld_personnel
+t0 = tension(boss, outfit, rival); server.act("b3", "demand", "he offers the Greco crew a truce", target_actor_id=greco_head)
+assert tension(boss, outfit, rival) < t0 or waiting_on_you_has(server, "truce")   # agreed, or their answer is pending
+assert count(boss, "underworld_personnel") == 0 and count(boss, "underworld_organizations") == 0
+# revision 6.9: one purse
+assert server.money("m1", "pay", f"outfit:{outfit}", "me", 100)["status"] == "refused"   # his own money
+assert ledger.balance(conn, ("institution", outfit)) == ledger.balance(conn, ("person", boss))
+assert not ledger.can_draw(conn, his_second(conn, outfit), ("outfit", outfit))
+assert means_listed(server, boss).count(ledger.balance(conn, ("person", boss))) == 1          # shown once
+# revision 6.9: the start-time reads
+with pytest.raises(veto.Contradiction): veto.held_by_other(conn, "The Eastside Combine", "boss")   # its head is alive
+assert set(colleagues_seeded(conn, associate_start)) <= seated_men(conn, his_outfit_id(associate_start))
+# revision 6.10: the rest of the old layer
+server.act("b4", "attack", "he hits the Greco crew's card game", details={"targets": ["Greco crew"]})
+server.author("b5", "organisation", {"name": "the Dock Street crew", "leader_actor_id": nicky})
+assert org_named(conn, "the Dock Street crew") and seat_role(boss, nicky, org_named(conn, "the Dock Street crew"))
+server.lookup("b6", "the Eastside Combine")
+# revision 6.11: every outfit action under the watch
+server.act("b8", "order", "he makes Nicky a capo", target_actor_id=nicky, details={"role": "capo"})
+assert seat_role(boss, nicky, outfit) == "capo"
+server.act("b9", "order", "he retires old Sal", target_actor_id=sal, details={"retire": True})
+server.act("b10", "order", "he throws Joey out", target_actor_id=joey, details={"expel": True})
+assert seat_status(joey, outfit) == "expelled" and seat_status(sal, outfit) == "retired"
+server.act("b11", "demand", "he leans on the Kowalski bakery", details={"targets": ["business:kowalski"]})
+# revision 6.12: whose shop it is
+give_business(conn, rival_capo, bar); assert org_behind_business(conn, bar) == rival   # the owner's seat first
+assert org_behind_business(conn, shop_where_two_run) == top_weekly_take_there(conn, shop_where_two_run)
+assert org_behind_business(conn, shop_off_every_turf) is None
+server.act("b12", "attack", "he has Greco's runner roughed up", target_actor_id=greco_runner)
+assert not [s for s in seen if re.search(r"underworld_(organizations|personnel|crews)", s)]
+with pytest.raises(ValueError, match="no living head"): ledger.transfer(conn, ("outfit", headless), ("person", sal), 10)
+```
+- [ ] **Step 2 to 5:** run (FAIL), implement, run the task's test plus the tests of every modified module, commit.
+
+### Task 14d: Starts at any scale (Deploy 1)
+
+**Files:**
+- Modify: `engine/new_character.py` (a start in a held seat: `veto.held_by_other` no longer refuses it at the
+  opening. The holder is moved aside before day 0 through `real_figures` and the life paths, as retired, dead or not
+  present in this save, with the reason recorded. He takes the seat with its people, history and obligations.)
+- Modify: `engine/veto.py` (held seats refused during play as now, allowed only for the opening; an outfit's holder
+  is found the way Task 14d0 finds it)
+- Create: `tools/start_check.py` (the four-start check)
+- Revision 6.9: his outfit through the org core (revision 6.8) moved to its own task, 14d0, which is built first;
+  the boss start relies on it.
 - Test: `tests/start_scale_test.py`
 
 **Interfaces:**
@@ -1410,16 +1656,6 @@ for start in ("mechanic", "businessman", "politician", "boss"):
 league = server.author("p1", "organisation", {"name": "a national league office", "place": "New York"})
 rep = league_representative(conn, league); open_negotiation(server, me, rep, due_in_days=20); run_days(conn, 25)
 assert waiting_on_you_has(server, "league") and levels.resolution_of(conn, rep) != "gone"
-# revision 6.8: the boss runs his outfit through the org core
-boss = start_as("boss"); outfit = his_outfit_id(boss)
-before = org_money_rows(boss); r = server.act("b1", "pay", "he pays Sal for the job", target_actor_id=sal,
-                                           details={"amount": 500, "from": f"outfit:{outfit}"})
-assert r["status"] == "applied" and r["amount"] == 500                     # not "unknown outfit"
-server.act("b2", "hire", "he takes Nicky on as a soldier", target_actor_id=nicky, details={"into": f"outfit:{outfit}", "role": "soldier"})
-assert seat_role(boss, nicky, outfit) == "soldier"                            # an org_seats row, not underworld_personnel
-t0 = tension(boss, outfit, rival); server.act("b3", "demand", "he offers the Greco crew a truce", target_actor_id=greco_head)
-assert tension(boss, outfit, rival) < t0 or waiting_on_you_has(server, "truce")   # agreed, or their answer is pending
-assert count(boss, "underworld_personnel") == 0 and count(boss, "underworld_organizations") == 0
 ```
 - [ ] **Step 2 to 5:** run (FAIL), implement, run the task's test plus touched modules, commit. The lead reads the
   four reports, and `start_check.py` runs again before Deploy 2.
@@ -1591,9 +1827,14 @@ assert decision(conn, d2)["action"] in ("expand", "buy_out", "propose_alliance",
   owner offered, the new staff, the lender). It then travels by `news_gate.spread` to people in that trade or
   district. An offer for one of the named businesses, or one above `visible_spend`, is also an item on the paper.
   The intent itself stays with the mover and those in on it.
-- Modify: `engine/hearsay.py` (`waiting` includes pending decisions with `offer_to_actor_id` = him and `told_day` set)
+- Modify: `engine/hearsay.py` (`waiting` includes pending decisions with `offer_to_actor_id` = him and `told_day` set,
+  under the reference `decision:<decision id>` (revisions 6.9 and 6.10), which `_answer` hands to the handler below)
 - Modify: `engine/business.py` (`expand`) and `engine/player_operations.py` (revision 5.9: the payment and
   ownership change of an accepted `trade` move into one shared function that `buy_out` also calls; no second copy)
+- Modify: `connector/acting.py` (revisions 6.10 and 6.11: the offer branch of `_answer`'s `decision:` handler,
+  which Task 14c starts with his own stated decisions. An offer to him: yes accepts it through the same path as
+  anyone else's acceptance, no refuses it, `how` recorded either way. Test: an offer to him answered yes by
+  `decision:<id>` runs the acceptance)
 - Test: `tests/offscreen_fire_test.py`
 
 **Interfaces:**
@@ -1768,7 +2009,7 @@ good_work(conn, me, weeks=8); assert demand_cause(conn, me_shop)["kind"] == "rep
 overload(conn, me_shop); assert brief_money(server)["turned_away"] > 0
 quiet_month(conn, me_shop); assert demand_cause(conn, me_shop)                # nothing arrives, with a reason
 # revision 4.2: capacity and slumps become his decisions, with causes in the world
-overload(conn, me_shop, weeks=3); assert waiting_on_you_has(server, "turning work away")
+overload(conn, me_shop, weeks=3); assert waiting_on_you_has(server, "turning work away", ref="seat:")   # 6.10
 undercut(conn, rival, me_shop); assert discoverable(conn, me, cause="undercut", via=a_customer_or_supplier)
 ```
 - [ ] **Step 3 to 5:** implement, run the task's test plus touched modules, commit.

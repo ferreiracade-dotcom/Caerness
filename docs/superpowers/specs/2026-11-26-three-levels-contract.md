@@ -160,10 +160,15 @@ political offices and, from revision 5.8, `business_line` (the size of business 
   the existing `act(action_type="answer", details={"matter", "answer", "how"})`. For a `seat_decision` matter
   the connector passes `{"choice": how or answer}`, the player's own words ("no", "pay him half"), to
   `nominations.realize`, and the result says what the path recorded, or that the answer became his stated
-  decision. Every other matter goes to `life_matters.answer` as today.
+  decision. Every other matter goes to `life_matters.answer` as today. Revision 6.9: each `waiting_on_you` item's
+  `matter` is a reference naming its source (`life:<id>`, `seat:<id>`, `decision:<id>`; revision 6.10 renamed `offer:`, which now also covers his own stated
+  decisions, answered from Deploy 1 (revision 6.11)), and the connector sends
+  it on by the prefix; a bare number still means a life matter.
 - Revision 6.7: `act` results give sums as dollar numbers (`amount`, `short_of`), with the scale word only beside
   them. An intent `act` can't map to anything it models returns `status: "unmodelled"` with the record path
-  (a scene stamp with `known_to`, `money` for any sum, `author` for anyone new), never a refusal. `brief.full` and the skip result list
+  (a scene stamp with `known_to`, `money` for any sum, `author` for anyone new), never a refusal, and with no
+  `owner_notice` (revision 6.9). In a package that runs the org core, `outfit:<id>` and `institution:<id>` of an
+  outfit are its living head's purse: one holder, shown once, drawn on by the head only. `brief.full` and the skip result list
   `nominations` (new, to remind, overdue, and the small ones applied). `brief.full` has a `you` part. Tool results give facts and numbers in fields, not engine prose.
 - **People are a name or an id everywhere** (`close_scene`, stamps, threads). Names are matched against the open
   scene's people first, then the protagonist's known people. An ambiguous name, such as a first name two people share,

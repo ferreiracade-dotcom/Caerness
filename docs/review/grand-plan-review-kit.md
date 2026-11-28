@@ -80,12 +80,18 @@ End with any `REQUEST` lines.
 | 9 | 6 points, 5 requests | All 6 as revision 6.3: life draws for everyone; overdue seat matters lapse; restlessness and strain scoped; C-11 `near`; C-1 explainable money; cutaway guards; L-6 note | None. Point 1 was a real conflict between the plan's overview and Task 14a |
 | 10 | 6 points, drift check | All 6 as revision 6.4, slips in the plan's own text | None |
 | 11 | 2 Task 14 bugs; nothing else to raise | Both as revision 6.5: each conduct fact surfaces once; `note(kind="answer")` for seat matters | None. Gemini was satisfied with the plan as it stood |
-| 12 | (this round: the owner's code audit, revisions 6.6 to 6.8) | | |
+| 12 | 7 points on the audit revisions | All 7 as revision 6.9: prefixed answer references; one outfit purse; Task 14d0 split out; `where` places the unrouted; three switch names; `unmodelled` without `owner_notice`; old-layer reads at the start | Point 3 (three fallback rules, one per caller) became one rule in `routines.where`; point 4's optional switch was dropped instead of checked further |
+| 13 | 3 points; nothing else once applied | All 3 as revision 6.10: institutions meet one evening a week; `decision:` for offers and his own due decisions, `seat:` for his business; the rest of the old-layer reads, with a catch-all SQL watch | Point 1 got one rule in `routines.where`, not a district match in the scan; `offer:` was renamed `decision:` instead of adding a fourth prefix |
+| 14 | 2 points | Both as revision 6.11: his own decisions answerable in Deploy 1; all of `player_operations.py` on the org core, every outfit action under the SQL watch | Point 2 was wider than raised: about twenty helpers, including the outfit behind a business |
+| 15 | 1 point | As revision 6.12: the owner's seat first, then the biggest weekly racket take at the location, then none | The Deploy 2 protection link was left out (no such `exposure_links` kind in the plan); the tie rule was added |
+| 16 | Deploys 1 and 2 lean; a trim list for 3b to 6 | All six as revision 6.13: W-1 dated history plus a lazy place; C-11 figures on demand; C-14 no temperament shift; L-1 one weighing; C-12 alias plus knowledge; F-3 and F-7 only if play goes inside | L-1 kept as written (it already was the simple weigher), with a guard line |
+| 17 | Quick-suite audit, five drafts, task briefs | All three as revision 6.14: Task 0 (opening built once, more jobs, a move rule, a smoke test, tests later tasks must update); drafts filed in `docs/review/gemini-drafts/`; a clean pass before each build session | Seven schema pins, not two; `act_freeform` and `connector_views` stay; the audit covered a to f only; `levels.json` and the database checker not kept |
+| 18 | Move rule sound; two Task 0 lines; nothing else to raise | Both into revision 6.14: `connector_http_test` beside `connector_server_test`, Task 4 named; smoke test gains `actor_beliefs` and presence habits, with a protagonist made first | None. Gemini suggested skipping round 19 until Deploy 1 is playable |
 
 ## Settled decisions (don't reopen without new evidence)
 
 - The engine and GM split (three-levels revision 4) and story first (revision 5) are binding.
-- Deploys 1 and 2 are the three-levels plan, reviewed in thirteen rounds. Raise a point about them only if a
+- Deploys 1 and 2 are the three-levels plan, reviewed in nineteen rounds (the next round waits for Deploy 1 transcripts). Raise a point about them only if a
   grand-plan item collides with them.
 - The protagonist is always a new character, under the same rules as everyone, with one exception: where both are
   plausible, the GM leans toward his living.
@@ -103,20 +109,7 @@ End with any `REQUEST` lines.
 
 ## Open questions for you this round
 
-The owner had the running code audited against story first, and its findings were added to the plan as
-revisions 6.6 (the city's own clock), 6.7 (the paths that run during play) and 6.8 (systems doing one job
-twice). The audit and the full text of Tasks 2b, 3b, 11, 12, 14 and 14d, and the changed part of Task 3, are at
-the end of this copy.
+Revision 6.13 applied your trim list for Deploys 3b to 6. The plan stays open, not frozen.
 
-1. Do the revision 6.6 and 6.7 changes fix what the audit found, without breaking anything that reads the
-   switched-off rows or the changed tool results?
-2. Task 3b keeps the old presence check where `routines.where` returns `None` (someone with no routine). Is that
-   fallback right, or should those callers treat such a person as not placed?
-3. The audit kept the ten numbers on each relationship and the outfit motive scoring. Do you agree, judged by story
-   first?
-4. Did the audit miss a class of code that breaks story first or is heavier than the story needs? Say what to check.
-5. Revision 6.7 drops revision 6.5's `note(kind="answer")` for the existing `act` answer. Does Task 14c's seat
-   decision still work end to end through it?
-6. Revision 6.8 points his outfit tools at the org core, where an outfit's money is its living head's purse
-   (`org_money.purse_ref`). Is that the right purse for a boss paying "from the outfit", and does anything else in
-   his tools still read the old layer?
+1. Is anything else in Deploys 3a to 6 asking the engine to simulate what the GM can play from a recorded fact?
+2. Anything else, or nothing left to raise.
