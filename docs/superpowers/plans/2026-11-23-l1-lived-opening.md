@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.13, SQLite, `tools/build_opening.py --package saintjude`.
 
-**Spec:** the L1 brief (owner-approved, relayed 2026-11-23) and `.superpowers/sdd/2026-11-19-saintjude-org-core/task-C1-creation-report.md` (the audit this round closes).
+**Spec:** the L1 brief (owner-approved, relayed 2026-11-23) and `docs/superpowers/reports/2026-11-19-saintjude-org-core-task-C1-creation-report.md` (the audit this round closes).
 
 ## Global Constraints
 
@@ -114,7 +114,7 @@
 
 ### Task 7: Wire it, rebuild the packaged opening, audit before/after, one-year consistency
 
-**Files:** Modify `engine/activation.py` (gated call order: households, businesses, past, careers/memories, races, ties); create `tests/l1_consistency_test.py`, `tests/l1_budget_test.py`; rebuild `data/saintjude.db`; write `.superpowers/sdd/2026-11-19-saintjude-org-core/task-L1-report.md`.
+**Files:** Modify `engine/activation.py` (gated call order: households, businesses, past, careers/memories, races, ties); create `tests/l1_consistency_test.py`, `tests/l1_budget_test.py`; rebuild `data/saintjude.db`; write `docs/superpowers/reports/2026-11-19-saintjude-org-core-task-L1-report.md`.
 
 - [ ] **Step 1: Failing tests.** `l1_budget_test`: opening build under 60 s and the DB under a stated size; `l1_consistency_test` (env `L1_SEED` in 3/7/11): build the opening, advance 365 days once, and check money (ledger totals reconcile, no negative purse a drawn rate made), seats (every seat holder alive or replaced, no dual head), canon (named canon marriages, offices and feuds unchanged by seeding).
 - [ ] **Step 2: Run, fail. Step 3: Wire and fix. Step 4: Run seeds 3, 7, 11 one after another (never in parallel, never with the quick suite); pass.**

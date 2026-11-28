@@ -166,7 +166,7 @@ Rules (spec 5.7): all hold or unknown -> `on_time` at the real date. Enabler arr
 
 ### Task 10: Play check, no-world-words, measures, report
 
-**Files:** create `tests/history_play_test.py`; update `AGENTS.md` section 2 by one paragraph; write `.superpowers/sdd/2026-11-19-saintjude-org-core/task-R1-report.md`.
+**Files:** create `tests/history_play_test.py`; update `AGENTS.md` section 2 by one paragraph; write `docs/superpowers/reports/2026-11-19-saintjude-org-core-task-R1-report.md`.
 
 - [ ] Play test: from a scratch Saint Jude opening: propose a technology, a firm and a law through `author`; kill a figure; found a venture in a foreseen firm's field; advance across the real dates; assert outcomes, `history_due`, divergences, lookups and that an unrelated fact stayed `on_time`.
 - [ ] Run the quick suite alone (`python tools/run_suite.py --out runs/suite`), compare failures with the nine known pre-existing failures in the I1 report; run `tests/no_world_words_test.py`; `git restore game/campaign_01/model_requests/`.
