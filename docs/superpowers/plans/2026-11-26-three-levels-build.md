@@ -197,7 +197,7 @@ and a stated decision takes its target from the stamp (Task 4).
 - `standing_here` sits inside `you` (Task 11).
 
 **Revision 6.14 (Gemini's suite audit and drafts, owner's yes 2026-11-28).**
-- New Task 0, built before Task 1: a quicker `--quick` (the Saint Jude opening built once per run, more jobs at once,
+- New Task 0, built before Task 1: a quicker `--quick` (the opening cache warmed once per run, more jobs at once,
   Caerness-only, legacy and benchmark tests moved to the full suite, a Saint Jude smoke test) and the list of existing
   tests that later tasks must update.
 - Global Constraints: a clean pass of each task before its build session.
@@ -205,6 +205,8 @@ and a stated decision takes its target from the stamp (Task 4).
   task, never the source.
 - Gemini round 18: `connector_http_test` joins the tool-list pins (Task 4 is the first tool change); the smoke test
   gains `actor_beliefs` (Task 2b) and new presence habits (Task 3b), and its save creates a protagonist first.
+- Cleanup 2026-11-28: `build_opening` already caches the opening across processes, so Task 0's Step 1 only warms that
+  cache before the pool starts (no new environment variable, fixtures unchanged).
 
 **Revision 6.12 (Gemini round 15).**
 - Task 14d0: the outfit behind a business is, in order, the outfit its owner sits in, then the outfit whose rackets
@@ -327,10 +329,12 @@ is reported as the finished design.
 ### Task 0: A quicker quick suite (revision 6.14, built before Task 1)
 
 Every later task runs `--quick` before it reports, so this one pays for itself first. Today `--quick` runs 224 tests
-four at a time; 130 of them open a Saint Jude world, and each test process builds its own copy of the opening.
+four at a time; 130 of them open a Saint Jude world. `build_opening` already keeps one built opening in
+`runs/fixture_cache`, keyed by a hash of its sources, and later builds copy it; but when the sources change, the first
+tests to run in parallel all find the cache cold and build at once.
 
 **Files:**
-- Modify: `tools/run_suite.py`, `tests/sj_fixture.py`, `tests/outfit_choice_fixture.py`
+- Modify: `tools/run_suite.py`
 - Modify: `tests/slow_tests.txt` (the moved tests join it, under a `# full suite only: not Saint Jude` heading, so
   `--quick` skips them and the full run keeps them)
 - Modify: the tests that build the default Saint Jude opening themselves, where they need no build arguments of their
@@ -340,17 +344,16 @@ four at a time; 130 of them open a Saint Jude world, and each test process build
 - Create: `tests/saintjude_smoke_test.py`
 
 **Interfaces:**
-- Produces: the environment variable `CAERNESS_SJ_OPENING`, the path of a Saint Jude opening built once for the run.
-  `sj_fixture._cached_build()` uses that file when the variable is set and the file exists, and builds as today
-  otherwise, so a test run on its own still works. Tests copy it and never open it in place.
+- Consumes: the existing opening cache (`tools/build_opening.py`, `runs/fixture_cache`). No new environment variable;
+  the fixtures are unchanged.
 - Produces: `tests/saintjude_smoke_test.py`, which Task 2b and Task 11 extend (below).
 
-- [ ] **Step 1: Build the opening once per run.** Before the pool starts, `run_suite.py` builds the Saint Jude opening
-  into `<out>/sj_opening.db` when at least one selected test mentions `saintjude`, `sj_fixture`,
-  `outfit_choice_fixture`, `org_core_fixture` or `history_fixture`, passes its path as `CAERNESS_SJ_OPENING` and
-  removes it when the run ends. `outfit_choice_fixture` takes its world from `sj_fixture` rather than building its own.
-  Check: `--quick --only` with two `sj_fixture` tests builds once; neither test's log has the
-  `sj_fixture: Saint Jude opening built` line.
+- [ ] **Step 1: Warm the cache once per run.** Before the pool starts, `run_suite.py` calls
+  `build_opening(<out>/sj_warm.db, package="saintjude")` when at least one selected test mentions `saintjude`,
+  `sj_fixture`, `outfit_choice_fixture`, `org_core_fixture` or `history_fixture`, then deletes `sj_warm.db`. On a warm
+  cache that is a copy; on a cold one it is the run's only build. Skip it when `CAERNESS_NO_OPENING_CACHE` is set.
+  Check: with `runs/fixture_cache` emptied, `--quick --only` with three Saint Jude tests at `--jobs 3` leaves exactly
+  one `saintjude_*.db` in the cache and no `.part` files.
 - [ ] **Step 2: More at once.** The default `--jobs` becomes `min(8, os.cpu_count() or 4)`. The rule of no more than
   two long runs, and none beside the quick suite, is unchanged.
 - [ ] **Step 3: Move what Saint Jude never runs.** A test leaves `--quick` only if both hold: it never opens a Saint
